@@ -1,0 +1,257 @@
+(
+    events: {
+        "Dance3D_buffactivate": [
+            "characters/Velkoz/sounds/951687895.ogg",
+        ],
+        "Death3D_cast": [
+            "characters/Velkoz/sounds/438599671.ogg",
+        ],
+        "Joke3D_buffactivate": [
+            "characters/Velkoz/sounds/929427092.ogg",
+        ],
+        "Laugh3D_buffactivate": [
+            "characters/Velkoz/sounds/946529661.ogg",
+        ],
+        "Play_vo_Velkoz_Attack2DGeneral": [
+            "characters/Velkoz/sounds/1006711071.ogg",
+            "characters/Velkoz/sounds/1008986644.ogg",
+            "characters/Velkoz/sounds/1024339391.ogg",
+            "characters/Velkoz/sounds/1063733400.ogg",
+            "characters/Velkoz/sounds/1069074929.ogg",
+            "characters/Velkoz/sounds/137193720.ogg",
+            "characters/Velkoz/sounds/194031301.ogg",
+            "characters/Velkoz/sounds/322180772.ogg",
+            "characters/Velkoz/sounds/42083240.ogg",
+            "characters/Velkoz/sounds/459203390.ogg",
+            "characters/Velkoz/sounds/496307922.ogg",
+            "characters/Velkoz/sounds/541927573.ogg",
+            "characters/Velkoz/sounds/602512698.ogg",
+            "characters/Velkoz/sounds/606742651.ogg",
+            "characters/Velkoz/sounds/638344375.ogg",
+            "characters/Velkoz/sounds/79589769.ogg",
+            "characters/Velkoz/sounds/803348854.ogg",
+            "characters/Velkoz/sounds/837118375.ogg",
+            "characters/Velkoz/sounds/919305287.ogg",
+            "characters/Velkoz/sounds/960095668.ogg",
+            "characters/Velkoz/sounds/971454789.ogg",
+            "characters/Velkoz/sounds/98572801.ogg",
+        ],
+        "Play_vo_Velkoz_Death3D": [
+            "characters/Velkoz/sounds/213996700.ogg",
+            "characters/Velkoz/sounds/41022853.ogg",
+            "characters/Velkoz/sounds/540120822.ogg",
+            "characters/Velkoz/sounds/620057977.ogg",
+        ],
+        "Play_vo_Velkoz_Joke3DGeneral": [
+            "characters/Velkoz/sounds/217201709.ogg",
+            "characters/Velkoz/sounds/467039043.ogg",
+            "characters/Velkoz/sounds/700063593.ogg",
+        ],
+        "Play_vo_Velkoz_Laugh3DGeneral": [
+            "characters/Velkoz/sounds/172413058.ogg",
+            "characters/Velkoz/sounds/267850142.ogg",
+            "characters/Velkoz/sounds/755177389.ogg",
+            "characters/Velkoz/sounds/786958655.ogg",
+        ],
+        "Play_vo_Velkoz_Move2DStandard": [
+            "characters/Velkoz/sounds/1058786133.ogg",
+            "characters/Velkoz/sounds/1062206948.ogg",
+            "characters/Velkoz/sounds/135807091.ogg",
+            "characters/Velkoz/sounds/138663146.ogg",
+            "characters/Velkoz/sounds/373520938.ogg",
+            "characters/Velkoz/sounds/380505604.ogg",
+            "characters/Velkoz/sounds/408090284.ogg",
+            "characters/Velkoz/sounds/479650636.ogg",
+            "characters/Velkoz/sounds/493294811.ogg",
+            "characters/Velkoz/sounds/558755159.ogg",
+            "characters/Velkoz/sounds/591364025.ogg",
+            "characters/Velkoz/sounds/626984176.ogg",
+            "characters/Velkoz/sounds/694189696.ogg",
+            "characters/Velkoz/sounds/705015465.ogg",
+            "characters/Velkoz/sounds/71994409.ogg",
+            "characters/Velkoz/sounds/751552678.ogg",
+            "characters/Velkoz/sounds/826386301.ogg",
+            "characters/Velkoz/sounds/974901578.ogg",
+            "characters/Velkoz/sounds/986182351.ogg",
+        ],
+        "Play_vo_Velkoz_Taunt3DGeneral": [
+            "characters/Velkoz/sounds/1013145666.ogg",
+            "characters/Velkoz/sounds/186497066.ogg",
+        ],
+        "Recall3D_leadin": [
+            "characters/Velkoz/sounds/628967462.ogg",
+        ],
+        "Recall3D_leadout": [
+            "characters/Velkoz/sounds/37076512.ogg",
+        ],
+        "Respawn3D_buffactivate": [
+            "characters/Velkoz/sounds/181717353.ogg",
+        ],
+        "Taunt3D_buffactivate": [
+            "characters/Velkoz/sounds/495015105.ogg",
+        ],
+        "VelkozBasicAttack2_OnCast": [
+            "characters/Velkoz/sounds/144500587.ogg",
+            "characters/Velkoz/sounds/291438162.ogg",
+            "characters/Velkoz/sounds/503115847.ogg",
+            "characters/Velkoz/sounds/7518464.ogg",
+        ],
+        "VelkozBasicAttack2_OnHit": [
+            "characters/Velkoz/sounds/168556015.ogg",
+            "characters/Velkoz/sounds/347309716.ogg",
+            "characters/Velkoz/sounds/386105791.ogg",
+            "characters/Velkoz/sounds/4055372.ogg",
+        ],
+        "VelkozBasicAttack3_OnCast": [
+            "characters/Velkoz/sounds/144500587.ogg",
+            "characters/Velkoz/sounds/291438162.ogg",
+            "characters/Velkoz/sounds/503115847.ogg",
+            "characters/Velkoz/sounds/7518464.ogg",
+        ],
+        "VelkozBasicAttack3_OnHit": [
+            "characters/Velkoz/sounds/168556015.ogg",
+            "characters/Velkoz/sounds/347309716.ogg",
+            "characters/Velkoz/sounds/386105791.ogg",
+            "characters/Velkoz/sounds/4055372.ogg",
+        ],
+        "VelkozBasicAttack_OnCast": [
+            "characters/Velkoz/sounds/144500587.ogg",
+            "characters/Velkoz/sounds/291438162.ogg",
+            "characters/Velkoz/sounds/503115847.ogg",
+            "characters/Velkoz/sounds/7518464.ogg",
+        ],
+        "VelkozBasicAttack_OnHit": [
+            "characters/Velkoz/sounds/168556015.ogg",
+            "characters/Velkoz/sounds/347309716.ogg",
+            "characters/Velkoz/sounds/386105791.ogg",
+            "characters/Velkoz/sounds/4055372.ogg",
+        ],
+        "VelkozCritAttack_OnCast": [
+            "characters/Velkoz/sounds/144500587.ogg",
+            "characters/Velkoz/sounds/291438162.ogg",
+            "characters/Velkoz/sounds/503115847.ogg",
+            "characters/Velkoz/sounds/7518464.ogg",
+        ],
+        "VelkozCritAttack_OnHit": [
+            "characters/Velkoz/sounds/168556015.ogg",
+            "characters/Velkoz/sounds/347309716.ogg",
+            "characters/Velkoz/sounds/386105791.ogg",
+            "characters/Velkoz/sounds/4055372.ogg",
+        ],
+        "VelkozEMissile_missilelaunch": [
+            "characters/Velkoz/sounds/103234602.ogg",
+            "characters/Velkoz/sounds/986560321.ogg",
+            "characters/Velkoz/sounds/990561769.ogg",
+        ],
+        "VelkozEStun_OnBuffActivate": [
+            "characters/Velkoz/sounds/1017564177.ogg",
+            "characters/Velkoz/sounds/355627516.ogg",
+            "characters/Velkoz/sounds/673843679.ogg",
+        ],
+        "VelkozE_OnCast": [
+            "characters/Velkoz/sounds/1023050831.ogg",
+            "characters/Velkoz/sounds/67939182.ogg",
+        ],
+        "VelkozE_explo": [
+            "characters/Velkoz/sounds/574623238.ogg",
+            "characters/Velkoz/sounds/945688071.ogg",
+        ],
+        "VelkozP1_buffactivate_champ": [
+            "characters/Velkoz/sounds/66687053.ogg",
+        ],
+        "VelkozP1_buffactivate_minion": [
+            "characters/Velkoz/sounds/837722070.ogg",
+        ],
+        "VelkozP2_buffactivate_champ": [
+            "characters/Velkoz/sounds/671175809.ogg",
+        ],
+        "VelkozP2_buffactivate_minion": [
+            "characters/Velkoz/sounds/772369225.ogg",
+        ],
+        "VelkozPFull_buffactivate": [
+            "characters/Velkoz/sounds/847498002.ogg",
+        ],
+        "VelkozPFull_buffactivate_champ": [
+            "characters/Velkoz/sounds/811087207.ogg",
+        ],
+        "VelkozPFull_buffactivate_minion": [
+            "characters/Velkoz/sounds/14878688.ogg",
+        ],
+        "VelkozQSplitExplosion_buffactivate": [
+            "characters/Velkoz/sounds/115412851.ogg",
+            "characters/Velkoz/sounds/334976034.ogg",
+            "characters/Velkoz/sounds/960907077.ogg",
+        ],
+        "VelkozQSplitImplosion_buffactivate": [
+            "characters/Velkoz/sounds/135436441.ogg",
+            "characters/Velkoz/sounds/383114491.ogg",
+        ],
+        "VelkozQSplitMis_missilelaunch": [
+            "characters/Velkoz/sounds/619735112.ogg",
+        ],
+        "VelkozQ_OnCast": [
+            "characters/Velkoz/sounds/21472551.ogg",
+            "characters/Velkoz/sounds/437282891.ogg",
+            "characters/Velkoz/sounds/522480943.ogg",
+        ],
+        "VelkozQ_hit": [
+            "characters/Velkoz/sounds/108656599.ogg",
+            "characters/Velkoz/sounds/176978345.ogg",
+        ],
+        "VelkozQ_missilelaunch": [
+            "characters/Velkoz/sounds/619735112.ogg",
+        ],
+        "VelkozRBeamEnd_buffactivate": [
+            "characters/Velkoz/sounds/998045250.ogg",
+        ],
+        "VelkozR_OnBuffActivate": [
+            "characters/Velkoz/sounds/1007049235.ogg",
+        ],
+        "VelkozR_OnBuffDeactivate": [
+            "characters/Velkoz/sounds/327502969.ogg",
+        ],
+        "VelkozR_OnCast": [
+            "characters/Velkoz/sounds/709640180.ogg",
+        ],
+        "VelkozR_hit": [
+            "characters/Velkoz/sounds/117495984.ogg",
+            "characters/Velkoz/sounds/612316320.ogg",
+            "characters/Velkoz/sounds/701693347.ogg",
+        ],
+        "VelkozR_hit_researched": [
+            "characters/Velkoz/sounds/390293057.ogg",
+            "characters/Velkoz/sounds/601649804.ogg",
+            "characters/Velkoz/sounds/660077075.ogg",
+        ],
+        "VelkozWSoundDummyBuff_OnBuffActivate": [
+            "characters/Velkoz/sounds/272401142.ogg",
+            "characters/Velkoz/sounds/441275537.ogg",
+            "characters/Velkoz/sounds/486660990.ogg",
+        ],
+        "VelkozWTarPersist_hit": [
+            "characters/Velkoz/sounds/302128664.ogg",
+            "characters/Velkoz/sounds/424547689.ogg",
+            "characters/Velkoz/sounds/484365235.ogg",
+            "characters/Velkoz/sounds/679643890.ogg",
+        ],
+        "VelkozWTar_hit": [
+            "characters/Velkoz/sounds/524548647.ogg",
+            "characters/Velkoz/sounds/530441101.ogg",
+            "characters/Velkoz/sounds/624658022.ogg",
+            "characters/Velkoz/sounds/783866142.ogg",
+        ],
+        "VelkozW_OnCast": [
+            "characters/Velkoz/sounds/189962261.ogg",
+            "characters/Velkoz/sounds/419333510.ogg",
+            "characters/Velkoz/sounds/490446757.ogg",
+        ],
+        "VelkozW_buffactivate": [
+            "characters/Velkoz/sounds/1030941555.ogg",
+            "characters/Velkoz/sounds/401120375.ogg",
+            "characters/Velkoz/sounds/674197655.ogg",
+        ],
+        "Winddown3D_buffactivate": [
+            "characters/Velkoz/sounds/1006693592.ogg",
+        ],
+    },
+)

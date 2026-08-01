@@ -1,0 +1,544 @@
+(
+    events: {
+        "Dance3D_buffactivate_in": [
+            "characters/Kayle/sounds/358092930.ogg",
+        ],
+        "Dance3D_loop": [
+            "characters/Kayle/sounds/878838659.ogg",
+        ],
+        "Death3D_cast": [
+            "characters/Kayle/sounds/319114850.ogg",
+        ],
+        "Homeguard3D_cast": [
+            "characters/Kayle/sounds/715056004.ogg",
+        ],
+        "Joke3D_buffactivate": [
+            "characters/Kayle/sounds/1001903440.ogg",
+        ],
+        "KayleBasicAttack2_OnCast": [
+            "characters/Kayle/sounds/292689271.ogg",
+            "characters/Kayle/sounds/397776893.ogg",
+            "characters/Kayle/sounds/651968625.ogg",
+            "characters/Kayle/sounds/668782891.ogg",
+        ],
+        "KayleBasicAttack2_OnHit": [
+            "characters/Kayle/sounds/232252988.ogg",
+            "characters/Kayle/sounds/350815727.ogg",
+            "characters/Kayle/sounds/584898965.ogg",
+            "characters/Kayle/sounds/732131953.ogg",
+        ],
+        "KayleBasicAttack3_OnCast": [
+            "characters/Kayle/sounds/292689271.ogg",
+            "characters/Kayle/sounds/397776893.ogg",
+            "characters/Kayle/sounds/651968625.ogg",
+            "characters/Kayle/sounds/668782891.ogg",
+        ],
+        "KayleBasicAttack3_OnHit": [
+            "characters/Kayle/sounds/286773117.ogg",
+        ],
+        "KayleBasicAttack3_OnMissileCast": [
+            "characters/Kayle/sounds/818637153.ogg",
+        ],
+        "KayleBasicAttack4_OnCast": [
+            "characters/Kayle/sounds/292689271.ogg",
+            "characters/Kayle/sounds/397776893.ogg",
+            "characters/Kayle/sounds/651968625.ogg",
+            "characters/Kayle/sounds/668782891.ogg",
+        ],
+        "KayleBasicAttack4_OnHit": [
+            "characters/Kayle/sounds/286773117.ogg",
+        ],
+        "KayleBasicAttack4_OnMissileCast": [
+            "characters/Kayle/sounds/818637153.ogg",
+        ],
+        "KayleBasicAttack_OnCast": [
+            "characters/Kayle/sounds/292689271.ogg",
+            "characters/Kayle/sounds/397776893.ogg",
+            "characters/Kayle/sounds/651968625.ogg",
+            "characters/Kayle/sounds/668782891.ogg",
+        ],
+        "KayleBasicAttack_OnHit": [
+            "characters/Kayle/sounds/232252988.ogg",
+            "characters/Kayle/sounds/350815727.ogg",
+            "characters/Kayle/sounds/584898965.ogg",
+            "characters/Kayle/sounds/732131953.ogg",
+        ],
+        "KayleEAttackMelee_OnCast": [
+            "characters/Kayle/sounds/521317911.ogg",
+        ],
+        "KayleEAttackMelee_OnHit": [
+            "characters/Kayle/sounds/1059902022.ogg",
+            "characters/Kayle/sounds/337742228.ogg",
+            "characters/Kayle/sounds/404379899.ogg",
+            "characters/Kayle/sounds/635359905.ogg",
+        ],
+        "KayleEAttackUpgrade_OnCast": [
+            "characters/Kayle/sounds/521317911.ogg",
+        ],
+        "KayleEAttackUpgrade_OnHit": [
+            "characters/Kayle/sounds/1059902022.ogg",
+            "characters/Kayle/sounds/337742228.ogg",
+            "characters/Kayle/sounds/404379899.ogg",
+            "characters/Kayle/sounds/635359905.ogg",
+        ],
+        "KayleEAttackUpgrade_OnMissileCast": [
+            "characters/Kayle/sounds/678524736.ogg",
+        ],
+        "KayleEAttack_OnCast": [
+            "characters/Kayle/sounds/521317911.ogg",
+        ],
+        "KayleEAttack_OnHit": [
+            "characters/Kayle/sounds/1059902022.ogg",
+            "characters/Kayle/sounds/337742228.ogg",
+            "characters/Kayle/sounds/404379899.ogg",
+            "characters/Kayle/sounds/635359905.ogg",
+        ],
+        "KayleEAttack_OnMissileCast": [
+            "characters/Kayle/sounds/678524736.ogg",
+        ],
+        "KayleEMagic_hit": [
+            "characters/Kayle/sounds/124492913.ogg",
+            "characters/Kayle/sounds/257952045.ogg",
+            "characters/Kayle/sounds/881551001.ogg",
+            "characters/Kayle/sounds/954956700.ogg",
+        ],
+        "KayleE_OnCast": [
+            "characters/Kayle/sounds/152863463.ogg",
+            "characters/Kayle/sounds/262221857.ogg",
+            "characters/Kayle/sounds/353054774.ogg",
+            "characters/Kayle/sounds/779600072.ogg",
+        ],
+        "KayleEnrageConeMisUpgrade_cast": [
+            "characters/Kayle/sounds/100629338.ogg",
+            "characters/Kayle/sounds/808858988.ogg",
+            "characters/Kayle/sounds/866972015.ogg",
+            "characters/Kayle/sounds/951583669.ogg",
+        ],
+        "KayleEnrageConeMis_OnMissileCast": [
+            "characters/Kayle/sounds/354986336.ogg",
+            "characters/Kayle/sounds/503874140.ogg",
+            "characters/Kayle/sounds/540660147.ogg",
+            "characters/Kayle/sounds/713164411.ogg",
+        ],
+        "KayleEnrageConeMis_hit": [
+            "characters/Kayle/sounds/794209875.ogg",
+        ],
+        "KayleEnrageReady_buffactivate": [
+            "characters/Kayle/sounds/894077360.ogg",
+        ],
+        "KayleEnrage_buffactivate": [
+            "characters/Kayle/sounds/55720510.ogg",
+        ],
+        "KaylePassiveCeremony1_cast": [
+            "characters/Kayle/sounds/544847462.ogg",
+        ],
+        "KaylePassiveCeremony1_cast_self": [
+            "characters/Kayle/sounds/453091104.ogg",
+        ],
+        "KaylePassiveCeremony2_cast": [
+            "characters/Kayle/sounds/538164647.ogg",
+        ],
+        "KaylePassiveCeremony2_cast_self": [
+            "characters/Kayle/sounds/187248670.ogg",
+        ],
+        "KaylePassiveCeremony3_cast": [
+            "characters/Kayle/sounds/671570586.ogg",
+        ],
+        "KaylePassiveCeremony3_cast_self": [
+            "characters/Kayle/sounds/821606321.ogg",
+        ],
+        "KaylePassiveCeremony_cast": [
+            "characters/Kayle/sounds/131314342.ogg",
+        ],
+        "KaylePassiveCeremony_cast_self": [
+            "characters/Kayle/sounds/414543172.ogg",
+        ],
+        "KayleQMis_OnHit": [
+            "characters/Kayle/sounds/173697673.ogg",
+            "characters/Kayle/sounds/188728287.ogg",
+            "characters/Kayle/sounds/270897883.ogg",
+            "characters/Kayle/sounds/971218117.ogg",
+        ],
+        "KayleQMis_OnMissileCast": [
+            "characters/Kayle/sounds/538052598.ogg",
+            "characters/Kayle/sounds/549546589.ogg",
+            "characters/Kayle/sounds/690259189.ogg",
+            "characters/Kayle/sounds/957713341.ogg",
+        ],
+        "KayleQ_OnCast": [
+            "characters/Kayle/sounds/148057318.ogg",
+            "characters/Kayle/sounds/282030697.ogg",
+            "characters/Kayle/sounds/506340085.ogg",
+            "characters/Kayle/sounds/73558991.ogg",
+        ],
+        "KayleR_OnCast": [
+            "characters/Kayle/sounds/667843458.ogg",
+        ],
+        "KayleR_cast_blades_down": [
+            "characters/Kayle/sounds/673873780.ogg",
+        ],
+        "KayleR_cast_blades_up": [
+            "characters/Kayle/sounds/818709488.ogg",
+        ],
+        "KayleR_hit": [
+            "characters/Kayle/sounds/301686469.ogg",
+        ],
+        "KayleR_hit_self": [
+            "characters/Kayle/sounds/754972048.ogg",
+        ],
+        "KayleWHeal_OnCast": [
+            "characters/Kayle/sounds/128073833.ogg",
+            "characters/Kayle/sounds/129920208.ogg",
+            "characters/Kayle/sounds/357813012.ogg",
+            "characters/Kayle/sounds/388773973.ogg",
+        ],
+        "Laugh3D_buffactivate": [
+            "characters/Kayle/sounds/496061041.ogg",
+        ],
+        "Play_vo_KayleSkin42_Chat3DMorgana_Spell3DBasicHitKayle01_Chat2_01": [
+            "characters/Kayle/sounds/189284621.ogg",
+        ],
+        "Play_vo_KayleSkin42_Chat3DMorgana_Spell3DBasicHitKayle02_Chat2_01": [
+            "characters/Kayle/sounds/374148712.ogg",
+        ],
+        "Play_vo_KayleSkin42_Chat3DMorgana_Spell3DBasicHitKayle03_Chat2_01": [
+            "characters/Kayle/sounds/599143408.ogg",
+        ],
+        "Play_vo_KayleSkin42_Chat3DMorgana_Spell3DBasicHitKayle04_Chat2_01": [
+            "characters/Kayle/sounds/377233325.ogg",
+        ],
+        "Play_vo_KayleSkin42_Chat3DMorgana_Spell3DEHitKayle01_Chat2_01": [
+            "characters/Kayle/sounds/993590788.ogg",
+        ],
+        "Play_vo_KayleSkin42_Chat3DMorgana_Spell3DEHitKayle02_Chat2_01": [
+            "characters/Kayle/sounds/266679484.ogg",
+        ],
+        "Play_vo_KayleSkin42_Chat3DMorgana_Spell3DEHitKayle03_Chat2_01": [
+            "characters/Kayle/sounds/534524789.ogg",
+        ],
+        "Play_vo_Kayle_Attack2DGeneral": [
+            "characters/Kayle/sounds/1034033330.ogg",
+            "characters/Kayle/sounds/202861123.ogg",
+            "characters/Kayle/sounds/232186728.ogg",
+            "characters/Kayle/sounds/256285424.ogg",
+            "characters/Kayle/sounds/26956148.ogg",
+            "characters/Kayle/sounds/282484312.ogg",
+            "characters/Kayle/sounds/295698476.ogg",
+            "characters/Kayle/sounds/309104661.ogg",
+            "characters/Kayle/sounds/322278575.ogg",
+            "characters/Kayle/sounds/339026957.ogg",
+            "characters/Kayle/sounds/374764922.ogg",
+            "characters/Kayle/sounds/454494471.ogg",
+            "characters/Kayle/sounds/459054229.ogg",
+            "characters/Kayle/sounds/634492714.ogg",
+            "characters/Kayle/sounds/649775701.ogg",
+            "characters/Kayle/sounds/656436976.ogg",
+            "characters/Kayle/sounds/744327925.ogg",
+            "characters/Kayle/sounds/747687932.ogg",
+            "characters/Kayle/sounds/753487307.ogg",
+            "characters/Kayle/sounds/790834028.ogg",
+            "characters/Kayle/sounds/7964739.ogg",
+            "characters/Kayle/sounds/799730119.ogg",
+            "characters/Kayle/sounds/835824079.ogg",
+            "characters/Kayle/sounds/846116562.ogg",
+            "characters/Kayle/sounds/861426298.ogg",
+            "characters/Kayle/sounds/882970886.ogg",
+            "characters/Kayle/sounds/921096658.ogg",
+            "characters/Kayle/sounds/942367483.ogg",
+            "characters/Kayle/sounds/963348193.ogg",
+            "characters/Kayle/sounds/980345772.ogg",
+            "characters/Kayle/sounds/981684259.ogg",
+        ],
+        "Play_vo_Kayle_Chat3DMorgana_FirstEncounter3DKayle01_Chat2": [
+            "characters/Kayle/sounds/585483141.ogg",
+        ],
+        "Play_vo_Kayle_Chat3DMorgana_FirstEncounter3DKayle05_Chat2": [
+            "characters/Kayle/sounds/286049834.ogg",
+        ],
+        "Play_vo_Kayle_Chat3DMorgana_FirstEncounter3DKayle06_Chat2": [
+            "characters/Kayle/sounds/764745245.ogg",
+        ],
+        "Play_vo_Kayle_Chat3DMorgana_FirstEncounter3DKayle07_Chat2": [
+            "characters/Kayle/sounds/903170595.ogg",
+        ],
+        "Play_vo_Kayle_Chat3DMorgana_Move3DKayle01_Chat2": [
+            "characters/Kayle/sounds/293180441.ogg",
+        ],
+        "Play_vo_Kayle_Chat3DMorgana_Move3DMorgana": [
+            "characters/Kayle/sounds/1023863931.ogg",
+            "characters/Kayle/sounds/342870448.ogg",
+            "characters/Kayle/sounds/402424086.ogg",
+            "characters/Kayle/sounds/567018643.ogg",
+            "characters/Kayle/sounds/785596236.ogg",
+        ],
+        "Play_vo_Kayle_Chat3DMorgana_Move3DMorgana05_Chat3": [
+            "characters/Kayle/sounds/969749465.ogg",
+        ],
+        "Play_vo_Kayle_Chat3DMorgana_Move3DYordle": [
+            "characters/Kayle/sounds/990639235.ogg",
+        ],
+        "Play_vo_Kayle_Chat3DMorgana_Spell3DBasicHitMorgana": [
+            "characters/Kayle/sounds/156745963.ogg",
+            "characters/Kayle/sounds/655908882.ogg",
+        ],
+        "Play_vo_Kayle_Chat3DMorgana_Taunt3DKayle01_Chat2": [
+            "characters/Kayle/sounds/20863256.ogg",
+        ],
+        "Play_vo_Kayle_Chat3DMorgana_Taunt3DKayle02_Chat2": [
+            "characters/Kayle/sounds/737976203.ogg",
+        ],
+        "Play_vo_Kayle_Chat3DMorgana_Taunt3DKayle03_Chat2": [
+            "characters/Kayle/sounds/68450419.ogg",
+        ],
+        "Play_vo_Kayle_Death3D": [
+            "characters/Kayle/sounds/158446834.ogg",
+            "characters/Kayle/sounds/225861545.ogg",
+            "characters/Kayle/sounds/482682537.ogg",
+            "characters/Kayle/sounds/581418098.ogg",
+            "characters/Kayle/sounds/908571085.ogg",
+        ],
+        "Play_vo_Kayle_FirstEncounter3DDemacia": [
+            "characters/Kayle/sounds/563916758.ogg",
+        ],
+        "Play_vo_Kayle_FirstEncounter3DGaren": [
+            "characters/Kayle/sounds/779705436.ogg",
+        ],
+        "Play_vo_Kayle_FirstEncounter3DGeneral": [
+            "characters/Kayle/sounds/102721184.ogg",
+            "characters/Kayle/sounds/53879248.ogg",
+            "characters/Kayle/sounds/711971573.ogg",
+        ],
+        "Play_vo_Kayle_FirstEncounter3DJarvanIV": [
+            "characters/Kayle/sounds/881745623.ogg",
+        ],
+        "Play_vo_Kayle_FirstEncounter3DLux": [
+            "characters/Kayle/sounds/181580301.ogg",
+        ],
+        "Play_vo_Kayle_FirstEncounter3DMorgana": [
+            "characters/Kayle/sounds/536249054.ogg",
+            "characters/Kayle/sounds/873524797.ogg",
+        ],
+        "Play_vo_Kayle_FirstEncounter3DPyke": [
+            "characters/Kayle/sounds/692078902.ogg",
+        ],
+        "Play_vo_Kayle_FirstEncounter3DSylas": [
+            "characters/Kayle/sounds/614058358.ogg",
+        ],
+        "Play_vo_Kayle_FirstEncounter3DYordle": [
+            "characters/Kayle/sounds/200547026.ogg",
+        ],
+        "Play_vo_Kayle_Joke3DGeneral": [
+            "characters/Kayle/sounds/453943572.ogg",
+            "characters/Kayle/sounds/559134939.ogg",
+        ],
+        "Play_vo_Kayle_KayleBasicAttack2_cast3D": [
+            "characters/Kayle/sounds/173014824.ogg",
+            "characters/Kayle/sounds/251876548.ogg",
+            "characters/Kayle/sounds/283035477.ogg",
+            "characters/Kayle/sounds/585226324.ogg",
+            "characters/Kayle/sounds/739315584.ogg",
+            "characters/Kayle/sounds/845645661.ogg",
+            "characters/Kayle/sounds/854326038.ogg",
+            "characters/Kayle/sounds/922830465.ogg",
+        ],
+        "Play_vo_Kayle_KayleBasicAttack3_cast3D": [
+            "characters/Kayle/sounds/173014824.ogg",
+            "characters/Kayle/sounds/251876548.ogg",
+            "characters/Kayle/sounds/283035477.ogg",
+            "characters/Kayle/sounds/585226324.ogg",
+            "characters/Kayle/sounds/739315584.ogg",
+            "characters/Kayle/sounds/845645661.ogg",
+            "characters/Kayle/sounds/854326038.ogg",
+            "characters/Kayle/sounds/922830465.ogg",
+        ],
+        "Play_vo_Kayle_KayleBasicAttack4_cast3D": [
+            "characters/Kayle/sounds/173014824.ogg",
+            "characters/Kayle/sounds/251876548.ogg",
+            "characters/Kayle/sounds/283035477.ogg",
+            "characters/Kayle/sounds/585226324.ogg",
+            "characters/Kayle/sounds/739315584.ogg",
+            "characters/Kayle/sounds/845645661.ogg",
+            "characters/Kayle/sounds/854326038.ogg",
+            "characters/Kayle/sounds/922830465.ogg",
+        ],
+        "Play_vo_Kayle_KayleBasicAttack_cast3D": [
+            "characters/Kayle/sounds/173014824.ogg",
+            "characters/Kayle/sounds/251876548.ogg",
+            "characters/Kayle/sounds/283035477.ogg",
+            "characters/Kayle/sounds/585226324.ogg",
+            "characters/Kayle/sounds/739315584.ogg",
+            "characters/Kayle/sounds/845645661.ogg",
+            "characters/Kayle/sounds/854326038.ogg",
+            "characters/Kayle/sounds/922830465.ogg",
+        ],
+        "Play_vo_Kayle_KayleE_cast3D": [
+            "characters/Kayle/sounds/113818656.ogg",
+            "characters/Kayle/sounds/210790588.ogg",
+            "characters/Kayle/sounds/215507755.ogg",
+            "characters/Kayle/sounds/426934424.ogg",
+        ],
+        "Play_vo_Kayle_KayleQ_cast3D": [
+            "characters/Kayle/sounds/511828284.ogg",
+            "characters/Kayle/sounds/730233605.ogg",
+        ],
+        "Play_vo_Kayle_KayleR_Chat3DMorgana_Spell3DRHitMorgana": [
+            "characters/Kayle/sounds/373154776.ogg",
+            "characters/Kayle/sounds/715136400.ogg",
+            "characters/Kayle/sounds/729054573.ogg",
+        ],
+        "Play_vo_Kayle_KayleR_hit3D": [
+            "characters/Kayle/sounds/180005940.ogg",
+            "characters/Kayle/sounds/290705073.ogg",
+            "characters/Kayle/sounds/426184120.ogg",
+            "characters/Kayle/sounds/724424025.ogg",
+            "characters/Kayle/sounds/812392923.ogg",
+            "characters/Kayle/sounds/962705228.ogg",
+            "characters/Kayle/sounds/988443242.ogg",
+        ],
+        "Play_vo_Kayle_KayleW_Chat3DMorgana_Spell3DWHitMorgana": [
+            "characters/Kayle/sounds/903344037.ogg",
+        ],
+        "Play_vo_Kayle_KayleW_hit3D": [
+            "characters/Kayle/sounds/568121054.ogg",
+            "characters/Kayle/sounds/807553850.ogg",
+        ],
+        "Play_vo_Kayle_Kill3DGeneral": [
+            "characters/Kayle/sounds/274666198.ogg",
+            "characters/Kayle/sounds/754913268.ogg",
+            "characters/Kayle/sounds/876890026.ogg",
+        ],
+        "Play_vo_Kayle_Kill3DMorgana": [
+            "characters/Kayle/sounds/352849312.ogg",
+            "characters/Kayle/sounds/500712164.ogg",
+        ],
+        "Play_vo_Kayle_Kill3DPenta": [
+            "characters/Kayle/sounds/137976656.ogg",
+        ],
+        "Play_vo_Kayle_Kill3DVelkoz": [
+            "characters/Kayle/sounds/751905974.ogg",
+        ],
+        "Play_vo_Kayle_Laugh3DGeneral": [
+            "characters/Kayle/sounds/191474898.ogg",
+            "characters/Kayle/sounds/778528061.ogg",
+            "characters/Kayle/sounds/882056310.ogg",
+        ],
+        "Play_vo_Kayle_Move2DFirst": [
+            "characters/Kayle/sounds/156637188.ogg",
+            "characters/Kayle/sounds/455343630.ogg",
+            "characters/Kayle/sounds/498987870.ogg",
+            "characters/Kayle/sounds/532902659.ogg",
+            "characters/Kayle/sounds/79904991.ogg",
+        ],
+        "Play_vo_Kayle_Move2DFirstAllyMorgana": [
+            "characters/Kayle/sounds/383960245.ogg",
+        ],
+        "Play_vo_Kayle_Move2DFirstEnemyMorgana": [
+            "characters/Kayle/sounds/17334303.ogg",
+            "characters/Kayle/sounds/509755731.ogg",
+            "characters/Kayle/sounds/824527313.ogg",
+        ],
+        "Play_vo_Kayle_Move2DLong": [
+            "characters/Kayle/sounds/1004747044.ogg",
+            "characters/Kayle/sounds/158773504.ogg",
+            "characters/Kayle/sounds/209282738.ogg",
+            "characters/Kayle/sounds/274114648.ogg",
+            "characters/Kayle/sounds/483296131.ogg",
+            "characters/Kayle/sounds/801385463.ogg",
+            "characters/Kayle/sounds/925526040.ogg",
+            "characters/Kayle/sounds/98475770.ogg",
+        ],
+        "Play_vo_Kayle_Move2DStandard": [
+            "characters/Kayle/sounds/100129793.ogg",
+            "characters/Kayle/sounds/1015289366.ogg",
+            "characters/Kayle/sounds/1023058517.ogg",
+            "characters/Kayle/sounds/1031187243.ogg",
+            "characters/Kayle/sounds/105566980.ogg",
+            "characters/Kayle/sounds/1059509292.ogg",
+            "characters/Kayle/sounds/136221890.ogg",
+            "characters/Kayle/sounds/159514753.ogg",
+            "characters/Kayle/sounds/163548371.ogg",
+            "characters/Kayle/sounds/167731152.ogg",
+            "characters/Kayle/sounds/214274575.ogg",
+            "characters/Kayle/sounds/298775264.ogg",
+            "characters/Kayle/sounds/300470835.ogg",
+            "characters/Kayle/sounds/303793323.ogg",
+            "characters/Kayle/sounds/32386634.ogg",
+            "characters/Kayle/sounds/32910769.ogg",
+            "characters/Kayle/sounds/334941809.ogg",
+            "characters/Kayle/sounds/338247593.ogg",
+            "characters/Kayle/sounds/363404186.ogg",
+            "characters/Kayle/sounds/37464596.ogg",
+            "characters/Kayle/sounds/379650596.ogg",
+            "characters/Kayle/sounds/387806545.ogg",
+            "characters/Kayle/sounds/391762070.ogg",
+            "characters/Kayle/sounds/40289494.ogg",
+            "characters/Kayle/sounds/413937628.ogg",
+            "characters/Kayle/sounds/45708271.ogg",
+            "characters/Kayle/sounds/458916925.ogg",
+            "characters/Kayle/sounds/480935357.ogg",
+            "characters/Kayle/sounds/49347914.ogg",
+            "characters/Kayle/sounds/495666662.ogg",
+            "characters/Kayle/sounds/499372390.ogg",
+            "characters/Kayle/sounds/526251006.ogg",
+            "characters/Kayle/sounds/56234164.ogg",
+            "characters/Kayle/sounds/592624514.ogg",
+            "characters/Kayle/sounds/60297734.ogg",
+            "characters/Kayle/sounds/605852511.ogg",
+            "characters/Kayle/sounds/624017537.ogg",
+            "characters/Kayle/sounds/625593757.ogg",
+            "characters/Kayle/sounds/69497155.ogg",
+            "characters/Kayle/sounds/730905225.ogg",
+            "characters/Kayle/sounds/746254939.ogg",
+            "characters/Kayle/sounds/775826957.ogg",
+            "characters/Kayle/sounds/777158008.ogg",
+            "characters/Kayle/sounds/782995975.ogg",
+            "characters/Kayle/sounds/783819253.ogg",
+            "characters/Kayle/sounds/803637700.ogg",
+            "characters/Kayle/sounds/812247373.ogg",
+            "characters/Kayle/sounds/819488338.ogg",
+            "characters/Kayle/sounds/845221289.ogg",
+            "characters/Kayle/sounds/905229991.ogg",
+            "characters/Kayle/sounds/942311895.ogg",
+            "characters/Kayle/sounds/947352756.ogg",
+            "characters/Kayle/sounds/966775181.ogg",
+            "characters/Kayle/sounds/971064923.ogg",
+            "characters/Kayle/sounds/999724364.ogg",
+        ],
+        "Play_vo_Kayle_Recall3DGeneral": [
+            "characters/Kayle/sounds/1036616625.ogg",
+            "characters/Kayle/sounds/645931722.ogg",
+        ],
+        "Play_vo_Kayle_Respawn2DGeneral": [
+            "characters/Kayle/sounds/108133429.ogg",
+            "characters/Kayle/sounds/932609259.ogg",
+        ],
+        "Play_vo_Kayle_Spell2DPRank1": [
+            "characters/Kayle/sounds/980295020.ogg",
+        ],
+        "Play_vo_Kayle_Spell2DPRank2": [
+            "characters/Kayle/sounds/969628777.ogg",
+        ],
+        "Play_vo_Kayle_Spell2DPRank3": [
+            "characters/Kayle/sounds/619353365.ogg",
+        ],
+        "Play_vo_Kayle_Spell2DPRank4": [
+            "characters/Kayle/sounds/1038535056.ogg",
+        ],
+        "Play_vo_Kayle_Taunt3DGeneral": [
+            "characters/Kayle/sounds/251573911.ogg",
+            "characters/Kayle/sounds/353094249.ogg",
+        ],
+        "Play_vo_Kayle_Taunt3DMorgana": [
+            "characters/Kayle/sounds/97645513.ogg",
+        ],
+        "Recall3D_leadin": [
+            "characters/Kayle/sounds/799945176.ogg",
+        ],
+        "Recall3D_winddown": [
+            "characters/Kayle/sounds/812122933.ogg",
+        ],
+        "Taunt3D_buffactivate": [
+            "characters/Kayle/sounds/438040055.ogg",
+        ],
+    },
+)

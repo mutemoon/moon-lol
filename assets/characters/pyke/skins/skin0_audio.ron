@@ -1,0 +1,216 @@
+(
+    events: {
+        "Dance3D_buffactivate": [
+            "characters/Pyke/sounds/542374792.ogg",
+        ],
+        "Dance3D_buffactivate_loop": [
+            "characters/Pyke/sounds/266885843.ogg",
+        ],
+        "Death3D_cast": [
+            "characters/Pyke/sounds/451000017.ogg",
+        ],
+        "Joke3D_buffactivate": [
+            "characters/Pyke/sounds/194580707.ogg",
+            "characters/Pyke/sounds/51301709.ogg",
+        ],
+        "Laugh3D_buffactivate": [
+            "characters/Pyke/sounds/347842046.ogg",
+        ],
+        "PykeBasicAttack2_OnCast": [
+            "characters/Pyke/sounds/243259862.ogg",
+            "characters/Pyke/sounds/353109052.ogg",
+            "characters/Pyke/sounds/567219283.ogg",
+        ],
+        "PykeBasicAttack2_OnHit": [
+            "characters/Pyke/sounds/116952725.ogg",
+            "characters/Pyke/sounds/167538768.ogg",
+            "characters/Pyke/sounds/330141959.ogg",
+            "characters/Pyke/sounds/4215631.ogg",
+            "characters/Pyke/sounds/502957683.ogg",
+            "characters/Pyke/sounds/656064945.ogg",
+            "characters/Pyke/sounds/68076877.ogg",
+            "characters/Pyke/sounds/758512610.ogg",
+            "characters/Pyke/sounds/875919813.ogg",
+            "characters/Pyke/sounds/931656764.ogg",
+            "characters/Pyke/sounds/944149257.ogg",
+            "characters/Pyke/sounds/975559407.ogg",
+        ],
+        "PykeBasicAttack_OnCast": [
+            "characters/Pyke/sounds/243259862.ogg",
+            "characters/Pyke/sounds/353109052.ogg",
+            "characters/Pyke/sounds/567219283.ogg",
+        ],
+        "PykeBasicAttack_OnHit": [
+            "characters/Pyke/sounds/116952725.ogg",
+            "characters/Pyke/sounds/167538768.ogg",
+            "characters/Pyke/sounds/330141959.ogg",
+            "characters/Pyke/sounds/4215631.ogg",
+            "characters/Pyke/sounds/502957683.ogg",
+            "characters/Pyke/sounds/656064945.ogg",
+            "characters/Pyke/sounds/68076877.ogg",
+            "characters/Pyke/sounds/758512610.ogg",
+            "characters/Pyke/sounds/875919813.ogg",
+            "characters/Pyke/sounds/931656764.ogg",
+            "characters/Pyke/sounds/944149257.ogg",
+            "characters/Pyke/sounds/975559407.ogg",
+        ],
+        "PykeCritAttack_OnCast": [
+            "characters/Pyke/sounds/927887192.ogg",
+        ],
+        "PykeCritAttack_OnHit": [
+            "characters/Pyke/sounds/392983254.ogg",
+            "characters/Pyke/sounds/691665017.ogg",
+            "characters/Pyke/sounds/879944616.ogg",
+            "characters/Pyke/sounds/92536018.ogg",
+        ],
+        "PykeEMissile_hit": [
+            "characters/Pyke/sounds/782224351.ogg",
+        ],
+        "PykeEMissile_missilelaunch": [
+            "characters/Pyke/sounds/1033147710.ogg",
+        ],
+        "PykeEMissile_return": [
+            "characters/Pyke/sounds/26190705.ogg",
+            "characters/Pyke/sounds/574464180.ogg",
+            "characters/Pyke/sounds/718654779.ogg",
+        ],
+        "PykeE_OnCast": [
+            "characters/Pyke/sounds/893859128.ogg",
+        ],
+        "PykeE_clone_charge": [
+            "characters/Pyke/sounds/1033147710.ogg",
+        ],
+        "PykePassiveVFX_buffactivate": [
+            "characters/Pyke/sounds/829785800.ogg",
+        ],
+        "PykePassive_heal_start": [
+            "characters/Pyke/sounds/285925337.ogg",
+            "characters/Pyke/sounds/336711174.ogg",
+            "characters/Pyke/sounds/699587741.ogg",
+            "characters/Pyke/sounds/921882884.ogg",
+            "characters/Pyke/sounds/950947029.ogg",
+        ],
+        "PykeQMelee_OnCast": [
+            "characters/Pyke/sounds/699085510.ogg",
+            "characters/Pyke/sounds/820858610.ogg",
+            "characters/Pyke/sounds/888093439.ogg",
+        ],
+        "PykeQMelee_hit": [
+            "characters/Pyke/sounds/199979917.ogg",
+            "characters/Pyke/sounds/819164633.ogg",
+            "characters/Pyke/sounds/869464993.ogg",
+        ],
+        "PykeQRange_OnCast": [
+            "characters/Pyke/sounds/279655220.ogg",
+            "characters/Pyke/sounds/409506034.ogg",
+            "characters/Pyke/sounds/668123478.ogg",
+        ],
+        "PykeQRange_OnMissileCast": [
+            "characters/Pyke/sounds/1012841276.ogg",
+            "characters/Pyke/sounds/248502052.ogg",
+            "characters/Pyke/sounds/503714442.ogg",
+        ],
+        "PykeQRange_hit_champion": [
+            "characters/Pyke/sounds/432350823.ogg",
+            "characters/Pyke/sounds/812879980.ogg",
+            "characters/Pyke/sounds/995904696.ogg",
+        ],
+        "PykeQRange_hit_nonchampion": [
+            "characters/Pyke/sounds/688523115.ogg",
+            "characters/Pyke/sounds/728491233.ogg",
+            "characters/Pyke/sounds/764752529.ogg",
+        ],
+        "PykeQ_OnCast": [
+            "characters/Pyke/sounds/113913074.ogg",
+        ],
+        "PykeQ_buffdeactivate": [
+            "characters/Pyke/sounds/1050490955.ogg",
+            "characters/Pyke/sounds/476825520.ogg",
+            "characters/Pyke/sounds/949747973.ogg",
+        ],
+        "PykeR_cast": [
+            "characters/Pyke/sounds/554757553.ogg",
+        ],
+        "PykeR_cast_selfonly": [
+            "characters/Pyke/sounds/554757553.ogg",
+        ],
+        "PykeR_execute_enemy_target": [
+            "characters/Pyke/sounds/869196649.ogg",
+            "characters/Pyke/sounds/905075707.ogg",
+            "characters/Pyke/sounds/930826278.ogg",
+            "characters/Pyke/sounds/978235891.ogg",
+            "characters/Pyke/sounds/985771169.ogg",
+        ],
+        "PykeR_hitlocation_enemy": [
+            "characters/Pyke/sounds/166973476.ogg",
+            "characters/Pyke/sounds/723813682.ogg",
+            "characters/Pyke/sounds/887819556.ogg",
+            "characters/Pyke/sounds/91302559.ogg",
+        ],
+        "PykeR_hitlocation_enemy_selfonly": [
+            "characters/Pyke/sounds/155237681.ogg",
+            "characters/Pyke/sounds/238366617.ogg",
+            "characters/Pyke/sounds/4265230.ogg",
+            "characters/Pyke/sounds/724526855.ogg",
+        ],
+        "PykeR_hitlocation_noenemy": [
+            "characters/Pyke/sounds/675480660.ogg",
+        ],
+        "PykeR_kill_penta_selfonly": [
+            "characters/Pyke/sounds/175121820.ogg",
+            "characters/Pyke/sounds/302448406.ogg",
+        ],
+        "PykeR_kill_reset_selfonly": [
+            "characters/Pyke/sounds/1021963331.ogg",
+            "characters/Pyke/sounds/175121820.ogg",
+            "characters/Pyke/sounds/282352123.ogg",
+            "characters/Pyke/sounds/423088961.ogg",
+            "characters/Pyke/sounds/806279548.ogg",
+        ],
+        "PykeWWarning_high_buffactivate_target": [
+            "characters/Pyke/sounds/422799163.ogg",
+            "characters/Pyke/sounds/492190402.ogg",
+            "characters/Pyke/sounds/651971584.ogg",
+            "characters/Pyke/sounds/943130022.ogg",
+        ],
+        "PykeWWarning_low_buffactivate_target": [
+            "characters/Pyke/sounds/241542664.ogg",
+            "characters/Pyke/sounds/302660449.ogg",
+            "characters/Pyke/sounds/37237514.ogg",
+            "characters/Pyke/sounds/911110428.ogg",
+        ],
+        "PykeW_OnBuffDeactivate": [
+            "characters/Pyke/sounds/1000125421.ogg",
+            "characters/Pyke/sounds/298254308.ogg",
+            "characters/Pyke/sounds/605317205.ogg",
+            "characters/Pyke/sounds/681537301.ogg",
+        ],
+        "PykeW_buffactivate": [
+            "characters/Pyke/sounds/450168093.ogg",
+        ],
+        "PykeW_buffactivate_selfonly": [
+            "characters/Pyke/sounds/126830345.ogg",
+            "characters/Pyke/sounds/604630699.ogg",
+            "characters/Pyke/sounds/75453542.ogg",
+            "characters/Pyke/sounds/869196649.ogg",
+            "characters/Pyke/sounds/905075707.ogg",
+            "characters/Pyke/sounds/978235891.ogg",
+            "characters/Pyke/sounds/985771169.ogg",
+        ],
+        "PykeW_buffdeactivate_selfonly": [
+            "characters/Pyke/sounds/1000125421.ogg",
+            "characters/Pyke/sounds/298254308.ogg",
+            "characters/Pyke/sounds/605317205.ogg",
+            "characters/Pyke/sounds/681537301.ogg",
+        ],
+        "Recall3D_buffactivate": [
+            "characters/Pyke/sounds/208783825.ogg",
+        ],
+        "Respawn3D_buffactivate": [
+            "characters/Pyke/sounds/179186932.ogg",
+        ],
+        "Taunt3D_buffactivate": [
+            "characters/Pyke/sounds/295171213.ogg",
+        ],
+    },
+)

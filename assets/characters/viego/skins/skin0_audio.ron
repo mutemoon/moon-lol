@@ -1,0 +1,453 @@
+(
+    events: {
+        "Dance3D_cast": [
+            "characters/Viego/sounds/638281047.ogg",
+        ],
+        "Dance3D_loop": [
+            "characters/Viego/sounds/997888138.ogg",
+        ],
+        "Dance3D_music": [
+            "characters/Viego/sounds/227314521.ogg",
+            "characters/Viego/sounds/509907651.ogg",
+            "characters/Viego/sounds/934576734.ogg",
+            "characters/Viego/sounds/994713036.ogg",
+        ],
+        "Death3D_cast": [
+            "characters/Viego/sounds/261209301.ogg",
+        ],
+        "Joke3D_buffactivate": [
+            "characters/Viego/sounds/149668398.ogg",
+        ],
+        "Laugh3D_buffactivate": [
+            "characters/Viego/sounds/240959543.ogg",
+        ],
+        "Play_vo_Viego_Attack2DGeneral": [
+            "characters/Viego/sounds/1023487200.ogg",
+            "characters/Viego/sounds/103379283.ogg",
+            "characters/Viego/sounds/1036937102.ogg",
+            "characters/Viego/sounds/134490313.ogg",
+            "characters/Viego/sounds/148045845.ogg",
+            "characters/Viego/sounds/167235979.ogg",
+            "characters/Viego/sounds/191544938.ogg",
+            "characters/Viego/sounds/210899971.ogg",
+            "characters/Viego/sounds/213964811.ogg",
+            "characters/Viego/sounds/254488932.ogg",
+            "characters/Viego/sounds/30175308.ogg",
+            "characters/Viego/sounds/309322359.ogg",
+            "characters/Viego/sounds/373175290.ogg",
+            "characters/Viego/sounds/382437753.ogg",
+            "characters/Viego/sounds/385088117.ogg",
+            "characters/Viego/sounds/39781545.ogg",
+            "characters/Viego/sounds/43584831.ogg",
+            "characters/Viego/sounds/47792558.ogg",
+            "characters/Viego/sounds/478735813.ogg",
+            "characters/Viego/sounds/571620797.ogg",
+            "characters/Viego/sounds/58375004.ogg",
+            "characters/Viego/sounds/61986117.ogg",
+            "characters/Viego/sounds/711013207.ogg",
+            "characters/Viego/sounds/761433078.ogg",
+            "characters/Viego/sounds/868070854.ogg",
+            "characters/Viego/sounds/891728134.ogg",
+            "characters/Viego/sounds/915035782.ogg",
+            "characters/Viego/sounds/926963914.ogg",
+            "characters/Viego/sounds/954856194.ogg",
+            "characters/Viego/sounds/965587600.ogg",
+        ],
+        "Play_vo_Viego_Death3D": [
+            "characters/Viego/sounds/113828400.ogg",
+            "characters/Viego/sounds/619064230.ogg",
+            "characters/Viego/sounds/725933937.ogg",
+            "characters/Viego/sounds/965337377.ogg",
+        ],
+        "Play_vo_Viego_FirstEncounter3DFiddlesticks": [
+            "characters/Viego/sounds/866135952.ogg",
+        ],
+        "Play_vo_Viego_FirstEncounter3DHecarim": [
+            "characters/Viego/sounds/73003293.ogg",
+        ],
+        "Play_vo_Viego_FirstEncounter3DIllaoi": [
+            "characters/Viego/sounds/826243865.ogg",
+        ],
+        "Play_vo_Viego_FirstEncounter3DKalista": [
+            "characters/Viego/sounds/719769196.ogg",
+        ],
+        "Play_vo_Viego_FirstEncounter3DKarthus": [
+            "characters/Viego/sounds/865201227.ogg",
+        ],
+        "Play_vo_Viego_FirstEncounter3DKindred": [
+            "characters/Viego/sounds/323600987.ogg",
+        ],
+        "Play_vo_Viego_FirstEncounter3DMaokai": [
+            "characters/Viego/sounds/564353014.ogg",
+        ],
+        "Play_vo_Viego_FirstEncounter3DSenna": [
+            "characters/Viego/sounds/549292179.ogg",
+        ],
+        "Play_vo_Viego_FirstEncounter3DThresh": [
+            "characters/Viego/sounds/709673880.ogg",
+        ],
+        "Play_vo_Viego_FirstEncounter3DVladimir": [
+            "characters/Viego/sounds/484488657.ogg",
+        ],
+        "Play_vo_Viego_FirstEncounter3DYorick": [
+            "characters/Viego/sounds/116687232.ogg",
+        ],
+        "Play_vo_Viego_Joke3DGeneral": [
+            "characters/Viego/sounds/627573864.ogg",
+            "characters/Viego/sounds/891860178.ogg",
+        ],
+        "Play_vo_Viego_JokeResponse3DGeneral": [
+            "characters/Viego/sounds/234179288.ogg",
+        ],
+        "Play_vo_Viego_Kill3DFirst": [
+            "characters/Viego/sounds/49518421.ogg",
+            "characters/Viego/sounds/526678972.ogg",
+            "characters/Viego/sounds/589134349.ogg",
+            "characters/Viego/sounds/590777885.ogg",
+            "characters/Viego/sounds/655387268.ogg",
+            "characters/Viego/sounds/710347589.ogg",
+            "characters/Viego/sounds/779337391.ogg",
+            "characters/Viego/sounds/898445668.ogg",
+            "characters/Viego/sounds/991314115.ogg",
+        ],
+        "Play_vo_Viego_Kill3DGeneral": [
+            "characters/Viego/sounds/257789845.ogg",
+            "characters/Viego/sounds/410637007.ogg",
+            "characters/Viego/sounds/639456688.ogg",
+            "characters/Viego/sounds/791951696.ogg",
+            "characters/Viego/sounds/827979258.ogg",
+            "characters/Viego/sounds/865858615.ogg",
+            "characters/Viego/sounds/873630719.ogg",
+            "characters/Viego/sounds/894259204.ogg",
+            "characters/Viego/sounds/95353650.ogg",
+        ],
+        "Play_vo_Viego_Kill3DHecarim": [
+            "characters/Viego/sounds/111180014.ogg",
+        ],
+        "Play_vo_Viego_Kill3DKalista": [
+            "characters/Viego/sounds/106652981.ogg",
+        ],
+        "Play_vo_Viego_Kill3DKindred": [
+            "characters/Viego/sounds/839456063.ogg",
+        ],
+        "Play_vo_Viego_Kill3DPenta": [
+            "characters/Viego/sounds/509424233.ogg",
+        ],
+        "Play_vo_Viego_Kill3DSenna": [
+            "characters/Viego/sounds/879353488.ogg",
+        ],
+        "Play_vo_Viego_Kill3DThresh": [
+            "characters/Viego/sounds/575281658.ogg",
+        ],
+        "Play_vo_Viego_Kill3DVladimir": [
+            "characters/Viego/sounds/42241240.ogg",
+        ],
+        "Play_vo_Viego_Kill3DYorick": [
+            "characters/Viego/sounds/474630078.ogg",
+        ],
+        "Play_vo_Viego_Laugh3DGeneral": [
+            "characters/Viego/sounds/202083608.ogg",
+        ],
+        "Play_vo_Viego_Move2DFirst": [
+            "characters/Viego/sounds/38119102.ogg",
+            "characters/Viego/sounds/800774937.ogg",
+            "characters/Viego/sounds/998315366.ogg",
+        ],
+        "Play_vo_Viego_Move2DLong": [
+            "characters/Viego/sounds/1067407646.ogg",
+            "characters/Viego/sounds/177040039.ogg",
+            "characters/Viego/sounds/327500299.ogg",
+            "characters/Viego/sounds/454515011.ogg",
+            "characters/Viego/sounds/69696243.ogg",
+            "characters/Viego/sounds/863575866.ogg",
+            "characters/Viego/sounds/868620929.ogg",
+        ],
+        "Play_vo_Viego_Move2DStandard": [
+            "characters/Viego/sounds/1036242670.ogg",
+            "characters/Viego/sounds/1055285323.ogg",
+            "characters/Viego/sounds/1065674553.ogg",
+            "characters/Viego/sounds/239432763.ogg",
+            "characters/Viego/sounds/264073739.ogg",
+            "characters/Viego/sounds/323534903.ogg",
+            "characters/Viego/sounds/407519267.ogg",
+            "characters/Viego/sounds/428867853.ogg",
+            "characters/Viego/sounds/493133919.ogg",
+            "characters/Viego/sounds/514328367.ogg",
+            "characters/Viego/sounds/527061549.ogg",
+            "characters/Viego/sounds/54665746.ogg",
+            "characters/Viego/sounds/570019586.ogg",
+            "characters/Viego/sounds/584643380.ogg",
+            "characters/Viego/sounds/624802379.ogg",
+            "characters/Viego/sounds/649228500.ogg",
+            "characters/Viego/sounds/731928668.ogg",
+            "characters/Viego/sounds/815489029.ogg",
+            "characters/Viego/sounds/875911780.ogg",
+            "characters/Viego/sounds/8808730.ogg",
+            "characters/Viego/sounds/905062262.ogg",
+            "characters/Viego/sounds/917174455.ogg",
+        ],
+        "Play_vo_Viego_Recall3DGeneral": [
+            "characters/Viego/sounds/138519413.ogg",
+            "characters/Viego/sounds/309653564.ogg",
+            "characters/Viego/sounds/320753360.ogg",
+        ],
+        "Play_vo_Viego_Respawn2DGeneral": [
+            "characters/Viego/sounds/629130809.ogg",
+            "characters/Viego/sounds/668070746.ogg",
+            "characters/Viego/sounds/89827899.ogg",
+        ],
+        "Play_vo_Viego_Spell3DW2Cast": [
+            "characters/Viego/sounds/150287452.ogg",
+            "characters/Viego/sounds/358840015.ogg",
+            "characters/Viego/sounds/945217173.ogg",
+        ],
+        "Play_vo_Viego_Taunt3DGeneral": [
+            "characters/Viego/sounds/371491227.ogg",
+            "characters/Viego/sounds/715611471.ogg",
+        ],
+        "Play_vo_Viego_TauntResponse3DGeneral": [
+            "characters/Viego/sounds/407300936.ogg",
+        ],
+        "Play_vo_Viego_ViegoBasicAttack2_cast3D": [
+            "characters/Viego/sounds/42889539.ogg",
+            "characters/Viego/sounds/46360601.ogg",
+            "characters/Viego/sounds/91958154.ogg",
+            "characters/Viego/sounds/921243846.ogg",
+        ],
+        "Play_vo_Viego_ViegoBasicAttack3_cast3D": [
+            "characters/Viego/sounds/42889539.ogg",
+            "characters/Viego/sounds/46360601.ogg",
+            "characters/Viego/sounds/91958154.ogg",
+            "characters/Viego/sounds/921243846.ogg",
+        ],
+        "Play_vo_Viego_ViegoBasicAttack_cast3D": [
+            "characters/Viego/sounds/42889539.ogg",
+            "characters/Viego/sounds/46360601.ogg",
+            "characters/Viego/sounds/91958154.ogg",
+            "characters/Viego/sounds/921243846.ogg",
+        ],
+        "Play_vo_Viego_ViegoCritAttack2_cast3D": [
+            "characters/Viego/sounds/42889539.ogg",
+            "characters/Viego/sounds/46360601.ogg",
+            "characters/Viego/sounds/91958154.ogg",
+            "characters/Viego/sounds/921243846.ogg",
+        ],
+        "Play_vo_Viego_ViegoCritAttack_cast3D": [
+            "characters/Viego/sounds/42889539.ogg",
+            "characters/Viego/sounds/46360601.ogg",
+            "characters/Viego/sounds/91958154.ogg",
+            "characters/Viego/sounds/921243846.ogg",
+        ],
+        "Play_vo_Viego_ViegoE_cast3D": [
+            "characters/Viego/sounds/11679412.ogg",
+            "characters/Viego/sounds/170180076.ogg",
+            "characters/Viego/sounds/172808687.ogg",
+            "characters/Viego/sounds/203560568.ogg",
+            "characters/Viego/sounds/297394055.ogg",
+            "characters/Viego/sounds/359470625.ogg",
+            "characters/Viego/sounds/383383676.ogg",
+            "characters/Viego/sounds/459321068.ogg",
+            "characters/Viego/sounds/695924438.ogg",
+            "characters/Viego/sounds/873263615.ogg",
+        ],
+        "Play_vo_Viego_ViegoQ_cast3D": [
+            "characters/Viego/sounds/376261772.ogg",
+            "characters/Viego/sounds/598179642.ogg",
+            "characters/Viego/sounds/692614351.ogg",
+        ],
+        "Play_vo_Viego_ViegoR_cast3D": [
+            "characters/Viego/sounds/226737353.ogg",
+            "characters/Viego/sounds/230314759.ogg",
+            "characters/Viego/sounds/301230952.ogg",
+            "characters/Viego/sounds/489478913.ogg",
+            "characters/Viego/sounds/676384581.ogg",
+            "characters/Viego/sounds/903931313.ogg",
+        ],
+        "Recall3D_buffactivate": [
+            "characters/Viego/sounds/40268801.ogg",
+        ],
+        "Respawn3D_buffactivate": [
+            "characters/Viego/sounds/370170221.ogg",
+        ],
+        "Taunt3D_buffactivate": [
+            "characters/Viego/sounds/10520235.ogg",
+        ],
+        "Taunt3D_buffactivate_grip": [
+            "characters/Viego/sounds/871660027.ogg",
+        ],
+        "ViegoBasicAttack2_OnCast": [
+            "characters/Viego/sounds/117550210.ogg",
+            "characters/Viego/sounds/166948521.ogg",
+            "characters/Viego/sounds/185543076.ogg",
+            "characters/Viego/sounds/757639912.ogg",
+        ],
+        "ViegoBasicAttack2_OnHit": [
+            "characters/Viego/sounds/12789642.ogg",
+            "characters/Viego/sounds/156313936.ogg",
+            "characters/Viego/sounds/158596280.ogg",
+            "characters/Viego/sounds/206538472.ogg",
+            "characters/Viego/sounds/263867466.ogg",
+            "characters/Viego/sounds/284517000.ogg",
+            "characters/Viego/sounds/286619917.ogg",
+            "characters/Viego/sounds/313255292.ogg",
+            "characters/Viego/sounds/437309093.ogg",
+            "characters/Viego/sounds/597235335.ogg",
+            "characters/Viego/sounds/699083705.ogg",
+            "characters/Viego/sounds/718168519.ogg",
+            "characters/Viego/sounds/746149212.ogg",
+            "characters/Viego/sounds/87159301.ogg",
+            "characters/Viego/sounds/89839331.ogg",
+            "characters/Viego/sounds/920364370.ogg",
+        ],
+        "ViegoBasicAttack3_OnCast": [
+            "characters/Viego/sounds/427039325.ogg",
+        ],
+        "ViegoBasicAttack3_OnHit": [
+            "characters/Viego/sounds/12789642.ogg",
+            "characters/Viego/sounds/156313936.ogg",
+            "characters/Viego/sounds/158596280.ogg",
+            "characters/Viego/sounds/206538472.ogg",
+            "characters/Viego/sounds/263867466.ogg",
+            "characters/Viego/sounds/284517000.ogg",
+            "characters/Viego/sounds/286619917.ogg",
+            "characters/Viego/sounds/313255292.ogg",
+            "characters/Viego/sounds/437309093.ogg",
+            "characters/Viego/sounds/597235335.ogg",
+            "characters/Viego/sounds/699083705.ogg",
+            "characters/Viego/sounds/718168519.ogg",
+            "characters/Viego/sounds/746149212.ogg",
+            "characters/Viego/sounds/87159301.ogg",
+            "characters/Viego/sounds/89839331.ogg",
+            "characters/Viego/sounds/920364370.ogg",
+        ],
+        "ViegoBasicAttack_OnCast": [
+            "characters/Viego/sounds/117550210.ogg",
+            "characters/Viego/sounds/166948521.ogg",
+            "characters/Viego/sounds/185543076.ogg",
+            "characters/Viego/sounds/757639912.ogg",
+        ],
+        "ViegoBasicAttack_OnHit": [
+            "characters/Viego/sounds/12789642.ogg",
+            "characters/Viego/sounds/156313936.ogg",
+            "characters/Viego/sounds/158596280.ogg",
+            "characters/Viego/sounds/206538472.ogg",
+            "characters/Viego/sounds/263867466.ogg",
+            "characters/Viego/sounds/284517000.ogg",
+            "characters/Viego/sounds/286619917.ogg",
+            "characters/Viego/sounds/313255292.ogg",
+            "characters/Viego/sounds/437309093.ogg",
+            "characters/Viego/sounds/597235335.ogg",
+            "characters/Viego/sounds/699083705.ogg",
+            "characters/Viego/sounds/718168519.ogg",
+            "characters/Viego/sounds/746149212.ogg",
+            "characters/Viego/sounds/87159301.ogg",
+            "characters/Viego/sounds/89839331.ogg",
+            "characters/Viego/sounds/920364370.ogg",
+        ],
+        "ViegoCritAttack2_OnCast": [
+            "characters/Viego/sounds/714756512.ogg",
+        ],
+        "ViegoCritAttack2_OnHit": [
+            "characters/Viego/sounds/578091759.ogg",
+        ],
+        "ViegoCritAttack_OnCast": [
+            "characters/Viego/sounds/714756512.ogg",
+        ],
+        "ViegoCritAttack_OnHit": [
+            "characters/Viego/sounds/578091759.ogg",
+        ],
+        "ViegoEHaste_buffactivate": [
+            "characters/Viego/sounds/13878620.ogg",
+            "characters/Viego/sounds/317921758.ogg",
+        ],
+        "ViegoEMissile_buffactivate": [
+            "characters/Viego/sounds/359126724.ogg",
+        ],
+        "ViegoEMissile_hit": [
+            "characters/Viego/sounds/1046777050.ogg",
+        ],
+        "ViegoEWallFollowMis_cast": [
+            "characters/Viego/sounds/917976379.ogg",
+        ],
+        "ViegoE_OnCast": [
+            "characters/Viego/sounds/327747289.ogg",
+        ],
+        "ViegoE_buffactivate": [
+            "characters/Viego/sounds/102140343.ogg",
+        ],
+        "ViegoE_buffdeactivate": [
+            "characters/Viego/sounds/501944586.ogg",
+        ],
+        "ViegoPWarning_buffactivate": [
+            "characters/Viego/sounds/616642416.ogg",
+        ],
+        "ViegoP_cast": [
+            "characters/Viego/sounds/1066142186.ogg",
+        ],
+        "ViegoP_hit": [
+            "characters/Viego/sounds/981558616.ogg",
+        ],
+        "ViegoPassiveTransform_OnBuffDeactivate": [
+            "characters/Viego/sounds/648939083.ogg",
+        ],
+        "ViegoQDoubleAttack_OnCast": [
+            "characters/Viego/sounds/251352244.ogg",
+        ],
+        "ViegoQDoubleAttack_OnHit": [
+            "characters/Viego/sounds/412731487.ogg",
+        ],
+        "ViegoQDoubleAttack_Soul_hit": [
+            "characters/Viego/sounds/205703603.ogg",
+            "characters/Viego/sounds/282527104.ogg",
+            "characters/Viego/sounds/408163219.ogg",
+        ],
+        "ViegoQ_OnCast": [
+            "characters/Viego/sounds/137852511.ogg",
+            "characters/Viego/sounds/183965474.ogg",
+            "characters/Viego/sounds/449212179.ogg",
+        ],
+        "ViegoQ_hit": [
+            "characters/Viego/sounds/270717817.ogg",
+            "characters/Viego/sounds/477012892.ogg",
+            "characters/Viego/sounds/893799730.ogg",
+        ],
+        "ViegoRCast_hit": [
+            "characters/Viego/sounds/343979316.ogg",
+        ],
+        "ViegoR_Execution_hit": [
+            "characters/Viego/sounds/1003281412.ogg",
+        ],
+        "ViegoR_cast": [
+            "characters/Viego/sounds/961211742.ogg",
+        ],
+        "ViegoR_cast_warning": [
+            "characters/Viego/sounds/637635836.ogg",
+        ],
+        "ViegoR_hitlocation": [
+            "characters/Viego/sounds/409667577.ogg",
+        ],
+        "ViegoWMis_OnHit": [
+            "characters/Viego/sounds/227383700.ogg",
+            "characters/Viego/sounds/853567206.ogg",
+        ],
+        "ViegoWMis_OnMissileCast": [
+            "characters/Viego/sounds/219179181.ogg",
+            "characters/Viego/sounds/860830576.ogg",
+        ],
+        "ViegoW_OnBuffDeactivate": [
+            "characters/Viego/sounds/634911034.ogg",
+            "characters/Viego/sounds/830570484.ogg",
+        ],
+        "ViegoW_buffactivate": [
+            "characters/Viego/sounds/1036335491.ogg",
+            "characters/Viego/sounds/518642850.ogg",
+        ],
+        "ViegoW_missilelaunch": [
+            "characters/Viego/sounds/1058815205.ogg",
+            "characters/Viego/sounds/988116032.ogg",
+        ],
+        "Winddown3D_buffactivate": [
+            "characters/Viego/sounds/370170221.ogg",
+        ],
+    },
+)

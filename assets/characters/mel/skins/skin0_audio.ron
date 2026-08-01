@@ -1,0 +1,488 @@
+(
+    events: {
+        "Dance3D_leadin": [
+            "characters/Mel/sounds/947523655.ogg",
+        ],
+        "Dance3D_loop_buffactivate": [
+            "characters/Mel/sounds/563706074.ogg",
+        ],
+        "Dance3D_magic_loop_buffactivate": [
+            "characters/Mel/sounds/419872049.ogg",
+        ],
+        "Death3D_cast": [
+            "characters/Mel/sounds/7105837.ogg",
+        ],
+        "Joke3D_buffactivate": [
+            "characters/Mel/sounds/914421639.ogg",
+        ],
+        "Laugh3D_buffactivate": [
+            "characters/Mel/sounds/18476506.ogg",
+        ],
+        "MelBasicAttackEnhanced_OnCast": [
+            "characters/Mel/sounds/188688604.ogg",
+            "characters/Mel/sounds/210505607.ogg",
+            "characters/Mel/sounds/26761430.ogg",
+        ],
+        "MelBasicAttackEnhanced_OnHit": [
+            "characters/Mel/sounds/132317619.ogg",
+            "characters/Mel/sounds/391813129.ogg",
+            "characters/Mel/sounds/421690043.ogg",
+        ],
+        "MelBasicAttackEnhanced_OnMissileCast": [
+            "characters/Mel/sounds/378717097.ogg",
+            "characters/Mel/sounds/70498840.ogg",
+        ],
+        "MelBasicAttack_OnCast": [
+            "characters/Mel/sounds/200636722.ogg",
+            "characters/Mel/sounds/341318335.ogg",
+            "characters/Mel/sounds/708090850.ogg",
+        ],
+        "MelBasicAttack_OnHit": [
+            "characters/Mel/sounds/132317619.ogg",
+            "characters/Mel/sounds/391813129.ogg",
+            "characters/Mel/sounds/421690043.ogg",
+        ],
+        "MelBasicAttack_OnMissileLaunch": [
+            "characters/Mel/sounds/673057764.ogg",
+            "characters/Mel/sounds/758728416.ogg",
+            "characters/Mel/sounds/77765864.ogg",
+        ],
+        "MelCritAttack_OnCast": [
+            "characters/Mel/sounds/200636722.ogg",
+            "characters/Mel/sounds/341318335.ogg",
+            "characters/Mel/sounds/708090850.ogg",
+        ],
+        "MelCritAttack_OnHit": [
+            "characters/Mel/sounds/132317619.ogg",
+            "characters/Mel/sounds/391813129.ogg",
+            "characters/Mel/sounds/421690043.ogg",
+        ],
+        "MelCritAttack_OnMissileLaunch": [
+            "characters/Mel/sounds/673057764.ogg",
+            "characters/Mel/sounds/758728416.ogg",
+            "characters/Mel/sounds/77765864.ogg",
+        ],
+        "MelE_OnCast": [
+            "characters/Mel/sounds/466358459.ogg",
+            "characters/Mel/sounds/958790743.ogg",
+        ],
+        "MelE_OnMissileCast": [
+            "characters/Mel/sounds/734821735.ogg",
+            "characters/Mel/sounds/906410230.ogg",
+        ],
+        "MelE_OnMissileLaunch": [
+            "characters/Mel/sounds/898516573.ogg",
+            "characters/Mel/sounds/998231759.ogg",
+        ],
+        "MelE_hit_edge": [
+            "characters/Mel/sounds/16787017.ogg",
+            "characters/Mel/sounds/359069756.ogg",
+            "characters/Mel/sounds/824260874.ogg",
+        ],
+        "MelE_hit_root_champion_buffactivate": [
+            "characters/Mel/sounds/561997761.ogg",
+            "characters/Mel/sounds/844098923.ogg",
+        ],
+        "MelE_hit_root_minion_buffactivate": [
+            "characters/Mel/sounds/126242584.ogg",
+        ],
+        "MelExecute_champion": [
+            "characters/Mel/sounds/114393173.ogg",
+            "characters/Mel/sounds/653117688.ogg",
+            "characters/Mel/sounds/786511995.ogg",
+            "characters/Mel/sounds/887928136.ogg",
+        ],
+        "MelExecute_minion": [
+            "characters/Mel/sounds/114393173.ogg",
+            "characters/Mel/sounds/653117688.ogg",
+            "characters/Mel/sounds/786511995.ogg",
+            "characters/Mel/sounds/887928136.ogg",
+        ],
+        "MelMark_buffactivate": [
+            "characters/Mel/sounds/531582727.ogg",
+            "characters/Mel/sounds/532995148.ogg",
+            "characters/Mel/sounds/59964004.ogg",
+        ],
+        "MelMark_execute_ready_buffactivate": [
+            "characters/Mel/sounds/222969581.ogg",
+            "characters/Mel/sounds/748343576.ogg",
+        ],
+        "MelPassiveBonusMissileLeft_OnHit": [
+            "characters/Mel/sounds/528771296.ogg",
+            "characters/Mel/sounds/549107483.ogg",
+            "characters/Mel/sounds/581855614.ogg",
+        ],
+        "MelPassiveBonusMissileRight_OnHit": [
+            "characters/Mel/sounds/528771296.ogg",
+            "characters/Mel/sounds/549107483.ogg",
+            "characters/Mel/sounds/581855614.ogg",
+        ],
+        "MelQ_OnCast": [
+            "characters/Mel/sounds/114306922.ogg",
+            "characters/Mel/sounds/452539193.ogg",
+            "characters/Mel/sounds/604754762.ogg",
+        ],
+        "MelQ_hit": [
+            "characters/Mel/sounds/25598061.ogg",
+            "characters/Mel/sounds/312072310.ogg",
+            "characters/Mel/sounds/489366663.ogg",
+            "characters/Mel/sounds/67133814.ogg",
+            "characters/Mel/sounds/765326174.ogg",
+        ],
+        "MelQ_hit_fullcombo": [
+            "characters/Mel/sounds/112283412.ogg",
+            "characters/Mel/sounds/260543361.ogg",
+        ],
+        "MelQ_hitlocation": [
+            "characters/Mel/sounds/291268994.ogg",
+            "characters/Mel/sounds/29626745.ogg",
+            "characters/Mel/sounds/302282541.ogg",
+            "characters/Mel/sounds/314346474.ogg",
+            "characters/Mel/sounds/760015025.ogg",
+            "characters/Mel/sounds/809317032.ogg",
+            "characters/Mel/sounds/865899832.ogg",
+            "characters/Mel/sounds/871924691.ogg",
+        ],
+        "MelQ_missilecast": [
+            "characters/Mel/sounds/1014016203.ogg",
+            "characters/Mel/sounds/1034326865.ogg",
+            "characters/Mel/sounds/483045749.ogg",
+            "characters/Mel/sounds/633925690.ogg",
+            "characters/Mel/sounds/69906464.ogg",
+            "characters/Mel/sounds/999450566.ogg",
+        ],
+        "MelR_OnCast": [
+            "characters/Mel/sounds/1002542283.ogg",
+            "characters/Mel/sounds/222109077.ogg",
+            "characters/Mel/sounds/854170882.ogg",
+        ],
+        "MelR_enemy_execute": [
+            "characters/Mel/sounds/632959058.ogg",
+        ],
+        "MelR_enemy_hit": [
+            "characters/Mel/sounds/112728814.ogg",
+            "characters/Mel/sounds/270041739.ogg",
+        ],
+        "MelR_warning_buffactivate": [
+            "characters/Mel/sounds/243105584.ogg",
+            "characters/Mel/sounds/822393296.ogg",
+        ],
+        "MelR_warning_buffactivate_target2D": [
+            "characters/Mel/sounds/195481522.ogg",
+        ],
+        "MelWReflect_Global_buffactivate": [
+            "characters/Mel/sounds/302111241.ogg",
+        ],
+        "MelWReflect_Normal_buffactivate": [
+            "characters/Mel/sounds/61464375.ogg",
+        ],
+        "MelWReflect_Ult_buffactivate": [
+            "characters/Mel/sounds/458896861.ogg",
+        ],
+        "MelWShield_buffdeactivate": [
+            "characters/Mel/sounds/696495942.ogg",
+            "characters/Mel/sounds/966372264.ogg",
+        ],
+        "MelW_OnCast": [
+            "characters/Mel/sounds/286412259.ogg",
+            "characters/Mel/sounds/580783724.ogg",
+            "characters/Mel/sounds/622514781.ogg",
+            "characters/Mel/sounds/700348529.ogg",
+        ],
+        "Play_vo_Mel_Attack2DAtakhan": [
+            "characters/Mel/sounds/283421489.ogg",
+        ],
+        "Play_vo_Mel_Attack2DBaron": [
+            "characters/Mel/sounds/215457008.ogg",
+        ],
+        "Play_vo_Mel_Attack2DGeneral": [
+            "characters/Mel/sounds/1061625629.ogg",
+            "characters/Mel/sounds/1071076662.ogg",
+            "characters/Mel/sounds/187962911.ogg",
+            "characters/Mel/sounds/285192831.ogg",
+            "characters/Mel/sounds/31628077.ogg",
+            "characters/Mel/sounds/33904472.ogg",
+            "characters/Mel/sounds/339345813.ogg",
+            "characters/Mel/sounds/37401553.ogg",
+            "characters/Mel/sounds/385420059.ogg",
+            "characters/Mel/sounds/49935287.ogg",
+            "characters/Mel/sounds/507717426.ogg",
+            "characters/Mel/sounds/644742421.ogg",
+            "characters/Mel/sounds/730571883.ogg",
+            "characters/Mel/sounds/747507408.ogg",
+            "characters/Mel/sounds/790650526.ogg",
+            "characters/Mel/sounds/89991663.ogg",
+        ],
+        "Play_vo_Mel_Death3D": [
+            "characters/Mel/sounds/116353498.ogg",
+            "characters/Mel/sounds/37937160.ogg",
+            "characters/Mel/sounds/502042562.ogg",
+            "characters/Mel/sounds/555625483.ogg",
+            "characters/Mel/sounds/603829909.ogg",
+        ],
+        "Play_vo_Mel_Death3DAmbessa": [
+            "characters/Mel/sounds/936938651.ogg",
+        ],
+        "Play_vo_Mel_FirstEncounter3DAmbessa": [
+            "characters/Mel/sounds/12842645.ogg",
+        ],
+        "Play_vo_Mel_FirstEncounter3DCaitlyn": [
+            "characters/Mel/sounds/666593938.ogg",
+        ],
+        "Play_vo_Mel_FirstEncounter3DDraven": [
+            "characters/Mel/sounds/417343432.ogg",
+        ],
+        "Play_vo_Mel_FirstEncounter3DGeneral": [
+            "characters/Mel/sounds/1026059665.ogg",
+            "characters/Mel/sounds/166546073.ogg",
+            "characters/Mel/sounds/499410132.ogg",
+            "characters/Mel/sounds/780259003.ogg",
+            "characters/Mel/sounds/881399984.ogg",
+            "characters/Mel/sounds/891076715.ogg",
+        ],
+        "Play_vo_Mel_FirstEncounter3DHeimerdinger": [
+            "characters/Mel/sounds/818813955.ogg",
+        ],
+        "Play_vo_Mel_FirstEncounter3DHwei": [
+            "characters/Mel/sounds/557377001.ogg",
+        ],
+        "Play_vo_Mel_FirstEncounter3DJayce": [
+            "characters/Mel/sounds/366991065.ogg",
+        ],
+        "Play_vo_Mel_FirstEncounter3DJinx": [
+            "characters/Mel/sounds/355143753.ogg",
+        ],
+        "Play_vo_Mel_FirstEncounter3DLeBlanc": [
+            "characters/Mel/sounds/36641792.ogg",
+        ],
+        "Play_vo_Mel_FirstEncounter3DLux": [
+            "characters/Mel/sounds/712335930.ogg",
+        ],
+        "Play_vo_Mel_FirstEncounter3DSenna": [
+            "characters/Mel/sounds/493901315.ogg",
+        ],
+        "Play_vo_Mel_FirstEncounter3DSwain": [
+            "characters/Mel/sounds/244786714.ogg",
+        ],
+        "Play_vo_Mel_FirstEncounter3DVi": [
+            "characters/Mel/sounds/868982987.ogg",
+        ],
+        "Play_vo_Mel_FirstEncounter3DViktor": [
+            "characters/Mel/sounds/340694454.ogg",
+        ],
+        "Play_vo_Mel_Joke3DGeneral": [
+            "characters/Mel/sounds/114207287.ogg",
+        ],
+        "Play_vo_Mel_JokeResponse3DGeneral": [
+            "characters/Mel/sounds/333747041.ogg",
+        ],
+        "Play_vo_Mel_Kill3DAmbessa": [
+            "characters/Mel/sounds/125791024.ogg",
+            "characters/Mel/sounds/215665114.ogg",
+        ],
+        "Play_vo_Mel_Kill3DDraven": [
+            "characters/Mel/sounds/641776764.ogg",
+        ],
+        "Play_vo_Mel_Kill3DFirst": [
+            "characters/Mel/sounds/1038732451.ogg",
+        ],
+        "Play_vo_Mel_Kill3DGeneral": [
+            "characters/Mel/sounds/1022488959.ogg",
+            "characters/Mel/sounds/1037966683.ogg",
+            "characters/Mel/sounds/1052109141.ogg",
+            "characters/Mel/sounds/135506772.ogg",
+            "characters/Mel/sounds/240005904.ogg",
+            "characters/Mel/sounds/326107338.ogg",
+            "characters/Mel/sounds/336067285.ogg",
+            "characters/Mel/sounds/445241555.ogg",
+            "characters/Mel/sounds/633207473.ogg",
+        ],
+        "Play_vo_Mel_Kill3DHeimerdinger": [
+            "characters/Mel/sounds/290184786.ogg",
+        ],
+        "Play_vo_Mel_Kill3DHwei": [
+            "characters/Mel/sounds/171376586.ogg",
+        ],
+        "Play_vo_Mel_Kill3DJayce": [
+            "characters/Mel/sounds/256616942.ogg",
+        ],
+        "Play_vo_Mel_Kill3DJinx": [
+            "characters/Mel/sounds/949933840.ogg",
+        ],
+        "Play_vo_Mel_Kill3DLeBlanc": [
+            "characters/Mel/sounds/291907180.ogg",
+        ],
+        "Play_vo_Mel_Kill3DLux": [
+            "characters/Mel/sounds/114903371.ogg",
+        ],
+        "Play_vo_Mel_Kill3DPenta": [
+            "characters/Mel/sounds/736412893.ogg",
+        ],
+        "Play_vo_Mel_Kill3DSenna": [
+            "characters/Mel/sounds/189678417.ogg",
+        ],
+        "Play_vo_Mel_Kill3DSwain": [
+            "characters/Mel/sounds/1004306276.ogg",
+        ],
+        "Play_vo_Mel_Kill3DVi": [
+            "characters/Mel/sounds/887544637.ogg",
+        ],
+        "Play_vo_Mel_Kill3DViktor": [
+            "characters/Mel/sounds/988835847.ogg",
+        ],
+        "Play_vo_Mel_Laugh3DGeneral": [
+            "characters/Mel/sounds/135493446.ogg",
+        ],
+        "Play_vo_Mel_MelBasicAttackEnhanced_cast3D": [
+            "characters/Mel/sounds/564242466.ogg",
+            "characters/Mel/sounds/647372447.ogg",
+            "characters/Mel/sounds/717059604.ogg",
+            "characters/Mel/sounds/777662045.ogg",
+        ],
+        "Play_vo_Mel_MelBasicAttack_cast3D": [
+            "characters/Mel/sounds/201942882.ogg",
+            "characters/Mel/sounds/516879258.ogg",
+            "characters/Mel/sounds/598653.ogg",
+            "characters/Mel/sounds/793631255.ogg",
+        ],
+        "Play_vo_Mel_MelCritAttack_cast3D": [
+            "characters/Mel/sounds/201942882.ogg",
+            "characters/Mel/sounds/516879258.ogg",
+            "characters/Mel/sounds/598653.ogg",
+            "characters/Mel/sounds/793631255.ogg",
+        ],
+        "Play_vo_Mel_MelE_cast3D": [
+            "characters/Mel/sounds/150108428.ogg",
+            "characters/Mel/sounds/223483355.ogg",
+            "characters/Mel/sounds/23161726.ogg",
+            "characters/Mel/sounds/241794639.ogg",
+            "characters/Mel/sounds/275609223.ogg",
+            "characters/Mel/sounds/460348355.ogg",
+            "characters/Mel/sounds/739053322.ogg",
+            "characters/Mel/sounds/89510725.ogg",
+        ],
+        "Play_vo_Mel_MelQ_cast3D": [
+            "characters/Mel/sounds/1061313671.ogg",
+            "characters/Mel/sounds/516756782.ogg",
+            "characters/Mel/sounds/710961359.ogg",
+            "characters/Mel/sounds/999638962.ogg",
+        ],
+        "Play_vo_Mel_MelR_cast3D": [
+            "characters/Mel/sounds/385893536.ogg",
+            "characters/Mel/sounds/511142895.ogg",
+            "characters/Mel/sounds/795108042.ogg",
+            "characters/Mel/sounds/958366761.ogg",
+            "characters/Mel/sounds/993791143.ogg",
+        ],
+        "Play_vo_Mel_MelW_cast3D": [
+            "characters/Mel/sounds/135212349.ogg",
+            "characters/Mel/sounds/663752272.ogg",
+            "characters/Mel/sounds/928107291.ogg",
+            "characters/Mel/sounds/999986361.ogg",
+        ],
+        "Play_vo_Mel_Move2DFirst": [
+            "characters/Mel/sounds/1030570871.ogg",
+            "characters/Mel/sounds/350589960.ogg",
+            "characters/Mel/sounds/451484361.ogg",
+            "characters/Mel/sounds/573045416.ogg",
+            "characters/Mel/sounds/877566473.ogg",
+            "characters/Mel/sounds/964681892.ogg",
+        ],
+        "Play_vo_Mel_Move2DFirstAllyAmbessa": [
+            "characters/Mel/sounds/42647791.ogg",
+        ],
+        "Play_vo_Mel_Move2DFirstEnemyAmbessa": [
+            "characters/Mel/sounds/13730708.ogg",
+        ],
+        "Play_vo_Mel_Move2DLong": [
+            "characters/Mel/sounds/144741095.ogg",
+            "characters/Mel/sounds/241052228.ogg",
+            "characters/Mel/sounds/454935887.ogg",
+            "characters/Mel/sounds/485645998.ogg",
+            "characters/Mel/sounds/487630343.ogg",
+            "characters/Mel/sounds/54915965.ogg",
+            "characters/Mel/sounds/641884440.ogg",
+            "characters/Mel/sounds/851669291.ogg",
+            "characters/Mel/sounds/862574703.ogg",
+            "characters/Mel/sounds/866692728.ogg",
+        ],
+        "Play_vo_Mel_Move2DStandard": [
+            "characters/Mel/sounds/135753279.ogg",
+            "characters/Mel/sounds/160020174.ogg",
+            "characters/Mel/sounds/264018454.ogg",
+            "characters/Mel/sounds/283439032.ogg",
+            "characters/Mel/sounds/412375689.ogg",
+            "characters/Mel/sounds/53612105.ogg",
+            "characters/Mel/sounds/573978295.ogg",
+            "characters/Mel/sounds/58589624.ogg",
+            "characters/Mel/sounds/607775147.ogg",
+            "characters/Mel/sounds/631288813.ogg",
+            "characters/Mel/sounds/65686512.ogg",
+            "characters/Mel/sounds/670191028.ogg",
+            "characters/Mel/sounds/686778096.ogg",
+            "characters/Mel/sounds/711717006.ogg",
+            "characters/Mel/sounds/713521854.ogg",
+            "characters/Mel/sounds/749696036.ogg",
+            "characters/Mel/sounds/781195820.ogg",
+            "characters/Mel/sounds/836154683.ogg",
+            "characters/Mel/sounds/841727407.ogg",
+            "characters/Mel/sounds/859972293.ogg",
+            "characters/Mel/sounds/914186084.ogg",
+            "characters/Mel/sounds/916625902.ogg",
+            "characters/Mel/sounds/954968386.ogg",
+            "characters/Mel/sounds/996034009.ogg",
+        ],
+        "Play_vo_Mel_Recall3DGeneral": [
+            "characters/Mel/sounds/40484608.ogg",
+            "characters/Mel/sounds/547166639.ogg",
+            "characters/Mel/sounds/778371090.ogg",
+            "characters/Mel/sounds/81055694.ogg",
+            "characters/Mel/sounds/858930.ogg",
+            "characters/Mel/sounds/994355289.ogg",
+        ],
+        "Play_vo_Mel_Respawn2DGeneral": [
+            "characters/Mel/sounds/623102092.ogg",
+            "characters/Mel/sounds/735636197.ogg",
+            "characters/Mel/sounds/73951956.ogg",
+            "characters/Mel/sounds/791035150.ogg",
+            "characters/Mel/sounds/931875247.ogg",
+            "characters/Mel/sounds/987262940.ogg",
+        ],
+        "Play_vo_Mel_Spell2DRRankOne": [
+            "characters/Mel/sounds/7887490.ogg",
+        ],
+        "Play_vo_Mel_Spell3DWReflect": [
+            "characters/Mel/sounds/160051784.ogg",
+            "characters/Mel/sounds/232001575.ogg",
+            "characters/Mel/sounds/406505033.ogg",
+            "characters/Mel/sounds/4723056.ogg",
+            "characters/Mel/sounds/479194854.ogg",
+            "characters/Mel/sounds/51754472.ogg",
+            "characters/Mel/sounds/66539294.ogg",
+            "characters/Mel/sounds/905563939.ogg",
+        ],
+        "Play_vo_Mel_Spell3DWReflectR": [
+            "characters/Mel/sounds/616413736.ogg",
+            "characters/Mel/sounds/677818502.ogg",
+            "characters/Mel/sounds/930014630.ogg",
+        ],
+        "Play_vo_Mel_Taunt3DGeneral": [
+            "characters/Mel/sounds/414851846.ogg",
+        ],
+        "Play_vo_Mel_TauntResponse3DGeneral": [
+            "characters/Mel/sounds/82358946.ogg",
+        ],
+        "Recall3D_buffactivate": [
+            "characters/Mel/sounds/821659144.ogg",
+        ],
+        "Respawn3D_buffactivate": [
+            "characters/Mel/sounds/969449274.ogg",
+        ],
+        "Taunt3D_buffactivate": [
+            "characters/Mel/sounds/320151910.ogg",
+        ],
+        "Winddown3D_buffactivate": [
+            "characters/Mel/sounds/835686457.ogg",
+        ],
+    },
+)

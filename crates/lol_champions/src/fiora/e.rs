@@ -139,11 +139,10 @@ pub fn on_event_attack_end(
             commands.trigger(CommandSkinSoundPlay {
                 entity,
                 key: if was == 2 {
-                    "FioraEAttack".to_string()
+                    "FioraEAttack_OnHit".to_string()
                 } else {
-                    "FioraEAttack2".to_string()
+                    "FioraEAttack2_OnHit".to_string()
                 },
-                hit: true,
             });
         }
 

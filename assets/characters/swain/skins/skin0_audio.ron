@@ -1,0 +1,688 @@
+(
+    events: {
+        "Dance3D_cast": [
+            "characters/Swain/sounds/695492347.ogg",
+            "characters/Swain/sounds/858853578.ogg",
+        ],
+        "Dance3D_loop": [
+            "characters/Swain/sounds/195436327.ogg",
+            "characters/Swain/sounds/315598213.ogg",
+            "characters/Swain/sounds/430585328.ogg",
+            "characters/Swain/sounds/677089957.ogg",
+            "characters/Swain/sounds/971646564.ogg",
+        ],
+        "Death3D_cast": [
+            "characters/Swain/sounds/395803263.ogg",
+        ],
+        "Joke3D_cast": [
+            "characters/Swain/sounds/932137813.ogg",
+        ],
+        "Joke3D_loop": [
+            "characters/Swain/sounds/273700221.ogg",
+            "characters/Swain/sounds/726681542.ogg",
+            "characters/Swain/sounds/861880022.ogg",
+        ],
+        "Laugh3D_buffactivate": [
+            "characters/Swain/sounds/303753036.ogg",
+        ],
+        "Play_vo_SwainW_2D_demon": [
+            "characters/Swain/sounds/141516828.ogg",
+            "characters/Swain/sounds/202373885.ogg",
+            "characters/Swain/sounds/288312125.ogg",
+            "characters/Swain/sounds/351912810.ogg",
+            "characters/Swain/sounds/408598825.ogg",
+        ],
+        "Play_vo_Swain_Attack2DGeneral": [
+            "characters/Swain/sounds/1018638608.ogg",
+            "characters/Swain/sounds/109189299.ogg",
+            "characters/Swain/sounds/139102695.ogg",
+            "characters/Swain/sounds/176907882.ogg",
+            "characters/Swain/sounds/201591299.ogg",
+            "characters/Swain/sounds/234082947.ogg",
+            "characters/Swain/sounds/244916363.ogg",
+            "characters/Swain/sounds/283098945.ogg",
+            "characters/Swain/sounds/284272206.ogg",
+            "characters/Swain/sounds/291923801.ogg",
+            "characters/Swain/sounds/316728673.ogg",
+            "characters/Swain/sounds/413131719.ogg",
+            "characters/Swain/sounds/415188688.ogg",
+            "characters/Swain/sounds/434315325.ogg",
+            "characters/Swain/sounds/463917829.ogg",
+            "characters/Swain/sounds/512958052.ogg",
+            "characters/Swain/sounds/556815491.ogg",
+            "characters/Swain/sounds/563327134.ogg",
+            "characters/Swain/sounds/579537606.ogg",
+            "characters/Swain/sounds/59515936.ogg",
+            "characters/Swain/sounds/718620548.ogg",
+            "characters/Swain/sounds/784965552.ogg",
+            "characters/Swain/sounds/84007487.ogg",
+            "characters/Swain/sounds/973769261.ogg",
+        ],
+        "Play_vo_Swain_Death3D": [
+            "characters/Swain/sounds/1038782233.ogg",
+            "characters/Swain/sounds/595618165.ogg",
+            "characters/Swain/sounds/775194543.ogg",
+            "characters/Swain/sounds/870609542.ogg",
+        ],
+        "Play_vo_Swain_FirstEncounter3DAhri": [
+            "characters/Swain/sounds/265944157.ogg",
+        ],
+        "Play_vo_Swain_FirstEncounter3DBard": [
+            "characters/Swain/sounds/20797902.ogg",
+        ],
+        "Play_vo_Swain_FirstEncounter3DBlackRose": [
+            "characters/Swain/sounds/196159645.ogg",
+        ],
+        "Play_vo_Swain_FirstEncounter3DCassiopeia": [
+            "characters/Swain/sounds/1023273593.ogg",
+        ],
+        "Play_vo_Swain_FirstEncounter3DDarius": [
+            "characters/Swain/sounds/1005416154.ogg",
+            "characters/Swain/sounds/736430458.ogg",
+        ],
+        "Play_vo_Swain_FirstEncounter3DDemacia": [
+            "characters/Swain/sounds/856070888.ogg",
+        ],
+        "Play_vo_Swain_FirstEncounter3DDemon": [
+            "characters/Swain/sounds/555951316.ogg",
+        ],
+        "Play_vo_Swain_FirstEncounter3DDraven": [
+            "characters/Swain/sounds/535379906.ogg",
+            "characters/Swain/sounds/942816754.ogg",
+        ],
+        "Play_vo_Swain_FirstEncounter3DIrelia": [
+            "characters/Swain/sounds/839511571.ogg",
+        ],
+        "Play_vo_Swain_FirstEncounter3DJax": [
+            "characters/Swain/sounds/393080367.ogg",
+        ],
+        "Play_vo_Swain_FirstEncounter3DKatarina": [
+            "characters/Swain/sounds/492362443.ogg",
+        ],
+        "Play_vo_Swain_FirstEncounter3DKindred": [
+            "characters/Swain/sounds/449345506.ogg",
+        ],
+        "Play_vo_Swain_FirstEncounter3DLeBlanc": [
+            "characters/Swain/sounds/308360985.ogg",
+            "characters/Swain/sounds/310339695.ogg",
+            "characters/Swain/sounds/75663624.ogg",
+            "characters/Swain/sounds/875762357.ogg",
+        ],
+        "Play_vo_Swain_FirstEncounter3DNoxus": [
+            "characters/Swain/sounds/475780478.ogg",
+        ],
+        "Play_vo_Swain_FirstEncounter3DPoppy": [
+            "characters/Swain/sounds/151524271.ogg",
+        ],
+        "Play_vo_Swain_FirstEncounter3DRakan": [
+            "characters/Swain/sounds/546848177.ogg",
+        ],
+        "Play_vo_Swain_FirstEncounter3DRiven": [
+            "characters/Swain/sounds/503824730.ogg",
+        ],
+        "Play_vo_Swain_FirstEncounter3DSinged": [
+            "characters/Swain/sounds/148199408.ogg",
+        ],
+        "Play_vo_Swain_FirstEncounter3DSion": [
+            "characters/Swain/sounds/338841037.ogg",
+        ],
+        "Play_vo_Swain_FirstEncounter3DUrgot": [
+            "characters/Swain/sounds/940886073.ogg",
+        ],
+        "Play_vo_Swain_Joke3DGeneral": [
+            "characters/Swain/sounds/251602609.ogg",
+            "characters/Swain/sounds/491349114.ogg",
+            "characters/Swain/sounds/605453380.ogg",
+            "characters/Swain/sounds/631087007.ogg",
+        ],
+        "Play_vo_Swain_JokeResponse3DGeneral": [
+            "characters/Swain/sounds/169921999.ogg",
+            "characters/Swain/sounds/174852009.ogg",
+        ],
+        "Play_vo_Swain_Kill3DBilgewater": [
+            "characters/Swain/sounds/261109179.ogg",
+        ],
+        "Play_vo_Swain_Kill3DDemacia": [
+            "characters/Swain/sounds/261109179.ogg",
+        ],
+        "Play_vo_Swain_Kill3DDragon": [
+            "characters/Swain/sounds/1000427050.ogg",
+            "characters/Swain/sounds/170357425.ogg",
+            "characters/Swain/sounds/184553297.ogg",
+            "characters/Swain/sounds/317164168.ogg",
+            "characters/Swain/sounds/381673162.ogg",
+            "characters/Swain/sounds/387607467.ogg",
+            "characters/Swain/sounds/422088420.ogg",
+            "characters/Swain/sounds/655910603.ogg",
+            "characters/Swain/sounds/857874463.ogg",
+            "characters/Swain/sounds/865910163.ogg",
+        ],
+        "Play_vo_Swain_Kill3DGangplank": [
+            "characters/Swain/sounds/127683074.ogg",
+        ],
+        "Play_vo_Swain_Kill3DGeneral": [
+            "characters/Swain/sounds/180550964.ogg",
+            "characters/Swain/sounds/386163129.ogg",
+            "characters/Swain/sounds/429579001.ogg",
+            "characters/Swain/sounds/452069941.ogg",
+            "characters/Swain/sounds/701936866.ogg",
+            "characters/Swain/sounds/790312719.ogg",
+            "characters/Swain/sounds/84890058.ogg",
+        ],
+        "Play_vo_Swain_Kill3DNoxus": [
+            "characters/Swain/sounds/100683682.ogg",
+            "characters/Swain/sounds/593730712.ogg",
+            "characters/Swain/sounds/652400694.ogg",
+        ],
+        "Play_vo_Swain_Kill3DPenta": [
+            "characters/Swain/sounds/735885820.ogg",
+        ],
+        "Play_vo_Swain_Kill3DTurret": [
+            "characters/Swain/sounds/1031706161.ogg",
+            "characters/Swain/sounds/133150314.ogg",
+            "characters/Swain/sounds/271399411.ogg",
+            "characters/Swain/sounds/426928712.ogg",
+            "characters/Swain/sounds/47774516.ogg",
+            "characters/Swain/sounds/483684190.ogg",
+            "characters/Swain/sounds/508253798.ogg",
+            "characters/Swain/sounds/624838317.ogg",
+            "characters/Swain/sounds/66892599.ogg",
+            "characters/Swain/sounds/737148977.ogg",
+            "characters/Swain/sounds/770948282.ogg",
+            "characters/Swain/sounds/82118652.ogg",
+            "characters/Swain/sounds/878555754.ogg",
+        ],
+        "Play_vo_Swain_Laugh3DGeneral": [
+            "characters/Swain/sounds/50748893.ogg",
+            "characters/Swain/sounds/908276396.ogg",
+            "characters/Swain/sounds/908565553.ogg",
+        ],
+        "Play_vo_Swain_Move2DFirst": [
+            "characters/Swain/sounds/188606875.ogg",
+            "characters/Swain/sounds/214685382.ogg",
+            "characters/Swain/sounds/265930220.ogg",
+            "characters/Swain/sounds/297655695.ogg",
+            "characters/Swain/sounds/705302195.ogg",
+        ],
+        "Play_vo_Swain_Move2DFirstAllyBilgewater": [
+            "characters/Swain/sounds/43728832.ogg",
+            "characters/Swain/sounds/667285067.ogg",
+            "characters/Swain/sounds/819014951.ogg",
+        ],
+        "Play_vo_Swain_Move2DFirstEnemyLeblanc": [
+            "characters/Swain/sounds/921254138.ogg",
+        ],
+        "Play_vo_Swain_Move2DStandard": [
+            "characters/Swain/sounds/1016619902.ogg",
+            "characters/Swain/sounds/1026214793.ogg",
+            "characters/Swain/sounds/1042040909.ogg",
+            "characters/Swain/sounds/1060255504.ogg",
+            "characters/Swain/sounds/122660142.ogg",
+            "characters/Swain/sounds/125880340.ogg",
+            "characters/Swain/sounds/14253200.ogg",
+            "characters/Swain/sounds/144897674.ogg",
+            "characters/Swain/sounds/156634734.ogg",
+            "characters/Swain/sounds/162654572.ogg",
+            "characters/Swain/sounds/174538750.ogg",
+            "characters/Swain/sounds/18954913.ogg",
+            "characters/Swain/sounds/201891711.ogg",
+            "characters/Swain/sounds/229452010.ogg",
+            "characters/Swain/sounds/231905072.ogg",
+            "characters/Swain/sounds/250062380.ogg",
+            "characters/Swain/sounds/322820094.ogg",
+            "characters/Swain/sounds/34701078.ogg",
+            "characters/Swain/sounds/364491200.ogg",
+            "characters/Swain/sounds/387701203.ogg",
+            "characters/Swain/sounds/403064463.ogg",
+            "characters/Swain/sounds/451134479.ogg",
+            "characters/Swain/sounds/509521237.ogg",
+            "characters/Swain/sounds/512565734.ogg",
+            "characters/Swain/sounds/518094419.ogg",
+            "characters/Swain/sounds/548909323.ogg",
+            "characters/Swain/sounds/676891970.ogg",
+            "characters/Swain/sounds/696187710.ogg",
+            "characters/Swain/sounds/722278758.ogg",
+            "characters/Swain/sounds/727359795.ogg",
+            "characters/Swain/sounds/82220841.ogg",
+            "characters/Swain/sounds/923215805.ogg",
+            "characters/Swain/sounds/93931363.ogg",
+            "characters/Swain/sounds/946611714.ogg",
+            "characters/Swain/sounds/950654064.ogg",
+        ],
+        "Play_vo_Swain_RallyTeam2DAhead": [
+            "characters/Swain/sounds/1047841262.ogg",
+            "characters/Swain/sounds/213732621.ogg",
+            "characters/Swain/sounds/452195410.ogg",
+            "characters/Swain/sounds/533858562.ogg",
+            "characters/Swain/sounds/600767353.ogg",
+            "characters/Swain/sounds/791456385.ogg",
+            "characters/Swain/sounds/960166533.ogg",
+        ],
+        "Play_vo_Swain_RallyTeam2DBehind": [
+            "characters/Swain/sounds/384650769.ogg",
+            "characters/Swain/sounds/703741174.ogg",
+            "characters/Swain/sounds/70643940.ogg",
+            "characters/Swain/sounds/749180067.ogg",
+            "characters/Swain/sounds/955967760.ogg",
+            "characters/Swain/sounds/959685642.ogg",
+        ],
+        "Play_vo_Swain_RallyTeam2DEven": [
+            "characters/Swain/sounds/124791931.ogg",
+            "characters/Swain/sounds/1368985.ogg",
+            "characters/Swain/sounds/295754741.ogg",
+            "characters/Swain/sounds/345781693.ogg",
+            "characters/Swain/sounds/375459915.ogg",
+            "characters/Swain/sounds/936025056.ogg",
+        ],
+        "Play_vo_Swain_Recall3DGeneral": [
+            "characters/Swain/sounds/370469159.ogg",
+            "characters/Swain/sounds/488263444.ogg",
+            "characters/Swain/sounds/733952388.ogg",
+            "characters/Swain/sounds/88433638.ogg",
+            "characters/Swain/sounds/988733425.ogg",
+        ],
+        "Play_vo_Swain_Respawn2DGeneral": [
+            "characters/Swain/sounds/1020477641.ogg",
+            "characters/Swain/sounds/215153900.ogg",
+            "characters/Swain/sounds/381356074.ogg",
+            "characters/Swain/sounds/621113810.ogg",
+            "characters/Swain/sounds/628608263.ogg",
+            "characters/Swain/sounds/869205372.ogg",
+        ],
+        "Play_vo_Swain_Spell2DPCastAshe": [
+            "characters/Swain/sounds/926725887.ogg",
+        ],
+        "Play_vo_Swain_Spell2DPCastAurelionSol": [
+            "characters/Swain/sounds/841327634.ogg",
+        ],
+        "Play_vo_Swain_Spell2DPCastBilgewater": [
+            "characters/Swain/sounds/1059796565.ogg",
+        ],
+        "Play_vo_Swain_Spell2DPCastBlackRose": [
+            "characters/Swain/sounds/569546101.ogg",
+        ],
+        "Play_vo_Swain_Spell2DPCastCamille": [
+            "characters/Swain/sounds/523340962.ogg",
+        ],
+        "Play_vo_Swain_Spell2DPCastCassiopeia": [
+            "characters/Swain/sounds/1051271222.ogg",
+        ],
+        "Play_vo_Swain_Spell2DPCastDarius": [
+            "characters/Swain/sounds/232362946.ogg",
+        ],
+        "Play_vo_Swain_Spell2DPCastDarkin": [
+            "characters/Swain/sounds/569546101.ogg",
+        ],
+        "Play_vo_Swain_Spell2DPCastDemacia": [
+            "characters/Swain/sounds/824947787.ogg",
+        ],
+        "Play_vo_Swain_Spell2DPCastDemon": [
+            "characters/Swain/sounds/1031701155.ogg",
+        ],
+        "Play_vo_Swain_Spell2DPCastEkko": [
+            "characters/Swain/sounds/781476622.ogg",
+        ],
+        "Play_vo_Swain_Spell2DPCastElise": [
+            "characters/Swain/sounds/424769100.ogg",
+        ],
+        "Play_vo_Swain_Spell2DPCastFiora": [
+            "characters/Swain/sounds/529034959.ogg",
+        ],
+        "Play_vo_Swain_Spell2DPCastFreljord": [
+            "characters/Swain/sounds/738218947.ogg",
+        ],
+        "Play_vo_Swain_Spell2DPCastGalio": [
+            "characters/Swain/sounds/237299698.ogg",
+        ],
+        "Play_vo_Swain_Spell2DPCastGaren": [
+            "characters/Swain/sounds/490599508.ogg",
+        ],
+        "Play_vo_Swain_Spell2DPCastGeneral": [
+            "characters/Swain/sounds/158578005.ogg",
+            "characters/Swain/sounds/306395663.ogg",
+            "characters/Swain/sounds/313591621.ogg",
+            "characters/Swain/sounds/404260433.ogg",
+            "characters/Swain/sounds/645070062.ogg",
+            "characters/Swain/sounds/791150716.ogg",
+            "characters/Swain/sounds/827083194.ogg",
+        ],
+        "Play_vo_Swain_Spell2DPCastIonia": [
+            "characters/Swain/sounds/374842912.ogg",
+        ],
+        "Play_vo_Swain_Spell2DPCastJarvanIV": [
+            "characters/Swain/sounds/904569013.ogg",
+        ],
+        "Play_vo_Swain_Spell2DPCastJinx": [
+            "characters/Swain/sounds/130349780.ogg",
+        ],
+        "Play_vo_Swain_Spell2DPCastKalista": [
+            "characters/Swain/sounds/357614847.ogg",
+        ],
+        "Play_vo_Swain_Spell2DPCastKassadin": [
+            "characters/Swain/sounds/559458243.ogg",
+        ],
+        "Play_vo_Swain_Spell2DPCastKatarina": [
+            "characters/Swain/sounds/841923144.ogg",
+        ],
+        "Play_vo_Swain_Spell2DPCastKayn": [
+            "characters/Swain/sounds/37572765.ogg",
+        ],
+        "Play_vo_Swain_Spell2DPCastLux": [
+            "characters/Swain/sounds/737941870.ogg",
+        ],
+        "Play_vo_Swain_Spell2DPCastNoxus": [
+            "characters/Swain/sounds/72208646.ogg",
+        ],
+        "Play_vo_Swain_Spell2DPCastPiltover": [
+            "characters/Swain/sounds/324490637.ogg",
+        ],
+        "Play_vo_Swain_Spell2DPCastPoppy": [
+            "characters/Swain/sounds/222714406.ogg",
+        ],
+        "Play_vo_Swain_Spell2DPCastQuinn": [
+            "characters/Swain/sounds/960323303.ogg",
+        ],
+        "Play_vo_Swain_Spell2DPCastRiven": [
+            "characters/Swain/sounds/690750011.ogg",
+        ],
+        "Play_vo_Swain_Spell2DPCastShadowIsles": [
+            "characters/Swain/sounds/1036281139.ogg",
+        ],
+        "Play_vo_Swain_Spell2DPCastShen": [
+            "characters/Swain/sounds/530967583.ogg",
+        ],
+        "Play_vo_Swain_Spell2DPCastSion": [
+            "characters/Swain/sounds/5077774.ogg",
+        ],
+        "Play_vo_Swain_Spell2DPCastSwain": [
+            "characters/Swain/sounds/849243948.ogg",
+        ],
+        "Play_vo_Swain_Spell2DPCastTahmKench": [
+            "characters/Swain/sounds/385786726.ogg",
+        ],
+        "Play_vo_Swain_Spell2DPCastTaliyah": [
+            "characters/Swain/sounds/813359320.ogg",
+        ],
+        "Play_vo_Swain_Spell2DPCastVastaya": [
+            "characters/Swain/sounds/112499164.ogg",
+        ],
+        "Play_vo_Swain_Spell2DPCastVoid": [
+            "characters/Swain/sounds/85920783.ogg",
+        ],
+        "Play_vo_Swain_Spell2DPCastWarwick": [
+            "characters/Swain/sounds/189285277.ogg",
+        ],
+        "Play_vo_Swain_Spell2DPCastZaun": [
+            "characters/Swain/sounds/132547268.ogg",
+        ],
+        "Play_vo_Swain_Spell3DE2Cast": [
+            "characters/Swain/sounds/1047558883.ogg",
+            "characters/Swain/sounds/926435529.ogg",
+            "characters/Swain/sounds/933220514.ogg",
+        ],
+        "Play_vo_Swain_Spell3DREnd": [
+            "characters/Swain/sounds/265159836.ogg",
+            "characters/Swain/sounds/793337616.ogg",
+            "characters/Swain/sounds/861915574.ogg",
+        ],
+        "Play_vo_Swain_SwainBasicAttack2_cast3D": [
+            "characters/Swain/sounds/257903606.ogg",
+            "characters/Swain/sounds/36194629.ogg",
+            "characters/Swain/sounds/392382799.ogg",
+            "characters/Swain/sounds/548510636.ogg",
+            "characters/Swain/sounds/697217616.ogg",
+            "characters/Swain/sounds/835476855.ogg",
+        ],
+        "Play_vo_Swain_SwainBasicAttack_cast3D": [
+            "characters/Swain/sounds/257903606.ogg",
+            "characters/Swain/sounds/36194629.ogg",
+            "characters/Swain/sounds/392382799.ogg",
+            "characters/Swain/sounds/548510636.ogg",
+            "characters/Swain/sounds/697217616.ogg",
+            "characters/Swain/sounds/835476855.ogg",
+        ],
+        "Play_vo_Swain_SwainQ_cast3D": [
+            "characters/Swain/sounds/289352567.ogg",
+            "characters/Swain/sounds/79229887.ogg",
+            "characters/Swain/sounds/892393401.ogg",
+        ],
+        "Play_vo_Swain_Taunt3DGeneral": [
+            "characters/Swain/sounds/545287160.ogg",
+            "characters/Swain/sounds/60733109.ogg",
+            "characters/Swain/sounds/629820654.ogg",
+            "characters/Swain/sounds/750021222.ogg",
+        ],
+        "Play_vo_Swain_TauntResponse3DDarius": [
+            "characters/Swain/sounds/390161576.ogg",
+        ],
+        "Play_vo_Swain_TauntResponse3DGeneral": [
+            "characters/Swain/sounds/467709904.ogg",
+            "characters/Swain/sounds/827353016.ogg",
+        ],
+        "Play_vo_Swain_TauntResponse3DSionUrgot": [
+            "characters/Swain/sounds/859122415.ogg",
+        ],
+        "Play_vo_Swain_UseItem2DWard": [
+            "characters/Swain/sounds/640070872.ogg",
+            "characters/Swain/sounds/753706743.ogg",
+            "characters/Swain/sounds/767703567.ogg",
+            "characters/Swain/sounds/777525203.ogg",
+        ],
+        "Recall3D_buffactivate": [
+            "characters/Swain/sounds/9041402.ogg",
+        ],
+        "Recall3D_buffdeactivate": [
+            "characters/Swain/sounds/271348712.ogg",
+        ],
+        "Respawn3D_cast": [
+            "characters/Swain/sounds/168330291.ogg",
+        ],
+        "SwainBasicAttack2_OnCast": [
+            "characters/Swain/sounds/585637667.ogg",
+            "characters/Swain/sounds/619253096.ogg",
+            "characters/Swain/sounds/911125223.ogg",
+        ],
+        "SwainBasicAttack2_OnMissileLaunch": [
+            "characters/Swain/sounds/1007650209.ogg",
+            "characters/Swain/sounds/289075325.ogg",
+            "characters/Swain/sounds/480563584.ogg",
+            "characters/Swain/sounds/592061574.ogg",
+            "characters/Swain/sounds/630500580.ogg",
+        ],
+        "SwainBasicAttack_OnCast": [
+            "characters/Swain/sounds/585637667.ogg",
+            "characters/Swain/sounds/619253096.ogg",
+            "characters/Swain/sounds/911125223.ogg",
+        ],
+        "SwainBasicAttack_OnHit": [
+            "characters/Swain/sounds/316701766.ogg",
+            "characters/Swain/sounds/437968055.ogg",
+            "characters/Swain/sounds/642140948.ogg",
+            "characters/Swain/sounds/783008096.ogg",
+            "characters/Swain/sounds/991117185.ogg",
+        ],
+        "SwainBasicAttack_OnMissileLaunch": [
+            "characters/Swain/sounds/1007650209.ogg",
+            "characters/Swain/sounds/289075325.ogg",
+            "characters/Swain/sounds/480563584.ogg",
+            "characters/Swain/sounds/592061574.ogg",
+            "characters/Swain/sounds/630500580.ogg",
+        ],
+        "SwainCritAttack_OnCast": [
+            "characters/Swain/sounds/585637667.ogg",
+            "characters/Swain/sounds/619253096.ogg",
+            "characters/Swain/sounds/911125223.ogg",
+        ],
+        "SwainCritAttack_OnHit": [
+            "characters/Swain/sounds/316701766.ogg",
+            "characters/Swain/sounds/437968055.ogg",
+            "characters/Swain/sounds/642140948.ogg",
+            "characters/Swain/sounds/783008096.ogg",
+            "characters/Swain/sounds/991117185.ogg",
+        ],
+        "SwainCritAttack_OnMissileLaunch": [
+            "characters/Swain/sounds/1007650209.ogg",
+            "characters/Swain/sounds/289075325.ogg",
+            "characters/Swain/sounds/480563584.ogg",
+            "characters/Swain/sounds/592061574.ogg",
+            "characters/Swain/sounds/630500580.ogg",
+        ],
+        "SwainEReturnMissile_OnMissileLaunch": [
+            "characters/Swain/sounds/1042276703.ogg",
+            "characters/Swain/sounds/410412846.ogg",
+            "characters/Swain/sounds/886595905.ogg",
+            "characters/Swain/sounds/969383508.ogg",
+        ],
+        "SwainERoot_hit_champ": [
+            "characters/Swain/sounds/655946240.ogg",
+            "characters/Swain/sounds/678629829.ogg",
+        ],
+        "SwainERoot_hit_minion": [
+            "characters/Swain/sounds/655946240.ogg",
+            "characters/Swain/sounds/678629829.ogg",
+        ],
+        "SwainE_OnCast": [
+            "characters/Swain/sounds/1020739363.ogg",
+            "characters/Swain/sounds/435221493.ogg",
+            "characters/Swain/sounds/52086508.ogg",
+            "characters/Swain/sounds/709057759.ogg",
+        ],
+        "SwainE_OnMissileCast": [
+            "characters/Swain/sounds/115984353.ogg",
+            "characters/Swain/sounds/125188364.ogg",
+            "characters/Swain/sounds/232292250.ogg",
+            "characters/Swain/sounds/583244472.ogg",
+        ],
+        "SwainE_OnMissileLaunch": [
+            "characters/Swain/sounds/650331853.ogg",
+            "characters/Swain/sounds/803081282.ogg",
+            "characters/Swain/sounds/830067088.ogg",
+        ],
+        "SwainE_hit": [
+            "characters/Swain/sounds/260038120.ogg",
+            "characters/Swain/sounds/357220578.ogg",
+            "characters/Swain/sounds/586905711.ogg",
+            "characters/Swain/sounds/889658985.ogg",
+        ],
+        "SwainPDisplacementCheck_buffactivate": [
+            "characters/Swain/sounds/10532794.ogg",
+            "characters/Swain/sounds/107871084.ogg",
+            "characters/Swain/sounds/720356840.ogg",
+            "characters/Swain/sounds/762123083.ogg",
+        ],
+        "SwainPDisplacementCheck_buffactivate_target": [
+            "characters/Swain/sounds/186305093.ogg",
+            "characters/Swain/sounds/212475379.ogg",
+            "characters/Swain/sounds/640741540.ogg",
+            "characters/Swain/sounds/825720335.ogg",
+        ],
+        "SwainPSecrets_hit": [
+            "characters/Swain/sounds/135784691.ogg",
+            "characters/Swain/sounds/145667216.ogg",
+            "characters/Swain/sounds/172196337.ogg",
+            "characters/Swain/sounds/249371800.ogg",
+            "characters/Swain/sounds/309925621.ogg",
+        ],
+        "SwainPSoulCollect_hit": [
+            "characters/Swain/sounds/1003470707.ogg",
+            "characters/Swain/sounds/204723038.ogg",
+            "characters/Swain/sounds/296557267.ogg",
+        ],
+        "SwainPSoulCollect_missilelaunch": [
+            "characters/Swain/sounds/27141654.ogg",
+            "characters/Swain/sounds/458038996.ogg",
+        ],
+        "SwainQMissile_hit_miss": [
+            "characters/Swain/sounds/1030256329.ogg",
+            "characters/Swain/sounds/735929011.ogg",
+            "characters/Swain/sounds/933311970.ogg",
+            "characters/Swain/sounds/964595629.ogg",
+        ],
+        "SwainQMissile_hit_target": [
+            "characters/Swain/sounds/648449935.ogg",
+            "characters/Swain/sounds/651319071.ogg",
+            "characters/Swain/sounds/755952140.ogg",
+            "characters/Swain/sounds/845054405.ogg",
+        ],
+        "SwainQMissile_hit_target_large": [
+            "characters/Swain/sounds/1010271505.ogg",
+            "characters/Swain/sounds/1036000785.ogg",
+            "characters/Swain/sounds/196060312.ogg",
+            "characters/Swain/sounds/647993080.ogg",
+        ],
+        "SwainQ_OnCast": [
+            "characters/Swain/sounds/1045025915.ogg",
+            "characters/Swain/sounds/111443854.ogg",
+            "characters/Swain/sounds/236656213.ogg",
+            "characters/Swain/sounds/372007732.ogg",
+            "characters/Swain/sounds/512300961.ogg",
+            "characters/Swain/sounds/607051307.ogg",
+            "characters/Swain/sounds/611341660.ogg",
+            "characters/Swain/sounds/713960360.ogg",
+            "characters/Swain/sounds/726907095.ogg",
+            "characters/Swain/sounds/744059375.ogg",
+            "characters/Swain/sounds/954631177.ogg",
+        ],
+        "SwainRSoulBurn_buffcast": [
+            "characters/Swain/sounds/848803670.ogg",
+            "characters/Swain/sounds/922526327.ogg",
+            "characters/Swain/sounds/932837029.ogg",
+        ],
+        "SwainRSoulFlare_buffdeactivate": [
+            "characters/Swain/sounds/522310967.ogg",
+        ],
+        "SwainRSoulFlare_fullcharge": [
+            "characters/Swain/sounds/188470381.ogg",
+            "characters/Swain/sounds/285054096.ogg",
+            "characters/Swain/sounds/50891377.ogg",
+            "characters/Swain/sounds/57573307.ogg",
+            "characters/Swain/sounds/730529054.ogg",
+            "characters/Swain/sounds/982143076.ogg",
+        ],
+        "SwainRSoulFlare_fullcharge_self": [
+            "characters/Swain/sounds/442957066.ogg",
+        ],
+        "SwainRSoulFlare_hit": [
+            "characters/Swain/sounds/499264143.ogg",
+            "characters/Swain/sounds/560019897.ogg",
+            "characters/Swain/sounds/605475180.ogg",
+            "characters/Swain/sounds/712087015.ogg",
+        ],
+        "SwainR_OnCast": [
+            "characters/Swain/sounds/690795204.ogg",
+        ],
+        "SwainR_buffactivate": [
+            "characters/Swain/sounds/770657740.ogg",
+        ],
+        "SwainR_buffdeactivate": [
+            "characters/Swain/sounds/141543733.ogg",
+            "characters/Swain/sounds/214546267.ogg",
+            "characters/Swain/sounds/757668628.ogg",
+        ],
+        "SwainR_endtimer": [
+            "characters/Swain/sounds/422695087.ogg",
+        ],
+        "SwainR_lightning": [
+            "characters/Swain/sounds/303366064.ogg",
+            "characters/Swain/sounds/416336613.ogg",
+            "characters/Swain/sounds/591755547.ogg",
+            "characters/Swain/sounds/679225060.ogg",
+        ],
+        "SwainW_hit": [
+            "characters/Swain/sounds/31061407.ogg",
+            "characters/Swain/sounds/445790561.ogg",
+            "characters/Swain/sounds/785137315.ogg",
+        ],
+        "SwainW_hitlocation": [
+            "characters/Swain/sounds/1048940047.ogg",
+            "characters/Swain/sounds/172856413.ogg",
+            "characters/Swain/sounds/215272498.ogg",
+            "characters/Swain/sounds/278094528.ogg",
+            "characters/Swain/sounds/510294382.ogg",
+            "characters/Swain/sounds/838690226.ogg",
+        ],
+        "Taunt3D_buffactivate": [
+            "characters/Swain/sounds/837660042.ogg",
+        ],
+    },
+)

@@ -1,0 +1,544 @@
+(
+    events: {
+        "Dance3D_cast": [
+            "characters/Samira/sounds/898119412.ogg",
+        ],
+        "Dance3D_loop": [
+            "characters/Samira/sounds/974364750.ogg",
+        ],
+        "Death3D_cast": [
+            "characters/Samira/sounds/865573891.ogg",
+        ],
+        "Joke3D_cast": [
+            "characters/Samira/sounds/463493903.ogg",
+        ],
+        "Joke3D_loop": [
+            "characters/Samira/sounds/993900749.ogg",
+        ],
+        "Laugh3D_buffactivate": [
+            "characters/Samira/sounds/971940971.ogg",
+        ],
+        "Play_vo_Samira_Attack2DGeneral": [
+            "characters/Samira/sounds/1024689452.ogg",
+            "characters/Samira/sounds/1040396362.ogg",
+            "characters/Samira/sounds/1056314151.ogg",
+            "characters/Samira/sounds/154284868.ogg",
+            "characters/Samira/sounds/190551381.ogg",
+            "characters/Samira/sounds/220688033.ogg",
+            "characters/Samira/sounds/248012299.ogg",
+            "characters/Samira/sounds/299643874.ogg",
+            "characters/Samira/sounds/5174449.ogg",
+            "characters/Samira/sounds/545705707.ogg",
+            "characters/Samira/sounds/554325289.ogg",
+            "characters/Samira/sounds/642859413.ogg",
+            "characters/Samira/sounds/67116361.ogg",
+            "characters/Samira/sounds/725005026.ogg",
+            "characters/Samira/sounds/743571018.ogg",
+            "characters/Samira/sounds/780914648.ogg",
+            "characters/Samira/sounds/834062247.ogg",
+            "characters/Samira/sounds/834650534.ogg",
+            "characters/Samira/sounds/838199388.ogg",
+            "characters/Samira/sounds/846261415.ogg",
+            "characters/Samira/sounds/915159245.ogg",
+            "characters/Samira/sounds/936181212.ogg",
+        ],
+        "Play_vo_Samira_Death3D": [
+            "characters/Samira/sounds/345061509.ogg",
+            "characters/Samira/sounds/355756134.ogg",
+            "characters/Samira/sounds/458015044.ogg",
+            "characters/Samira/sounds/509644146.ogg",
+        ],
+        "Play_vo_Samira_FirstEncounter3DAmumu": [
+            "characters/Samira/sounds/671826253.ogg",
+        ],
+        "Play_vo_Samira_FirstEncounter3DAzir": [
+            "characters/Samira/sounds/241982945.ogg",
+        ],
+        "Play_vo_Samira_FirstEncounter3DDraven": [
+            "characters/Samira/sounds/636187395.ogg",
+        ],
+        "Play_vo_Samira_FirstEncounter3DEzreal": [
+            "characters/Samira/sounds/1060698240.ogg",
+        ],
+        "Play_vo_Samira_FirstEncounter3DLeblanc": [
+            "characters/Samira/sounds/167071297.ogg",
+        ],
+        "Play_vo_Samira_FirstEncounter3DMissFortune": [
+            "characters/Samira/sounds/571462192.ogg",
+        ],
+        "Play_vo_Samira_FirstEncounter3DRammus": [
+            "characters/Samira/sounds/290249278.ogg",
+        ],
+        "Play_vo_Samira_FirstEncounter3DSivir": [
+            "characters/Samira/sounds/36008235.ogg",
+        ],
+        "Play_vo_Samira_FirstEncounter3DSwain": [
+            "characters/Samira/sounds/326848992.ogg",
+        ],
+        "Play_vo_Samira_FirstEncounter3DThresh": [
+            "characters/Samira/sounds/795825507.ogg",
+        ],
+        "Play_vo_Samira_FirstEncounter3DVladimir": [
+            "characters/Samira/sounds/371713517.ogg",
+        ],
+        "Play_vo_Samira_FirstEncounter3DXerath": [
+            "characters/Samira/sounds/879080289.ogg",
+        ],
+        "Play_vo_Samira_Joke3DGeneral": [
+            "characters/Samira/sounds/154602355.ogg",
+            "characters/Samira/sounds/302605402.ogg",
+            "characters/Samira/sounds/709439696.ogg",
+        ],
+        "Play_vo_Samira_JokeResponse3DGeneral": [
+            "characters/Samira/sounds/524007038.ogg",
+        ],
+        "Play_vo_Samira_Kill3DAmumu": [
+            "characters/Samira/sounds/599328918.ogg",
+        ],
+        "Play_vo_Samira_Kill3DAzir": [
+            "characters/Samira/sounds/692349538.ogg",
+        ],
+        "Play_vo_Samira_Kill3DCondescendingChamp": [
+            "characters/Samira/sounds/1035988548.ogg",
+        ],
+        "Play_vo_Samira_Kill3DDraven": [
+            "characters/Samira/sounds/1048014817.ogg",
+        ],
+        "Play_vo_Samira_Kill3DEzreal": [
+            "characters/Samira/sounds/399043004.ogg",
+        ],
+        "Play_vo_Samira_Kill3DGeneral": [
+            "characters/Samira/sounds/1071492475.ogg",
+            "characters/Samira/sounds/1071973863.ogg",
+            "characters/Samira/sounds/232014154.ogg",
+            "characters/Samira/sounds/392861173.ogg",
+            "characters/Samira/sounds/803589545.ogg",
+            "characters/Samira/sounds/818488694.ogg",
+            "characters/Samira/sounds/876480765.ogg",
+            "characters/Samira/sounds/941126421.ogg",
+            "characters/Samira/sounds/952332745.ogg",
+        ],
+        "Play_vo_Samira_Kill3DLeBlanc": [
+            "characters/Samira/sounds/37786989.ogg",
+        ],
+        "Play_vo_Samira_Kill3DMissFortune": [
+            "characters/Samira/sounds/755069198.ogg",
+        ],
+        "Play_vo_Samira_Kill3DPenta": [
+            "characters/Samira/sounds/765866903.ogg",
+        ],
+        "Play_vo_Samira_Kill3DRammus": [
+            "characters/Samira/sounds/1044806703.ogg",
+        ],
+        "Play_vo_Samira_Kill3DSivir": [
+            "characters/Samira/sounds/623552279.ogg",
+        ],
+        "Play_vo_Samira_Kill3DSwain": [
+            "characters/Samira/sounds/151121466.ogg",
+        ],
+        "Play_vo_Samira_Kill3DThresh": [
+            "characters/Samira/sounds/981776645.ogg",
+        ],
+        "Play_vo_Samira_Kill3DVladimir": [
+            "characters/Samira/sounds/217951914.ogg",
+        ],
+        "Play_vo_Samira_Kill3DXerath": [
+            "characters/Samira/sounds/650125051.ogg",
+        ],
+        "Play_vo_Samira_Laugh3DGeneral": [
+            "characters/Samira/sounds/145975068.ogg",
+            "characters/Samira/sounds/366834514.ogg",
+            "characters/Samira/sounds/381758076.ogg",
+        ],
+        "Play_vo_Samira_Move2DFirst": [
+            "characters/Samira/sounds/1028065638.ogg",
+            "characters/Samira/sounds/707454887.ogg",
+            "characters/Samira/sounds/896673700.ogg",
+            "characters/Samira/sounds/998316500.ogg",
+        ],
+        "Play_vo_Samira_Move2DLong": [
+            "characters/Samira/sounds/1002981566.ogg",
+            "characters/Samira/sounds/102747759.ogg",
+            "characters/Samira/sounds/124172672.ogg",
+            "characters/Samira/sounds/20213972.ogg",
+            "characters/Samira/sounds/244121854.ogg",
+            "characters/Samira/sounds/343342674.ogg",
+            "characters/Samira/sounds/405687262.ogg",
+            "characters/Samira/sounds/455530527.ogg",
+            "characters/Samira/sounds/530202643.ogg",
+            "characters/Samira/sounds/919652522.ogg",
+        ],
+        "Play_vo_Samira_Move2DStandard": [
+            "characters/Samira/sounds/1061925331.ogg",
+            "characters/Samira/sounds/106543187.ogg",
+            "characters/Samira/sounds/1069897238.ogg",
+            "characters/Samira/sounds/139045983.ogg",
+            "characters/Samira/sounds/177624801.ogg",
+            "characters/Samira/sounds/20780865.ogg",
+            "characters/Samira/sounds/217902241.ogg",
+            "characters/Samira/sounds/253088827.ogg",
+            "characters/Samira/sounds/350898501.ogg",
+            "characters/Samira/sounds/447865957.ogg",
+            "characters/Samira/sounds/482983024.ogg",
+            "characters/Samira/sounds/583947515.ogg",
+            "characters/Samira/sounds/643384813.ogg",
+            "characters/Samira/sounds/681893603.ogg",
+            "characters/Samira/sounds/712388341.ogg",
+            "characters/Samira/sounds/784523942.ogg",
+            "characters/Samira/sounds/788447969.ogg",
+            "characters/Samira/sounds/799417337.ogg",
+            "characters/Samira/sounds/81886134.ogg",
+            "characters/Samira/sounds/821731413.ogg",
+            "characters/Samira/sounds/88888773.ogg",
+            "characters/Samira/sounds/891096767.ogg",
+            "characters/Samira/sounds/897170034.ogg",
+            "characters/Samira/sounds/931184042.ogg",
+            "characters/Samira/sounds/982591079.ogg",
+        ],
+        "Play_vo_Samira_Recall3DGeneral": [
+            "characters/Samira/sounds/252252472.ogg",
+            "characters/Samira/sounds/415039464.ogg",
+            "characters/Samira/sounds/977917960.ogg",
+        ],
+        "Play_vo_Samira_Respawn2DGeneral": [
+            "characters/Samira/sounds/1017503358.ogg",
+            "characters/Samira/sounds/301221168.ogg",
+            "characters/Samira/sounds/476441052.ogg",
+            "characters/Samira/sounds/56595489.ogg",
+        ],
+        "Play_vo_Samira_SamiraBasicAttack2_cast3D": [
+            "characters/Samira/sounds/1071918848.ogg",
+            "characters/Samira/sounds/581884535.ogg",
+            "characters/Samira/sounds/691210772.ogg",
+            "characters/Samira/sounds/76326053.ogg",
+        ],
+        "Play_vo_Samira_SamiraBasicAttackMelee2_cast3D": [
+            "characters/Samira/sounds/110308167.ogg",
+            "characters/Samira/sounds/16160911.ogg",
+            "characters/Samira/sounds/274135927.ogg",
+            "characters/Samira/sounds/943878863.ogg",
+        ],
+        "Play_vo_Samira_SamiraBasicAttackMelee_cast3D": [
+            "characters/Samira/sounds/110308167.ogg",
+            "characters/Samira/sounds/16160911.ogg",
+            "characters/Samira/sounds/274135927.ogg",
+            "characters/Samira/sounds/943878863.ogg",
+        ],
+        "Play_vo_Samira_SamiraBasicAttack_cast3D": [
+            "characters/Samira/sounds/1071918848.ogg",
+            "characters/Samira/sounds/581884535.ogg",
+            "characters/Samira/sounds/691210772.ogg",
+            "characters/Samira/sounds/76326053.ogg",
+        ],
+        "Play_vo_Samira_SamiraCritAttackMelee_cast3D": [
+            "characters/Samira/sounds/110308167.ogg",
+            "characters/Samira/sounds/16160911.ogg",
+            "characters/Samira/sounds/274135927.ogg",
+            "characters/Samira/sounds/943878863.ogg",
+        ],
+        "Play_vo_Samira_SamiraCritAttack_cast3D": [
+            "characters/Samira/sounds/1071918848.ogg",
+            "characters/Samira/sounds/581884535.ogg",
+            "characters/Samira/sounds/691210772.ogg",
+            "characters/Samira/sounds/76326053.ogg",
+        ],
+        "Play_vo_Samira_SamiraE_cast3D": [
+            "characters/Samira/sounds/584817662.ogg",
+            "characters/Samira/sounds/591080400.ogg",
+            "characters/Samira/sounds/613155475.ogg",
+            "characters/Samira/sounds/650441734.ogg",
+            "characters/Samira/sounds/663122305.ogg",
+            "characters/Samira/sounds/719224789.ogg",
+            "characters/Samira/sounds/932350987.ogg",
+        ],
+        "Play_vo_Samira_SamiraQGun_cast3D": [
+            "characters/Samira/sounds/1054824315.ogg",
+            "characters/Samira/sounds/131605034.ogg",
+            "characters/Samira/sounds/192890126.ogg",
+            "characters/Samira/sounds/409593246.ogg",
+            "characters/Samira/sounds/52662617.ogg",
+        ],
+        "Play_vo_Samira_SamiraQSword_cast3D": [
+            "characters/Samira/sounds/412498121.ogg",
+            "characters/Samira/sounds/415148965.ogg",
+            "characters/Samira/sounds/577237239.ogg",
+        ],
+        "Play_vo_Samira_SamiraR_cast3D": [
+            "characters/Samira/sounds/184254938.ogg",
+            "characters/Samira/sounds/597153265.ogg",
+            "characters/Samira/sounds/934912979.ogg",
+            "characters/Samira/sounds/99245773.ogg",
+        ],
+        "Play_vo_Samira_SamiraW_cast3D": [
+            "characters/Samira/sounds/249514457.ogg",
+            "characters/Samira/sounds/394693813.ogg",
+            "characters/Samira/sounds/459061089.ogg",
+            "characters/Samira/sounds/56320513.ogg",
+            "characters/Samira/sounds/609155345.ogg",
+            "characters/Samira/sounds/714394117.ogg",
+            "characters/Samira/sounds/87109929.ogg",
+        ],
+        "Play_vo_Samira_Spell3DRCastReady": [
+            "characters/Samira/sounds/107974186.ogg",
+            "characters/Samira/sounds/333290340.ogg",
+            "characters/Samira/sounds/650345077.ogg",
+        ],
+        "Play_vo_Samira_Taunt3DGeneral": [
+            "characters/Samira/sounds/262153211.ogg",
+            "characters/Samira/sounds/264684219.ogg",
+            "characters/Samira/sounds/320351819.ogg",
+            "characters/Samira/sounds/787178368.ogg",
+        ],
+        "Play_vo_Samira_TauntResponse3DGeneral": [
+            "characters/Samira/sounds/140960769.ogg",
+        ],
+        "Recall3D_buffactivate": [
+            "characters/Samira/sounds/135807045.ogg",
+        ],
+        "Respawn3D_buffactivate": [
+            "characters/Samira/sounds/776199022.ogg",
+        ],
+        "SamiraBasicAttack2_OnCast": [
+            "characters/Samira/sounds/640578572.ogg",
+            "characters/Samira/sounds/658596097.ogg",
+            "characters/Samira/sounds/676475569.ogg",
+        ],
+        "SamiraBasicAttack2_OnHit": [
+            "characters/Samira/sounds/218708644.ogg",
+            "characters/Samira/sounds/232754450.ogg",
+            "characters/Samira/sounds/325051733.ogg",
+        ],
+        "SamiraBasicAttack2_OnMissileLaunch": [
+            "characters/Samira/sounds/1054895961.ogg",
+            "characters/Samira/sounds/79215513.ogg",
+            "characters/Samira/sounds/823756417.ogg",
+        ],
+        "SamiraBasicAttackMelee2_OnCast": [
+            "characters/Samira/sounds/13012876.ogg",
+            "characters/Samira/sounds/212256786.ogg",
+            "characters/Samira/sounds/909407961.ogg",
+        ],
+        "SamiraBasicAttackMelee2_OnHit": [
+            "characters/Samira/sounds/112151358.ogg",
+            "characters/Samira/sounds/252527482.ogg",
+            "characters/Samira/sounds/257870015.ogg",
+            "characters/Samira/sounds/315848984.ogg",
+            "characters/Samira/sounds/348581197.ogg",
+            "characters/Samira/sounds/544136085.ogg",
+            "characters/Samira/sounds/558361823.ogg",
+            "characters/Samira/sounds/747816832.ogg",
+            "characters/Samira/sounds/764873739.ogg",
+            "characters/Samira/sounds/79000433.ogg",
+            "characters/Samira/sounds/854861629.ogg",
+            "characters/Samira/sounds/858037320.ogg",
+        ],
+        "SamiraBasicAttackMelee_OnCast": [
+            "characters/Samira/sounds/13012876.ogg",
+            "characters/Samira/sounds/212256786.ogg",
+            "characters/Samira/sounds/909407961.ogg",
+        ],
+        "SamiraBasicAttackMelee_OnHit": [
+            "characters/Samira/sounds/112151358.ogg",
+            "characters/Samira/sounds/252527482.ogg",
+            "characters/Samira/sounds/257870015.ogg",
+            "characters/Samira/sounds/315848984.ogg",
+            "characters/Samira/sounds/348581197.ogg",
+            "characters/Samira/sounds/544136085.ogg",
+            "characters/Samira/sounds/558361823.ogg",
+            "characters/Samira/sounds/747816832.ogg",
+            "characters/Samira/sounds/764873739.ogg",
+            "characters/Samira/sounds/79000433.ogg",
+            "characters/Samira/sounds/854861629.ogg",
+            "characters/Samira/sounds/858037320.ogg",
+        ],
+        "SamiraBasicAttack_OnCast": [
+            "characters/Samira/sounds/640578572.ogg",
+            "characters/Samira/sounds/658596097.ogg",
+            "characters/Samira/sounds/676475569.ogg",
+        ],
+        "SamiraBasicAttack_OnHit": [
+            "characters/Samira/sounds/218708644.ogg",
+            "characters/Samira/sounds/232754450.ogg",
+            "characters/Samira/sounds/325051733.ogg",
+        ],
+        "SamiraBasicAttack_OnMissileLaunch": [
+            "characters/Samira/sounds/1054895961.ogg",
+            "characters/Samira/sounds/79215513.ogg",
+            "characters/Samira/sounds/823756417.ogg",
+        ],
+        "SamiraBasicAttack_missilecast": [
+            "characters/Samira/sounds/218166557.ogg",
+            "characters/Samira/sounds/529331082.ogg",
+            "characters/Samira/sounds/814243558.ogg",
+        ],
+        "SamiraCritAttackMelee_OnCast": [
+            "characters/Samira/sounds/100718295.ogg",
+            "characters/Samira/sounds/1070563650.ogg",
+            "characters/Samira/sounds/734011527.ogg",
+        ],
+        "SamiraCritAttackMelee_OnHit": [
+            "characters/Samira/sounds/112151358.ogg",
+            "characters/Samira/sounds/252527482.ogg",
+            "characters/Samira/sounds/257870015.ogg",
+            "characters/Samira/sounds/315848984.ogg",
+            "characters/Samira/sounds/348581197.ogg",
+            "characters/Samira/sounds/544136085.ogg",
+            "characters/Samira/sounds/558361823.ogg",
+            "characters/Samira/sounds/747816832.ogg",
+            "characters/Samira/sounds/764873739.ogg",
+            "characters/Samira/sounds/79000433.ogg",
+            "characters/Samira/sounds/854861629.ogg",
+            "characters/Samira/sounds/858037320.ogg",
+        ],
+        "SamiraCritAttack_OnCast": [
+            "characters/Samira/sounds/439951117.ogg",
+            "characters/Samira/sounds/52946606.ogg",
+            "characters/Samira/sounds/769082339.ogg",
+        ],
+        "SamiraCritAttack_OnHit": [
+            "characters/Samira/sounds/218708644.ogg",
+            "characters/Samira/sounds/232754450.ogg",
+            "characters/Samira/sounds/325051733.ogg",
+        ],
+        "SamiraCritAttack_OnMissileLaunch": [
+            "characters/Samira/sounds/1054895961.ogg",
+            "characters/Samira/sounds/79215513.ogg",
+            "characters/Samira/sounds/823756417.ogg",
+        ],
+        "SamiraCritAttack_missilecast": [
+            "characters/Samira/sounds/286920890.ogg",
+            "characters/Samira/sounds/53745995.ogg",
+            "characters/Samira/sounds/818142430.ogg",
+        ],
+        "SamiraE_cast": [
+            "characters/Samira/sounds/36011639.ogg",
+            "characters/Samira/sounds/50287791.ogg",
+        ],
+        "SamiraE_hit": [
+            "characters/Samira/sounds/1006569434.ogg",
+            "characters/Samira/sounds/595350713.ogg",
+            "characters/Samira/sounds/64301541.ogg",
+        ],
+        "SamiraPDash_cast": [
+            "characters/Samira/sounds/107071894.ogg",
+            "characters/Samira/sounds/501792295.ogg",
+            "characters/Samira/sounds/952652869.ogg",
+        ],
+        "SamiraPJuggle_buffactivate": [
+            "characters/Samira/sounds/123387326.ogg",
+        ],
+        "SamiraPMissileOffhand_OnHit": [
+            "characters/Samira/sounds/1064561202.ogg",
+            "characters/Samira/sounds/446049584.ogg",
+            "characters/Samira/sounds/627268660.ogg",
+        ],
+        "SamiraPMissileOffhand_OnMissileCast": [
+            "characters/Samira/sounds/614495476.ogg",
+            "characters/Samira/sounds/622887553.ogg",
+            "characters/Samira/sounds/708584923.ogg",
+        ],
+        "SamiraPSwordJuggle_OnBuffActivate": [
+            "characters/Samira/sounds/21194958.ogg",
+            "characters/Samira/sounds/84819860.ogg",
+        ],
+        "SamiraPassiveCombo_OnBuffDeactivate": [
+            "characters/Samira/sounds/39865855.ogg",
+            "characters/Samira/sounds/673255613.ogg",
+            "characters/Samira/sounds/998098946.ogg",
+        ],
+        "SamiraQBufferedSword_OnCast": [
+            "characters/Samira/sounds/708687753.ogg",
+        ],
+        "SamiraQBufferedSword_buffactivate": [
+            "characters/Samira/sounds/899929633.ogg",
+        ],
+        "SamiraQBufferedSword_hit": [
+            "characters/Samira/sounds/701433613.ogg",
+            "characters/Samira/sounds/717838009.ogg",
+            "characters/Samira/sounds/979313932.ogg",
+        ],
+        "SamiraQGun_OnCast": [
+            "characters/Samira/sounds/989068643.ogg",
+        ],
+        "SamiraQGun_OnHit": [
+            "characters/Samira/sounds/1019508706.ogg",
+            "characters/Samira/sounds/754240472.ogg",
+            "characters/Samira/sounds/848588543.ogg",
+        ],
+        "SamiraQGun_OnMissileLaunch": [
+            "characters/Samira/sounds/253583916.ogg",
+            "characters/Samira/sounds/524273960.ogg",
+            "characters/Samira/sounds/994479747.ogg",
+        ],
+        "SamiraQSword_OnCast": [
+            "characters/Samira/sounds/427924245.ogg",
+        ],
+        "SamiraQSword_OnHit": [
+            "characters/Samira/sounds/390837308.ogg",
+            "characters/Samira/sounds/690603460.ogg",
+        ],
+        "SamiraRMissile_OnHit": [
+            "characters/Samira/sounds/164871394.ogg",
+            "characters/Samira/sounds/441884831.ogg",
+            "characters/Samira/sounds/535041940.ogg",
+        ],
+        "SamiraRMissile_OnMissileCast": [
+            "characters/Samira/sounds/267099161.ogg",
+            "characters/Samira/sounds/457904448.ogg",
+            "characters/Samira/sounds/988031923.ogg",
+        ],
+        "SamiraRReadyBuff_OnBuffActivate": [
+            "characters/Samira/sounds/412985637.ogg",
+            "characters/Samira/sounds/642198598.ogg",
+        ],
+        "SamiraR_OnBuffActivate": [
+            "characters/Samira/sounds/885394566.ogg",
+        ],
+        "SamiraR_OnCast": [
+            "characters/Samira/sounds/465542607.ogg",
+        ],
+        "SamiraTauntMissile_OnHit": [
+            "characters/Samira/sounds/1034112626.ogg",
+        ],
+        "SamiraTauntMissile_OnMissileCast": [
+            "characters/Samira/sounds/21278593.ogg",
+        ],
+        "SamiraTauntMissile_OnMissileLaunch": [
+            "characters/Samira/sounds/321938151.ogg",
+        ],
+        "SamiraW_OnBuffActivate": [
+            "characters/Samira/sounds/205097347.ogg",
+        ],
+        "SamiraW_OnCast": [
+            "characters/Samira/sounds/312204363.ogg",
+        ],
+        "SamiraW_hit": [
+            "characters/Samira/sounds/162944145.ogg",
+            "characters/Samira/sounds/43297997.ogg",
+        ],
+        "SamiraW_hit_block_sml": [
+            "characters/Samira/sounds/541947937.ogg",
+            "characters/Samira/sounds/713611878.ogg",
+            "characters/Samira/sounds/831387214.ogg",
+        ],
+        "SamiraW_hit_block_ult": [
+            "characters/Samira/sounds/393766383.ogg",
+        ],
+        "SheathGun_buffactivate": [
+            "characters/Samira/sounds/319127300.ogg",
+        ],
+        "SheathSword_buffactivate": [
+            "characters/Samira/sounds/751038163.ogg",
+        ],
+        "Taunt3D_buffactivate": [
+            "characters/Samira/sounds/193374392.ogg",
+        ],
+        "Walkover_buffactivate": [
+            "characters/Samira/sounds/12119250.ogg",
+            "characters/Samira/sounds/589683560.ogg",
+        ],
+        "Winddown3D_buffactivate": [
+            "characters/Samira/sounds/776199022.ogg",
+        ],
+    },
+)

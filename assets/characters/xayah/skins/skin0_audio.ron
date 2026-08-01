@@ -1,0 +1,1033 @@
+(
+    events: {
+        "Dance3D_into": [
+            "characters/Xayah/sounds/335225371.ogg",
+        ],
+        "Dance3D_loop": [
+            "characters/Xayah/sounds/852529110.ogg",
+        ],
+        "Death3D_buffactivate": [
+            "characters/Xayah/sounds/713509594.ogg",
+        ],
+        "Joke3D_buffactivate": [
+            "characters/Xayah/sounds/989544506.ogg",
+        ],
+        "Laugh3D_buffactivate": [
+            "characters/Xayah/sounds/352491399.ogg",
+        ],
+        "Play_vo_Xayah_Attack2DGeneral": [
+            "characters/Xayah/sounds/1064472852.ogg",
+            "characters/Xayah/sounds/144823570.ogg",
+            "characters/Xayah/sounds/236409216.ogg",
+            "characters/Xayah/sounds/238459797.ogg",
+            "characters/Xayah/sounds/241665863.ogg",
+            "characters/Xayah/sounds/258430080.ogg",
+            "characters/Xayah/sounds/283901997.ogg",
+            "characters/Xayah/sounds/284655036.ogg",
+            "characters/Xayah/sounds/286731086.ogg",
+            "characters/Xayah/sounds/3236154.ogg",
+            "characters/Xayah/sounds/324263527.ogg",
+            "characters/Xayah/sounds/412245614.ogg",
+            "characters/Xayah/sounds/436728846.ogg",
+            "characters/Xayah/sounds/500270388.ogg",
+            "characters/Xayah/sounds/501196094.ogg",
+            "characters/Xayah/sounds/514198535.ogg",
+            "characters/Xayah/sounds/546305399.ogg",
+            "characters/Xayah/sounds/54663602.ogg",
+            "characters/Xayah/sounds/567210532.ogg",
+            "characters/Xayah/sounds/56866678.ogg",
+            "characters/Xayah/sounds/585333867.ogg",
+            "characters/Xayah/sounds/622776382.ogg",
+            "characters/Xayah/sounds/693772748.ogg",
+            "characters/Xayah/sounds/704536573.ogg",
+            "characters/Xayah/sounds/773175563.ogg",
+            "characters/Xayah/sounds/801947701.ogg",
+            "characters/Xayah/sounds/812810223.ogg",
+            "characters/Xayah/sounds/821850347.ogg",
+            "characters/Xayah/sounds/847294632.ogg",
+            "characters/Xayah/sounds/904794240.ogg",
+            "characters/Xayah/sounds/923106025.ogg",
+            "characters/Xayah/sounds/950055357.ogg",
+            "characters/Xayah/sounds/99899982.ogg",
+        ],
+        "Play_vo_Xayah_BuyItem2DGeneral": [
+            "characters/Xayah/sounds/1000665197.ogg",
+            "characters/Xayah/sounds/202028247.ogg",
+            "characters/Xayah/sounds/238995539.ogg",
+            "characters/Xayah/sounds/493385640.ogg",
+            "characters/Xayah/sounds/538412349.ogg",
+            "characters/Xayah/sounds/713963620.ogg",
+            "characters/Xayah/sounds/817525608.ogg",
+            "characters/Xayah/sounds/912863454.ogg",
+            "characters/Xayah/sounds/952317031.ogg",
+            "characters/Xayah/sounds/991110224.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanFar_Move2DStandard": [
+            "characters/Xayah/sounds/1008750122.ogg",
+            "characters/Xayah/sounds/1073670252.ogg",
+            "characters/Xayah/sounds/136191128.ogg",
+            "characters/Xayah/sounds/169446932.ogg",
+            "characters/Xayah/sounds/185353707.ogg",
+            "characters/Xayah/sounds/298690630.ogg",
+            "characters/Xayah/sounds/307178962.ogg",
+            "characters/Xayah/sounds/314002695.ogg",
+            "characters/Xayah/sounds/391753967.ogg",
+            "characters/Xayah/sounds/393198575.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanFar_Move2DStandard03_Chat2": [
+            "characters/Xayah/sounds/525358964.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanFar_Move2DStandard05_Chat2": [
+            "characters/Xayah/sounds/695065703.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanFar_Move2DStandard05_Chat4": [
+            "characters/Xayah/sounds/488108666.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanFar_Move2DStandard07_Chat2": [
+            "characters/Xayah/sounds/121446766.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanFar_Move2DStandard08_Chat2": [
+            "characters/Xayah/sounds/663270989.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanFar_Move2DStandard09_Chat2": [
+            "characters/Xayah/sounds/393271418.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanFar_Move2DStandard10_Chat2": [
+            "characters/Xayah/sounds/656580408.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanFar_Move2DStandard11_Chat3": [
+            "characters/Xayah/sounds/747512817.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanFar_Move2DStandard12_Chat2": [
+            "characters/Xayah/sounds/849494711.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanFar_Move2DStandard13_Chat2": [
+            "characters/Xayah/sounds/523987135.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanFar_Move2DStandard14_Chat2": [
+            "characters/Xayah/sounds/629236743.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanFar_Move2DStandard15_Chat2": [
+            "characters/Xayah/sounds/925897986.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanFar_Move2DStandard16_Chat2": [
+            "characters/Xayah/sounds/1017762401.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanFar_Move2DStandard17_Chat2": [
+            "characters/Xayah/sounds/754418820.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanFar_Move2DStandard18_Chat2": [
+            "characters/Xayah/sounds/5023238.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanFar_Move2DStandard19_Chat2": [
+            "characters/Xayah/sounds/676545885.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanFar_Move2DStandard20_Chat3": [
+            "characters/Xayah/sounds/677090077.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanFar_Move2DStandard21_Chat2": [
+            "characters/Xayah/sounds/293953972.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanFar_Move2DStandard23_Chat2": [
+            "characters/Xayah/sounds/846124709.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanFar_Move2DStandard24_Chat3": [
+            "characters/Xayah/sounds/139618859.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanFar_Move2DStandard26_Chat2": [
+            "characters/Xayah/sounds/834007991.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanFar_Move2DStandard27_Chat2": [
+            "characters/Xayah/sounds/644945696.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanFar_Move2DStandard28_Chat2": [
+            "characters/Xayah/sounds/400802610.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanFar_Move2DStandard29_Chat2": [
+            "characters/Xayah/sounds/795556154.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanFar_Move2DStandard29_Chat4": [
+            "characters/Xayah/sounds/584629130.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanNear_Attack2DGeneral": [
+            "characters/Xayah/sounds/181484070.ogg",
+            "characters/Xayah/sounds/271160593.ogg",
+            "characters/Xayah/sounds/322649258.ogg",
+            "characters/Xayah/sounds/378234131.ogg",
+            "characters/Xayah/sounds/394412879.ogg",
+            "characters/Xayah/sounds/420485.ogg",
+            "characters/Xayah/sounds/542832047.ogg",
+            "characters/Xayah/sounds/788817397.ogg",
+            "characters/Xayah/sounds/909354731.ogg",
+            "characters/Xayah/sounds/924020314.ogg",
+            "characters/Xayah/sounds/943687914.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanNear_Attack2DGeneral02_Chat2": [
+            "characters/Xayah/sounds/923211196.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanNear_Attack2DGeneral04_Chat3": [
+            "characters/Xayah/sounds/403601114.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanNear_Attack2DGeneral05_Chat2": [
+            "characters/Xayah/sounds/897273191.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanNear_Attack2DGeneral06_Chat2": [
+            "characters/Xayah/sounds/562883123.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanNear_Attack2DGeneral10_Chat2": [
+            "characters/Xayah/sounds/543991902.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanNear_Attack2DGeneral13_Chat2": [
+            "characters/Xayah/sounds/265732238.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanNear_Attack2DGeneral14_Chat2": [
+            "characters/Xayah/sounds/398367243.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanNear_Attack2DGeneral15_Chat2": [
+            "characters/Xayah/sounds/350188030.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanNear_Attack2DGeneral16_Chat2": [
+            "characters/Xayah/sounds/772635087.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanNear_Attack2DGeneral18_Chat2": [
+            "characters/Xayah/sounds/959212653.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanNear_Attack2DGeneral19_Chat2": [
+            "characters/Xayah/sounds/200027532.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanNear_Attack2DGeneral20_Chat2": [
+            "characters/Xayah/sounds/781673821.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanNear_Attack2DGeneral25_Chat2": [
+            "characters/Xayah/sounds/444905207.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanNear_Attack2DGeneral26_Chat2": [
+            "characters/Xayah/sounds/639302470.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanNear_Kill3DGeneral": [
+            "characters/Xayah/sounds/526671605.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanNear_Kill3DGeneral01_Chat2": [
+            "characters/Xayah/sounds/77316695.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanNear_Kill3DGeneral02_Chat2": [
+            "characters/Xayah/sounds/662067417.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanNear_Kill3DGeneral02_Chat4": [
+            "characters/Xayah/sounds/399205578.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanNear_Kill3DGeneral03_Chat2": [
+            "characters/Xayah/sounds/845679944.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanNear_Kill3DGeneral04_Chat2": [
+            "characters/Xayah/sounds/813880635.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanNear_Kill3DGeneral05_Chat2": [
+            "characters/Xayah/sounds/902797030.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanNear_Kill3DGeneral06_Chat2": [
+            "characters/Xayah/sounds/717333556.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanNear_Kill3DGeneral07_Chat2": [
+            "characters/Xayah/sounds/983340294.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanNear_Kill3DGeneral08_Chat2": [
+            "characters/Xayah/sounds/913900042.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanNear_Kill3DGeneral09_Chat2": [
+            "characters/Xayah/sounds/509373404.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanNear_Kill3DGeneral10_Chat3": [
+            "characters/Xayah/sounds/201405625.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanNear_Kill3DGeneral11_Chat2": [
+            "characters/Xayah/sounds/805073673.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanNear_Kill3DGeneral12_Chat2": [
+            "characters/Xayah/sounds/1070980548.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanNear_Move2DFirst": [
+            "characters/Xayah/sounds/1021557769.ogg",
+            "characters/Xayah/sounds/296073049.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanNear_Move2DFirst01_Chat2": [
+            "characters/Xayah/sounds/258684285.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanNear_Move2DFirst01_Chat4": [
+            "characters/Xayah/sounds/446584980.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanNear_Move2DFirst02_Chat3": [
+            "characters/Xayah/sounds/130483335.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanNear_Move2DFirst03_Chat2": [
+            "characters/Xayah/sounds/154322229.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanNear_Move2DFirst03_Chat4": [
+            "characters/Xayah/sounds/163151462.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanNear_Move2DFirst04_Chat2": [
+            "characters/Xayah/sounds/196804014.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanNear_Move2DFirst04_Chat4": [
+            "characters/Xayah/sounds/935823068.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanNear_Move2DFirst05_Chat3": [
+            "characters/Xayah/sounds/624565773.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanNear_Move2DFirst05_Chat5": [
+            "characters/Xayah/sounds/276006190.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanNear_Move2DFirst06_Chat2": [
+            "characters/Xayah/sounds/615643888.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanNear_Move2DFirst07_Chat2": [
+            "characters/Xayah/sounds/432391919.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanNear_Move2DStandard": [
+            "characters/Xayah/sounds/1048876838.ogg",
+            "characters/Xayah/sounds/1059493165.ogg",
+            "characters/Xayah/sounds/111075993.ogg",
+            "characters/Xayah/sounds/179410146.ogg",
+            "characters/Xayah/sounds/254586124.ogg",
+            "characters/Xayah/sounds/357147752.ogg",
+            "characters/Xayah/sounds/407758835.ogg",
+            "characters/Xayah/sounds/419977131.ogg",
+            "characters/Xayah/sounds/579898597.ogg",
+            "characters/Xayah/sounds/64760545.ogg",
+            "characters/Xayah/sounds/865136953.ogg",
+            "characters/Xayah/sounds/895832773.ogg",
+            "characters/Xayah/sounds/914081413.ogg",
+            "characters/Xayah/sounds/946347526.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanNear_Move2DStandard01_Chat2": [
+            "characters/Xayah/sounds/736285144.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanNear_Move2DStandard03_Chat2": [
+            "characters/Xayah/sounds/223856987.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanNear_Move2DStandard03_Chat4": [
+            "characters/Xayah/sounds/982454494.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanNear_Move2DStandard04_Chat2": [
+            "characters/Xayah/sounds/241744130.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanNear_Move2DStandard05_Chat3": [
+            "characters/Xayah/sounds/377951050.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanNear_Move2DStandard06_Chat2": [
+            "characters/Xayah/sounds/987368004.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanNear_Move2DStandard07_Chat3": [
+            "characters/Xayah/sounds/1063228115.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanNear_Move2DStandard08_Chat2": [
+            "characters/Xayah/sounds/88363265.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanNear_Move2DStandard08_Chat4": [
+            "characters/Xayah/sounds/182794521.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanNear_Move2DStandard09_Chat2": [
+            "characters/Xayah/sounds/395577287.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanNear_Move2DStandard10_Chat3": [
+            "characters/Xayah/sounds/772784081.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanNear_Move2DStandard11_Chat2": [
+            "characters/Xayah/sounds/75293179.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanNear_Move2DStandard12_Chat2": [
+            "characters/Xayah/sounds/685942646.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanNear_Move2DStandard13_Chat2": [
+            "characters/Xayah/sounds/483841917.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanNear_Move2DStandard14_Chat2": [
+            "characters/Xayah/sounds/281726780.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanNear_Move2DStandard15_Chat2": [
+            "characters/Xayah/sounds/185024153.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanNear_Move2DStandard16_Chat2": [
+            "characters/Xayah/sounds/473060212.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanNear_Move2DStandard17_Chat2": [
+            "characters/Xayah/sounds/1001417530.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanNear_Move2DStandard17_Chat4": [
+            "characters/Xayah/sounds/40522347.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanNear_Move2DStandard18_Chat3": [
+            "characters/Xayah/sounds/646881045.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanNear_Move2DStandard19_Chat3": [
+            "characters/Xayah/sounds/255867404.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanNear_Move2DStandard20_Chat2": [
+            "characters/Xayah/sounds/282065340.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanNear_Move2DStandard21_Chat2": [
+            "characters/Xayah/sounds/783528826.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanNear_Move2DStandard22_Chat2": [
+            "characters/Xayah/sounds/344693768.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanNear_Move2DStandard23_Chat2": [
+            "characters/Xayah/sounds/129644484.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanNear_Move2DStandard24_Chat2": [
+            "characters/Xayah/sounds/384376553.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanNear_Move2DStandard25_Chat3": [
+            "characters/Xayah/sounds/244779426.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanNear_Move2DStandard26_Chat2": [
+            "characters/Xayah/sounds/603487145.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanNear_Move2DStandard29_Chat2": [
+            "characters/Xayah/sounds/120273159.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanNear_Move2DStandard32_Chat3": [
+            "characters/Xayah/sounds/396001139.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanNear_Move2DStandard33_Chat2": [
+            "characters/Xayah/sounds/538498311.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanNear_Move2DStandard34_Chat3": [
+            "characters/Xayah/sounds/550175580.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanNear_Move2DStandard35_Chat2": [
+            "characters/Xayah/sounds/202837174.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanNear_Taunt3DGeneral01_Chat2": [
+            "characters/Xayah/sounds/512188536.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanNear_Taunt3DGeneral02_Chat2": [
+            "characters/Xayah/sounds/934713816.ogg",
+        ],
+        "Play_vo_Xayah_Chat3DRakanNear_TauntResponse3DGeneral": [
+            "characters/Xayah/sounds/182551995.ogg",
+            "characters/Xayah/sounds/245471326.ogg",
+        ],
+        "Play_vo_Xayah_Dance3DGeneral": [
+            "characters/Xayah/sounds/1071838640.ogg",
+            "characters/Xayah/sounds/230447472.ogg",
+            "characters/Xayah/sounds/641816147.ogg",
+            "characters/Xayah/sounds/78912563.ogg",
+            "characters/Xayah/sounds/833556799.ogg",
+            "characters/Xayah/sounds/940378709.ogg",
+        ],
+        "Play_vo_Xayah_Death3D": [
+            "characters/Xayah/sounds/1051981011.ogg",
+            "characters/Xayah/sounds/112453131.ogg",
+            "characters/Xayah/sounds/298545906.ogg",
+            "characters/Xayah/sounds/327822864.ogg",
+            "characters/Xayah/sounds/528778693.ogg",
+            "characters/Xayah/sounds/59463160.ogg",
+        ],
+        "Play_vo_Xayah_FirstEncounter3DAhri": [
+            "characters/Xayah/sounds/598411532.ogg",
+            "characters/Xayah/sounds/86461324.ogg",
+        ],
+        "Play_vo_Xayah_FirstEncounter3DAmumu": [
+            "characters/Xayah/sounds/974169669.ogg",
+        ],
+        "Play_vo_Xayah_FirstEncounter3DAurelionSol": [
+            "characters/Xayah/sounds/705817825.ogg",
+        ],
+        "Play_vo_Xayah_FirstEncounter3DBard": [
+            "characters/Xayah/sounds/761114496.ogg",
+        ],
+        "Play_vo_Xayah_FirstEncounter3DCaitlyn": [
+            "characters/Xayah/sounds/952523717.ogg",
+        ],
+        "Play_vo_Xayah_FirstEncounter3DCamille": [
+            "characters/Xayah/sounds/593013204.ogg",
+        ],
+        "Play_vo_Xayah_FirstEncounter3DEkko": [
+            "characters/Xayah/sounds/767982620.ogg",
+        ],
+        "Play_vo_Xayah_FirstEncounter3DGaren": [
+            "characters/Xayah/sounds/466737173.ogg",
+        ],
+        "Play_vo_Xayah_FirstEncounter3DIllaoi": [
+            "characters/Xayah/sounds/855231521.ogg",
+        ],
+        "Play_vo_Xayah_FirstEncounter3DIvern": [
+            "characters/Xayah/sounds/273486361.ogg",
+        ],
+        "Play_vo_Xayah_FirstEncounter3DKled": [
+            "characters/Xayah/sounds/104567824.ogg",
+        ],
+        "Play_vo_Xayah_FirstEncounter3DRammus": [
+            "characters/Xayah/sounds/227085826.ogg",
+        ],
+        "Play_vo_Xayah_FirstEncounter3DRengar": [
+            "characters/Xayah/sounds/991084991.ogg",
+        ],
+        "Play_vo_Xayah_FirstEncounter3DTahmKench": [
+            "characters/Xayah/sounds/228556550.ogg",
+        ],
+        "Play_vo_Xayah_FirstEncounter3DUrgot": [
+            "characters/Xayah/sounds/72045445.ogg",
+        ],
+        "Play_vo_Xayah_FirstEncounter3DVi": [
+            "characters/Xayah/sounds/200508461.ogg",
+        ],
+        "Play_vo_Xayah_FirstEncounter3DVladimir": [
+            "characters/Xayah/sounds/62677232.ogg",
+        ],
+        "Play_vo_Xayah_FirstEncounter3DWukong": [
+            "characters/Xayah/sounds/888013762.ogg",
+        ],
+        "Play_vo_Xayah_FirstEncounter3DYordle": [
+            "characters/Xayah/sounds/324367453.ogg",
+            "characters/Xayah/sounds/422167475.ogg",
+            "characters/Xayah/sounds/540988455.ogg",
+        ],
+        "Play_vo_Xayah_Joke3DGeneral": [
+            "characters/Xayah/sounds/1053813879.ogg",
+        ],
+        "Play_vo_Xayah_JokeResponse3DGeneral": [
+            "characters/Xayah/sounds/1033954357.ogg",
+            "characters/Xayah/sounds/338314418.ogg",
+            "characters/Xayah/sounds/345952284.ogg",
+            "characters/Xayah/sounds/642927047.ogg",
+            "characters/Xayah/sounds/745843086.ogg",
+            "characters/Xayah/sounds/958433546.ogg",
+        ],
+        "Play_vo_Xayah_Kill3DAhri": [
+            "characters/Xayah/sounds/374232690.ogg",
+        ],
+        "Play_vo_Xayah_Kill3DGeneral": [
+            "characters/Xayah/sounds/102637976.ogg",
+            "characters/Xayah/sounds/134500493.ogg",
+            "characters/Xayah/sounds/16460614.ogg",
+            "characters/Xayah/sounds/165542277.ogg",
+            "characters/Xayah/sounds/325788971.ogg",
+            "characters/Xayah/sounds/403519369.ogg",
+            "characters/Xayah/sounds/412532579.ogg",
+            "characters/Xayah/sounds/432222216.ogg",
+            "characters/Xayah/sounds/555217289.ogg",
+            "characters/Xayah/sounds/585821899.ogg",
+            "characters/Xayah/sounds/674449784.ogg",
+            "characters/Xayah/sounds/67515965.ogg",
+            "characters/Xayah/sounds/858617630.ogg",
+            "characters/Xayah/sounds/923685608.ogg",
+            "characters/Xayah/sounds/94511363.ogg",
+        ],
+        "Play_vo_Xayah_Kill3DLux": [
+            "characters/Xayah/sounds/958787635.ogg",
+        ],
+        "Play_vo_Xayah_Kill3DMinion": [
+            "characters/Xayah/sounds/1005077746.ogg",
+            "characters/Xayah/sounds/360520348.ogg",
+            "characters/Xayah/sounds/519435059.ogg",
+            "characters/Xayah/sounds/663764929.ogg",
+            "characters/Xayah/sounds/676663735.ogg",
+            "characters/Xayah/sounds/779623696.ogg",
+            "characters/Xayah/sounds/967287991.ogg",
+        ],
+        "Play_vo_Xayah_Kill3DPenta": [
+            "characters/Xayah/sounds/1001660904.ogg",
+            "characters/Xayah/sounds/137547400.ogg",
+            "characters/Xayah/sounds/16207942.ogg",
+            "characters/Xayah/sounds/220234863.ogg",
+            "characters/Xayah/sounds/324168430.ogg",
+            "characters/Xayah/sounds/776329969.ogg",
+        ],
+        "Play_vo_Xayah_Kill3DTaliyah": [
+            "characters/Xayah/sounds/1065871101.ogg",
+        ],
+        "Play_vo_Xayah_Kill3DTurret": [
+            "characters/Xayah/sounds/104919365.ogg",
+            "characters/Xayah/sounds/131212701.ogg",
+            "characters/Xayah/sounds/154713617.ogg",
+            "characters/Xayah/sounds/15741064.ogg",
+            "characters/Xayah/sounds/165286063.ogg",
+            "characters/Xayah/sounds/29120585.ogg",
+            "characters/Xayah/sounds/37250913.ogg",
+            "characters/Xayah/sounds/449022672.ogg",
+            "characters/Xayah/sounds/575727193.ogg",
+            "characters/Xayah/sounds/610482889.ogg",
+            "characters/Xayah/sounds/683732426.ogg",
+            "characters/Xayah/sounds/737017655.ogg",
+            "characters/Xayah/sounds/76159282.ogg",
+            "characters/Xayah/sounds/80234331.ogg",
+            "characters/Xayah/sounds/906193482.ogg",
+        ],
+        "Play_vo_Xayah_Kill3DVastaya": [
+            "characters/Xayah/sounds/1004748522.ogg",
+            "characters/Xayah/sounds/1066286119.ogg",
+            "characters/Xayah/sounds/114704290.ogg",
+            "characters/Xayah/sounds/149946971.ogg",
+            "characters/Xayah/sounds/258873790.ogg",
+            "characters/Xayah/sounds/456704619.ogg",
+            "characters/Xayah/sounds/509150433.ogg",
+            "characters/Xayah/sounds/976303328.ogg",
+        ],
+        "Play_vo_Xayah_Kill3DWard": [
+            "characters/Xayah/sounds/389625816.ogg",
+            "characters/Xayah/sounds/428238276.ogg",
+            "characters/Xayah/sounds/585129017.ogg",
+            "characters/Xayah/sounds/744606673.ogg",
+            "characters/Xayah/sounds/772449915.ogg",
+            "characters/Xayah/sounds/951797595.ogg",
+        ],
+        "Play_vo_Xayah_Laugh3DGeneral": [
+            "characters/Xayah/sounds/157220670.ogg",
+            "characters/Xayah/sounds/792409815.ogg",
+            "characters/Xayah/sounds/897508321.ogg",
+            "characters/Xayah/sounds/906481875.ogg",
+        ],
+        "Play_vo_Xayah_Move2DFirst": [
+            "characters/Xayah/sounds/124784019.ogg",
+            "characters/Xayah/sounds/441057892.ogg",
+            "characters/Xayah/sounds/506252279.ogg",
+            "characters/Xayah/sounds/588606189.ogg",
+            "characters/Xayah/sounds/603436912.ogg",
+            "characters/Xayah/sounds/650144705.ogg",
+            "characters/Xayah/sounds/892595339.ogg",
+            "characters/Xayah/sounds/928617167.ogg",
+        ],
+        "Play_vo_Xayah_Move2DStandard": [
+            "characters/Xayah/sounds/1012294959.ogg",
+            "characters/Xayah/sounds/1016638779.ogg",
+            "characters/Xayah/sounds/1017255330.ogg",
+            "characters/Xayah/sounds/1054094652.ogg",
+            "characters/Xayah/sounds/122740920.ogg",
+            "characters/Xayah/sounds/165855705.ogg",
+            "characters/Xayah/sounds/194787876.ogg",
+            "characters/Xayah/sounds/213247701.ogg",
+            "characters/Xayah/sounds/242853610.ogg",
+            "characters/Xayah/sounds/276192889.ogg",
+            "characters/Xayah/sounds/342171192.ogg",
+            "characters/Xayah/sounds/361407853.ogg",
+            "characters/Xayah/sounds/437506244.ogg",
+            "characters/Xayah/sounds/495907787.ogg",
+            "characters/Xayah/sounds/509869417.ogg",
+            "characters/Xayah/sounds/510689877.ogg",
+            "characters/Xayah/sounds/524658569.ogg",
+            "characters/Xayah/sounds/558135041.ogg",
+            "characters/Xayah/sounds/584246854.ogg",
+            "characters/Xayah/sounds/630066851.ogg",
+            "characters/Xayah/sounds/668933376.ogg",
+            "characters/Xayah/sounds/739469889.ogg",
+            "characters/Xayah/sounds/754546284.ogg",
+            "characters/Xayah/sounds/768835374.ogg",
+            "characters/Xayah/sounds/770488939.ogg",
+            "characters/Xayah/sounds/781906756.ogg",
+            "characters/Xayah/sounds/813497280.ogg",
+            "characters/Xayah/sounds/874271232.ogg",
+            "characters/Xayah/sounds/87723180.ogg",
+            "characters/Xayah/sounds/879642522.ogg",
+            "characters/Xayah/sounds/88448359.ogg",
+            "characters/Xayah/sounds/896165095.ogg",
+            "characters/Xayah/sounds/941519486.ogg",
+            "characters/Xayah/sounds/996536582.ogg",
+        ],
+        "Play_vo_Xayah_Ping3DAssistMeRakan": [
+            "characters/Xayah/sounds/310445453.ogg",
+            "characters/Xayah/sounds/347984427.ogg",
+            "characters/Xayah/sounds/53221095.ogg",
+            "characters/Xayah/sounds/715525250.ogg",
+            "characters/Xayah/sounds/806454491.ogg",
+        ],
+        "Play_vo_Xayah_Ping3DDangerRakan": [
+            "characters/Xayah/sounds/183704768.ogg",
+            "characters/Xayah/sounds/192902155.ogg",
+            "characters/Xayah/sounds/322390202.ogg",
+            "characters/Xayah/sounds/446175375.ogg",
+            "characters/Xayah/sounds/669649703.ogg",
+            "characters/Xayah/sounds/704592592.ogg",
+            "characters/Xayah/sounds/781549833.ogg",
+            "characters/Xayah/sounds/796712577.ogg",
+            "characters/Xayah/sounds/869933567.ogg",
+            "characters/Xayah/sounds/888224597.ogg",
+            "characters/Xayah/sounds/889271293.ogg",
+        ],
+        "Play_vo_Xayah_Ping3DEnemyMissingRakan": [
+            "characters/Xayah/sounds/117207974.ogg",
+            "characters/Xayah/sounds/293455277.ogg",
+            "characters/Xayah/sounds/341044340.ogg",
+            "characters/Xayah/sounds/53529185.ogg",
+            "characters/Xayah/sounds/597539431.ogg",
+            "characters/Xayah/sounds/725657067.ogg",
+            "characters/Xayah/sounds/839110737.ogg",
+        ],
+        "Play_vo_Xayah_Ping3DOnMyWayRakan": [
+            "characters/Xayah/sounds/1035890023.ogg",
+            "characters/Xayah/sounds/104978115.ogg",
+            "characters/Xayah/sounds/1054551832.ogg",
+            "characters/Xayah/sounds/209099723.ogg",
+            "characters/Xayah/sounds/215486013.ogg",
+            "characters/Xayah/sounds/288183392.ogg",
+            "characters/Xayah/sounds/360429478.ogg",
+            "characters/Xayah/sounds/520250825.ogg",
+            "characters/Xayah/sounds/653576072.ogg",
+            "characters/Xayah/sounds/747276709.ogg",
+            "characters/Xayah/sounds/87620281.ogg",
+            "characters/Xayah/sounds/936519847.ogg",
+        ],
+        "Play_vo_Xayah_Ping3DTargetRakan": [
+            "characters/Xayah/sounds/1014928523.ogg",
+            "characters/Xayah/sounds/160985566.ogg",
+            "characters/Xayah/sounds/358093141.ogg",
+            "characters/Xayah/sounds/802659568.ogg",
+            "characters/Xayah/sounds/858131768.ogg",
+            "characters/Xayah/sounds/876811998.ogg",
+            "characters/Xayah/sounds/877980491.ogg",
+        ],
+        "Play_vo_Xayah_Recall3DGeneral": [
+            "characters/Xayah/sounds/183637492.ogg",
+            "characters/Xayah/sounds/231059623.ogg",
+            "characters/Xayah/sounds/896871061.ogg",
+        ],
+        "Play_vo_Xayah_Recall3DRakan": [
+            "characters/Xayah/sounds/227223883.ogg",
+            "characters/Xayah/sounds/36556232.ogg",
+            "characters/Xayah/sounds/4641733.ogg",
+            "characters/Xayah/sounds/547615234.ogg",
+            "characters/Xayah/sounds/739077861.ogg",
+            "characters/Xayah/sounds/818197988.ogg",
+        ],
+        "Play_vo_Xayah_Receive3DShield": [
+            "characters/Xayah/sounds/436499061.ogg",
+            "characters/Xayah/sounds/522172048.ogg",
+            "characters/Xayah/sounds/646606869.ogg",
+        ],
+        "Play_vo_Xayah_Receive3DShieldRakan": [
+            "characters/Xayah/sounds/585006572.ogg",
+            "characters/Xayah/sounds/640394813.ogg",
+            "characters/Xayah/sounds/649983148.ogg",
+            "characters/Xayah/sounds/832066434.ogg",
+        ],
+        "Play_vo_Xayah_Respawn2DGeneral": [
+            "characters/Xayah/sounds/1034666056.ogg",
+            "characters/Xayah/sounds/104348321.ogg",
+            "characters/Xayah/sounds/399436958.ogg",
+            "characters/Xayah/sounds/555495183.ogg",
+            "characters/Xayah/sounds/683055769.ogg",
+        ],
+        "Play_vo_Xayah_Spell3DERoot": [
+            "characters/Xayah/sounds/103215529.ogg",
+            "characters/Xayah/sounds/300889880.ogg",
+            "characters/Xayah/sounds/32547445.ogg",
+            "characters/Xayah/sounds/328969662.ogg",
+            "characters/Xayah/sounds/355794794.ogg",
+            "characters/Xayah/sounds/359464675.ogg",
+            "characters/Xayah/sounds/463012409.ogg",
+            "characters/Xayah/sounds/469787290.ogg",
+            "characters/Xayah/sounds/540923345.ogg",
+            "characters/Xayah/sounds/69008884.ogg",
+            "characters/Xayah/sounds/740670671.ogg",
+            "characters/Xayah/sounds/981743866.ogg",
+            "characters/Xayah/sounds/993362685.ogg",
+        ],
+        "Play_vo_Xayah_Taunt3DAllyNotRakan": [
+            "characters/Xayah/sounds/2270866.ogg",
+            "characters/Xayah/sounds/247090830.ogg",
+            "characters/Xayah/sounds/349967481.ogg",
+            "characters/Xayah/sounds/544836788.ogg",
+            "characters/Xayah/sounds/886092964.ogg",
+            "characters/Xayah/sounds/907018936.ogg",
+            "characters/Xayah/sounds/984490044.ogg",
+        ],
+        "Play_vo_Xayah_Taunt3DGeneral": [
+            "characters/Xayah/sounds/329598612.ogg",
+            "characters/Xayah/sounds/452197960.ogg",
+            "characters/Xayah/sounds/560445306.ogg",
+            "characters/Xayah/sounds/566748946.ogg",
+            "characters/Xayah/sounds/601719722.ogg",
+            "characters/Xayah/sounds/74627456.ogg",
+            "characters/Xayah/sounds/899036555.ogg",
+            "characters/Xayah/sounds/922491639.ogg",
+            "characters/Xayah/sounds/988171300.ogg",
+        ],
+        "Play_vo_Xayah_TauntResponse3DGeneral": [
+            "characters/Xayah/sounds/329766925.ogg",
+            "characters/Xayah/sounds/383942616.ogg",
+            "characters/Xayah/sounds/557354584.ogg",
+            "characters/Xayah/sounds/666283522.ogg",
+            "characters/Xayah/sounds/921086130.ogg",
+        ],
+        "Play_vo_Xayah_UseItem2DWard": [
+            "characters/Xayah/sounds/1052714556.ogg",
+            "characters/Xayah/sounds/120072874.ogg",
+            "characters/Xayah/sounds/418804166.ogg",
+            "characters/Xayah/sounds/572093377.ogg",
+            "characters/Xayah/sounds/613529562.ogg",
+            "characters/Xayah/sounds/803334719.ogg",
+            "characters/Xayah/sounds/817449196.ogg",
+            "characters/Xayah/sounds/86961967.ogg",
+            "characters/Xayah/sounds/914822772.ogg",
+            "characters/Xayah/sounds/977538815.ogg",
+        ],
+        "Play_vo_Xayah_WithRakanDance3D": [
+            "characters/Xayah/sounds/1033610515.ogg",
+            "characters/Xayah/sounds/87636289.ogg",
+            "characters/Xayah/sounds/925434000.ogg",
+        ],
+        "Play_vo_Xayah_WithRakanDanceInto3D": [
+            "characters/Xayah/sounds/892415166.ogg",
+        ],
+        "Play_vo_Xayah_XayahE_cast3D": [
+            "characters/Xayah/sounds/64700471.ogg",
+            "characters/Xayah/sounds/771707386.ogg",
+            "characters/Xayah/sounds/866805564.ogg",
+            "characters/Xayah/sounds/884196929.ogg",
+            "characters/Xayah/sounds/967630619.ogg",
+        ],
+        "Play_vo_Xayah_XayahQ_cast3D": [
+            "characters/Xayah/sounds/1071213046.ogg",
+            "characters/Xayah/sounds/733819897.ogg",
+            "characters/Xayah/sounds/925682725.ogg",
+        ],
+        "Play_vo_Xayah_XayahR_cast3D": [
+            "characters/Xayah/sounds/661232847.ogg",
+        ],
+        "Recall3D_buffactivate_bamf": [
+            "characters/Xayah/sounds/709854624.ogg",
+        ],
+        "Recall3D_buffactivate_catch": [
+            "characters/Xayah/sounds/73629740.ogg",
+        ],
+        "Recall3D_buffactivate_spin": [
+            "characters/Xayah/sounds/892356252.ogg",
+        ],
+        "Recall3D_buffactivate_throw": [
+            "characters/Xayah/sounds/84465788.ogg",
+        ],
+        "Recall3D_buffactivate_wingflap": [
+            "characters/Xayah/sounds/539573896.ogg",
+        ],
+        "Recall3D_buffactivate_wingslide_1": [
+            "characters/Xayah/sounds/439887406.ogg",
+        ],
+        "Recall3D_buffactivate_wingslide_2": [
+            "characters/Xayah/sounds/486103525.ogg",
+        ],
+        "Respawn3D_buffactivate": [
+            "characters/Xayah/sounds/743395564.ogg",
+        ],
+        "TandemRecall_activate": [
+            "characters/Xayah/sounds/97189456.ogg",
+        ],
+        "Taunt3D_buffactivate": [
+            "characters/Xayah/sounds/22360625.ogg",
+        ],
+        "WithRakan_Dance_into": [
+            "characters/Xayah/sounds/139958606.ogg",
+        ],
+        "WithRakan_Dance_loop": [
+            "characters/Xayah/sounds/399624667.ogg",
+        ],
+        "XayahBasicAttack_OnCast": [
+            "characters/Xayah/sounds/1013698442.ogg",
+            "characters/Xayah/sounds/11873463.ogg",
+            "characters/Xayah/sounds/259875172.ogg",
+            "characters/Xayah/sounds/886609448.ogg",
+            "characters/Xayah/sounds/961904137.ogg",
+        ],
+        "XayahBasicAttack_OnHit": [
+            "characters/Xayah/sounds/104987976.ogg",
+            "characters/Xayah/sounds/10841184.ogg",
+            "characters/Xayah/sounds/115687573.ogg",
+            "characters/Xayah/sounds/122768583.ogg",
+            "characters/Xayah/sounds/163086390.ogg",
+            "characters/Xayah/sounds/171643406.ogg",
+            "characters/Xayah/sounds/24481610.ogg",
+            "characters/Xayah/sounds/263171907.ogg",
+            "characters/Xayah/sounds/277551594.ogg",
+            "characters/Xayah/sounds/283971483.ogg",
+            "characters/Xayah/sounds/37427645.ogg",
+            "characters/Xayah/sounds/51343943.ogg",
+            "characters/Xayah/sounds/64742889.ogg",
+            "characters/Xayah/sounds/71540409.ogg",
+            "characters/Xayah/sounds/7791494.ogg",
+            "characters/Xayah/sounds/8950046.ogg",
+            "characters/Xayah/sounds/94670395.ogg",
+            "characters/Xayah/sounds/9507949.ogg",
+            "characters/Xayah/sounds/95895497.ogg",
+            "characters/Xayah/sounds/96252725.ogg",
+        ],
+        "XayahBasicAttack_OnMissileLaunch": [
+            "characters/Xayah/sounds/386612930.ogg",
+            "characters/Xayah/sounds/742851175.ogg",
+            "characters/Xayah/sounds/911301550.ogg",
+            "characters/Xayah/sounds/949766869.ogg",
+            "characters/Xayah/sounds/983896287.ogg",
+        ],
+        "XayahCritAttack_OnCast": [
+            "characters/Xayah/sounds/108009464.ogg",
+            "characters/Xayah/sounds/143706922.ogg",
+            "characters/Xayah/sounds/145453991.ogg",
+            "characters/Xayah/sounds/391400911.ogg",
+            "characters/Xayah/sounds/708591199.ogg",
+        ],
+        "XayahCritAttack_OnHit": [
+            "characters/Xayah/sounds/104987976.ogg",
+            "characters/Xayah/sounds/10841184.ogg",
+            "characters/Xayah/sounds/112780828.ogg",
+            "characters/Xayah/sounds/115687573.ogg",
+            "characters/Xayah/sounds/122768583.ogg",
+            "characters/Xayah/sounds/159797729.ogg",
+            "characters/Xayah/sounds/163086390.ogg",
+            "characters/Xayah/sounds/171643406.ogg",
+            "characters/Xayah/sounds/24481610.ogg",
+            "characters/Xayah/sounds/263171907.ogg",
+            "characters/Xayah/sounds/277551594.ogg",
+            "characters/Xayah/sounds/283971483.ogg",
+            "characters/Xayah/sounds/309228681.ogg",
+            "characters/Xayah/sounds/37427645.ogg",
+            "characters/Xayah/sounds/481183756.ogg",
+            "characters/Xayah/sounds/51164537.ogg",
+            "characters/Xayah/sounds/51343943.ogg",
+            "characters/Xayah/sounds/64742889.ogg",
+            "characters/Xayah/sounds/71540409.ogg",
+            "characters/Xayah/sounds/7791494.ogg",
+            "characters/Xayah/sounds/8950046.ogg",
+            "characters/Xayah/sounds/94670395.ogg",
+            "characters/Xayah/sounds/9507949.ogg",
+            "characters/Xayah/sounds/95895497.ogg",
+            "characters/Xayah/sounds/96252725.ogg",
+        ],
+        "XayahCritAttack_OnMissileLaunch": [
+            "characters/Xayah/sounds/386612930.ogg",
+            "characters/Xayah/sounds/742851175.ogg",
+            "characters/Xayah/sounds/911301550.ogg",
+            "characters/Xayah/sounds/949766869.ogg",
+            "characters/Xayah/sounds/983896287.ogg",
+        ],
+        "XayahE_cast": [
+            "characters/Xayah/sounds/482031824.ogg",
+        ],
+        "XayahE_feather_catch": [
+            "characters/Xayah/sounds/720384227.ogg",
+        ],
+        "XayahE_feather_flyby": [
+            "characters/Xayah/sounds/185609577.ogg",
+            "characters/Xayah/sounds/332984518.ogg",
+            "characters/Xayah/sounds/72244847.ogg",
+        ],
+        "XayahE_feather_hit": [
+            "characters/Xayah/sounds/11416379.ogg",
+            "characters/Xayah/sounds/24169822.ogg",
+            "characters/Xayah/sounds/453799481.ogg",
+            "characters/Xayah/sounds/494387490.ogg",
+            "characters/Xayah/sounds/613451275.ogg",
+        ],
+        "XayahE_feather_launch": [
+            "characters/Xayah/sounds/193591456.ogg",
+        ],
+        "XayahE_feather_pullout": [
+            "characters/Xayah/sounds/13777635.ogg",
+            "characters/Xayah/sounds/17087216.ogg",
+            "characters/Xayah/sounds/493960324.ogg",
+            "characters/Xayah/sounds/506516554.ogg",
+            "characters/Xayah/sounds/930208990.ogg",
+            "characters/Xayah/sounds/976953811.ogg",
+        ],
+        "XayahE_root_hit": [
+            "characters/Xayah/sounds/425209492.ogg",
+            "characters/Xayah/sounds/66955044.ogg",
+            "characters/Xayah/sounds/731834587.ogg",
+            "characters/Xayah/sounds/863365552.ogg",
+            "characters/Xayah/sounds/958966887.ogg",
+        ],
+        "XayahPassiveAttack_OnCast": [
+            "characters/Xayah/sounds/167371954.ogg",
+            "characters/Xayah/sounds/283090364.ogg",
+            "characters/Xayah/sounds/64960377.ogg",
+            "characters/Xayah/sounds/765628192.ogg",
+            "characters/Xayah/sounds/846198950.ogg",
+        ],
+        "XayahPassiveAttack_OnHit": [
+            "characters/Xayah/sounds/104987976.ogg",
+            "characters/Xayah/sounds/115687573.ogg",
+            "characters/Xayah/sounds/122768583.ogg",
+            "characters/Xayah/sounds/143644917.ogg",
+            "characters/Xayah/sounds/163086390.ogg",
+            "characters/Xayah/sounds/171643406.ogg",
+            "characters/Xayah/sounds/24481610.ogg",
+            "characters/Xayah/sounds/37427645.ogg",
+            "characters/Xayah/sounds/51343943.ogg",
+            "characters/Xayah/sounds/607266311.ogg",
+            "characters/Xayah/sounds/64742889.ogg",
+            "characters/Xayah/sounds/652895986.ogg",
+            "characters/Xayah/sounds/712346951.ogg",
+            "characters/Xayah/sounds/71540409.ogg",
+            "characters/Xayah/sounds/7791494.ogg",
+            "characters/Xayah/sounds/8950046.ogg",
+            "characters/Xayah/sounds/94670395.ogg",
+            "characters/Xayah/sounds/95895497.ogg",
+            "characters/Xayah/sounds/96252725.ogg",
+        ],
+        "XayahPassiveAttack_OnMissileLaunch": [
+            "characters/Xayah/sounds/118730611.ogg",
+            "characters/Xayah/sounds/276824729.ogg",
+            "characters/Xayah/sounds/344518599.ogg",
+            "characters/Xayah/sounds/360357930.ogg",
+            "characters/Xayah/sounds/491861534.ogg",
+            "characters/Xayah/sounds/541366438.ogg",
+        ],
+        "XayahPassiveAttack_feather_dirt": [
+            "characters/Xayah/sounds/247351530.ogg",
+            "characters/Xayah/sounds/341625441.ogg",
+            "characters/Xayah/sounds/500614795.ogg",
+            "characters/Xayah/sounds/517001029.ogg",
+            "characters/Xayah/sounds/649943100.ogg",
+            "characters/Xayah/sounds/866830407.ogg",
+        ],
+        "XayahPassiveAttack_feather_water": [
+            "characters/Xayah/sounds/1001791.ogg",
+            "characters/Xayah/sounds/141102209.ogg",
+            "characters/Xayah/sounds/25159452.ogg",
+            "characters/Xayah/sounds/315121047.ogg",
+            "characters/Xayah/sounds/509749798.ogg",
+            "characters/Xayah/sounds/901674338.ogg",
+        ],
+        "XayahQMissile1_OnHitLocation": [
+            "characters/Xayah/sounds/115312720.ogg",
+            "characters/Xayah/sounds/195416324.ogg",
+            "characters/Xayah/sounds/308882689.ogg",
+            "characters/Xayah/sounds/34093138.ogg",
+            "characters/Xayah/sounds/775008110.ogg",
+        ],
+        "XayahQMissile1_OnMissileLaunch": [
+            "characters/Xayah/sounds/717480521.ogg",
+        ],
+        "XayahQMissile2_OnHitLocation": [
+            "characters/Xayah/sounds/115312720.ogg",
+            "characters/Xayah/sounds/195416324.ogg",
+            "characters/Xayah/sounds/308882689.ogg",
+            "characters/Xayah/sounds/34093138.ogg",
+            "characters/Xayah/sounds/775008110.ogg",
+        ],
+        "XayahQ_OnCast": [
+            "characters/Xayah/sounds/947407279.ogg",
+        ],
+        "XayahRMissile_OnMissileLaunch": [
+            "characters/Xayah/sounds/798027026.ogg",
+        ],
+        "XayahR_OnCast": [
+            "characters/Xayah/sounds/979219185.ogg",
+        ],
+        "XayahWMissile_cast": [
+            "characters/Xayah/sounds/17819072.ogg",
+            "characters/Xayah/sounds/508890712.ogg",
+            "characters/Xayah/sounds/718864513.ogg",
+            "characters/Xayah/sounds/731333523.ogg",
+            "characters/Xayah/sounds/797742750.ogg",
+            "characters/Xayah/sounds/948232293.ogg",
+        ],
+        "XayahW_OnCast": [
+            "characters/Xayah/sounds/530879371.ogg",
+        ],
+        "XayahW_cast_loop": [
+            "characters/Xayah/sounds/393196455.ogg",
+        ],
+        "XayahW_hit": [
+            "characters/Xayah/sounds/49210859.ogg",
+        ],
+    },
+)

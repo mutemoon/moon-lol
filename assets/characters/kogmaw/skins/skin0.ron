@@ -5,6 +5,7 @@
   entities: {
     4294967259: (
       components: {
+        "lol_base::audio::AudioBank": (Path("characters/kogmaw/skins/skin0_audio.ron")),
         "bevy_animation::graph::AnimationGraphHandle": (Path("characters/KogMaw/animations/skin0.ron")),
         "bevy_camera::visibility::Visibility": Inherited,
         "bevy_world_serialization::components::WorldAssetRoot": (Path("characters/KogMaw/skins/skin0.glb#Scene0")),

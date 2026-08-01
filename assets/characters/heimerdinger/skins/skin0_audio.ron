@@ -1,0 +1,390 @@
+(
+    events: {
+        "Dance3D_buffactivate": [
+            "characters/Heimerdinger/sounds/753510251.ogg",
+        ],
+        "Dance3D_cast": [
+            "characters/Heimerdinger/sounds/495187326.ogg",
+        ],
+        "Death3D_cast": [
+            "characters/Heimerdinger/sounds/47084942.ogg",
+        ],
+        "HeimerTBlue_HeimerTBlueBasicAttack_OnCast": [
+            "characters/Heimerdinger/sounds/1041810913.ogg",
+            "characters/Heimerdinger/sounds/123488026.ogg",
+            "characters/Heimerdinger/sounds/333558636.ogg",
+        ],
+        "HeimerTBlue_HeimerTBlueBasicAttack_OnHit": [
+            "characters/Heimerdinger/sounds/262804252.ogg",
+            "characters/Heimerdinger/sounds/343540703.ogg",
+            "characters/Heimerdinger/sounds/864232872.ogg",
+        ],
+        "HeimerTBlue_HeimerTBlueBasicAttack_OnMissileLaunch": [
+            "characters/Heimerdinger/sounds/1010324953.ogg",
+            "characters/Heimerdinger/sounds/690409167.ogg",
+            "characters/Heimerdinger/sounds/811032722.ogg",
+        ],
+        "HeimerTBlue_HeimerdingerRQEngineAudio_OnBuffActivate": [
+            "characters/Heimerdinger/sounds/912715458.ogg",
+        ],
+        "HeimerTBlue_HeimerdingerTurretBigEnergyBlast_OnCast": [
+            "characters/Heimerdinger/sounds/399013180.ogg",
+        ],
+        "HeimerTBlue_HeimerdingerTurretBigEnergyBlast_OnHit": [
+            "characters/Heimerdinger/sounds/6555657.ogg",
+        ],
+        "HeimerTBlue_HeimerdingerTurretBigEnergyBlast_OnMissileLaunch": [
+            "characters/Heimerdinger/sounds/448058728.ogg",
+        ],
+        "HeimerTYellow_HeimerTYellowBasicAttack2_OnCast": [
+            "characters/Heimerdinger/sounds/129453777.ogg",
+            "characters/Heimerdinger/sounds/260610384.ogg",
+            "characters/Heimerdinger/sounds/64413714.ogg",
+        ],
+        "HeimerTYellow_HeimerTYellowBasicAttack2_OnHit": [
+            "characters/Heimerdinger/sounds/224891789.ogg",
+            "characters/Heimerdinger/sounds/275716958.ogg",
+            "characters/Heimerdinger/sounds/888669.ogg",
+        ],
+        "HeimerTYellow_HeimerTYellowBasicAttack2_OnMissileLaunch": [
+            "characters/Heimerdinger/sounds/140771516.ogg",
+            "characters/Heimerdinger/sounds/330799502.ogg",
+            "characters/Heimerdinger/sounds/631515596.ogg",
+        ],
+        "HeimerTYellow_HeimerTYellowBasicAttack_OnCast": [
+            "characters/Heimerdinger/sounds/129453777.ogg",
+            "characters/Heimerdinger/sounds/260610384.ogg",
+            "characters/Heimerdinger/sounds/64413714.ogg",
+        ],
+        "HeimerTYellow_HeimerTYellowBasicAttack_OnHit": [
+            "characters/Heimerdinger/sounds/224891789.ogg",
+            "characters/Heimerdinger/sounds/275716958.ogg",
+            "characters/Heimerdinger/sounds/888669.ogg",
+        ],
+        "HeimerTYellow_HeimerTYellowBasicAttack_OnMissileLaunch": [
+            "characters/Heimerdinger/sounds/140771516.ogg",
+            "characters/Heimerdinger/sounds/330799502.ogg",
+            "characters/Heimerdinger/sounds/631515596.ogg",
+        ],
+        "HeimerTYellow_HeimerTurretShutdown_OnBuffActivate": [
+            "characters/Heimerdinger/sounds/1745931.ogg",
+            "characters/Heimerdinger/sounds/610270178.ogg",
+            "characters/Heimerdinger/sounds/948821724.ogg",
+        ],
+        "HeimerTYellow_HeimerTurretShutdown_OnBuffDeactivate": [
+            "characters/Heimerdinger/sounds/14511344.ogg",
+            "characters/Heimerdinger/sounds/266734436.ogg",
+            "characters/Heimerdinger/sounds/5681745.ogg",
+        ],
+        "HeimerTYellow_HeimerdingerEngineAudio_OnBuffActivate": [
+            "characters/Heimerdinger/sounds/567747790.ogg",
+        ],
+        "HeimerTYellow_HeimerdingerEngineAudio_turrettalk_buffactivate": [
+            "characters/Heimerdinger/sounds/431416833.ogg",
+            "characters/Heimerdinger/sounds/443873088.ogg",
+            "characters/Heimerdinger/sounds/93672036.ogg",
+        ],
+        "HeimerTYellow_HeimerdingerQSpawnDestroyAudio_OnBuffActivate": [
+            "characters/Heimerdinger/sounds/14511344.ogg",
+            "characters/Heimerdinger/sounds/266734436.ogg",
+            "characters/Heimerdinger/sounds/5681745.ogg",
+        ],
+        "HeimerTYellow_HeimerdingerQSpawnDestroyAudio_OnBuffDeactivate": [
+            "characters/Heimerdinger/sounds/281129591.ogg",
+            "characters/Heimerdinger/sounds/703650768.ogg",
+            "characters/Heimerdinger/sounds/998471615.ogg",
+        ],
+        "HeimerTYellow_HeimerdingerTurretEnergyBlast_OnCast": [
+            "characters/Heimerdinger/sounds/399013180.ogg",
+        ],
+        "HeimerTYellow_HeimerdingerTurretEnergyBlast_OnHit": [
+            "characters/Heimerdinger/sounds/6555657.ogg",
+        ],
+        "HeimerTYellow_HeimerdingerTurretEnergyBlast_OnMissileLaunch": [
+            "characters/Heimerdinger/sounds/448058728.ogg",
+        ],
+        "HeimerdingerBasicAttack2_OnCast": [
+            "characters/Heimerdinger/sounds/110645941.ogg",
+            "characters/Heimerdinger/sounds/124438371.ogg",
+            "characters/Heimerdinger/sounds/533745841.ogg",
+        ],
+        "HeimerdingerBasicAttack2_OnHit": [
+            "characters/Heimerdinger/sounds/151048393.ogg",
+            "characters/Heimerdinger/sounds/168890777.ogg",
+            "characters/Heimerdinger/sounds/26140918.ogg",
+        ],
+        "HeimerdingerBasicAttack2_OnMissileLaunch": [
+            "characters/Heimerdinger/sounds/177726101.ogg",
+            "characters/Heimerdinger/sounds/49973390.ogg",
+            "characters/Heimerdinger/sounds/848829892.ogg",
+        ],
+        "HeimerdingerBasicAttack_OnCast": [
+            "characters/Heimerdinger/sounds/110645941.ogg",
+            "characters/Heimerdinger/sounds/124438371.ogg",
+            "characters/Heimerdinger/sounds/533745841.ogg",
+        ],
+        "HeimerdingerBasicAttack_OnHit": [
+            "characters/Heimerdinger/sounds/151048393.ogg",
+            "characters/Heimerdinger/sounds/168890777.ogg",
+            "characters/Heimerdinger/sounds/26140918.ogg",
+        ],
+        "HeimerdingerBasicAttack_OnMissileLaunch": [
+            "characters/Heimerdinger/sounds/177726101.ogg",
+            "characters/Heimerdinger/sounds/49973390.ogg",
+            "characters/Heimerdinger/sounds/848829892.ogg",
+        ],
+        "HeimerdingerCritAttack_OnCast": [
+            "characters/Heimerdinger/sounds/110645941.ogg",
+            "characters/Heimerdinger/sounds/443639060.ogg",
+            "characters/Heimerdinger/sounds/533745841.ogg",
+        ],
+        "HeimerdingerCritAttack_OnHit": [
+            "characters/Heimerdinger/sounds/151048393.ogg",
+            "characters/Heimerdinger/sounds/168890777.ogg",
+            "characters/Heimerdinger/sounds/26140918.ogg",
+        ],
+        "HeimerdingerCritAttack_OnMissileLaunch": [
+            "characters/Heimerdinger/sounds/195592874.ogg",
+            "characters/Heimerdinger/sounds/314921929.ogg",
+            "characters/Heimerdinger/sounds/32079365.ogg",
+        ],
+        "HeimerdingerESpell_OnMissileLaunch": [
+            "characters/Heimerdinger/sounds/218554139.ogg",
+            "characters/Heimerdinger/sounds/70791703.ogg",
+            "characters/Heimerdinger/sounds/755294990.ogg",
+        ],
+        "HeimerdingerESpell_Ult_OnMissileLaunch": [
+            "characters/Heimerdinger/sounds/199988144.ogg",
+            "characters/Heimerdinger/sounds/357172786.ogg",
+            "characters/Heimerdinger/sounds/535334535.ogg",
+        ],
+        "HeimerdingerESpell_Ult_hit": [
+            "characters/Heimerdinger/sounds/331971650.ogg",
+            "characters/Heimerdinger/sounds/875787089.ogg",
+        ],
+        "HeimerdingerESpell_hit": [
+            "characters/Heimerdinger/sounds/41269912.ogg",
+            "characters/Heimerdinger/sounds/43360029.ogg",
+        ],
+        "HeimerdingerEUlt_OnCast": [
+            "characters/Heimerdinger/sounds/317991366.ogg",
+            "characters/Heimerdinger/sounds/60228847.ogg",
+            "characters/Heimerdinger/sounds/91707352.ogg",
+        ],
+        "HeimerdingerE_OnCast": [
+            "characters/Heimerdinger/sounds/317991366.ogg",
+            "characters/Heimerdinger/sounds/60228847.ogg",
+            "characters/Heimerdinger/sounds/91707352.ogg",
+        ],
+        "HeimerdingerQ_OnCast": [
+            "characters/Heimerdinger/sounds/491852476.ogg",
+        ],
+        "HeimerdingerR_OnBuffActivate": [
+            "characters/Heimerdinger/sounds/226200736.ogg",
+            "characters/Heimerdinger/sounds/458997122.ogg",
+        ],
+        "HeimerdingerR_OnBuffDeactivate": [
+            "characters/Heimerdinger/sounds/980402433.ogg",
+        ],
+        "HeimerdingerSuperTurret_OnBuffActivate": [
+            "characters/Heimerdinger/sounds/1035289988.ogg",
+            "characters/Heimerdinger/sounds/41269912.ogg",
+            "characters/Heimerdinger/sounds/43360029.ogg",
+        ],
+        "HeimerdingerSuperTurret_OnBuffDeactivate": [
+            "characters/Heimerdinger/sounds/596254398.ogg",
+        ],
+        "HeimerdingerWAttack2Ult_OnMissileLaunch": [
+            "characters/Heimerdinger/sounds/362753745.ogg",
+            "characters/Heimerdinger/sounds/812173402.ogg",
+            "characters/Heimerdinger/sounds/835492375.ogg",
+            "characters/Heimerdinger/sounds/912065064.ogg",
+        ],
+        "HeimerdingerWAttack2Ult_hit": [
+            "characters/Heimerdinger/sounds/748574321.ogg",
+            "characters/Heimerdinger/sounds/968482347.ogg",
+        ],
+        "HeimerdingerWAttack2_OnMissileCast": [
+            "characters/Heimerdinger/sounds/421651474.ogg",
+            "characters/Heimerdinger/sounds/426392015.ogg",
+            "characters/Heimerdinger/sounds/511578410.ogg",
+        ],
+        "HeimerdingerWAttack2_OnMissileLaunch": [
+            "characters/Heimerdinger/sounds/172782241.ogg",
+            "characters/Heimerdinger/sounds/63894742.ogg",
+            "characters/Heimerdinger/sounds/70961338.ogg",
+        ],
+        "HeimerdingerWAttack2_hit": [
+            "characters/Heimerdinger/sounds/226891451.ogg",
+            "characters/Heimerdinger/sounds/65873044.ogg",
+        ],
+        "HeimerdingerW_OnCast": [
+            "characters/Heimerdinger/sounds/1019057065.ogg",
+            "characters/Heimerdinger/sounds/562163445.ogg",
+            "characters/Heimerdinger/sounds/742164365.ogg",
+        ],
+        "Idle2_buffactivate": [
+            "characters/Heimerdinger/sounds/545768988.ogg",
+        ],
+        "Play_vo_Heimerdinger_Attack2DGeneral": [
+            "characters/Heimerdinger/sounds/1057313336.ogg",
+            "characters/Heimerdinger/sounds/1059974872.ogg",
+            "characters/Heimerdinger/sounds/1063594909.ogg",
+            "characters/Heimerdinger/sounds/12487647.ogg",
+            "characters/Heimerdinger/sounds/142444121.ogg",
+            "characters/Heimerdinger/sounds/162347368.ogg",
+            "characters/Heimerdinger/sounds/185933162.ogg",
+            "characters/Heimerdinger/sounds/239898669.ogg",
+            "characters/Heimerdinger/sounds/263390478.ogg",
+            "characters/Heimerdinger/sounds/380190194.ogg",
+            "characters/Heimerdinger/sounds/410879175.ogg",
+            "characters/Heimerdinger/sounds/425422254.ogg",
+            "characters/Heimerdinger/sounds/478803125.ogg",
+            "characters/Heimerdinger/sounds/537108678.ogg",
+            "characters/Heimerdinger/sounds/636461159.ogg",
+            "characters/Heimerdinger/sounds/644948583.ogg",
+            "characters/Heimerdinger/sounds/688973929.ogg",
+            "characters/Heimerdinger/sounds/708856704.ogg",
+            "characters/Heimerdinger/sounds/923739546.ogg",
+            "characters/Heimerdinger/sounds/965452096.ogg",
+        ],
+        "Play_vo_Heimerdinger_Death3D": [
+            "characters/Heimerdinger/sounds/319283500.ogg",
+            "characters/Heimerdinger/sounds/454690056.ogg",
+            "characters/Heimerdinger/sounds/579085102.ogg",
+            "characters/Heimerdinger/sounds/993358979.ogg",
+        ],
+        "Play_vo_Heimerdinger_FirstEncounter3DJayce": [
+            "characters/Heimerdinger/sounds/222955418.ogg",
+        ],
+        "Play_vo_Heimerdinger_FirstEncounter3DVelkoz": [
+            "characters/Heimerdinger/sounds/660875226.ogg",
+        ],
+        "Play_vo_Heimerdinger_FirstEncounter3DVi": [
+            "characters/Heimerdinger/sounds/431168445.ogg",
+        ],
+        "Play_vo_Heimerdinger_FirstEncounter3DViktor": [
+            "characters/Heimerdinger/sounds/782601740.ogg",
+        ],
+        "Play_vo_Heimerdinger_FirstEncounter3DZiggs": [
+            "characters/Heimerdinger/sounds/238635638.ogg",
+            "characters/Heimerdinger/sounds/658839307.ogg",
+            "characters/Heimerdinger/sounds/924700314.ogg",
+        ],
+        "Play_vo_Heimerdinger_HeimerdingerBasicAttack2_cast3D": [
+            "characters/Heimerdinger/sounds/1024379764.ogg",
+            "characters/Heimerdinger/sounds/1055338372.ogg",
+            "characters/Heimerdinger/sounds/435040668.ogg",
+            "characters/Heimerdinger/sounds/498019424.ogg",
+        ],
+        "Play_vo_Heimerdinger_HeimerdingerBasicAttack_cast3D": [
+            "characters/Heimerdinger/sounds/1024379764.ogg",
+            "characters/Heimerdinger/sounds/1055338372.ogg",
+            "characters/Heimerdinger/sounds/435040668.ogg",
+            "characters/Heimerdinger/sounds/498019424.ogg",
+        ],
+        "Play_vo_Heimerdinger_HeimerdingerCritAttack_cast3D": [
+            "characters/Heimerdinger/sounds/1024379764.ogg",
+            "characters/Heimerdinger/sounds/1055338372.ogg",
+            "characters/Heimerdinger/sounds/435040668.ogg",
+            "characters/Heimerdinger/sounds/498019424.ogg",
+        ],
+        "Play_vo_Heimerdinger_HeimerdingerEUlt_cast3D": [
+            "characters/Heimerdinger/sounds/1038869542.ogg",
+            "characters/Heimerdinger/sounds/266649214.ogg",
+            "characters/Heimerdinger/sounds/345669711.ogg",
+            "characters/Heimerdinger/sounds/979167055.ogg",
+        ],
+        "Play_vo_Heimerdinger_HeimerdingerE_cast3D": [
+            "characters/Heimerdinger/sounds/185769464.ogg",
+            "characters/Heimerdinger/sounds/671978470.ogg",
+            "characters/Heimerdinger/sounds/716206103.ogg",
+            "characters/Heimerdinger/sounds/778887228.ogg",
+        ],
+        "Play_vo_Heimerdinger_HeimerdingerQUlt_cast3D": [
+            "characters/Heimerdinger/sounds/198071783.ogg",
+            "characters/Heimerdinger/sounds/245089641.ogg",
+            "characters/Heimerdinger/sounds/309598420.ogg",
+            "characters/Heimerdinger/sounds/683435130.ogg",
+        ],
+        "Play_vo_Heimerdinger_HeimerdingerQ_cast3D": [
+            "characters/Heimerdinger/sounds/109986303.ogg",
+            "characters/Heimerdinger/sounds/205842538.ogg",
+            "characters/Heimerdinger/sounds/709070030.ogg",
+            "characters/Heimerdinger/sounds/910891461.ogg",
+        ],
+        "Play_vo_Heimerdinger_HeimerdingerR_cast3D": [
+            "characters/Heimerdinger/sounds/229146733.ogg",
+            "characters/Heimerdinger/sounds/256106688.ogg",
+            "characters/Heimerdinger/sounds/295128697.ogg",
+            "characters/Heimerdinger/sounds/364005981.ogg",
+        ],
+        "Play_vo_Heimerdinger_HeimerdingerWUlt_cast3D": [
+            "characters/Heimerdinger/sounds/1014182941.ogg",
+            "characters/Heimerdinger/sounds/386998467.ogg",
+            "characters/Heimerdinger/sounds/838890086.ogg",
+            "characters/Heimerdinger/sounds/939410938.ogg",
+        ],
+        "Play_vo_Heimerdinger_HeimerdingerW_cast3D": [
+            "characters/Heimerdinger/sounds/153114185.ogg",
+            "characters/Heimerdinger/sounds/165538265.ogg",
+            "characters/Heimerdinger/sounds/418315394.ogg",
+            "characters/Heimerdinger/sounds/847583451.ogg",
+        ],
+        "Play_vo_Heimerdinger_Joke3DGeneral": [
+            "characters/Heimerdinger/sounds/128343088.ogg",
+            "characters/Heimerdinger/sounds/704295798.ogg",
+            "characters/Heimerdinger/sounds/995066174.ogg",
+        ],
+        "Play_vo_Heimerdinger_Laugh3DGeneral": [
+            "characters/Heimerdinger/sounds/1034816443.ogg",
+            "characters/Heimerdinger/sounds/268139099.ogg",
+            "characters/Heimerdinger/sounds/633636769.ogg",
+            "characters/Heimerdinger/sounds/703288500.ogg",
+        ],
+        "Play_vo_Heimerdinger_Move2DStandard": [
+            "characters/Heimerdinger/sounds/105619562.ogg",
+            "characters/Heimerdinger/sounds/120516214.ogg",
+            "characters/Heimerdinger/sounds/267400230.ogg",
+            "characters/Heimerdinger/sounds/287753015.ogg",
+            "characters/Heimerdinger/sounds/34197699.ogg",
+            "characters/Heimerdinger/sounds/357504293.ogg",
+            "characters/Heimerdinger/sounds/363973286.ogg",
+            "characters/Heimerdinger/sounds/373183212.ogg",
+            "characters/Heimerdinger/sounds/415112955.ogg",
+            "characters/Heimerdinger/sounds/495701853.ogg",
+            "characters/Heimerdinger/sounds/515844715.ogg",
+            "characters/Heimerdinger/sounds/563824603.ogg",
+            "characters/Heimerdinger/sounds/638941034.ogg",
+            "characters/Heimerdinger/sounds/667143969.ogg",
+            "characters/Heimerdinger/sounds/670140830.ogg",
+            "characters/Heimerdinger/sounds/701093907.ogg",
+            "characters/Heimerdinger/sounds/71776733.ogg",
+            "characters/Heimerdinger/sounds/785188752.ogg",
+            "characters/Heimerdinger/sounds/790261374.ogg",
+            "characters/Heimerdinger/sounds/817391785.ogg",
+            "characters/Heimerdinger/sounds/867268652.ogg",
+            "characters/Heimerdinger/sounds/881659328.ogg",
+            "characters/Heimerdinger/sounds/922191752.ogg",
+            "characters/Heimerdinger/sounds/923951544.ogg",
+            "characters/Heimerdinger/sounds/936512966.ogg",
+            "characters/Heimerdinger/sounds/993266072.ogg",
+        ],
+        "Play_vo_Heimerdinger_Recall3DGeneral": [
+            "characters/Heimerdinger/sounds/811903277.ogg",
+        ],
+        "Play_vo_Heimerdinger_Taunt3DGeneral": [
+            "characters/Heimerdinger/sounds/1052489183.ogg",
+            "characters/Heimerdinger/sounds/381668646.ogg",
+        ],
+        "Recall3D_buffactivate": [
+            "characters/Heimerdinger/sounds/97553456.ogg",
+        ],
+        "Respawn3D_buffactivate": [
+            "characters/Heimerdinger/sounds/847505850.ogg",
+        ],
+        "Taunt3D_buffactivate": [
+            "characters/Heimerdinger/sounds/299867771.ogg",
+        ],
+    },
+)

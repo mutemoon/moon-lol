@@ -1,0 +1,606 @@
+(
+    events: {
+        "AmbessaBasicAttack2_OnCast": [
+            "characters/Ambessa/sounds/346972743.ogg",
+            "characters/Ambessa/sounds/358998023.ogg",
+            "characters/Ambessa/sounds/9798892.ogg",
+        ],
+        "AmbessaBasicAttack2_OnHit": [
+            "characters/Ambessa/sounds/109103120.ogg",
+            "characters/Ambessa/sounds/224852185.ogg",
+            "characters/Ambessa/sounds/94988481.ogg",
+        ],
+        "AmbessaBasicAttackChained1_OnCast": [
+            "characters/Ambessa/sounds/236970226.ogg",
+            "characters/Ambessa/sounds/243196981.ogg",
+            "characters/Ambessa/sounds/981175732.ogg",
+        ],
+        "AmbessaBasicAttackChained1_OnHit": [
+            "characters/Ambessa/sounds/1034749439.ogg",
+            "characters/Ambessa/sounds/120296271.ogg",
+            "characters/Ambessa/sounds/393635459.ogg",
+        ],
+        "AmbessaBasicAttackChained2_OnCast": [
+            "characters/Ambessa/sounds/236970226.ogg",
+            "characters/Ambessa/sounds/243196981.ogg",
+            "characters/Ambessa/sounds/981175732.ogg",
+        ],
+        "AmbessaBasicAttackChained2_OnHit": [
+            "characters/Ambessa/sounds/1034749439.ogg",
+            "characters/Ambessa/sounds/120296271.ogg",
+            "characters/Ambessa/sounds/393635459.ogg",
+        ],
+        "AmbessaBasicAttack_OnCast": [
+            "characters/Ambessa/sounds/346972743.ogg",
+            "characters/Ambessa/sounds/358998023.ogg",
+            "characters/Ambessa/sounds/9798892.ogg",
+        ],
+        "AmbessaBasicAttack_OnHit": [
+            "characters/Ambessa/sounds/109103120.ogg",
+            "characters/Ambessa/sounds/224852185.ogg",
+            "characters/Ambessa/sounds/94988481.ogg",
+        ],
+        "AmbessaCritAttack2_OnCast": [
+            "characters/Ambessa/sounds/346972743.ogg",
+            "characters/Ambessa/sounds/358998023.ogg",
+            "characters/Ambessa/sounds/9798892.ogg",
+        ],
+        "AmbessaCritAttack2_OnHit": [
+            "characters/Ambessa/sounds/124577786.ogg",
+            "characters/Ambessa/sounds/782720526.ogg",
+            "characters/Ambessa/sounds/93977027.ogg",
+        ],
+        "AmbessaCritAttackChained1_OnCast": [
+            "characters/Ambessa/sounds/236970226.ogg",
+            "characters/Ambessa/sounds/243196981.ogg",
+            "characters/Ambessa/sounds/981175732.ogg",
+        ],
+        "AmbessaCritAttackChained1_OnHit": [
+            "characters/Ambessa/sounds/1034749439.ogg",
+            "characters/Ambessa/sounds/120296271.ogg",
+            "characters/Ambessa/sounds/393635459.ogg",
+        ],
+        "AmbessaCritAttackChained2_OnCast": [
+            "characters/Ambessa/sounds/236970226.ogg",
+            "characters/Ambessa/sounds/243196981.ogg",
+            "characters/Ambessa/sounds/981175732.ogg",
+        ],
+        "AmbessaCritAttackChained2_OnHit": [
+            "characters/Ambessa/sounds/1034749439.ogg",
+            "characters/Ambessa/sounds/120296271.ogg",
+            "characters/Ambessa/sounds/393635459.ogg",
+        ],
+        "AmbessaCritAttack_OnCast": [
+            "characters/Ambessa/sounds/346972743.ogg",
+            "characters/Ambessa/sounds/358998023.ogg",
+            "characters/Ambessa/sounds/9798892.ogg",
+        ],
+        "AmbessaCritAttack_OnHit": [
+            "characters/Ambessa/sounds/124577786.ogg",
+            "characters/Ambessa/sounds/782720526.ogg",
+            "characters/Ambessa/sounds/93977027.ogg",
+        ],
+        "AmbessaE_OnCast": [
+            "characters/Ambessa/sounds/101684807.ogg",
+            "characters/Ambessa/sounds/365759117.ogg",
+            "characters/Ambessa/sounds/591726198.ogg",
+        ],
+        "AmbessaE_buffactivate": [
+            "characters/Ambessa/sounds/1071956916.ogg",
+            "characters/Ambessa/sounds/302677654.ogg",
+            "characters/Ambessa/sounds/795548730.ogg",
+        ],
+        "AmbessaE_hit": [
+            "characters/Ambessa/sounds/237449846.ogg",
+            "characters/Ambessa/sounds/619849698.ogg",
+        ],
+        "AmbessaPassiveChainDrag": [
+            "characters/Ambessa/sounds/295591063.ogg",
+            "characters/Ambessa/sounds/346052803.ogg",
+        ],
+        "AmbessaPassiveChainDragCatch": [
+            "characters/Ambessa/sounds/169321914.ogg",
+            "characters/Ambessa/sounds/760313936.ogg",
+            "characters/Ambessa/sounds/774410473.ogg",
+        ],
+        "AmbessaPassiveChainDragCatchCrit": [
+            "characters/Ambessa/sounds/159113307.ogg",
+            "characters/Ambessa/sounds/291868283.ogg",
+        ],
+        "AmbessaPassiveDash_OnCast": [
+            "characters/Ambessa/sounds/678784226.ogg",
+            "characters/Ambessa/sounds/86189467.ogg",
+        ],
+        "AmbessaQ1SweetSpot_hit": [
+            "characters/Ambessa/sounds/382429590.ogg",
+            "characters/Ambessa/sounds/497720230.ogg",
+            "characters/Ambessa/sounds/913630909.ogg",
+        ],
+        "AmbessaQ1_OnCast": [
+            "characters/Ambessa/sounds/101077655.ogg",
+            "characters/Ambessa/sounds/453552612.ogg",
+            "characters/Ambessa/sounds/759688872.ogg",
+        ],
+        "AmbessaQ1_OnHitLocation": [
+            "characters/Ambessa/sounds/105800252.ogg",
+            "characters/Ambessa/sounds/439743049.ogg",
+            "characters/Ambessa/sounds/737437352.ogg",
+        ],
+        "AmbessaQ1_catch": [
+            "characters/Ambessa/sounds/123061296.ogg",
+            "characters/Ambessa/sounds/200329910.ogg",
+            "characters/Ambessa/sounds/280941837.ogg",
+        ],
+        "AmbessaQ1_hit": [
+            "characters/Ambessa/sounds/1072149247.ogg",
+            "characters/Ambessa/sounds/189575657.ogg",
+            "characters/Ambessa/sounds/422455469.ogg",
+        ],
+        "AmbessaQ2_OnCast": [
+            "characters/Ambessa/sounds/308944202.ogg",
+            "characters/Ambessa/sounds/456245971.ogg",
+            "characters/Ambessa/sounds/953318087.ogg",
+        ],
+        "AmbessaQ2_OnHitLocation": [
+            "characters/Ambessa/sounds/161320577.ogg",
+            "characters/Ambessa/sounds/317007267.ogg",
+            "characters/Ambessa/sounds/92733742.ogg",
+        ],
+        "AmbessaQ2_catch": [
+            "characters/Ambessa/sounds/1041387306.ogg",
+            "characters/Ambessa/sounds/837541069.ogg",
+            "characters/Ambessa/sounds/95631726.ogg",
+        ],
+        "AmbessaQ2_hit": [
+            "characters/Ambessa/sounds/1045246266.ogg",
+            "characters/Ambessa/sounds/278048340.ogg",
+            "characters/Ambessa/sounds/297635219.ogg",
+            "characters/Ambessa/sounds/373012295.ogg",
+            "characters/Ambessa/sounds/805541861.ogg",
+            "characters/Ambessa/sounds/925786714.ogg",
+        ],
+        "AmbessaQEmpowerReady_OnBuffActivate": [
+            "characters/Ambessa/sounds/197784421.ogg",
+            "characters/Ambessa/sounds/297958465.ogg",
+            "characters/Ambessa/sounds/386381844.ogg",
+            "characters/Ambessa/sounds/683518535.ogg",
+        ],
+        "AmbessaQEmpowerReady_OnBuffDeactivate": [
+            "characters/Ambessa/sounds/170458739.ogg",
+        ],
+        "AmbessaRBuffSuppressing_OnBuffCast": [
+            "characters/Ambessa/sounds/415179238.ogg",
+        ],
+        "AmbessaRBuffSuppressing_OnBuffDeactivate": [
+            "characters/Ambessa/sounds/79717189.ogg",
+        ],
+        "AmbessaR_OnCast": [
+            "characters/Ambessa/sounds/813797773.ogg",
+        ],
+        "AmbessaSpecialAttackReady_buffactivate": [
+            "characters/Ambessa/sounds/46525609.ogg",
+        ],
+        "AmbessaSpecialAttackReady_buffdeactivate": [
+            "characters/Ambessa/sounds/1037808183.ogg",
+            "characters/Ambessa/sounds/106204039.ogg",
+            "characters/Ambessa/sounds/122590766.ogg",
+        ],
+        "AmbessaWRelease_greater_buffactivate": [
+            "characters/Ambessa/sounds/358136905.ogg",
+            "characters/Ambessa/sounds/374170263.ogg",
+            "characters/Ambessa/sounds/374909080.ogg",
+        ],
+        "AmbessaWRelease_lesser_buffactivate": [
+            "characters/Ambessa/sounds/19724138.ogg",
+            "characters/Ambessa/sounds/28405641.ogg",
+            "characters/Ambessa/sounds/66962546.ogg",
+        ],
+        "AmbessaWTarget_hit": [
+            "characters/Ambessa/sounds/1019775771.ogg",
+            "characters/Ambessa/sounds/758795636.ogg",
+            "characters/Ambessa/sounds/802773656.ogg",
+        ],
+        "AmbessaW_OnCast": [
+            "characters/Ambessa/sounds/1025053153.ogg",
+            "characters/Ambessa/sounds/813702158.ogg",
+            "characters/Ambessa/sounds/871405779.ogg",
+        ],
+        "AmbessaW_block_large": [
+            "characters/Ambessa/sounds/1032072537.ogg",
+            "characters/Ambessa/sounds/1052968984.ogg",
+            "characters/Ambessa/sounds/1067039865.ogg",
+        ],
+        "AmbessaW_block_small": [
+            "characters/Ambessa/sounds/144564341.ogg",
+            "characters/Ambessa/sounds/441593361.ogg",
+            "characters/Ambessa/sounds/827160815.ogg",
+        ],
+        "Dance3D_buffactivate_clang": [
+            "characters/Ambessa/sounds/444517467.ogg",
+        ],
+        "Dance3D_buffactivate_intro": [
+            "characters/Ambessa/sounds/102836754.ogg",
+        ],
+        "Dance3D_buffactivate_loop": [
+            "characters/Ambessa/sounds/270318692.ogg",
+        ],
+        "Death3D_buffactivate": [
+            "characters/Ambessa/sounds/1008058863.ogg",
+        ],
+        "Homeguard3D_buffactivate_footstep": [
+            "characters/Ambessa/sounds/320043266.ogg",
+            "characters/Ambessa/sounds/467848250.ogg",
+            "characters/Ambessa/sounds/544983345.ogg",
+            "characters/Ambessa/sounds/822687862.ogg",
+            "characters/Ambessa/sounds/876182580.ogg",
+        ],
+        "Idle3D_Idle3_buffactivate": [
+            "characters/Ambessa/sounds/260147043.ogg",
+        ],
+        "Joke3D_buffactivate": [
+            "characters/Ambessa/sounds/124897707.ogg",
+        ],
+        "Laugh3D_buffactivate": [
+            "characters/Ambessa/sounds/247389229.ogg",
+        ],
+        "Play_vo_Ambessa_AmbessaBasicAttack2_cast3D": [
+            "characters/Ambessa/sounds/159744969.ogg",
+            "characters/Ambessa/sounds/185680160.ogg",
+            "characters/Ambessa/sounds/442504346.ogg",
+            "characters/Ambessa/sounds/530516449.ogg",
+            "characters/Ambessa/sounds/620585969.ogg",
+        ],
+        "Play_vo_Ambessa_AmbessaBasicAttackChained1_cast3D": [
+            "characters/Ambessa/sounds/159744969.ogg",
+            "characters/Ambessa/sounds/185680160.ogg",
+            "characters/Ambessa/sounds/442504346.ogg",
+            "characters/Ambessa/sounds/530516449.ogg",
+            "characters/Ambessa/sounds/620585969.ogg",
+        ],
+        "Play_vo_Ambessa_AmbessaBasicAttackChained2_cast3D": [
+            "characters/Ambessa/sounds/159744969.ogg",
+            "characters/Ambessa/sounds/185680160.ogg",
+            "characters/Ambessa/sounds/442504346.ogg",
+            "characters/Ambessa/sounds/530516449.ogg",
+            "characters/Ambessa/sounds/620585969.ogg",
+        ],
+        "Play_vo_Ambessa_AmbessaBasicAttack_cast3D": [
+            "characters/Ambessa/sounds/159744969.ogg",
+            "characters/Ambessa/sounds/185680160.ogg",
+            "characters/Ambessa/sounds/442504346.ogg",
+            "characters/Ambessa/sounds/530516449.ogg",
+            "characters/Ambessa/sounds/620585969.ogg",
+        ],
+        "Play_vo_Ambessa_AmbessaCritAttack2_cast3D": [
+            "characters/Ambessa/sounds/159744969.ogg",
+            "characters/Ambessa/sounds/185680160.ogg",
+            "characters/Ambessa/sounds/442504346.ogg",
+            "characters/Ambessa/sounds/530516449.ogg",
+            "characters/Ambessa/sounds/620585969.ogg",
+        ],
+        "Play_vo_Ambessa_AmbessaCritAttackChained1_cast3D": [
+            "characters/Ambessa/sounds/159744969.ogg",
+            "characters/Ambessa/sounds/185680160.ogg",
+            "characters/Ambessa/sounds/442504346.ogg",
+            "characters/Ambessa/sounds/530516449.ogg",
+            "characters/Ambessa/sounds/620585969.ogg",
+        ],
+        "Play_vo_Ambessa_AmbessaCritAttackChained2_cast3D": [
+            "characters/Ambessa/sounds/159744969.ogg",
+            "characters/Ambessa/sounds/185680160.ogg",
+            "characters/Ambessa/sounds/442504346.ogg",
+            "characters/Ambessa/sounds/530516449.ogg",
+            "characters/Ambessa/sounds/620585969.ogg",
+        ],
+        "Play_vo_Ambessa_AmbessaCritAttack_cast3D": [
+            "characters/Ambessa/sounds/159744969.ogg",
+            "characters/Ambessa/sounds/185680160.ogg",
+            "characters/Ambessa/sounds/442504346.ogg",
+            "characters/Ambessa/sounds/530516449.ogg",
+            "characters/Ambessa/sounds/620585969.ogg",
+        ],
+        "Play_vo_Ambessa_AmbessaE_cast3D": [
+            "characters/Ambessa/sounds/239779129.ogg",
+            "characters/Ambessa/sounds/309237887.ogg",
+            "characters/Ambessa/sounds/450667366.ogg",
+            "characters/Ambessa/sounds/850557883.ogg",
+            "characters/Ambessa/sounds/929101373.ogg",
+        ],
+        "Play_vo_Ambessa_AmbessaPassiveDash_cast3D": [
+            "characters/Ambessa/sounds/159744969.ogg",
+            "characters/Ambessa/sounds/185680160.ogg",
+            "characters/Ambessa/sounds/442504346.ogg",
+            "characters/Ambessa/sounds/530516449.ogg",
+            "characters/Ambessa/sounds/620585969.ogg",
+        ],
+        "Play_vo_Ambessa_AmbessaQ1_cast3D": [
+            "characters/Ambessa/sounds/406698218.ogg",
+            "characters/Ambessa/sounds/659028726.ogg",
+            "characters/Ambessa/sounds/766066484.ogg",
+            "characters/Ambessa/sounds/807788876.ogg",
+            "characters/Ambessa/sounds/999348094.ogg",
+        ],
+        "Play_vo_Ambessa_AmbessaQ2_cast3D": [
+            "characters/Ambessa/sounds/1003427609.ogg",
+            "characters/Ambessa/sounds/183014855.ogg",
+            "characters/Ambessa/sounds/543194274.ogg",
+            "characters/Ambessa/sounds/817436865.ogg",
+            "characters/Ambessa/sounds/878972046.ogg",
+        ],
+        "Play_vo_Ambessa_AmbessaR_cast3D": [
+            "characters/Ambessa/sounds/1039299175.ogg",
+            "characters/Ambessa/sounds/228089720.ogg",
+            "characters/Ambessa/sounds/712402945.ogg",
+            "characters/Ambessa/sounds/808446691.ogg",
+            "characters/Ambessa/sounds/925419674.ogg",
+        ],
+        "Play_vo_Ambessa_Assist3DMel": [
+            "characters/Ambessa/sounds/1024276181.ogg",
+            "characters/Ambessa/sounds/361828369.ogg",
+            "characters/Ambessa/sounds/833400300.ogg",
+            "characters/Ambessa/sounds/897385366.ogg",
+        ],
+        "Play_vo_Ambessa_Attack2DBaron": [
+            "characters/Ambessa/sounds/913233041.ogg",
+        ],
+        "Play_vo_Ambessa_Attack2DElderDragon": [
+            "characters/Ambessa/sounds/267144322.ogg",
+        ],
+        "Play_vo_Ambessa_Attack2DElementalDragon": [
+            "characters/Ambessa/sounds/51728340.ogg",
+        ],
+        "Play_vo_Ambessa_Attack2DGeneral": [
+            "characters/Ambessa/sounds/1024257715.ogg",
+            "characters/Ambessa/sounds/204606973.ogg",
+            "characters/Ambessa/sounds/224865308.ogg",
+            "characters/Ambessa/sounds/226143018.ogg",
+            "characters/Ambessa/sounds/259774300.ogg",
+            "characters/Ambessa/sounds/339508093.ogg",
+            "characters/Ambessa/sounds/463506605.ogg",
+            "characters/Ambessa/sounds/471655172.ogg",
+            "characters/Ambessa/sounds/498237801.ogg",
+            "characters/Ambessa/sounds/63856102.ogg",
+            "characters/Ambessa/sounds/69507257.ogg",
+            "characters/Ambessa/sounds/704796053.ogg",
+            "characters/Ambessa/sounds/713216772.ogg",
+            "characters/Ambessa/sounds/738365381.ogg",
+            "characters/Ambessa/sounds/75789881.ogg",
+            "characters/Ambessa/sounds/768450196.ogg",
+            "characters/Ambessa/sounds/768819935.ogg",
+            "characters/Ambessa/sounds/855934197.ogg",
+            "characters/Ambessa/sounds/907846768.ogg",
+            "characters/Ambessa/sounds/939423220.ogg",
+        ],
+        "Play_vo_Ambessa_Attack2DHerald": [
+            "characters/Ambessa/sounds/774246699.ogg",
+        ],
+        "Play_vo_Ambessa_Death3D": [
+            "characters/Ambessa/sounds/106508768.ogg",
+            "characters/Ambessa/sounds/1070796096.ogg",
+            "characters/Ambessa/sounds/308388278.ogg",
+            "characters/Ambessa/sounds/319541241.ogg",
+        ],
+        "Play_vo_Ambessa_Death3DMel": [
+            "characters/Ambessa/sounds/360875121.ogg",
+        ],
+        "Play_vo_Ambessa_FirstEncounter3DAmbessasType": [
+            "characters/Ambessa/sounds/212094225.ogg",
+        ],
+        "Play_vo_Ambessa_FirstEncounter3DCaitlyn": [
+            "characters/Ambessa/sounds/411765437.ogg",
+        ],
+        "Play_vo_Ambessa_FirstEncounter3DDarius": [
+            "characters/Ambessa/sounds/630980622.ogg",
+        ],
+        "Play_vo_Ambessa_FirstEncounter3DDraven": [
+            "characters/Ambessa/sounds/149542440.ogg",
+        ],
+        "Play_vo_Ambessa_FirstEncounter3DGeneral": [
+            "characters/Ambessa/sounds/357450179.ogg",
+            "characters/Ambessa/sounds/69508035.ogg",
+            "characters/Ambessa/sounds/753171933.ogg",
+            "characters/Ambessa/sounds/833974961.ogg",
+            "characters/Ambessa/sounds/887096406.ogg",
+        ],
+        "Play_vo_Ambessa_FirstEncounter3DJayce": [
+            "characters/Ambessa/sounds/639131337.ogg",
+        ],
+        "Play_vo_Ambessa_FirstEncounter3DJayceSkin35": [
+            "characters/Ambessa/sounds/50524025.ogg",
+        ],
+        "Play_vo_Ambessa_FirstEncounter3DJinx": [
+            "characters/Ambessa/sounds/944766600.ogg",
+        ],
+        "Play_vo_Ambessa_FirstEncounter3DLeBlanc": [
+            "characters/Ambessa/sounds/777761824.ogg",
+        ],
+        "Play_vo_Ambessa_FirstEncounter3DMel": [
+            "characters/Ambessa/sounds/547440368.ogg",
+            "characters/Ambessa/sounds/7008638.ogg",
+        ],
+        "Play_vo_Ambessa_FirstEncounter3DRiven": [
+            "characters/Ambessa/sounds/525127450.ogg",
+        ],
+        "Play_vo_Ambessa_FirstEncounter3DSamira": [
+            "characters/Ambessa/sounds/954113455.ogg",
+        ],
+        "Play_vo_Ambessa_FirstEncounter3DSwain": [
+            "characters/Ambessa/sounds/939429908.ogg",
+        ],
+        "Play_vo_Ambessa_FirstEncounter3DVi": [
+            "characters/Ambessa/sounds/544579567.ogg",
+        ],
+        "Play_vo_Ambessa_FirstEncounter3DViktor": [
+            "characters/Ambessa/sounds/935159503.ogg",
+        ],
+        "Play_vo_Ambessa_FirstEncounter3DWarwick": [
+            "characters/Ambessa/sounds/614654129.ogg",
+        ],
+        "Play_vo_Ambessa_Joke3DGeneral": [
+            "characters/Ambessa/sounds/909040169.ogg",
+        ],
+        "Play_vo_Ambessa_JokeResponse3DGeneral": [
+            "characters/Ambessa/sounds/236398283.ogg",
+        ],
+        "Play_vo_Ambessa_Kill3DCaitlyn": [
+            "characters/Ambessa/sounds/437970855.ogg",
+        ],
+        "Play_vo_Ambessa_Kill3DDarius": [
+            "characters/Ambessa/sounds/162843927.ogg",
+        ],
+        "Play_vo_Ambessa_Kill3DDraven": [
+            "characters/Ambessa/sounds/430344900.ogg",
+        ],
+        "Play_vo_Ambessa_Kill3DFirst": [
+            "characters/Ambessa/sounds/1008889172.ogg",
+        ],
+        "Play_vo_Ambessa_Kill3DGeneral": [
+            "characters/Ambessa/sounds/1014158729.ogg",
+            "characters/Ambessa/sounds/1028921085.ogg",
+            "characters/Ambessa/sounds/127496971.ogg",
+            "characters/Ambessa/sounds/540717129.ogg",
+            "characters/Ambessa/sounds/612935520.ogg",
+            "characters/Ambessa/sounds/722241385.ogg",
+            "characters/Ambessa/sounds/801772309.ogg",
+            "characters/Ambessa/sounds/832200935.ogg",
+        ],
+        "Play_vo_Ambessa_Kill3DJayceSkin35": [
+            "characters/Ambessa/sounds/113429870.ogg",
+        ],
+        "Play_vo_Ambessa_Kill3DJinx": [
+            "characters/Ambessa/sounds/706240431.ogg",
+        ],
+        "Play_vo_Ambessa_Kill3DLeBlanc": [
+            "characters/Ambessa/sounds/1013249252.ogg",
+        ],
+        "Play_vo_Ambessa_Kill3DMel": [
+            "characters/Ambessa/sounds/222272049.ogg",
+            "characters/Ambessa/sounds/702086177.ogg",
+        ],
+        "Play_vo_Ambessa_Kill3DNearMel": [
+            "characters/Ambessa/sounds/231593504.ogg",
+            "characters/Ambessa/sounds/23168623.ogg",
+            "characters/Ambessa/sounds/830355265.ogg",
+        ],
+        "Play_vo_Ambessa_Kill3DNoxus": [
+            "characters/Ambessa/sounds/177867169.ogg",
+        ],
+        "Play_vo_Ambessa_Kill3DPenta": [
+            "characters/Ambessa/sounds/803824376.ogg",
+        ],
+        "Play_vo_Ambessa_Kill3DPiltoverZaun": [
+            "characters/Ambessa/sounds/743663496.ogg",
+        ],
+        "Play_vo_Ambessa_Kill3DRiven": [
+            "characters/Ambessa/sounds/398538124.ogg",
+        ],
+        "Play_vo_Ambessa_Kill3DSamira": [
+            "characters/Ambessa/sounds/1025880262.ogg",
+        ],
+        "Play_vo_Ambessa_Kill3DSwain": [
+            "characters/Ambessa/sounds/114168559.ogg",
+        ],
+        "Play_vo_Ambessa_Kill3DVi": [
+            "characters/Ambessa/sounds/111743160.ogg",
+        ],
+        "Play_vo_Ambessa_Kill3DViktor": [
+            "characters/Ambessa/sounds/584532631.ogg",
+        ],
+        "Play_vo_Ambessa_Kill3DWarwick": [
+            "characters/Ambessa/sounds/849623367.ogg",
+        ],
+        "Play_vo_Ambessa_Laugh3DGeneral": [
+            "characters/Ambessa/sounds/895415117.ogg",
+        ],
+        "Play_vo_Ambessa_Move2DFirst": [
+            "characters/Ambessa/sounds/356564670.ogg",
+            "characters/Ambessa/sounds/643521556.ogg",
+            "characters/Ambessa/sounds/720072031.ogg",
+            "characters/Ambessa/sounds/838585406.ogg",
+            "characters/Ambessa/sounds/935891754.ogg",
+        ],
+        "Play_vo_Ambessa_Move2DFirstAllyMel": [
+            "characters/Ambessa/sounds/624477688.ogg",
+            "characters/Ambessa/sounds/8013873.ogg",
+        ],
+        "Play_vo_Ambessa_Move2DFirstEnemyMel": [
+            "characters/Ambessa/sounds/832262439.ogg",
+        ],
+        "Play_vo_Ambessa_Move2DLong": [
+            "characters/Ambessa/sounds/121054633.ogg",
+            "characters/Ambessa/sounds/138895953.ogg",
+            "characters/Ambessa/sounds/211113011.ogg",
+            "characters/Ambessa/sounds/213083489.ogg",
+            "characters/Ambessa/sounds/340725101.ogg",
+            "characters/Ambessa/sounds/369353753.ogg",
+            "characters/Ambessa/sounds/51000565.ogg",
+            "characters/Ambessa/sounds/555592523.ogg",
+            "characters/Ambessa/sounds/619110706.ogg",
+            "characters/Ambessa/sounds/706538072.ogg",
+            "characters/Ambessa/sounds/743943709.ogg",
+            "characters/Ambessa/sounds/790829140.ogg",
+            "characters/Ambessa/sounds/894214740.ogg",
+        ],
+        "Play_vo_Ambessa_Move2DStandard": [
+            "characters/Ambessa/sounds/1034260311.ogg",
+            "characters/Ambessa/sounds/261819405.ogg",
+            "characters/Ambessa/sounds/272749473.ogg",
+            "characters/Ambessa/sounds/310427595.ogg",
+            "characters/Ambessa/sounds/321288055.ogg",
+            "characters/Ambessa/sounds/410404187.ogg",
+            "characters/Ambessa/sounds/430937712.ogg",
+            "characters/Ambessa/sounds/454183308.ogg",
+            "characters/Ambessa/sounds/535691217.ogg",
+            "characters/Ambessa/sounds/537073623.ogg",
+            "characters/Ambessa/sounds/569694304.ogg",
+            "characters/Ambessa/sounds/809265290.ogg",
+            "characters/Ambessa/sounds/877949639.ogg",
+            "characters/Ambessa/sounds/885117265.ogg",
+            "characters/Ambessa/sounds/904594230.ogg",
+            "characters/Ambessa/sounds/920096484.ogg",
+            "characters/Ambessa/sounds/967324284.ogg",
+            "characters/Ambessa/sounds/967715338.ogg",
+            "characters/Ambessa/sounds/979848190.ogg",
+            "characters/Ambessa/sounds/983255051.ogg",
+        ],
+        "Play_vo_Ambessa_Recall3DGeneral": [
+            "characters/Ambessa/sounds/237120414.ogg",
+            "characters/Ambessa/sounds/584519309.ogg",
+            "characters/Ambessa/sounds/744845776.ogg",
+            "characters/Ambessa/sounds/785475998.ogg",
+            "characters/Ambessa/sounds/844203789.ogg",
+        ],
+        "Play_vo_Ambessa_Respawn2DGeneral": [
+            "characters/Ambessa/sounds/277056394.ogg",
+            "characters/Ambessa/sounds/461427009.ogg",
+            "characters/Ambessa/sounds/501265274.ogg",
+            "characters/Ambessa/sounds/517674316.ogg",
+            "characters/Ambessa/sounds/815480230.ogg",
+        ],
+        "Play_vo_Ambessa_Spell3DWParry": [
+            "characters/Ambessa/sounds/28614306.ogg",
+            "characters/Ambessa/sounds/557138935.ogg",
+            "characters/Ambessa/sounds/718787136.ogg",
+            "characters/Ambessa/sounds/889343156.ogg",
+            "characters/Ambessa/sounds/924946912.ogg",
+        ],
+        "Play_vo_Ambessa_Taunt3DGeneral": [
+            "characters/Ambessa/sounds/288270877.ogg",
+        ],
+        "Play_vo_Ambessa_TauntResponse3DGeneral": [
+            "characters/Ambessa/sounds/155486179.ogg",
+        ],
+        "Recall3D_buffactivate": [
+            "characters/Ambessa/sounds/262085109.ogg",
+        ],
+        "Taunt3D_buffactivate": [
+            "characters/Ambessa/sounds/1011330067.ogg",
+        ],
+        "Taunt3D_buffactivate_loop": [
+            "characters/Ambessa/sounds/587608172.ogg",
+        ],
+        "Winddown3D_buffactivate": [
+            "characters/Ambessa/sounds/1028183370.ogg",
+        ],
+    },
+)

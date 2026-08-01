@@ -5,7 +5,7 @@
 use bevy::prelude::*;
 use bevy::time::{Timer, TimerMode};
 use lol_base::animation_names::ANIM_SPELL2;
-use lol_base::render_cmd::CommandAnimationPlay;
+use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinSoundPlay};
 use lol_base::spell::Spell;
 use lol_core::base::buff::{BuffOf, Buffs};
 use lol_core::damage::{CommandDamageCreate, Damage, DamageType};
@@ -146,6 +146,10 @@ pub fn on_volibear_w(
             commands
                 .entity(enemy)
                 .with_related::<BuffOf>(DebuffVolibearWMark::new(entity, VOLIBEAR_W_MARK_DURATION));
+            commands.trigger(CommandSkinSoundPlay {
+                entity,
+                key: "VolibearW_OnHit".to_string(),
+            });
         }
     } else {
         // W2：移除重施 + 重置冷却 + 咬最近敌人（已标记则 1.5x + 治疗）
@@ -176,6 +180,14 @@ pub fn on_volibear_w(
                     tag: Some(VOLIBEAR_W_TAG),
                 });
             }
+            commands.trigger(CommandSkinSoundPlay {
+                entity,
+                key: if marked {
+                    "VolibearWEmp_OnHit".to_string()
+                } else {
+                    "VolibearW_OnHit".to_string()
+                },
+            });
             if marked {
                 let missing = (max_hp - current_hp).max(0.0);
                 let heal = base_heal + heal_percent * missing;

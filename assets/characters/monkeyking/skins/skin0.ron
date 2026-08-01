@@ -5,6 +5,7 @@
   entities: {
     4294967259: (
       components: {
+        "lol_base::audio::AudioBank": (Path("characters/monkeyking/skins/skin0_audio.ron")),
         "bevy_animation::graph::AnimationGraphHandle": (Path("characters/MonkeyKing/animations/skin0.ron")),
         "bevy_camera::visibility::Visibility": Inherited,
         "bevy_world_serialization::components::WorldAssetRoot": (Path("characters/MonkeyKing/skins/skin0.glb#Scene0")),

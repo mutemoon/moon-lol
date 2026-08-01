@@ -5,6 +5,7 @@
   entities: {
     4294967259: (
       components: {
+        "lol_base::audio::AudioBank": (Path("characters/vladimir/skins/skin0_audio.ron")),
         "bevy_animation::graph::AnimationGraphHandle": (Path("characters/Vladimir/animations/skin0.ron")),
         "bevy_camera::visibility::Visibility": Inherited,
         "bevy_world_serialization::components::WorldAssetRoot": (Path("characters/Vladimir/skins/skin0.glb#Scene0")),

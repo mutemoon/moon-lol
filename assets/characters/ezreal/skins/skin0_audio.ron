@@ -1,0 +1,523 @@
+(
+    events: {
+        "Dance3D_buffactivate": [
+            "characters/Ezreal/sounds/851261454.ogg",
+        ],
+        "Dance3D_loop": [
+            "characters/Ezreal/sounds/764044989.ogg",
+        ],
+        "Death3D_cast": [
+            "characters/Ezreal/sounds/79763005.ogg",
+        ],
+        "EzrealBasicAttack2_OnCast": [
+            "characters/Ezreal/sounds/467813069.ogg",
+            "characters/Ezreal/sounds/604408532.ogg",
+            "characters/Ezreal/sounds/78925441.ogg",
+        ],
+        "EzrealBasicAttack2_OnHit": [
+            "characters/Ezreal/sounds/30365090.ogg",
+            "characters/Ezreal/sounds/700217297.ogg",
+            "characters/Ezreal/sounds/725991357.ogg",
+        ],
+        "EzrealBasicAttack2_OnMissileLaunch": [
+            "characters/Ezreal/sounds/620068021.ogg",
+            "characters/Ezreal/sounds/853814717.ogg",
+            "characters/Ezreal/sounds/909069665.ogg",
+        ],
+        "EzrealBasicAttack_OnCast": [
+            "characters/Ezreal/sounds/467813069.ogg",
+            "characters/Ezreal/sounds/604408532.ogg",
+            "characters/Ezreal/sounds/78925441.ogg",
+        ],
+        "EzrealBasicAttack_OnHit": [
+            "characters/Ezreal/sounds/30365090.ogg",
+            "characters/Ezreal/sounds/700217297.ogg",
+            "characters/Ezreal/sounds/725991357.ogg",
+        ],
+        "EzrealBasicAttack_OnMissileLaunch": [
+            "characters/Ezreal/sounds/620068021.ogg",
+            "characters/Ezreal/sounds/853814717.ogg",
+            "characters/Ezreal/sounds/909069665.ogg",
+        ],
+        "EzrealCritAttack_OnCast": [
+            "characters/Ezreal/sounds/467813069.ogg",
+            "characters/Ezreal/sounds/604408532.ogg",
+            "characters/Ezreal/sounds/78925441.ogg",
+        ],
+        "EzrealCritAttack_OnHit": [
+            "characters/Ezreal/sounds/30365090.ogg",
+            "characters/Ezreal/sounds/700217297.ogg",
+            "characters/Ezreal/sounds/725991357.ogg",
+        ],
+        "EzrealCritAttack_OnMissileLaunch": [
+            "characters/Ezreal/sounds/620068021.ogg",
+            "characters/Ezreal/sounds/853814717.ogg",
+            "characters/Ezreal/sounds/909069665.ogg",
+        ],
+        "EzrealEMissile_OnHit": [
+            "characters/Ezreal/sounds/152123294.ogg",
+            "characters/Ezreal/sounds/404164393.ogg",
+            "characters/Ezreal/sounds/667783863.ogg",
+            "characters/Ezreal/sounds/671318830.ogg",
+            "characters/Ezreal/sounds/829521042.ogg",
+        ],
+        "EzrealEMissile_OnMissileLaunch": [
+            "characters/Ezreal/sounds/653013048.ogg",
+            "characters/Ezreal/sounds/752354885.ogg",
+            "characters/Ezreal/sounds/893800350.ogg",
+        ],
+        "EzrealE_OnCast": [
+            "characters/Ezreal/sounds/176694516.ogg",
+            "characters/Ezreal/sounds/578012949.ogg",
+            "characters/Ezreal/sounds/920084241.ogg",
+        ],
+        "EzrealE_return": [
+            "characters/Ezreal/sounds/1047068031.ogg",
+            "characters/Ezreal/sounds/669125664.ogg",
+            "characters/Ezreal/sounds/794066408.ogg",
+        ],
+        "EzrealQ_OnCast": [
+            "characters/Ezreal/sounds/258194894.ogg",
+            "characters/Ezreal/sounds/366665525.ogg",
+            "characters/Ezreal/sounds/434473051.ogg",
+        ],
+        "EzrealQ_OnHit": [
+            "characters/Ezreal/sounds/165307882.ogg",
+            "characters/Ezreal/sounds/183122777.ogg",
+            "characters/Ezreal/sounds/738256140.ogg",
+        ],
+        "EzrealQ_OnMissileLaunch": [
+            "characters/Ezreal/sounds/399112274.ogg",
+            "characters/Ezreal/sounds/549522403.ogg",
+            "characters/Ezreal/sounds/988036729.ogg",
+        ],
+        "EzrealR_OnCast": [
+            "characters/Ezreal/sounds/182352551.ogg",
+            "characters/Ezreal/sounds/303197261.ogg",
+            "characters/Ezreal/sounds/581827871.ogg",
+        ],
+        "EzrealR_OnHit": [
+            "characters/Ezreal/sounds/293131390.ogg",
+            "characters/Ezreal/sounds/522296616.ogg",
+            "characters/Ezreal/sounds/986590775.ogg",
+        ],
+        "EzrealR_OnMissileCast": [
+            "characters/Ezreal/sounds/242416471.ogg",
+            "characters/Ezreal/sounds/546889014.ogg",
+            "characters/Ezreal/sounds/685370749.ogg",
+        ],
+        "EzrealR_OnMissileLaunch": [
+            "characters/Ezreal/sounds/721058416.ogg",
+        ],
+        "EzrealWAttach_detonate": [
+            "characters/Ezreal/sounds/428650762.ogg",
+            "characters/Ezreal/sounds/586902453.ogg",
+            "characters/Ezreal/sounds/88285726.ogg",
+        ],
+        "EzrealW_OnCast": [
+            "characters/Ezreal/sounds/215960405.ogg",
+            "characters/Ezreal/sounds/341588782.ogg",
+            "characters/Ezreal/sounds/783596333.ogg",
+        ],
+        "EzrealW_OnHit": [
+            "characters/Ezreal/sounds/586485724.ogg",
+        ],
+        "EzrealW_OnMissileLaunch": [
+            "characters/Ezreal/sounds/1059225817.ogg",
+        ],
+        "Joke3D_buffactivate": [
+            "characters/Ezreal/sounds/145443037.ogg",
+        ],
+        "Laugh3D_buffactivate": [
+            "characters/Ezreal/sounds/531827664.ogg",
+        ],
+        "Play_vo_Ezreal_Attack2DBaron": [
+            "characters/Ezreal/sounds/148247933.ogg",
+        ],
+        "Play_vo_Ezreal_Attack2DDragon": [
+            "characters/Ezreal/sounds/141247172.ogg",
+        ],
+        "Play_vo_Ezreal_Attack2DEkko": [
+            "characters/Ezreal/sounds/949208347.ogg",
+        ],
+        "Play_vo_Ezreal_Attack2DGaren": [
+            "characters/Ezreal/sounds/391718220.ogg",
+        ],
+        "Play_vo_Ezreal_Attack2DGeneral": [
+            "characters/Ezreal/sounds/1053572033.ogg",
+            "characters/Ezreal/sounds/13159358.ogg",
+            "characters/Ezreal/sounds/156933075.ogg",
+            "characters/Ezreal/sounds/186663971.ogg",
+            "characters/Ezreal/sounds/218141250.ogg",
+            "characters/Ezreal/sounds/296975731.ogg",
+            "characters/Ezreal/sounds/34362282.ogg",
+            "characters/Ezreal/sounds/39583145.ogg",
+            "characters/Ezreal/sounds/439354359.ogg",
+            "characters/Ezreal/sounds/469890035.ogg",
+            "characters/Ezreal/sounds/529550760.ogg",
+            "characters/Ezreal/sounds/544678000.ogg",
+            "characters/Ezreal/sounds/576187099.ogg",
+            "characters/Ezreal/sounds/595110643.ogg",
+            "characters/Ezreal/sounds/705513344.ogg",
+            "characters/Ezreal/sounds/713471150.ogg",
+            "characters/Ezreal/sounds/837366276.ogg",
+            "characters/Ezreal/sounds/870690933.ogg",
+            "characters/Ezreal/sounds/890028088.ogg",
+            "characters/Ezreal/sounds/890044243.ogg",
+            "characters/Ezreal/sounds/976049260.ogg",
+        ],
+        "Play_vo_Ezreal_Attack2DLux": [
+            "characters/Ezreal/sounds/319362141.ogg",
+            "characters/Ezreal/sounds/597546112.ogg",
+        ],
+        "Play_vo_Ezreal_Attack2DShyvana": [
+            "characters/Ezreal/sounds/838412846.ogg",
+        ],
+        "Play_vo_Ezreal_Attack2DYordle": [
+            "characters/Ezreal/sounds/775392260.ogg",
+        ],
+        "Play_vo_Ezreal_Attack2DZoe": [
+            "characters/Ezreal/sounds/618867844.ogg",
+        ],
+        "Play_vo_Ezreal_BuyItem2DGeneral": [
+            "characters/Ezreal/sounds/132326062.ogg",
+            "characters/Ezreal/sounds/271751175.ogg",
+            "characters/Ezreal/sounds/666567024.ogg",
+        ],
+        "Play_vo_Ezreal_Dance3DGeneral": [
+            "characters/Ezreal/sounds/1005140843.ogg",
+            "characters/Ezreal/sounds/869735948.ogg",
+        ],
+        "Play_vo_Ezreal_Death3D": [
+            "characters/Ezreal/sounds/316648547.ogg",
+            "characters/Ezreal/sounds/385084913.ogg",
+        ],
+        "Play_vo_Ezreal_EzrealBasicAttack2_cast3D": [
+            "characters/Ezreal/sounds/133364118.ogg",
+            "characters/Ezreal/sounds/16347273.ogg",
+            "characters/Ezreal/sounds/450881206.ogg",
+            "characters/Ezreal/sounds/914516522.ogg",
+        ],
+        "Play_vo_Ezreal_EzrealBasicAttack_cast3D": [
+            "characters/Ezreal/sounds/133364118.ogg",
+            "characters/Ezreal/sounds/16347273.ogg",
+            "characters/Ezreal/sounds/450881206.ogg",
+            "characters/Ezreal/sounds/914516522.ogg",
+        ],
+        "Play_vo_Ezreal_EzrealCritAttack_cast3D": [
+            "characters/Ezreal/sounds/133364118.ogg",
+            "characters/Ezreal/sounds/16347273.ogg",
+            "characters/Ezreal/sounds/450881206.ogg",
+            "characters/Ezreal/sounds/914516522.ogg",
+        ],
+        "Play_vo_Ezreal_EzrealE_cast3D": [
+            "characters/Ezreal/sounds/115899746.ogg",
+            "characters/Ezreal/sounds/235482783.ogg",
+            "characters/Ezreal/sounds/342798921.ogg",
+            "characters/Ezreal/sounds/561231159.ogg",
+            "characters/Ezreal/sounds/833079336.ogg",
+            "characters/Ezreal/sounds/998821862.ogg",
+        ],
+        "Play_vo_Ezreal_EzrealQ_cast3D": [
+            "characters/Ezreal/sounds/1065832740.ogg",
+            "characters/Ezreal/sounds/136698151.ogg",
+            "characters/Ezreal/sounds/17431310.ogg",
+            "characters/Ezreal/sounds/240488001.ogg",
+            "characters/Ezreal/sounds/486091802.ogg",
+            "characters/Ezreal/sounds/776943145.ogg",
+            "characters/Ezreal/sounds/786226900.ogg",
+        ],
+        "Play_vo_Ezreal_EzrealQ_hit3D": [
+            "characters/Ezreal/sounds/1070897840.ogg",
+            "characters/Ezreal/sounds/123384331.ogg",
+            "characters/Ezreal/sounds/177345406.ogg",
+            "characters/Ezreal/sounds/302229678.ogg",
+            "characters/Ezreal/sounds/837018905.ogg",
+        ],
+        "Play_vo_Ezreal_EzrealQ_miss3D": [
+            "characters/Ezreal/sounds/206859059.ogg",
+            "characters/Ezreal/sounds/56269861.ogg",
+            "characters/Ezreal/sounds/731218745.ogg",
+            "characters/Ezreal/sounds/783849916.ogg",
+            "characters/Ezreal/sounds/997603121.ogg",
+        ],
+        "Play_vo_Ezreal_EzrealR_cast3D": [
+            "characters/Ezreal/sounds/176211245.ogg",
+            "characters/Ezreal/sounds/620267144.ogg",
+            "characters/Ezreal/sounds/772674530.ogg",
+            "characters/Ezreal/sounds/934689773.ogg",
+        ],
+        "Play_vo_Ezreal_EzrealW_cast3D": [
+            "characters/Ezreal/sounds/539689449.ogg",
+            "characters/Ezreal/sounds/564747118.ogg",
+            "characters/Ezreal/sounds/819628596.ogg",
+            "characters/Ezreal/sounds/985372207.ogg",
+        ],
+        "Play_vo_Ezreal_FirstEncounter3DAnnie": [
+            "characters/Ezreal/sounds/1063054578.ogg",
+        ],
+        "Play_vo_Ezreal_FirstEncounter3DAscended": [
+            "characters/Ezreal/sounds/119378145.ogg",
+        ],
+        "Play_vo_Ezreal_FirstEncounter3DAshe": [
+            "characters/Ezreal/sounds/618587563.ogg",
+        ],
+        "Play_vo_Ezreal_FirstEncounter3DAurelionSol": [
+            "characters/Ezreal/sounds/171952678.ogg",
+        ],
+        "Play_vo_Ezreal_FirstEncounter3DBilgewater": [
+            "characters/Ezreal/sounds/1022036577.ogg",
+        ],
+        "Play_vo_Ezreal_FirstEncounter3DCaitlyn": [
+            "characters/Ezreal/sounds/1013709349.ogg",
+        ],
+        "Play_vo_Ezreal_FirstEncounter3DCamille": [
+            "characters/Ezreal/sounds/6477822.ogg",
+        ],
+        "Play_vo_Ezreal_FirstEncounter3DCorki": [
+            "characters/Ezreal/sounds/475049712.ogg",
+        ],
+        "Play_vo_Ezreal_FirstEncounter3DDarkin": [
+            "characters/Ezreal/sounds/751613627.ogg",
+        ],
+        "Play_vo_Ezreal_FirstEncounter3DDemacia": [
+            "characters/Ezreal/sounds/418281224.ogg",
+            "characters/Ezreal/sounds/492801437.ogg",
+        ],
+        "Play_vo_Ezreal_FirstEncounter3DDemigod": [
+            "characters/Ezreal/sounds/788809444.ogg",
+            "characters/Ezreal/sounds/839474452.ogg",
+        ],
+        "Play_vo_Ezreal_FirstEncounter3DDemon": [
+            "characters/Ezreal/sounds/80585352.ogg",
+        ],
+        "Play_vo_Ezreal_FirstEncounter3DEzreal": [
+            "characters/Ezreal/sounds/126493684.ogg",
+        ],
+        "Play_vo_Ezreal_FirstEncounter3DGalio": [
+            "characters/Ezreal/sounds/657807551.ogg",
+        ],
+        "Play_vo_Ezreal_FirstEncounter3DGeneral": [
+            "characters/Ezreal/sounds/1019218032.ogg",
+            "characters/Ezreal/sounds/46282980.ogg",
+        ],
+        "Play_vo_Ezreal_FirstEncounter3DHeimerdinger": [
+            "characters/Ezreal/sounds/796801439.ogg",
+        ],
+        "Play_vo_Ezreal_FirstEncounter3DJayce": [
+            "characters/Ezreal/sounds/536594029.ogg",
+        ],
+        "Play_vo_Ezreal_FirstEncounter3DJhin": [
+            "characters/Ezreal/sounds/127852494.ogg",
+        ],
+        "Play_vo_Ezreal_FirstEncounter3DJinx": [
+            "characters/Ezreal/sounds/679841670.ogg",
+        ],
+        "Play_vo_Ezreal_FirstEncounter3DKindred": [
+            "characters/Ezreal/sounds/451224133.ogg",
+        ],
+        "Play_vo_Ezreal_FirstEncounter3DLeBlanc": [
+            "characters/Ezreal/sounds/378981867.ogg",
+        ],
+        "Play_vo_Ezreal_FirstEncounter3DLucian": [
+            "characters/Ezreal/sounds/1033793662.ogg",
+        ],
+        "Play_vo_Ezreal_FirstEncounter3DLux": [
+            "characters/Ezreal/sounds/242068014.ogg",
+            "characters/Ezreal/sounds/574373427.ogg",
+            "characters/Ezreal/sounds/678489193.ogg",
+            "characters/Ezreal/sounds/771620494.ogg",
+        ],
+        "Play_vo_Ezreal_FirstEncounter3DNoxus": [
+            "characters/Ezreal/sounds/1010988796.ogg",
+            "characters/Ezreal/sounds/8698876.ogg",
+        ],
+        "Play_vo_Ezreal_FirstEncounter3DOrnn": [
+            "characters/Ezreal/sounds/372052583.ogg",
+        ],
+        "Play_vo_Ezreal_FirstEncounter3DPiltover": [
+            "characters/Ezreal/sounds/101777136.ogg",
+        ],
+        "Play_vo_Ezreal_FirstEncounter3DPyke": [
+            "characters/Ezreal/sounds/350035909.ogg",
+        ],
+        "Play_vo_Ezreal_FirstEncounter3DRakan": [
+            "characters/Ezreal/sounds/338318422.ogg",
+        ],
+        "Play_vo_Ezreal_FirstEncounter3DRekSai": [
+            "characters/Ezreal/sounds/152520003.ogg",
+        ],
+        "Play_vo_Ezreal_FirstEncounter3DRyze": [
+            "characters/Ezreal/sounds/42554537.ogg",
+        ],
+        "Play_vo_Ezreal_FirstEncounter3DShadowIsles": [
+            "characters/Ezreal/sounds/718289034.ogg",
+        ],
+        "Play_vo_Ezreal_FirstEncounter3DShurima": [
+            "characters/Ezreal/sounds/909745879.ogg",
+        ],
+        "Play_vo_Ezreal_FirstEncounter3DSivir": [
+            "characters/Ezreal/sounds/838357904.ogg",
+        ],
+        "Play_vo_Ezreal_FirstEncounter3DTaliyah": [
+            "characters/Ezreal/sounds/1015465811.ogg",
+        ],
+        "Play_vo_Ezreal_FirstEncounter3DTargon": [
+            "characters/Ezreal/sounds/123054044.ogg",
+        ],
+        "Play_vo_Ezreal_FirstEncounter3DTaric": [
+            "characters/Ezreal/sounds/247855070.ogg",
+        ],
+        "Play_vo_Ezreal_FirstEncounter3DUndead": [
+            "characters/Ezreal/sounds/197940844.ogg",
+        ],
+        "Play_vo_Ezreal_FirstEncounter3DVastaya": [
+            "characters/Ezreal/sounds/545964145.ogg",
+        ],
+        "Play_vo_Ezreal_FirstEncounter3DXayah": [
+            "characters/Ezreal/sounds/691056800.ogg",
+        ],
+        "Play_vo_Ezreal_FirstEncounter3DXerath": [
+            "characters/Ezreal/sounds/405893492.ogg",
+        ],
+        "Play_vo_Ezreal_FirstEncounter3DYordle": [
+            "characters/Ezreal/sounds/434963280.ogg",
+        ],
+        "Play_vo_Ezreal_FirstEncounter3DZoe": [
+            "characters/Ezreal/sounds/203432429.ogg",
+            "characters/Ezreal/sounds/419195087.ogg",
+        ],
+        "Play_vo_Ezreal_Idle3DGeneral": [
+            "characters/Ezreal/sounds/26259077.ogg",
+            "characters/Ezreal/sounds/623869208.ogg",
+        ],
+        "Play_vo_Ezreal_Joke3DGeneral": [
+            "characters/Ezreal/sounds/406367830.ogg",
+        ],
+        "Play_vo_Ezreal_JokeResponse3DGeneral": [
+            "characters/Ezreal/sounds/769866884.ogg",
+            "characters/Ezreal/sounds/879031428.ogg",
+        ],
+        "Play_vo_Ezreal_Kill3DBaron": [
+            "characters/Ezreal/sounds/439460991.ogg",
+        ],
+        "Play_vo_Ezreal_Kill3DGeneral": [
+            "characters/Ezreal/sounds/352665369.ogg",
+            "characters/Ezreal/sounds/672990292.ogg",
+            "characters/Ezreal/sounds/891424711.ogg",
+        ],
+        "Play_vo_Ezreal_Kill3DPenta": [
+            "characters/Ezreal/sounds/289730885.ogg",
+            "characters/Ezreal/sounds/431427211.ogg",
+            "characters/Ezreal/sounds/894125347.ogg",
+        ],
+        "Play_vo_Ezreal_Kill3DTurret": [
+            "characters/Ezreal/sounds/16261644.ogg",
+            "characters/Ezreal/sounds/194054977.ogg",
+            "characters/Ezreal/sounds/406642790.ogg",
+            "characters/Ezreal/sounds/894846734.ogg",
+            "characters/Ezreal/sounds/967828837.ogg",
+        ],
+        "Play_vo_Ezreal_Laugh3DGeneral": [
+            "characters/Ezreal/sounds/154419601.ogg",
+            "characters/Ezreal/sounds/570980.ogg",
+            "characters/Ezreal/sounds/640212784.ogg",
+            "characters/Ezreal/sounds/732611351.ogg",
+        ],
+        "Play_vo_Ezreal_Move2DFirst": [
+            "characters/Ezreal/sounds/1054874459.ogg",
+            "characters/Ezreal/sounds/178651378.ogg",
+            "characters/Ezreal/sounds/361467547.ogg",
+            "characters/Ezreal/sounds/526125503.ogg",
+            "characters/Ezreal/sounds/737267026.ogg",
+            "characters/Ezreal/sounds/850821945.ogg",
+            "characters/Ezreal/sounds/918081506.ogg",
+        ],
+        "Play_vo_Ezreal_Move2DJungle": [
+            "characters/Ezreal/sounds/118793459.ogg",
+            "characters/Ezreal/sounds/677335709.ogg",
+            "characters/Ezreal/sounds/835900180.ogg",
+            "characters/Ezreal/sounds/939740952.ogg",
+        ],
+        "Play_vo_Ezreal_Move2DLong": [
+            "characters/Ezreal/sounds/1024660517.ogg",
+            "characters/Ezreal/sounds/113857871.ogg",
+            "characters/Ezreal/sounds/151134538.ogg",
+            "characters/Ezreal/sounds/157809527.ogg",
+            "characters/Ezreal/sounds/191455450.ogg",
+            "characters/Ezreal/sounds/305382416.ogg",
+            "characters/Ezreal/sounds/478946584.ogg",
+            "characters/Ezreal/sounds/629669506.ogg",
+            "characters/Ezreal/sounds/670083870.ogg",
+            "characters/Ezreal/sounds/825573720.ogg",
+            "characters/Ezreal/sounds/862255182.ogg",
+            "characters/Ezreal/sounds/916268541.ogg",
+        ],
+        "Play_vo_Ezreal_Move2DRiver": [
+            "characters/Ezreal/sounds/143518293.ogg",
+            "characters/Ezreal/sounds/570661385.ogg",
+            "characters/Ezreal/sounds/835307124.ogg",
+        ],
+        "Play_vo_Ezreal_Move2DStandard": [
+            "characters/Ezreal/sounds/1050778016.ogg",
+            "characters/Ezreal/sounds/149305251.ogg",
+            "characters/Ezreal/sounds/158330857.ogg",
+            "characters/Ezreal/sounds/20953802.ogg",
+            "characters/Ezreal/sounds/276098532.ogg",
+            "characters/Ezreal/sounds/32000868.ogg",
+            "characters/Ezreal/sounds/383633409.ogg",
+            "characters/Ezreal/sounds/39773411.ogg",
+            "characters/Ezreal/sounds/536774290.ogg",
+            "characters/Ezreal/sounds/590064395.ogg",
+            "characters/Ezreal/sounds/688155089.ogg",
+            "characters/Ezreal/sounds/711249261.ogg",
+            "characters/Ezreal/sounds/755914843.ogg",
+            "characters/Ezreal/sounds/780402324.ogg",
+            "characters/Ezreal/sounds/79743297.ogg",
+            "characters/Ezreal/sounds/818460741.ogg",
+            "characters/Ezreal/sounds/848578400.ogg",
+            "characters/Ezreal/sounds/856408386.ogg",
+            "characters/Ezreal/sounds/898500226.ogg",
+            "characters/Ezreal/sounds/912575396.ogg",
+        ],
+        "Play_vo_Ezreal_Recall3DGeneral": [
+            "characters/Ezreal/sounds/318404745.ogg",
+            "characters/Ezreal/sounds/648555176.ogg",
+            "characters/Ezreal/sounds/795437621.ogg",
+            "characters/Ezreal/sounds/81920004.ogg",
+            "characters/Ezreal/sounds/876412001.ogg",
+            "characters/Ezreal/sounds/964558791.ogg",
+        ],
+        "Play_vo_Ezreal_Respawn2DGeneral": [
+            "characters/Ezreal/sounds/1024703891.ogg",
+            "characters/Ezreal/sounds/141670525.ogg",
+            "characters/Ezreal/sounds/178583592.ogg",
+            "characters/Ezreal/sounds/280874353.ogg",
+        ],
+        "Play_vo_Ezreal_Shop2DOpen": [
+            "characters/Ezreal/sounds/147698478.ogg",
+            "characters/Ezreal/sounds/177200175.ogg",
+            "characters/Ezreal/sounds/68156623.ogg",
+        ],
+        "Play_vo_Ezreal_Taunt3DGeneral": [
+            "characters/Ezreal/sounds/683196740.ogg",
+            "characters/Ezreal/sounds/708132996.ogg",
+        ],
+        "Play_vo_Ezreal_TauntResponse3DGeneral": [
+            "characters/Ezreal/sounds/164882478.ogg",
+            "characters/Ezreal/sounds/913909219.ogg",
+        ],
+        "Recall3D_buffactivate": [
+            "characters/Ezreal/sounds/164091030.ogg",
+        ],
+        "Recall3D_leadout": [
+            "characters/Ezreal/sounds/361342531.ogg",
+        ],
+        "Recall3D_winddown": [
+            "characters/Ezreal/sounds/553872772.ogg",
+        ],
+        "Taunt3D_buffactivate": [
+            "characters/Ezreal/sounds/760252937.ogg",
+        ],
+    },
+)

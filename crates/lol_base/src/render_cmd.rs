@@ -30,12 +30,11 @@ pub struct CommandAnimationPlay {
     pub duration: Option<f32>,
 }
 
-/// 皮肤音效播放命令：`key` 为 `ConfigAudio.spells` 的技能名（如 "FioraEAttack"），
-/// `hit=true` 播 `on_hit`（命中时刻），`hit=false` 播 `on_cast`（施放/触发时刻）。
-/// 用于技能命中、被动触发等没有独立技能施放事件（EventSkillCast）的音效时机。
+/// 皮肤音效播放命令：`key` 为 `ConfigAudio.events` 中的事件名
+/// （如 "AatroxPassiveReady_OnBuffActivate"），运行时从该 key 对应的
+/// ogg 列表中随机挑一个播放。
 #[derive(EntityEvent)]
 pub struct CommandSkinSoundPlay {
     pub entity: Entity,
     pub key: String,
-    pub hit: bool,
 }

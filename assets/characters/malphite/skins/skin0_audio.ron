@@ -1,0 +1,174 @@
+(
+    events: {
+        "CleaveArc_hit": [
+            "characters/Malphite/sounds/380506501.ogg",
+            "characters/Malphite/sounds/420359461.ogg",
+            "characters/Malphite/sounds/814230581.ogg",
+        ],
+        "Landslide_OnCast": [
+            "characters/Malphite/sounds/1045794121.ogg",
+        ],
+        "Landslide_hit": [
+            "characters/Malphite/sounds/233503083.ogg",
+        ],
+        "MalphiteBasicAttack2_OnCast": [
+            "characters/Malphite/sounds/10180290.ogg",
+            "characters/Malphite/sounds/218780253.ogg",
+            "characters/Malphite/sounds/245666285.ogg",
+        ],
+        "MalphiteBasicAttack2_OnHit": [
+            "characters/Malphite/sounds/10927155.ogg",
+            "characters/Malphite/sounds/121695443.ogg",
+            "characters/Malphite/sounds/157345883.ogg",
+            "characters/Malphite/sounds/16774502.ogg",
+            "characters/Malphite/sounds/278777164.ogg",
+            "characters/Malphite/sounds/312465873.ogg",
+            "characters/Malphite/sounds/324565353.ogg",
+            "characters/Malphite/sounds/365680144.ogg",
+            "characters/Malphite/sounds/4189139.ogg",
+            "characters/Malphite/sounds/67734091.ogg",
+            "characters/Malphite/sounds/76928700.ogg",
+            "characters/Malphite/sounds/83742960.ogg",
+        ],
+        "MalphiteBasicAttack_OnCast": [
+            "characters/Malphite/sounds/10180290.ogg",
+            "characters/Malphite/sounds/218780253.ogg",
+            "characters/Malphite/sounds/245666285.ogg",
+        ],
+        "MalphiteBasicAttack_OnHit": [
+            "characters/Malphite/sounds/10927155.ogg",
+            "characters/Malphite/sounds/121695443.ogg",
+            "characters/Malphite/sounds/157345883.ogg",
+            "characters/Malphite/sounds/16774502.ogg",
+            "characters/Malphite/sounds/278777164.ogg",
+            "characters/Malphite/sounds/312465873.ogg",
+            "characters/Malphite/sounds/324565353.ogg",
+            "characters/Malphite/sounds/365680144.ogg",
+            "characters/Malphite/sounds/4189139.ogg",
+            "characters/Malphite/sounds/67734091.ogg",
+            "characters/Malphite/sounds/76928700.ogg",
+            "characters/Malphite/sounds/83742960.ogg",
+        ],
+        "MalphiteCleave_OnBuffActivate": [
+            "characters/Malphite/sounds/255731332.ogg",
+        ],
+        "MalphiteCritAttack_OnCast": [
+            "characters/Malphite/sounds/657549411.ogg",
+            "characters/Malphite/sounds/675377031.ogg",
+            "characters/Malphite/sounds/914837790.ogg",
+        ],
+        "MalphiteCritAttack_OnHit": [
+            "characters/Malphite/sounds/10927155.ogg",
+            "characters/Malphite/sounds/121695443.ogg",
+            "characters/Malphite/sounds/157345883.ogg",
+            "characters/Malphite/sounds/16774502.ogg",
+            "characters/Malphite/sounds/278777164.ogg",
+            "characters/Malphite/sounds/312465873.ogg",
+            "characters/Malphite/sounds/324565353.ogg",
+            "characters/Malphite/sounds/365680144.ogg",
+            "characters/Malphite/sounds/4189139.ogg",
+            "characters/Malphite/sounds/67734091.ogg",
+            "characters/Malphite/sounds/76928700.ogg",
+            "characters/Malphite/sounds/83742960.ogg",
+        ],
+        "MalphiteShieldEffect_OnBuffActivate": [
+            "characters/Malphite/sounds/203686964.ogg",
+        ],
+        "MalphiteShieldEffect_OnBuffDeactivate": [
+            "characters/Malphite/sounds/750653838.ogg",
+        ],
+        "MalphiteThunderclap_OnBuffActivate": [
+            "characters/Malphite/sounds/255731332.ogg",
+        ],
+        "ObduracyAttack_OnCast": [
+            "characters/Malphite/sounds/10180290.ogg",
+            "characters/Malphite/sounds/218780253.ogg",
+            "characters/Malphite/sounds/245666285.ogg",
+        ],
+        "ObduracyAttack_OnHit": [
+            "characters/Malphite/sounds/1069385621.ogg",
+        ],
+        "Obduracy_OnCast": [
+            "characters/Malphite/sounds/805753790.ogg",
+        ],
+        "Play_vo_Malphite_Attack2DGeneral": [
+            "characters/Malphite/sounds/142992673.ogg",
+            "characters/Malphite/sounds/299911402.ogg",
+            "characters/Malphite/sounds/486545435.ogg",
+            "characters/Malphite/sounds/570547254.ogg",
+            "characters/Malphite/sounds/577038088.ogg",
+            "characters/Malphite/sounds/962535239.ogg",
+        ],
+        "Play_vo_Malphite_Death3D": [
+            "characters/Malphite/sounds/1048141741.ogg",
+            "characters/Malphite/sounds/162250942.ogg",
+            "characters/Malphite/sounds/305993870.ogg",
+        ],
+        "Play_vo_Malphite_Joke3DGeneral": [
+            "characters/Malphite/sounds/1057099494.ogg",
+        ],
+        "Play_vo_Malphite_Landslide_cast3D": [
+            "characters/Malphite/sounds/482597810.ogg",
+            "characters/Malphite/sounds/51522119.ogg",
+            "characters/Malphite/sounds/668841021.ogg",
+            "characters/Malphite/sounds/696524130.ogg",
+        ],
+        "Play_vo_Malphite_Laugh3DGeneral": [
+            "characters/Malphite/sounds/306164559.ogg",
+            "characters/Malphite/sounds/404173581.ogg",
+            "characters/Malphite/sounds/499590481.ogg",
+            "characters/Malphite/sounds/688057765.ogg",
+        ],
+        "Play_vo_Malphite_MalphiteBasicAttack2_cast3D": [
+            "characters/Malphite/sounds/482597810.ogg",
+            "characters/Malphite/sounds/51522119.ogg",
+            "characters/Malphite/sounds/668841021.ogg",
+            "characters/Malphite/sounds/696524130.ogg",
+        ],
+        "Play_vo_Malphite_MalphiteBasicAttack_cast3D": [
+            "characters/Malphite/sounds/482597810.ogg",
+            "characters/Malphite/sounds/51522119.ogg",
+            "characters/Malphite/sounds/668841021.ogg",
+            "characters/Malphite/sounds/696524130.ogg",
+        ],
+        "Play_vo_Malphite_MalphiteCritAttack_cast3D": [
+            "characters/Malphite/sounds/482597810.ogg",
+            "characters/Malphite/sounds/51522119.ogg",
+            "characters/Malphite/sounds/668841021.ogg",
+            "characters/Malphite/sounds/696524130.ogg",
+        ],
+        "Play_vo_Malphite_Move2DStandard": [
+            "characters/Malphite/sounds/166178220.ogg",
+            "characters/Malphite/sounds/270433262.ogg",
+            "characters/Malphite/sounds/539745593.ogg",
+            "characters/Malphite/sounds/570595025.ogg",
+            "characters/Malphite/sounds/690143927.ogg",
+            "characters/Malphite/sounds/878418500.ogg",
+            "characters/Malphite/sounds/972116068.ogg",
+        ],
+        "Play_vo_Malphite_Taunt3DGeneral": [
+            "characters/Malphite/sounds/574087986.ogg",
+        ],
+        "SeismicShard_OnBuffActivate": [
+            "characters/Malphite/sounds/98577070.ogg",
+        ],
+        "SeismicShard_OnCast": [
+            "characters/Malphite/sounds/80020153.ogg",
+        ],
+        "SeismicShard_OnHit": [
+            "characters/Malphite/sounds/834748279.ogg",
+        ],
+        "SeismicShard_OnMissileLaunch": [
+            "characters/Malphite/sounds/990876360.ogg",
+        ],
+        "UFSlash_OnCast": [
+            "characters/Malphite/sounds/50545186.ogg",
+        ],
+        "UFSlash_hit": [
+            "characters/Malphite/sounds/586583816.ogg",
+        ],
+        "UFSlash_land": [
+            "characters/Malphite/sounds/365334701.ogg",
+        ],
+    },
+)

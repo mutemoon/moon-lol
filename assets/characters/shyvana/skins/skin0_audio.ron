@@ -1,0 +1,634 @@
+(
+    events: {
+        "Play_vo_Shyvana_Attack2DBaron": [
+            "characters/Shyvana/sounds/162786387.ogg",
+        ],
+        "Play_vo_Shyvana_Attack2DDragon": [
+            "characters/Shyvana/sounds/426243112.ogg",
+        ],
+        "Play_vo_Shyvana_Attack2DElderDragon": [
+            "characters/Shyvana/sounds/647322110.ogg",
+        ],
+        "Play_vo_Shyvana_Attack2DGeneral": [
+            "characters/Shyvana/sounds/1047152487.ogg",
+            "characters/Shyvana/sounds/280541611.ogg",
+            "characters/Shyvana/sounds/369118117.ogg",
+            "characters/Shyvana/sounds/474935659.ogg",
+            "characters/Shyvana/sounds/49727381.ogg",
+            "characters/Shyvana/sounds/545773943.ogg",
+            "characters/Shyvana/sounds/708916561.ogg",
+            "characters/Shyvana/sounds/863161614.ogg",
+            "characters/Shyvana/sounds/913683083.ogg",
+            "characters/Shyvana/sounds/949062217.ogg",
+            "characters/Shyvana/sounds/96684173.ogg",
+            "characters/Shyvana/sounds/983554170.ogg",
+        ],
+        "Play_vo_Shyvana_Death3DHuman": [
+            "characters/Shyvana/sounds/209490977.ogg",
+            "characters/Shyvana/sounds/347778956.ogg",
+            "characters/Shyvana/sounds/867113587.ogg",
+            "characters/Shyvana/sounds/939781997.ogg",
+            "characters/Shyvana/sounds/965519932.ogg",
+        ],
+        "Play_vo_Shyvana_Dragon_Attack2DGeneral": [
+            "characters/Shyvana/sounds/278340033.ogg",
+            "characters/Shyvana/sounds/296299720.ogg",
+            "characters/Shyvana/sounds/670194882.ogg",
+            "characters/Shyvana/sounds/730917735.ogg",
+            "characters/Shyvana/sounds/811635405.ogg",
+        ],
+        "Play_vo_Shyvana_Dragon_Joke3DGeneral": [
+            "characters/Shyvana/sounds/221188721.ogg",
+            "characters/Shyvana/sounds/652962260.ogg",
+        ],
+        "Play_vo_Shyvana_Dragon_Kill3DGeneral": [
+            "characters/Shyvana/sounds/1007773892.ogg",
+            "characters/Shyvana/sounds/1020728346.ogg",
+            "characters/Shyvana/sounds/137035359.ogg",
+            "characters/Shyvana/sounds/23756329.ogg",
+            "characters/Shyvana/sounds/696861714.ogg",
+            "characters/Shyvana/sounds/729141509.ogg",
+            "characters/Shyvana/sounds/771671705.ogg",
+        ],
+        "Play_vo_Shyvana_Dragon_Kill3DPenta": [
+            "characters/Shyvana/sounds/896062988.ogg",
+        ],
+        "Play_vo_Shyvana_Dragon_Taunt3DGeneral": [
+            "characters/Shyvana/sounds/19564408.ogg",
+        ],
+        "Play_vo_Shyvana_EnemyTeamKill3DEpicMonster": [
+            "characters/Shyvana/sounds/459561450.ogg",
+            "characters/Shyvana/sounds/49537904.ogg",
+            "characters/Shyvana/sounds/92302791.ogg",
+        ],
+        "Play_vo_Shyvana_FirstEncounter3DAurelionSol": [
+            "characters/Shyvana/sounds/977107345.ogg",
+        ],
+        "Play_vo_Shyvana_FirstEncounter3DDemacia": [
+            "characters/Shyvana/sounds/422825780.ogg",
+        ],
+        "Play_vo_Shyvana_FirstEncounter3DGeneral": [
+            "characters/Shyvana/sounds/202148392.ogg",
+            "characters/Shyvana/sounds/217301401.ogg",
+            "characters/Shyvana/sounds/237110979.ogg",
+            "characters/Shyvana/sounds/405716260.ogg",
+            "characters/Shyvana/sounds/606574296.ogg",
+            "characters/Shyvana/sounds/614524496.ogg",
+        ],
+        "Play_vo_Shyvana_FirstEncounter3DJarvanIV": [
+            "characters/Shyvana/sounds/208366979.ogg",
+        ],
+        "Play_vo_Shyvana_FirstEncounter3DMilio": [
+            "characters/Shyvana/sounds/962214069.ogg",
+        ],
+        "Play_vo_Shyvana_FirstEncounter3DPoppy": [
+            "characters/Shyvana/sounds/913803009.ogg",
+        ],
+        "Play_vo_Shyvana_FirstEncounter3DQuinn": [
+            "characters/Shyvana/sounds/452509928.ogg",
+        ],
+        "Play_vo_Shyvana_FirstEncounter3DSmolder": [
+            "characters/Shyvana/sounds/804917604.ogg",
+        ],
+        "Play_vo_Shyvana_Joke3DGeneral": [
+            "characters/Shyvana/sounds/269357497.ogg",
+            "characters/Shyvana/sounds/880780434.ogg",
+        ],
+        "Play_vo_Shyvana_JokeResponse3DGeneral": [
+            "characters/Shyvana/sounds/586944615.ogg",
+        ],
+        "Play_vo_Shyvana_Kill3DAurelionSol": [
+            "characters/Shyvana/sounds/238111877.ogg",
+        ],
+        "Play_vo_Shyvana_Kill3DDemacia": [
+            "characters/Shyvana/sounds/378438115.ogg",
+        ],
+        "Play_vo_Shyvana_Kill3DEpicMonsterAheadAllyTeam": [
+            "characters/Shyvana/sounds/148100780.ogg",
+            "characters/Shyvana/sounds/404435131.ogg",
+            "characters/Shyvana/sounds/872171175.ogg",
+        ],
+        "Play_vo_Shyvana_Kill3DEpicMonsterBehindAllyTeam": [
+            "characters/Shyvana/sounds/212618008.ogg",
+            "characters/Shyvana/sounds/253348545.ogg",
+            "characters/Shyvana/sounds/613546590.ogg",
+        ],
+        "Play_vo_Shyvana_Kill3DFirst": [
+            "characters/Shyvana/sounds/126974726.ogg",
+        ],
+        "Play_vo_Shyvana_Kill3DGeneral": [
+            "characters/Shyvana/sounds/1064292601.ogg",
+            "characters/Shyvana/sounds/1789493.ogg",
+            "characters/Shyvana/sounds/525871432.ogg",
+            "characters/Shyvana/sounds/58601820.ogg",
+            "characters/Shyvana/sounds/58728244.ogg",
+            "characters/Shyvana/sounds/663114619.ogg",
+            "characters/Shyvana/sounds/709759707.ogg",
+            "characters/Shyvana/sounds/786088661.ogg",
+            "characters/Shyvana/sounds/875570682.ogg",
+            "characters/Shyvana/sounds/898661282.ogg",
+            "characters/Shyvana/sounds/924676462.ogg",
+        ],
+        "Play_vo_Shyvana_Kill3DJarvanIV": [
+            "characters/Shyvana/sounds/737871291.ogg",
+        ],
+        "Play_vo_Shyvana_Kill3DMilio": [
+            "characters/Shyvana/sounds/8373924.ogg",
+        ],
+        "Play_vo_Shyvana_Kill3DPenta": [
+            "characters/Shyvana/sounds/705005515.ogg",
+        ],
+        "Play_vo_Shyvana_Kill3DPoppy": [
+            "characters/Shyvana/sounds/936751520.ogg",
+        ],
+        "Play_vo_Shyvana_Kill3DQuinn": [
+            "characters/Shyvana/sounds/217088636.ogg",
+        ],
+        "Play_vo_Shyvana_Kill3DSmolder": [
+            "characters/Shyvana/sounds/164360112.ogg",
+        ],
+        "Play_vo_Shyvana_Laugh3DGeneral": [
+            "characters/Shyvana/sounds/177566745.ogg",
+        ],
+        "Play_vo_Shyvana_Move2DFirst": [
+            "characters/Shyvana/sounds/260805904.ogg",
+            "characters/Shyvana/sounds/283584841.ogg",
+            "characters/Shyvana/sounds/527743865.ogg",
+            "characters/Shyvana/sounds/77925342.ogg",
+            "characters/Shyvana/sounds/94718125.ogg",
+        ],
+        "Play_vo_Shyvana_Move2DFirstAllyDemacia": [
+            "characters/Shyvana/sounds/599190860.ogg",
+        ],
+        "Play_vo_Shyvana_Move2DFirstAllyJarvanIV": [
+            "characters/Shyvana/sounds/356908639.ogg",
+        ],
+        "Play_vo_Shyvana_Move2DFirstAllyQuinn": [
+            "characters/Shyvana/sounds/33490752.ogg",
+        ],
+        "Play_vo_Shyvana_Move2DLong": [
+            "characters/Shyvana/sounds/1016004097.ogg",
+            "characters/Shyvana/sounds/1066719292.ogg",
+            "characters/Shyvana/sounds/142868549.ogg",
+            "characters/Shyvana/sounds/280699689.ogg",
+            "characters/Shyvana/sounds/452854522.ogg",
+            "characters/Shyvana/sounds/468320489.ogg",
+            "characters/Shyvana/sounds/476334631.ogg",
+            "characters/Shyvana/sounds/934318615.ogg",
+            "characters/Shyvana/sounds/99624903.ogg",
+        ],
+        "Play_vo_Shyvana_Move2DStandard": [
+            "characters/Shyvana/sounds/1002035306.ogg",
+            "characters/Shyvana/sounds/125806657.ogg",
+            "characters/Shyvana/sounds/147371286.ogg",
+            "characters/Shyvana/sounds/248064006.ogg",
+            "characters/Shyvana/sounds/277042113.ogg",
+            "characters/Shyvana/sounds/470377258.ogg",
+            "characters/Shyvana/sounds/471278119.ogg",
+            "characters/Shyvana/sounds/478918413.ogg",
+            "characters/Shyvana/sounds/58041868.ogg",
+            "characters/Shyvana/sounds/686737317.ogg",
+            "characters/Shyvana/sounds/721471150.ogg",
+            "characters/Shyvana/sounds/743244779.ogg",
+            "characters/Shyvana/sounds/861744195.ogg",
+            "characters/Shyvana/sounds/886510565.ogg",
+            "characters/Shyvana/sounds/886712886.ogg",
+            "characters/Shyvana/sounds/956220790.ogg",
+            "characters/Shyvana/sounds/972910888.ogg",
+            "characters/Shyvana/sounds/991920773.ogg",
+        ],
+        "Play_vo_Shyvana_Ping2DAssistMe": [
+            "characters/Shyvana/sounds/161299731.ogg",
+            "characters/Shyvana/sounds/198714419.ogg",
+            "characters/Shyvana/sounds/475236738.ogg",
+        ],
+        "Play_vo_Shyvana_Ping2DDanger": [
+            "characters/Shyvana/sounds/115460831.ogg",
+            "characters/Shyvana/sounds/37465529.ogg",
+            "characters/Shyvana/sounds/416824058.ogg",
+        ],
+        "Play_vo_Shyvana_Ping2DEnemyMissing": [
+            "characters/Shyvana/sounds/120346231.ogg",
+            "characters/Shyvana/sounds/140189391.ogg",
+            "characters/Shyvana/sounds/965054255.ogg",
+        ],
+        "Play_vo_Shyvana_Ping2DOnMyWay": [
+            "characters/Shyvana/sounds/401249295.ogg",
+            "characters/Shyvana/sounds/420465536.ogg",
+            "characters/Shyvana/sounds/513082189.ogg",
+        ],
+        "Play_vo_Shyvana_Ping2DTarget": [
+            "characters/Shyvana/sounds/129646272.ogg",
+            "characters/Shyvana/sounds/693999706.ogg",
+            "characters/Shyvana/sounds/769960713.ogg",
+        ],
+        "Play_vo_Shyvana_Recall3DGeneral": [
+            "characters/Shyvana/sounds/1014761517.ogg",
+            "characters/Shyvana/sounds/177850264.ogg",
+            "characters/Shyvana/sounds/238926600.ogg",
+            "characters/Shyvana/sounds/377185048.ogg",
+            "characters/Shyvana/sounds/398374370.ogg",
+            "characters/Shyvana/sounds/567544309.ogg",
+            "characters/Shyvana/sounds/686427826.ogg",
+            "characters/Shyvana/sounds/89846593.ogg",
+        ],
+        "Play_vo_Shyvana_Respawn2DGeneral": [
+            "characters/Shyvana/sounds/317797897.ogg",
+            "characters/Shyvana/sounds/424941066.ogg",
+            "characters/Shyvana/sounds/728275346.ogg",
+            "characters/Shyvana/sounds/729328272.ogg",
+            "characters/Shyvana/sounds/740258677.ogg",
+            "characters/Shyvana/sounds/907291775.ogg",
+        ],
+        "Play_vo_Shyvana_ShyvanaBasicAttack2_cast3D": [
+            "characters/Shyvana/sounds/1067973450.ogg",
+            "characters/Shyvana/sounds/270526583.ogg",
+            "characters/Shyvana/sounds/676685272.ogg",
+            "characters/Shyvana/sounds/84532327.ogg",
+        ],
+        "Play_vo_Shyvana_ShyvanaBasicAttack_cast3D": [
+            "characters/Shyvana/sounds/1067973450.ogg",
+            "characters/Shyvana/sounds/270526583.ogg",
+            "characters/Shyvana/sounds/676685272.ogg",
+            "characters/Shyvana/sounds/84532327.ogg",
+        ],
+        "Play_vo_Shyvana_ShyvanaCritAttack_cast3D": [
+            "characters/Shyvana/sounds/1067973450.ogg",
+            "characters/Shyvana/sounds/270526583.ogg",
+            "characters/Shyvana/sounds/676685272.ogg",
+            "characters/Shyvana/sounds/84532327.ogg",
+        ],
+        "Play_vo_Shyvana_ShyvanaE_cast3D": [
+            "characters/Shyvana/sounds/528111716.ogg",
+            "characters/Shyvana/sounds/568088229.ogg",
+            "characters/Shyvana/sounds/668089559.ogg",
+            "characters/Shyvana/sounds/670394451.ogg",
+            "characters/Shyvana/sounds/990428053.ogg",
+        ],
+        "Play_vo_Shyvana_ShyvanaQAttack2_cast3D": [
+            "characters/Shyvana/sounds/180978002.ogg",
+            "characters/Shyvana/sounds/295060612.ogg",
+            "characters/Shyvana/sounds/728235190.ogg",
+        ],
+        "Play_vo_Shyvana_ShyvanaQAttack_cast3D": [
+            "characters/Shyvana/sounds/369963236.ogg",
+            "characters/Shyvana/sounds/831227738.ogg",
+            "characters/Shyvana/sounds/895859900.ogg",
+        ],
+        "Play_vo_Shyvana_Spell2DRRankOne": [
+            "characters/Shyvana/sounds/520712193.ogg",
+        ],
+        "Play_vo_Shyvana_Spell2DRankUpGeneral": [
+            "characters/Shyvana/sounds/386958676.ogg",
+            "characters/Shyvana/sounds/821224095.ogg",
+            "characters/Shyvana/sounds/892526870.ogg",
+            "characters/Shyvana/sounds/898897358.ogg",
+        ],
+        "Play_vo_Shyvana_Spell3DPMax": [
+            "characters/Shyvana/sounds/127867237.ogg",
+            "characters/Shyvana/sounds/316366715.ogg",
+            "characters/Shyvana/sounds/486073293.ogg",
+            "characters/Shyvana/sounds/536094254.ogg",
+            "characters/Shyvana/sounds/933131473.ogg",
+        ],
+        "Play_vo_Shyvana_Taunt3DGeneral": [
+            "characters/Shyvana/sounds/481871791.ogg",
+        ],
+        "Play_vo_Shyvana_TauntResponse3DGeneral": [
+            "characters/Shyvana/sounds/609831296.ogg",
+        ],
+        "ShyvanaBasicAttack2_OnCast": [
+            "characters/Shyvana/sounds/151345236.ogg",
+            "characters/Shyvana/sounds/572803182.ogg",
+            "characters/Shyvana/sounds/61600654.ogg",
+            "characters/Shyvana/sounds/703825810.ogg",
+            "characters/Shyvana/sounds/862617973.ogg",
+        ],
+        "ShyvanaBasicAttack2_OnHit": [
+            "characters/Shyvana/sounds/1006819181.ogg",
+            "characters/Shyvana/sounds/132507726.ogg",
+            "characters/Shyvana/sounds/424869297.ogg",
+            "characters/Shyvana/sounds/496304681.ogg",
+            "characters/Shyvana/sounds/568947087.ogg",
+        ],
+        "ShyvanaBasicAttack_OnCast": [
+            "characters/Shyvana/sounds/151345236.ogg",
+            "characters/Shyvana/sounds/572803182.ogg",
+            "characters/Shyvana/sounds/61600654.ogg",
+            "characters/Shyvana/sounds/703825810.ogg",
+            "characters/Shyvana/sounds/862617973.ogg",
+        ],
+        "ShyvanaBasicAttack_OnHit": [
+            "characters/Shyvana/sounds/1006819181.ogg",
+            "characters/Shyvana/sounds/132507726.ogg",
+            "characters/Shyvana/sounds/424869297.ogg",
+            "characters/Shyvana/sounds/496304681.ogg",
+            "characters/Shyvana/sounds/568947087.ogg",
+        ],
+        "ShyvanaCritAttack_OnCast": [
+            "characters/Shyvana/sounds/125650644.ogg",
+            "characters/Shyvana/sounds/294099083.ogg",
+            "characters/Shyvana/sounds/698236393.ogg",
+        ],
+        "ShyvanaCritAttack_OnHit": [
+            "characters/Shyvana/sounds/214419138.ogg",
+            "characters/Shyvana/sounds/446933373.ogg",
+            "characters/Shyvana/sounds/644197515.ogg",
+        ],
+        "ShyvanaDance3D_leadin": [
+            "characters/Shyvana/sounds/403746139.ogg",
+        ],
+        "ShyvanaDance3D_loop": [
+            "characters/Shyvana/sounds/509229718.ogg",
+        ],
+        "ShyvanaDeath3D_buffactivate": [
+            "characters/Shyvana/sounds/264611614.ogg",
+        ],
+        "ShyvanaDragonBasicAttack2_OnCast": [
+            "characters/Shyvana/sounds/1059558433.ogg",
+            "characters/Shyvana/sounds/160428788.ogg",
+            "characters/Shyvana/sounds/903261489.ogg",
+        ],
+        "ShyvanaDragonBasicAttack2_OnHit": [
+            "characters/Shyvana/sounds/37820401.ogg",
+            "characters/Shyvana/sounds/406417464.ogg",
+            "characters/Shyvana/sounds/751557710.ogg",
+        ],
+        "ShyvanaDragonBasicAttack_OnCast": [
+            "characters/Shyvana/sounds/1059558433.ogg",
+            "characters/Shyvana/sounds/160428788.ogg",
+            "characters/Shyvana/sounds/903261489.ogg",
+        ],
+        "ShyvanaDragonBasicAttack_OnHit": [
+            "characters/Shyvana/sounds/37820401.ogg",
+            "characters/Shyvana/sounds/406417464.ogg",
+            "characters/Shyvana/sounds/751557710.ogg",
+        ],
+        "ShyvanaDragonCritAttack_OnCast": [
+            "characters/Shyvana/sounds/567008440.ogg",
+            "characters/Shyvana/sounds/602862180.ogg",
+            "characters/Shyvana/sounds/99054675.ogg",
+        ],
+        "ShyvanaDragonCritAttack_OnHit": [
+            "characters/Shyvana/sounds/1021382283.ogg",
+            "characters/Shyvana/sounds/248870031.ogg",
+            "characters/Shyvana/sounds/404182118.ogg",
+        ],
+        "ShyvanaDragonDance3D_leadin": [
+            "characters/Shyvana/sounds/189387313.ogg",
+        ],
+        "ShyvanaDragonDance3D_loop": [
+            "characters/Shyvana/sounds/623697667.ogg",
+        ],
+        "ShyvanaDragonDeath3D_buffactivate": [
+            "characters/Shyvana/sounds/414684636.ogg",
+        ],
+        "ShyvanaDragonHomeguard3D_leadin": [
+            "characters/Shyvana/sounds/126151935.ogg",
+        ],
+        "ShyvanaDragonHomeguard3D_loop": [
+            "characters/Shyvana/sounds/1056317131.ogg",
+        ],
+        "ShyvanaDragonJoke3D_buffactivate": [
+            "characters/Shyvana/sounds/96505769.ogg",
+        ],
+        "ShyvanaDragonLaugh3D_buffactivate": [
+            "characters/Shyvana/sounds/910620698.ogg",
+        ],
+        "ShyvanaDragonQ1_buffactivate_loop": [
+            "characters/Shyvana/sounds/5435603.ogg",
+        ],
+        "ShyvanaDragonQ2_buffactivate": [
+            "characters/Shyvana/sounds/952017710.ogg",
+        ],
+        "ShyvanaDragonQ3_buffactivate": [
+            "characters/Shyvana/sounds/680774302.ogg",
+        ],
+        "ShyvanaDragonQ3_buffactivate_loop": [
+            "characters/Shyvana/sounds/135045652.ogg",
+        ],
+        "ShyvanaDragonQ_buffactivate": [
+            "characters/Shyvana/sounds/577396661.ogg",
+        ],
+        "ShyvanaDragonRTransform_buffactivate_loop": [
+            "characters/Shyvana/sounds/217487858.ogg",
+        ],
+        "ShyvanaDragonR_hit": [
+            "characters/Shyvana/sounds/603673766.ogg",
+            "characters/Shyvana/sounds/810666909.ogg",
+            "characters/Shyvana/sounds/882225241.ogg",
+        ],
+        "ShyvanaDragonR_obd": [
+            "characters/Shyvana/sounds/400864807.ogg",
+        ],
+        "ShyvanaDragonR_omc": [
+            "characters/Shyvana/sounds/333287345.ogg",
+        ],
+        "ShyvanaDragonR_oncast": [
+            "characters/Shyvana/sounds/388913046.ogg",
+            "characters/Shyvana/sounds/491008034.ogg",
+            "characters/Shyvana/sounds/653963107.ogg",
+            "characters/Shyvana/sounds/965219771.ogg",
+        ],
+        "ShyvanaDragonR_ready_self": [
+            "characters/Shyvana/sounds/292406926.ogg",
+            "characters/Shyvana/sounds/371098727.ogg",
+            "characters/Shyvana/sounds/419344579.ogg",
+        ],
+        "ShyvanaDragonR_untransform": [
+            "characters/Shyvana/sounds/903889723.ogg",
+        ],
+        "ShyvanaDragonRecall3D_buffactivate": [
+            "characters/Shyvana/sounds/318708758.ogg",
+        ],
+        "ShyvanaDragonRespawn3D_buffactivate": [
+            "characters/Shyvana/sounds/541247464.ogg",
+        ],
+        "ShyvanaDragonTaunt3D_buffactivate": [
+            "characters/Shyvana/sounds/369016252.ogg",
+        ],
+        "ShyvanaDragonW_buffactivate": [
+            "characters/Shyvana/sounds/1061508843.ogg",
+        ],
+        "ShyvanaDragonW_buffcast": [
+            "characters/Shyvana/sounds/298311009.ogg",
+            "characters/Shyvana/sounds/561965919.ogg",
+            "characters/Shyvana/sounds/619344436.ogg",
+        ],
+        "ShyvanaDragonW_buffdeactivate": [
+            "characters/Shyvana/sounds/218548829.ogg",
+            "characters/Shyvana/sounds/286264050.ogg",
+            "characters/Shyvana/sounds/954510484.ogg",
+        ],
+        "ShyvanaDragonW_heal": [
+            "characters/Shyvana/sounds/721050692.ogg",
+            "characters/Shyvana/sounds/940528428.ogg",
+            "characters/Shyvana/sounds/977108257.ogg",
+        ],
+        "ShyvanaDragonW_run_in": [
+            "characters/Shyvana/sounds/40516919.ogg",
+        ],
+        "ShyvanaDragonW_runloop": [
+            "characters/Shyvana/sounds/150794743.ogg",
+        ],
+        "ShyvanaEDragon_OnCast": [
+            "characters/Shyvana/sounds/237697861.ogg",
+            "characters/Shyvana/sounds/554421333.ogg",
+            "characters/Shyvana/sounds/670873921.ogg",
+        ],
+        "ShyvanaEDragon_OnMissileCast": [
+            "characters/Shyvana/sounds/21844259.ogg",
+            "characters/Shyvana/sounds/228416905.ogg",
+            "characters/Shyvana/sounds/982226148.ogg",
+        ],
+        "ShyvanaEDragon_OnMissileLaunch": [
+            "characters/Shyvana/sounds/418937125.ogg",
+        ],
+        "ShyvanaEDragon_hitlocation": [
+            "characters/Shyvana/sounds/323585144.ogg",
+            "characters/Shyvana/sounds/616779134.ogg",
+            "characters/Shyvana/sounds/639209683.ogg",
+            "characters/Shyvana/sounds/764281793.ogg",
+        ],
+        "ShyvanaEDragon_hitlocation_champ_sweetener": [
+            "characters/Shyvana/sounds/307990241.ogg",
+            "characters/Shyvana/sounds/510792644.ogg",
+            "characters/Shyvana/sounds/548180268.ogg",
+        ],
+        "ShyvanaEDragon_hitlocation_dot": [
+            "characters/Shyvana/sounds/241130225.ogg",
+        ],
+        "ShyvanaE_OnCast": [
+            "characters/Shyvana/sounds/15425789.ogg",
+            "characters/Shyvana/sounds/245538304.ogg",
+            "characters/Shyvana/sounds/413489378.ogg",
+        ],
+        "ShyvanaE_OnMissileLaunch": [
+            "characters/Shyvana/sounds/755027261.ogg",
+            "characters/Shyvana/sounds/774723590.ogg",
+            "characters/Shyvana/sounds/973947505.ogg",
+        ],
+        "ShyvanaE_hit": [
+            "characters/Shyvana/sounds/612183612.ogg",
+            "characters/Shyvana/sounds/684040196.ogg",
+            "characters/Shyvana/sounds/998340922.ogg",
+        ],
+        "ShyvanaE_hitlocation": [
+            "characters/Shyvana/sounds/410829372.ogg",
+            "characters/Shyvana/sounds/533051337.ogg",
+            "characters/Shyvana/sounds/574621054.ogg",
+        ],
+        "ShyvanaE_hitlocation_champ_sweetener": [
+            "characters/Shyvana/sounds/138059326.ogg",
+            "characters/Shyvana/sounds/338684252.ogg",
+            "characters/Shyvana/sounds/432468713.ogg",
+        ],
+        "ShyvanaHomeguard3D_footstep_01": [
+            "characters/Shyvana/sounds/310974953.ogg",
+        ],
+        "ShyvanaHomeguard3D_footstep_02": [
+            "characters/Shyvana/sounds/688358305.ogg",
+        ],
+        "ShyvanaJoke3D_buffactivate": [
+            "characters/Shyvana/sounds/905734938.ogg",
+        ],
+        "ShyvanaLaugh3D_buffactivate": [
+            "characters/Shyvana/sounds/489527129.ogg",
+        ],
+        "ShyvanaQ2_buffactivate": [
+            "characters/Shyvana/sounds/1049034229.ogg",
+            "characters/Shyvana/sounds/622702588.ogg",
+            "characters/Shyvana/sounds/919716403.ogg",
+        ],
+        "ShyvanaQAttack2_OnCast": [
+            "characters/Shyvana/sounds/136969387.ogg",
+            "characters/Shyvana/sounds/305521366.ogg",
+        ],
+        "ShyvanaQAttack2_OnHit": [
+            "characters/Shyvana/sounds/503546630.ogg",
+            "characters/Shyvana/sounds/725973486.ogg",
+            "characters/Shyvana/sounds/959218643.ogg",
+        ],
+        "ShyvanaQAttackDragon2_OnCast": [
+            "characters/Shyvana/sounds/303100416.ogg",
+        ],
+        "ShyvanaQAttackDragon2_OnHit": [
+            "characters/Shyvana/sounds/418184286.ogg",
+        ],
+        "ShyvanaQAttackDragon3_OnCast": [
+            "characters/Shyvana/sounds/295101937.ogg",
+        ],
+        "ShyvanaQAttackDragon3_OnHit": [
+            "characters/Shyvana/sounds/765584319.ogg",
+        ],
+        "ShyvanaQAttackDragon_OnCast": [
+            "characters/Shyvana/sounds/889418221.ogg",
+        ],
+        "ShyvanaQAttackDragon_OnHit": [
+            "characters/Shyvana/sounds/553049401.ogg",
+        ],
+        "ShyvanaQAttackReady2_OnBuffDeactivate": [
+            "characters/Shyvana/sounds/187504990.ogg",
+        ],
+        "ShyvanaQAttackReady3_OnBuffDeactivate": [
+            "characters/Shyvana/sounds/187504990.ogg",
+        ],
+        "ShyvanaQAttackReady_OnBuffDeactivate": [
+            "characters/Shyvana/sounds/187504990.ogg",
+        ],
+        "ShyvanaQAttack_OnCast": [
+            "characters/Shyvana/sounds/935918271.ogg",
+        ],
+        "ShyvanaQAttack_OnHit": [
+            "characters/Shyvana/sounds/1000966831.ogg",
+            "characters/Shyvana/sounds/562026629.ogg",
+            "characters/Shyvana/sounds/845488668.ogg",
+        ],
+        "ShyvanaQ_buffactivate": [
+            "characters/Shyvana/sounds/18565773.ogg",
+            "characters/Shyvana/sounds/593651908.ogg",
+            "characters/Shyvana/sounds/97656422.ogg",
+        ],
+        "ShyvanaQ_buffactivate_loop": [
+            "characters/Shyvana/sounds/340875512.ogg",
+        ],
+        "ShyvanaRecall3D_buffactivate": [
+            "characters/Shyvana/sounds/303991017.ogg",
+        ],
+        "ShyvanaRespawn3D_buffactivate": [
+            "characters/Shyvana/sounds/909386310.ogg",
+        ],
+        "ShyvanaTaunt3D_buffactivate": [
+            "characters/Shyvana/sounds/756978185.ogg",
+        ],
+        "ShyvanaW_buffactivate": [
+            "characters/Shyvana/sounds/48779079.ogg",
+        ],
+        "ShyvanaW_buffcast": [
+            "characters/Shyvana/sounds/1050050083.ogg",
+            "characters/Shyvana/sounds/254906227.ogg",
+            "characters/Shyvana/sounds/97597020.ogg",
+        ],
+        "ShyvanaW_buffdeactivate": [
+            "characters/Shyvana/sounds/263489638.ogg",
+            "characters/Shyvana/sounds/884909956.ogg",
+            "characters/Shyvana/sounds/937938753.ogg",
+        ],
+        "ShyvanaW_buffdeactivate_champ_hit": [
+            "characters/Shyvana/sounds/570063416.ogg",
+            "characters/Shyvana/sounds/702337523.ogg",
+            "characters/Shyvana/sounds/803093608.ogg",
+        ],
+        "ShyvanaW_recast_ready_oc": [
+            "characters/Shyvana/sounds/422751239.ogg",
+            "characters/Shyvana/sounds/455677058.ogg",
+            "characters/Shyvana/sounds/587344936.ogg",
+        ],
+        "ShyvanaW_run_footstep1": [
+            "characters/Shyvana/sounds/520745227.ogg",
+        ],
+        "ShyvanaW_run_footstep2": [
+            "characters/Shyvana/sounds/134401689.ogg",
+        ],
+    },
+)

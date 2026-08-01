@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn, CommandSkinSoundPlay};
 use lol_base::spell::Spell;
 use lol_core::action::dash::{ActionDash, DashMoveType};
 use lol_core::action::displace::{
@@ -113,6 +113,13 @@ pub fn on_riven_q(
             rotation: None,
             resolver_entity: None,
         });
+        commands.trigger(CommandSkinSoundPlay {
+            entity,
+            key: match stage {
+                2 => "RivenQ2_OnCast".to_string(),
+                _ => "RivenQ_OnCast".to_string(),
+            },
+        });
         commands.trigger(CommandAttachedFieldCreate {
             entity,
             radius,
@@ -148,6 +155,10 @@ pub fn on_riven_dash_end(
         hash: "Riven_Q_03_Detonate".to_string(),
         rotation: None,
         resolver_entity: None,
+    });
+    commands.trigger(CommandSkinSoundPlay {
+        entity,
+        key: "RivenQ3_OnCast".to_string(),
     });
 
     // 使用统一位移体系：Circle + PushAway + Knockup + Damage

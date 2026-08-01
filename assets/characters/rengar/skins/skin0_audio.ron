@@ -1,0 +1,332 @@
+(
+    events: {
+        "Dance3D_buffactivate": [
+            "characters/Rengar/sounds/846924816.ogg",
+        ],
+        "Death3D_cast": [
+            "characters/Rengar/sounds/60980538.ogg",
+        ],
+        "Joke3D_buffactivate": [
+            "characters/Rengar/sounds/40185885.ogg",
+        ],
+        "Laugh3D_buffactivate": [
+            "characters/Rengar/sounds/412489507.ogg",
+        ],
+        "Play_vo_Rengar_Attack2DGeneral": [
+            "characters/Rengar/sounds/162988081.ogg",
+            "characters/Rengar/sounds/39373797.ogg",
+            "characters/Rengar/sounds/405479262.ogg",
+            "characters/Rengar/sounds/433454508.ogg",
+            "characters/Rengar/sounds/752457050.ogg",
+            "characters/Rengar/sounds/777110658.ogg",
+            "characters/Rengar/sounds/850615087.ogg",
+        ],
+        "Play_vo_Rengar_Death3D": [
+            "characters/Rengar/sounds/12816564.ogg",
+            "characters/Rengar/sounds/641621447.ogg",
+            "characters/Rengar/sounds/68789565.ogg",
+            "characters/Rengar/sounds/816905910.ogg",
+        ],
+        "Play_vo_Rengar_FirstEncounter3DKhazix": [
+            "characters/Rengar/sounds/492565620.ogg",
+            "characters/Rengar/sounds/504171735.ogg",
+        ],
+        "Play_vo_Rengar_Joke3DGeneral": [
+            "characters/Rengar/sounds/183515523.ogg",
+            "characters/Rengar/sounds/834116630.ogg",
+        ],
+        "Play_vo_Rengar_Laugh3DGeneral": [
+            "characters/Rengar/sounds/170729522.ogg",
+            "characters/Rengar/sounds/479385689.ogg",
+            "characters/Rengar/sounds/95733462.ogg",
+        ],
+        "Play_vo_Rengar_Move2DStandard": [
+            "characters/Rengar/sounds/16075045.ogg",
+            "characters/Rengar/sounds/259996220.ogg",
+            "characters/Rengar/sounds/316894002.ogg",
+            "characters/Rengar/sounds/380854457.ogg",
+            "characters/Rengar/sounds/527773579.ogg",
+            "characters/Rengar/sounds/585721890.ogg",
+            "characters/Rengar/sounds/642780522.ogg",
+            "characters/Rengar/sounds/67170567.ogg",
+            "characters/Rengar/sounds/853025531.ogg",
+            "characters/Rengar/sounds/981220071.ogg",
+        ],
+        "Play_vo_Rengar_RengarBasicAttack2_cast3D": [
+            "characters/Rengar/sounds/116001945.ogg",
+            "characters/Rengar/sounds/533246090.ogg",
+            "characters/Rengar/sounds/625646870.ogg",
+            "characters/Rengar/sounds/862285376.ogg",
+        ],
+        "Play_vo_Rengar_RengarBasicAttack3_cast3D": [
+            "characters/Rengar/sounds/116001945.ogg",
+            "characters/Rengar/sounds/533246090.ogg",
+            "characters/Rengar/sounds/625646870.ogg",
+            "characters/Rengar/sounds/862285376.ogg",
+        ],
+        "Play_vo_Rengar_RengarBasicAttack_cast3D": [
+            "characters/Rengar/sounds/116001945.ogg",
+            "characters/Rengar/sounds/533246090.ogg",
+            "characters/Rengar/sounds/625646870.ogg",
+            "characters/Rengar/sounds/862285376.ogg",
+        ],
+        "Play_vo_Rengar_RengarCritAttack_cast3D": [
+            "characters/Rengar/sounds/116001945.ogg",
+            "characters/Rengar/sounds/533246090.ogg",
+            "characters/Rengar/sounds/625646870.ogg",
+            "characters/Rengar/sounds/862285376.ogg",
+        ],
+        "Play_vo_Rengar_RengarEEmp_cast3D": [
+            "characters/Rengar/sounds/203933131.ogg",
+            "characters/Rengar/sounds/226273143.ogg",
+            "characters/Rengar/sounds/343048832.ogg",
+            "characters/Rengar/sounds/356484723.ogg",
+            "characters/Rengar/sounds/860699595.ogg",
+            "characters/Rengar/sounds/870760040.ogg",
+        ],
+        "Play_vo_Rengar_RengarE_cast3D": [
+            "characters/Rengar/sounds/203933131.ogg",
+            "characters/Rengar/sounds/226273143.ogg",
+            "characters/Rengar/sounds/343048832.ogg",
+            "characters/Rengar/sounds/356484723.ogg",
+            "characters/Rengar/sounds/860699595.ogg",
+            "characters/Rengar/sounds/870760040.ogg",
+        ],
+        "Play_vo_Rengar_RengarQEmp_cast3D": [
+            "characters/Rengar/sounds/265281380.ogg",
+            "characters/Rengar/sounds/31667692.ogg",
+            "characters/Rengar/sounds/654847799.ogg",
+            "characters/Rengar/sounds/930305439.ogg",
+        ],
+        "Play_vo_Rengar_RengarQ_cast3D": [
+            "characters/Rengar/sounds/265281380.ogg",
+            "characters/Rengar/sounds/31667692.ogg",
+            "characters/Rengar/sounds/654847799.ogg",
+            "characters/Rengar/sounds/930305439.ogg",
+        ],
+        "Play_vo_Rengar_RengarR_cast3D": [
+            "characters/Rengar/sounds/1067045100.ogg",
+            "characters/Rengar/sounds/78490548.ogg",
+            "characters/Rengar/sounds/952753012.ogg",
+        ],
+        "Play_vo_Rengar_RengarWEmp_cast3D": [
+            "characters/Rengar/sounds/149201414.ogg",
+            "characters/Rengar/sounds/21986186.ogg",
+            "characters/Rengar/sounds/295180045.ogg",
+            "characters/Rengar/sounds/765509692.ogg",
+            "characters/Rengar/sounds/798837568.ogg",
+            "characters/Rengar/sounds/986721898.ogg",
+        ],
+        "Play_vo_Rengar_RengarW_cast3D": [
+            "characters/Rengar/sounds/149201414.ogg",
+            "characters/Rengar/sounds/21986186.ogg",
+            "characters/Rengar/sounds/295180045.ogg",
+            "characters/Rengar/sounds/765509692.ogg",
+            "characters/Rengar/sounds/798837568.ogg",
+            "characters/Rengar/sounds/986721898.ogg",
+        ],
+        "Play_vo_Rengar_Spell3DPStackFive": [
+            "characters/Rengar/sounds/398868634.ogg",
+            "characters/Rengar/sounds/918547441.ogg",
+        ],
+        "Play_vo_Rengar_Spell3DPStackFour": [
+            "characters/Rengar/sounds/637002993.ogg",
+            "characters/Rengar/sounds/883862499.ogg",
+        ],
+        "Play_vo_Rengar_Spell3DPStackOne": [
+            "characters/Rengar/sounds/697319120.ogg",
+            "characters/Rengar/sounds/805305363.ogg",
+        ],
+        "Play_vo_Rengar_Spell3DPStackThree": [
+            "characters/Rengar/sounds/244254978.ogg",
+            "characters/Rengar/sounds/539834884.ogg",
+        ],
+        "Play_vo_Rengar_Spell3DPStackTwo": [
+            "characters/Rengar/sounds/699017702.ogg",
+            "characters/Rengar/sounds/878468570.ogg",
+        ],
+        "Play_vo_Rengar_Taunt3DGeneral": [
+            "characters/Rengar/sounds/667506072.ogg",
+            "characters/Rengar/sounds/869663278.ogg",
+        ],
+        "RengarBasicAttack2_OnCast": [
+            "characters/Rengar/sounds/233335201.ogg",
+            "characters/Rengar/sounds/248548646.ogg",
+            "characters/Rengar/sounds/841224316.ogg",
+            "characters/Rengar/sounds/872169538.ogg",
+        ],
+        "RengarBasicAttack2_OnHit": [
+            "characters/Rengar/sounds/1017452316.ogg",
+            "characters/Rengar/sounds/1054137726.ogg",
+            "characters/Rengar/sounds/165787850.ogg",
+            "characters/Rengar/sounds/356315846.ogg",
+            "characters/Rengar/sounds/614669551.ogg",
+            "characters/Rengar/sounds/615085572.ogg",
+            "characters/Rengar/sounds/684673882.ogg",
+            "characters/Rengar/sounds/774789221.ogg",
+            "characters/Rengar/sounds/805802863.ogg",
+            "characters/Rengar/sounds/920037159.ogg",
+            "characters/Rengar/sounds/93136753.ogg",
+            "characters/Rengar/sounds/931874155.ogg",
+        ],
+        "RengarBasicAttack3_OnCast": [
+            "characters/Rengar/sounds/182059566.ogg",
+            "characters/Rengar/sounds/736422171.ogg",
+        ],
+        "RengarBasicAttack3_OnHit": [
+            "characters/Rengar/sounds/1019329146.ogg",
+            "characters/Rengar/sounds/316416970.ogg",
+            "characters/Rengar/sounds/449825690.ogg",
+            "characters/Rengar/sounds/605790584.ogg",
+            "characters/Rengar/sounds/732938742.ogg",
+            "characters/Rengar/sounds/756360503.ogg",
+            "characters/Rengar/sounds/796925831.ogg",
+            "characters/Rengar/sounds/859894010.ogg",
+            "characters/Rengar/sounds/879232787.ogg",
+            "characters/Rengar/sounds/962511648.ogg",
+        ],
+        "RengarBasicAttack_OnCast": [
+            "characters/Rengar/sounds/244896504.ogg",
+            "characters/Rengar/sounds/250531944.ogg",
+            "characters/Rengar/sounds/43345862.ogg",
+            "characters/Rengar/sounds/484668233.ogg",
+        ],
+        "RengarBasicAttack_OnHit": [
+            "characters/Rengar/sounds/1064994511.ogg",
+            "characters/Rengar/sounds/1065356812.ogg",
+            "characters/Rengar/sounds/213881167.ogg",
+            "characters/Rengar/sounds/300033886.ogg",
+            "characters/Rengar/sounds/389698136.ogg",
+            "characters/Rengar/sounds/411975550.ogg",
+            "characters/Rengar/sounds/537853689.ogg",
+            "characters/Rengar/sounds/608354326.ogg",
+            "characters/Rengar/sounds/622308403.ogg",
+            "characters/Rengar/sounds/664602241.ogg",
+            "characters/Rengar/sounds/719225180.ogg",
+            "characters/Rengar/sounds/876769892.ogg",
+            "characters/Rengar/sounds/937376108.ogg",
+            "characters/Rengar/sounds/982736144.ogg",
+        ],
+        "RengarCritAttack_OnCast": [
+            "characters/Rengar/sounds/233335201.ogg",
+            "characters/Rengar/sounds/248548646.ogg",
+            "characters/Rengar/sounds/841224316.ogg",
+        ],
+        "RengarCritAttack_OnHit": [
+            "characters/Rengar/sounds/165787850.ogg",
+            "characters/Rengar/sounds/93136753.ogg",
+        ],
+        "RengarEEmp_OnCast": [
+            "characters/Rengar/sounds/475252865.ogg",
+            "characters/Rengar/sounds/565659565.ogg",
+        ],
+        "RengarEEmpmis_OnHit": [
+            "characters/Rengar/sounds/884896830.ogg",
+            "characters/Rengar/sounds/922244655.ogg",
+        ],
+        "RengarEEmpmis_OnMissileLaunch": [
+            "characters/Rengar/sounds/288751881.ogg",
+            "characters/Rengar/sounds/64138681.ogg",
+        ],
+        "RengarE_OnCast": [
+            "characters/Rengar/sounds/285189644.ogg",
+            "characters/Rengar/sounds/820656419.ogg",
+        ],
+        "RengarE_hit": [
+            "characters/Rengar/sounds/638434982.ogg",
+            "characters/Rengar/sounds/918711645.ogg",
+        ],
+        "RengarE_missilelaunch": [
+            "characters/Rengar/sounds/555612877.ogg",
+            "characters/Rengar/sounds/721252382.ogg",
+        ],
+        "RengarPEmp_buffactivate": [
+            "characters/Rengar/sounds/640668492.ogg",
+        ],
+        "RengarP_cast": [
+            "characters/Rengar/sounds/144799297.ogg",
+            "characters/Rengar/sounds/939844980.ogg",
+        ],
+        "RengarP_leaphit": [
+            "characters/Rengar/sounds/15165027.ogg",
+            "characters/Rengar/sounds/299643670.ogg",
+        ],
+        "RengarQAttack_OnCast": [
+            "characters/Rengar/sounds/817338133.ogg",
+            "characters/Rengar/sounds/991430356.ogg",
+        ],
+        "RengarQAttack_OnHit": [
+            "characters/Rengar/sounds/691770131.ogg",
+            "characters/Rengar/sounds/932962317.ogg",
+            "characters/Rengar/sounds/933303664.ogg",
+            "characters/Rengar/sounds/977090987.ogg",
+        ],
+        "RengarQEmpAttack_OnCast": [
+            "characters/Rengar/sounds/113686181.ogg",
+            "characters/Rengar/sounds/24090427.ogg",
+        ],
+        "RengarQEmpAttack_OnHit": [
+            "characters/Rengar/sounds/1066864481.ogg",
+            "characters/Rengar/sounds/129773198.ogg",
+            "characters/Rengar/sounds/208263333.ogg",
+            "characters/Rengar/sounds/636951633.ogg",
+        ],
+        "RengarQEmp_OnBuffDeactivate": [
+            "characters/Rengar/sounds/93937301.ogg",
+        ],
+        "RengarQEmp_OnCast": [
+            "characters/Rengar/sounds/1055325746.ogg",
+        ],
+        "RengarQ_OnBuffDeactivate": [
+            "characters/Rengar/sounds/93937301.ogg",
+        ],
+        "RengarQ_OnCast": [
+            "characters/Rengar/sounds/137336967.ogg",
+            "characters/Rengar/sounds/648887529.ogg",
+            "characters/Rengar/sounds/865555344.ogg",
+            "characters/Rengar/sounds/936235237.ogg",
+        ],
+        "RengarQ_buffactivate": [
+            "characters/Rengar/sounds/624172001.ogg",
+        ],
+        "RengarRSecondaryTarget_start": [
+            "characters/Rengar/sounds/258959632.ogg",
+            "characters/Rengar/sounds/273848724.ogg",
+        ],
+        "RengarR_OnBuffDeactivate": [
+            "characters/Rengar/sounds/473455356.ogg",
+        ],
+        "RengarR_OnCast": [
+            "characters/Rengar/sounds/429868354.ogg",
+        ],
+        "RengarR_buffactivateheartbeat": [
+            "characters/Rengar/sounds/987845809.ogg",
+        ],
+        "RengarRstealth_end": [
+            "characters/Rengar/sounds/473455356.ogg",
+        ],
+        "RengarRstealth_start": [
+            "characters/Rengar/sounds/1001873488.ogg",
+            "characters/Rengar/sounds/1071365721.ogg",
+            "characters/Rengar/sounds/659840680.ogg",
+        ],
+        "RengarWBuff_buffactivate": [
+            "characters/Rengar/sounds/852271739.ogg",
+        ],
+        "RengarWEmp_OnCast": [
+            "characters/Rengar/sounds/1045967649.ogg",
+            "characters/Rengar/sounds/203041901.ogg",
+            "characters/Rengar/sounds/205740390.ogg",
+            "characters/Rengar/sounds/601125969.ogg",
+            "characters/Rengar/sounds/660985211.ogg",
+        ],
+        "RengarW_OnCast": [
+            "characters/Rengar/sounds/1045967649.ogg",
+            "characters/Rengar/sounds/205740390.ogg",
+            "characters/Rengar/sounds/660985211.ogg",
+        ],
+        "Taunt3D_buffactivate": [
+            "characters/Rengar/sounds/184325266.ogg",
+        ],
+    },
+)

@@ -2,7 +2,7 @@
 
 use bevy::prelude::*;
 use lol_base::animation_names::ANIM_SPELL1;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn, CommandSkinSoundPlay};
 use lol_base::spell::Spell;
 use lol_core::action::dash::{ActionDash, DashMoveType};
 use lol_core::attack::CommandAttackReset;
@@ -103,6 +103,10 @@ pub fn on_irelia_q(
             hash: "Irelia_Q_heal".to_string(),
             rotation: None,
             resolver_entity: None,
+        });
+        commands.trigger(CommandSkinSoundPlay {
+            entity,
+            key: "IreliaQ_OnHit".to_string(),
         });
 
         if is_unsteady {

@@ -1,10 +1,10 @@
 //! 皮肤音效提取：从 skin_audio_properties.bank_units 出发，解析 Wwise bnk/wpk，
-//! 把普攻/技能事件解析成 wem，转码为 ogg 落盘，并生成 [`ConfigAudio`]。
+//! 将事件名映射为 ogg 音频文件列表，并生成 [`ConfigAudio`]。
 //!
 //! 数据链路：bankUnits → bankPath(*_audio.bnk/*.wpk 提供媒体, *_events.bnk 提供 HIRC)
 //! + Events(事件名) → FNV-1 哈希 → HIRC 解析出 wem id → ww2ogg 转 ogg。
 
-use std::collections::{BTreeMap, HashMap, HashSet};
+use std::collections::{BTreeMap, HashMap};
 use std::io::Cursor;
 
 use league_core::extract::SkinCharacterDataProperties;
@@ -13,84 +13,29 @@ use league_file::wpk::WpkFile;
 use league_loader::game::LeagueLoader;
 use league_loader::prop_bin::LeagueWadLoaderTrait;
 use league_loader::wad::LeagueWadLoader;
-use lol_base::audio::{AudioCue, ConfigAudio};
+use lol_base::audio::ConfigAudio;
 use ww2ogg::{CodebookLibrary, WwiseRiffVorbis};
 
 use super::utils::write_to_file;
 
-/// 触发相位。
-#[derive(Clone, Copy, PartialEq, Debug)]
-enum Phase {
-    Cast,
-    Hit,
-}
-
-/// 从事件名判断相位；除了 OnCast/OnHit，Wwise 里大量技能音效走 buff 通道
-/// （`_OnBuffActivate`/`_OnBuffCast`/`_buffactivate` 等），R、被动、W 格挡等音效都在其中。
-/// `Stop_*` 是停止命令，不参与归类；VO 等其余事件返回 None 被忽略。
-fn phase_of(event: &str) -> Option<Phase> {
-    let e = event.to_ascii_lowercase();
-    if e.starts_with("stop_") {
-        return None;
-    }
-    if e.contains("onhit") || e.contains("hitsound") || e.contains("_hit") {
-        Some(Phase::Hit)
-    } else if e.contains("attack") && e.contains("buffcast")
-        || e.contains("attack") && e.contains("buffactivate")
-    {
-        // 攻击类音效走 buff 通道时是命中反馈（如 FioraQAttack_OnBuffCast 即 Q 的命中音）
-        Some(Phase::Hit)
-    } else if e.contains("oncast")
-        || e.contains("onbuffactivate")
-        || e.contains("onbuffcast")
-        || e.contains("buffactivate")
-        || e.contains("buffcast")
-    {
-        Some(Phase::Cast)
+/// 从事件名提取 key：去掉 `Play_sfx_{Champ}_` 或 `Play_sfx_` 前缀。
+fn clean_event_key<'a>(event: &'a str, champ_name: &str) -> &'a str {
+    let champ_prefix = format!("Play_sfx_{}_", champ_name);
+    if let Some(rest) = event.strip_prefix(&champ_prefix) {
+        rest
+    } else if let Some(rest) = event.strip_prefix("Play_sfx_") {
+        rest
     } else {
-        None
+        event
     }
 }
 
-/// 事件是否走 buff 通道（OnBuffActivate/OnBuffCast/_buffactivate/_buffcast）。
-fn is_buff_channel_event(event: &str) -> bool {
-    let e = event.to_ascii_lowercase();
-    e.contains("onbuffactivate")
-        || e.contains("onbuffcast")
-        || e.contains("buffactivate")
-        || e.contains("buffcast")
-}
-
-/// 从事件名提取描述名：去掉 `Play_sfx_<Champ>_` 前缀和相位后缀。
-/// 如 `Play_sfx_Fiora_FioraPassiveReadySound_OnBuffActivate` -> `FioraPassiveReadySound`。
-fn event_descriptor(event: &str, champ_name: &str) -> Option<String> {
-    let prefix = format!("Play_sfx_{}_", champ_name);
-    let rest = event.strip_prefix(&prefix)?;
-    for suffix in [
-        "_OnBuffActivate",
-        "_OnBuffCast",
-        "_OnHit",
-        "_OnCast",
-        "_buffactivate",
-        "_buffcast",
-        "_hit",
-    ] {
-        if let Some(s) = rest.strip_suffix(suffix) {
-            return Some(s.to_string());
-        }
-    }
-    None
-}
-
-/// 提取皮肤音效并返回 ConfigAudio；`all_spell_names` 为该英雄全部技能对象名，
-/// `basic_attack_names` 为普攻/暴击的攻击名（用于把事件归类到普攻）。
+/// 提取皮肤音效并返回 ConfigAudio；解析 Wwise bnk/wpk，将事件映射到 ogg 资源路径。
 pub fn export_audio_for_skin(
     loader: &LeagueLoader,
     champ_name: &str,
     skin_id: &str,
     skin_data: &SkinCharacterDataProperties,
-    all_spell_names: &[String],
-    basic_attack_names: &[String],
 ) -> ConfigAudio {
     let mut config = ConfigAudio::default();
 
@@ -206,69 +151,18 @@ pub fn export_audio_for_skin(
         return config;
     }
 
-    // 2) 分类事件到 普攻 / 各技能
-    // 技能候选：排除普攻名，按名字长度降序以便优先匹配更具体的技能名
-    let basic_lower: Vec<String> = basic_attack_names.iter().map(|s| s.to_lowercase()).collect();
-    let mut spell_candidates: Vec<String> = all_spell_names
-        .iter()
-        .filter(|name| {
-            let lower = name.to_lowercase();
-            !basic_lower.iter().any(|b| !b.is_empty() && lower == *b)
-        })
-        .cloned()
-        .collect();
-    spell_candidates.sort_by(|a, b| b.len().cmp(&a.len()));
-
     let sounds_dir = format!("characters/{}/sounds", champ_name);
     let mut ogg_cache: HashMap<u32, Option<String>> = HashMap::new();
+    let mut events_map: BTreeMap<String, Vec<String>> = BTreeMap::new();
 
-    let mut basic = AudioCue::default();
-    let mut spells: BTreeMap<String, AudioCue> = BTreeMap::new();
-
-    println!("[AUDIO] 开始处理事件（技能候选 {} 个）", spell_candidates.len());
+    println!("[AUDIO] 开始处理事件");
     let mut n_matched = 0usize;
     for (ei, event) in all_events.iter().enumerate() {
-        let Some(phase) = phase_of(event) else {
-            println!("[AUDIO]   [{}/{}] 跳过（非 cast/hit）: {}", ei + 1, all_events.len(), event);
-            continue;
-        };
-        let lower = event.to_lowercase();
-
-        // 归类：普攻优先（名字命中或含 basicattack/critattack 关键字），否则匹配技能名
-        let is_basic = basic_lower.iter().any(|b| !b.is_empty() && lower.contains(b))
-            || lower.contains("basicattack")
-            || lower.contains("critattack");
-        let bucket: Option<String> = if is_basic {
-            None // 归入 basic
-        } else {
-            spell_candidates
-                .iter()
-                .find(|name| lower.contains(&name.to_lowercase()))
-                .cloned()
-        };
-        // 若描述名不是技能名，则拆成独立 cue（如 FioraPassiveReadySound / FioraWSlow /
-        // FioraRMark），避免 ReadySound/Speed/Stun 等不同时机的音效混进同一组随机播放。
-        let cue_key: Option<String> = if let Some(b) = &bucket {
-            if !is_basic {
-                if let Some(desc) = event_descriptor(event, champ_name) {
-                    if *b != desc {
-                        Some(desc)
-                    } else {
-                        Some(b.clone())
-                    }
-                } else {
-                    Some(b.clone())
-                }
-            } else {
-                Some(b.clone())
-            }
-        } else {
-            None
-        };
-        if !is_basic && cue_key.is_none() {
-            println!("[AUDIO]   [{}/{}] 跳过（与普攻/技能无关）: {}", ei + 1, all_events.len(), event);
+        if event.to_ascii_lowercase().starts_with("stop_") {
             continue;
         }
+
+        let event_key = clean_event_key(event, champ_name).to_string();
 
         // 解析事件 -> wem -> ogg 路径
         let mut wems: Vec<u32> = Vec::new();
@@ -277,17 +171,8 @@ pub fn export_audio_for_skin(
         }
         wems.sort_unstable();
         wems.dedup();
-        println!(
-            "[AUDIO]   [{}/{}] 事件 {} -> phase={:?} cue={:?} wems={:?}",
-            ei + 1,
-            all_events.len(),
-            event,
-            phase,
-            cue_key,
-            wems
-        );
         if wems.is_empty() {
-            println!("[AUDIO]     没有解析到任何 wem（事件未命中 HIRC）");
+            println!("[AUDIO]     [{}/{}] 没有解析到任何 wem: {}", ei + 1, all_events.len(), event);
             continue;
         }
 
@@ -304,57 +189,28 @@ pub fn export_audio_for_skin(
             continue;
         }
 
-        let cue = match &cue_key {
-            Some(name) => spells.entry(name.clone()).or_default(),
-            None => &mut basic,
-        };
-        match phase {
-            Phase::Cast => cue.on_cast.extend(oggs),
-            Phase::Hit => cue.on_hit.extend(oggs),
-        }
+        events_map.entry(event_key).or_default().extend(oggs);
         n_matched += 1;
     }
-    println!("[AUDIO] 事件处理完成：成功归类 {} 个事件", n_matched);
+    println!("[AUDIO] 事件处理完成：成功解析 {} 个事件", n_matched);
 
-    // 减去与普攻共享的“通用层”音效：原版命中/施法音常由 通用层 + 专属层 两个 action 组成
-    // （如破绽击破 = 普攻命中容器 + 专属破绽音），单文件随机播放模型下只保留专属层，
-    // 避免破绽/技能命中随机抽到普通攻击音。
-    let basic_cast_set: HashSet<&String> = basic.on_cast.iter().collect();
-    let basic_hit_set: HashSet<&String> = basic.on_hit.iter().collect();
-    for cue in spells.values_mut() {
-        cue.on_cast.retain(|p| !basic_cast_set.contains(p));
-        cue.on_hit.retain(|p| !basic_hit_set.contains(p));
+    // 去重每个 key 的 ogg 变体
+    for oggs in events_map.values_mut() {
+        oggs.sort();
+        oggs.dedup();
     }
+    events_map.retain(|_, oggs| !oggs.is_empty());
 
-    // 去重每个 cue 的变体
-    dedup_cue(&mut basic);
-    for cue in spells.values_mut() {
-        dedup_cue(cue);
-    }
-    spells.retain(|_, cue| !cue.is_empty());
+    config.events = events_map;
 
-    config.basic_attack = basic;
-    config.spells = spells;
-
-    let cast_n = config.basic_attack.on_cast.len();
-    let hit_n = config.basic_attack.on_hit.len();
     println!(
-        "[AUDIO] {} {}: 普攻 cast={} hit={}, 技能 {} 组",
+        "[AUDIO] {} {}: 提取完成，共包含 {} 个音效事件",
         champ_name,
         skin_id,
-        cast_n,
-        hit_n,
-        config.spells.len()
+        config.events.len()
     );
 
     config
-}
-
-fn dedup_cue(cue: &mut AudioCue) {
-    cue.on_cast.sort();
-    cue.on_cast.dedup();
-    cue.on_hit.sort();
-    cue.on_hit.dedup();
 }
 
 /// 把一个 wem 转码为 ogg 落盘，返回相对 `assets/` 的路径；带缓存避免重复转码。

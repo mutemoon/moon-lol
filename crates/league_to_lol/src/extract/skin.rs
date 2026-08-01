@@ -30,8 +30,7 @@ pub fn extract_skin_for_champion(
     champ_name: &str,
     skin_bin_path: Option<&str>,
     hashes: &HashMap<u32, String>,
-    all_spell_names: &[String],
-    basic_attack_names: &[String],
+    _all_spell_names: &[String],
 ) {
     let Some(skin_bin_path) = skin_bin_path else {
         return;
@@ -260,8 +259,6 @@ pub fn extract_skin_for_champion(
         champ_name,
         skin_id,
         &skin_data,
-        all_spell_names,
-        basic_attack_names,
     );
     let output_audio_path = format!("characters/{}/skins/{}_audio.ron", champ_name, skin_id);
     let serialized_audio = to_string_pretty(&config_audio, PrettyConfig::default()).unwrap();

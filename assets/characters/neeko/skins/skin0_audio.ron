@@ -1,0 +1,453 @@
+(
+    events: {
+        "Dance3D_jump": [
+            "characters/Neeko/sounds/645923097.ogg",
+            "characters/Neeko/sounds/76679266.ogg",
+        ],
+        "Dance3D_shuffle": [
+            "characters/Neeko/sounds/881192248.ogg",
+            "characters/Neeko/sounds/991310015.ogg",
+        ],
+        "Death3D_buffactivate": [
+            "characters/Neeko/sounds/521733623.ogg",
+        ],
+        "Joke3D_TailSwish": [
+            "characters/Neeko/sounds/1031776806.ogg",
+            "characters/Neeko/sounds/176671926.ogg",
+            "characters/Neeko/sounds/266237047.ogg",
+            "characters/Neeko/sounds/43328223.ogg",
+            "characters/Neeko/sounds/848631482.ogg",
+            "characters/Neeko/sounds/881246134.ogg",
+        ],
+        "Joke3D_into": [
+            "characters/Neeko/sounds/977935651.ogg",
+        ],
+        "Joke3D_tailspinmagic_lp": [
+            "characters/Neeko/sounds/585253721.ogg",
+        ],
+        "Laugh3D_buffactivate": [
+            "characters/Neeko/sounds/333794547.ogg",
+        ],
+        "NeekoBasicAttack_OnCast": [
+            "characters/Neeko/sounds/275151109.ogg",
+            "characters/Neeko/sounds/588248558.ogg",
+            "characters/Neeko/sounds/878376162.ogg",
+        ],
+        "NeekoBasicAttack_OnHit": [
+            "characters/Neeko/sounds/224294745.ogg",
+            "characters/Neeko/sounds/429215487.ogg",
+            "characters/Neeko/sounds/985231141.ogg",
+        ],
+        "NeekoBasicAttack_OnMissileLaunch": [
+            "characters/Neeko/sounds/1031598380.ogg",
+            "characters/Neeko/sounds/127197540.ogg",
+            "characters/Neeko/sounds/499385368.ogg",
+        ],
+        "NeekoCritAttack_OnCast": [
+            "characters/Neeko/sounds/525877774.ogg",
+            "characters/Neeko/sounds/552570490.ogg",
+            "characters/Neeko/sounds/89984791.ogg",
+        ],
+        "NeekoCritAttack_OnHit": [
+            "characters/Neeko/sounds/290252972.ogg",
+            "characters/Neeko/sounds/380228407.ogg",
+            "characters/Neeko/sounds/728587170.ogg",
+        ],
+        "NeekoE_OnCast": [
+            "characters/Neeko/sounds/220654456.ogg",
+        ],
+        "NeekoE_OnMissileLaunch": [
+            "characters/Neeko/sounds/227909802.ogg",
+        ],
+        "NeekoE_hit_empowered": [
+            "characters/Neeko/sounds/591940240.ogg",
+        ],
+        "NeekoE_hit_first": [
+            "characters/Neeko/sounds/492409747.ogg",
+        ],
+        "NeekoE_hit_root": [
+            "characters/Neeko/sounds/1017151430.ogg",
+            "characters/Neeko/sounds/197971184.ogg",
+            "characters/Neeko/sounds/885278412.ogg",
+        ],
+        "NeekoE_missile_empowered": [
+            "characters/Neeko/sounds/938177497.ogg",
+        ],
+        "NeekoP_buffdeactivate": [
+            "characters/Neeko/sounds/680088983.ogg",
+        ],
+        "NeekoP_cast": [
+            "characters/Neeko/sounds/130195267.ogg",
+            "characters/Neeko/sounds/240026435.ogg",
+            "characters/Neeko/sounds/241891117.ogg",
+            "characters/Neeko/sounds/594666448.ogg",
+            "characters/Neeko/sounds/714692787.ogg",
+        ],
+        "NeekoP_cast_self": [
+            "characters/Neeko/sounds/138176596.ogg",
+            "characters/Neeko/sounds/481732260.ogg",
+            "characters/Neeko/sounds/483401898.ogg",
+            "characters/Neeko/sounds/813690075.ogg",
+            "characters/Neeko/sounds/873645067.ogg",
+        ],
+        "NeekoP_charge": [
+            "characters/Neeko/sounds/497935997.ogg",
+        ],
+        "NeekoP_charge_active": [
+            "characters/Neeko/sounds/291309766.ogg",
+        ],
+        "NeekoP_jump": [
+            "characters/Neeko/sounds/23999576.ogg",
+        ],
+        "NeekoQ_OnCast": [
+            "characters/Neeko/sounds/301856675.ogg",
+        ],
+        "NeekoQ_OnMissileLaunch": [
+            "characters/Neeko/sounds/973737951.ogg",
+        ],
+        "NeekoQ_hit1": [
+            "characters/Neeko/sounds/576288659.ogg",
+        ],
+        "NeekoQ_hit2": [
+            "characters/Neeko/sounds/699894380.ogg",
+        ],
+        "NeekoQ_hit3": [
+            "characters/Neeko/sounds/93372805.ogg",
+        ],
+        "NeekoQ_hit_minion": [
+            "characters/Neeko/sounds/435139319.ogg",
+            "characters/Neeko/sounds/601143195.ogg",
+            "characters/Neeko/sounds/810087678.ogg",
+            "characters/Neeko/sounds/903423185.ogg",
+        ],
+        "NeekoQ_hit_noenemy": [
+            "characters/Neeko/sounds/258293529.ogg",
+            "characters/Neeko/sounds/297450407.ogg",
+            "characters/Neeko/sounds/535365067.ogg",
+            "characters/Neeko/sounds/928818017.ogg",
+        ],
+        "NeekoQ_missilecast1": [
+            "characters/Neeko/sounds/581688182.ogg",
+        ],
+        "NeekoQ_missilecast2": [
+            "characters/Neeko/sounds/491204334.ogg",
+        ],
+        "NeekoRShield_buffactivate": [
+            "characters/Neeko/sounds/898719634.ogg",
+        ],
+        "NeekoRShield_buffactivate_self": [
+            "characters/Neeko/sounds/662958855.ogg",
+        ],
+        "NeekoR_cast": [
+            "characters/Neeko/sounds/662203058.ogg",
+        ],
+        "NeekoR_cast_self": [
+            "characters/Neeko/sounds/580683424.ogg",
+        ],
+        "NeekoWClone_clonedeath": [
+            "characters/Neeko/sounds/759157884.ogg",
+        ],
+        "NeekoWPassiveAttack_OnCast": [
+            "characters/Neeko/sounds/525877774.ogg",
+            "characters/Neeko/sounds/552570490.ogg",
+            "characters/Neeko/sounds/89984791.ogg",
+        ],
+        "NeekoWPassiveAttack_OnHit": [
+            "characters/Neeko/sounds/290252972.ogg",
+            "characters/Neeko/sounds/380228407.ogg",
+            "characters/Neeko/sounds/728587170.ogg",
+        ],
+        "NeekoW_buffdeactivate": [
+            "characters/Neeko/sounds/1033663541.ogg",
+        ],
+        "NeekoW_cast": [
+            "characters/Neeko/sounds/3933453.ogg",
+        ],
+        "Play_vo_Neeko_Attack2DGeneral": [
+            "characters/Neeko/sounds/1055159127.ogg",
+            "characters/Neeko/sounds/1061611809.ogg",
+            "characters/Neeko/sounds/1072990513.ogg",
+            "characters/Neeko/sounds/119774560.ogg",
+            "characters/Neeko/sounds/171613618.ogg",
+            "characters/Neeko/sounds/250971660.ogg",
+            "characters/Neeko/sounds/285048689.ogg",
+            "characters/Neeko/sounds/295676799.ogg",
+            "characters/Neeko/sounds/333263002.ogg",
+            "characters/Neeko/sounds/426739803.ogg",
+            "characters/Neeko/sounds/434957396.ogg",
+            "characters/Neeko/sounds/548333133.ogg",
+            "characters/Neeko/sounds/72698262.ogg",
+            "characters/Neeko/sounds/734638794.ogg",
+            "characters/Neeko/sounds/768781891.ogg",
+            "characters/Neeko/sounds/792999904.ogg",
+            "characters/Neeko/sounds/793116706.ogg",
+            "characters/Neeko/sounds/850953365.ogg",
+            "characters/Neeko/sounds/863554077.ogg",
+            "characters/Neeko/sounds/89905460.ogg",
+        ],
+        "Play_vo_Neeko_CloneDestroyed2D": [
+            "characters/Neeko/sounds/191414787.ogg",
+            "characters/Neeko/sounds/318181350.ogg",
+            "characters/Neeko/sounds/371025182.ogg",
+            "characters/Neeko/sounds/457578032.ogg",
+            "characters/Neeko/sounds/510405335.ogg",
+            "characters/Neeko/sounds/600485360.ogg",
+            "characters/Neeko/sounds/705334754.ogg",
+            "characters/Neeko/sounds/864301706.ogg",
+        ],
+        "Play_vo_Neeko_Dance3DGeneral": [
+            "characters/Neeko/sounds/425988423.ogg",
+            "characters/Neeko/sounds/583154812.ogg",
+            "characters/Neeko/sounds/662715071.ogg",
+        ],
+        "Play_vo_Neeko_Death3D": [
+            "characters/Neeko/sounds/190945983.ogg",
+        ],
+        "Play_vo_Neeko_FirstEncounter3DAnivia": [
+            "characters/Neeko/sounds/1050076452.ogg",
+        ],
+        "Play_vo_Neeko_FirstEncounter3DFemale": [
+            "characters/Neeko/sounds/733131864.ogg",
+            "characters/Neeko/sounds/845227579.ogg",
+        ],
+        "Play_vo_Neeko_FirstEncounter3DGeneral": [
+            "characters/Neeko/sounds/1031969411.ogg",
+            "characters/Neeko/sounds/789346781.ogg",
+        ],
+        "Play_vo_Neeko_FirstEncounter3DIvern": [
+            "characters/Neeko/sounds/339800547.ogg",
+            "characters/Neeko/sounds/944102017.ogg",
+        ],
+        "Play_vo_Neeko_FirstEncounter3DNidalee": [
+            "characters/Neeko/sounds/247722338.ogg",
+        ],
+        "Play_vo_Neeko_FirstEncounter3DRengar": [
+            "characters/Neeko/sounds/361353189.ogg",
+        ],
+        "Play_vo_Neeko_FirstEncounter3DTaliyah": [
+            "characters/Neeko/sounds/281863835.ogg",
+        ],
+        "Play_vo_Neeko_FirstEncounter3DVastaya": [
+            "characters/Neeko/sounds/853534337.ogg",
+            "characters/Neeko/sounds/896096005.ogg",
+        ],
+        "Play_vo_Neeko_FirstEncounter3DVelkoz": [
+            "characters/Neeko/sounds/770349093.ogg",
+        ],
+        "Play_vo_Neeko_FirstEncounter3DZyra": [
+            "characters/Neeko/sounds/615739066.ogg",
+        ],
+        "Play_vo_Neeko_Joke3DGeneral": [
+            "characters/Neeko/sounds/1064126354.ogg",
+        ],
+        "Play_vo_Neeko_Kill3DGeneral": [
+            "characters/Neeko/sounds/103155118.ogg",
+            "characters/Neeko/sounds/925442775.ogg",
+            "characters/Neeko/sounds/938526848.ogg",
+        ],
+        "Play_vo_Neeko_Laugh3DGeneral": [
+            "characters/Neeko/sounds/187319454.ogg",
+            "characters/Neeko/sounds/421255333.ogg",
+            "characters/Neeko/sounds/587245397.ogg",
+            "characters/Neeko/sounds/639892888.ogg",
+        ],
+        "Play_vo_Neeko_Move2DDisguised": [
+            "characters/Neeko/sounds/151046189.ogg",
+            "characters/Neeko/sounds/170574973.ogg",
+            "characters/Neeko/sounds/394824806.ogg",
+            "characters/Neeko/sounds/488676216.ogg",
+            "characters/Neeko/sounds/489402937.ogg",
+            "characters/Neeko/sounds/538432342.ogg",
+            "characters/Neeko/sounds/585462393.ogg",
+            "characters/Neeko/sounds/591146655.ogg",
+            "characters/Neeko/sounds/822809748.ogg",
+            "characters/Neeko/sounds/89915850.ogg",
+            "characters/Neeko/sounds/939329684.ogg",
+        ],
+        "Play_vo_Neeko_Move2DFirst": [
+            "characters/Neeko/sounds/1070149856.ogg",
+            "characters/Neeko/sounds/941658754.ogg",
+            "characters/Neeko/sounds/944579699.ogg",
+        ],
+        "Play_vo_Neeko_Move2DLong": [
+            "characters/Neeko/sounds/1033852186.ogg",
+            "characters/Neeko/sounds/338226428.ogg",
+            "characters/Neeko/sounds/411324189.ogg",
+            "characters/Neeko/sounds/676963396.ogg",
+            "characters/Neeko/sounds/743950058.ogg",
+            "characters/Neeko/sounds/77131616.ogg",
+            "characters/Neeko/sounds/792849749.ogg",
+            "characters/Neeko/sounds/958978501.ogg",
+        ],
+        "Play_vo_Neeko_Move2DStandard": [
+            "characters/Neeko/sounds/101739331.ogg",
+            "characters/Neeko/sounds/1070195903.ogg",
+            "characters/Neeko/sounds/151046189.ogg",
+            "characters/Neeko/sounds/165470788.ogg",
+            "characters/Neeko/sounds/170574973.ogg",
+            "characters/Neeko/sounds/18519490.ogg",
+            "characters/Neeko/sounds/207469813.ogg",
+            "characters/Neeko/sounds/233876084.ogg",
+            "characters/Neeko/sounds/296023657.ogg",
+            "characters/Neeko/sounds/332939643.ogg",
+            "characters/Neeko/sounds/394824806.ogg",
+            "characters/Neeko/sounds/444975345.ogg",
+            "characters/Neeko/sounds/45092862.ogg",
+            "characters/Neeko/sounds/488676216.ogg",
+            "characters/Neeko/sounds/489402937.ogg",
+            "characters/Neeko/sounds/515496025.ogg",
+            "characters/Neeko/sounds/52295546.ogg",
+            "characters/Neeko/sounds/538432342.ogg",
+            "characters/Neeko/sounds/556164157.ogg",
+            "characters/Neeko/sounds/575170332.ogg",
+            "characters/Neeko/sounds/584564664.ogg",
+            "characters/Neeko/sounds/585462393.ogg",
+            "characters/Neeko/sounds/591146655.ogg",
+            "characters/Neeko/sounds/635545192.ogg",
+            "characters/Neeko/sounds/664352042.ogg",
+            "characters/Neeko/sounds/693535107.ogg",
+            "characters/Neeko/sounds/767756189.ogg",
+            "characters/Neeko/sounds/77610383.ogg",
+            "characters/Neeko/sounds/818731426.ogg",
+            "characters/Neeko/sounds/822809748.ogg",
+            "characters/Neeko/sounds/825835308.ogg",
+            "characters/Neeko/sounds/86119113.ogg",
+            "characters/Neeko/sounds/864066892.ogg",
+            "characters/Neeko/sounds/89915850.ogg",
+            "characters/Neeko/sounds/899987513.ogg",
+            "characters/Neeko/sounds/939329684.ogg",
+            "characters/Neeko/sounds/969865188.ogg",
+            "characters/Neeko/sounds/972622523.ogg",
+        ],
+        "Play_vo_Neeko_NeekoE_cast3D": [
+            "characters/Neeko/sounds/537936574.ogg",
+            "characters/Neeko/sounds/610948891.ogg",
+            "characters/Neeko/sounds/822087790.ogg",
+        ],
+        "Play_vo_Neeko_NeekoQ_cast3D": [
+            "characters/Neeko/sounds/1006433042.ogg",
+            "characters/Neeko/sounds/1021675817.ogg",
+            "characters/Neeko/sounds/197718251.ogg",
+            "characters/Neeko/sounds/710226542.ogg",
+        ],
+        "Play_vo_Neeko_NeekoRDummySpell_cast3DAlly": [
+            "characters/Neeko/sounds/499543928.ogg",
+        ],
+        "Play_vo_Neeko_NeekoRDummySpell_cast3DEnemy": [
+            "characters/Neeko/sounds/721503702.ogg",
+        ],
+        "Play_vo_Neeko_NeekoR_cast3D": [
+            "characters/Neeko/sounds/749803908.ogg",
+            "characters/Neeko/sounds/816945413.ogg",
+            "characters/Neeko/sounds/995140084.ogg",
+        ],
+        "Play_vo_Neeko_Respawn2DGeneral": [
+            "characters/Neeko/sounds/182153560.ogg",
+            "characters/Neeko/sounds/408791688.ogg",
+            "characters/Neeko/sounds/697863257.ogg",
+            "characters/Neeko/sounds/703906208.ogg",
+        ],
+        "Play_vo_Neeko_Spell2DPCastAhri": [
+            "characters/Neeko/sounds/343549089.ogg",
+        ],
+        "Play_vo_Neeko_Spell2DPCastAurelionSol": [
+            "characters/Neeko/sounds/395790397.ogg",
+        ],
+        "Play_vo_Neeko_Spell2DPCastBlitzcrank": [
+            "characters/Neeko/sounds/999608007.ogg",
+        ],
+        "Play_vo_Neeko_Spell2DPCastBrand": [
+            "characters/Neeko/sounds/1046288137.ogg",
+        ],
+        "Play_vo_Neeko_Spell2DPCastDrMundo": [
+            "characters/Neeko/sounds/233881166.ogg",
+        ],
+        "Play_vo_Neeko_Spell2DPCastEvelynn": [
+            "characters/Neeko/sounds/342475106.ogg",
+        ],
+        "Play_vo_Neeko_Spell2DPCastEzreal": [
+            "characters/Neeko/sounds/220055330.ogg",
+        ],
+        "Play_vo_Neeko_Spell2DPCastFemale": [
+            "characters/Neeko/sounds/244553898.ogg",
+            "characters/Neeko/sounds/444885596.ogg",
+            "characters/Neeko/sounds/707856094.ogg",
+        ],
+        "Play_vo_Neeko_Spell2DPCastGaren": [
+            "characters/Neeko/sounds/535349797.ogg",
+        ],
+        "Play_vo_Neeko_Spell2DPCastGeneral": [
+            "characters/Neeko/sounds/367824673.ogg",
+            "characters/Neeko/sounds/672589552.ogg",
+            "characters/Neeko/sounds/676944061.ogg",
+        ],
+        "Play_vo_Neeko_Spell2DPCastGraves": [
+            "characters/Neeko/sounds/329584392.ogg",
+        ],
+        "Play_vo_Neeko_Spell2DPCastIllaoi": [
+            "characters/Neeko/sounds/962221389.ogg",
+        ],
+        "Play_vo_Neeko_Spell2DPCastIvern": [
+            "characters/Neeko/sounds/106205669.ogg",
+        ],
+        "Play_vo_Neeko_Spell2DPCastJinx": [
+            "characters/Neeko/sounds/626463693.ogg",
+        ],
+        "Play_vo_Neeko_Spell2DPCastKled": [
+            "characters/Neeko/sounds/758883818.ogg",
+        ],
+        "Play_vo_Neeko_Spell2DPCastMale": [
+            "characters/Neeko/sounds/20159605.ogg",
+            "characters/Neeko/sounds/350735394.ogg",
+            "characters/Neeko/sounds/667724526.ogg",
+        ],
+        "Play_vo_Neeko_Spell2DPCastMalphite": [
+            "characters/Neeko/sounds/421118820.ogg",
+        ],
+        "Play_vo_Neeko_Spell2DPCastNidalee": [
+            "characters/Neeko/sounds/974691023.ogg",
+        ],
+        "Play_vo_Neeko_Spell2DPCastRakan": [
+            "characters/Neeko/sounds/345139505.ogg",
+        ],
+        "Play_vo_Neeko_Spell2DPCastShadowIsles": [
+            "characters/Neeko/sounds/349946044.ogg",
+        ],
+        "Play_vo_Neeko_Spell2DPCastShyvana": [
+            "characters/Neeko/sounds/363579121.ogg",
+        ],
+        "Play_vo_Neeko_Spell2DPCastTaliyah": [
+            "characters/Neeko/sounds/754867374.ogg",
+        ],
+        "Play_vo_Neeko_Spell2DPCastTaric": [
+            "characters/Neeko/sounds/337238769.ogg",
+        ],
+        "Play_vo_Neeko_Spell2DPCastVarus": [
+            "characters/Neeko/sounds/312957174.ogg",
+        ],
+        "Play_vo_Neeko_Spell2DPCastVastaya": [
+            "characters/Neeko/sounds/974594090.ogg",
+        ],
+        "Play_vo_Neeko_Spell2DPCastVoid": [
+            "characters/Neeko/sounds/621200252.ogg",
+        ],
+        "Play_vo_Neeko_Spell2DPCastXayah": [
+            "characters/Neeko/sounds/21065144.ogg",
+        ],
+        "Play_vo_Neeko_Spell2DPCastYordle": [
+            "characters/Neeko/sounds/853594131.ogg",
+        ],
+        "Play_vo_Neeko_Spell2DPCastZyra": [
+            "characters/Neeko/sounds/595615409.ogg",
+        ],
+        "Recall3D_buffactivate": [
+            "characters/Neeko/sounds/168545524.ogg",
+        ],
+        "Respawn3D_buffactivate": [
+            "characters/Neeko/sounds/826025379.ogg",
+        ],
+        "Taunt3D_buffactivate": [
+            "characters/Neeko/sounds/692974958.ogg",
+        ],
+    },
+)

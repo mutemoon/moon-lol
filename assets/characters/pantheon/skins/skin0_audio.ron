@@ -1,0 +1,482 @@
+(
+    events: {
+        "Dance_cast": [
+            "characters/Pantheon/sounds/216624920.ogg",
+        ],
+        "Dance_loop": [
+            "characters/Pantheon/sounds/905563743.ogg",
+        ],
+        "Dance_shield": [
+            "characters/Pantheon/sounds/70400317.ogg",
+        ],
+        "Death3D": [
+            "characters/Pantheon/sounds/227748099.ogg",
+        ],
+        "Idle2_cast_anim": [
+            "characters/Pantheon/sounds/1000254826.ogg",
+        ],
+        "Idle_PassiveSpear_cast_anim": [
+            "characters/Pantheon/sounds/62370503.ogg",
+        ],
+        "Idle_SpearReturn_cast_anim": [
+            "characters/Pantheon/sounds/464174835.ogg",
+        ],
+        "Joke_cast": [
+            "characters/Pantheon/sounds/196497511.ogg",
+        ],
+        "Laugh_cast": [
+            "characters/Pantheon/sounds/47585158.ogg",
+        ],
+        "PantheonBasicAttack2_OnCast": [
+            "characters/Pantheon/sounds/670184489.ogg",
+            "characters/Pantheon/sounds/679766162.ogg",
+            "characters/Pantheon/sounds/818947808.ogg",
+        ],
+        "PantheonBasicAttack2_OnHit": [
+            "characters/Pantheon/sounds/151472812.ogg",
+            "characters/Pantheon/sounds/154032094.ogg",
+            "characters/Pantheon/sounds/253166563.ogg",
+            "characters/Pantheon/sounds/307746730.ogg",
+            "characters/Pantheon/sounds/416588423.ogg",
+            "characters/Pantheon/sounds/463979481.ogg",
+            "characters/Pantheon/sounds/648136092.ogg",
+            "characters/Pantheon/sounds/711924793.ogg",
+            "characters/Pantheon/sounds/860475167.ogg",
+            "characters/Pantheon/sounds/932774674.ogg",
+            "characters/Pantheon/sounds/960111904.ogg",
+            "characters/Pantheon/sounds/988936807.ogg",
+        ],
+        "PantheonBasicAttack3_OnCast": [
+            "characters/Pantheon/sounds/271153528.ogg",
+            "characters/Pantheon/sounds/700740698.ogg",
+            "characters/Pantheon/sounds/925816583.ogg",
+        ],
+        "PantheonBasicAttack3_OnHit": [
+            "characters/Pantheon/sounds/106715538.ogg",
+            "characters/Pantheon/sounds/118759468.ogg",
+            "characters/Pantheon/sounds/136986521.ogg",
+            "characters/Pantheon/sounds/15461235.ogg",
+            "characters/Pantheon/sounds/159928379.ogg",
+            "characters/Pantheon/sounds/165590441.ogg",
+            "characters/Pantheon/sounds/208197651.ogg",
+            "characters/Pantheon/sounds/297592160.ogg",
+            "characters/Pantheon/sounds/53923318.ogg",
+            "characters/Pantheon/sounds/72523275.ogg",
+            "characters/Pantheon/sounds/76265310.ogg",
+            "characters/Pantheon/sounds/81885346.ogg",
+        ],
+        "PantheonBasicAttack_OnCast": [
+            "characters/Pantheon/sounds/608615584.ogg",
+            "characters/Pantheon/sounds/674109136.ogg",
+            "characters/Pantheon/sounds/678732111.ogg",
+        ],
+        "PantheonBasicAttack_OnHit": [
+            "characters/Pantheon/sounds/106715538.ogg",
+            "characters/Pantheon/sounds/118759468.ogg",
+            "characters/Pantheon/sounds/136986521.ogg",
+            "characters/Pantheon/sounds/15461235.ogg",
+            "characters/Pantheon/sounds/159928379.ogg",
+            "characters/Pantheon/sounds/165590441.ogg",
+            "characters/Pantheon/sounds/208197651.ogg",
+            "characters/Pantheon/sounds/297592160.ogg",
+            "characters/Pantheon/sounds/53923318.ogg",
+            "characters/Pantheon/sounds/72523275.ogg",
+            "characters/Pantheon/sounds/76265310.ogg",
+            "characters/Pantheon/sounds/81885346.ogg",
+        ],
+        "PantheonCritAttack_OnCast": [
+            "characters/Pantheon/sounds/123097416.ogg",
+        ],
+        "PantheonCritAttack_OnHit": [
+            "characters/Pantheon/sounds/652534336.ogg",
+        ],
+        "PantheonEShieldSlam_OnCast": [
+            "characters/Pantheon/sounds/791165126.ogg",
+            "characters/Pantheon/sounds/822059435.ogg",
+        ],
+        "PantheonEShieldSlam_hit_lua": [
+            "characters/Pantheon/sounds/1027135903.ogg",
+            "characters/Pantheon/sounds/1069232639.ogg",
+        ],
+        "PantheonE_OnBuffActivate": [
+            "characters/Pantheon/sounds/216835116.ogg",
+        ],
+        "PantheonE_OnCast": [
+            "characters/Pantheon/sounds/444555528.ogg",
+            "characters/Pantheon/sounds/725704520.ogg",
+        ],
+        "PantheonE_block_vfx": [
+            "characters/Pantheon/sounds/196564100.ogg",
+        ],
+        "PantheonE_hit_lua": [
+            "characters/Pantheon/sounds/462289838.ogg",
+            "characters/Pantheon/sounds/476998396.ogg",
+            "characters/Pantheon/sounds/575167413.ogg",
+            "characters/Pantheon/sounds/796636803.ogg",
+        ],
+        "PantheonPassiveReady_OnBuffActivate": [
+            "characters/Pantheon/sounds/1066137298.ogg",
+        ],
+        "PantheonQMissile_OnCast": [
+            "characters/Pantheon/sounds/110947429.ogg",
+            "characters/Pantheon/sounds/274577126.ogg",
+            "characters/Pantheon/sounds/746138356.ogg",
+        ],
+        "PantheonQMissile_OnMissileLaunch": [
+            "characters/Pantheon/sounds/384655715.ogg",
+            "characters/Pantheon/sounds/760559825.ogg",
+            "characters/Pantheon/sounds/921683591.ogg",
+        ],
+        "PantheonQMissile_hit_empowered_vfx": [
+            "characters/Pantheon/sounds/1035332353.ogg",
+            "characters/Pantheon/sounds/28829235.ogg",
+            "characters/Pantheon/sounds/524410692.ogg",
+        ],
+        "PantheonQMissile_hit_vfx": [
+            "characters/Pantheon/sounds/113966397.ogg",
+            "characters/Pantheon/sounds/159441603.ogg",
+            "characters/Pantheon/sounds/209183813.ogg",
+            "characters/Pantheon/sounds/52321619.ogg",
+        ],
+        "PantheonQMissile_missilecast_lua": [
+            "characters/Pantheon/sounds/574046849.ogg",
+            "characters/Pantheon/sounds/983799119.ogg",
+            "characters/Pantheon/sounds/984239308.ogg",
+        ],
+        "PantheonQTap_cast_empowered_lua": [
+            "characters/Pantheon/sounds/181528245.ogg",
+            "characters/Pantheon/sounds/798699582.ogg",
+            "characters/Pantheon/sounds/976934516.ogg",
+        ],
+        "PantheonQTap_cast_lua": [
+            "characters/Pantheon/sounds/179240518.ogg",
+            "characters/Pantheon/sounds/31367315.ogg",
+            "characters/Pantheon/sounds/800651771.ogg",
+        ],
+        "PantheonQTap_hit_empowered_vfx": [
+            "characters/Pantheon/sounds/1035332353.ogg",
+            "characters/Pantheon/sounds/28829235.ogg",
+            "characters/Pantheon/sounds/524410692.ogg",
+        ],
+        "PantheonQTap_hit_vfx": [
+            "characters/Pantheon/sounds/113966397.ogg",
+            "characters/Pantheon/sounds/159441603.ogg",
+            "characters/Pantheon/sounds/209183813.ogg",
+            "characters/Pantheon/sounds/52321619.ogg",
+        ],
+        "PantheonQ_OnCast": [
+            "characters/Pantheon/sounds/137547784.ogg",
+            "characters/Pantheon/sounds/377780128.ogg",
+            "characters/Pantheon/sounds/548517914.ogg",
+            "characters/Pantheon/sounds/695403388.ogg",
+            "characters/Pantheon/sounds/765049069.ogg",
+            "characters/Pantheon/sounds/947306085.ogg",
+        ],
+        "PantheonQ_buffactivate_empowered_vfx": [
+            "characters/Pantheon/sounds/373734925.ogg",
+        ],
+        "PantheonQ_buffactivate_vfx": [
+            "characters/Pantheon/sounds/849927174.ogg",
+        ],
+        "PantheonQ_groundhit_vfx": [
+            "characters/Pantheon/sounds/60336224.ogg",
+            "characters/Pantheon/sounds/686751538.ogg",
+            "characters/Pantheon/sounds/764949782.ogg",
+        ],
+        "PantheonQ_missilecast_empowered_lua": [
+            "characters/Pantheon/sounds/303479068.ogg",
+        ],
+        "PantheonRMissile3_OnMissileLaunch": [
+            "characters/Pantheon/sounds/1013463044.ogg",
+        ],
+        "PantheonRMissile_OnMissileLaunch": [
+            "characters/Pantheon/sounds/67580815.ogg",
+        ],
+        "PantheonR_OnCast": [
+            "characters/Pantheon/sounds/941465106.ogg",
+        ],
+        "PantheonR_OnCast_blast_stereo_vfx": [
+            "characters/Pantheon/sounds/840596375.ogg",
+        ],
+        "PantheonR_OnCast_stereo": [
+            "characters/Pantheon/sounds/3911959.ogg",
+        ],
+        "PantheonR_buffactivate_vfx": [
+            "characters/Pantheon/sounds/685244675.ogg",
+        ],
+        "PantheonR_impact_vfx": [
+            "characters/Pantheon/sounds/427591306.ogg",
+        ],
+        "PantheonR_indicator_vfx": [
+            "characters/Pantheon/sounds/38915562.ogg",
+        ],
+        "PantheonR_land_vfx": [
+            "characters/Pantheon/sounds/931137241.ogg",
+        ],
+        "PantheonR_shockwave_vfx": [
+            "characters/Pantheon/sounds/962091735.ogg",
+        ],
+        "PantheonWEmpoweredAttack_hit_vfx": [
+            "characters/Pantheon/sounds/53923318.ogg",
+            "characters/Pantheon/sounds/72523275.ogg",
+            "characters/Pantheon/sounds/76265310.ogg",
+        ],
+        "PantheonW_OnCast": [
+            "characters/Pantheon/sounds/1046891786.ogg",
+            "characters/Pantheon/sounds/201023699.ogg",
+            "characters/Pantheon/sounds/215130155.ogg",
+        ],
+        "PantheonW_hit": [
+            "characters/Pantheon/sounds/1065376863.ogg",
+            "characters/Pantheon/sounds/58241021.ogg",
+            "characters/Pantheon/sounds/702608173.ogg",
+        ],
+        "Play_vo_Pantheon_Attack2DGeneral": [
+            "characters/Pantheon/sounds/1012164951.ogg",
+            "characters/Pantheon/sounds/101319343.ogg",
+            "characters/Pantheon/sounds/1021865973.ogg",
+            "characters/Pantheon/sounds/1049068775.ogg",
+            "characters/Pantheon/sounds/1049682547.ogg",
+            "characters/Pantheon/sounds/261218792.ogg",
+            "characters/Pantheon/sounds/382939669.ogg",
+            "characters/Pantheon/sounds/426805829.ogg",
+            "characters/Pantheon/sounds/462504270.ogg",
+            "characters/Pantheon/sounds/474788501.ogg",
+            "characters/Pantheon/sounds/520100715.ogg",
+            "characters/Pantheon/sounds/532094861.ogg",
+            "characters/Pantheon/sounds/639107883.ogg",
+            "characters/Pantheon/sounds/687579281.ogg",
+            "characters/Pantheon/sounds/713202446.ogg",
+            "characters/Pantheon/sounds/721238133.ogg",
+            "characters/Pantheon/sounds/745638033.ogg",
+            "characters/Pantheon/sounds/754615741.ogg",
+            "characters/Pantheon/sounds/852530604.ogg",
+            "characters/Pantheon/sounds/863473738.ogg",
+            "characters/Pantheon/sounds/959370123.ogg",
+        ],
+        "Play_vo_Pantheon_Death3D": [
+            "characters/Pantheon/sounds/131324778.ogg",
+            "characters/Pantheon/sounds/592589362.ogg",
+            "characters/Pantheon/sounds/982796858.ogg",
+        ],
+        "Play_vo_Pantheon_FirstEncounter3DAatrox": [
+            "characters/Pantheon/sounds/206097737.ogg",
+            "characters/Pantheon/sounds/681749882.ogg",
+            "characters/Pantheon/sounds/841090353.ogg",
+        ],
+        "Play_vo_Pantheon_FirstEncounter3DAscended": [
+            "characters/Pantheon/sounds/266145260.ogg",
+        ],
+        "Play_vo_Pantheon_FirstEncounter3DAspectDarkin": [
+            "characters/Pantheon/sounds/1070536832.ogg",
+            "characters/Pantheon/sounds/459793926.ogg",
+            "characters/Pantheon/sounds/603834945.ogg",
+            "characters/Pantheon/sounds/69677510.ogg",
+        ],
+        "Play_vo_Pantheon_FirstEncounter3DAurelionSol": [
+            "characters/Pantheon/sounds/706224611.ogg",
+            "characters/Pantheon/sounds/98954610.ogg",
+        ],
+        "Play_vo_Pantheon_FirstEncounter3DDiana": [
+            "characters/Pantheon/sounds/187337378.ogg",
+        ],
+        "Play_vo_Pantheon_FirstEncounter3DFreljordDemigod": [
+            "characters/Pantheon/sounds/1049639833.ogg",
+        ],
+        "Play_vo_Pantheon_FirstEncounter3DGarenOrKatarina": [
+            "characters/Pantheon/sounds/1072354119.ogg",
+        ],
+        "Play_vo_Pantheon_FirstEncounter3DGeneral": [
+            "characters/Pantheon/sounds/101033631.ogg",
+            "characters/Pantheon/sounds/196671944.ogg",
+            "characters/Pantheon/sounds/557161178.ogg",
+        ],
+        "Play_vo_Pantheon_FirstEncounter3DIllaoi": [
+            "characters/Pantheon/sounds/42239382.ogg",
+        ],
+        "Play_vo_Pantheon_FirstEncounter3DKayn": [
+            "characters/Pantheon/sounds/837851882.ogg",
+        ],
+        "Play_vo_Pantheon_FirstEncounter3DLeona": [
+            "characters/Pantheon/sounds/632199436.ogg",
+            "characters/Pantheon/sounds/679252083.ogg",
+            "characters/Pantheon/sounds/79775425.ogg",
+        ],
+        "Play_vo_Pantheon_FirstEncounter3DLunari": [
+            "characters/Pantheon/sounds/655846290.ogg",
+        ],
+        "Play_vo_Pantheon_FirstEncounter3DSoraka": [
+            "characters/Pantheon/sounds/104967708.ogg",
+        ],
+        "Play_vo_Pantheon_FirstEncounter3DTaric": [
+            "characters/Pantheon/sounds/257363927.ogg",
+            "characters/Pantheon/sounds/4377269.ogg",
+        ],
+        "Play_vo_Pantheon_FirstEncounter3DXinZhao": [
+            "characters/Pantheon/sounds/552873476.ogg",
+        ],
+        "Play_vo_Pantheon_FirstEncounter3DZoe": [
+            "characters/Pantheon/sounds/131833727.ogg",
+        ],
+        "Play_vo_Pantheon_Joke3DGeneral": [
+            "characters/Pantheon/sounds/1061664283.ogg",
+            "characters/Pantheon/sounds/341452447.ogg",
+        ],
+        "Play_vo_Pantheon_Kill3DAatrox": [
+            "characters/Pantheon/sounds/438294377.ogg",
+            "characters/Pantheon/sounds/663537683.ogg",
+        ],
+        "Play_vo_Pantheon_Kill3DAspect": [
+            "characters/Pantheon/sounds/495374774.ogg",
+            "characters/Pantheon/sounds/736842950.ogg",
+            "characters/Pantheon/sounds/88131200.ogg",
+        ],
+        "Play_vo_Pantheon_Kill3DGeneral": [
+            "characters/Pantheon/sounds/1018055379.ogg",
+            "characters/Pantheon/sounds/600636020.ogg",
+            "characters/Pantheon/sounds/678605819.ogg",
+            "characters/Pantheon/sounds/729663640.ogg",
+            "characters/Pantheon/sounds/783379140.ogg",
+        ],
+        "Play_vo_Pantheon_Kill3DShield": [
+            "characters/Pantheon/sounds/988626342.ogg",
+        ],
+        "Play_vo_Pantheon_Laugh3DGeneral": [
+            "characters/Pantheon/sounds/661961306.ogg",
+            "characters/Pantheon/sounds/902924839.ogg",
+        ],
+        "Play_vo_Pantheon_Move2DFirst": [
+            "characters/Pantheon/sounds/1010966060.ogg",
+            "characters/Pantheon/sounds/1052597463.ogg",
+            "characters/Pantheon/sounds/353115856.ogg",
+            "characters/Pantheon/sounds/61842439.ogg",
+            "characters/Pantheon/sounds/770008543.ogg",
+            "characters/Pantheon/sounds/796011303.ogg",
+            "characters/Pantheon/sounds/850954234.ogg",
+        ],
+        "Play_vo_Pantheon_Move2DFirstEnemyAatrox": [
+            "characters/Pantheon/sounds/447686077.ogg",
+        ],
+        "Play_vo_Pantheon_Move2DLong": [
+            "characters/Pantheon/sounds/1047418728.ogg",
+            "characters/Pantheon/sounds/255697231.ogg",
+            "characters/Pantheon/sounds/339805858.ogg",
+            "characters/Pantheon/sounds/451684896.ogg",
+            "characters/Pantheon/sounds/463392177.ogg",
+            "characters/Pantheon/sounds/496659953.ogg",
+            "characters/Pantheon/sounds/501774227.ogg",
+            "characters/Pantheon/sounds/802775118.ogg",
+            "characters/Pantheon/sounds/804049142.ogg",
+            "characters/Pantheon/sounds/866380168.ogg",
+            "characters/Pantheon/sounds/913487117.ogg",
+            "characters/Pantheon/sounds/945720913.ogg",
+            "characters/Pantheon/sounds/974463341.ogg",
+        ],
+        "Play_vo_Pantheon_Move2DStandard": [
+            "characters/Pantheon/sounds/1023965942.ogg",
+            "characters/Pantheon/sounds/119655791.ogg",
+            "characters/Pantheon/sounds/125839441.ogg",
+            "characters/Pantheon/sounds/147233370.ogg",
+            "characters/Pantheon/sounds/283764263.ogg",
+            "characters/Pantheon/sounds/291704794.ogg",
+            "characters/Pantheon/sounds/306777211.ogg",
+            "characters/Pantheon/sounds/320031268.ogg",
+            "characters/Pantheon/sounds/325823227.ogg",
+            "characters/Pantheon/sounds/36028127.ogg",
+            "characters/Pantheon/sounds/498047025.ogg",
+            "characters/Pantheon/sounds/511558382.ogg",
+            "characters/Pantheon/sounds/531071544.ogg",
+            "characters/Pantheon/sounds/687912344.ogg",
+            "characters/Pantheon/sounds/707986082.ogg",
+            "characters/Pantheon/sounds/74652968.ogg",
+            "characters/Pantheon/sounds/796844918.ogg",
+            "characters/Pantheon/sounds/803999356.ogg",
+            "characters/Pantheon/sounds/820107065.ogg",
+            "characters/Pantheon/sounds/830290041.ogg",
+            "characters/Pantheon/sounds/891384632.ogg",
+            "characters/Pantheon/sounds/89749136.ogg",
+            "characters/Pantheon/sounds/920144289.ogg",
+            "characters/Pantheon/sounds/93229570.ogg",
+            "characters/Pantheon/sounds/950557601.ogg",
+            "characters/Pantheon/sounds/952829565.ogg",
+            "characters/Pantheon/sounds/954383718.ogg",
+            "characters/Pantheon/sounds/974170028.ogg",
+            "characters/Pantheon/sounds/992849937.ogg",
+        ],
+        "Play_vo_Pantheon_PantheonBasicAttack2_cast3D": [
+            "characters/Pantheon/sounds/470335941.ogg",
+            "characters/Pantheon/sounds/678456480.ogg",
+            "characters/Pantheon/sounds/691508837.ogg",
+            "characters/Pantheon/sounds/805465415.ogg",
+        ],
+        "Play_vo_Pantheon_PantheonBasicAttack3_cast3D": [
+            "characters/Pantheon/sounds/470335941.ogg",
+            "characters/Pantheon/sounds/678456480.ogg",
+            "characters/Pantheon/sounds/691508837.ogg",
+            "characters/Pantheon/sounds/805465415.ogg",
+        ],
+        "Play_vo_Pantheon_PantheonBasicAttack_cast3D": [
+            "characters/Pantheon/sounds/470335941.ogg",
+            "characters/Pantheon/sounds/678456480.ogg",
+            "characters/Pantheon/sounds/691508837.ogg",
+            "characters/Pantheon/sounds/805465415.ogg",
+        ],
+        "Play_vo_Pantheon_PantheonCritAttack_cast3D": [
+            "characters/Pantheon/sounds/470335941.ogg",
+            "characters/Pantheon/sounds/678456480.ogg",
+            "characters/Pantheon/sounds/691508837.ogg",
+            "characters/Pantheon/sounds/805465415.ogg",
+        ],
+        "Play_vo_Pantheon_PantheonQMissile_cast3D": [
+            "characters/Pantheon/sounds/204490030.ogg",
+            "characters/Pantheon/sounds/390627310.ogg",
+        ],
+        "Play_vo_Pantheon_PantheonQTap_cast3D": [
+            "characters/Pantheon/sounds/259353667.ogg",
+            "characters/Pantheon/sounds/313066022.ogg",
+        ],
+        "Play_vo_Pantheon_PantheonR_cast3D": [
+            "characters/Pantheon/sounds/256753566.ogg",
+            "characters/Pantheon/sounds/634479007.ogg",
+            "characters/Pantheon/sounds/634725334.ogg",
+        ],
+        "Play_vo_Pantheon_PantheonW_cast3D": [
+            "characters/Pantheon/sounds/1039602110.ogg",
+            "characters/Pantheon/sounds/123787989.ogg",
+        ],
+        "Play_vo_Pantheon_Recall3DGeneral": [
+            "characters/Pantheon/sounds/1069424478.ogg",
+            "characters/Pantheon/sounds/748517353.ogg",
+            "characters/Pantheon/sounds/834114509.ogg",
+        ],
+        "Play_vo_Pantheon_Respawn2DGeneral": [
+            "characters/Pantheon/sounds/378034530.ogg",
+            "characters/Pantheon/sounds/596003701.ogg",
+            "characters/Pantheon/sounds/657011220.ogg",
+            "characters/Pantheon/sounds/701709974.ogg",
+            "characters/Pantheon/sounds/703720536.ogg",
+            "characters/Pantheon/sounds/905863026.ogg",
+        ],
+        "Play_vo_Pantheon_Taunt3DGeneral": [
+            "characters/Pantheon/sounds/783357012.ogg",
+        ],
+        "Recall_cast": [
+            "characters/Pantheon/sounds/153319359.ogg",
+        ],
+        "Respawn_cast": [
+            "characters/Pantheon/sounds/131023565.ogg",
+        ],
+        "Respawn_cast_long_anim": [
+            "characters/Pantheon/sounds/821866304.ogg",
+        ],
+        "Respawn_cast_short_anim": [
+            "characters/Pantheon/sounds/721304791.ogg",
+        ],
+        "Taunt_cast": [
+            "characters/Pantheon/sounds/486497707.ogg",
+        ],
+        "Taunt_loop_anim": [
+            "characters/Pantheon/sounds/644503626.ogg",
+        ],
+    },
+)

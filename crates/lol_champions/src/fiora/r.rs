@@ -288,8 +288,7 @@ pub fn on_fiora_r(
     // R 施放（标记出现）音效：FioraRMark
     commands.trigger(CommandSkinSoundPlay {
         entity,
-        key: "FioraRMark".to_string(),
-        hit: false,
+        key: "FioraRMark_OnBuffActivate".to_string(),
     });
 
     commands
@@ -372,8 +371,7 @@ pub fn on_r_damage_create(
     });
     commands.trigger(CommandSkinSoundPlay {
         entity: trigger.source,
-        key: "FioraRHitSound".to_string(),
-        hit: true,
+        key: "FioraRHitSound_OnHit".to_string(),
     });
 
     let true_damage = hp.max * buff_fiora_r.vital_pct;
@@ -424,8 +422,7 @@ pub fn on_r_damage_create(
         // 四要害全破触发治疗光环音效：FioraRHeal
         commands.trigger(CommandSkinSoundPlay {
             entity: trigger.source,
-            key: "FioraRHeal".to_string(),
-            hit: false,
+            key: "FioraRHeal_OnBuffActivate".to_string(),
         });
         commands.entity(buff_entity).despawn();
     }

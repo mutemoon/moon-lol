@@ -1,0 +1,302 @@
+(
+    events: {
+        "Play_vo_Vladimir_Attack2DGeneral": [
+            "characters/Vladimir/sounds/115613436.ogg",
+            "characters/Vladimir/sounds/179772342.ogg",
+            "characters/Vladimir/sounds/332669023.ogg",
+            "characters/Vladimir/sounds/373673417.ogg",
+            "characters/Vladimir/sounds/506192238.ogg",
+            "characters/Vladimir/sounds/526119774.ogg",
+            "characters/Vladimir/sounds/860900738.ogg",
+        ],
+        "Play_vo_Vladimir_Death3D": [
+            "characters/Vladimir/sounds/253851682.ogg",
+            "characters/Vladimir/sounds/305521479.ogg",
+            "characters/Vladimir/sounds/419569871.ogg",
+            "characters/Vladimir/sounds/806015348.ogg",
+        ],
+        "Play_vo_Vladimir_Joke3DGeneral": [
+            "characters/Vladimir/sounds/1045258987.ogg",
+        ],
+        "Play_vo_Vladimir_Laugh3DGeneral": [
+            "characters/Vladimir/sounds/172610256.ogg",
+            "characters/Vladimir/sounds/272587030.ogg",
+            "characters/Vladimir/sounds/332619907.ogg",
+            "characters/Vladimir/sounds/728929306.ogg",
+        ],
+        "Play_vo_Vladimir_Move2DStandard": [
+            "characters/Vladimir/sounds/1062205650.ogg",
+            "characters/Vladimir/sounds/192261302.ogg",
+            "characters/Vladimir/sounds/268091508.ogg",
+            "characters/Vladimir/sounds/326632437.ogg",
+            "characters/Vladimir/sounds/434552402.ogg",
+            "characters/Vladimir/sounds/473760290.ogg",
+            "characters/Vladimir/sounds/579728090.ogg",
+            "characters/Vladimir/sounds/713795120.ogg",
+            "characters/Vladimir/sounds/850714312.ogg",
+            "characters/Vladimir/sounds/992741439.ogg",
+        ],
+        "Play_vo_Vladimir_Spell3DWEnd": [
+            "characters/Vladimir/sounds/1014999638.ogg",
+            "characters/Vladimir/sounds/378291154.ogg",
+            "characters/Vladimir/sounds/381888678.ogg",
+            "characters/Vladimir/sounds/863846809.ogg",
+        ],
+        "Play_vo_Vladimir_Taunt3DGeneral": [
+            "characters/Vladimir/sounds/325711157.ogg",
+        ],
+        "Play_vo_Vladimir_VladimirBasicAttack2_cast3D": [
+            "characters/Vladimir/sounds/1046892343.ogg",
+            "characters/Vladimir/sounds/595026366.ogg",
+            "characters/Vladimir/sounds/763927911.ogg",
+            "characters/Vladimir/sounds/965603657.ogg",
+        ],
+        "Play_vo_Vladimir_VladimirBasicAttack3_cast3D": [
+            "characters/Vladimir/sounds/1046892343.ogg",
+            "characters/Vladimir/sounds/595026366.ogg",
+            "characters/Vladimir/sounds/763927911.ogg",
+            "characters/Vladimir/sounds/965603657.ogg",
+        ],
+        "Play_vo_Vladimir_VladimirBasicAttack4_cast3D": [
+            "characters/Vladimir/sounds/1046892343.ogg",
+            "characters/Vladimir/sounds/595026366.ogg",
+            "characters/Vladimir/sounds/763927911.ogg",
+            "characters/Vladimir/sounds/965603657.ogg",
+        ],
+        "Play_vo_Vladimir_VladimirBasicAttack_cast3D": [
+            "characters/Vladimir/sounds/1046892343.ogg",
+            "characters/Vladimir/sounds/595026366.ogg",
+            "characters/Vladimir/sounds/763927911.ogg",
+            "characters/Vladimir/sounds/965603657.ogg",
+        ],
+        "Play_vo_Vladimir_VladimirCritAttack_cast3D": [
+            "characters/Vladimir/sounds/1046892343.ogg",
+            "characters/Vladimir/sounds/595026366.ogg",
+            "characters/Vladimir/sounds/763927911.ogg",
+            "characters/Vladimir/sounds/965603657.ogg",
+        ],
+        "Play_vo_Vladimir_VladimirE_cast3D": [
+            "characters/Vladimir/sounds/291700448.ogg",
+            "characters/Vladimir/sounds/539997370.ogg",
+            "characters/Vladimir/sounds/671419972.ogg",
+            "characters/Vladimir/sounds/732937533.ogg",
+        ],
+        "Play_vo_Vladimir_VladimirHemoplague_cast3D": [
+            "characters/Vladimir/sounds/232953232.ogg",
+            "characters/Vladimir/sounds/294410006.ogg",
+            "characters/Vladimir/sounds/47870577.ogg",
+            "characters/Vladimir/sounds/788746273.ogg",
+        ],
+        "Play_vo_Vladimir_VladimirQ_cast3D": [
+            "characters/Vladimir/sounds/1031920979.ogg",
+            "characters/Vladimir/sounds/49373442.ogg",
+            "characters/Vladimir/sounds/595328464.ogg",
+            "characters/Vladimir/sounds/928458895.ogg",
+        ],
+        "Recall3D_buffactivate": [
+            "characters/Vladimir/sounds/161768685.ogg",
+        ],
+        "VladimirBasicAttack2_OnCast": [
+            "characters/Vladimir/sounds/171382479.ogg",
+            "characters/Vladimir/sounds/615242584.ogg",
+            "characters/Vladimir/sounds/669421689.ogg",
+        ],
+        "VladimirBasicAttack2_OnHit": [
+            "characters/Vladimir/sounds/240743488.ogg",
+            "characters/Vladimir/sounds/41679235.ogg",
+            "characters/Vladimir/sounds/674560434.ogg",
+        ],
+        "VladimirBasicAttack2_OnMissileLaunch": [
+            "characters/Vladimir/sounds/1782578.ogg",
+            "characters/Vladimir/sounds/448112524.ogg",
+            "characters/Vladimir/sounds/618881767.ogg",
+        ],
+        "VladimirBasicAttack3_OnCast": [
+            "characters/Vladimir/sounds/171382479.ogg",
+            "characters/Vladimir/sounds/615242584.ogg",
+            "characters/Vladimir/sounds/669421689.ogg",
+        ],
+        "VladimirBasicAttack3_OnHit": [
+            "characters/Vladimir/sounds/240743488.ogg",
+            "characters/Vladimir/sounds/41679235.ogg",
+            "characters/Vladimir/sounds/674560434.ogg",
+        ],
+        "VladimirBasicAttack3_OnMissileLaunch": [
+            "characters/Vladimir/sounds/1782578.ogg",
+            "characters/Vladimir/sounds/448112524.ogg",
+            "characters/Vladimir/sounds/618881767.ogg",
+        ],
+        "VladimirBasicAttack4_OnCast": [
+            "characters/Vladimir/sounds/171382479.ogg",
+            "characters/Vladimir/sounds/615242584.ogg",
+            "characters/Vladimir/sounds/669421689.ogg",
+        ],
+        "VladimirBasicAttack4_OnHit": [
+            "characters/Vladimir/sounds/240743488.ogg",
+            "characters/Vladimir/sounds/41679235.ogg",
+            "characters/Vladimir/sounds/674560434.ogg",
+        ],
+        "VladimirBasicAttack4_OnMissileLaunch": [
+            "characters/Vladimir/sounds/1782578.ogg",
+            "characters/Vladimir/sounds/448112524.ogg",
+            "characters/Vladimir/sounds/618881767.ogg",
+        ],
+        "VladimirBasicAttack_OnCast": [
+            "characters/Vladimir/sounds/171382479.ogg",
+            "characters/Vladimir/sounds/615242584.ogg",
+            "characters/Vladimir/sounds/669421689.ogg",
+        ],
+        "VladimirBasicAttack_OnHit": [
+            "characters/Vladimir/sounds/240743488.ogg",
+            "characters/Vladimir/sounds/41679235.ogg",
+            "characters/Vladimir/sounds/674560434.ogg",
+        ],
+        "VladimirBasicAttack_OnMissileLaunch": [
+            "characters/Vladimir/sounds/1782578.ogg",
+            "characters/Vladimir/sounds/448112524.ogg",
+            "characters/Vladimir/sounds/618881767.ogg",
+        ],
+        "VladimirCritAttack_OnCast": [
+            "characters/Vladimir/sounds/171382479.ogg",
+            "characters/Vladimir/sounds/615242584.ogg",
+            "characters/Vladimir/sounds/669421689.ogg",
+        ],
+        "VladimirCritAttack_OnHit": [
+            "characters/Vladimir/sounds/240743488.ogg",
+            "characters/Vladimir/sounds/41679235.ogg",
+            "characters/Vladimir/sounds/674560434.ogg",
+        ],
+        "VladimirCritAttack_OnMissileLaunch": [
+            "characters/Vladimir/sounds/1782578.ogg",
+            "characters/Vladimir/sounds/448112524.ogg",
+            "characters/Vladimir/sounds/618881767.ogg",
+        ],
+        "VladimirE_OnCast": [
+            "characters/Vladimir/sounds/235234450.ogg",
+            "characters/Vladimir/sounds/52740444.ogg",
+            "characters/Vladimir/sounds/74230523.ogg",
+        ],
+        "VladimirE_charged_hit": [
+            "characters/Vladimir/sounds/388518403.ogg",
+            "characters/Vladimir/sounds/822046644.ogg",
+            "characters/Vladimir/sounds/841654757.ogg",
+        ],
+        "VladimirE_charged_onmissilelaunch": [
+            "characters/Vladimir/sounds/495572975.ogg",
+            "characters/Vladimir/sounds/531549957.ogg",
+        ],
+        "VladimirE_fullcharge": [
+            "characters/Vladimir/sounds/1071547049.ogg",
+            "characters/Vladimir/sounds/323467604.ogg",
+        ],
+        "VladimirE_hit": [
+            "characters/Vladimir/sounds/488052070.ogg",
+            "characters/Vladimir/sounds/705025911.ogg",
+            "characters/Vladimir/sounds/949079498.ogg",
+        ],
+        "VladimirE_onmissilelaunch": [
+            "characters/Vladimir/sounds/361417743.ogg",
+            "characters/Vladimir/sounds/641201804.ogg",
+            "characters/Vladimir/sounds/686682523.ogg",
+        ],
+        "VladimirHemoplagueDebuff_OnBuffActivate": [
+            "characters/Vladimir/sounds/130782278.ogg",
+            "characters/Vladimir/sounds/39457484.ogg",
+            "characters/Vladimir/sounds/92187228.ogg",
+        ],
+        "VladimirHemoplagueDebuff_buffactivate": [
+            "characters/Vladimir/sounds/365565477.ogg",
+            "characters/Vladimir/sounds/382807065.ogg",
+            "characters/Vladimir/sounds/575185429.ogg",
+        ],
+        "VladimirHemoplagueDebuff_buffdeactivate": [
+            "characters/Vladimir/sounds/350249843.ogg",
+            "characters/Vladimir/sounds/606669730.ogg",
+            "characters/Vladimir/sounds/915984567.ogg",
+        ],
+        "VladimirHemoplague_OnCast": [
+            "characters/Vladimir/sounds/289936887.ogg",
+        ],
+        "VladimirHemoplague_heal": [
+            "characters/Vladimir/sounds/48071176.ogg",
+            "characters/Vladimir/sounds/584541983.ogg",
+        ],
+        "VladimirHemoplague_hit": [
+            "characters/Vladimir/sounds/314399472.ogg",
+            "characters/Vladimir/sounds/834435702.ogg",
+        ],
+        "VladimirQFrenzy_OnBuffActivate": [
+            "characters/Vladimir/sounds/587580206.ogg",
+            "characters/Vladimir/sounds/741036833.ogg",
+            "characters/Vladimir/sounds/771080947.ogg",
+        ],
+        "VladimirQFrenzy_OnBuffDeactivate": [
+            "characters/Vladimir/sounds/582064616.ogg",
+            "characters/Vladimir/sounds/984056544.ogg",
+        ],
+        "VladimirQFrenzy_start": [
+            "characters/Vladimir/sounds/198925154.ogg",
+            "characters/Vladimir/sounds/749797786.ogg",
+            "characters/Vladimir/sounds/954663749.ogg",
+        ],
+        "VladimirQ_OnCast": [
+            "characters/Vladimir/sounds/175167940.ogg",
+            "characters/Vladimir/sounds/728495261.ogg",
+            "characters/Vladimir/sounds/739285685.ogg",
+        ],
+        "VladimirQ_OnCast_01": [
+            "characters/Vladimir/sounds/175167940.ogg",
+            "characters/Vladimir/sounds/728495261.ogg",
+            "characters/Vladimir/sounds/739285685.ogg",
+        ],
+        "VladimirQ_OnHit": [
+            "characters/Vladimir/sounds/106245111.ogg",
+            "characters/Vladimir/sounds/133649384.ogg",
+            "characters/Vladimir/sounds/323391853.ogg",
+        ],
+        "VladimirSanguinePool_OnBuffActivate": [
+            "characters/Vladimir/sounds/677977447.ogg",
+            "characters/Vladimir/sounds/841466121.ogg",
+            "characters/Vladimir/sounds/92177640.ogg",
+        ],
+        "VladimirSanguinePool_OnBuffDeactivate": [
+            "characters/Vladimir/sounds/131875393.ogg",
+            "characters/Vladimir/sounds/988953811.ogg",
+        ],
+        "VladimirSanguinePool_OnCast": [
+            "characters/Vladimir/sounds/260104086.ogg",
+            "characters/Vladimir/sounds/378031948.ogg",
+            "characters/Vladimir/sounds/718995861.ogg",
+        ],
+        "VladimirTidesofBloodHeal_OnHit": [
+            "characters/Vladimir/sounds/128723874.ogg",
+        ],
+        "VladimirTidesofBloodNuke_OnHit": [
+            "characters/Vladimir/sounds/1048619434.ogg",
+            "characters/Vladimir/sounds/461644759.ogg",
+            "characters/Vladimir/sounds/623821285.ogg",
+        ],
+        "VladimirTidesofBloodNuke_OnMissileLaunch": [
+            "characters/Vladimir/sounds/4586565.ogg",
+            "characters/Vladimir/sounds/568079621.ogg",
+            "characters/Vladimir/sounds/613621727.ogg",
+        ],
+        "VladimirTidesofBlood_OnCast": [
+            "characters/Vladimir/sounds/104329900.ogg",
+            "characters/Vladimir/sounds/351552810.ogg",
+            "characters/Vladimir/sounds/401216419.ogg",
+        ],
+        "VladimirTransfusionHeal_OnHit": [
+            "characters/Vladimir/sounds/48071176.ogg",
+            "characters/Vladimir/sounds/584541983.ogg",
+        ],
+        "VladimirTransfusionHeal_OnMissileLaunch": [
+            "characters/Vladimir/sounds/1071229809.ogg",
+            "characters/Vladimir/sounds/304332962.ogg",
+            "characters/Vladimir/sounds/770365136.ogg",
+        ],
+        "Winddown3D_buffactivate": [
+            "characters/Vladimir/sounds/469420205.ogg",
+        ],
+    },
+)

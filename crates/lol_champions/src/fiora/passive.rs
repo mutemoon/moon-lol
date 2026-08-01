@@ -266,8 +266,7 @@ pub fn update_remove_vital(
                     // 破绽真正生成（预警转激活）瞬间音效
                     commands.trigger(CommandSkinSoundPlay {
                         entity,
-                        key: "FioraPassiveReadySound".to_string(),
-                        hit: false,
+                        key: "FioraPassiveReadySound_OnBuffActivate".to_string(),
                     });
                 }
                 continue;
@@ -363,8 +362,7 @@ pub fn on_passive_damage_create(
     });
     commands.trigger(CommandSkinSoundPlay {
         entity: trigger.source,
-        key: "FioraPassiveHitSound".to_string(),
-        hit: true,
+        key: "FioraPassiveHitSound_OnHit".to_string(),
     });
 
     let direction = match last_direction.entity_to_last_direction.get(&target_entity) {

@@ -1,0 +1,644 @@
+(
+    events: {
+        "Dance3D_buffactivate": [
+            "characters/Leblanc/sounds/277132427.ogg",
+        ],
+        "Dance3D_buffactivate_loop": [
+            "characters/Leblanc/sounds/435083511.ogg",
+        ],
+        "Dance3D_buffactivate_spotlight": [
+            "characters/Leblanc/sounds/604835198.ogg",
+        ],
+        "Death3D_cast": [
+            "characters/Leblanc/sounds/172688280.ogg",
+            "characters/Leblanc/sounds/662862866.ogg",
+        ],
+        "Homeguard3D_buffactivate": [
+            "characters/Leblanc/sounds/200646991.ogg",
+        ],
+        "Homeguard3D_buffactivate_loop": [
+            "characters/Leblanc/sounds/324659736.ogg",
+        ],
+        "Joke3D_buffactivate": [
+            "characters/Leblanc/sounds/291658574.ogg",
+        ],
+        "Laugh3D_buffactivate": [
+            "characters/Leblanc/sounds/787857476.ogg",
+        ],
+        "LeblancBasicAttack2_OnCast": [
+            "characters/Leblanc/sounds/72860817.ogg",
+            "characters/Leblanc/sounds/78625464.ogg",
+            "characters/Leblanc/sounds/91586835.ogg",
+        ],
+        "LeblancBasicAttack2_OnHit": [
+            "characters/Leblanc/sounds/200826237.ogg",
+            "characters/Leblanc/sounds/440677293.ogg",
+            "characters/Leblanc/sounds/775728102.ogg",
+        ],
+        "LeblancBasicAttack2_OnMissileLaunch": [
+            "characters/Leblanc/sounds/266510960.ogg",
+            "characters/Leblanc/sounds/699496021.ogg",
+            "characters/Leblanc/sounds/738123127.ogg",
+        ],
+        "LeblancBasicAttack_OnCast": [
+            "characters/Leblanc/sounds/72860817.ogg",
+            "characters/Leblanc/sounds/78625464.ogg",
+            "characters/Leblanc/sounds/91586835.ogg",
+        ],
+        "LeblancBasicAttack_OnHit": [
+            "characters/Leblanc/sounds/200826237.ogg",
+            "characters/Leblanc/sounds/440677293.ogg",
+            "characters/Leblanc/sounds/775728102.ogg",
+        ],
+        "LeblancBasicAttack_OnMissileLaunch": [
+            "characters/Leblanc/sounds/266510960.ogg",
+            "characters/Leblanc/sounds/699496021.ogg",
+            "characters/Leblanc/sounds/738123127.ogg",
+        ],
+        "LeblancCritAttack_OnCast": [
+            "characters/Leblanc/sounds/72860817.ogg",
+            "characters/Leblanc/sounds/78625464.ogg",
+            "characters/Leblanc/sounds/91586835.ogg",
+        ],
+        "LeblancCritAttack_OnHit": [
+            "characters/Leblanc/sounds/200826237.ogg",
+            "characters/Leblanc/sounds/440677293.ogg",
+            "characters/Leblanc/sounds/775728102.ogg",
+        ],
+        "LeblancCritAttack_OnMissileLaunch": [
+            "characters/Leblanc/sounds/266510960.ogg",
+            "characters/Leblanc/sounds/699496021.ogg",
+            "characters/Leblanc/sounds/738123127.ogg",
+        ],
+        "LeblancEMissile_OnHit": [
+            "characters/Leblanc/sounds/477846694.ogg",
+            "characters/Leblanc/sounds/760271444.ogg",
+            "characters/Leblanc/sounds/763804142.ogg",
+        ],
+        "LeblancEMissile_missilelaunch": [
+            "characters/Leblanc/sounds/116061050.ogg",
+            "characters/Leblanc/sounds/35208391.ogg",
+            "characters/Leblanc/sounds/834292799.ogg",
+        ],
+        "LeblancERoot_OnBuffActivate": [
+            "characters/Leblanc/sounds/107103494.ogg",
+            "characters/Leblanc/sounds/113509888.ogg",
+            "characters/Leblanc/sounds/136576736.ogg",
+            "characters/Leblanc/sounds/169583554.ogg",
+            "characters/Leblanc/sounds/314151957.ogg",
+            "characters/Leblanc/sounds/75855426.ogg",
+        ],
+        "LeblancERoot_buffactivate_target": [
+            "characters/Leblanc/sounds/18128174.ogg",
+            "characters/Leblanc/sounds/88338608.ogg",
+        ],
+        "LeblancE_OnBuffActivate": [
+            "characters/Leblanc/sounds/494097158.ogg",
+            "characters/Leblanc/sounds/505083132.ogg",
+        ],
+        "LeblancE_OnBuffDeactivate": [
+            "characters/Leblanc/sounds/15959216.ogg",
+            "characters/Leblanc/sounds/242426091.ogg",
+            "characters/Leblanc/sounds/484193493.ogg",
+        ],
+        "LeblancE_OnCast": [
+            "characters/Leblanc/sounds/17573359.ogg",
+            "characters/Leblanc/sounds/517147838.ogg",
+            "characters/Leblanc/sounds/776488818.ogg",
+        ],
+        "LeblancP_buffactivate": [
+            "characters/Leblanc/sounds/616959978.ogg",
+        ],
+        "LeblancP_buffactivate_self": [
+            "characters/Leblanc/sounds/799628405.ogg",
+        ],
+        "LeblancP_buffdeactivate": [
+            "characters/Leblanc/sounds/165392653.ogg",
+            "characters/Leblanc/sounds/404904059.ogg",
+            "characters/Leblanc/sounds/99075403.ogg",
+        ],
+        "LeblancP_clone_buffdeactivate": [
+            "characters/Leblanc/sounds/445107183.ogg",
+        ],
+        "LeblancQDetonate_buffactivate": [
+            "characters/Leblanc/sounds/1009323411.ogg",
+            "characters/Leblanc/sounds/384716067.ogg",
+            "characters/Leblanc/sounds/487575468.ogg",
+        ],
+        "LeblancQMark_OnBuffActivate": [
+            "characters/Leblanc/sounds/368684532.ogg",
+        ],
+        "LeblancQMark_OnBuffDeactivate": [
+            "characters/Leblanc/sounds/103236143.ogg",
+            "characters/Leblanc/sounds/963322811.ogg",
+            "characters/Leblanc/sounds/991795602.ogg",
+        ],
+        "LeblancQMark_buffactivate": [
+            "characters/Leblanc/sounds/127197078.ogg",
+            "characters/Leblanc/sounds/337466154.ogg",
+            "characters/Leblanc/sounds/727287106.ogg",
+        ],
+        "LeblancQ_OnCast": [
+            "characters/Leblanc/sounds/28542573.ogg",
+            "characters/Leblanc/sounds/723945449.ogg",
+            "characters/Leblanc/sounds/90732952.ogg",
+        ],
+        "LeblancQ_OnHit": [
+            "characters/Leblanc/sounds/160525364.ogg",
+            "characters/Leblanc/sounds/479793586.ogg",
+            "characters/Leblanc/sounds/954172860.ogg",
+        ],
+        "LeblancQ_OnMissileLaunch": [
+            "characters/Leblanc/sounds/1059474850.ogg",
+            "characters/Leblanc/sounds/17200326.ogg",
+            "characters/Leblanc/sounds/902117353.ogg",
+        ],
+        "LeblancREMissile_OnHit": [
+            "characters/Leblanc/sounds/477846694.ogg",
+            "characters/Leblanc/sounds/760271444.ogg",
+            "characters/Leblanc/sounds/763804142.ogg",
+        ],
+        "LeblancREMissile_missilelaunch": [
+            "characters/Leblanc/sounds/116061050.ogg",
+            "characters/Leblanc/sounds/35208391.ogg",
+            "characters/Leblanc/sounds/834292799.ogg",
+        ],
+        "LeblancRERoot_OnBuffActivate": [
+            "characters/Leblanc/sounds/107103494.ogg",
+            "characters/Leblanc/sounds/113509888.ogg",
+            "characters/Leblanc/sounds/136576736.ogg",
+            "characters/Leblanc/sounds/169583554.ogg",
+            "characters/Leblanc/sounds/314151957.ogg",
+            "characters/Leblanc/sounds/75855426.ogg",
+        ],
+        "LeblancRERoot_buffactivate_target": [
+            "characters/Leblanc/sounds/18128174.ogg",
+            "characters/Leblanc/sounds/88338608.ogg",
+        ],
+        "LeblancRE_OnBuffActivate": [
+            "characters/Leblanc/sounds/455622014.ogg",
+            "characters/Leblanc/sounds/883151324.ogg",
+        ],
+        "LeblancRE_OnBuffDeactivate": [
+            "characters/Leblanc/sounds/15959216.ogg",
+            "characters/Leblanc/sounds/242426091.ogg",
+            "characters/Leblanc/sounds/484193493.ogg",
+        ],
+        "LeblancRE_OnCast": [
+            "characters/Leblanc/sounds/17573359.ogg",
+            "characters/Leblanc/sounds/188154843.ogg",
+            "characters/Leblanc/sounds/517147838.ogg",
+            "characters/Leblanc/sounds/543785790.ogg",
+            "characters/Leblanc/sounds/549360314.ogg",
+            "characters/Leblanc/sounds/776488818.ogg",
+        ],
+        "LeblancRQDetonate_buffactivate": [
+            "characters/Leblanc/sounds/1009323411.ogg",
+            "characters/Leblanc/sounds/384716067.ogg",
+            "characters/Leblanc/sounds/487575468.ogg",
+        ],
+        "LeblancRQMark_OnBuffActivate": [
+            "characters/Leblanc/sounds/732872935.ogg",
+        ],
+        "LeblancRQMark_OnBuffDeactivate": [
+            "characters/Leblanc/sounds/103236143.ogg",
+            "characters/Leblanc/sounds/963322811.ogg",
+            "characters/Leblanc/sounds/991795602.ogg",
+        ],
+        "LeblancRQMark_buffactivate": [
+            "characters/Leblanc/sounds/46713655.ogg",
+            "characters/Leblanc/sounds/668310499.ogg",
+        ],
+        "LeblancRQ_OnCast": [
+            "characters/Leblanc/sounds/188154843.ogg",
+            "characters/Leblanc/sounds/28542573.ogg",
+            "characters/Leblanc/sounds/543785790.ogg",
+            "characters/Leblanc/sounds/549360314.ogg",
+            "characters/Leblanc/sounds/723945449.ogg",
+            "characters/Leblanc/sounds/90732952.ogg",
+        ],
+        "LeblancRQ_OnHit": [
+            "characters/Leblanc/sounds/160525364.ogg",
+            "characters/Leblanc/sounds/479793586.ogg",
+            "characters/Leblanc/sounds/954172860.ogg",
+        ],
+        "LeblancRQ_OnMissileLaunch": [
+            "characters/Leblanc/sounds/1059474850.ogg",
+            "characters/Leblanc/sounds/17200326.ogg",
+            "characters/Leblanc/sounds/902117353.ogg",
+        ],
+        "LeblancRWReturn_cast": [
+            "characters/Leblanc/sounds/196128323.ogg",
+            "characters/Leblanc/sounds/33032431.ogg",
+            "characters/Leblanc/sounds/519784208.ogg",
+        ],
+        "LeblancRW_buffdeactivate": [
+            "characters/Leblanc/sounds/191138113.ogg",
+            "characters/Leblanc/sounds/303981639.ogg",
+            "characters/Leblanc/sounds/819728188.ogg",
+        ],
+        "LeblancRW_clone_buffactivate": [
+            "characters/Leblanc/sounds/413111049.ogg",
+            "characters/Leblanc/sounds/65301696.ogg",
+            "characters/Leblanc/sounds/731317628.ogg",
+            "characters/Leblanc/sounds/777292931.ogg",
+        ],
+        "LeblancRW_clone_buffdeactivate": [
+            "characters/Leblanc/sounds/569923006.ogg",
+            "characters/Leblanc/sounds/796151015.ogg",
+            "characters/Leblanc/sounds/853992549.ogg",
+        ],
+        "LeblancRW_hit": [
+            "characters/Leblanc/sounds/1058289257.ogg",
+            "characters/Leblanc/sounds/16852288.ogg",
+            "characters/Leblanc/sounds/849289274.ogg",
+            "characters/Leblanc/sounds/977604492.ogg",
+        ],
+        "LeblancRW_hitlocation": [
+            "characters/Leblanc/sounds/529066835.ogg",
+            "characters/Leblanc/sounds/7178671.ogg",
+            "characters/Leblanc/sounds/721242451.ogg",
+        ],
+        "LeblancRW_missilelaunch": [
+            "characters/Leblanc/sounds/188154843.ogg",
+            "characters/Leblanc/sounds/436058226.ogg",
+            "characters/Leblanc/sounds/48107802.ogg",
+            "characters/Leblanc/sounds/543785790.ogg",
+            "characters/Leblanc/sounds/549360314.ogg",
+            "characters/Leblanc/sounds/90367447.ogg",
+        ],
+        "LeblancWReturn_cast": [
+            "characters/Leblanc/sounds/196128323.ogg",
+            "characters/Leblanc/sounds/33032431.ogg",
+            "characters/Leblanc/sounds/519784208.ogg",
+        ],
+        "LeblancW_buffdeactivate": [
+            "characters/Leblanc/sounds/191138113.ogg",
+            "characters/Leblanc/sounds/303981639.ogg",
+            "characters/Leblanc/sounds/819728188.ogg",
+        ],
+        "LeblancW_clone_buffactivate": [
+            "characters/Leblanc/sounds/413111049.ogg",
+            "characters/Leblanc/sounds/65301696.ogg",
+            "characters/Leblanc/sounds/731317628.ogg",
+            "characters/Leblanc/sounds/777292931.ogg",
+        ],
+        "LeblancW_clone_buffdeactivate": [
+            "characters/Leblanc/sounds/569923006.ogg",
+            "characters/Leblanc/sounds/796151015.ogg",
+            "characters/Leblanc/sounds/853992549.ogg",
+        ],
+        "LeblancW_foley": [
+            "characters/Leblanc/sounds/185521954.ogg",
+            "characters/Leblanc/sounds/355890360.ogg",
+            "characters/Leblanc/sounds/623640607.ogg",
+        ],
+        "LeblancW_hit": [
+            "characters/Leblanc/sounds/235922309.ogg",
+            "characters/Leblanc/sounds/708861666.ogg",
+            "characters/Leblanc/sounds/834632342.ogg",
+            "characters/Leblanc/sounds/941963286.ogg",
+        ],
+        "LeblancW_hitlocation": [
+            "characters/Leblanc/sounds/529066835.ogg",
+            "characters/Leblanc/sounds/7178671.ogg",
+            "characters/Leblanc/sounds/721242451.ogg",
+        ],
+        "LeblancW_missilelaunch": [
+            "characters/Leblanc/sounds/436058226.ogg",
+            "characters/Leblanc/sounds/48107802.ogg",
+            "characters/Leblanc/sounds/90367447.ogg",
+        ],
+        "Play_vo_LeBlanc_Move2DStandard": [
+            "characters/Leblanc/sounds/212581477.ogg",
+            "characters/Leblanc/sounds/289246605.ogg",
+            "characters/Leblanc/sounds/373283573.ogg",
+            "characters/Leblanc/sounds/39524374.ogg",
+            "characters/Leblanc/sounds/459037118.ogg",
+            "characters/Leblanc/sounds/579573842.ogg",
+            "characters/Leblanc/sounds/602678246.ogg",
+            "characters/Leblanc/sounds/610213050.ogg",
+            "characters/Leblanc/sounds/620141111.ogg",
+            "characters/Leblanc/sounds/625362626.ogg",
+            "characters/Leblanc/sounds/763669403.ogg",
+            "characters/Leblanc/sounds/77516460.ogg",
+            "characters/Leblanc/sounds/838374035.ogg",
+            "characters/Leblanc/sounds/878807589.ogg",
+            "characters/Leblanc/sounds/928623655.ogg",
+            "characters/Leblanc/sounds/973403226.ogg",
+        ],
+        "Play_vo_Leblanc_Attack2DAtakhan": [
+            "characters/Leblanc/sounds/588642337.ogg",
+            "characters/Leblanc/sounds/750675471.ogg",
+        ],
+        "Play_vo_Leblanc_Attack2DGeneral": [
+            "characters/Leblanc/sounds/1010663227.ogg",
+            "characters/Leblanc/sounds/105264042.ogg",
+            "characters/Leblanc/sounds/1058853239.ogg",
+            "characters/Leblanc/sounds/263211634.ogg",
+            "characters/Leblanc/sounds/267896526.ogg",
+            "characters/Leblanc/sounds/270355347.ogg",
+            "characters/Leblanc/sounds/291171208.ogg",
+            "characters/Leblanc/sounds/330284194.ogg",
+            "characters/Leblanc/sounds/396838941.ogg",
+            "characters/Leblanc/sounds/436821321.ogg",
+            "characters/Leblanc/sounds/467119908.ogg",
+            "characters/Leblanc/sounds/513725261.ogg",
+            "characters/Leblanc/sounds/696879641.ogg",
+            "characters/Leblanc/sounds/737407088.ogg",
+            "characters/Leblanc/sounds/851778051.ogg",
+            "characters/Leblanc/sounds/865598901.ogg",
+        ],
+        "Play_vo_Leblanc_Death3D": [
+            "characters/Leblanc/sounds/130563690.ogg",
+            "characters/Leblanc/sounds/341654641.ogg",
+            "characters/Leblanc/sounds/423552406.ogg",
+            "characters/Leblanc/sounds/460294852.ogg",
+            "characters/Leblanc/sounds/853934900.ogg",
+        ],
+        "Play_vo_Leblanc_FirstEncounter3DAmbessa": [
+            "characters/Leblanc/sounds/306831868.ogg",
+            "characters/Leblanc/sounds/961866320.ogg",
+        ],
+        "Play_vo_Leblanc_FirstEncounter3DBlackRose": [
+            "characters/Leblanc/sounds/834503464.ogg",
+        ],
+        "Play_vo_Leblanc_FirstEncounter3DDarkin": [
+            "characters/Leblanc/sounds/489516460.ogg",
+            "characters/Leblanc/sounds/559946917.ogg",
+        ],
+        "Play_vo_Leblanc_FirstEncounter3DDemon": [
+            "characters/Leblanc/sounds/704268763.ogg",
+        ],
+        "Play_vo_Leblanc_FirstEncounter3DElise": [
+            "characters/Leblanc/sounds/279906588.ogg",
+            "characters/Leblanc/sounds/393459368.ogg",
+        ],
+        "Play_vo_Leblanc_FirstEncounter3DGeneral": [
+            "characters/Leblanc/sounds/13566813.ogg",
+            "characters/Leblanc/sounds/527036133.ogg",
+            "characters/Leblanc/sounds/624251551.ogg",
+        ],
+        "Play_vo_Leblanc_FirstEncounter3DJarvanIV": [
+            "characters/Leblanc/sounds/517706119.ogg",
+            "characters/Leblanc/sounds/626460995.ogg",
+        ],
+        "Play_vo_Leblanc_FirstEncounter3DKatarina": [
+            "characters/Leblanc/sounds/76796830.ogg",
+        ],
+        "Play_vo_Leblanc_FirstEncounter3DMel": [
+            "characters/Leblanc/sounds/418145091.ogg",
+            "characters/Leblanc/sounds/437708767.ogg",
+        ],
+        "Play_vo_Leblanc_FirstEncounter3DMordekaiser": [
+            "characters/Leblanc/sounds/436676755.ogg",
+        ],
+        "Play_vo_Leblanc_FirstEncounter3DNoxus": [
+            "characters/Leblanc/sounds/11735903.ogg",
+        ],
+        "Play_vo_Leblanc_FirstEncounter3DRyze": [
+            "characters/Leblanc/sounds/201872047.ogg",
+        ],
+        "Play_vo_Leblanc_FirstEncounter3DSwain": [
+            "characters/Leblanc/sounds/436465063.ogg",
+            "characters/Leblanc/sounds/577615481.ogg",
+        ],
+        "Play_vo_Leblanc_FirstEncounter3DTalon": [
+            "characters/Leblanc/sounds/738723514.ogg",
+        ],
+        "Play_vo_Leblanc_FirstEncounter3DVeigar": [
+            "characters/Leblanc/sounds/784897698.ogg",
+        ],
+        "Play_vo_Leblanc_FirstEncounter3DVladimir": [
+            "characters/Leblanc/sounds/179474796.ogg",
+            "characters/Leblanc/sounds/741438335.ogg",
+        ],
+        "Play_vo_Leblanc_Joke3DGeneral": [
+            "characters/Leblanc/sounds/814322411.ogg",
+        ],
+        "Play_vo_Leblanc_JokeResponse3DGeneral": [
+            "characters/Leblanc/sounds/122609465.ogg",
+        ],
+        "Play_vo_Leblanc_Kill3DAmbessa": [
+            "characters/Leblanc/sounds/837997329.ogg",
+        ],
+        "Play_vo_Leblanc_Kill3DBriar": [
+            "characters/Leblanc/sounds/1033607449.ogg",
+        ],
+        "Play_vo_Leblanc_Kill3DDarkin": [
+            "characters/Leblanc/sounds/897041780.ogg",
+        ],
+        "Play_vo_Leblanc_Kill3DElise": [
+            "characters/Leblanc/sounds/488500702.ogg",
+        ],
+        "Play_vo_Leblanc_Kill3DFirst": [
+            "characters/Leblanc/sounds/810792458.ogg",
+        ],
+        "Play_vo_Leblanc_Kill3DGeneral": [
+            "characters/Leblanc/sounds/198358432.ogg",
+            "characters/Leblanc/sounds/205897661.ogg",
+            "characters/Leblanc/sounds/266838386.ogg",
+            "characters/Leblanc/sounds/297947827.ogg",
+            "characters/Leblanc/sounds/968966370.ogg",
+        ],
+        "Play_vo_Leblanc_Kill3DJarvanIV": [
+            "characters/Leblanc/sounds/912223093.ogg",
+        ],
+        "Play_vo_Leblanc_Kill3DKatarina": [
+            "characters/Leblanc/sounds/578957124.ogg",
+        ],
+        "Play_vo_Leblanc_Kill3DMel": [
+            "characters/Leblanc/sounds/451751577.ogg",
+        ],
+        "Play_vo_Leblanc_Kill3DMordekaiser": [
+            "characters/Leblanc/sounds/152246779.ogg",
+        ],
+        "Play_vo_Leblanc_Kill3DPenta": [
+            "characters/Leblanc/sounds/238799607.ogg",
+        ],
+        "Play_vo_Leblanc_Kill3DRyze": [
+            "characters/Leblanc/sounds/591099797.ogg",
+        ],
+        "Play_vo_Leblanc_Kill3DSwain": [
+            "characters/Leblanc/sounds/543359699.ogg",
+        ],
+        "Play_vo_Leblanc_Kill3DTalon": [
+            "characters/Leblanc/sounds/182250577.ogg",
+        ],
+        "Play_vo_Leblanc_Kill3DTurret": [
+            "characters/Leblanc/sounds/30673404.ogg",
+            "characters/Leblanc/sounds/751786450.ogg",
+            "characters/Leblanc/sounds/907954014.ogg",
+        ],
+        "Play_vo_Leblanc_Kill3DVeigar": [
+            "characters/Leblanc/sounds/342689295.ogg",
+        ],
+        "Play_vo_Leblanc_Kill3DVladimir": [
+            "characters/Leblanc/sounds/186060503.ogg",
+        ],
+        "Play_vo_Leblanc_Laugh3DGeneral": [
+            "characters/Leblanc/sounds/384081732.ogg",
+        ],
+        "Play_vo_Leblanc_LeBlancBasicAttack2_cast3D": [
+            "characters/Leblanc/sounds/167974420.ogg",
+            "characters/Leblanc/sounds/280715495.ogg",
+            "characters/Leblanc/sounds/597652485.ogg",
+            "characters/Leblanc/sounds/88396630.ogg",
+            "characters/Leblanc/sounds/890981824.ogg",
+        ],
+        "Play_vo_Leblanc_LeBlancBasicAttack_cast3D": [
+            "characters/Leblanc/sounds/167974420.ogg",
+            "characters/Leblanc/sounds/280715495.ogg",
+            "characters/Leblanc/sounds/597652485.ogg",
+            "characters/Leblanc/sounds/88396630.ogg",
+            "characters/Leblanc/sounds/890981824.ogg",
+        ],
+        "Play_vo_Leblanc_LeBlancCritAttack_cast3D": [
+            "characters/Leblanc/sounds/167974420.ogg",
+            "characters/Leblanc/sounds/280715495.ogg",
+            "characters/Leblanc/sounds/597652485.ogg",
+            "characters/Leblanc/sounds/88396630.ogg",
+            "characters/Leblanc/sounds/890981824.ogg",
+        ],
+        "Play_vo_Leblanc_LeBlancE_cast3D": [
+            "characters/Leblanc/sounds/1035784248.ogg",
+            "characters/Leblanc/sounds/675269582.ogg",
+        ],
+        "Play_vo_Leblanc_LeBlancP_cast3D": [
+            "characters/Leblanc/sounds/223042665.ogg",
+            "characters/Leblanc/sounds/341316327.ogg",
+            "characters/Leblanc/sounds/544458317.ogg",
+            "characters/Leblanc/sounds/780205139.ogg",
+        ],
+        "Play_vo_Leblanc_LeBlancQ_cast3D": [
+            "characters/Leblanc/sounds/223340373.ogg",
+            "characters/Leblanc/sounds/685871355.ogg",
+        ],
+        "Play_vo_Leblanc_LeBlancRE_cast3D": [
+            "characters/Leblanc/sounds/151403572.ogg",
+            "characters/Leblanc/sounds/421975514.ogg",
+            "characters/Leblanc/sounds/911362421.ogg",
+        ],
+        "Play_vo_Leblanc_LeBlancRQ_cast3D": [
+            "characters/Leblanc/sounds/169645203.ogg",
+            "characters/Leblanc/sounds/386055243.ogg",
+            "characters/Leblanc/sounds/827284616.ogg",
+        ],
+        "Play_vo_Leblanc_LeBlancRW_cast3D": [
+            "characters/Leblanc/sounds/332774362.ogg",
+            "characters/Leblanc/sounds/858576217.ogg",
+            "characters/Leblanc/sounds/893770035.ogg",
+        ],
+        "Play_vo_Leblanc_LeBlancW_cast3D": [
+            "characters/Leblanc/sounds/406718000.ogg",
+            "characters/Leblanc/sounds/578330816.ogg",
+        ],
+        "Play_vo_Leblanc_Move2DFirst": [
+            "characters/Leblanc/sounds/293772477.ogg",
+            "characters/Leblanc/sounds/671343276.ogg",
+            "characters/Leblanc/sounds/703711779.ogg",
+            "characters/Leblanc/sounds/744315694.ogg",
+            "characters/Leblanc/sounds/912937042.ogg",
+        ],
+        "Play_vo_Leblanc_Move2DFirstAllyAmbessa": [
+            "characters/Leblanc/sounds/351929913.ogg",
+        ],
+        "Play_vo_Leblanc_Move2DFirstAllyBriar": [
+            "characters/Leblanc/sounds/76812726.ogg",
+        ],
+        "Play_vo_Leblanc_Move2DFirstAllyCassiopeia": [
+            "characters/Leblanc/sounds/40466905.ogg",
+        ],
+        "Play_vo_Leblanc_Move2DFirstAllyElise": [
+            "characters/Leblanc/sounds/275681591.ogg",
+        ],
+        "Play_vo_Leblanc_Move2DFirstAllyMel": [
+            "characters/Leblanc/sounds/662516937.ogg",
+        ],
+        "Play_vo_Leblanc_Move2DFirstAllyMordekaiser": [
+            "characters/Leblanc/sounds/268406081.ogg",
+        ],
+        "Play_vo_Leblanc_Move2DFirstAllyRyze": [
+            "characters/Leblanc/sounds/977445492.ogg",
+        ],
+        "Play_vo_Leblanc_Move2DFirstAllySion": [
+            "characters/Leblanc/sounds/741871753.ogg",
+        ],
+        "Play_vo_Leblanc_Move2DFirstAllySwain": [
+            "characters/Leblanc/sounds/414457133.ogg",
+        ],
+        "Play_vo_Leblanc_Move2DFirstAllyVladimir": [
+            "characters/Leblanc/sounds/423400443.ogg",
+        ],
+        "Play_vo_Leblanc_Move2DLong": [
+            "characters/Leblanc/sounds/104959658.ogg",
+            "characters/Leblanc/sounds/1052845184.ogg",
+            "characters/Leblanc/sounds/245021474.ogg",
+            "characters/Leblanc/sounds/356660090.ogg",
+            "characters/Leblanc/sounds/401727535.ogg",
+            "characters/Leblanc/sounds/463018064.ogg",
+            "characters/Leblanc/sounds/483147002.ogg",
+            "characters/Leblanc/sounds/515874145.ogg",
+            "characters/Leblanc/sounds/598121464.ogg",
+            "characters/Leblanc/sounds/609751076.ogg",
+            "characters/Leblanc/sounds/623914680.ogg",
+            "characters/Leblanc/sounds/769330056.ogg",
+            "characters/Leblanc/sounds/811359857.ogg",
+            "characters/Leblanc/sounds/852983944.ogg",
+        ],
+        "Play_vo_Leblanc_Open2DGeneral": [
+            "characters/Leblanc/sounds/31109291.ogg",
+            "characters/Leblanc/sounds/417950548.ogg",
+            "characters/Leblanc/sounds/70345982.ogg",
+        ],
+        "Play_vo_Leblanc_Recall3DGeneral": [
+            "characters/Leblanc/sounds/493048747.ogg",
+            "characters/Leblanc/sounds/658323019.ogg",
+            "characters/Leblanc/sounds/67456639.ogg",
+            "characters/Leblanc/sounds/800320292.ogg",
+        ],
+        "Play_vo_Leblanc_Respawn2DGeneral": [
+            "characters/Leblanc/sounds/235948320.ogg",
+            "characters/Leblanc/sounds/307153198.ogg",
+            "characters/Leblanc/sounds/688115089.ogg",
+            "characters/Leblanc/sounds/802318725.ogg",
+        ],
+        "Play_vo_Leblanc_Spell2DRRankOne": [
+            "characters/Leblanc/sounds/1052936313.ogg",
+            "characters/Leblanc/sounds/499237122.ogg",
+            "characters/Leblanc/sounds/99055920.ogg",
+        ],
+        "Play_vo_Leblanc_Spell3DPCast": [
+            "characters/Leblanc/sounds/223042665.ogg",
+            "characters/Leblanc/sounds/341316327.ogg",
+            "characters/Leblanc/sounds/544458317.ogg",
+            "characters/Leblanc/sounds/780205139.ogg",
+        ],
+        "Play_vo_Leblanc_Taunt3DGeneral": [
+            "characters/Leblanc/sounds/725363929.ogg",
+        ],
+        "Play_vo_Leblanc_TauntResponse3DGeneral": [
+            "characters/Leblanc/sounds/251037128.ogg",
+        ],
+        "Play_vo_Leblanc_UseItem2DWard": [
+            "characters/Leblanc/sounds/411803014.ogg",
+            "characters/Leblanc/sounds/78323148.ogg",
+        ],
+        "Recall3D_buffactivate": [
+            "characters/Leblanc/sounds/205404290.ogg",
+        ],
+        "Respawn3D_buffactivate": [
+            "characters/Leblanc/sounds/693208050.ogg",
+        ],
+        "Respawn3D_buffactivate_magic": [
+            "characters/Leblanc/sounds/632493947.ogg",
+        ],
+        "Taunt3D_buffactivate": [
+            "characters/Leblanc/sounds/13847993.ogg",
+            "characters/Leblanc/sounds/612875749.ogg",
+        ],
+        "Taunt3D_buffdeactivate": [
+            "characters/Leblanc/sounds/429558904.ogg",
+        ],
+    },
+)

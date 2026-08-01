@@ -267,11 +267,10 @@ fn counter_thrust(
     commands.trigger(CommandSkinSoundPlay {
         entity: caster,
         key: if buff.parried_hard_cc {
-            "FioraWStun".to_string()
+            "FioraWStun_OnHit".to_string()
         } else {
-            "FioraWSlow".to_string()
+            "FioraWSlow_OnHit".to_string()
         },
-        hit: true,
     });
 
     commands.entity(target).trigger(|e| CommandDamageCreate {
@@ -320,8 +319,7 @@ pub fn on_fiora_w_parried_cc(
             // 招架住硬控音效：FioraWBlockCCSound
             commands.trigger(CommandSkinSoundPlay {
                 entity: char,
-                key: "FioraWBlockCCSound".to_string(),
-                hit: false,
+                key: "FioraWBlockCCSound_OnBuffActivate".to_string(),
             });
             return;
         }
@@ -361,7 +359,6 @@ pub fn on_fiora_w_block_damage(
     });
     commands.trigger(CommandSkinSoundPlay {
         entity: target,
-        key: "FioraWBlockHitSound".to_string(),
-        hit: true,
+        key: "FioraWBlockHitSound_OnHit".to_string(),
     });
 }

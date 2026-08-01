@@ -1,0 +1,517 @@
+(
+    events: {
+        "AuroraBasicAttack2_OnCast": [
+            "characters/Aurora/sounds/239454606.ogg",
+            "characters/Aurora/sounds/613071339.ogg",
+            "characters/Aurora/sounds/782123611.ogg",
+        ],
+        "AuroraBasicAttack2_OnHit": [
+            "characters/Aurora/sounds/1047011249.ogg",
+            "characters/Aurora/sounds/136261763.ogg",
+            "characters/Aurora/sounds/68755980.ogg",
+        ],
+        "AuroraBasicAttack2_OnMissileLaunch": [
+            "characters/Aurora/sounds/514241720.ogg",
+            "characters/Aurora/sounds/688984495.ogg",
+            "characters/Aurora/sounds/830767753.ogg",
+        ],
+        "AuroraBasicAttack_OnCast": [
+            "characters/Aurora/sounds/239454606.ogg",
+            "characters/Aurora/sounds/613071339.ogg",
+            "characters/Aurora/sounds/782123611.ogg",
+        ],
+        "AuroraBasicAttack_OnHit": [
+            "characters/Aurora/sounds/1047011249.ogg",
+            "characters/Aurora/sounds/136261763.ogg",
+            "characters/Aurora/sounds/68755980.ogg",
+        ],
+        "AuroraBasicAttack_OnMissileLaunch": [
+            "characters/Aurora/sounds/514241720.ogg",
+            "characters/Aurora/sounds/688984495.ogg",
+            "characters/Aurora/sounds/830767753.ogg",
+        ],
+        "AuroraCritAttack_OnCast": [
+            "characters/Aurora/sounds/239454606.ogg",
+            "characters/Aurora/sounds/613071339.ogg",
+            "characters/Aurora/sounds/782123611.ogg",
+        ],
+        "AuroraCritAttack_OnHit": [
+            "characters/Aurora/sounds/1047011249.ogg",
+            "characters/Aurora/sounds/136261763.ogg",
+            "characters/Aurora/sounds/68755980.ogg",
+        ],
+        "AuroraCritAttack_OnMissileLaunch": [
+            "characters/Aurora/sounds/514241720.ogg",
+            "characters/Aurora/sounds/688984495.ogg",
+            "characters/Aurora/sounds/830767753.ogg",
+        ],
+        "AuroraE_OnCast": [
+            "characters/Aurora/sounds/1047204312.ogg",
+            "characters/Aurora/sounds/519404369.ogg",
+            "characters/Aurora/sounds/617074539.ogg",
+        ],
+        "AuroraE_hit": [
+            "characters/Aurora/sounds/906221147.ogg",
+        ],
+        "AuroraE_missilelaunch": [
+            "characters/Aurora/sounds/20891474.ogg",
+            "characters/Aurora/sounds/290193518.ogg",
+            "characters/Aurora/sounds/904759758.ogg",
+        ],
+        "AuroraPDebuff_buffactivate": [
+            "characters/Aurora/sounds/22388435.ogg",
+            "characters/Aurora/sounds/455246408.ogg",
+            "characters/Aurora/sounds/670125943.ogg",
+        ],
+        "AuroraPSpiritMinion_buffactivate": [
+            "characters/Aurora/sounds/1027730221.ogg",
+            "characters/Aurora/sounds/600827320.ogg",
+            "characters/Aurora/sounds/701532339.ogg",
+            "characters/Aurora/sounds/721163886.ogg",
+        ],
+        "AuroraPSpiritMinion_buffdeactivate": [
+            "characters/Aurora/sounds/334395632.ogg",
+        ],
+        "AuroraPSpiritmode_buffactivate": [
+            "characters/Aurora/sounds/276760908.ogg",
+            "characters/Aurora/sounds/353425598.ogg",
+            "characters/Aurora/sounds/430285560.ogg",
+            "characters/Aurora/sounds/43666729.ogg",
+        ],
+        "AuroraPSpiritmode_buffdeactivate": [
+            "characters/Aurora/sounds/739968734.ogg",
+        ],
+        "AuroraQRecast_OnCast": [
+            "characters/Aurora/sounds/2664430.ogg",
+            "characters/Aurora/sounds/417302545.ogg",
+            "characters/Aurora/sounds/460505497.ogg",
+        ],
+        "AuroraQReturnMissile_OnMissileLaunch": [
+            "characters/Aurora/sounds/112554952.ogg",
+            "characters/Aurora/sounds/506668174.ogg",
+            "characters/Aurora/sounds/523840980.ogg",
+        ],
+        "AuroraQReturnMissile_buffcast": [
+            "characters/Aurora/sounds/105081405.ogg",
+            "characters/Aurora/sounds/602467293.ogg",
+            "characters/Aurora/sounds/960806108.ogg",
+        ],
+        "AuroraQReturnMissile_buffdeactivate": [
+            "characters/Aurora/sounds/199020561.ogg",
+        ],
+        "AuroraQ_OnCast": [
+            "characters/Aurora/sounds/325390843.ogg",
+            "characters/Aurora/sounds/370007085.ogg",
+            "characters/Aurora/sounds/690447943.ogg",
+        ],
+        "AuroraQ_OnHit": [
+            "characters/Aurora/sounds/152972394.ogg",
+            "characters/Aurora/sounds/273753853.ogg",
+            "characters/Aurora/sounds/376621350.ogg",
+            "characters/Aurora/sounds/794587209.ogg",
+        ],
+        "AuroraQ_OnMissileLaunch": [
+            "characters/Aurora/sounds/1046364422.ogg",
+            "characters/Aurora/sounds/739623464.ogg",
+            "characters/Aurora/sounds/931530675.ogg",
+        ],
+        "AuroraQ_mark": [
+            "characters/Aurora/sounds/1069308697.ogg",
+            "characters/Aurora/sounds/306933457.ogg",
+            "characters/Aurora/sounds/695198065.ogg",
+            "characters/Aurora/sounds/73034232.ogg",
+        ],
+        "AuroraR_OnCast": [
+            "characters/Aurora/sounds/834645204.ogg",
+        ],
+        "AuroraR_buffactivate": [
+            "characters/Aurora/sounds/321037915.ogg",
+            "characters/Aurora/sounds/34373100.ogg",
+            "characters/Aurora/sounds/636937090.ogg",
+        ],
+        "AuroraR_exit_champ_buffactivate": [
+            "characters/Aurora/sounds/616620876.ogg",
+        ],
+        "AuroraR_exit_minion_buffactivate": [
+            "characters/Aurora/sounds/525828813.ogg",
+        ],
+        "AuroraR_hit": [
+            "characters/Aurora/sounds/1009723920.ogg",
+        ],
+        "AuroraR_portal_door": [
+            "characters/Aurora/sounds/949216818.ogg",
+        ],
+        "AuroraR_portal_loop": [
+            "characters/Aurora/sounds/16675632.ogg",
+        ],
+        "AuroraR_teleport_buffactivate": [
+            "characters/Aurora/sounds/85621431.ogg",
+        ],
+        "AuroraWInvis_OnBuffActivate": [
+            "characters/Aurora/sounds/1065824493.ogg",
+            "characters/Aurora/sounds/264699036.ogg",
+            "characters/Aurora/sounds/602407175.ogg",
+            "characters/Aurora/sounds/729839965.ogg",
+        ],
+        "AuroraWInvis_OnBuffDeactivate": [
+            "characters/Aurora/sounds/650530258.ogg",
+        ],
+        "AuroraW_OnCast": [
+            "characters/Aurora/sounds/460152881.ogg",
+            "characters/Aurora/sounds/746265414.ogg",
+            "characters/Aurora/sounds/954165082.ogg",
+        ],
+        "AuroraW_portal_buffactivate": [
+            "characters/Aurora/sounds/287633279.ogg",
+            "characters/Aurora/sounds/309262767.ogg",
+            "characters/Aurora/sounds/5965167.ogg",
+        ],
+        "Dance3D_leadin": [
+            "characters/Aurora/sounds/695566048.ogg",
+        ],
+        "Dance3D_loop": [
+            "characters/Aurora/sounds/451910769.ogg",
+        ],
+        "Death3D_buffactivate": [
+            "characters/Aurora/sounds/275686210.ogg",
+        ],
+        "Homeguard3D_leadin": [
+            "characters/Aurora/sounds/737492398.ogg",
+        ],
+        "Homeguard3D_loop": [
+            "characters/Aurora/sounds/883439495.ogg",
+        ],
+        "Homeguard3D_out": [
+            "characters/Aurora/sounds/746185521.ogg",
+        ],
+        "Idle3D_1_buffactivate": [
+            "characters/Aurora/sounds/639920316.ogg",
+        ],
+        "Idle3D_2_buffactivate": [
+            "characters/Aurora/sounds/644407934.ogg",
+        ],
+        "Idle3D_3_buffactivate": [
+            "characters/Aurora/sounds/1029236671.ogg",
+        ],
+        "Joke3D_buffactivate": [
+            "characters/Aurora/sounds/1068365683.ogg",
+        ],
+        "Laugh3D_buffactivate": [
+            "characters/Aurora/sounds/364354951.ogg",
+        ],
+        "Play_vo_Aurora_Attack2DGeneral": [
+            "characters/Aurora/sounds/11346977.ogg",
+            "characters/Aurora/sounds/258287219.ogg",
+            "characters/Aurora/sounds/26718910.ogg",
+            "characters/Aurora/sounds/277829266.ogg",
+            "characters/Aurora/sounds/379739751.ogg",
+            "characters/Aurora/sounds/399976646.ogg",
+            "characters/Aurora/sounds/464443689.ogg",
+            "characters/Aurora/sounds/517408966.ogg",
+            "characters/Aurora/sounds/63818481.ogg",
+            "characters/Aurora/sounds/643421349.ogg",
+            "characters/Aurora/sounds/656070655.ogg",
+            "characters/Aurora/sounds/66387960.ogg",
+            "characters/Aurora/sounds/714414514.ogg",
+            "characters/Aurora/sounds/817701872.ogg",
+        ],
+        "Play_vo_Aurora_AuroraBasicAttack2_cast3D": [
+            "characters/Aurora/sounds/1031559374.ogg",
+            "characters/Aurora/sounds/1061429997.ogg",
+            "characters/Aurora/sounds/33598217.ogg",
+            "characters/Aurora/sounds/904355024.ogg",
+            "characters/Aurora/sounds/926383529.ogg",
+            "characters/Aurora/sounds/943689876.ogg",
+            "characters/Aurora/sounds/944408479.ogg",
+        ],
+        "Play_vo_Aurora_AuroraBasicAttack_cast3D": [
+            "characters/Aurora/sounds/1031559374.ogg",
+            "characters/Aurora/sounds/1061429997.ogg",
+            "characters/Aurora/sounds/33598217.ogg",
+            "characters/Aurora/sounds/904355024.ogg",
+            "characters/Aurora/sounds/926383529.ogg",
+            "characters/Aurora/sounds/943689876.ogg",
+            "characters/Aurora/sounds/944408479.ogg",
+        ],
+        "Play_vo_Aurora_AuroraCritAttack_cast3D": [
+            "characters/Aurora/sounds/1031559374.ogg",
+            "characters/Aurora/sounds/1061429997.ogg",
+            "characters/Aurora/sounds/33598217.ogg",
+            "characters/Aurora/sounds/904355024.ogg",
+            "characters/Aurora/sounds/926383529.ogg",
+            "characters/Aurora/sounds/943689876.ogg",
+            "characters/Aurora/sounds/944408479.ogg",
+        ],
+        "Play_vo_Aurora_AuroraE_cast3D": [
+            "characters/Aurora/sounds/251683823.ogg",
+            "characters/Aurora/sounds/502436614.ogg",
+            "characters/Aurora/sounds/517416532.ogg",
+            "characters/Aurora/sounds/830361678.ogg",
+            "characters/Aurora/sounds/906507155.ogg",
+        ],
+        "Play_vo_Aurora_AuroraQRecast_cast3D": [
+            "characters/Aurora/sounds/176715782.ogg",
+            "characters/Aurora/sounds/539569863.ogg",
+            "characters/Aurora/sounds/82057550.ogg",
+            "characters/Aurora/sounds/834240228.ogg",
+            "characters/Aurora/sounds/844248680.ogg",
+        ],
+        "Play_vo_Aurora_AuroraQ_cast3D": [
+            "characters/Aurora/sounds/1063970176.ogg",
+            "characters/Aurora/sounds/332752812.ogg",
+            "characters/Aurora/sounds/33357274.ogg",
+            "characters/Aurora/sounds/672673221.ogg",
+            "characters/Aurora/sounds/950679262.ogg",
+        ],
+        "Play_vo_Aurora_AuroraQ_hit3D": [
+            "characters/Aurora/sounds/58795230.ogg",
+            "characters/Aurora/sounds/617717570.ogg",
+            "characters/Aurora/sounds/849975645.ogg",
+        ],
+        "Play_vo_Aurora_AuroraR_cast3D": [
+            "characters/Aurora/sounds/367616256.ogg",
+            "characters/Aurora/sounds/560935143.ogg",
+            "characters/Aurora/sounds/678896655.ogg",
+            "characters/Aurora/sounds/687652818.ogg",
+            "characters/Aurora/sounds/849548073.ogg",
+        ],
+        "Play_vo_Aurora_AuroraW_cast3D": [
+            "characters/Aurora/sounds/1023617609.ogg",
+            "characters/Aurora/sounds/108369069.ogg",
+            "characters/Aurora/sounds/79629256.ogg",
+            "characters/Aurora/sounds/8165866.ogg",
+            "characters/Aurora/sounds/860751435.ogg",
+        ],
+        "Play_vo_Aurora_Dance3DGeneral": [
+            "characters/Aurora/sounds/728406079.ogg",
+        ],
+        "Play_vo_Aurora_Death3D": [
+            "characters/Aurora/sounds/1046193310.ogg",
+            "characters/Aurora/sounds/192338882.ogg",
+            "characters/Aurora/sounds/480421749.ogg",
+            "characters/Aurora/sounds/906816781.ogg",
+            "characters/Aurora/sounds/936383335.ogg",
+        ],
+        "Play_vo_Aurora_FirstEncounter3DAnivia": [
+            "characters/Aurora/sounds/49368727.ogg",
+        ],
+        "Play_vo_Aurora_FirstEncounter3DAshe": [
+            "characters/Aurora/sounds/546508411.ogg",
+        ],
+        "Play_vo_Aurora_FirstEncounter3DBewitching": [
+            "characters/Aurora/sounds/391715614.ogg",
+        ],
+        "Play_vo_Aurora_FirstEncounter3DBriar": [
+            "characters/Aurora/sounds/843660984.ogg",
+        ],
+        "Play_vo_Aurora_FirstEncounter3DDemon": [
+            "characters/Aurora/sounds/1005506172.ogg",
+        ],
+        "Play_vo_Aurora_FirstEncounter3DGeneral": [
+            "characters/Aurora/sounds/1043298447.ogg",
+            "characters/Aurora/sounds/131914298.ogg",
+            "characters/Aurora/sounds/374111414.ogg",
+            "characters/Aurora/sounds/665106132.ogg",
+            "characters/Aurora/sounds/792984888.ogg",
+        ],
+        "Play_vo_Aurora_FirstEncounter3DIllaoi": [
+            "characters/Aurora/sounds/399964.ogg",
+        ],
+        "Play_vo_Aurora_FirstEncounter3DKindred": [
+            "characters/Aurora/sounds/30856765.ogg",
+        ],
+        "Play_vo_Aurora_FirstEncounter3DLissandra": [
+            "characters/Aurora/sounds/205973834.ogg",
+        ],
+        "Play_vo_Aurora_FirstEncounter3DLuluVeigar": [
+            "characters/Aurora/sounds/63420548.ogg",
+        ],
+        "Play_vo_Aurora_FirstEncounter3DOrnn": [
+            "characters/Aurora/sounds/440908201.ogg",
+        ],
+        "Play_vo_Aurora_FirstEncounter3DSpirit": [
+            "characters/Aurora/sounds/558406947.ogg",
+        ],
+        "Play_vo_Aurora_FirstEncounter3DSwain": [
+            "characters/Aurora/sounds/625278858.ogg",
+        ],
+        "Play_vo_Aurora_FirstEncounter3DUdyr": [
+            "characters/Aurora/sounds/632433414.ogg",
+        ],
+        "Play_vo_Aurora_FirstEncounter3DVolibear": [
+            "characters/Aurora/sounds/98553404.ogg",
+        ],
+        "Play_vo_Aurora_FirstEncounter3DYone": [
+            "characters/Aurora/sounds/1005571509.ogg",
+        ],
+        "Play_vo_Aurora_FirstEncounter3DYordle": [
+            "characters/Aurora/sounds/486237206.ogg",
+        ],
+        "Play_vo_Aurora_FirstEncounter3DYuumi": [
+            "characters/Aurora/sounds/97533843.ogg",
+        ],
+        "Play_vo_Aurora_Joke3DGeneral": [
+            "characters/Aurora/sounds/623933631.ogg",
+        ],
+        "Play_vo_Aurora_JokeResponse3DGeneral": [
+            "characters/Aurora/sounds/1047563455.ogg",
+        ],
+        "Play_vo_Aurora_Kill3DAnivia": [
+            "characters/Aurora/sounds/382843481.ogg",
+        ],
+        "Play_vo_Aurora_Kill3DAshe": [
+            "characters/Aurora/sounds/966502413.ogg",
+        ],
+        "Play_vo_Aurora_Kill3DGeneral": [
+            "characters/Aurora/sounds/1010103382.ogg",
+            "characters/Aurora/sounds/1052630439.ogg",
+            "characters/Aurora/sounds/435058208.ogg",
+            "characters/Aurora/sounds/561110756.ogg",
+            "characters/Aurora/sounds/760061437.ogg",
+            "characters/Aurora/sounds/821694437.ogg",
+            "characters/Aurora/sounds/966216805.ogg",
+        ],
+        "Play_vo_Aurora_Kill3DIllaoi": [
+            "characters/Aurora/sounds/1040836954.ogg",
+        ],
+        "Play_vo_Aurora_Kill3DKindred": [
+            "characters/Aurora/sounds/110297104.ogg",
+        ],
+        "Play_vo_Aurora_Kill3DLissandra": [
+            "characters/Aurora/sounds/683375915.ogg",
+        ],
+        "Play_vo_Aurora_Kill3DMinion": [
+            "characters/Aurora/sounds/622085064.ogg",
+            "characters/Aurora/sounds/938671578.ogg",
+        ],
+        "Play_vo_Aurora_Kill3DOrnn": [
+            "characters/Aurora/sounds/608840401.ogg",
+        ],
+        "Play_vo_Aurora_Kill3DPenta": [
+            "characters/Aurora/sounds/768428268.ogg",
+        ],
+        "Play_vo_Aurora_Kill3DSpirit": [
+            "characters/Aurora/sounds/778971274.ogg",
+        ],
+        "Play_vo_Aurora_Kill3DTurret": [
+            "characters/Aurora/sounds/280268259.ogg",
+            "characters/Aurora/sounds/442074886.ogg",
+            "characters/Aurora/sounds/948465577.ogg",
+        ],
+        "Play_vo_Aurora_Kill3DUdyr": [
+            "characters/Aurora/sounds/660844229.ogg",
+        ],
+        "Play_vo_Aurora_Kill3DVolibear": [
+            "characters/Aurora/sounds/267215698.ogg",
+        ],
+        "Play_vo_Aurora_Kill3DYone": [
+            "characters/Aurora/sounds/670989253.ogg",
+        ],
+        "Play_vo_Aurora_Kill3DYordle": [
+            "characters/Aurora/sounds/538731318.ogg",
+        ],
+        "Play_vo_Aurora_Laugh3DGeneral": [
+            "characters/Aurora/sounds/922012674.ogg",
+        ],
+        "Play_vo_Aurora_Move2DFirst": [
+            "characters/Aurora/sounds/139961399.ogg",
+            "characters/Aurora/sounds/193660271.ogg",
+            "characters/Aurora/sounds/302585203.ogg",
+            "characters/Aurora/sounds/526152879.ogg",
+            "characters/Aurora/sounds/566933015.ogg",
+            "characters/Aurora/sounds/621773708.ogg",
+            "characters/Aurora/sounds/718975388.ogg",
+        ],
+        "Play_vo_Aurora_Move2DFirstAllyOrnn": [
+            "characters/Aurora/sounds/869915304.ogg",
+        ],
+        "Play_vo_Aurora_Move2DFirstAllySpirit": [
+            "characters/Aurora/sounds/941492264.ogg",
+        ],
+        "Play_vo_Aurora_Move2DFirstAllyUdyr": [
+            "characters/Aurora/sounds/634680218.ogg",
+        ],
+        "Play_vo_Aurora_Move2DLong": [
+            "characters/Aurora/sounds/1027920306.ogg",
+            "characters/Aurora/sounds/1039516288.ogg",
+            "characters/Aurora/sounds/1071217381.ogg",
+            "characters/Aurora/sounds/186076345.ogg",
+            "characters/Aurora/sounds/312555162.ogg",
+            "characters/Aurora/sounds/357791117.ogg",
+            "characters/Aurora/sounds/630358340.ogg",
+            "characters/Aurora/sounds/674044201.ogg",
+            "characters/Aurora/sounds/744898341.ogg",
+            "characters/Aurora/sounds/923324681.ogg",
+            "characters/Aurora/sounds/924383381.ogg",
+            "characters/Aurora/sounds/971913979.ogg",
+        ],
+        "Play_vo_Aurora_Move2DRiver": [
+            "characters/Aurora/sounds/268915174.ogg",
+        ],
+        "Play_vo_Aurora_Move2DStandard": [
+            "characters/Aurora/sounds/1057176438.ogg",
+            "characters/Aurora/sounds/123506524.ogg",
+            "characters/Aurora/sounds/128873528.ogg",
+            "characters/Aurora/sounds/297864252.ogg",
+            "characters/Aurora/sounds/348333790.ogg",
+            "characters/Aurora/sounds/431392930.ogg",
+            "characters/Aurora/sounds/487867873.ogg",
+            "characters/Aurora/sounds/606504321.ogg",
+            "characters/Aurora/sounds/65085767.ogg",
+            "characters/Aurora/sounds/656500859.ogg",
+            "characters/Aurora/sounds/704847797.ogg",
+            "characters/Aurora/sounds/712900308.ogg",
+            "characters/Aurora/sounds/833689049.ogg",
+            "characters/Aurora/sounds/860863945.ogg",
+            "characters/Aurora/sounds/868022259.ogg",
+            "characters/Aurora/sounds/945719329.ogg",
+            "characters/Aurora/sounds/959556843.ogg",
+        ],
+        "Play_vo_Aurora_Passive3DCast": [
+            "characters/Aurora/sounds/1018591935.ogg",
+            "characters/Aurora/sounds/224178256.ogg",
+            "characters/Aurora/sounds/50929164.ogg",
+            "characters/Aurora/sounds/623061051.ogg",
+            "characters/Aurora/sounds/739754787.ogg",
+            "characters/Aurora/sounds/946715170.ogg",
+        ],
+        "Play_vo_Aurora_Recall3DGeneral": [
+            "characters/Aurora/sounds/109969920.ogg",
+            "characters/Aurora/sounds/214095643.ogg",
+            "characters/Aurora/sounds/410280244.ogg",
+            "characters/Aurora/sounds/569748178.ogg",
+            "characters/Aurora/sounds/659391787.ogg",
+            "characters/Aurora/sounds/880701640.ogg",
+        ],
+        "Play_vo_Aurora_Respawn2DGeneral": [
+            "characters/Aurora/sounds/119873832.ogg",
+            "characters/Aurora/sounds/229118309.ogg",
+            "characters/Aurora/sounds/444347032.ogg",
+            "characters/Aurora/sounds/507141409.ogg",
+            "characters/Aurora/sounds/772482797.ogg",
+        ],
+        "Play_vo_Aurora_Shop2DOpen": [
+            "characters/Aurora/sounds/233263295.ogg",
+            "characters/Aurora/sounds/261964207.ogg",
+            "characters/Aurora/sounds/455104813.ogg",
+        ],
+        "Play_vo_Aurora_Taunt3DGeneral": [
+            "characters/Aurora/sounds/443793211.ogg",
+        ],
+        "Play_vo_Aurora_TauntResponse3DGeneral": [
+            "characters/Aurora/sounds/806706696.ogg",
+        ],
+        "Recall3D_buffactivate": [
+            "characters/Aurora/sounds/637846029.ogg",
+        ],
+        "Recall3D_winddown": [
+            "characters/Aurora/sounds/77000176.ogg",
+        ],
+        "Respawn3D_buffactivate": [
+            "characters/Aurora/sounds/956611574.ogg",
+        ],
+        "Taunt3D_buffactivate": [
+            "characters/Aurora/sounds/1027740230.ogg",
+        ],
+    },
+)

@@ -3,7 +3,7 @@
 //! 就绪时下次普攻附带目标最大生命值 15% 额外魔法伤害 + 治疗；冷却 22s。
 
 use bevy::prelude::*;
-use lol_base::render_cmd::{CommandSkinParticleDespawn, CommandSkinParticleSpawn};
+use lol_base::render_cmd::{CommandSkinParticleDespawn, CommandSkinParticleSpawn, CommandSkinSoundPlay};
 use lol_core::attack::EventAttackEnd;
 use lol_core::damage::{CommandDamageCreate, DamageType};
 use lol_core::life::Health;
@@ -77,6 +77,10 @@ pub fn on_aatrox_attack_end(
         rotation: None,
         resolver_entity: Some(attacker),
     });
+    commands.trigger(CommandSkinSoundPlay {
+        entity: attacker,
+        key: "AatroxPassiveAttack_OnHit".to_string(),
+    });
 }
 
 /// 被动冷却倒计时：到时再次就绪。
@@ -98,6 +102,10 @@ pub fn update_aatrox_passive(
                 hash: "Aatrox_P_Ready".to_string(),
                 rotation: None,
                 resolver_entity: None,
+            });
+            commands.trigger(CommandSkinSoundPlay {
+                entity,
+                key: "AatroxPassiveReady_OnBuffActivate".to_string(),
             });
         }
     }

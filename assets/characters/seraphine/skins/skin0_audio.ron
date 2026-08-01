@@ -1,0 +1,476 @@
+(
+    events: {
+        "Dance3D_cast": [
+            "characters/Seraphine/sounds/547032394.ogg",
+        ],
+        "Dance3D_cast_music": [
+            "characters/Seraphine/sounds/769800559.ogg",
+        ],
+        "Dance3D_loop": [
+            "characters/Seraphine/sounds/487792592.ogg",
+        ],
+        "Dance3D_loop_music": [
+            "characters/Seraphine/sounds/403495090.ogg",
+        ],
+        "Death3D_cast": [
+            "characters/Seraphine/sounds/969913411.ogg",
+        ],
+        "Joke3D_cast": [
+            "characters/Seraphine/sounds/473280119.ogg",
+        ],
+        "Joke3D_loop": [
+            "characters/Seraphine/sounds/1058632621.ogg",
+            "characters/Seraphine/sounds/369509911.ogg",
+            "characters/Seraphine/sounds/533611898.ogg",
+            "characters/Seraphine/sounds/857939660.ogg",
+            "characters/Seraphine/sounds/953499995.ogg",
+        ],
+        "Laugh3D_buffactivate": [
+            "characters/Seraphine/sounds/203156759.ogg",
+        ],
+        "Play_vo_Seraphine_Attack2DGeneral": [
+            "characters/Seraphine/sounds/1264951.ogg",
+            "characters/Seraphine/sounds/168020370.ogg",
+            "characters/Seraphine/sounds/209261828.ogg",
+            "characters/Seraphine/sounds/227575001.ogg",
+            "characters/Seraphine/sounds/302388300.ogg",
+            "characters/Seraphine/sounds/347540233.ogg",
+            "characters/Seraphine/sounds/384427755.ogg",
+            "characters/Seraphine/sounds/432884514.ogg",
+            "characters/Seraphine/sounds/438857342.ogg",
+            "characters/Seraphine/sounds/45365696.ogg",
+            "characters/Seraphine/sounds/656686215.ogg",
+            "characters/Seraphine/sounds/777090360.ogg",
+            "characters/Seraphine/sounds/779804936.ogg",
+            "characters/Seraphine/sounds/826094080.ogg",
+            "characters/Seraphine/sounds/866897613.ogg",
+            "characters/Seraphine/sounds/877549666.ogg",
+            "characters/Seraphine/sounds/997859285.ogg",
+        ],
+        "Play_vo_Seraphine_Dance3DGeneral": [
+            "characters/Seraphine/sounds/477287769.ogg",
+        ],
+        "Play_vo_Seraphine_DanceResponse3DGeneral": [
+            "characters/Seraphine/sounds/860005326.ogg",
+        ],
+        "Play_vo_Seraphine_Death3D": [
+            "characters/Seraphine/sounds/111987559.ogg",
+            "characters/Seraphine/sounds/412665682.ogg",
+            "characters/Seraphine/sounds/773743938.ogg",
+        ],
+        "Play_vo_Seraphine_FirstEncounter3DAzir": [
+            "characters/Seraphine/sounds/261976150.ogg",
+        ],
+        "Play_vo_Seraphine_FirstEncounter3DCamille": [
+            "characters/Seraphine/sounds/349788673.ogg",
+        ],
+        "Play_vo_Seraphine_FirstEncounter3DEkko": [
+            "characters/Seraphine/sounds/569690651.ogg",
+        ],
+        "Play_vo_Seraphine_FirstEncounter3DGeneral": [
+            "characters/Seraphine/sounds/105959257.ogg",
+            "characters/Seraphine/sounds/304000499.ogg",
+            "characters/Seraphine/sounds/357221562.ogg",
+            "characters/Seraphine/sounds/361906502.ogg",
+            "characters/Seraphine/sounds/384438103.ogg",
+        ],
+        "Play_vo_Seraphine_FirstEncounter3DJhin": [
+            "characters/Seraphine/sounds/37480533.ogg",
+        ],
+        "Play_vo_Seraphine_FirstEncounter3DJinx": [
+            "characters/Seraphine/sounds/673572023.ogg",
+        ],
+        "Play_vo_Seraphine_FirstEncounter3DLux": [
+            "characters/Seraphine/sounds/987936047.ogg",
+        ],
+        "Play_vo_Seraphine_FirstEncounter3DNeeko": [
+            "characters/Seraphine/sounds/176872745.ogg",
+        ],
+        "Play_vo_Seraphine_FirstEncounter3DSona": [
+            "characters/Seraphine/sounds/238033252.ogg",
+        ],
+        "Play_vo_Seraphine_FirstEncounter3DVi": [
+            "characters/Seraphine/sounds/434153288.ogg",
+        ],
+        "Play_vo_Seraphine_Joke3DGeneral": [
+            "characters/Seraphine/sounds/277140085.ogg",
+        ],
+        "Play_vo_Seraphine_Kill3DFirst": [
+            "characters/Seraphine/sounds/959146205.ogg",
+        ],
+        "Play_vo_Seraphine_Kill3DGeneral": [
+            "characters/Seraphine/sounds/341704363.ogg",
+            "characters/Seraphine/sounds/386003292.ogg",
+            "characters/Seraphine/sounds/419021452.ogg",
+            "characters/Seraphine/sounds/558646649.ogg",
+            "characters/Seraphine/sounds/783109591.ogg",
+        ],
+        "Play_vo_Seraphine_Kill3DJhin": [
+            "characters/Seraphine/sounds/49614674.ogg",
+        ],
+        "Play_vo_Seraphine_Kill3DPenta": [
+            "characters/Seraphine/sounds/733286389.ogg",
+        ],
+        "Play_vo_Seraphine_Laugh3DGeneral": [
+            "characters/Seraphine/sounds/372183856.ogg",
+            "characters/Seraphine/sounds/457896541.ogg",
+        ],
+        "Play_vo_Seraphine_LowHealth2DGeneral": [
+            "characters/Seraphine/sounds/745895615.ogg",
+        ],
+        "Play_vo_Seraphine_Move2DFirst": [
+            "characters/Seraphine/sounds/1055750895.ogg",
+            "characters/Seraphine/sounds/211298221.ogg",
+            "characters/Seraphine/sounds/220120171.ogg",
+            "characters/Seraphine/sounds/333305016.ogg",
+            "characters/Seraphine/sounds/470421479.ogg",
+            "characters/Seraphine/sounds/816674504.ogg",
+            "characters/Seraphine/sounds/994405474.ogg",
+        ],
+        "Play_vo_Seraphine_Move2DLong": [
+            "characters/Seraphine/sounds/20101849.ogg",
+            "characters/Seraphine/sounds/321340370.ogg",
+            "characters/Seraphine/sounds/351901604.ogg",
+            "characters/Seraphine/sounds/463245194.ogg",
+            "characters/Seraphine/sounds/479703934.ogg",
+            "characters/Seraphine/sounds/6045615.ogg",
+            "characters/Seraphine/sounds/687274509.ogg",
+            "characters/Seraphine/sounds/743061855.ogg",
+            "characters/Seraphine/sounds/877028913.ogg",
+            "characters/Seraphine/sounds/951594825.ogg",
+            "characters/Seraphine/sounds/960741166.ogg",
+            "characters/Seraphine/sounds/992420871.ogg",
+        ],
+        "Play_vo_Seraphine_Move2DStandard": [
+            "characters/Seraphine/sounds/1035541275.ogg",
+            "characters/Seraphine/sounds/1058284663.ogg",
+            "characters/Seraphine/sounds/122474808.ogg",
+            "characters/Seraphine/sounds/132505323.ogg",
+            "characters/Seraphine/sounds/142552928.ogg",
+            "characters/Seraphine/sounds/144463862.ogg",
+            "characters/Seraphine/sounds/175823882.ogg",
+            "characters/Seraphine/sounds/288002774.ogg",
+            "characters/Seraphine/sounds/290651382.ogg",
+            "characters/Seraphine/sounds/314313541.ogg",
+            "characters/Seraphine/sounds/35780895.ogg",
+            "characters/Seraphine/sounds/399203956.ogg",
+            "characters/Seraphine/sounds/469084437.ogg",
+            "characters/Seraphine/sounds/478304119.ogg",
+            "characters/Seraphine/sounds/551369459.ogg",
+            "characters/Seraphine/sounds/570575587.ogg",
+            "characters/Seraphine/sounds/57425361.ogg",
+            "characters/Seraphine/sounds/586182154.ogg",
+            "characters/Seraphine/sounds/681519052.ogg",
+            "characters/Seraphine/sounds/70965611.ogg",
+            "characters/Seraphine/sounds/7527091.ogg",
+            "characters/Seraphine/sounds/784711516.ogg",
+            "characters/Seraphine/sounds/796713151.ogg",
+            "characters/Seraphine/sounds/825032550.ogg",
+            "characters/Seraphine/sounds/900683170.ogg",
+            "characters/Seraphine/sounds/950692083.ogg",
+        ],
+        "Play_vo_Seraphine_Ping2DAssistMe": [
+            "characters/Seraphine/sounds/870180992.ogg",
+        ],
+        "Play_vo_Seraphine_Ping2DDanger": [
+            "characters/Seraphine/sounds/896235189.ogg",
+        ],
+        "Play_vo_Seraphine_Ping2DEnemyMissing": [
+            "characters/Seraphine/sounds/815888465.ogg",
+        ],
+        "Play_vo_Seraphine_Ping2DOnMyWay": [
+            "characters/Seraphine/sounds/265438088.ogg",
+        ],
+        "Play_vo_Seraphine_Recall3DGeneral": [
+            "characters/Seraphine/sounds/1021117043.ogg",
+            "characters/Seraphine/sounds/506254877.ogg",
+            "characters/Seraphine/sounds/782443239.ogg",
+        ],
+        "Play_vo_Seraphine_Respawn2DGeneral": [
+            "characters/Seraphine/sounds/1028076879.ogg",
+            "characters/Seraphine/sounds/1070539402.ogg",
+            "characters/Seraphine/sounds/396202387.ogg",
+            "characters/Seraphine/sounds/488957087.ogg",
+            "characters/Seraphine/sounds/77029137.ogg",
+            "characters/Seraphine/sounds/999481157.ogg",
+        ],
+        "Play_vo_Seraphine_SeraphineBasicAttack2_cast3D": [
+            "characters/Seraphine/sounds/257925657.ogg",
+            "characters/Seraphine/sounds/396551469.ogg",
+            "characters/Seraphine/sounds/735420294.ogg",
+            "characters/Seraphine/sounds/792426417.ogg",
+        ],
+        "Play_vo_Seraphine_SeraphineBasicAttack_cast3D": [
+            "characters/Seraphine/sounds/257925657.ogg",
+            "characters/Seraphine/sounds/396551469.ogg",
+            "characters/Seraphine/sounds/735420294.ogg",
+            "characters/Seraphine/sounds/792426417.ogg",
+        ],
+        "Play_vo_Seraphine_SeraphineCritAttack_cast3D": [
+            "characters/Seraphine/sounds/257925657.ogg",
+            "characters/Seraphine/sounds/396551469.ogg",
+            "characters/Seraphine/sounds/735420294.ogg",
+            "characters/Seraphine/sounds/792426417.ogg",
+        ],
+        "Play_vo_Seraphine_SeraphineECastEcho_cast3D": [
+            "characters/Seraphine/sounds/488840030.ogg",
+        ],
+        "Play_vo_Seraphine_SeraphineECast_cast3D": [
+            "characters/Seraphine/sounds/213696172.ogg",
+            "characters/Seraphine/sounds/299599862.ogg",
+            "characters/Seraphine/sounds/473412299.ogg",
+        ],
+        "Play_vo_Seraphine_SeraphineEMissile_hit3D": [
+            "characters/Seraphine/sounds/776571355.ogg",
+            "characters/Seraphine/sounds/777310081.ogg",
+        ],
+        "Play_vo_Seraphine_SeraphineQCastEcho_cast3D": [
+            "characters/Seraphine/sounds/290304592.ogg",
+            "characters/Seraphine/sounds/555757344.ogg",
+        ],
+        "Play_vo_Seraphine_SeraphineQCast_cast3D": [
+            "characters/Seraphine/sounds/1015526406.ogg",
+            "characters/Seraphine/sounds/638200490.ogg",
+            "characters/Seraphine/sounds/675561582.ogg",
+            "characters/Seraphine/sounds/741551967.ogg",
+            "characters/Seraphine/sounds/818007920.ogg",
+        ],
+        "Play_vo_Seraphine_SeraphineR_cast3D": [
+            "characters/Seraphine/sounds/173881975.ogg",
+            "characters/Seraphine/sounds/332079146.ogg",
+        ],
+        "Play_vo_Seraphine_SeraphineWCastEcho_cast3D": [
+            "characters/Seraphine/sounds/1067270714.ogg",
+            "characters/Seraphine/sounds/309492966.ogg",
+            "characters/Seraphine/sounds/536296059.ogg",
+        ],
+        "Play_vo_Seraphine_SeraphineWCast_cast3D": [
+            "characters/Seraphine/sounds/660556423.ogg",
+            "characters/Seraphine/sounds/969454802.ogg",
+            "characters/Seraphine/sounds/978733439.ogg",
+        ],
+        "Recall3D_buffactivate": [
+            "characters/Seraphine/sounds/488930682.ogg",
+        ],
+        "Respawn3D_buffactivate": [
+            "characters/Seraphine/sounds/328891403.ogg",
+        ],
+        "SeraphineBasicAttack2_OnCast": [
+            "characters/Seraphine/sounds/142420705.ogg",
+            "characters/Seraphine/sounds/21600774.ogg",
+            "characters/Seraphine/sounds/49916033.ogg",
+        ],
+        "SeraphineBasicAttack2_OnHit": [
+            "characters/Seraphine/sounds/143704395.ogg",
+            "characters/Seraphine/sounds/168066898.ogg",
+            "characters/Seraphine/sounds/92800397.ogg",
+        ],
+        "SeraphineBasicAttack2_OnMissileLaunch": [
+            "characters/Seraphine/sounds/160078753.ogg",
+            "characters/Seraphine/sounds/205931755.ogg",
+            "characters/Seraphine/sounds/240189195.ogg",
+        ],
+        "SeraphineBasicAttack_OnCast": [
+            "characters/Seraphine/sounds/142420705.ogg",
+            "characters/Seraphine/sounds/21600774.ogg",
+            "characters/Seraphine/sounds/49916033.ogg",
+        ],
+        "SeraphineBasicAttack_OnHit": [
+            "characters/Seraphine/sounds/143704395.ogg",
+            "characters/Seraphine/sounds/168066898.ogg",
+            "characters/Seraphine/sounds/92800397.ogg",
+        ],
+        "SeraphineBasicAttack_OnMissileLaunch": [
+            "characters/Seraphine/sounds/160078753.ogg",
+            "characters/Seraphine/sounds/205931755.ogg",
+            "characters/Seraphine/sounds/240189195.ogg",
+        ],
+        "SeraphineCritAttack_OnCast": [
+            "characters/Seraphine/sounds/142420705.ogg",
+            "characters/Seraphine/sounds/21600774.ogg",
+            "characters/Seraphine/sounds/49916033.ogg",
+        ],
+        "SeraphineCritAttack_OnHit": [
+            "characters/Seraphine/sounds/143704395.ogg",
+            "characters/Seraphine/sounds/168066898.ogg",
+            "characters/Seraphine/sounds/92800397.ogg",
+        ],
+        "SeraphineCritAttack_OnMissileLaunch": [
+            "characters/Seraphine/sounds/160078753.ogg",
+            "characters/Seraphine/sounds/205931755.ogg",
+            "characters/Seraphine/sounds/240189195.ogg",
+        ],
+        "SeraphineECastEcho_OnCast": [
+            "characters/Seraphine/sounds/1073658154.ogg",
+            "characters/Seraphine/sounds/216489016.ogg",
+            "characters/Seraphine/sounds/469613952.ogg",
+            "characters/Seraphine/sounds/893791783.ogg",
+        ],
+        "SeraphineEMissile_OnHit": [
+            "characters/Seraphine/sounds/482080954.ogg",
+            "characters/Seraphine/sounds/895396987.ogg",
+        ],
+        "SeraphineEMissile_OnMissileLaunch": [
+            "characters/Seraphine/sounds/626029843.ogg",
+            "characters/Seraphine/sounds/741203869.ogg",
+            "characters/Seraphine/sounds/858179131.ogg",
+        ],
+        "SeraphineERoot_OnBuffActivate": [
+            "characters/Seraphine/sounds/684336140.ogg",
+        ],
+        "SeraphineEStun_OnBuffActivate": [
+            "characters/Seraphine/sounds/696729714.ogg",
+            "characters/Seraphine/sounds/777213724.ogg",
+        ],
+        "SeraphineE_OnCast": [
+            "characters/Seraphine/sounds/820665655.ogg",
+            "characters/Seraphine/sounds/853214421.ogg",
+        ],
+        "SeraphinePEcho_ready_buffactivate_self": [
+            "characters/Seraphine/sounds/228315451.ogg",
+            "characters/Seraphine/sounds/88512264.ogg",
+        ],
+        "SeraphinePassiveAttack_OnCast": [
+            "characters/Seraphine/sounds/142420705.ogg",
+            "characters/Seraphine/sounds/21600774.ogg",
+            "characters/Seraphine/sounds/49916033.ogg",
+        ],
+        "SeraphinePassiveAttack_OnHit": [
+            "characters/Seraphine/sounds/143704395.ogg",
+            "characters/Seraphine/sounds/168066898.ogg",
+            "characters/Seraphine/sounds/92800397.ogg",
+        ],
+        "SeraphinePassiveAttack_OnMissileLaunch": [
+            "characters/Seraphine/sounds/133632451.ogg",
+            "characters/Seraphine/sounds/744887014.ogg",
+            "characters/Seraphine/sounds/899040063.ogg",
+        ],
+        "SeraphinePassiveEchoStage2_OnBuffActivate": [
+            "characters/Seraphine/sounds/459634749.ogg",
+        ],
+        "SeraphinePassiveNotesBuff_OnBuffActivate": [
+            "characters/Seraphine/sounds/806602402.ogg",
+        ],
+        "SeraphinePassiveNotesMissileTarget1_OnHit": [
+            "characters/Seraphine/sounds/280478557.ogg",
+            "characters/Seraphine/sounds/317669684.ogg",
+            "characters/Seraphine/sounds/425721744.ogg",
+            "characters/Seraphine/sounds/612070554.ogg",
+            "characters/Seraphine/sounds/86900911.ogg",
+            "characters/Seraphine/sounds/898393989.ogg",
+        ],
+        "SeraphinePassiveNotesMissileTarget1_OnMissileLaunch": [
+            "characters/Seraphine/sounds/275702063.ogg",
+            "characters/Seraphine/sounds/389607087.ogg",
+            "characters/Seraphine/sounds/885919737.ogg",
+        ],
+        "SeraphinePassiveNotesMissileTarget2_OnHit": [
+            "characters/Seraphine/sounds/280478557.ogg",
+            "characters/Seraphine/sounds/317669684.ogg",
+            "characters/Seraphine/sounds/425721744.ogg",
+            "characters/Seraphine/sounds/612070554.ogg",
+            "characters/Seraphine/sounds/86900911.ogg",
+            "characters/Seraphine/sounds/898393989.ogg",
+        ],
+        "SeraphinePassiveNotesMissileTarget2_OnMissileLaunch": [
+            "characters/Seraphine/sounds/275702063.ogg",
+            "characters/Seraphine/sounds/389607087.ogg",
+            "characters/Seraphine/sounds/885919737.ogg",
+        ],
+        "SeraphinePassiveNotes_music_loop": [
+            "characters/Seraphine/sounds/120842722.ogg",
+            "characters/Seraphine/sounds/177932211.ogg",
+            "characters/Seraphine/sounds/213884883.ogg",
+            "characters/Seraphine/sounds/260082088.ogg",
+            "characters/Seraphine/sounds/314464249.ogg",
+            "characters/Seraphine/sounds/498823865.ogg",
+            "characters/Seraphine/sounds/71352084.ogg",
+            "characters/Seraphine/sounds/73899503.ogg",
+        ],
+        "SeraphinePassiveNotes_music_loop_self": [
+            "characters/Seraphine/sounds/120842722.ogg",
+            "characters/Seraphine/sounds/177932211.ogg",
+            "characters/Seraphine/sounds/213884883.ogg",
+            "characters/Seraphine/sounds/260082088.ogg",
+            "characters/Seraphine/sounds/314464249.ogg",
+            "characters/Seraphine/sounds/498823865.ogg",
+            "characters/Seraphine/sounds/71352084.ogg",
+            "characters/Seraphine/sounds/73899503.ogg",
+        ],
+        "SeraphineQCastEcho_OnCast": [
+            "characters/Seraphine/sounds/1031382302.ogg",
+            "characters/Seraphine/sounds/200049444.ogg",
+            "characters/Seraphine/sounds/252736394.ogg",
+            "characters/Seraphine/sounds/88467287.ogg",
+        ],
+        "SeraphineQInitialMissile_OnHitLocation": [
+            "characters/Seraphine/sounds/13865021.ogg",
+            "characters/Seraphine/sounds/534677476.ogg",
+            "characters/Seraphine/sounds/613854225.ogg",
+        ],
+        "SeraphineQInitialMissile_OnMissileLaunch": [
+            "characters/Seraphine/sounds/309802858.ogg",
+            "characters/Seraphine/sounds/490561593.ogg",
+            "characters/Seraphine/sounds/909002570.ogg",
+        ],
+        "SeraphineQ_OnCast": [
+            "characters/Seraphine/sounds/36239856.ogg",
+            "characters/Seraphine/sounds/881822493.ogg",
+            "characters/Seraphine/sounds/895481833.ogg",
+        ],
+        "SeraphineQ_hit_champ": [
+            "characters/Seraphine/sounds/1058817475.ogg",
+            "characters/Seraphine/sounds/283432514.ogg",
+            "characters/Seraphine/sounds/631737126.ogg",
+        ],
+        "SeraphineQ_hit_minion": [
+            "characters/Seraphine/sounds/644910447.ogg",
+            "characters/Seraphine/sounds/679323630.ogg",
+            "characters/Seraphine/sounds/853430352.ogg",
+        ],
+        "SeraphineRCharm_hit": [
+            "characters/Seraphine/sounds/92558949.ogg",
+        ],
+        "SeraphineR_OnCast": [
+            "characters/Seraphine/sounds/162389452.ogg",
+            "characters/Seraphine/sounds/254128159.ogg",
+            "characters/Seraphine/sounds/528211957.ogg",
+            "characters/Seraphine/sounds/984136618.ogg",
+        ],
+        "SeraphineR_OnMissileCast": [
+            "characters/Seraphine/sounds/362475194.ogg",
+        ],
+        "SeraphineR_OnMissileLaunch": [
+            "characters/Seraphine/sounds/717640036.ogg",
+        ],
+        "SeraphineR_cast": [
+            "characters/Seraphine/sounds/467035668.ogg",
+        ],
+        "SeraphineR_hit": [
+            "characters/Seraphine/sounds/415891848.ogg",
+            "characters/Seraphine/sounds/526232641.ogg",
+            "characters/Seraphine/sounds/82909684.ogg",
+        ],
+        "SeraphineW2Warning_OnBuffActivate": [
+            "characters/Seraphine/sounds/590142079.ogg",
+            "characters/Seraphine/sounds/969414909.ogg",
+        ],
+        "SeraphineW2Warning_OnBuffDeactivate": [
+            "characters/Seraphine/sounds/438945577.ogg",
+        ],
+        "SeraphineWCastEcho_OnCast": [
+            "characters/Seraphine/sounds/929230822.ogg",
+        ],
+        "SeraphineWShield_buffactivate": [
+            "characters/Seraphine/sounds/398854998.ogg",
+            "characters/Seraphine/sounds/399104007.ogg",
+            "characters/Seraphine/sounds/672460553.ogg",
+        ],
+        "SeraphineW_OnCast": [
+            "characters/Seraphine/sounds/655350838.ogg",
+        ],
+        "Winddown3D_buffactivate": [
+            "characters/Seraphine/sounds/592704382.ogg",
+        ],
+    },
+)

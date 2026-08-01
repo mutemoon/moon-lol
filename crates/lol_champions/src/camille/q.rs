@@ -7,6 +7,7 @@ use bevy::prelude::*;
 use lol_base::animation_names::ANIM_SPELL1;
 use lol_base::render_cmd::{
     CommandAnimationPlay, CommandSkinParticleDespawn, CommandSkinParticleSpawn,
+    CommandSkinSoundPlay,
 };
 use lol_base::spell::Spell;
 use lol_core::attack::{CommandAttackReset, EventAttackEnd};
@@ -168,5 +169,9 @@ pub fn on_camille_q_attack_end(
         hash: "Camille_Q_tar".to_string(),
         rotation: None,
         resolver_entity: Some(attacker),
+    });
+    commands.trigger(CommandSkinSoundPlay {
+        entity: attacker,
+        key: "CamilleQAttack_OnHit".to_string(),
     });
 }

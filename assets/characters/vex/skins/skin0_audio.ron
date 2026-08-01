@@ -1,0 +1,431 @@
+(
+    events: {
+        "Dance3D_buffactivate": [
+            "characters/Vex/sounds/622402117.ogg",
+        ],
+        "Death3D_buffactivate": [
+            "characters/Vex/sounds/640333481.ogg",
+        ],
+        "Homeguard3D_buffactivate": [
+            "characters/Vex/sounds/804792689.ogg",
+        ],
+        "Homeguard3D_cast": [
+            "characters/Vex/sounds/750992429.ogg",
+        ],
+        "Idle3D_buffactivate": [
+            "characters/Vex/sounds/403236700.ogg",
+            "characters/Vex/sounds/444451925.ogg",
+            "characters/Vex/sounds/981016105.ogg",
+        ],
+        "Joke3D_buffactivate": [
+            "characters/Vex/sounds/256973487.ogg",
+        ],
+        "Laugh3D_buffactivate": [
+            "characters/Vex/sounds/412499177.ogg",
+        ],
+        "Play_vo_Vex_Attack2DGeneral": [
+            "characters/Vex/sounds/1005069108.ogg",
+            "characters/Vex/sounds/1028047520.ogg",
+            "characters/Vex/sounds/1035523449.ogg",
+            "characters/Vex/sounds/1048990419.ogg",
+            "characters/Vex/sounds/1070278203.ogg",
+            "characters/Vex/sounds/196235144.ogg",
+            "characters/Vex/sounds/244721348.ogg",
+            "characters/Vex/sounds/311679549.ogg",
+            "characters/Vex/sounds/326162942.ogg",
+            "characters/Vex/sounds/332462792.ogg",
+            "characters/Vex/sounds/385921836.ogg",
+            "characters/Vex/sounds/472301806.ogg",
+            "characters/Vex/sounds/474976996.ogg",
+            "characters/Vex/sounds/479806253.ogg",
+            "characters/Vex/sounds/512848370.ogg",
+            "characters/Vex/sounds/523676837.ogg",
+            "characters/Vex/sounds/569480513.ogg",
+            "characters/Vex/sounds/578556482.ogg",
+            "characters/Vex/sounds/594787640.ogg",
+            "characters/Vex/sounds/607339013.ogg",
+            "characters/Vex/sounds/640159.ogg",
+            "characters/Vex/sounds/7432660.ogg",
+            "characters/Vex/sounds/854446261.ogg",
+            "characters/Vex/sounds/935996234.ogg",
+        ],
+        "Play_vo_Vex_Dance3DGeneral": [
+            "characters/Vex/sounds/434377142.ogg",
+        ],
+        "Play_vo_Vex_Death3D": [
+            "characters/Vex/sounds/126279808.ogg",
+            "characters/Vex/sounds/241722550.ogg",
+            "characters/Vex/sounds/49471964.ogg",
+            "characters/Vex/sounds/513861493.ogg",
+            "characters/Vex/sounds/76866602.ogg",
+        ],
+        "Play_vo_Vex_FirstEncounter3DAmumu": [
+            "characters/Vex/sounds/505494005.ogg",
+        ],
+        "Play_vo_Vex_FirstEncounter3DDrMundo": [
+            "characters/Vex/sounds/837736344.ogg",
+        ],
+        "Play_vo_Vex_FirstEncounter3DGeneral": [
+            "characters/Vex/sounds/1034348872.ogg",
+            "characters/Vex/sounds/118264881.ogg",
+            "characters/Vex/sounds/153104265.ogg",
+            "characters/Vex/sounds/493184907.ogg",
+            "characters/Vex/sounds/530504716.ogg",
+            "characters/Vex/sounds/541642883.ogg",
+            "characters/Vex/sounds/774343563.ogg",
+        ],
+        "Play_vo_Vex_FirstEncounter3DKarthus": [
+            "characters/Vex/sounds/812896598.ogg",
+        ],
+        "Play_vo_Vex_FirstEncounter3DLucian": [
+            "characters/Vex/sounds/1015290208.ogg",
+        ],
+        "Play_vo_Vex_FirstEncounter3DLux": [
+            "characters/Vex/sounds/638726408.ogg",
+        ],
+        "Play_vo_Vex_FirstEncounter3DSentinels": [
+            "characters/Vex/sounds/537979915.ogg",
+        ],
+        "Play_vo_Vex_FirstEncounter3DShadowIsles": [
+            "characters/Vex/sounds/917710061.ogg",
+        ],
+        "Play_vo_Vex_FirstEncounter3DThreshSkin27": [
+            "characters/Vex/sounds/902228221.ogg",
+        ],
+        "Play_vo_Vex_FirstEncounter3DVeigar": [
+            "characters/Vex/sounds/137445330.ogg",
+        ],
+        "Play_vo_Vex_FirstEncounter3DViego": [
+            "characters/Vex/sounds/605881888.ogg",
+            "characters/Vex/sounds/666306606.ogg",
+        ],
+        "Play_vo_Vex_FirstEncounter3DYasuo": [
+            "characters/Vex/sounds/70216541.ogg",
+        ],
+        "Play_vo_Vex_FirstEncounter3DYordles": [
+            "characters/Vex/sounds/663478843.ogg",
+        ],
+        "Play_vo_Vex_FirstEncounter3DYuumi": [
+            "characters/Vex/sounds/32517474.ogg",
+        ],
+        "Play_vo_Vex_Joke3DGeneral": [
+            "characters/Vex/sounds/663430185.ogg",
+        ],
+        "Play_vo_Vex_JokeResponse3DGeneral": [
+            "characters/Vex/sounds/309258622.ogg",
+        ],
+        "Play_vo_Vex_Kill3DGeneral": [
+            "characters/Vex/sounds/1045768076.ogg",
+            "characters/Vex/sounds/14454471.ogg",
+            "characters/Vex/sounds/28583681.ogg",
+            "characters/Vex/sounds/349229529.ogg",
+            "characters/Vex/sounds/3979076.ogg",
+            "characters/Vex/sounds/400813065.ogg",
+            "characters/Vex/sounds/580509585.ogg",
+            "characters/Vex/sounds/59304133.ogg",
+            "characters/Vex/sounds/732088955.ogg",
+        ],
+        "Play_vo_Vex_Kill3DPenta": [
+            "characters/Vex/sounds/538898870.ogg",
+        ],
+        "Play_vo_Vex_Laugh3DGeneral": [
+            "characters/Vex/sounds/275856942.ogg",
+        ],
+        "Play_vo_Vex_Move2DFirst": [
+            "characters/Vex/sounds/134938615.ogg",
+            "characters/Vex/sounds/344246224.ogg",
+            "characters/Vex/sounds/44766153.ogg",
+            "characters/Vex/sounds/490629258.ogg",
+            "characters/Vex/sounds/520563716.ogg",
+            "characters/Vex/sounds/690454456.ogg",
+            "characters/Vex/sounds/725455952.ogg",
+        ],
+        "Play_vo_Vex_Move2DLong": [
+            "characters/Vex/sounds/164533965.ogg",
+            "characters/Vex/sounds/278218066.ogg",
+            "characters/Vex/sounds/325375012.ogg",
+            "characters/Vex/sounds/611702250.ogg",
+            "characters/Vex/sounds/776528664.ogg",
+            "characters/Vex/sounds/935644846.ogg",
+            "characters/Vex/sounds/939362151.ogg",
+            "characters/Vex/sounds/968721347.ogg",
+        ],
+        "Play_vo_Vex_Move2DStandard": [
+            "characters/Vex/sounds/1058077168.ogg",
+            "characters/Vex/sounds/121807872.ogg",
+            "characters/Vex/sounds/247766246.ogg",
+            "characters/Vex/sounds/249065072.ogg",
+            "characters/Vex/sounds/325020037.ogg",
+            "characters/Vex/sounds/329838204.ogg",
+            "characters/Vex/sounds/372033669.ogg",
+            "characters/Vex/sounds/374653834.ogg",
+            "characters/Vex/sounds/449983722.ogg",
+            "characters/Vex/sounds/455003436.ogg",
+            "characters/Vex/sounds/462700814.ogg",
+            "characters/Vex/sounds/514225577.ogg",
+            "characters/Vex/sounds/529562883.ogg",
+            "characters/Vex/sounds/601370426.ogg",
+            "characters/Vex/sounds/68069910.ogg",
+            "characters/Vex/sounds/723280273.ogg",
+            "characters/Vex/sounds/73730128.ogg",
+            "characters/Vex/sounds/748870785.ogg",
+            "characters/Vex/sounds/749259940.ogg",
+            "characters/Vex/sounds/779742374.ogg",
+            "characters/Vex/sounds/789749947.ogg",
+            "characters/Vex/sounds/7987632.ogg",
+            "characters/Vex/sounds/837689857.ogg",
+            "characters/Vex/sounds/856720235.ogg",
+            "characters/Vex/sounds/880355278.ogg",
+            "characters/Vex/sounds/935573668.ogg",
+            "characters/Vex/sounds/961560135.ogg",
+            "characters/Vex/sounds/971081749.ogg",
+        ],
+        "Play_vo_Vex_Recall3DGeneral": [
+            "characters/Vex/sounds/132936184.ogg",
+            "characters/Vex/sounds/276805354.ogg",
+            "characters/Vex/sounds/360478654.ogg",
+            "characters/Vex/sounds/404776256.ogg",
+            "characters/Vex/sounds/585830510.ogg",
+            "characters/Vex/sounds/586812117.ogg",
+            "characters/Vex/sounds/765063846.ogg",
+        ],
+        "Play_vo_Vex_Respawn2DGeneral": [
+            "characters/Vex/sounds/321299264.ogg",
+            "characters/Vex/sounds/357482440.ogg",
+            "characters/Vex/sounds/614458031.ogg",
+            "characters/Vex/sounds/728125635.ogg",
+            "characters/Vex/sounds/760709466.ogg",
+            "characters/Vex/sounds/885068716.ogg",
+            "characters/Vex/sounds/904169601.ogg",
+            "characters/Vex/sounds/99346903.ogg",
+        ],
+        "Play_vo_Vex_Spell3DPMark": [
+            "characters/Vex/sounds/156840764.ogg",
+            "characters/Vex/sounds/301045111.ogg",
+            "characters/Vex/sounds/53394168.ogg",
+            "characters/Vex/sounds/575837885.ogg",
+            "characters/Vex/sounds/662692220.ogg",
+            "characters/Vex/sounds/819639104.ogg",
+            "characters/Vex/sounds/941214107.ogg",
+        ],
+        "Play_vo_Vex_Spell3DPReady": [
+            "characters/Vex/sounds/1007375797.ogg",
+            "characters/Vex/sounds/1052410942.ogg",
+            "characters/Vex/sounds/185183050.ogg",
+            "characters/Vex/sounds/674028570.ogg",
+            "characters/Vex/sounds/81606598.ogg",
+            "characters/Vex/sounds/840418144.ogg",
+            "characters/Vex/sounds/869739663.ogg",
+        ],
+        "Play_vo_Vex_Taunt3DGeneral": [
+            "characters/Vex/sounds/837893830.ogg",
+        ],
+        "Play_vo_Vex_TauntResponse3DGeneral": [
+            "characters/Vex/sounds/49143510.ogg",
+        ],
+        "Play_vo_Vex_VexBasicAttack2_cast3D": [
+            "characters/Vex/sounds/168956031.ogg",
+            "characters/Vex/sounds/557709883.ogg",
+            "characters/Vex/sounds/594300798.ogg",
+            "characters/Vex/sounds/620883963.ogg",
+        ],
+        "Play_vo_Vex_VexBasicAttack_cast3D": [
+            "characters/Vex/sounds/168956031.ogg",
+            "characters/Vex/sounds/557709883.ogg",
+            "characters/Vex/sounds/594300798.ogg",
+            "characters/Vex/sounds/620883963.ogg",
+        ],
+        "Play_vo_Vex_VexCritAttack_cast3D": [
+            "characters/Vex/sounds/168956031.ogg",
+            "characters/Vex/sounds/557709883.ogg",
+            "characters/Vex/sounds/594300798.ogg",
+            "characters/Vex/sounds/620883963.ogg",
+        ],
+        "Play_vo_Vex_VexE_cast3D": [
+            "characters/Vex/sounds/27625043.ogg",
+            "characters/Vex/sounds/333946150.ogg",
+            "characters/Vex/sounds/759945223.ogg",
+            "characters/Vex/sounds/788069125.ogg",
+        ],
+        "Play_vo_Vex_VexQ_cast3D": [
+            "characters/Vex/sounds/1058924571.ogg",
+            "characters/Vex/sounds/245002812.ogg",
+            "characters/Vex/sounds/452003612.ogg",
+            "characters/Vex/sounds/538923338.ogg",
+        ],
+        "Play_vo_Vex_VexR2_cast3D": [
+            "characters/Vex/sounds/1054971496.ogg",
+            "characters/Vex/sounds/382163956.ogg",
+            "characters/Vex/sounds/440659135.ogg",
+            "characters/Vex/sounds/624583433.ogg",
+            "characters/Vex/sounds/96253691.ogg",
+        ],
+        "Play_vo_Vex_VexR_cast3D": [
+            "characters/Vex/sounds/461940313.ogg",
+            "characters/Vex/sounds/513893314.ogg",
+            "characters/Vex/sounds/567768883.ogg",
+            "characters/Vex/sounds/921513781.ogg",
+        ],
+        "Play_vo_Vex_VexW_cast3D": [
+            "characters/Vex/sounds/341208978.ogg",
+            "characters/Vex/sounds/528872018.ogg",
+            "characters/Vex/sounds/643491107.ogg",
+            "characters/Vex/sounds/688196376.ogg",
+        ],
+        "Recall3D_leadin": [
+            "characters/Vex/sounds/626308383.ogg",
+        ],
+        "Respawn3D_buffactivate": [
+            "characters/Vex/sounds/473130548.ogg",
+        ],
+        "Taunt3D_buffactivate": [
+            "characters/Vex/sounds/479347877.ogg",
+        ],
+        "VexBasicAttack2_OnCast": [
+            "characters/Vex/sounds/272338183.ogg",
+            "characters/Vex/sounds/4871067.ogg",
+            "characters/Vex/sounds/708955772.ogg",
+            "characters/Vex/sounds/866247251.ogg",
+        ],
+        "VexBasicAttack2_OnHit": [
+            "characters/Vex/sounds/105381811.ogg",
+            "characters/Vex/sounds/257716985.ogg",
+            "characters/Vex/sounds/308745100.ogg",
+            "characters/Vex/sounds/92648592.ogg",
+        ],
+        "VexBasicAttack_OnCast": [
+            "characters/Vex/sounds/272338183.ogg",
+            "characters/Vex/sounds/4871067.ogg",
+            "characters/Vex/sounds/708955772.ogg",
+            "characters/Vex/sounds/866247251.ogg",
+        ],
+        "VexBasicAttack_OnHit": [
+            "characters/Vex/sounds/105381811.ogg",
+            "characters/Vex/sounds/257716985.ogg",
+            "characters/Vex/sounds/308745100.ogg",
+            "characters/Vex/sounds/92648592.ogg",
+        ],
+        "VexBasicAttack_missilelaunch": [
+            "characters/Vex/sounds/202509119.ogg",
+            "characters/Vex/sounds/28478532.ogg",
+            "characters/Vex/sounds/453031971.ogg",
+            "characters/Vex/sounds/854316172.ogg",
+        ],
+        "VexCritAttack_OnCast": [
+            "characters/Vex/sounds/272338183.ogg",
+            "characters/Vex/sounds/4871067.ogg",
+            "characters/Vex/sounds/708955772.ogg",
+            "characters/Vex/sounds/866247251.ogg",
+        ],
+        "VexCritAttack_OnHit": [
+            "characters/Vex/sounds/105381811.ogg",
+            "characters/Vex/sounds/257716985.ogg",
+            "characters/Vex/sounds/308745100.ogg",
+            "characters/Vex/sounds/92648592.ogg",
+        ],
+        "VexE_OnCast": [
+            "characters/Vex/sounds/366668307.ogg",
+        ],
+        "VexE_buffactivate_doom": [
+            "characters/Vex/sounds/221184318.ogg",
+        ],
+        "VexE_cast": [
+            "characters/Vex/sounds/899265162.ogg",
+        ],
+        "VexE_hit": [
+            "characters/Vex/sounds/122214534.ogg",
+        ],
+        "VexE_missilelaunch": [
+            "characters/Vex/sounds/316479402.ogg",
+        ],
+        "VexPDoom_buffactivate": [
+            "characters/Vex/sounds/156739516.ogg",
+        ],
+        "VexPFear_buffactivate": [
+            "characters/Vex/sounds/315526932.ogg",
+            "characters/Vex/sounds/334118640.ogg",
+            "characters/Vex/sounds/362399893.ogg",
+            "characters/Vex/sounds/775106206.ogg",
+        ],
+        "VexPGloomAttack_OnCast": [
+            "characters/Vex/sounds/133253859.ogg",
+        ],
+        "VexPGloomAttack_OnHitLocation": [
+            "characters/Vex/sounds/1023805608.ogg",
+        ],
+        "VexPGloomAttack_buffactivate": [
+            "characters/Vex/sounds/725025888.ogg",
+        ],
+        "VexPGloomAttack_missilelaunch": [
+            "characters/Vex/sounds/969220579.ogg",
+        ],
+        "VexPGloom_Self_buffactivate": [
+            "characters/Vex/sounds/17763835.ogg",
+            "characters/Vex/sounds/366150073.ogg",
+            "characters/Vex/sounds/408275976.ogg",
+            "characters/Vex/sounds/666445700.ogg",
+        ],
+        "VexPGloom_buffactivate": [
+            "characters/Vex/sounds/39919439.ogg",
+            "characters/Vex/sounds/414274821.ogg",
+            "characters/Vex/sounds/527592824.ogg",
+            "characters/Vex/sounds/836120027.ogg",
+        ],
+        "VexQ_Doom_missilecast": [
+            "characters/Vex/sounds/37224634.ogg",
+        ],
+        "VexQ_Doom_missilelaunch": [
+            "characters/Vex/sounds/44078564.ogg",
+        ],
+        "VexQ_OnCast": [
+            "characters/Vex/sounds/1040963935.ogg",
+        ],
+        "VexQ_OnHit": [
+            "characters/Vex/sounds/19321425.ogg",
+            "characters/Vex/sounds/356850335.ogg",
+            "characters/Vex/sounds/676312067.ogg",
+            "characters/Vex/sounds/827705797.ogg",
+        ],
+        "VexQ_missilecast": [
+            "characters/Vex/sounds/802294691.ogg",
+        ],
+        "VexQ_missilelaunch": [
+            "characters/Vex/sounds/1019612697.ogg",
+        ],
+        "VexR2_OnCast": [
+            "characters/Vex/sounds/900406129.ogg",
+        ],
+        "VexR2_hit": [
+            "characters/Vex/sounds/332793068.ogg",
+        ],
+        "VexR2_travel_missilelaunch": [
+            "characters/Vex/sounds/298245717.ogg",
+        ],
+        "VexR_OnCast": [
+            "characters/Vex/sounds/577324008.ogg",
+        ],
+        "VexR_OnHit": [
+            "characters/Vex/sounds/652798360.ogg",
+        ],
+        "VexR_OnMissileCast": [
+            "characters/Vex/sounds/492928901.ogg",
+        ],
+        "VexR_missilelaunch": [
+            "characters/Vex/sounds/384729570.ogg",
+        ],
+        "VexW_buffdeactivate": [
+            "characters/Vex/sounds/273082529.ogg",
+        ],
+        "VexW_cast": [
+            "characters/Vex/sounds/195292286.ogg",
+            "characters/Vex/sounds/682871617.ogg",
+        ],
+        "VexW_cast_doom": [
+            "characters/Vex/sounds/278093015.ogg",
+            "characters/Vex/sounds/445255421.ogg",
+        ],
+        "VexW_hit": [
+            "characters/Vex/sounds/1033934088.ogg",
+        ],
+    },
+)

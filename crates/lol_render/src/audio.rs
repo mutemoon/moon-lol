@@ -27,7 +27,7 @@ impl Plugin for PluginAudio {
     }
 }
 
-/// 技能/被动命中或触发音效：由英雄代码在对应时机显式触发（如 Fiora E 强化普攻命中、R 击破要害）。
+/// 技能/被动命中或触发音效：由英雄代码在对应时机显式触发（通过 CommandSkinSoundPlay）。
 fn on_skin_sound_play(
     trigger: On<CommandSkinSoundPlay>,
     mut commands: Commands,
@@ -39,16 +39,18 @@ fn on_skin_sound_play(
     let Some(config) = config_of(&q_bank, &res_audio, entity) else {
         return;
     };
-    let Some(cue) = config.spells.get(&trigger.key) else {
-        return;
-    };
-    let preferred = if trigger.hit { &cue.on_hit } else { &cue.on_cast };
-    let fallback = if trigger.hit { &cue.on_cast } else { &cue.on_hit };
-    let paths = if preferred.is_empty() { fallback } else { preferred };
-    play_random(&mut commands, &asset_server, paths);
+    if let Some(paths) = config.events.get(&trigger.key) {
+        play_random(&mut commands, &asset_server, paths);
+    } else {
+        // Fallback: 忽略大小写查找 key
+        let lower_key = trigger.key.to_lowercase();
+        if let Some((_, paths)) = config.events.iter().find(|(k, _)| k.to_lowercase() == lower_key) {
+            play_random(&mut commands, &asset_server, paths);
+        }
+    }
 }
 
-/// 普攻出手：播放普攻 on_cast 音效
+/// 普攻出手：播放包含 BasicAttack 和 OnCast 的音效
 fn on_attack_cast_play_sound(
     trigger: On<EventAttackStart>,
     mut commands: Commands,
@@ -60,10 +62,19 @@ fn on_attack_cast_play_sound(
     let Some(config) = config_of(&q_bank, &res_audio, attacker) else {
         return;
     };
-    play_random(&mut commands, &asset_server, &config.basic_attack.on_cast);
+    let paths: Vec<String> = config
+        .events
+        .iter()
+        .filter(|(k, _)| {
+            let l = k.to_lowercase();
+            l.contains("basicattack") && (l.contains("oncast") || l.contains("cast"))
+        })
+        .flat_map(|(_, p)| p.iter().cloned())
+        .collect();
+    play_random(&mut commands, &asset_server, &paths);
 }
 
-/// 普攻命中：播放普攻 on_hit 音效
+/// 普攻命中：播放包含 BasicAttack 和 OnHit 的音效
 fn on_attack_hit_play_sound(
     trigger: On<EventAttackEnd>,
     mut commands: Commands,
@@ -75,10 +86,19 @@ fn on_attack_hit_play_sound(
     let Some(config) = config_of(&q_bank, &res_audio, attacker) else {
         return;
     };
-    play_random(&mut commands, &asset_server, &config.basic_attack.on_hit);
+    let paths: Vec<String> = config
+        .events
+        .iter()
+        .filter(|(k, _)| {
+            let l = k.to_lowercase();
+            l.contains("basicattack") && (l.contains("onhit") || l.contains("hit"))
+        })
+        .flat_map(|(_, p)| p.iter().cloned())
+        .collect();
+    play_random(&mut commands, &asset_server, &paths);
 }
 
-/// 技能施放：按技能对象名（如 AatroxQ）查找并播放对应 on_cast 音效
+/// 技能施放：按技能对象名（如 AatroxQ）查找并播放对应 OnCast 音效
 fn on_skill_cast_play_sound(
     trigger: On<EventSkillCast>,
     mut commands: Commands,
@@ -97,10 +117,17 @@ fn on_skill_cast_play_sound(
     let Some(name) = spell_name_from_handle(&asset_server, &skill.spell) else {
         return;
     };
-    let Some(cue) = config.spells.get(&name) else {
-        return;
-    };
-    play_random(&mut commands, &asset_server, &cue.on_cast);
+    let lower_name = name.to_lowercase();
+    let paths: Vec<String> = config
+        .events
+        .iter()
+        .filter(|(k, _)| {
+            let l = k.to_lowercase();
+            l.contains(&lower_name) && (l.contains("oncast") || l.contains("cast") || l.contains("onbuffactivate"))
+        })
+        .flat_map(|(_, p)| p.iter().cloned())
+        .collect();
+    play_random(&mut commands, &asset_server, &paths);
 }
 
 /// 从实体读取 AudioBank 并拿到已加载的 ConfigAudio

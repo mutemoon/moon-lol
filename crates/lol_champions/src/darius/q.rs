@@ -8,7 +8,7 @@
 
 use bevy::prelude::*;
 use lol_base::animation_names::ANIM_SPELL1;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn, CommandSkinSoundPlay};
 use lol_base::spell::Spell;
 use lol_core::action::damage::{ActionDamageEffect, DamageShape, TargetDamage, TargetFilter};
 use lol_core::action::delayed_damage::{ActionDelayedDamage, AoEIndicator, AoEOrigin};
@@ -161,6 +161,10 @@ pub fn on_darius_q_hit_particles(
         hash: key.to_string(),
         rotation: None,
         resolver_entity: Some(trigger.source),
+    });
+    commands.trigger(CommandSkinSoundPlay {
+        entity: trigger.source,
+        key: "DariusCleave_OnHit".to_string(),
     });
 }
 

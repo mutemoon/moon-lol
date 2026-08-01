@@ -1,0 +1,614 @@
+(
+    events: {
+        "Dance3D_intro_buffactivate": [
+            "characters/Hwei/sounds/681327954.ogg",
+        ],
+        "Dance3D_look_buffactivate": [
+            "characters/Hwei/sounds/167426127.ogg",
+        ],
+        "Dance3D_loop1_buffactivate": [
+            "characters/Hwei/sounds/250942655.ogg",
+            "characters/Hwei/sounds/430660720.ogg",
+            "characters/Hwei/sounds/758492626.ogg",
+            "characters/Hwei/sounds/937130986.ogg",
+        ],
+        "Dance3D_loop2_buffactivate": [
+            "characters/Hwei/sounds/277045196.ogg",
+            "characters/Hwei/sounds/98163748.ogg",
+        ],
+        "Dance3D_paint_fast_buffactivate": [
+            "characters/Hwei/sounds/265940830.ogg",
+            "characters/Hwei/sounds/753330446.ogg",
+            "characters/Hwei/sounds/953884237.ogg",
+        ],
+        "Dance3D_paint_slow_buffactivate": [
+            "characters/Hwei/sounds/289959118.ogg",
+            "characters/Hwei/sounds/592946868.ogg",
+            "characters/Hwei/sounds/849944948.ogg",
+        ],
+        "Death3D_cast": [
+            "characters/Hwei/sounds/958521376.ogg",
+        ],
+        "HweiBasicAttack2_OnCast": [
+            "characters/Hwei/sounds/264119915.ogg",
+            "characters/Hwei/sounds/509415897.ogg",
+            "characters/Hwei/sounds/896970569.ogg",
+            "characters/Hwei/sounds/920687034.ogg",
+        ],
+        "HweiBasicAttack2_OnHit": [
+            "characters/Hwei/sounds/336067650.ogg",
+            "characters/Hwei/sounds/717501662.ogg",
+            "characters/Hwei/sounds/921414364.ogg",
+            "characters/Hwei/sounds/99660840.ogg",
+        ],
+        "HweiBasicAttack2_OnMissileLaunch": [
+            "characters/Hwei/sounds/469434993.ogg",
+            "characters/Hwei/sounds/712783096.ogg",
+            "characters/Hwei/sounds/794898167.ogg",
+            "characters/Hwei/sounds/834357895.ogg",
+        ],
+        "HweiBasicAttack_OnCast": [
+            "characters/Hwei/sounds/264119915.ogg",
+            "characters/Hwei/sounds/509415897.ogg",
+            "characters/Hwei/sounds/896970569.ogg",
+            "characters/Hwei/sounds/920687034.ogg",
+        ],
+        "HweiBasicAttack_OnHit": [
+            "characters/Hwei/sounds/336067650.ogg",
+            "characters/Hwei/sounds/717501662.ogg",
+            "characters/Hwei/sounds/921414364.ogg",
+            "characters/Hwei/sounds/99660840.ogg",
+        ],
+        "HweiBasicAttack_OnMissileLaunch": [
+            "characters/Hwei/sounds/469434993.ogg",
+            "characters/Hwei/sounds/712783096.ogg",
+            "characters/Hwei/sounds/794898167.ogg",
+            "characters/Hwei/sounds/834357895.ogg",
+        ],
+        "HweiCritAttack2_OnCast": [
+            "characters/Hwei/sounds/264119915.ogg",
+            "characters/Hwei/sounds/509415897.ogg",
+            "characters/Hwei/sounds/896970569.ogg",
+            "characters/Hwei/sounds/920687034.ogg",
+        ],
+        "HweiCritAttack2_OnHit": [
+            "characters/Hwei/sounds/336067650.ogg",
+            "characters/Hwei/sounds/717501662.ogg",
+            "characters/Hwei/sounds/921414364.ogg",
+            "characters/Hwei/sounds/99660840.ogg",
+        ],
+        "HweiCritAttack2_OnMissileLaunch": [
+            "characters/Hwei/sounds/469434993.ogg",
+            "characters/Hwei/sounds/712783096.ogg",
+            "characters/Hwei/sounds/794898167.ogg",
+            "characters/Hwei/sounds/834357895.ogg",
+        ],
+        "HweiCritAttack_OnCast": [
+            "characters/Hwei/sounds/264119915.ogg",
+            "characters/Hwei/sounds/509415897.ogg",
+            "characters/Hwei/sounds/896970569.ogg",
+            "characters/Hwei/sounds/920687034.ogg",
+        ],
+        "HweiCritAttack_OnHit": [
+            "characters/Hwei/sounds/336067650.ogg",
+            "characters/Hwei/sounds/717501662.ogg",
+            "characters/Hwei/sounds/921414364.ogg",
+            "characters/Hwei/sounds/99660840.ogg",
+        ],
+        "HweiCritAttack_OnMissileLaunch": [
+            "characters/Hwei/sounds/469434993.ogg",
+            "characters/Hwei/sounds/712783096.ogg",
+            "characters/Hwei/sounds/794898167.ogg",
+            "characters/Hwei/sounds/834357895.ogg",
+        ],
+        "HweiEE_AoE_buffactivate": [
+            "characters/Hwei/sounds/31144744.ogg",
+            "characters/Hwei/sounds/878541495.ogg",
+            "characters/Hwei/sounds/913692991.ogg",
+        ],
+        "HweiEE_OnCast": [
+            "characters/Hwei/sounds/316379760.ogg",
+            "characters/Hwei/sounds/409023581.ogg",
+            "characters/Hwei/sounds/672044604.ogg",
+        ],
+        "HweiEE_hit": [
+            "characters/Hwei/sounds/168525570.ogg",
+            "characters/Hwei/sounds/631926018.ogg",
+            "characters/Hwei/sounds/884789044.ogg",
+        ],
+        "HweiEQ_OnCast": [
+            "characters/Hwei/sounds/44534611.ogg",
+            "characters/Hwei/sounds/612368760.ogg",
+            "characters/Hwei/sounds/75087253.ogg",
+        ],
+        "HweiEQ_OnHit": [
+            "characters/Hwei/sounds/239381480.ogg",
+            "characters/Hwei/sounds/287426527.ogg",
+            "characters/Hwei/sounds/69834651.ogg",
+        ],
+        "HweiEQ_OnMissileLaunch": [
+            "characters/Hwei/sounds/1011508883.ogg",
+            "characters/Hwei/sounds/156665197.ogg",
+            "characters/Hwei/sounds/860479110.ogg",
+        ],
+        "HweiEW_AoE_buffactivate": [
+            "characters/Hwei/sounds/579031134.ogg",
+        ],
+        "HweiEW_AoE_buffdeactivate": [
+            "characters/Hwei/sounds/509579061.ogg",
+        ],
+        "HweiEW_OnCast": [
+            "characters/Hwei/sounds/787880827.ogg",
+        ],
+        "HweiEW_OnMissileLaunch": [
+            "characters/Hwei/sounds/885155326.ogg",
+        ],
+        "HweiEW_hit": [
+            "characters/Hwei/sounds/293542346.ogg",
+        ],
+        "HweiEW_target_warning": [
+            "characters/Hwei/sounds/893879419.ogg",
+        ],
+        "HweiE_cast": [
+            "characters/Hwei/sounds/1069277997.ogg",
+            "characters/Hwei/sounds/864992003.ogg",
+            "characters/Hwei/sounds/971815737.ogg",
+        ],
+        "HweiP_explosion_buffactivate": [
+            "characters/Hwei/sounds/213300042.ogg",
+            "characters/Hwei/sounds/59284678.ogg",
+            "characters/Hwei/sounds/720691046.ogg",
+        ],
+        "HweiP_explosion_warning_buffactivate": [
+            "characters/Hwei/sounds/421543990.ogg",
+            "characters/Hwei/sounds/434178266.ogg",
+            "characters/Hwei/sounds/923466744.ogg",
+        ],
+        "HweiP_mark_buffactivate": [
+            "characters/Hwei/sounds/774366203.ogg",
+        ],
+        "HweiQETell_OnMissileLaunch": [
+            "characters/Hwei/sounds/31448537.ogg",
+            "characters/Hwei/sounds/406707590.ogg",
+            "characters/Hwei/sounds/646220841.ogg",
+        ],
+        "HweiQE_OnCast": [
+            "characters/Hwei/sounds/241389340.ogg",
+            "characters/Hwei/sounds/350824723.ogg",
+            "characters/Hwei/sounds/365481898.ogg",
+        ],
+        "HweiQE_lava_explode": [
+            "characters/Hwei/sounds/113873006.ogg",
+            "characters/Hwei/sounds/32982011.ogg",
+            "characters/Hwei/sounds/545873862.ogg",
+            "characters/Hwei/sounds/889290978.ogg",
+            "characters/Hwei/sounds/917625137.ogg",
+        ],
+        "HweiQQ_OnCast": [
+            "characters/Hwei/sounds/132116725.ogg",
+            "characters/Hwei/sounds/272636676.ogg",
+            "characters/Hwei/sounds/317724452.ogg",
+        ],
+        "HweiQQ_OnMissileLaunch": [
+            "characters/Hwei/sounds/1015498916.ogg",
+            "characters/Hwei/sounds/384316185.ogg",
+            "characters/Hwei/sounds/890829090.ogg",
+        ],
+        "HweiQQ_explosion": [
+            "characters/Hwei/sounds/661237584.ogg",
+            "characters/Hwei/sounds/712570078.ogg",
+            "characters/Hwei/sounds/809882295.ogg",
+        ],
+        "HweiQW_AoE_explode": [
+            "characters/Hwei/sounds/133629197.ogg",
+            "characters/Hwei/sounds/405884972.ogg",
+            "characters/Hwei/sounds/59360961.ogg",
+        ],
+        "HweiQW_AoE_warning": [
+            "characters/Hwei/sounds/220391854.ogg",
+            "characters/Hwei/sounds/524415055.ogg",
+            "characters/Hwei/sounds/623755826.ogg",
+        ],
+        "HweiQW_OnCast": [
+            "characters/Hwei/sounds/180135768.ogg",
+            "characters/Hwei/sounds/365730371.ogg",
+            "characters/Hwei/sounds/779488228.ogg",
+        ],
+        "HweiQ_cast": [
+            "characters/Hwei/sounds/1048501976.ogg",
+            "characters/Hwei/sounds/125176752.ogg",
+            "characters/Hwei/sounds/814320408.ogg",
+        ],
+        "HweiR_AoE_grow_buffactivate": [
+            "characters/Hwei/sounds/604542522.ogg",
+        ],
+        "HweiR_AoE_shatter_buffactivate": [
+            "characters/Hwei/sounds/85753487.ogg",
+        ],
+        "HweiR_OnCast": [
+            "characters/Hwei/sounds/596012280.ogg",
+        ],
+        "HweiR_OnHit": [
+            "characters/Hwei/sounds/845806209.ogg",
+        ],
+        "HweiR_OnMissileLaunch": [
+            "characters/Hwei/sounds/422723899.ogg",
+        ],
+        "HweiWEBuffCounter_OnBuffActivate": [
+            "characters/Hwei/sounds/836352885.ogg",
+        ],
+        "HweiWEBuffCounter_OnBuffDeactivate": [
+            "characters/Hwei/sounds/1072959099.ogg",
+            "characters/Hwei/sounds/109368057.ogg",
+            "characters/Hwei/sounds/420993106.ogg",
+        ],
+        "HweiWE_OnCast": [
+            "characters/Hwei/sounds/189233813.ogg",
+            "characters/Hwei/sounds/341436263.ogg",
+            "characters/Hwei/sounds/805805808.ogg",
+        ],
+        "HweiWE_empowered_damage_hit": [
+            "characters/Hwei/sounds/28395576.ogg",
+            "characters/Hwei/sounds/830220018.ogg",
+            "characters/Hwei/sounds/9129879.ogg",
+        ],
+        "HweiWQMoveSpeed_OnBuffActivate": [
+            "characters/Hwei/sounds/152381603.ogg",
+        ],
+        "HweiWQ_AoE_buffactivate_loop": [
+            "characters/Hwei/sounds/702862147.ogg",
+        ],
+        "HweiWQ_OnCast": [
+            "characters/Hwei/sounds/210764644.ogg",
+            "characters/Hwei/sounds/517659938.ogg",
+            "characters/Hwei/sounds/906285292.ogg",
+        ],
+        "HweiWQ_OnMissileLaunch": [
+            "characters/Hwei/sounds/39246469.ogg",
+            "characters/Hwei/sounds/409448275.ogg",
+            "characters/Hwei/sounds/557659008.ogg",
+        ],
+        "HweiWWShield_OnBuffActivate": [
+            "characters/Hwei/sounds/11883371.ogg",
+            "characters/Hwei/sounds/847111021.ogg",
+            "characters/Hwei/sounds/917985218.ogg",
+        ],
+        "HweiWWShield_OnBuffDeactivate": [
+            "characters/Hwei/sounds/295475204.ogg",
+            "characters/Hwei/sounds/613960608.ogg",
+            "characters/Hwei/sounds/943573375.ogg",
+        ],
+        "HweiWW_AoE_buffactivate": [
+            "characters/Hwei/sounds/1069930793.ogg",
+            "characters/Hwei/sounds/484442950.ogg",
+            "characters/Hwei/sounds/82312596.ogg",
+            "characters/Hwei/sounds/959023424.ogg",
+        ],
+        "HweiWW_OnCast": [
+            "characters/Hwei/sounds/373472203.ogg",
+            "characters/Hwei/sounds/401414887.ogg",
+            "characters/Hwei/sounds/418862165.ogg",
+        ],
+        "HweiW_cast": [
+            "characters/Hwei/sounds/508793077.ogg",
+            "characters/Hwei/sounds/875391169.ogg",
+            "characters/Hwei/sounds/955896075.ogg",
+        ],
+        "HweiWashBrush_cast": [
+            "characters/Hwei/sounds/203874653.ogg",
+            "characters/Hwei/sounds/732034452.ogg",
+            "characters/Hwei/sounds/913971560.ogg",
+        ],
+        "Joke3D_buffactivate": [
+            "characters/Hwei/sounds/654835763.ogg",
+        ],
+        "Laugh3D_buffactivate": [
+            "characters/Hwei/sounds/1011137172.ogg",
+        ],
+        "Play_vo_Hwei_Assist3DJhin": [
+            "characters/Hwei/sounds/665310282.ogg",
+        ],
+        "Play_vo_Hwei_Attack2DGeneral": [
+            "characters/Hwei/sounds/1041411452.ogg",
+            "characters/Hwei/sounds/1044453977.ogg",
+            "characters/Hwei/sounds/204982536.ogg",
+            "characters/Hwei/sounds/236576853.ogg",
+            "characters/Hwei/sounds/247714215.ogg",
+            "characters/Hwei/sounds/262328319.ogg",
+            "characters/Hwei/sounds/273480672.ogg",
+            "characters/Hwei/sounds/563417496.ogg",
+            "characters/Hwei/sounds/585728692.ogg",
+            "characters/Hwei/sounds/740352612.ogg",
+            "characters/Hwei/sounds/821236653.ogg",
+            "characters/Hwei/sounds/892547820.ogg",
+        ],
+        "Play_vo_Hwei_Death3D": [
+            "characters/Hwei/sounds/163501491.ogg",
+            "characters/Hwei/sounds/365998325.ogg",
+            "characters/Hwei/sounds/917827777.ogg",
+            "characters/Hwei/sounds/967437748.ogg",
+        ],
+        "Play_vo_Hwei_FirstEncounter3DAhri": [
+            "characters/Hwei/sounds/428071880.ogg",
+        ],
+        "Play_vo_Hwei_FirstEncounter3DAkali": [
+            "characters/Hwei/sounds/463685619.ogg",
+        ],
+        "Play_vo_Hwei_FirstEncounter3DGeneral": [
+            "characters/Hwei/sounds/512539305.ogg",
+            "characters/Hwei/sounds/614159239.ogg",
+            "characters/Hwei/sounds/702259364.ogg",
+            "characters/Hwei/sounds/754556754.ogg",
+        ],
+        "Play_vo_Hwei_FirstEncounter3DIonia": [
+            "characters/Hwei/sounds/814980164.ogg",
+        ],
+        "Play_vo_Hwei_FirstEncounter3DIrelia": [
+            "characters/Hwei/sounds/830306153.ogg",
+        ],
+        "Play_vo_Hwei_FirstEncounter3DJhin": [
+            "characters/Hwei/sounds/14613213.ogg",
+        ],
+        "Play_vo_Hwei_FirstEncounter3DKarma": [
+            "characters/Hwei/sounds/222181761.ogg",
+        ],
+        "Play_vo_Hwei_FirstEncounter3DKayn": [
+            "characters/Hwei/sounds/315394978.ogg",
+        ],
+        "Play_vo_Hwei_FirstEncounter3DKennen": [
+            "characters/Hwei/sounds/1053695404.ogg",
+        ],
+        "Play_vo_Hwei_FirstEncounter3DLeeSin": [
+            "characters/Hwei/sounds/46294069.ogg",
+        ],
+        "Play_vo_Hwei_FirstEncounter3DMasterYi": [
+            "characters/Hwei/sounds/504062593.ogg",
+        ],
+        "Play_vo_Hwei_FirstEncounter3DSett": [
+            "characters/Hwei/sounds/530854443.ogg",
+        ],
+        "Play_vo_Hwei_FirstEncounter3DShen": [
+            "characters/Hwei/sounds/1029306789.ogg",
+        ],
+        "Play_vo_Hwei_FirstEncounter3DSona": [
+            "characters/Hwei/sounds/192597683.ogg",
+        ],
+        "Play_vo_Hwei_FirstEncounter3DSyndra": [
+            "characters/Hwei/sounds/382704545.ogg",
+        ],
+        "Play_vo_Hwei_FirstEncounter3DVex": [
+            "characters/Hwei/sounds/932215101.ogg",
+        ],
+        "Play_vo_Hwei_FirstEncounter3DYasuo": [
+            "characters/Hwei/sounds/360114781.ogg",
+        ],
+        "Play_vo_Hwei_FirstEncounter3DYone": [
+            "characters/Hwei/sounds/778734290.ogg",
+        ],
+        "Play_vo_Hwei_FirstEncounter3DZed": [
+            "characters/Hwei/sounds/11448717.ogg",
+        ],
+        "Play_vo_Hwei_HweiBasicAttack2_cast3D": [
+            "characters/Hwei/sounds/150700095.ogg",
+            "characters/Hwei/sounds/417810302.ogg",
+            "characters/Hwei/sounds/509604802.ogg",
+            "characters/Hwei/sounds/935837051.ogg",
+        ],
+        "Play_vo_Hwei_HweiBasicAttack_cast3D": [
+            "characters/Hwei/sounds/150700095.ogg",
+            "characters/Hwei/sounds/417810302.ogg",
+            "characters/Hwei/sounds/509604802.ogg",
+            "characters/Hwei/sounds/935837051.ogg",
+        ],
+        "Play_vo_Hwei_HweiCritAttack_cast3D": [
+            "characters/Hwei/sounds/150700095.ogg",
+            "characters/Hwei/sounds/417810302.ogg",
+            "characters/Hwei/sounds/509604802.ogg",
+            "characters/Hwei/sounds/935837051.ogg",
+        ],
+        "Play_vo_Hwei_HweiEE_cast3D": [
+            "characters/Hwei/sounds/141793922.ogg",
+            "characters/Hwei/sounds/217096417.ogg",
+            "characters/Hwei/sounds/863877595.ogg",
+        ],
+        "Play_vo_Hwei_HweiEQ_cast3D": [
+            "characters/Hwei/sounds/21995993.ogg",
+            "characters/Hwei/sounds/380796293.ogg",
+            "characters/Hwei/sounds/503649806.ogg",
+            "characters/Hwei/sounds/520807397.ogg",
+            "characters/Hwei/sounds/521563154.ogg",
+            "characters/Hwei/sounds/846072534.ogg",
+        ],
+        "Play_vo_Hwei_HweiQE_cast3D": [
+            "characters/Hwei/sounds/1063003394.ogg",
+            "characters/Hwei/sounds/115177689.ogg",
+            "characters/Hwei/sounds/914712498.ogg",
+        ],
+        "Play_vo_Hwei_HweiQQ_cast3D": [
+            "characters/Hwei/sounds/1068397906.ogg",
+            "characters/Hwei/sounds/154595018.ogg",
+            "characters/Hwei/sounds/582012581.ogg",
+            "characters/Hwei/sounds/618412015.ogg",
+        ],
+        "Play_vo_Hwei_HweiR_cast3D": [
+            "characters/Hwei/sounds/303351685.ogg",
+            "characters/Hwei/sounds/378420649.ogg",
+            "characters/Hwei/sounds/790184957.ogg",
+            "characters/Hwei/sounds/859212755.ogg",
+            "characters/Hwei/sounds/984979741.ogg",
+        ],
+        "Play_vo_Hwei_HweiWQ_cast3D": [
+            "characters/Hwei/sounds/326489285.ogg",
+            "characters/Hwei/sounds/373995459.ogg",
+            "characters/Hwei/sounds/374239719.ogg",
+            "characters/Hwei/sounds/705486133.ogg",
+            "characters/Hwei/sounds/843976401.ogg",
+        ],
+        "Play_vo_Hwei_HweiWW_cast3D": [
+            "characters/Hwei/sounds/353046660.ogg",
+            "characters/Hwei/sounds/533606644.ogg",
+            "characters/Hwei/sounds/889445534.ogg",
+            "characters/Hwei/sounds/911102549.ogg",
+            "characters/Hwei/sounds/957187840.ogg",
+        ],
+        "Play_vo_Hwei_Joke3DGeneral": [
+            "characters/Hwei/sounds/601247230.ogg",
+        ],
+        "Play_vo_Hwei_JokeResponse3DGeneral": [
+            "characters/Hwei/sounds/948490037.ogg",
+        ],
+        "Play_vo_Hwei_Kill3DAhri": [
+            "characters/Hwei/sounds/756469525.ogg",
+        ],
+        "Play_vo_Hwei_Kill3DAkali": [
+            "characters/Hwei/sounds/119340059.ogg",
+        ],
+        "Play_vo_Hwei_Kill3DFirst": [
+            "characters/Hwei/sounds/941834505.ogg",
+        ],
+        "Play_vo_Hwei_Kill3DGeneral": [
+            "characters/Hwei/sounds/462039233.ogg",
+            "characters/Hwei/sounds/545011952.ogg",
+            "characters/Hwei/sounds/813572626.ogg",
+            "characters/Hwei/sounds/84864195.ogg",
+            "characters/Hwei/sounds/896033264.ogg",
+        ],
+        "Play_vo_Hwei_Kill3DJhin": [
+            "characters/Hwei/sounds/745247439.ogg",
+        ],
+        "Play_vo_Hwei_Kill3DKayn": [
+            "characters/Hwei/sounds/375451720.ogg",
+        ],
+        "Play_vo_Hwei_Kill3DMasterYi": [
+            "characters/Hwei/sounds/279903148.ogg",
+        ],
+        "Play_vo_Hwei_Kill3DPenta": [
+            "characters/Hwei/sounds/574054555.ogg",
+        ],
+        "Play_vo_Hwei_Kill3DQW": [
+            "characters/Hwei/sounds/24041735.ogg",
+            "characters/Hwei/sounds/609372432.ogg",
+            "characters/Hwei/sounds/971395093.ogg",
+        ],
+        "Play_vo_Hwei_Kill3DShen": [
+            "characters/Hwei/sounds/162200511.ogg",
+        ],
+        "Play_vo_Hwei_Kill3DZed": [
+            "characters/Hwei/sounds/268127443.ogg",
+        ],
+        "Play_vo_Hwei_Laugh3DGeneral": [
+            "characters/Hwei/sounds/318897151.ogg",
+        ],
+        "Play_vo_Hwei_Move2DFirst": [
+            "characters/Hwei/sounds/355288246.ogg",
+            "characters/Hwei/sounds/57941491.ogg",
+            "characters/Hwei/sounds/688005576.ogg",
+            "characters/Hwei/sounds/869444364.ogg",
+        ],
+        "Play_vo_Hwei_Move2DFirstDark": [
+            "characters/Hwei/sounds/87316283.ogg",
+        ],
+        "Play_vo_Hwei_Move2DFirstDarkJhin": [
+            "characters/Hwei/sounds/308476639.ogg",
+        ],
+        "Play_vo_Hwei_Move2DFirstLight": [
+            "characters/Hwei/sounds/96842737.ogg",
+        ],
+        "Play_vo_Hwei_Move2DFirstLightJhin": [
+            "characters/Hwei/sounds/185244250.ogg",
+        ],
+        "Play_vo_Hwei_Move2DLong": [
+            "characters/Hwei/sounds/1071621596.ogg",
+            "characters/Hwei/sounds/19740282.ogg",
+            "characters/Hwei/sounds/272771137.ogg",
+            "characters/Hwei/sounds/274052788.ogg",
+            "characters/Hwei/sounds/291487236.ogg",
+            "characters/Hwei/sounds/740362039.ogg",
+            "characters/Hwei/sounds/802956461.ogg",
+            "characters/Hwei/sounds/841023852.ogg",
+            "characters/Hwei/sounds/935900329.ogg",
+            "characters/Hwei/sounds/996954566.ogg",
+        ],
+        "Play_vo_Hwei_Move2DStandard": [
+            "characters/Hwei/sounds/1057309976.ogg",
+            "characters/Hwei/sounds/11953226.ogg",
+            "characters/Hwei/sounds/162034592.ogg",
+            "characters/Hwei/sounds/197161322.ogg",
+            "characters/Hwei/sounds/268389929.ogg",
+            "characters/Hwei/sounds/274545042.ogg",
+            "characters/Hwei/sounds/325906304.ogg",
+            "characters/Hwei/sounds/348411833.ogg",
+            "characters/Hwei/sounds/361757298.ogg",
+            "characters/Hwei/sounds/369969867.ogg",
+            "characters/Hwei/sounds/443878215.ogg",
+            "characters/Hwei/sounds/542623983.ogg",
+            "characters/Hwei/sounds/581267061.ogg",
+            "characters/Hwei/sounds/627402726.ogg",
+            "characters/Hwei/sounds/638644394.ogg",
+            "characters/Hwei/sounds/661161120.ogg",
+            "characters/Hwei/sounds/700619944.ogg",
+            "characters/Hwei/sounds/733746285.ogg",
+            "characters/Hwei/sounds/734196970.ogg",
+            "characters/Hwei/sounds/80928595.ogg",
+            "characters/Hwei/sounds/886146117.ogg",
+            "characters/Hwei/sounds/907236016.ogg",
+            "characters/Hwei/sounds/913153350.ogg",
+            "characters/Hwei/sounds/976726254.ogg",
+            "characters/Hwei/sounds/982014051.ogg",
+        ],
+        "Play_vo_Hwei_Recall3DGeneral": [
+            "characters/Hwei/sounds/102657728.ogg",
+            "characters/Hwei/sounds/154635896.ogg",
+            "characters/Hwei/sounds/629287137.ogg",
+            "characters/Hwei/sounds/728090402.ogg",
+            "characters/Hwei/sounds/978029505.ogg",
+        ],
+        "Play_vo_Hwei_Respawn2DGeneral": [
+            "characters/Hwei/sounds/256983499.ogg",
+            "characters/Hwei/sounds/316977135.ogg",
+            "characters/Hwei/sounds/337209396.ogg",
+            "characters/Hwei/sounds/984330038.ogg",
+        ],
+        "Play_vo_Hwei_Spell2DRRankOne": [
+            "characters/Hwei/sounds/579497941.ogg",
+            "characters/Hwei/sounds/929828265.ogg",
+        ],
+        "Play_vo_Hwei_Spell2DRRankOneJhin": [
+            "characters/Hwei/sounds/29934199.ogg",
+            "characters/Hwei/sounds/349034965.ogg",
+        ],
+        "Play_vo_Hwei_Spell2DRRankTwo": [
+            "characters/Hwei/sounds/430386207.ogg",
+            "characters/Hwei/sounds/773560907.ogg",
+        ],
+        "Play_vo_Hwei_Spell2DRRankTwoJhin": [
+            "characters/Hwei/sounds/1069186815.ogg",
+            "characters/Hwei/sounds/507721021.ogg",
+        ],
+        "Play_vo_Hwei_Spell3DEWRoot": [
+            "characters/Hwei/sounds/1032965206.ogg",
+            "characters/Hwei/sounds/115290845.ogg",
+            "characters/Hwei/sounds/637861895.ogg",
+            "characters/Hwei/sounds/903157906.ogg",
+            "characters/Hwei/sounds/942409228.ogg",
+        ],
+        "Play_vo_Hwei_Taunt3DGeneral": [
+            "characters/Hwei/sounds/905956697.ogg",
+        ],
+        "Play_vo_Hwei_TauntResponse3DGeneral": [
+            "characters/Hwei/sounds/917915338.ogg",
+        ],
+        "Recall3D_buffactivate": [
+            "characters/Hwei/sounds/255288334.ogg",
+        ],
+        "Respawn3D_buffactivate": [
+            "characters/Hwei/sounds/291270139.ogg",
+        ],
+        "Taunt3D_buffactivate": [
+            "characters/Hwei/sounds/99680284.ogg",
+        ],
+        "Winddown3D_buffactivate": [
+            "characters/Hwei/sounds/989506988.ogg",
+        ],
+    },
+)

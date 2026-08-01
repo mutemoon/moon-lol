@@ -1,0 +1,546 @@
+(
+    events: {
+        "Dance3D_buffactivate": [
+            "characters/Teemo/sounds/112295849.ogg",
+            "characters/Teemo/sounds/276141411.ogg",
+            "characters/Teemo/sounds/287633730.ogg",
+            "characters/Teemo/sounds/309450031.ogg",
+            "characters/Teemo/sounds/36113068.ogg",
+            "characters/Teemo/sounds/441289033.ogg",
+            "characters/Teemo/sounds/505314933.ogg",
+            "characters/Teemo/sounds/96469829.ogg",
+        ],
+        "Dance3D_buffactivate_spam": [
+            "characters/Teemo/sounds/112295849.ogg",
+            "characters/Teemo/sounds/276141411.ogg",
+            "characters/Teemo/sounds/287633730.ogg",
+            "characters/Teemo/sounds/309450031.ogg",
+            "characters/Teemo/sounds/36113068.ogg",
+            "characters/Teemo/sounds/441289033.ogg",
+            "characters/Teemo/sounds/505314933.ogg",
+            "characters/Teemo/sounds/96469829.ogg",
+        ],
+        "Dance3D_buffactivate_spam2": [
+            "characters/Teemo/sounds/112295849.ogg",
+            "characters/Teemo/sounds/335844375.ogg",
+            "characters/Teemo/sounds/419612212.ogg",
+            "characters/Teemo/sounds/453849115.ogg",
+            "characters/Teemo/sounds/511027065.ogg",
+            "characters/Teemo/sounds/626712930.ogg",
+            "characters/Teemo/sounds/945006975.ogg",
+            "characters/Teemo/sounds/96469829.ogg",
+        ],
+        "Death3D_cast": [
+            "characters/Teemo/sounds/681817783.ogg",
+        ],
+        "Homeguard3D_buffactivate": [
+            "characters/Teemo/sounds/1062012970.ogg",
+            "characters/Teemo/sounds/126959713.ogg",
+            "characters/Teemo/sounds/149026869.ogg",
+            "characters/Teemo/sounds/285082251.ogg",
+            "characters/Teemo/sounds/385887940.ogg",
+            "characters/Teemo/sounds/415828419.ogg",
+            "characters/Teemo/sounds/426451028.ogg",
+            "characters/Teemo/sounds/4919760.ogg",
+            "characters/Teemo/sounds/528243330.ogg",
+            "characters/Teemo/sounds/569634746.ogg",
+            "characters/Teemo/sounds/580573562.ogg",
+            "characters/Teemo/sounds/581966783.ogg",
+            "characters/Teemo/sounds/600749850.ogg",
+            "characters/Teemo/sounds/662952115.ogg",
+            "characters/Teemo/sounds/668988406.ogg",
+            "characters/Teemo/sounds/71932454.ogg",
+            "characters/Teemo/sounds/76908658.ogg",
+            "characters/Teemo/sounds/934902182.ogg",
+        ],
+        "Joke3D_buffactivate": [
+            "characters/Teemo/sounds/100506451.ogg",
+            "characters/Teemo/sounds/513437395.ogg",
+            "characters/Teemo/sounds/757755644.ogg",
+        ],
+        "Joke3D_buffactivate_ground": [
+            "characters/Teemo/sounds/1062012970.ogg",
+            "characters/Teemo/sounds/126959713.ogg",
+            "characters/Teemo/sounds/149026869.ogg",
+            "characters/Teemo/sounds/285082251.ogg",
+            "characters/Teemo/sounds/385887940.ogg",
+            "characters/Teemo/sounds/415828419.ogg",
+            "characters/Teemo/sounds/426451028.ogg",
+            "characters/Teemo/sounds/4919760.ogg",
+            "characters/Teemo/sounds/528243330.ogg",
+            "characters/Teemo/sounds/569634746.ogg",
+            "characters/Teemo/sounds/600749850.ogg",
+            "characters/Teemo/sounds/662952115.ogg",
+            "characters/Teemo/sounds/668988406.ogg",
+            "characters/Teemo/sounds/71932454.ogg",
+            "characters/Teemo/sounds/76908658.ogg",
+            "characters/Teemo/sounds/934902182.ogg",
+        ],
+        "Joke3D_buffactivate_in": [
+            "characters/Teemo/sounds/39453579.ogg",
+        ],
+        "Joke3D_buffactivate_out": [
+            "characters/Teemo/sounds/718899250.ogg",
+        ],
+        "Laugh3D_buffactivate": [
+            "characters/Teemo/sounds/1061076676.ogg",
+        ],
+        "Play_vo_Teemo_Assist3DGeneral": [
+            "characters/Teemo/sounds/561992749.ogg",
+            "characters/Teemo/sounds/798295556.ogg",
+            "characters/Teemo/sounds/994704108.ogg",
+        ],
+        "Play_vo_Teemo_Attack2DBaron": [
+            "characters/Teemo/sounds/1050376213.ogg",
+            "characters/Teemo/sounds/545964546.ogg",
+        ],
+        "Play_vo_Teemo_Attack2DGeneral": [
+            "characters/Teemo/sounds/104360088.ogg",
+            "characters/Teemo/sounds/178501258.ogg",
+            "characters/Teemo/sounds/245027599.ogg",
+            "characters/Teemo/sounds/281486163.ogg",
+            "characters/Teemo/sounds/284033685.ogg",
+            "characters/Teemo/sounds/305241492.ogg",
+            "characters/Teemo/sounds/332371764.ogg",
+            "characters/Teemo/sounds/333176844.ogg",
+            "characters/Teemo/sounds/432353140.ogg",
+            "characters/Teemo/sounds/451003467.ogg",
+            "characters/Teemo/sounds/601343706.ogg",
+            "characters/Teemo/sounds/717636156.ogg",
+            "characters/Teemo/sounds/894154968.ogg",
+        ],
+        "Play_vo_Teemo_Death3D": [
+            "characters/Teemo/sounds/191402682.ogg",
+            "characters/Teemo/sounds/42301290.ogg",
+            "characters/Teemo/sounds/955762282.ogg",
+        ],
+        "Play_vo_Teemo_FirstEncounter3DCorki": [
+            "characters/Teemo/sounds/335549242.ogg",
+        ],
+        "Play_vo_Teemo_FirstEncounter3DDog": [
+            "characters/Teemo/sounds/552678270.ogg",
+        ],
+        "Play_vo_Teemo_FirstEncounter3DFizz": [
+            "characters/Teemo/sounds/475102403.ogg",
+        ],
+        "Play_vo_Teemo_FirstEncounter3DGeneral": [
+            "characters/Teemo/sounds/268597932.ogg",
+            "characters/Teemo/sounds/3956216.ogg",
+            "characters/Teemo/sounds/463465619.ogg",
+            "characters/Teemo/sounds/631317146.ogg",
+        ],
+        "Play_vo_Teemo_FirstEncounter3DGnar": [
+            "characters/Teemo/sounds/359984968.ogg",
+        ],
+        "Play_vo_Teemo_FirstEncounter3DKennen": [
+            "characters/Teemo/sounds/720057345.ogg",
+        ],
+        "Play_vo_Teemo_FirstEncounter3DKled": [
+            "characters/Teemo/sounds/12607549.ogg",
+        ],
+        "Play_vo_Teemo_FirstEncounter3DLulu": [
+            "characters/Teemo/sounds/638119566.ogg",
+        ],
+        "Play_vo_Teemo_FirstEncounter3DPoppy": [
+            "characters/Teemo/sounds/133784190.ogg",
+        ],
+        "Play_vo_Teemo_FirstEncounter3DRumble": [
+            "characters/Teemo/sounds/864288133.ogg",
+        ],
+        "Play_vo_Teemo_FirstEncounter3DTristana": [
+            "characters/Teemo/sounds/263984881.ogg",
+        ],
+        "Play_vo_Teemo_FirstEncounter3DVeigar": [
+            "characters/Teemo/sounds/769687782.ogg",
+        ],
+        "Play_vo_Teemo_FirstEncounter3DVex": [
+            "characters/Teemo/sounds/434961515.ogg",
+        ],
+        "Play_vo_Teemo_FirstEncounter3DVoid": [
+            "characters/Teemo/sounds/671885746.ogg",
+        ],
+        "Play_vo_Teemo_FirstEncounter3DYordle": [
+            "characters/Teemo/sounds/142844568.ogg",
+        ],
+        "Play_vo_Teemo_Joke3DGeneral": [
+            "characters/Teemo/sounds/537114399.ogg",
+            "characters/Teemo/sounds/68624843.ogg",
+        ],
+        "Play_vo_Teemo_JokeResponse3DGeneral": [
+            "characters/Teemo/sounds/976845876.ogg",
+        ],
+        "Play_vo_Teemo_Kill3DCorki": [
+            "characters/Teemo/sounds/627141767.ogg",
+        ],
+        "Play_vo_Teemo_Kill3DDog": [
+            "characters/Teemo/sounds/875675723.ogg",
+        ],
+        "Play_vo_Teemo_Kill3DFirst": [
+            "characters/Teemo/sounds/43543976.ogg",
+        ],
+        "Play_vo_Teemo_Kill3DFizz": [
+            "characters/Teemo/sounds/741577662.ogg",
+        ],
+        "Play_vo_Teemo_Kill3DGeneral": [
+            "characters/Teemo/sounds/165648437.ogg",
+            "characters/Teemo/sounds/363869218.ogg",
+            "characters/Teemo/sounds/51355643.ogg",
+            "characters/Teemo/sounds/546941504.ogg",
+            "characters/Teemo/sounds/564978897.ogg",
+            "characters/Teemo/sounds/890393591.ogg",
+            "characters/Teemo/sounds/906407017.ogg",
+            "characters/Teemo/sounds/954022222.ogg",
+        ],
+        "Play_vo_Teemo_Kill3DGnar": [
+            "characters/Teemo/sounds/456953739.ogg",
+        ],
+        "Play_vo_Teemo_Kill3DKennen": [
+            "characters/Teemo/sounds/570966625.ogg",
+        ],
+        "Play_vo_Teemo_Kill3DKled": [
+            "characters/Teemo/sounds/79296292.ogg",
+        ],
+        "Play_vo_Teemo_Kill3DLulu": [
+            "characters/Teemo/sounds/575294995.ogg",
+        ],
+        "Play_vo_Teemo_Kill3DPenta": [
+            "characters/Teemo/sounds/881315169.ogg",
+        ],
+        "Play_vo_Teemo_Kill3DPoppy": [
+            "characters/Teemo/sounds/52196863.ogg",
+        ],
+        "Play_vo_Teemo_Kill3DR": [
+            "characters/Teemo/sounds/1033893643.ogg",
+            "characters/Teemo/sounds/225683934.ogg",
+            "characters/Teemo/sounds/821165625.ogg",
+        ],
+        "Play_vo_Teemo_Kill3DRFar": [
+            "characters/Teemo/sounds/330301862.ogg",
+            "characters/Teemo/sounds/907738496.ogg",
+        ],
+        "Play_vo_Teemo_Kill3DRumble": [
+            "characters/Teemo/sounds/985051735.ogg",
+        ],
+        "Play_vo_Teemo_Kill3DTristana": [
+            "characters/Teemo/sounds/717960123.ogg",
+        ],
+        "Play_vo_Teemo_Kill3DTurret": [
+            "characters/Teemo/sounds/401763251.ogg",
+            "characters/Teemo/sounds/605012757.ogg",
+            "characters/Teemo/sounds/733313649.ogg",
+        ],
+        "Play_vo_Teemo_Kill3DVeigar": [
+            "characters/Teemo/sounds/626500133.ogg",
+        ],
+        "Play_vo_Teemo_Kill3DVex": [
+            "characters/Teemo/sounds/817938218.ogg",
+        ],
+        "Play_vo_Teemo_Kill3DVoid": [
+            "characters/Teemo/sounds/865438614.ogg",
+        ],
+        "Play_vo_Teemo_Kill3DYordle": [
+            "characters/Teemo/sounds/758216714.ogg",
+        ],
+        "Play_vo_Teemo_Laugh3DGeneral": [
+            "characters/Teemo/sounds/359407052.ogg",
+            "characters/Teemo/sounds/900188616.ogg",
+            "characters/Teemo/sounds/926832477.ogg",
+        ],
+        "Play_vo_Teemo_LevelUp2DGeneral": [
+            "characters/Teemo/sounds/176105505.ogg",
+            "characters/Teemo/sounds/657387775.ogg",
+        ],
+        "Play_vo_Teemo_Move2DFirst": [
+            "characters/Teemo/sounds/443767031.ogg",
+            "characters/Teemo/sounds/534015819.ogg",
+            "characters/Teemo/sounds/578507086.ogg",
+            "characters/Teemo/sounds/857198554.ogg",
+        ],
+        "Play_vo_Teemo_Move2DFirstAllyYordle": [
+            "characters/Teemo/sounds/749557229.ogg",
+        ],
+        "Play_vo_Teemo_Move2DLong": [
+            "characters/Teemo/sounds/108300484.ogg",
+            "characters/Teemo/sounds/131260016.ogg",
+            "characters/Teemo/sounds/175869809.ogg",
+            "characters/Teemo/sounds/285272634.ogg",
+            "characters/Teemo/sounds/538481700.ogg",
+            "characters/Teemo/sounds/754182365.ogg",
+            "characters/Teemo/sounds/800765610.ogg",
+            "characters/Teemo/sounds/838850145.ogg",
+        ],
+        "Play_vo_Teemo_Move2DStandard": [
+            "characters/Teemo/sounds/1029377963.ogg",
+            "characters/Teemo/sounds/1072556361.ogg",
+            "characters/Teemo/sounds/171967014.ogg",
+            "characters/Teemo/sounds/202050625.ogg",
+            "characters/Teemo/sounds/240539096.ogg",
+            "characters/Teemo/sounds/437482995.ogg",
+            "characters/Teemo/sounds/526104223.ogg",
+            "characters/Teemo/sounds/577306683.ogg",
+            "characters/Teemo/sounds/606940894.ogg",
+            "characters/Teemo/sounds/637995276.ogg",
+            "characters/Teemo/sounds/671411659.ogg",
+            "characters/Teemo/sounds/695456340.ogg",
+            "characters/Teemo/sounds/70616977.ogg",
+            "characters/Teemo/sounds/775810445.ogg",
+            "characters/Teemo/sounds/859956094.ogg",
+            "characters/Teemo/sounds/87427212.ogg",
+            "characters/Teemo/sounds/945862512.ogg",
+            "characters/Teemo/sounds/984774543.ogg",
+        ],
+        "Play_vo_Teemo_Recall3DGeneral": [
+            "characters/Teemo/sounds/1017658403.ogg",
+            "characters/Teemo/sounds/192374854.ogg",
+            "characters/Teemo/sounds/441332130.ogg",
+            "characters/Teemo/sounds/530075557.ogg",
+            "characters/Teemo/sounds/558002735.ogg",
+            "characters/Teemo/sounds/976235613.ogg",
+        ],
+        "Play_vo_Teemo_Respawn2DGeneral": [
+            "characters/Teemo/sounds/259519770.ogg",
+            "characters/Teemo/sounds/288858690.ogg",
+            "characters/Teemo/sounds/667906631.ogg",
+            "characters/Teemo/sounds/842403493.ogg",
+            "characters/Teemo/sounds/943725757.ogg",
+        ],
+        "Play_vo_Teemo_Shop2DOpen": [
+            "characters/Teemo/sounds/308872895.ogg",
+            "characters/Teemo/sounds/479830590.ogg",
+            "characters/Teemo/sounds/775256015.ogg",
+        ],
+        "Play_vo_Teemo_Spell2DRRankOne": [
+            "characters/Teemo/sounds/523572202.ogg",
+        ],
+        "Play_vo_Teemo_Spell3DPCast": [
+            "characters/Teemo/sounds/1008191584.ogg",
+            "characters/Teemo/sounds/1008843112.ogg",
+            "characters/Teemo/sounds/136381118.ogg",
+            "characters/Teemo/sounds/345729210.ogg",
+            "characters/Teemo/sounds/936635321.ogg",
+            "characters/Teemo/sounds/93827565.ogg",
+        ],
+        "Play_vo_Teemo_Spell3DPEnd": [
+            "characters/Teemo/sounds/1051131968.ogg",
+            "characters/Teemo/sounds/340949156.ogg",
+            "characters/Teemo/sounds/688972689.ogg",
+        ],
+        "Play_vo_Teemo_Spell3DRHit": [
+            "characters/Teemo/sounds/1044917721.ogg",
+            "characters/Teemo/sounds/1060235692.ogg",
+            "characters/Teemo/sounds/357704667.ogg",
+            "characters/Teemo/sounds/363098653.ogg",
+            "characters/Teemo/sounds/607108999.ogg",
+        ],
+        "Play_vo_Teemo_Taunt3DGeneral": [
+            "characters/Teemo/sounds/1070285006.ogg",
+            "characters/Teemo/sounds/196924830.ogg",
+            "characters/Teemo/sounds/513560379.ogg",
+            "characters/Teemo/sounds/565834249.ogg",
+        ],
+        "Play_vo_Teemo_TauntResponse3DGeneral": [
+            "characters/Teemo/sounds/754762101.ogg",
+        ],
+        "Play_vo_Teemo_TeemoBasicAttack_cast3D": [
+            "characters/Teemo/sounds/224175736.ogg",
+            "characters/Teemo/sounds/306966286.ogg",
+            "characters/Teemo/sounds/422548962.ogg",
+            "characters/Teemo/sounds/735248889.ogg",
+        ],
+        "Play_vo_Teemo_TeemoEAttack_cast3D": [
+            "characters/Teemo/sounds/224175736.ogg",
+            "characters/Teemo/sounds/306966286.ogg",
+            "characters/Teemo/sounds/422548962.ogg",
+            "characters/Teemo/sounds/735248889.ogg",
+        ],
+        "Play_vo_Teemo_TeemoECrit_cast3D": [
+            "characters/Teemo/sounds/224175736.ogg",
+            "characters/Teemo/sounds/306966286.ogg",
+            "characters/Teemo/sounds/422548962.ogg",
+            "characters/Teemo/sounds/735248889.ogg",
+        ],
+        "Play_vo_Teemo_TeemoQ_cast3D": [
+            "characters/Teemo/sounds/1017358703.ogg",
+            "characters/Teemo/sounds/165487248.ogg",
+            "characters/Teemo/sounds/504304962.ogg",
+            "characters/Teemo/sounds/559208908.ogg",
+            "characters/Teemo/sounds/855216270.ogg",
+            "characters/Teemo/sounds/960667195.ogg",
+        ],
+        "Play_vo_Teemo_TeemoR_cast3D": [
+            "characters/Teemo/sounds/1012732598.ogg",
+            "characters/Teemo/sounds/127932030.ogg",
+            "characters/Teemo/sounds/276824692.ogg",
+            "characters/Teemo/sounds/386146653.ogg",
+            "characters/Teemo/sounds/530300043.ogg",
+            "characters/Teemo/sounds/599505554.ogg",
+            "characters/Teemo/sounds/599740205.ogg",
+            "characters/Teemo/sounds/613327874.ogg",
+            "characters/Teemo/sounds/846567144.ogg",
+        ],
+        "Play_vo_Teemo_TeemoW_cast3D": [
+            "characters/Teemo/sounds/305344686.ogg",
+            "characters/Teemo/sounds/619542095.ogg",
+            "characters/Teemo/sounds/9301490.ogg",
+        ],
+        "Recall3D_buffactivate": [
+            "characters/Teemo/sounds/1050613885.ogg",
+        ],
+        "Respawn3D_buffactivate": [
+            "characters/Teemo/sounds/797296161.ogg",
+        ],
+        "Taunt3D_buffactivate": [
+            "characters/Teemo/sounds/790559357.ogg",
+        ],
+        "Taunt3D_buffactivate_spin": [
+            "characters/Teemo/sounds/197193768.ogg",
+            "characters/Teemo/sounds/241768271.ogg",
+            "characters/Teemo/sounds/954079962.ogg",
+        ],
+        "TeemoBasicAttack_OnCast": [
+            "characters/Teemo/sounds/349029602.ogg",
+            "characters/Teemo/sounds/721159118.ogg",
+        ],
+        "TeemoBasicAttack_OnHit": [
+            "characters/Teemo/sounds/303141121.ogg",
+            "characters/Teemo/sounds/607382600.ogg",
+        ],
+        "TeemoBasicAttack_OnMissileLaunch": [
+            "characters/Teemo/sounds/27483388.ogg",
+            "characters/Teemo/sounds/593182911.ogg",
+        ],
+        "TeemoCritAttack_OnCast": [
+            "characters/Teemo/sounds/349029602.ogg",
+            "characters/Teemo/sounds/721159118.ogg",
+        ],
+        "TeemoCritAttack_OnHit": [
+            "characters/Teemo/sounds/303141121.ogg",
+            "characters/Teemo/sounds/607382600.ogg",
+        ],
+        "TeemoCritAttack_OnMissileLaunch": [
+            "characters/Teemo/sounds/27483388.ogg",
+            "characters/Teemo/sounds/593182911.ogg",
+        ],
+        "TeemoEAttack_OnCast": [
+            "characters/Teemo/sounds/349029602.ogg",
+            "characters/Teemo/sounds/721159118.ogg",
+        ],
+        "TeemoEAttack_OnHit": [
+            "characters/Teemo/sounds/1037537174.ogg",
+            "characters/Teemo/sounds/596921769.ogg",
+        ],
+        "TeemoEAttack_OnMissileLaunch": [
+            "characters/Teemo/sounds/165806091.ogg",
+            "characters/Teemo/sounds/340765381.ogg",
+            "characters/Teemo/sounds/513627084.ogg",
+        ],
+        "TeemoECrit_OnCast": [
+            "characters/Teemo/sounds/349029602.ogg",
+            "characters/Teemo/sounds/721159118.ogg",
+        ],
+        "TeemoECrit_OnHit": [
+            "characters/Teemo/sounds/1037537174.ogg",
+            "characters/Teemo/sounds/596921769.ogg",
+        ],
+        "TeemoECrit_OnMissileLaunch": [
+            "characters/Teemo/sounds/165806091.ogg",
+            "characters/Teemo/sounds/340765381.ogg",
+            "characters/Teemo/sounds/513627084.ogg",
+        ],
+        "TeemoMushroom_TeemoRTrap_buffactivate_arm": [
+            "characters/Teemo/sounds/53442377.ogg",
+            "characters/Teemo/sounds/58976737.ogg",
+            "characters/Teemo/sounds/619167466.ogg",
+        ],
+        "TeemoMushroom_TeemoRTrap_buffdeactivate": [
+            "characters/Teemo/sounds/60373670.ogg",
+        ],
+        "TeemoMushroom_TeemoRTrap_hitlocation": [
+            "characters/Teemo/sounds/227595457.ogg",
+            "characters/Teemo/sounds/241550275.ogg",
+            "characters/Teemo/sounds/624392861.ogg",
+        ],
+        "TeemoPStealthBuff_buffactivate": [
+            "characters/Teemo/sounds/321636484.ogg",
+            "characters/Teemo/sounds/644313303.ogg",
+            "characters/Teemo/sounds/871583392.ogg",
+        ],
+        "TeemoPStealthBuff_buffactivate_loop": [
+            "characters/Teemo/sounds/447369530.ogg",
+        ],
+        "TeemoPStealthBuff_buffdeactivate": [
+            "characters/Teemo/sounds/326835034.ogg",
+            "characters/Teemo/sounds/940848204.ogg",
+            "characters/Teemo/sounds/972925774.ogg",
+        ],
+        "TeemoPStealthBuff_cast": [
+            "characters/Teemo/sounds/421478538.ogg",
+            "characters/Teemo/sounds/453723003.ogg",
+            "characters/Teemo/sounds/738087181.ogg",
+        ],
+        "TeemoQ_OnCast": [
+            "characters/Teemo/sounds/4691174.ogg",
+        ],
+        "TeemoQ_OnHit": [
+            "characters/Teemo/sounds/41272196.ogg",
+            "characters/Teemo/sounds/63286599.ogg",
+        ],
+        "TeemoQ_OnMissileLaunch": [
+            "characters/Teemo/sounds/1030668168.ogg",
+            "characters/Teemo/sounds/814203979.ogg",
+        ],
+        "TeemoQ_buffactivate": [
+            "characters/Teemo/sounds/1011848896.ogg",
+        ],
+        "TeemoRBounce_missilecast": [
+            "characters/Teemo/sounds/50357701.ogg",
+            "characters/Teemo/sounds/585642501.ogg",
+            "characters/Teemo/sounds/736301555.ogg",
+            "characters/Teemo/sounds/924481384.ogg",
+        ],
+        "TeemoRDot_OnBuffActivate": [
+            "characters/Teemo/sounds/378406947.ogg",
+            "characters/Teemo/sounds/407384102.ogg",
+        ],
+        "TeemoRTrap_OnBuffActivate": [
+            "characters/Teemo/sounds/826741817.ogg",
+        ],
+        "TeemoR_OnCast": [
+            "characters/Teemo/sounds/128789974.ogg",
+            "characters/Teemo/sounds/303949219.ogg",
+            "characters/Teemo/sounds/783239367.ogg",
+        ],
+        "TeemoR_missilelaunch": [
+            "characters/Teemo/sounds/296262384.ogg",
+            "characters/Teemo/sounds/563179543.ogg",
+            "characters/Teemo/sounds/642945511.ogg",
+        ],
+        "TeemoW_OnBuffActivate": [
+            "characters/Teemo/sounds/499756620.ogg",
+        ],
+        "TeemoW_OnBuffDeactivate": [
+            "characters/Teemo/sounds/904137033.ogg",
+        ],
+        "TeemoW_OnCast": [
+            "characters/Teemo/sounds/432173883.ogg",
+        ],
+        "TeemoW_buffactivate_footsteps": [
+            "characters/Teemo/sounds/1062012970.ogg",
+            "characters/Teemo/sounds/126959713.ogg",
+            "characters/Teemo/sounds/149026869.ogg",
+            "characters/Teemo/sounds/285082251.ogg",
+            "characters/Teemo/sounds/385887940.ogg",
+            "characters/Teemo/sounds/415828419.ogg",
+            "characters/Teemo/sounds/426451028.ogg",
+            "characters/Teemo/sounds/4919760.ogg",
+            "characters/Teemo/sounds/528243330.ogg",
+            "characters/Teemo/sounds/569634746.ogg",
+            "characters/Teemo/sounds/600749850.ogg",
+            "characters/Teemo/sounds/662952115.ogg",
+            "characters/Teemo/sounds/668988406.ogg",
+            "characters/Teemo/sounds/71932454.ogg",
+            "characters/Teemo/sounds/76908658.ogg",
+            "characters/Teemo/sounds/934902182.ogg",
+        ],
+    },
+)

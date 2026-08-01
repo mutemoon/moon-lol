@@ -4,7 +4,7 @@
 
 use bevy::prelude::*;
 use bevy::time::{Timer, TimerMode};
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn, CommandSkinSoundPlay};
 use lol_base::spell::Spell;
 use lol_core::base::buff::BuffOf;
 use lol_core::buffs::cc_debuffs::DebuffKnockup;
@@ -145,6 +145,14 @@ pub fn on_aatrox_q(
             hash: hit_key.to_string(),
             rotation: None,
             resolver_entity: Some(entity),
+        });
+        commands.trigger(CommandSkinSoundPlay {
+            entity,
+            key: match stage {
+                2 => "AatroxQ2_OnHit".to_string(),
+                3 => "AatroxQ3_OnHit".to_string(),
+                _ => "AatroxQ_OnHit".to_string(),
+            },
         });
     }
 

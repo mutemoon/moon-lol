@@ -1,0 +1,660 @@
+(
+    events: {
+        "Dance3D_var1_buffactivate": [
+            "characters/Skarner/sounds/821742959.ogg",
+        ],
+        "Dance3D_var2_buffactivate": [
+            "characters/Skarner/sounds/71489074.ogg",
+        ],
+        "Death3D_buffactivate": [
+            "characters/Skarner/sounds/697911887.ogg",
+        ],
+        "E_warning_loop": [
+            "characters/Skarner/sounds/848988819.ogg",
+        ],
+        "Emote3D_rock": [
+            "characters/Skarner/sounds/582990297.ogg",
+        ],
+        "Joke3D_buffactivate": [
+            "characters/Skarner/sounds/1046865043.ogg",
+        ],
+        "Laugh3D_buffactivate": [
+            "characters/Skarner/sounds/334921883.ogg",
+        ],
+        "Play_vo_Skarner_Attack2DBaron": [
+            "characters/Skarner/sounds/167537826.ogg",
+        ],
+        "Play_vo_Skarner_Attack2DBlueSentinel": [
+            "characters/Skarner/sounds/617635633.ogg",
+        ],
+        "Play_vo_Skarner_Attack2DElderDragon": [
+            "characters/Skarner/sounds/311956390.ogg",
+        ],
+        "Play_vo_Skarner_Attack2DElementalDragon": [
+            "characters/Skarner/sounds/555118920.ogg",
+            "characters/Skarner/sounds/73532985.ogg",
+        ],
+        "Play_vo_Skarner_Attack2DGeneral": [
+            "characters/Skarner/sounds/1002236484.ogg",
+            "characters/Skarner/sounds/1041182320.ogg",
+            "characters/Skarner/sounds/168272174.ogg",
+            "characters/Skarner/sounds/18993911.ogg",
+            "characters/Skarner/sounds/195325570.ogg",
+            "characters/Skarner/sounds/25030523.ogg",
+            "characters/Skarner/sounds/295344766.ogg",
+            "characters/Skarner/sounds/297297877.ogg",
+            "characters/Skarner/sounds/373805728.ogg",
+            "characters/Skarner/sounds/461008504.ogg",
+            "characters/Skarner/sounds/463036485.ogg",
+            "characters/Skarner/sounds/685765639.ogg",
+            "characters/Skarner/sounds/693415402.ogg",
+            "characters/Skarner/sounds/871629344.ogg",
+            "characters/Skarner/sounds/904666926.ogg",
+        ],
+        "Play_vo_Skarner_Attack2DGromp": [
+            "characters/Skarner/sounds/287739670.ogg",
+        ],
+        "Play_vo_Skarner_Attack2DHerald": [
+            "characters/Skarner/sounds/129594939.ogg",
+            "characters/Skarner/sounds/139205048.ogg",
+        ],
+        "Play_vo_Skarner_Attack2DKrug": [
+            "characters/Skarner/sounds/70763970.ogg",
+        ],
+        "Play_vo_Skarner_Attack2DNeutral": [
+            "characters/Skarner/sounds/188908448.ogg",
+            "characters/Skarner/sounds/331170256.ogg",
+            "characters/Skarner/sounds/516493356.ogg",
+            "characters/Skarner/sounds/750728813.ogg",
+            "characters/Skarner/sounds/931099507.ogg",
+            "characters/Skarner/sounds/961206165.ogg",
+        ],
+        "Play_vo_Skarner_Dance3DGeneral": [
+            "characters/Skarner/sounds/1020004601.ogg",
+        ],
+        "Play_vo_Skarner_Dance5DGeneral": [
+            "characters/Skarner/sounds/800294601.ogg",
+        ],
+        "Play_vo_Skarner_Death3D": [
+            "characters/Skarner/sounds/333556917.ogg",
+            "characters/Skarner/sounds/362508926.ogg",
+            "characters/Skarner/sounds/611182931.ogg",
+            "characters/Skarner/sounds/854172696.ogg",
+        ],
+        "Play_vo_Skarner_Death5D": [
+            "characters/Skarner/sounds/203675539.ogg",
+            "characters/Skarner/sounds/467792396.ogg",
+            "characters/Skarner/sounds/509490620.ogg",
+            "characters/Skarner/sounds/848809984.ogg",
+        ],
+        "Play_vo_Skarner_FirstEncounter5DAscended": [
+            "characters/Skarner/sounds/741908086.ogg",
+        ],
+        "Play_vo_Skarner_FirstEncounter5DAzir": [
+            "characters/Skarner/sounds/161718125.ogg",
+        ],
+        "Play_vo_Skarner_FirstEncounter5DBelVeth": [
+            "characters/Skarner/sounds/1015615431.ogg",
+        ],
+        "Play_vo_Skarner_FirstEncounter5DDarkin": [
+            "characters/Skarner/sounds/108712956.ogg",
+        ],
+        "Play_vo_Skarner_FirstEncounter5DGeneral": [
+            "characters/Skarner/sounds/263860076.ogg",
+            "characters/Skarner/sounds/62776632.ogg",
+            "characters/Skarner/sounds/750649081.ogg",
+            "characters/Skarner/sounds/75703728.ogg",
+            "characters/Skarner/sounds/873300712.ogg",
+        ],
+        "Play_vo_Skarner_FirstEncounter5DIxtal": [
+            "characters/Skarner/sounds/1007883338.ogg",
+        ],
+        "Play_vo_Skarner_FirstEncounter5DJax": [
+            "characters/Skarner/sounds/365403392.ogg",
+        ],
+        "Play_vo_Skarner_FirstEncounter5DMalphite": [
+            "characters/Skarner/sounds/965380772.ogg",
+        ],
+        "Play_vo_Skarner_FirstEncounter5DMilio": [
+            "characters/Skarner/sounds/816271476.ogg",
+        ],
+        "Play_vo_Skarner_FirstEncounter5DQiyana": [
+            "characters/Skarner/sounds/806691340.ogg",
+        ],
+        "Play_vo_Skarner_FirstEncounter5DRammus": [
+            "characters/Skarner/sounds/731591259.ogg",
+        ],
+        "Play_vo_Skarner_FirstEncounter5DTaliyah": [
+            "characters/Skarner/sounds/634428183.ogg",
+        ],
+        "Play_vo_Skarner_FirstEncounter5DVoid": [
+            "characters/Skarner/sounds/996525805.ogg",
+        ],
+        "Play_vo_Skarner_FirstEncounter5DZyra": [
+            "characters/Skarner/sounds/454472013.ogg",
+        ],
+        "Play_vo_Skarner_Joke3DGeneral": [
+            "characters/Skarner/sounds/1026911408.ogg",
+        ],
+        "Play_vo_Skarner_Joke5DGeneral": [
+            "characters/Skarner/sounds/24577651.ogg",
+        ],
+        "Play_vo_Skarner_JokeResponse3DGeneral": [
+            "characters/Skarner/sounds/26456310.ogg",
+        ],
+        "Play_vo_Skarner_JokeResponse5DGeneral": [
+            "characters/Skarner/sounds/572337679.ogg",
+        ],
+        "Play_vo_Skarner_Kill3DAscended": [
+            "characters/Skarner/sounds/922497542.ogg",
+        ],
+        "Play_vo_Skarner_Kill3DAzir": [
+            "characters/Skarner/sounds/534762521.ogg",
+        ],
+        "Play_vo_Skarner_Kill3DBelVeth": [
+            "characters/Skarner/sounds/167963344.ogg",
+        ],
+        "Play_vo_Skarner_Kill3DDarkin": [
+            "characters/Skarner/sounds/686647716.ogg",
+        ],
+        "Play_vo_Skarner_Kill3DGeneral": [
+            "characters/Skarner/sounds/14702340.ogg",
+            "characters/Skarner/sounds/259793322.ogg",
+            "characters/Skarner/sounds/592114038.ogg",
+            "characters/Skarner/sounds/62782373.ogg",
+            "characters/Skarner/sounds/70750304.ogg",
+            "characters/Skarner/sounds/753641117.ogg",
+        ],
+        "Play_vo_Skarner_Kill3DIxtal": [
+            "characters/Skarner/sounds/807163233.ogg",
+        ],
+        "Play_vo_Skarner_Kill3DJax": [
+            "characters/Skarner/sounds/46254779.ogg",
+        ],
+        "Play_vo_Skarner_Kill3DMalphite": [
+            "characters/Skarner/sounds/1032042026.ogg",
+        ],
+        "Play_vo_Skarner_Kill3DMilio": [
+            "characters/Skarner/sounds/581750645.ogg",
+        ],
+        "Play_vo_Skarner_Kill3DPenta": [
+            "characters/Skarner/sounds/951298630.ogg",
+        ],
+        "Play_vo_Skarner_Kill3DQiyana": [
+            "characters/Skarner/sounds/874342657.ogg",
+        ],
+        "Play_vo_Skarner_Kill3DRammus": [
+            "characters/Skarner/sounds/851454035.ogg",
+        ],
+        "Play_vo_Skarner_Kill3DTaliyah": [
+            "characters/Skarner/sounds/814645688.ogg",
+        ],
+        "Play_vo_Skarner_Kill5DAscended": [
+            "characters/Skarner/sounds/131435227.ogg",
+        ],
+        "Play_vo_Skarner_Kill5DAzir": [
+            "characters/Skarner/sounds/765810094.ogg",
+        ],
+        "Play_vo_Skarner_Kill5DBelVeth": [
+            "characters/Skarner/sounds/14753105.ogg",
+        ],
+        "Play_vo_Skarner_Kill5DDarkin": [
+            "characters/Skarner/sounds/423919444.ogg",
+        ],
+        "Play_vo_Skarner_Kill5DGeneral": [
+            "characters/Skarner/sounds/132503575.ogg",
+            "characters/Skarner/sounds/133945507.ogg",
+            "characters/Skarner/sounds/209119114.ogg",
+            "characters/Skarner/sounds/273815592.ogg",
+            "characters/Skarner/sounds/292110612.ogg",
+            "characters/Skarner/sounds/628726839.ogg",
+        ],
+        "Play_vo_Skarner_Kill5DIxtal": [
+            "characters/Skarner/sounds/77102060.ogg",
+        ],
+        "Play_vo_Skarner_Kill5DJax": [
+            "characters/Skarner/sounds/323147777.ogg",
+        ],
+        "Play_vo_Skarner_Kill5DMalphite": [
+            "characters/Skarner/sounds/42101527.ogg",
+        ],
+        "Play_vo_Skarner_Kill5DMilio": [
+            "characters/Skarner/sounds/1014918934.ogg",
+        ],
+        "Play_vo_Skarner_Kill5DPenta": [
+            "characters/Skarner/sounds/421112260.ogg",
+        ],
+        "Play_vo_Skarner_Kill5DQiyana": [
+            "characters/Skarner/sounds/32099899.ogg",
+        ],
+        "Play_vo_Skarner_Kill5DRammus": [
+            "characters/Skarner/sounds/984892906.ogg",
+        ],
+        "Play_vo_Skarner_Kill5DTaliyah": [
+            "characters/Skarner/sounds/17115201.ogg",
+        ],
+        "Play_vo_Skarner_Laugh3DGeneral": [
+            "characters/Skarner/sounds/777614585.ogg",
+        ],
+        "Play_vo_Skarner_Laugh5DGeneral": [
+            "characters/Skarner/sounds/636551838.ogg",
+        ],
+        "Play_vo_Skarner_Move2DFirst": [
+            "characters/Skarner/sounds/129935903.ogg",
+            "characters/Skarner/sounds/152597549.ogg",
+            "characters/Skarner/sounds/440257919.ogg",
+            "characters/Skarner/sounds/456865019.ogg",
+        ],
+        "Play_vo_Skarner_Move2DJungle": [
+            "characters/Skarner/sounds/13198096.ogg",
+            "characters/Skarner/sounds/154835811.ogg",
+            "characters/Skarner/sounds/980143217.ogg",
+        ],
+        "Play_vo_Skarner_Move2DLong": [
+            "characters/Skarner/sounds/103573767.ogg",
+            "characters/Skarner/sounds/1037843939.ogg",
+            "characters/Skarner/sounds/182155018.ogg",
+            "characters/Skarner/sounds/234287276.ogg",
+            "characters/Skarner/sounds/493768874.ogg",
+            "characters/Skarner/sounds/652030858.ogg",
+            "characters/Skarner/sounds/772194686.ogg",
+            "characters/Skarner/sounds/785966832.ogg",
+            "characters/Skarner/sounds/804908059.ogg",
+            "characters/Skarner/sounds/828800948.ogg",
+            "characters/Skarner/sounds/932619804.ogg",
+        ],
+        "Play_vo_Skarner_Move2DStandard": [
+            "characters/Skarner/sounds/1046477464.ogg",
+            "characters/Skarner/sounds/121129197.ogg",
+            "characters/Skarner/sounds/210793986.ogg",
+            "characters/Skarner/sounds/230923761.ogg",
+            "characters/Skarner/sounds/256441445.ogg",
+            "characters/Skarner/sounds/401213311.ogg",
+            "characters/Skarner/sounds/412747787.ogg",
+            "characters/Skarner/sounds/45548499.ogg",
+            "characters/Skarner/sounds/538503912.ogg",
+            "characters/Skarner/sounds/558870419.ogg",
+            "characters/Skarner/sounds/563586189.ogg",
+            "characters/Skarner/sounds/617796140.ogg",
+            "characters/Skarner/sounds/620115064.ogg",
+            "characters/Skarner/sounds/795059162.ogg",
+            "characters/Skarner/sounds/815546365.ogg",
+            "characters/Skarner/sounds/871351709.ogg",
+            "characters/Skarner/sounds/882929854.ogg",
+            "characters/Skarner/sounds/917804127.ogg",
+            "characters/Skarner/sounds/924075389.ogg",
+            "characters/Skarner/sounds/996577115.ogg",
+            "characters/Skarner/sounds/998718843.ogg",
+        ],
+        "Play_vo_Skarner_Recall5DGeneral": [
+            "characters/Skarner/sounds/11244876.ogg",
+            "characters/Skarner/sounds/426149288.ogg",
+            "characters/Skarner/sounds/857375710.ogg",
+        ],
+        "Play_vo_Skarner_Respawn2DGeneral": [
+            "characters/Skarner/sounds/529311767.ogg",
+            "characters/Skarner/sounds/60159826.ogg",
+            "characters/Skarner/sounds/615708481.ogg",
+            "characters/Skarner/sounds/77523422.ogg",
+            "characters/Skarner/sounds/919765659.ogg",
+        ],
+        "Play_vo_Skarner_SkarnerBasicAttack2_cast3D": [
+            "characters/Skarner/sounds/117627262.ogg",
+            "characters/Skarner/sounds/164507292.ogg",
+            "characters/Skarner/sounds/207635176.ogg",
+            "characters/Skarner/sounds/603851621.ogg",
+        ],
+        "Play_vo_Skarner_SkarnerBasicAttack2_cast5D": [
+            "characters/Skarner/sounds/117627262.ogg",
+            "characters/Skarner/sounds/164507292.ogg",
+            "characters/Skarner/sounds/207635176.ogg",
+            "characters/Skarner/sounds/603851621.ogg",
+        ],
+        "Play_vo_Skarner_SkarnerBasicAttack3_cast3D": [
+            "characters/Skarner/sounds/117627262.ogg",
+            "characters/Skarner/sounds/164507292.ogg",
+            "characters/Skarner/sounds/207635176.ogg",
+            "characters/Skarner/sounds/603851621.ogg",
+        ],
+        "Play_vo_Skarner_SkarnerBasicAttack3_cast5D": [
+            "characters/Skarner/sounds/117627262.ogg",
+            "characters/Skarner/sounds/164507292.ogg",
+            "characters/Skarner/sounds/207635176.ogg",
+            "characters/Skarner/sounds/603851621.ogg",
+        ],
+        "Play_vo_Skarner_SkarnerBasicAttack_cast3D": [
+            "characters/Skarner/sounds/117627262.ogg",
+            "characters/Skarner/sounds/164507292.ogg",
+            "characters/Skarner/sounds/207635176.ogg",
+            "characters/Skarner/sounds/603851621.ogg",
+        ],
+        "Play_vo_Skarner_SkarnerBasicAttack_cast5D": [
+            "characters/Skarner/sounds/117627262.ogg",
+            "characters/Skarner/sounds/164507292.ogg",
+            "characters/Skarner/sounds/207635176.ogg",
+            "characters/Skarner/sounds/603851621.ogg",
+        ],
+        "Play_vo_Skarner_SkarnerCritAttack_cast3D": [
+            "characters/Skarner/sounds/117627262.ogg",
+            "characters/Skarner/sounds/164507292.ogg",
+            "characters/Skarner/sounds/207635176.ogg",
+            "characters/Skarner/sounds/603851621.ogg",
+        ],
+        "Play_vo_Skarner_SkarnerCritAttack_cast5D": [
+            "characters/Skarner/sounds/117627262.ogg",
+            "characters/Skarner/sounds/164507292.ogg",
+            "characters/Skarner/sounds/207635176.ogg",
+            "characters/Skarner/sounds/603851621.ogg",
+        ],
+        "Play_vo_Skarner_SkarnerQClawAttack_cast3D": [
+            "characters/Skarner/sounds/117627262.ogg",
+            "characters/Skarner/sounds/164507292.ogg",
+            "characters/Skarner/sounds/207635176.ogg",
+            "characters/Skarner/sounds/603851621.ogg",
+        ],
+        "Play_vo_Skarner_SkarnerQClawAttack_cast5D": [
+            "characters/Skarner/sounds/117627262.ogg",
+            "characters/Skarner/sounds/164507292.ogg",
+            "characters/Skarner/sounds/207635176.ogg",
+            "characters/Skarner/sounds/603851621.ogg",
+        ],
+        "Play_vo_Skarner_SkarnerQRockAttack_cast3D": [
+            "characters/Skarner/sounds/117627262.ogg",
+            "characters/Skarner/sounds/164507292.ogg",
+            "characters/Skarner/sounds/207635176.ogg",
+            "characters/Skarner/sounds/603851621.ogg",
+        ],
+        "Play_vo_Skarner_SkarnerQRockAttack_cast5D": [
+            "characters/Skarner/sounds/117627262.ogg",
+            "characters/Skarner/sounds/164507292.ogg",
+            "characters/Skarner/sounds/207635176.ogg",
+            "characters/Skarner/sounds/603851621.ogg",
+        ],
+        "Play_vo_Skarner_SkarnerQRockThrow_cast3D": [
+            "characters/Skarner/sounds/350607648.ogg",
+            "characters/Skarner/sounds/47234025.ogg",
+            "characters/Skarner/sounds/5728707.ogg",
+            "characters/Skarner/sounds/7832094.ogg",
+        ],
+        "Play_vo_Skarner_SkarnerQRockThrow_cast5D": [
+            "characters/Skarner/sounds/350607648.ogg",
+            "characters/Skarner/sounds/47234025.ogg",
+            "characters/Skarner/sounds/5728707.ogg",
+            "characters/Skarner/sounds/7832094.ogg",
+        ],
+        "Play_vo_Skarner_SkarnerQRockThrow_hit3D": [
+            "characters/Skarner/sounds/237321240.ogg",
+            "characters/Skarner/sounds/259723546.ogg",
+            "characters/Skarner/sounds/292087113.ogg",
+            "characters/Skarner/sounds/527426796.ogg",
+            "characters/Skarner/sounds/713133249.ogg",
+        ],
+        "Play_vo_Skarner_SkarnerQRockThrow_hit5D": [
+            "characters/Skarner/sounds/237321240.ogg",
+            "characters/Skarner/sounds/259723546.ogg",
+            "characters/Skarner/sounds/292087113.ogg",
+            "characters/Skarner/sounds/527426796.ogg",
+            "characters/Skarner/sounds/713133249.ogg",
+        ],
+        "Play_vo_Skarner_SkarnerQ_cast3D": [
+            "characters/Skarner/sounds/197520625.ogg",
+            "characters/Skarner/sounds/200033695.ogg",
+            "characters/Skarner/sounds/361809283.ogg",
+            "characters/Skarner/sounds/4688775.ogg",
+            "characters/Skarner/sounds/6243748.ogg",
+        ],
+        "Play_vo_Skarner_SkarnerQ_cast5D": [
+            "characters/Skarner/sounds/197520625.ogg",
+            "characters/Skarner/sounds/200033695.ogg",
+            "characters/Skarner/sounds/361809283.ogg",
+            "characters/Skarner/sounds/4688775.ogg",
+            "characters/Skarner/sounds/6243748.ogg",
+        ],
+        "Play_vo_Skarner_SkarnerR_cast3D": [
+            "characters/Skarner/sounds/128383067.ogg",
+            "characters/Skarner/sounds/37632806.ogg",
+            "characters/Skarner/sounds/588741986.ogg",
+        ],
+        "Play_vo_Skarner_SkarnerR_cast5D": [
+            "characters/Skarner/sounds/128383067.ogg",
+            "characters/Skarner/sounds/37632806.ogg",
+            "characters/Skarner/sounds/588741986.ogg",
+        ],
+        "Play_vo_Skarner_SkarnerW_cast3D": [
+            "characters/Skarner/sounds/462859826.ogg",
+            "characters/Skarner/sounds/54014047.ogg",
+            "characters/Skarner/sounds/614714463.ogg",
+            "characters/Skarner/sounds/64822812.ogg",
+            "characters/Skarner/sounds/673394363.ogg",
+        ],
+        "Play_vo_Skarner_SkarnerW_cast5D": [
+            "characters/Skarner/sounds/462859826.ogg",
+            "characters/Skarner/sounds/54014047.ogg",
+            "characters/Skarner/sounds/614714463.ogg",
+            "characters/Skarner/sounds/64822812.ogg",
+            "characters/Skarner/sounds/673394363.ogg",
+        ],
+        "Play_vo_Skarner_Spell3DEStun": [
+            "characters/Skarner/sounds/19756106.ogg",
+            "characters/Skarner/sounds/325642675.ogg",
+            "characters/Skarner/sounds/339195036.ogg",
+            "characters/Skarner/sounds/49976718.ogg",
+            "characters/Skarner/sounds/532113414.ogg",
+            "characters/Skarner/sounds/59751062.ogg",
+        ],
+        "Play_vo_Skarner_Spell3DRHitMax": [
+            "characters/Skarner/sounds/505867966.ogg",
+            "characters/Skarner/sounds/656488089.ogg",
+        ],
+        "Play_vo_Skarner_Spell5DEStun": [
+            "characters/Skarner/sounds/19756106.ogg",
+            "characters/Skarner/sounds/325642675.ogg",
+            "characters/Skarner/sounds/339195036.ogg",
+            "characters/Skarner/sounds/49976718.ogg",
+            "characters/Skarner/sounds/532113414.ogg",
+            "characters/Skarner/sounds/59751062.ogg",
+        ],
+        "Play_vo_Skarner_Spell5DRHitMax": [
+            "characters/Skarner/sounds/505867966.ogg",
+            "characters/Skarner/sounds/656488089.ogg",
+        ],
+        "Play_vo_Skarner_Taunt3DGeneral": [
+            "characters/Skarner/sounds/275436421.ogg",
+        ],
+        "Play_vo_Skarner_Taunt5DGeneral": [
+            "characters/Skarner/sounds/144269555.ogg",
+        ],
+        "Play_vo_Skarner_TauntResponse3DGeneral": [
+            "characters/Skarner/sounds/129493512.ogg",
+        ],
+        "Play_vo_Skarner_TauntResponse5DGeneral": [
+            "characters/Skarner/sounds/304638997.ogg",
+        ],
+        "Recall3D_buffactivate": [
+            "characters/Skarner/sounds/132197545.ogg",
+        ],
+        "Recall3D_winddown": [
+            "characters/Skarner/sounds/539224463.ogg",
+        ],
+        "SkarnerBasicAttack2_OnCast": [
+            "characters/Skarner/sounds/215041596.ogg",
+            "characters/Skarner/sounds/490927933.ogg",
+            "characters/Skarner/sounds/852498928.ogg",
+            "characters/Skarner/sounds/857563181.ogg",
+        ],
+        "SkarnerBasicAttack2_OnHit": [
+            "characters/Skarner/sounds/364506462.ogg",
+            "characters/Skarner/sounds/581071294.ogg",
+            "characters/Skarner/sounds/756162151.ogg",
+            "characters/Skarner/sounds/935068290.ogg",
+        ],
+        "SkarnerBasicAttack_OnCast": [
+            "characters/Skarner/sounds/215041596.ogg",
+            "characters/Skarner/sounds/490927933.ogg",
+            "characters/Skarner/sounds/852498928.ogg",
+            "characters/Skarner/sounds/857563181.ogg",
+        ],
+        "SkarnerBasicAttack_OnHit": [
+            "characters/Skarner/sounds/364506462.ogg",
+            "characters/Skarner/sounds/581071294.ogg",
+            "characters/Skarner/sounds/756162151.ogg",
+            "characters/Skarner/sounds/935068290.ogg",
+        ],
+        "SkarnerCritAttack_OnCast": [
+            "characters/Skarner/sounds/215041596.ogg",
+            "characters/Skarner/sounds/490927933.ogg",
+            "characters/Skarner/sounds/852498928.ogg",
+            "characters/Skarner/sounds/857563181.ogg",
+        ],
+        "SkarnerCritAttack_OnHit": [
+            "characters/Skarner/sounds/364506462.ogg",
+            "characters/Skarner/sounds/581071294.ogg",
+            "characters/Skarner/sounds/756162151.ogg",
+            "characters/Skarner/sounds/935068290.ogg",
+        ],
+        "SkarnerEGrab_buffactivate": [
+            "characters/Skarner/sounds/611249060.ogg",
+        ],
+        "SkarnerEMovement_footstep": [
+            "characters/Skarner/sounds/836356418.ogg",
+        ],
+        "SkarnerEMovement_loop": [
+            "characters/Skarner/sounds/394721488.ogg",
+            "characters/Skarner/sounds/836356418.ogg",
+        ],
+        "SkarnerEMovement_wall_exit": [
+            "characters/Skarner/sounds/116309687.ogg",
+            "characters/Skarner/sounds/189937781.ogg",
+        ],
+        "SkarnerE_OnCast": [
+            "characters/Skarner/sounds/292566702.ogg",
+        ],
+        "SkarnerE_hit": [
+            "characters/Skarner/sounds/136409079.ogg",
+            "characters/Skarner/sounds/680789656.ogg",
+        ],
+        "SkarnerP_loop": [
+            "characters/Skarner/sounds/21663867.ogg",
+            "characters/Skarner/sounds/580341131.ogg",
+            "characters/Skarner/sounds/626643523.ogg",
+            "characters/Skarner/sounds/682732854.ogg",
+        ],
+        "SkarnerPassiveAttack_OnCast": [
+            "characters/Skarner/sounds/1054355300.ogg",
+            "characters/Skarner/sounds/108630851.ogg",
+            "characters/Skarner/sounds/531699101.ogg",
+            "characters/Skarner/sounds/664886339.ogg",
+        ],
+        "SkarnerPassiveAttack_OnHit": [
+            "characters/Skarner/sounds/438488604.ogg",
+            "characters/Skarner/sounds/767723276.ogg",
+            "characters/Skarner/sounds/778853403.ogg",
+            "characters/Skarner/sounds/785830281.ogg",
+        ],
+        "SkarnerQClawAttack_OnCast": [
+            "characters/Skarner/sounds/610453481.ogg",
+            "characters/Skarner/sounds/751398433.ogg",
+            "characters/Skarner/sounds/80325019.ogg",
+            "characters/Skarner/sounds/984352502.ogg",
+        ],
+        "SkarnerQClawAttack_OnHit": [
+            "characters/Skarner/sounds/237205211.ogg",
+            "characters/Skarner/sounds/3651960.ogg",
+            "characters/Skarner/sounds/827940831.ogg",
+            "characters/Skarner/sounds/851833007.ogg",
+        ],
+        "SkarnerQRockAttack_OnCast": [
+            "characters/Skarner/sounds/175062876.ogg",
+            "characters/Skarner/sounds/540579763.ogg",
+        ],
+        "SkarnerQRockAttack_OnHit": [
+            "characters/Skarner/sounds/475515700.ogg",
+            "characters/Skarner/sounds/700795174.ogg",
+        ],
+        "SkarnerQRockThrow_OnCast": [
+            "characters/Skarner/sounds/311627549.ogg",
+            "characters/Skarner/sounds/736081975.ogg",
+            "characters/Skarner/sounds/849903951.ogg",
+        ],
+        "SkarnerQThrow_hit": [
+            "characters/Skarner/sounds/322654751.ogg",
+            "characters/Skarner/sounds/807820446.ogg",
+            "characters/Skarner/sounds/952005807.ogg",
+        ],
+        "SkarnerQThrow_missilelaunch": [
+            "characters/Skarner/sounds/146584133.ogg",
+            "characters/Skarner/sounds/552541600.ogg",
+            "characters/Skarner/sounds/723712830.ogg",
+        ],
+        "SkarnerQThrow_obd": [
+            "characters/Skarner/sounds/149548680.ogg",
+            "characters/Skarner/sounds/279627083.ogg",
+            "characters/Skarner/sounds/428484887.ogg",
+        ],
+        "SkarnerQ_OnCast": [
+            "characters/Skarner/sounds/215376022.ogg",
+            "characters/Skarner/sounds/268686529.ogg",
+            "characters/Skarner/sounds/756108845.ogg",
+        ],
+        "SkarnerQ_buffdeactivate": [
+            "characters/Skarner/sounds/299197920.ogg",
+            "characters/Skarner/sounds/644560558.ogg",
+        ],
+        "SkarnerQ_timer": [
+            "characters/Skarner/sounds/161349780.ogg",
+            "characters/Skarner/sounds/539997818.ogg",
+        ],
+        "SkarnerR_buffactivate": [
+            "characters/Skarner/sounds/461819285.ogg",
+            "characters/Skarner/sounds/514510755.ogg",
+            "characters/Skarner/sounds/831154901.ogg",
+        ],
+        "SkarnerR_buffdeactivate": [
+            "characters/Skarner/sounds/430346922.ogg",
+        ],
+        "SkarnerR_cast": [
+            "characters/Skarner/sounds/30043072.ogg",
+        ],
+        "SkarnerR_hit": [
+            "characters/Skarner/sounds/690089023.ogg",
+            "characters/Skarner/sounds/718457819.ogg",
+            "characters/Skarner/sounds/877617706.ogg",
+        ],
+        "SkarnerR_hitlocation": [
+            "characters/Skarner/sounds/539648611.ogg",
+        ],
+        "SkarnerR_missilelaunch": [
+            "characters/Skarner/sounds/888226917.ogg",
+        ],
+        "SkarnerTurretAttack_OnCast": [
+            "characters/Skarner/sounds/215041596.ogg",
+            "characters/Skarner/sounds/490927933.ogg",
+            "characters/Skarner/sounds/852498928.ogg",
+            "characters/Skarner/sounds/857563181.ogg",
+        ],
+        "SkarnerTurretAttack_OnHit": [
+            "characters/Skarner/sounds/364506462.ogg",
+            "characters/Skarner/sounds/581071294.ogg",
+            "characters/Skarner/sounds/756162151.ogg",
+            "characters/Skarner/sounds/935068290.ogg",
+        ],
+        "SkarnerW_OnCast": [
+            "characters/Skarner/sounds/669453087.ogg",
+        ],
+        "SkarnerW_hit": [
+            "characters/Skarner/sounds/358178279.ogg",
+            "characters/Skarner/sounds/428702248.ogg",
+            "characters/Skarner/sounds/469615118.ogg",
+            "characters/Skarner/sounds/561178456.ogg",
+            "characters/Skarner/sounds/583395596.ogg",
+        ],
+        "SkarnerW_missilelaunch": [
+            "characters/Skarner/sounds/277961918.ogg",
+            "characters/Skarner/sounds/433708783.ogg",
+            "characters/Skarner/sounds/536339707.ogg",
+        ],
+        "Taunt3D_buffactivate": [
+            "characters/Skarner/sounds/340508545.ogg",
+        ],
+    },
+)

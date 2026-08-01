@@ -389,28 +389,12 @@ pub fn extract_character_from_record(
     let output_path = format!("characters/{}/config.ron", character_name);
     write_to_file(&output_path, serialized_scene);
 
-    // 构建普攻/暴击攻击名列表（用于音效归类）：fallback 名 + record 中声明的真实攻击名
-    let mut basic_attack_names: Vec<String> = vec![basic_attack_name.clone()];
-    if let Some(basic) = &record.basic_attack {
-        if let Some(name) = &basic.m_attack_name {
-            basic_attack_names.push(name.clone());
-        }
-    }
-    if let Some(crits) = &record.crit_attacks {
-        for crit in crits {
-            if let Some(name) = &crit.m_attack_name {
-                basic_attack_names.push(name.clone());
-            }
-        }
-    }
-
     extract_skin_for_champion(
         loader,
         character_name,
         skin_bin_path,
         hashes,
         &all_spell_names,
-        &basic_attack_names,
     );
 
     true

@@ -1,0 +1,556 @@
+(
+    events: {
+        "ApheliosCalibrumAttackMisChain_OnHit": [
+            "characters/Aphelios/sounds/397302680.ogg",
+        ],
+        "ApheliosCalibrumAttackOverride_OnCast": [
+            "characters/Aphelios/sounds/821472656.ogg",
+        ],
+        "ApheliosCalibrumAttack_OnCast": [
+            "characters/Aphelios/sounds/482245177.ogg",
+            "characters/Aphelios/sounds/658426365.ogg",
+        ],
+        "ApheliosCalibrumAttack_OnMissileCast": [
+            "characters/Aphelios/sounds/530158306.ogg",
+        ],
+        "ApheliosCalibrumAttack_hit": [
+            "characters/Aphelios/sounds/105467499.ogg",
+            "characters/Aphelios/sounds/409664323.ogg",
+            "characters/Aphelios/sounds/803683554.ogg",
+        ],
+        "ApheliosCalibrumAttack_launch": [
+            "characters/Aphelios/sounds/1021157035.ogg",
+            "characters/Aphelios/sounds/508055665.ogg",
+            "characters/Aphelios/sounds/9465823.ogg",
+        ],
+        "ApheliosCalibrumLineAttack_OnCast": [
+            "characters/Aphelios/sounds/482245177.ogg",
+        ],
+        "ApheliosCalibrumLineAttack_OnMissileCast": [
+            "characters/Aphelios/sounds/530158306.ogg",
+        ],
+        "ApheliosCalibrumLineAttack_cast": [
+            "characters/Aphelios/sounds/482245177.ogg",
+        ],
+        "ApheliosCalibrumQMarkRed_hit": [
+            "characters/Aphelios/sounds/627350755.ogg",
+        ],
+        "ApheliosCalibrumQMisChainStar_cast": [
+            "characters/Aphelios/sounds/478368872.ogg",
+            "characters/Aphelios/sounds/911987309.ogg",
+        ],
+        "ApheliosCalibrumQ_OnHit": [
+            "characters/Aphelios/sounds/667643501.ogg",
+        ],
+        "ApheliosCalibrumQ_OnMissileCast": [
+            "characters/Aphelios/sounds/262649505.ogg",
+        ],
+        "ApheliosCalibrumQ_cast": [
+            "characters/Aphelios/sounds/886514439.ogg",
+        ],
+        "ApheliosCrescendumAttackMisInMini_OnHit": [
+            "characters/Aphelios/sounds/115200926.ogg",
+            "characters/Aphelios/sounds/227478417.ogg",
+        ],
+        "ApheliosCrescendumAttackMisInMini_launch": [
+            "characters/Aphelios/sounds/1012736433.ogg",
+            "characters/Aphelios/sounds/439226257.ogg",
+        ],
+        "ApheliosCrescendumAttackMisIn_OnHit": [
+            "characters/Aphelios/sounds/115200926.ogg",
+            "characters/Aphelios/sounds/227478417.ogg",
+        ],
+        "ApheliosCrescendumAttackMisIn_OnMissileLaunch": [
+            "characters/Aphelios/sounds/286226985.ogg",
+            "characters/Aphelios/sounds/28892759.ogg",
+        ],
+        "ApheliosCrescendumAttackMisOutMini_launch": [
+            "characters/Aphelios/sounds/1012736433.ogg",
+            "characters/Aphelios/sounds/439226257.ogg",
+        ],
+        "ApheliosCrescendumAttackMisOut_OnHit": [
+            "characters/Aphelios/sounds/402888995.ogg",
+            "characters/Aphelios/sounds/820823436.ogg",
+        ],
+        "ApheliosCrescendumAttack_OnCast": [
+            "characters/Aphelios/sounds/1012736433.ogg",
+            "characters/Aphelios/sounds/530914965.ogg",
+            "characters/Aphelios/sounds/559979244.ogg",
+            "characters/Aphelios/sounds/626896505.ogg",
+            "characters/Aphelios/sounds/74186656.ogg",
+            "characters/Aphelios/sounds/744408302.ogg",
+        ],
+        "ApheliosCrescendumLineAttack_OnHit": [
+            "characters/Aphelios/sounds/402888995.ogg",
+            "characters/Aphelios/sounds/820823436.ogg",
+        ],
+        "ApheliosCrescendumLineAttack_OnMissileCast": [
+            "characters/Aphelios/sounds/1012736433.ogg",
+            "characters/Aphelios/sounds/559979244.ogg",
+        ],
+        "ApheliosCrescendumLineAttack_cast": [
+            "characters/Aphelios/sounds/626896505.ogg",
+            "characters/Aphelios/sounds/74186656.ogg",
+        ],
+        "ApheliosCrescendumOrbitManager_OnBuffDeactivate": [
+            "characters/Aphelios/sounds/286226985.ogg",
+            "characters/Aphelios/sounds/70953907.ogg",
+        ],
+        "ApheliosCrescendumQCalibrum_buffactivate": [
+            "characters/Aphelios/sounds/833177572.ogg",
+        ],
+        "ApheliosCrescendumQGravitum_buffactivate": [
+            "characters/Aphelios/sounds/118828142.ogg",
+        ],
+        "ApheliosCrescendumQInfernum_buffactivate": [
+            "characters/Aphelios/sounds/347943216.ogg",
+        ],
+        "ApheliosCrescendumQSeverum_buffactivate": [
+            "characters/Aphelios/sounds/931038793.ogg",
+        ],
+        "ApheliosCrescendumQ_OnBuffDeactivate": [
+            "characters/Aphelios/sounds/1015485460.ogg",
+        ],
+        "ApheliosCrescendumQ_OnCast": [
+            "characters/Aphelios/sounds/297445031.ogg",
+        ],
+        "ApheliosCrescendumQ_OnHitLocation": [
+            "characters/Aphelios/sounds/208392270.ogg",
+        ],
+        "ApheliosCritAttack_hit": [
+            "characters/Aphelios/sounds/105467499.ogg",
+            "characters/Aphelios/sounds/409664323.ogg",
+            "characters/Aphelios/sounds/803683554.ogg",
+        ],
+        "ApheliosGravitumAttack_OnCast": [
+            "characters/Aphelios/sounds/841630860.ogg",
+            "characters/Aphelios/sounds/957298371.ogg",
+        ],
+        "ApheliosGravitumAttack_OnMissileLaunch": [
+            "characters/Aphelios/sounds/735399789.ogg",
+            "characters/Aphelios/sounds/920299070.ogg",
+            "characters/Aphelios/sounds/9821339.ogg",
+        ],
+        "ApheliosGravitumAttack_hit": [
+            "characters/Aphelios/sounds/472353554.ogg",
+            "characters/Aphelios/sounds/582221349.ogg",
+            "characters/Aphelios/sounds/857869983.ogg",
+        ],
+        "ApheliosGravitumLineAttack_OnCast": [
+            "characters/Aphelios/sounds/340084268.ogg",
+        ],
+        "ApheliosGravitumLineAttack_OnMissileLaunch": [
+            "characters/Aphelios/sounds/9821339.ogg",
+        ],
+        "ApheliosGravitumLineAttack_cast": [
+            "characters/Aphelios/sounds/957298371.ogg",
+        ],
+        "ApheliosGravitumQBeam_missilelaunch": [
+            "characters/Aphelios/sounds/689221224.ogg",
+        ],
+        "ApheliosGravitumQ_cast": [
+            "characters/Aphelios/sounds/554412767.ogg",
+        ],
+        "ApheliosGravitumRoot_buffactivate": [
+            "characters/Aphelios/sounds/108243510.ogg",
+            "characters/Aphelios/sounds/110724107.ogg",
+            "characters/Aphelios/sounds/159085287.ogg",
+        ],
+        "ApheliosInfernumAttackMisChain_missilelaunch": [
+            "characters/Aphelios/sounds/390251285.ogg",
+        ],
+        "ApheliosInfernumAttack_OnCast": [
+            "characters/Aphelios/sounds/44761896.ogg",
+        ],
+        "ApheliosInfernumAttack_hit": [
+            "characters/Aphelios/sounds/308573529.ogg",
+            "characters/Aphelios/sounds/612844252.ogg",
+            "characters/Aphelios/sounds/953468525.ogg",
+        ],
+        "ApheliosInfernumAttack_launch": [
+            "characters/Aphelios/sounds/390251285.ogg",
+            "characters/Aphelios/sounds/56151827.ogg",
+            "characters/Aphelios/sounds/801538093.ogg",
+        ],
+        "ApheliosInfernumLineAttack_OnCast": [
+            "characters/Aphelios/sounds/44761896.ogg",
+        ],
+        "ApheliosInfernumLineAttack_OnMissileLaunch": [
+            "characters/Aphelios/sounds/390251285.ogg",
+        ],
+        "ApheliosInfernumQCastBurst_cast": [
+            "characters/Aphelios/sounds/790811018.ogg",
+        ],
+        "ApheliosInfernumQ_OnCast": [
+            "characters/Aphelios/sounds/79060594.ogg",
+        ],
+        "ApheliosPAluneGunSelf_cast": [
+            "characters/Aphelios/sounds/377643836.ogg",
+        ],
+        "ApheliosPAmmoWarning_cast": [
+            "characters/Aphelios/sounds/970741312.ogg",
+        ],
+        "ApheliosRMis_OnHit": [
+            "characters/Aphelios/sounds/65859385.ogg",
+        ],
+        "ApheliosRMis_OnMissileCast": [
+            "characters/Aphelios/sounds/654199906.ogg",
+        ],
+        "ApheliosRMis_OnMissileLaunch": [
+            "characters/Aphelios/sounds/323900703.ogg",
+        ],
+        "ApheliosR_OnCast": [
+            "characters/Aphelios/sounds/302920982.ogg",
+        ],
+        "ApheliosSeverumAttackMis_launch": [
+            "characters/Aphelios/sounds/310321154.ogg",
+            "characters/Aphelios/sounds/699001897.ogg",
+            "characters/Aphelios/sounds/879906303.ogg",
+        ],
+        "ApheliosSeverumAttack_OnCast": [
+            "characters/Aphelios/sounds/238241192.ogg",
+            "characters/Aphelios/sounds/886658733.ogg",
+        ],
+        "ApheliosSeverumAttack_hit": [
+            "characters/Aphelios/sounds/352545787.ogg",
+            "characters/Aphelios/sounds/705706399.ogg",
+            "characters/Aphelios/sounds/868568993.ogg",
+        ],
+        "ApheliosSeverumLineAttack_OnCast": [
+            "characters/Aphelios/sounds/238241192.ogg",
+        ],
+        "ApheliosSeverumLineAttack_cast": [
+            "characters/Aphelios/sounds/238241192.ogg",
+        ],
+        "ApheliosSeverumQ_OnCast": [
+            "characters/Aphelios/sounds/828473782.ogg",
+        ],
+        "ApheliosWCalibrum_swap": [
+            "characters/Aphelios/sounds/154165791.ogg",
+        ],
+        "ApheliosWCrescendum_swap": [
+            "characters/Aphelios/sounds/836462650.ogg",
+        ],
+        "ApheliosWGravitum_swap": [
+            "characters/Aphelios/sounds/893615299.ogg",
+        ],
+        "ApheliosWInfernum_swap": [
+            "characters/Aphelios/sounds/53189779.ogg",
+        ],
+        "ApheliosWSeverum_swap": [
+            "characters/Aphelios/sounds/206691407.ogg",
+        ],
+        "Dance3D_buffactivate": [
+            "characters/Aphelios/sounds/857933635.ogg",
+            "characters/Aphelios/sounds/899537426.ogg",
+        ],
+        "Death3D_cast": [
+            "characters/Aphelios/sounds/525294438.ogg",
+        ],
+        "Joke3D_buffactivate": [
+            "characters/Aphelios/sounds/256868649.ogg",
+        ],
+        "Lunari_Thrust3D_buffactivate": [
+            "characters/Aphelios/sounds/857933635.ogg",
+        ],
+        "Play_vo_Aphelios_Anim3DDrinkPoison": [
+            "characters/Aphelios/sounds/164861458.ogg",
+            "characters/Aphelios/sounds/513612838.ogg",
+            "characters/Aphelios/sounds/576273125.ogg",
+        ],
+        "Play_vo_Aphelios_ApheliosCalibrumAttack_cast3D": [
+            "characters/Aphelios/sounds/1011740148.ogg",
+            "characters/Aphelios/sounds/103778343.ogg",
+            "characters/Aphelios/sounds/423628021.ogg",
+            "characters/Aphelios/sounds/669401038.ogg",
+            "characters/Aphelios/sounds/7570679.ogg",
+            "characters/Aphelios/sounds/811423580.ogg",
+            "characters/Aphelios/sounds/904078650.ogg",
+        ],
+        "Play_vo_Aphelios_ApheliosCalibrumQ_cast3D": [
+            "characters/Aphelios/sounds/29058955.ogg",
+            "characters/Aphelios/sounds/354467324.ogg",
+            "characters/Aphelios/sounds/363620995.ogg",
+            "characters/Aphelios/sounds/885712009.ogg",
+        ],
+        "Play_vo_Aphelios_ApheliosCrescendumAttack_cast3D": [
+            "characters/Aphelios/sounds/1003325395.ogg",
+            "characters/Aphelios/sounds/124694606.ogg",
+            "characters/Aphelios/sounds/679509730.ogg",
+            "characters/Aphelios/sounds/699056006.ogg",
+            "characters/Aphelios/sounds/715334141.ogg",
+            "characters/Aphelios/sounds/941928815.ogg",
+        ],
+        "Play_vo_Aphelios_ApheliosCrescendumQ_cast3D": [
+            "characters/Aphelios/sounds/216785890.ogg",
+            "characters/Aphelios/sounds/888424564.ogg",
+        ],
+        "Play_vo_Aphelios_ApheliosGravitumAttack_cast3D": [
+            "characters/Aphelios/sounds/211622756.ogg",
+            "characters/Aphelios/sounds/348323066.ogg",
+            "characters/Aphelios/sounds/439407759.ogg",
+            "characters/Aphelios/sounds/474188576.ogg",
+            "characters/Aphelios/sounds/478573164.ogg",
+        ],
+        "Play_vo_Aphelios_ApheliosGravitumQ_cast3D": [
+            "characters/Aphelios/sounds/161206467.ogg",
+            "characters/Aphelios/sounds/451152651.ogg",
+            "characters/Aphelios/sounds/465265947.ogg",
+        ],
+        "Play_vo_Aphelios_ApheliosInfernumAttack_cast3D": [
+            "characters/Aphelios/sounds/1000343349.ogg",
+            "characters/Aphelios/sounds/39202869.ogg",
+            "characters/Aphelios/sounds/835801464.ogg",
+        ],
+        "Play_vo_Aphelios_ApheliosInfernumQ_cast3D": [
+            "characters/Aphelios/sounds/154745734.ogg",
+            "characters/Aphelios/sounds/619764639.ogg",
+            "characters/Aphelios/sounds/95529309.ogg",
+            "characters/Aphelios/sounds/991534309.ogg",
+        ],
+        "Play_vo_Aphelios_ApheliosR_cast3D": [
+            "characters/Aphelios/sounds/13685909.ogg",
+            "characters/Aphelios/sounds/428623729.ogg",
+            "characters/Aphelios/sounds/507716968.ogg",
+            "characters/Aphelios/sounds/659372054.ogg",
+            "characters/Aphelios/sounds/707161812.ogg",
+        ],
+        "Play_vo_Aphelios_ApheliosSeverumAttack_cast3D": [
+            "characters/Aphelios/sounds/1028381319.ogg",
+            "characters/Aphelios/sounds/265097896.ogg",
+            "characters/Aphelios/sounds/280641568.ogg",
+            "characters/Aphelios/sounds/387896286.ogg",
+            "characters/Aphelios/sounds/566288746.ogg",
+            "characters/Aphelios/sounds/589633104.ogg",
+            "characters/Aphelios/sounds/948203563.ogg",
+        ],
+        "Play_vo_Aphelios_ApheliosSeverumQ_cast3D": [
+            "characters/Aphelios/sounds/489811845.ogg",
+            "characters/Aphelios/sounds/60916607.ogg",
+            "characters/Aphelios/sounds/709705157.ogg",
+        ],
+        "Play_vo_Aphelios_ApheliosW_cast3D": [
+            "characters/Aphelios/sounds/17866549.ogg",
+            "characters/Aphelios/sounds/214901523.ogg",
+            "characters/Aphelios/sounds/232519736.ogg",
+            "characters/Aphelios/sounds/519822860.ogg",
+        ],
+        "Play_vo_Aphelios_Attack2DGeneral": [
+            "characters/Aphelios/sounds/11747542.ogg",
+            "characters/Aphelios/sounds/129050969.ogg",
+            "characters/Aphelios/sounds/152493473.ogg",
+            "characters/Aphelios/sounds/189574076.ogg",
+            "characters/Aphelios/sounds/299886032.ogg",
+            "characters/Aphelios/sounds/342559072.ogg",
+            "characters/Aphelios/sounds/345170791.ogg",
+            "characters/Aphelios/sounds/362294540.ogg",
+            "characters/Aphelios/sounds/383236447.ogg",
+            "characters/Aphelios/sounds/392205103.ogg",
+            "characters/Aphelios/sounds/452206003.ogg",
+            "characters/Aphelios/sounds/464415679.ogg",
+            "characters/Aphelios/sounds/499157928.ogg",
+            "characters/Aphelios/sounds/502677522.ogg",
+            "characters/Aphelios/sounds/561315312.ogg",
+            "characters/Aphelios/sounds/573914841.ogg",
+            "characters/Aphelios/sounds/633910369.ogg",
+            "characters/Aphelios/sounds/680545196.ogg",
+            "characters/Aphelios/sounds/718833142.ogg",
+            "characters/Aphelios/sounds/753164989.ogg",
+            "characters/Aphelios/sounds/818035481.ogg",
+            "characters/Aphelios/sounds/818493941.ogg",
+            "characters/Aphelios/sounds/868978240.ogg",
+            "characters/Aphelios/sounds/886912582.ogg",
+            "characters/Aphelios/sounds/984379905.ogg",
+            "characters/Aphelios/sounds/984717839.ogg",
+            "characters/Aphelios/sounds/987114602.ogg",
+        ],
+        "Play_vo_Aphelios_Death3D": [
+            "characters/Aphelios/sounds/234272904.ogg",
+            "characters/Aphelios/sounds/423266333.ogg",
+            "characters/Aphelios/sounds/851527418.ogg",
+        ],
+        "Play_vo_Aphelios_FirstEncounter2DAspect": [
+            "characters/Aphelios/sounds/920683811.ogg",
+        ],
+        "Play_vo_Aphelios_FirstEncounter2DDevout": [
+            "characters/Aphelios/sounds/151683264.ogg",
+        ],
+        "Play_vo_Aphelios_FirstEncounter2DDiana": [
+            "characters/Aphelios/sounds/1020958339.ogg",
+            "characters/Aphelios/sounds/1034354624.ogg",
+            "characters/Aphelios/sounds/831633029.ogg",
+        ],
+        "Play_vo_Aphelios_FirstEncounter2DGeneral": [
+            "characters/Aphelios/sounds/262249455.ogg",
+            "characters/Aphelios/sounds/580955832.ogg",
+        ],
+        "Play_vo_Aphelios_FirstEncounter2DGunWielder": [
+            "characters/Aphelios/sounds/245127997.ogg",
+        ],
+        "Play_vo_Aphelios_FirstEncounter2DKayleMorgana": [
+            "characters/Aphelios/sounds/717512662.ogg",
+        ],
+        "Play_vo_Aphelios_FirstEncounter2DLunari": [
+            "characters/Aphelios/sounds/977419829.ogg",
+        ],
+        "Play_vo_Aphelios_FirstEncounter2DSenna": [
+            "characters/Aphelios/sounds/792864209.ogg",
+        ],
+        "Play_vo_Aphelios_FirstEncounter2DSolari": [
+            "characters/Aphelios/sounds/763562307.ogg",
+        ],
+        "Play_vo_Aphelios_FirstEncounter2DSoraka": [
+            "characters/Aphelios/sounds/2513215.ogg",
+        ],
+        "Play_vo_Aphelios_FirstEncounter2DYuumi": [
+            "characters/Aphelios/sounds/424042594.ogg",
+        ],
+        "Play_vo_Aphelios_Joke3DGeneral": [
+            "characters/Aphelios/sounds/1041519641.ogg",
+        ],
+        "Play_vo_Aphelios_Kill2DDiana": [
+            "characters/Aphelios/sounds/226687110.ogg",
+        ],
+        "Play_vo_Aphelios_Kill2DGeneral": [
+            "characters/Aphelios/sounds/15156839.ogg",
+            "characters/Aphelios/sounds/208693594.ogg",
+            "characters/Aphelios/sounds/659165165.ogg",
+            "characters/Aphelios/sounds/872592588.ogg",
+        ],
+        "Play_vo_Aphelios_Kill2DPenta": [
+            "characters/Aphelios/sounds/131337551.ogg",
+        ],
+        "Play_vo_Aphelios_Kill2DSolari": [
+            "characters/Aphelios/sounds/139742627.ogg",
+        ],
+        "Play_vo_Aphelios_Laugh3DGeneral": [
+            "characters/Aphelios/sounds/593859652.ogg",
+            "characters/Aphelios/sounds/690713961.ogg",
+        ],
+        "Play_vo_Aphelios_LowHealth2DGeneral": [
+            "characters/Aphelios/sounds/1015310373.ogg",
+            "characters/Aphelios/sounds/1027518495.ogg",
+            "characters/Aphelios/sounds/16350626.ogg",
+            "characters/Aphelios/sounds/223902206.ogg",
+            "characters/Aphelios/sounds/240409077.ogg",
+            "characters/Aphelios/sounds/258398394.ogg",
+            "characters/Aphelios/sounds/407873412.ogg",
+            "characters/Aphelios/sounds/48973275.ogg",
+            "characters/Aphelios/sounds/556721773.ogg",
+            "characters/Aphelios/sounds/71531019.ogg",
+            "characters/Aphelios/sounds/763236031.ogg",
+            "characters/Aphelios/sounds/800838960.ogg",
+            "characters/Aphelios/sounds/857019214.ogg",
+            "characters/Aphelios/sounds/885579742.ogg",
+            "characters/Aphelios/sounds/946229930.ogg",
+        ],
+        "Play_vo_Aphelios_Move2DFirst": [
+            "characters/Aphelios/sounds/138184221.ogg",
+            "characters/Aphelios/sounds/520161368.ogg",
+            "characters/Aphelios/sounds/61300866.ogg",
+            "characters/Aphelios/sounds/809244979.ogg",
+            "characters/Aphelios/sounds/983805344.ogg",
+        ],
+        "Play_vo_Aphelios_Move2DLong": [
+            "characters/Aphelios/sounds/1055540939.ogg",
+            "characters/Aphelios/sounds/148328162.ogg",
+            "characters/Aphelios/sounds/24709172.ogg",
+            "characters/Aphelios/sounds/286409891.ogg",
+            "characters/Aphelios/sounds/298062791.ogg",
+            "characters/Aphelios/sounds/315705302.ogg",
+            "characters/Aphelios/sounds/354178791.ogg",
+            "characters/Aphelios/sounds/372904363.ogg",
+            "characters/Aphelios/sounds/39425466.ogg",
+            "characters/Aphelios/sounds/542089718.ogg",
+            "characters/Aphelios/sounds/625778563.ogg",
+            "characters/Aphelios/sounds/647640136.ogg",
+            "characters/Aphelios/sounds/711142684.ogg",
+            "characters/Aphelios/sounds/817872530.ogg",
+            "characters/Aphelios/sounds/851205270.ogg",
+            "characters/Aphelios/sounds/962515819.ogg",
+            "characters/Aphelios/sounds/963874862.ogg",
+        ],
+        "Play_vo_Aphelios_Move2DStandard": [
+            "characters/Aphelios/sounds/1004754057.ogg",
+            "characters/Aphelios/sounds/1020019506.ogg",
+            "characters/Aphelios/sounds/1029185572.ogg",
+            "characters/Aphelios/sounds/1037450410.ogg",
+            "characters/Aphelios/sounds/115226342.ogg",
+            "characters/Aphelios/sounds/162102092.ogg",
+            "characters/Aphelios/sounds/179469219.ogg",
+            "characters/Aphelios/sounds/233421915.ogg",
+            "characters/Aphelios/sounds/256830333.ogg",
+            "characters/Aphelios/sounds/271458548.ogg",
+            "characters/Aphelios/sounds/283332969.ogg",
+            "characters/Aphelios/sounds/313038738.ogg",
+            "characters/Aphelios/sounds/336564419.ogg",
+            "characters/Aphelios/sounds/357506824.ogg",
+            "characters/Aphelios/sounds/441825935.ogg",
+            "characters/Aphelios/sounds/467444271.ogg",
+            "characters/Aphelios/sounds/496796784.ogg",
+            "characters/Aphelios/sounds/506625395.ogg",
+            "characters/Aphelios/sounds/527316668.ogg",
+            "characters/Aphelios/sounds/545505511.ogg",
+            "characters/Aphelios/sounds/552366435.ogg",
+            "characters/Aphelios/sounds/580454122.ogg",
+            "characters/Aphelios/sounds/592024664.ogg",
+            "characters/Aphelios/sounds/616642801.ogg",
+            "characters/Aphelios/sounds/667624308.ogg",
+            "characters/Aphelios/sounds/698194207.ogg",
+            "characters/Aphelios/sounds/730042285.ogg",
+            "characters/Aphelios/sounds/757634291.ogg",
+            "characters/Aphelios/sounds/761650508.ogg",
+            "characters/Aphelios/sounds/772570686.ogg",
+            "characters/Aphelios/sounds/884769014.ogg",
+            "characters/Aphelios/sounds/944481865.ogg",
+            "characters/Aphelios/sounds/970476727.ogg",
+        ],
+        "Play_vo_Aphelios_Recall3DGeneral": [
+            "characters/Aphelios/sounds/723917940.ogg",
+        ],
+        "Play_vo_Aphelios_Respawn2DGeneral": [
+            "characters/Aphelios/sounds/422669.ogg",
+            "characters/Aphelios/sounds/453040091.ogg",
+            "characters/Aphelios/sounds/798801507.ogg",
+            "characters/Aphelios/sounds/934494134.ogg",
+        ],
+        "Play_vo_Aphelios_Spell2DPReload": [
+            "characters/Aphelios/sounds/1007080044.ogg",
+            "characters/Aphelios/sounds/1043425525.ogg",
+            "characters/Aphelios/sounds/122416167.ogg",
+            "characters/Aphelios/sounds/19901285.ogg",
+            "characters/Aphelios/sounds/272543269.ogg",
+            "characters/Aphelios/sounds/272662434.ogg",
+            "characters/Aphelios/sounds/392796948.ogg",
+            "characters/Aphelios/sounds/448312160.ogg",
+            "characters/Aphelios/sounds/49948793.ogg",
+            "characters/Aphelios/sounds/55276932.ogg",
+            "characters/Aphelios/sounds/599608963.ogg",
+            "characters/Aphelios/sounds/647410612.ogg",
+            "characters/Aphelios/sounds/657080412.ogg",
+            "characters/Aphelios/sounds/659777388.ogg",
+            "characters/Aphelios/sounds/673108887.ogg",
+            "characters/Aphelios/sounds/707425497.ogg",
+            "characters/Aphelios/sounds/747454714.ogg",
+            "characters/Aphelios/sounds/783464991.ogg",
+            "characters/Aphelios/sounds/788031097.ogg",
+            "characters/Aphelios/sounds/796852575.ogg",
+            "characters/Aphelios/sounds/944988749.ogg",
+        ],
+        "Play_vo_Aphelios_Taunt3DGeneral": [
+            "characters/Aphelios/sounds/64884772.ogg",
+        ],
+        "Recall3D_buffactivate": [
+            "characters/Aphelios/sounds/844828827.ogg",
+        ],
+        "Spawn3D_buffactivate": [
+            "characters/Aphelios/sounds/378942336.ogg",
+        ],
+        "SpawnIn3D_buffactivate": [
+            "characters/Aphelios/sounds/74573003.ogg",
+        ],
+        "Taunt3D_buffactivate": [
+            "characters/Aphelios/sounds/1002567518.ogg",
+        ],
+    },
+)

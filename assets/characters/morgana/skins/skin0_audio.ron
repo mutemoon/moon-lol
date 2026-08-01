@@ -1,0 +1,433 @@
+(
+    events: {
+        "Dance3D_loop": [
+            "characters/Morgana/sounds/954784700.ogg",
+        ],
+        "Death3D_cast": [
+            "characters/Morgana/sounds/480215450.ogg",
+        ],
+        "Joke3D_buffactivate_loveme": [
+            "characters/Morgana/sounds/314199323.ogg",
+        ],
+        "Joke3D_buffactivate_lovemenot": [
+            "characters/Morgana/sounds/591576471.ogg",
+        ],
+        "MorganaBasicAttack2_OnCast": [
+            "characters/Morgana/sounds/640779105.ogg",
+            "characters/Morgana/sounds/653655792.ogg",
+            "characters/Morgana/sounds/833225625.ogg",
+            "characters/Morgana/sounds/981738760.ogg",
+        ],
+        "MorganaBasicAttack2_OnHit": [
+            "characters/Morgana/sounds/17857187.ogg",
+            "characters/Morgana/sounds/399458252.ogg",
+            "characters/Morgana/sounds/865485901.ogg",
+            "characters/Morgana/sounds/875325854.ogg",
+        ],
+        "MorganaBasicAttack_OnCast": [
+            "characters/Morgana/sounds/640779105.ogg",
+            "characters/Morgana/sounds/653655792.ogg",
+            "characters/Morgana/sounds/833225625.ogg",
+            "characters/Morgana/sounds/981738760.ogg",
+        ],
+        "MorganaBasicAttack_OnHit": [
+            "characters/Morgana/sounds/17857187.ogg",
+            "characters/Morgana/sounds/399458252.ogg",
+            "characters/Morgana/sounds/865485901.ogg",
+            "characters/Morgana/sounds/875325854.ogg",
+        ],
+        "MorganaCritAttack_OnCast": [
+            "characters/Morgana/sounds/640779105.ogg",
+            "characters/Morgana/sounds/653655792.ogg",
+            "characters/Morgana/sounds/833225625.ogg",
+            "characters/Morgana/sounds/981738760.ogg",
+        ],
+        "MorganaCritAttack_OnHit": [
+            "characters/Morgana/sounds/17857187.ogg",
+            "characters/Morgana/sounds/399458252.ogg",
+            "characters/Morgana/sounds/865485901.ogg",
+            "characters/Morgana/sounds/875325854.ogg",
+        ],
+        "MorganaE_OnBuffActivate": [
+            "characters/Morgana/sounds/905946698.ogg",
+        ],
+        "MorganaE_OnBuffDeactivate": [
+            "characters/Morgana/sounds/914057310.ogg",
+        ],
+        "MorganaE_cast_others": [
+            "characters/Morgana/sounds/969810828.ogg",
+        ],
+        "MorganaE_cast_self": [
+            "characters/Morgana/sounds/959733458.ogg",
+        ],
+        "MorganaQ_OnCast": [
+            "characters/Morgana/sounds/1068013637.ogg",
+        ],
+        "MorganaQ_OnHit": [
+            "characters/Morgana/sounds/387836197.ogg",
+            "characters/Morgana/sounds/502569870.ogg",
+        ],
+        "MorganaQ_OnMissileLaunch": [
+            "characters/Morgana/sounds/157448222.ogg",
+            "characters/Morgana/sounds/372047406.ogg",
+            "characters/Morgana/sounds/641786620.ogg",
+        ],
+        "MorganaR_OnBuffDeactivate": [
+            "characters/Morgana/sounds/204921763.ogg",
+        ],
+        "MorganaR_cast_others": [
+            "characters/Morgana/sounds/861023303.ogg",
+        ],
+        "MorganaR_cast_self": [
+            "characters/Morgana/sounds/303111616.ogg",
+        ],
+        "MorganaR_detonate": [
+            "characters/Morgana/sounds/55759941.ogg",
+            "characters/Morgana/sounds/686421356.ogg",
+        ],
+        "MorganaR_hit_others": [
+            "characters/Morgana/sounds/314270290.ogg",
+        ],
+        "MorganaR_hit_self": [
+            "characters/Morgana/sounds/58681171.ogg",
+        ],
+        "MorganaW_cast": [
+            "characters/Morgana/sounds/931864068.ogg",
+        ],
+        "Play_vo_Morgana_Attack2DCaitlyn": [
+            "characters/Morgana/sounds/414749565.ogg",
+        ],
+        "Play_vo_Morgana_Attack2DDevout": [
+            "characters/Morgana/sounds/592640855.ogg",
+        ],
+        "Play_vo_Morgana_Attack2DGeneral": [
+            "characters/Morgana/sounds/1043483191.ogg",
+            "characters/Morgana/sounds/226848248.ogg",
+            "characters/Morgana/sounds/23876535.ogg",
+            "characters/Morgana/sounds/243771063.ogg",
+            "characters/Morgana/sounds/248984860.ogg",
+            "characters/Morgana/sounds/281908885.ogg",
+            "characters/Morgana/sounds/322808082.ogg",
+            "characters/Morgana/sounds/32830676.ogg",
+            "characters/Morgana/sounds/39341556.ogg",
+            "characters/Morgana/sounds/414433204.ogg",
+            "characters/Morgana/sounds/416222264.ogg",
+            "characters/Morgana/sounds/470676258.ogg",
+            "characters/Morgana/sounds/499977546.ogg",
+            "characters/Morgana/sounds/550549469.ogg",
+            "characters/Morgana/sounds/588637486.ogg",
+            "characters/Morgana/sounds/591298049.ogg",
+            "characters/Morgana/sounds/604122017.ogg",
+            "characters/Morgana/sounds/767839863.ogg",
+            "characters/Morgana/sounds/816272664.ogg",
+            "characters/Morgana/sounds/838675922.ogg",
+            "characters/Morgana/sounds/846248547.ogg",
+            "characters/Morgana/sounds/906019834.ogg",
+            "characters/Morgana/sounds/930703194.ogg",
+        ],
+        "Play_vo_Morgana_Attack2DKayle": [
+            "characters/Morgana/sounds/1036226273.ogg",
+            "characters/Morgana/sounds/20254593.ogg",
+            "characters/Morgana/sounds/673774122.ogg",
+            "characters/Morgana/sounds/898885751.ogg",
+            "characters/Morgana/sounds/950889412.ogg",
+        ],
+        "Play_vo_Morgana_Attack2DSwordChampion": [
+            "characters/Morgana/sounds/407686358.ogg",
+        ],
+        "Play_vo_Morgana_Attack2DVi": [
+            "characters/Morgana/sounds/136056555.ogg",
+        ],
+        "Play_vo_Morgana_Chat3DKayle_FirstEncounter3DKayle": [
+            "characters/Morgana/sounds/164351263.ogg",
+            "characters/Morgana/sounds/201768922.ogg",
+            "characters/Morgana/sounds/253863001.ogg",
+            "characters/Morgana/sounds/307390115.ogg",
+            "characters/Morgana/sounds/326347894.ogg",
+            "characters/Morgana/sounds/456593783.ogg",
+            "characters/Morgana/sounds/955290166.ogg",
+        ],
+        "Play_vo_Morgana_Chat3DKayle_Move3DKayle": [
+            "characters/Morgana/sounds/678605801.ogg",
+        ],
+        "Play_vo_Morgana_Chat3DKayle_Move3DKayle01_Chat3": [
+            "characters/Morgana/sounds/800528175.ogg",
+        ],
+        "Play_vo_Morgana_Chat3DKayle_Move3DMorgana01_Chat2": [
+            "characters/Morgana/sounds/673728456.ogg",
+        ],
+        "Play_vo_Morgana_Chat3DKayle_Move3DMorgana02_Chat2": [
+            "characters/Morgana/sounds/371136778.ogg",
+        ],
+        "Play_vo_Morgana_Chat3DKayle_Move3DMorgana03_Chat2": [
+            "characters/Morgana/sounds/898705499.ogg",
+        ],
+        "Play_vo_Morgana_Chat3DKayle_Move3DMorgana04_Chat2": [
+            "characters/Morgana/sounds/552788390.ogg",
+        ],
+        "Play_vo_Morgana_Chat3DKayle_Move3DMorgana05_Chat2": [
+            "characters/Morgana/sounds/506402151.ogg",
+        ],
+        "Play_vo_Morgana_Chat3DKayle_Move3DMorgana05_Chat4": [
+            "characters/Morgana/sounds/814188486.ogg",
+        ],
+        "Play_vo_Morgana_Chat3DKayle_Move3DYordle01_Chat2": [
+            "characters/Morgana/sounds/868579535.ogg",
+        ],
+        "Play_vo_Morgana_Chat3DKayle_Spell3DBasicHitMorgana01_Chat2": [
+            "characters/Morgana/sounds/516112150.ogg",
+        ],
+        "Play_vo_Morgana_Chat3DKayle_Spell3DBasicHitMorgana02_Chat2": [
+            "characters/Morgana/sounds/86804010.ogg",
+        ],
+        "Play_vo_Morgana_Chat3DKayle_Spell3DEHitKayle03_Chat3": [
+            "characters/Morgana/sounds/888739778.ogg",
+        ],
+        "Play_vo_Morgana_Chat3DKayle_Spell3DRHitMorgana01_Chat2": [
+            "characters/Morgana/sounds/318686601.ogg",
+        ],
+        "Play_vo_Morgana_Chat3DKayle_Spell3DRHitMorgana02_Chat2": [
+            "characters/Morgana/sounds/838050447.ogg",
+        ],
+        "Play_vo_Morgana_Chat3DKayle_Spell3DRHitMorgana03_Chat2": [
+            "characters/Morgana/sounds/784693772.ogg",
+        ],
+        "Play_vo_Morgana_Chat3DKayle_Spell3DWHitMorgana01_Chat2": [
+            "characters/Morgana/sounds/617174245.ogg",
+        ],
+        "Play_vo_Morgana_Death3D": [
+            "characters/Morgana/sounds/20926753.ogg",
+            "characters/Morgana/sounds/300922107.ogg",
+            "characters/Morgana/sounds/640381953.ogg",
+            "characters/Morgana/sounds/887387708.ogg",
+        ],
+        "Play_vo_Morgana_FirstEncounter3DDemacia": [
+            "characters/Morgana/sounds/477037836.ogg",
+            "characters/Morgana/sounds/994801884.ogg",
+        ],
+        "Play_vo_Morgana_FirstEncounter3DGaren": [
+            "characters/Morgana/sounds/462714405.ogg",
+        ],
+        "Play_vo_Morgana_FirstEncounter3DGeneral": [
+            "characters/Morgana/sounds/425750912.ogg",
+            "characters/Morgana/sounds/693279537.ogg",
+        ],
+        "Play_vo_Morgana_FirstEncounter3DJarvanIV": [
+            "characters/Morgana/sounds/1005459058.ogg",
+        ],
+        "Play_vo_Morgana_FirstEncounter3DLeBlanc": [
+            "characters/Morgana/sounds/556248478.ogg",
+        ],
+        "Play_vo_Morgana_FirstEncounter3DLux": [
+            "characters/Morgana/sounds/251725377.ogg",
+            "characters/Morgana/sounds/350891986.ogg",
+        ],
+        "Play_vo_Morgana_FirstEncounter3DMachines": [
+            "characters/Morgana/sounds/230088802.ogg",
+        ],
+        "Play_vo_Morgana_FirstEncounter3DSona": [
+            "characters/Morgana/sounds/124208548.ogg",
+        ],
+        "Play_vo_Morgana_FirstEncounter3DSylas": [
+            "characters/Morgana/sounds/236945766.ogg",
+        ],
+        "Play_vo_Morgana_FirstEncounter3DYordle": [
+            "characters/Morgana/sounds/319776494.ogg",
+        ],
+        "Play_vo_Morgana_FirstEncounter3DZed": [
+            "characters/Morgana/sounds/168091072.ogg",
+        ],
+        "Play_vo_Morgana_Joke3DLovesMe": [
+            "characters/Morgana/sounds/41904732.ogg",
+        ],
+        "Play_vo_Morgana_Joke3DLovesMeNot": [
+            "characters/Morgana/sounds/306750886.ogg",
+        ],
+        "Play_vo_Morgana_Kill3DGeneral": [
+            "characters/Morgana/sounds/635343517.ogg",
+            "characters/Morgana/sounds/758693999.ogg",
+            "characters/Morgana/sounds/853461576.ogg",
+        ],
+        "Play_vo_Morgana_Kill3DKayle": [
+            "characters/Morgana/sounds/458523790.ogg",
+            "characters/Morgana/sounds/511110795.ogg",
+            "characters/Morgana/sounds/984444630.ogg",
+        ],
+        "Play_vo_Morgana_Kill3DPenta": [
+            "characters/Morgana/sounds/490937426.ogg",
+        ],
+        "Play_vo_Morgana_Laugh3DGeneral": [
+            "characters/Morgana/sounds/482599884.ogg",
+            "characters/Morgana/sounds/490711901.ogg",
+            "characters/Morgana/sounds/585379026.ogg",
+        ],
+        "Play_vo_Morgana_MorganaBasicAttack2_cast3D": [
+            "characters/Morgana/sounds/1000161692.ogg",
+            "characters/Morgana/sounds/294552112.ogg",
+            "characters/Morgana/sounds/318251148.ogg",
+            "characters/Morgana/sounds/857003799.ogg",
+        ],
+        "Play_vo_Morgana_MorganaBasicAttack_Chat3DKayle_Spell3DBasicHitKayle": [
+            "characters/Morgana/sounds/47831667.ogg",
+            "characters/Morgana/sounds/487701561.ogg",
+            "characters/Morgana/sounds/749809675.ogg",
+            "characters/Morgana/sounds/94801253.ogg",
+        ],
+        "Play_vo_Morgana_MorganaBasicAttack_cast3D": [
+            "characters/Morgana/sounds/1000161692.ogg",
+            "characters/Morgana/sounds/294552112.ogg",
+            "characters/Morgana/sounds/318251148.ogg",
+            "characters/Morgana/sounds/857003799.ogg",
+        ],
+        "Play_vo_Morgana_MorganaCritAttack_cast3D": [
+            "characters/Morgana/sounds/1000161692.ogg",
+            "characters/Morgana/sounds/294552112.ogg",
+            "characters/Morgana/sounds/318251148.ogg",
+            "characters/Morgana/sounds/857003799.ogg",
+        ],
+        "Play_vo_Morgana_MorganaE_Chat3DKayle_Spell3DEHitKayle": [
+            "characters/Morgana/sounds/211658295.ogg",
+            "characters/Morgana/sounds/513464189.ogg",
+            "characters/Morgana/sounds/712017305.ogg",
+        ],
+        "Play_vo_Morgana_MorganaE_cast3D": [
+            "characters/Morgana/sounds/598757977.ogg",
+            "characters/Morgana/sounds/840557697.ogg",
+        ],
+        "Play_vo_Morgana_MorganaQ_cast3D": [
+            "characters/Morgana/sounds/525929745.ogg",
+            "characters/Morgana/sounds/689745117.ogg",
+            "characters/Morgana/sounds/833133491.ogg",
+        ],
+        "Play_vo_Morgana_MorganaQ_hit3D": [
+            "characters/Morgana/sounds/140283280.ogg",
+            "characters/Morgana/sounds/334028940.ogg",
+            "characters/Morgana/sounds/461195796.ogg",
+        ],
+        "Play_vo_Morgana_MorganaR_cast3D": [
+            "characters/Morgana/sounds/122128606.ogg",
+            "characters/Morgana/sounds/193461910.ogg",
+            "characters/Morgana/sounds/194883896.ogg",
+            "characters/Morgana/sounds/371703560.ogg",
+            "characters/Morgana/sounds/38854253.ogg",
+            "characters/Morgana/sounds/459940169.ogg",
+            "characters/Morgana/sounds/537642520.ogg",
+            "characters/Morgana/sounds/822641864.ogg",
+            "characters/Morgana/sounds/831449721.ogg",
+        ],
+        "Play_vo_Morgana_MorganaW_cast3D": [
+            "characters/Morgana/sounds/149605653.ogg",
+            "characters/Morgana/sounds/217119938.ogg",
+            "characters/Morgana/sounds/381428012.ogg",
+            "characters/Morgana/sounds/8543236.ogg",
+            "characters/Morgana/sounds/900612851.ogg",
+            "characters/Morgana/sounds/922287190.ogg",
+        ],
+        "Play_vo_Morgana_Move2DFirst": [
+            "characters/Morgana/sounds/1029699936.ogg",
+            "characters/Morgana/sounds/158413679.ogg",
+            "characters/Morgana/sounds/183348561.ogg",
+            "characters/Morgana/sounds/186327867.ogg",
+            "characters/Morgana/sounds/605521751.ogg",
+            "characters/Morgana/sounds/646046330.ogg",
+            "characters/Morgana/sounds/853224909.ogg",
+            "characters/Morgana/sounds/917135874.ogg",
+        ],
+        "Play_vo_Morgana_Move2DFirstAllyKayle": [
+            "characters/Morgana/sounds/273537797.ogg",
+            "characters/Morgana/sounds/360402546.ogg",
+        ],
+        "Play_vo_Morgana_Move2DFirstEnemyKayle": [
+            "characters/Morgana/sounds/158375185.ogg",
+            "characters/Morgana/sounds/324373039.ogg",
+            "characters/Morgana/sounds/719209414.ogg",
+            "characters/Morgana/sounds/783987589.ogg",
+        ],
+        "Play_vo_Morgana_Move2DLong": [
+            "characters/Morgana/sounds/110956678.ogg",
+            "characters/Morgana/sounds/136678185.ogg",
+            "characters/Morgana/sounds/138538870.ogg",
+            "characters/Morgana/sounds/206609986.ogg",
+            "characters/Morgana/sounds/434802053.ogg",
+            "characters/Morgana/sounds/721316696.ogg",
+            "characters/Morgana/sounds/798602044.ogg",
+            "characters/Morgana/sounds/820507807.ogg",
+        ],
+        "Play_vo_Morgana_Move2DStandard": [
+            "characters/Morgana/sounds/1050540754.ogg",
+            "characters/Morgana/sounds/119677185.ogg",
+            "characters/Morgana/sounds/157571848.ogg",
+            "characters/Morgana/sounds/1685986.ogg",
+            "characters/Morgana/sounds/180714579.ogg",
+            "characters/Morgana/sounds/183857597.ogg",
+            "characters/Morgana/sounds/220428238.ogg",
+            "characters/Morgana/sounds/260827646.ogg",
+            "characters/Morgana/sounds/265493593.ogg",
+            "characters/Morgana/sounds/265717151.ogg",
+            "characters/Morgana/sounds/269000352.ogg",
+            "characters/Morgana/sounds/282390900.ogg",
+            "characters/Morgana/sounds/299132408.ogg",
+            "characters/Morgana/sounds/374749645.ogg",
+            "characters/Morgana/sounds/426889115.ogg",
+            "characters/Morgana/sounds/474166881.ogg",
+            "characters/Morgana/sounds/503436715.ogg",
+            "characters/Morgana/sounds/512384350.ogg",
+            "characters/Morgana/sounds/5224531.ogg",
+            "characters/Morgana/sounds/540201682.ogg",
+            "characters/Morgana/sounds/621331065.ogg",
+            "characters/Morgana/sounds/643720042.ogg",
+            "characters/Morgana/sounds/685066804.ogg",
+            "characters/Morgana/sounds/689779137.ogg",
+            "characters/Morgana/sounds/698763075.ogg",
+            "characters/Morgana/sounds/699349470.ogg",
+            "characters/Morgana/sounds/70372963.ogg",
+            "characters/Morgana/sounds/712407615.ogg",
+            "characters/Morgana/sounds/72526412.ogg",
+            "characters/Morgana/sounds/765090725.ogg",
+            "characters/Morgana/sounds/773681196.ogg",
+            "characters/Morgana/sounds/791190665.ogg",
+            "characters/Morgana/sounds/831825172.ogg",
+            "characters/Morgana/sounds/87206814.ogg",
+            "characters/Morgana/sounds/895801480.ogg",
+            "characters/Morgana/sounds/897843482.ogg",
+            "characters/Morgana/sounds/904726489.ogg",
+            "characters/Morgana/sounds/907354379.ogg",
+            "characters/Morgana/sounds/909672483.ogg",
+            "characters/Morgana/sounds/923802502.ogg",
+            "characters/Morgana/sounds/957569025.ogg",
+            "characters/Morgana/sounds/990753687.ogg",
+            "characters/Morgana/sounds/996907391.ogg",
+        ],
+        "Play_vo_Morgana_Recall3DGeneral": [
+            "characters/Morgana/sounds/1027088.ogg",
+            "characters/Morgana/sounds/733575357.ogg",
+        ],
+        "Play_vo_Morgana_Respawn2DGeneral": [
+            "characters/Morgana/sounds/551854451.ogg",
+            "characters/Morgana/sounds/855873869.ogg",
+            "characters/Morgana/sounds/942161204.ogg",
+        ],
+        "Play_vo_Morgana_Taunt3DGeneral": [
+            "characters/Morgana/sounds/205225225.ogg",
+            "characters/Morgana/sounds/596848050.ogg",
+        ],
+        "Play_vo_Morgana_Taunt3DKayle": [
+            "characters/Morgana/sounds/143816832.ogg",
+            "characters/Morgana/sounds/566495594.ogg",
+            "characters/Morgana/sounds/718981143.ogg",
+            "characters/Morgana/sounds/751890398.ogg",
+        ],
+        "Play_vo_Morgana_UseItem2DWard": [
+            "characters/Morgana/sounds/156894463.ogg",
+            "characters/Morgana/sounds/256395966.ogg",
+            "characters/Morgana/sounds/669101591.ogg",
+            "characters/Morgana/sounds/776530130.ogg",
+        ],
+        "Recall3D_buffactivate": [
+            "characters/Morgana/sounds/625489341.ogg",
+        ],
+        "Taunt3D_buffactivate": [
+            "characters/Morgana/sounds/186750462.ogg",
+        ],
+    },
+)

@@ -1,0 +1,327 @@
+(
+    events: {
+        "Death3D_cast": [
+            "characters/Lux/sounds/332036173.ogg",
+        ],
+        "LuxBasicAttack2_OnCast": [
+            "characters/Lux/sounds/124217702.ogg",
+            "characters/Lux/sounds/228521462.ogg",
+            "characters/Lux/sounds/39682869.ogg",
+        ],
+        "LuxBasicAttack2_OnHit": [
+            "characters/Lux/sounds/20038201.ogg",
+            "characters/Lux/sounds/29363137.ogg",
+            "characters/Lux/sounds/48075948.ogg",
+        ],
+        "LuxBasicAttack_OnCast": [
+            "characters/Lux/sounds/124217702.ogg",
+            "characters/Lux/sounds/228521462.ogg",
+            "characters/Lux/sounds/39682869.ogg",
+        ],
+        "LuxBasicAttack_OnHit": [
+            "characters/Lux/sounds/20038201.ogg",
+            "characters/Lux/sounds/29363137.ogg",
+            "characters/Lux/sounds/48075948.ogg",
+        ],
+        "LuxCritAttack_OnCast": [
+            "characters/Lux/sounds/124217702.ogg",
+            "characters/Lux/sounds/228521462.ogg",
+            "characters/Lux/sounds/39682869.ogg",
+        ],
+        "LuxCritAttack_OnHit": [
+            "characters/Lux/sounds/20038201.ogg",
+            "characters/Lux/sounds/29363137.ogg",
+            "characters/Lux/sounds/48075948.ogg",
+        ],
+        "LuxIlluminationPassive_hit": [
+            "characters/Lux/sounds/1047162027.ogg",
+            "characters/Lux/sounds/295508404.ogg",
+            "characters/Lux/sounds/575879865.ogg",
+        ],
+        "LuxLightBindingDummy_OnMissileLaunch": [
+            "characters/Lux/sounds/336237173.ogg",
+            "characters/Lux/sounds/833485951.ogg",
+        ],
+        "LuxLightBindingMis_OnBuffActivate": [
+            "characters/Lux/sounds/201575472.ogg",
+            "characters/Lux/sounds/302858924.ogg",
+            "characters/Lux/sounds/384092916.ogg",
+            "characters/Lux/sounds/618792157.ogg",
+        ],
+        "LuxLightBindingMis_OnBuffDeactivate": [
+            "characters/Lux/sounds/110700647.ogg",
+            "characters/Lux/sounds/142487570.ogg",
+            "characters/Lux/sounds/311502990.ogg",
+        ],
+        "LuxLightBinding_OnBuffActivate": [
+            "characters/Lux/sounds/157721588.ogg",
+            "characters/Lux/sounds/170114085.ogg",
+        ],
+        "LuxLightBinding_OnBuffDeactivate": [
+            "characters/Lux/sounds/110700647.ogg",
+            "characters/Lux/sounds/142487570.ogg",
+            "characters/Lux/sounds/311502990.ogg",
+        ],
+        "LuxLightBinding_OnCast": [
+            "characters/Lux/sounds/148709649.ogg",
+            "characters/Lux/sounds/393263512.ogg",
+            "characters/Lux/sounds/683874540.ogg",
+        ],
+        "LuxLightStrikeKugel_OnCast": [
+            "characters/Lux/sounds/113441182.ogg",
+            "characters/Lux/sounds/607512994.ogg",
+            "characters/Lux/sounds/613551922.ogg",
+            "characters/Lux/sounds/97130071.ogg",
+        ],
+        "LuxLightStrikeKugel_OnMissileLaunch": [
+            "characters/Lux/sounds/208690342.ogg",
+            "characters/Lux/sounds/606969257.ogg",
+        ],
+        "LuxLightStrikeKugel_buffactivate": [
+            "characters/Lux/sounds/306363213.ogg",
+            "characters/Lux/sounds/386229644.ogg",
+            "characters/Lux/sounds/998184549.ogg",
+        ],
+        "LuxLightStrikeKugel_hit": [
+            "characters/Lux/sounds/297022039.ogg",
+            "characters/Lux/sounds/351538991.ogg",
+            "characters/Lux/sounds/979274182.ogg",
+        ],
+        "LuxPrismaticWaveMissile_OnMissileLaunch": [
+            "characters/Lux/sounds/868203650.ogg",
+        ],
+        "LuxPrismaticWaveShieldSelf_buffactivate": [
+            "characters/Lux/sounds/418417025.ogg",
+            "characters/Lux/sounds/423630636.ogg",
+            "characters/Lux/sounds/697403841.ogg",
+            "characters/Lux/sounds/847223693.ogg",
+        ],
+        "LuxPrismaticWaveShield_buffactivate": [
+            "characters/Lux/sounds/1028060919.ogg",
+            "characters/Lux/sounds/279136310.ogg",
+            "characters/Lux/sounds/703305165.ogg",
+            "characters/Lux/sounds/889598899.ogg",
+        ],
+        "LuxPrismaticWave_OnCast": [
+            "characters/Lux/sounds/1040682555.ogg",
+            "characters/Lux/sounds/608424071.ogg",
+            "characters/Lux/sounds/833473446.ogg",
+        ],
+        "LuxRBeam_beamend": [
+            "characters/Lux/sounds/103796073.ogg",
+            "characters/Lux/sounds/25979506.ogg",
+            "characters/Lux/sounds/266892436.ogg",
+            "characters/Lux/sounds/361719824.ogg",
+            "characters/Lux/sounds/3793796.ogg",
+            "characters/Lux/sounds/40380380.ogg",
+        ],
+        "LuxRBeam_beammiddle": [
+            "characters/Lux/sounds/103796073.ogg",
+            "characters/Lux/sounds/25979506.ogg",
+            "characters/Lux/sounds/266892436.ogg",
+            "characters/Lux/sounds/361719824.ogg",
+            "characters/Lux/sounds/3793796.ogg",
+            "characters/Lux/sounds/40380380.ogg",
+        ],
+        "LuxR_OnCast": [
+            "characters/Lux/sounds/103796073.ogg",
+            "characters/Lux/sounds/148291726.ogg",
+            "characters/Lux/sounds/266892436.ogg",
+            "characters/Lux/sounds/361719824.ogg",
+            "characters/Lux/sounds/3793796.ogg",
+            "characters/Lux/sounds/747203483.ogg",
+            "characters/Lux/sounds/763860472.ogg",
+            "characters/Lux/sounds/82083908.ogg",
+        ],
+        "Play_vo_Lux_Attack2DGeneral": [
+            "characters/Lux/sounds/1018714561.ogg",
+            "characters/Lux/sounds/1068561988.ogg",
+            "characters/Lux/sounds/214570114.ogg",
+            "characters/Lux/sounds/266591989.ogg",
+            "characters/Lux/sounds/286230628.ogg",
+            "characters/Lux/sounds/314093034.ogg",
+            "characters/Lux/sounds/364413341.ogg",
+            "characters/Lux/sounds/403709611.ogg",
+            "characters/Lux/sounds/489925240.ogg",
+            "characters/Lux/sounds/553919348.ogg",
+            "characters/Lux/sounds/555319060.ogg",
+            "characters/Lux/sounds/56349501.ogg",
+            "characters/Lux/sounds/921990.ogg",
+            "characters/Lux/sounds/942491961.ogg",
+            "characters/Lux/sounds/964369093.ogg",
+        ],
+        "Play_vo_Lux_Death3D": [
+            "characters/Lux/sounds/1023469803.ogg",
+            "characters/Lux/sounds/129626245.ogg",
+            "characters/Lux/sounds/412939584.ogg",
+            "characters/Lux/sounds/491698901.ogg",
+        ],
+        "Play_vo_Lux_FirstEncounter3DDemacia": [
+            "characters/Lux/sounds/605879662.ogg",
+        ],
+        "Play_vo_Lux_FirstEncounter3DEzreal": [
+            "characters/Lux/sounds/345309535.ogg",
+        ],
+        "Play_vo_Lux_FirstEncounter3DGalio": [
+            "characters/Lux/sounds/316709492.ogg",
+        ],
+        "Play_vo_Lux_FirstEncounter3DGaren": [
+            "characters/Lux/sounds/293909521.ogg",
+        ],
+        "Play_vo_Lux_FirstEncounter3DJarvanIV": [
+            "characters/Lux/sounds/221965604.ogg",
+        ],
+        "Play_vo_Lux_FirstEncounter3DKatarina": [
+            "characters/Lux/sounds/504353130.ogg",
+        ],
+        "Play_vo_Lux_FirstEncounter3DLeona": [
+            "characters/Lux/sounds/71095682.ogg",
+        ],
+        "Play_vo_Lux_FirstEncounter3DLucian": [
+            "characters/Lux/sounds/160128670.ogg",
+        ],
+        "Play_vo_Lux_FirstEncounter3DNoxus": [
+            "characters/Lux/sounds/127936199.ogg",
+            "characters/Lux/sounds/36315622.ogg",
+        ],
+        "Play_vo_Lux_FirstEncounter3DRyze": [
+            "characters/Lux/sounds/115292526.ogg",
+        ],
+        "Play_vo_Lux_FirstEncounter3DShadowIsles": [
+            "characters/Lux/sounds/426471850.ogg",
+        ],
+        "Play_vo_Lux_FirstEncounter3DSona": [
+            "characters/Lux/sounds/336456869.ogg",
+        ],
+        "Play_vo_Lux_FirstEncounter3DTaliyah": [
+            "characters/Lux/sounds/1051484650.ogg",
+            "characters/Lux/sounds/761138730.ogg",
+        ],
+        "Play_vo_Lux_FirstEncounter3DTwitch": [
+            "characters/Lux/sounds/10767982.ogg",
+        ],
+        "Play_vo_Lux_Joke3DGeneral": [
+            "characters/Lux/sounds/770252472.ogg",
+            "characters/Lux/sounds/805972414.ogg",
+        ],
+        "Play_vo_Lux_JokeResponse3DGeneral": [
+            "characters/Lux/sounds/266792280.ogg",
+        ],
+        "Play_vo_Lux_Kill3DGeneral": [
+            "characters/Lux/sounds/604183926.ogg",
+            "characters/Lux/sounds/890873838.ogg",
+        ],
+        "Play_vo_Lux_Laugh3DGeneral": [
+            "characters/Lux/sounds/172832117.ogg",
+            "characters/Lux/sounds/436619731.ogg",
+            "characters/Lux/sounds/701957389.ogg",
+            "characters/Lux/sounds/929380105.ogg",
+        ],
+        "Play_vo_Lux_LuxBasicAttack2_cast3D": [
+            "characters/Lux/sounds/154967359.ogg",
+            "characters/Lux/sounds/671162342.ogg",
+            "characters/Lux/sounds/759029040.ogg",
+            "characters/Lux/sounds/937719550.ogg",
+        ],
+        "Play_vo_Lux_LuxBasicAttack_cast3D": [
+            "characters/Lux/sounds/154967359.ogg",
+            "characters/Lux/sounds/671162342.ogg",
+            "characters/Lux/sounds/759029040.ogg",
+            "characters/Lux/sounds/937719550.ogg",
+        ],
+        "Play_vo_Lux_LuxCritAttack_cast3D": [
+            "characters/Lux/sounds/154967359.ogg",
+            "characters/Lux/sounds/671162342.ogg",
+            "characters/Lux/sounds/759029040.ogg",
+            "characters/Lux/sounds/937719550.ogg",
+        ],
+        "Play_vo_Lux_LuxLightBindingMis_hit3D": [
+            "characters/Lux/sounds/298849687.ogg",
+            "characters/Lux/sounds/319039140.ogg",
+            "characters/Lux/sounds/504352971.ogg",
+        ],
+        "Play_vo_Lux_LuxLightBinding_cast3D": [
+            "characters/Lux/sounds/1015143569.ogg",
+            "characters/Lux/sounds/202658042.ogg",
+            "characters/Lux/sounds/424985209.ogg",
+            "characters/Lux/sounds/477876329.ogg",
+        ],
+        "Play_vo_Lux_LuxLightStrikeKugel_cast3D": [
+            "characters/Lux/sounds/1015764149.ogg",
+            "characters/Lux/sounds/230776992.ogg",
+            "characters/Lux/sounds/483735110.ogg",
+            "characters/Lux/sounds/512094515.ogg",
+        ],
+        "Play_vo_Lux_LuxLightstrikeToggle_cast3D": [
+            "characters/Lux/sounds/1010366851.ogg",
+            "characters/Lux/sounds/659101891.ogg",
+        ],
+        "Play_vo_Lux_LuxPrismaticWaveMissile_hit3D": [
+            "characters/Lux/sounds/258308823.ogg",
+            "characters/Lux/sounds/392183986.ogg",
+        ],
+        "Play_vo_Lux_LuxPrismaticWave_cast3D": [
+            "characters/Lux/sounds/1025390011.ogg",
+            "characters/Lux/sounds/424348323.ogg",
+            "characters/Lux/sounds/728209513.ogg",
+            "characters/Lux/sounds/979345978.ogg",
+        ],
+        "Play_vo_Lux_LuxR_cast3D": [
+            "characters/Lux/sounds/368123771.ogg",
+            "characters/Lux/sounds/439566087.ogg",
+            "characters/Lux/sounds/667420428.ogg",
+            "characters/Lux/sounds/723719399.ogg",
+            "characters/Lux/sounds/760055769.ogg",
+            "characters/Lux/sounds/995689221.ogg",
+        ],
+        "Play_vo_Lux_Move2DFirst": [
+            "characters/Lux/sounds/1026418668.ogg",
+            "characters/Lux/sounds/293200305.ogg",
+            "characters/Lux/sounds/867756877.ogg",
+            "characters/Lux/sounds/974040895.ogg",
+        ],
+        "Play_vo_Lux_Move2DFirstAllyDemacia": [
+            "characters/Lux/sounds/1048347328.ogg",
+            "characters/Lux/sounds/332078577.ogg",
+        ],
+        "Play_vo_Lux_Move2DFirstAllyGalio": [
+            "characters/Lux/sounds/322358204.ogg",
+        ],
+        "Play_vo_Lux_Move2DFirstAllyGaren": [
+            "characters/Lux/sounds/109859316.ogg",
+        ],
+        "Play_vo_Lux_Move2DFirstAllyTaliyah": [
+            "characters/Lux/sounds/785199622.ogg",
+        ],
+        "Play_vo_Lux_Move2DStandard": [
+            "characters/Lux/sounds/1046954550.ogg",
+            "characters/Lux/sounds/137830384.ogg",
+            "characters/Lux/sounds/192088246.ogg",
+            "characters/Lux/sounds/296390345.ogg",
+            "characters/Lux/sounds/332039151.ogg",
+            "characters/Lux/sounds/342397566.ogg",
+            "characters/Lux/sounds/39368677.ogg",
+            "characters/Lux/sounds/600715877.ogg",
+            "characters/Lux/sounds/628085506.ogg",
+            "characters/Lux/sounds/750165326.ogg",
+            "characters/Lux/sounds/815645046.ogg",
+            "characters/Lux/sounds/834661459.ogg",
+            "characters/Lux/sounds/858655049.ogg",
+            "characters/Lux/sounds/87851516.ogg",
+            "characters/Lux/sounds/919738685.ogg",
+        ],
+        "Play_vo_Lux_Respawn2DGeneral": [
+            "characters/Lux/sounds/599373401.ogg",
+            "characters/Lux/sounds/958597678.ogg",
+            "characters/Lux/sounds/961993205.ogg",
+        ],
+        "Play_vo_Lux_Taunt3DGeneral": [
+            "characters/Lux/sounds/162523170.ogg",
+            "characters/Lux/sounds/274951227.ogg",
+            "characters/Lux/sounds/59168385.ogg",
+        ],
+        "Play_vo_Lux_TauntResponse3DGeneral": [
+            "characters/Lux/sounds/842559067.ogg",
+        ],
+    },
+)
