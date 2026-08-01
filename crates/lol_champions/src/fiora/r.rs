@@ -4,6 +4,9 @@
 //! 击破要害造成最大生命值真实伤害。四要害全破后触发治疗光环。
 
 use bevy::prelude::*;
+use lol_base::render_cmd::{
+    CommandSkinParticleDespawn, CommandSkinParticleSpawn, CommandSkinSoundPlay,
+};
 use lol_base::spell::Spell;
 use lol_core::base::buff::{Buff, BuffOf};
 use lol_core::base::direction::{Direction, is_in_direction};
@@ -15,6 +18,7 @@ use lol_core::skill::{EventSkillCast, Skill, SkillSlot, get_skill_data_value};
 use lol_core::team::Team;
 
 use crate::fiora::Fiora;
+use crate::fiora::passive::{direction_particle_suffix, hit_particle_rotation};
 
 /// 要害过期前红色闪烁预警时长（秒），游戏手感常数，不来自 RON。
 const VITAL_R_TIMEOUT: f32 = 1.5;
@@ -26,6 +30,8 @@ const FIORA_R_ACTIVE_DURATION: f32 = 0.5;
 pub struct BuffFioraR {
     pub vitals: Vec<Direction>,
     pub level: usize,
+    /// 施放者（菲奥娜），粒子键只在她的 resolver 里，撤挂粒子都要经她查表。
+    pub caster: Entity,
     pub active_timer: Timer,
     pub remove_timer: Timer,
     pub timeout_red_triggered: bool,
@@ -43,12 +49,13 @@ impl BuffFioraR {
 
 impl Default for BuffFioraR {
     fn default() -> Self {
-        Self::new(1, 8.0, 0.5, 0.03, 50.0, 5.0, 550.0)
+        Self::new(Entity::PLACEHOLDER, 1, 8.0, 0.5, 0.03, 50.0, 5.0, 550.0)
     }
 }
 
 impl BuffFioraR {
     pub fn new(
+        caster: Entity,
         level: usize,
         duration: f32,
         active_duration: f32,
@@ -60,6 +67,7 @@ impl BuffFioraR {
         Self {
             vitals: vec![Direction::Z, Direction::X, Direction::NegZ, Direction::NegX],
             level,
+            caster,
             active_timer: Timer::from_seconds(active_duration, TimerMode::Once),
             remove_timer: Timer::from_seconds(duration, TimerMode::Once),
             timeout_red_triggered: false,
@@ -68,6 +76,25 @@ impl BuffFioraR {
             heal_duration,
             heal_radius,
         }
+    }
+}
+
+/// R 标记方向 → 正式标记粒子键。
+fn r_mark_key(direction: &Direction) -> String {
+    format!("Fiora_R_Mark_{}", direction_particle_suffix(direction))
+}
+
+/// R 标记方向 → 超时红色粒子键。
+fn r_timeout_key(direction: &Direction) -> String {
+    format!("Fiora_R_{}_Timeout", direction_particle_suffix(direction))
+}
+
+/// 该方向当前挂着的标记粒子键，撤销时按超时状态二选一。
+fn r_current_key(direction: &Direction, timeout_red: bool) -> String {
+    if timeout_red {
+        r_timeout_key(direction)
+    } else {
+        r_mark_key(direction)
     }
 }
 
@@ -87,19 +114,58 @@ pub fn fixed_update(
     mut q_buff_fiora_r: Query<(Entity, &BuffOf, &mut BuffFioraR)>,
     time: Res<Time<Fixed>>,
 ) {
-    for (entity, _buff_of, mut buff) in q_buff_fiora_r.iter_mut() {
+    for (entity, buff_of, mut buff) in q_buff_fiora_r.iter_mut() {
+        let target = buff_of.0;
         if !buff.is_active() {
             buff.active_timer.tick(time.delta());
+            // 标记生效瞬间：撤下全方位预警，换上四方向正式标记粒子
+            if buff.active_timer.just_finished() {
+                commands.trigger(CommandSkinParticleDespawn {
+                    entity: target,
+                    hash: "Fiora_R_ALL_Warning".to_string(),
+                    resolver_entity: Some(buff.caster),
+                });
+                for direction in &buff.vitals {
+                    commands.trigger(CommandSkinParticleSpawn {
+                        entity: target,
+                        hash: r_mark_key(direction),
+                        rotation: None,
+                        resolver_entity: Some(buff.caster),
+                    });
+                }
+            }
             continue;
         }
 
         if !buff.timeout_red_triggered && buff.remove_timer.remaining_secs() <= VITAL_R_TIMEOUT {
             buff.timeout_red_triggered = true;
+            // 消失前：剩余标记切换为超时粒子
+            for direction in &buff.vitals {
+                commands.trigger(CommandSkinParticleDespawn {
+                    entity: target,
+                    hash: r_mark_key(direction),
+                    resolver_entity: Some(buff.caster),
+                });
+                commands.trigger(CommandSkinParticleSpawn {
+                    entity: target,
+                    hash: r_timeout_key(direction),
+                    rotation: None,
+                    resolver_entity: Some(buff.caster),
+                });
+            }
         }
 
         buff.remove_timer.tick(time.delta());
 
         if buff.remove_timer.is_finished() {
+            // 到时未破：撤下剩余标记粒子
+            for direction in &buff.vitals {
+                commands.trigger(CommandSkinParticleDespawn {
+                    entity: target,
+                    hash: r_current_key(direction, buff.timeout_red_triggered),
+                    resolver_entity: Some(buff.caster),
+                });
+            }
             commands.entity(entity).despawn();
         }
     }
@@ -107,15 +173,15 @@ pub fn fixed_update(
 
 pub fn update_fiora_r_heal(
     mut commands: Commands,
-    mut q_heal: Query<(Entity, &mut BuffFioraRHeal)>,
-    mut q_allies: Query<(&Transform, &Team, &mut Health), Without<Death>>,
+    mut q_heal: Query<(Entity, &BuffOf, &mut BuffFioraRHeal)>,
+    mut q_allies: Query<(Entity, &Transform, &Team, &mut Health), Without<Death>>,
     time: Res<Time<Fixed>>,
 ) {
-    for (buff_entity, mut heal) in q_heal.iter_mut() {
+    for (buff_entity, buff_of, mut heal) in q_heal.iter_mut() {
         heal.timer.tick(time.delta());
         heal.tick.tick(time.delta());
         if heal.tick.just_finished() {
-            for (transform, team, mut hp) in q_allies.iter_mut() {
+            for (ally, transform, team, mut hp) in q_allies.iter_mut() {
                 if team != &heal.team {
                     continue;
                 }
@@ -123,6 +189,13 @@ pub fn update_fiora_r_heal(
                     continue;
                 }
                 hp.value = (hp.value + heal.heal_per_second).min(hp.max);
+                // 每跳在受疗盟友身上播治疗粒子（键在菲奥娜 resolver 里）
+                commands.trigger(CommandSkinParticleSpawn {
+                    entity: ally,
+                    hash: "Fiora_R_Heal_Tar".to_string(),
+                    rotation: None,
+                    resolver_entity: Some(buff_of.0),
+                });
             }
         }
         if heal.timer.is_finished() {
@@ -195,6 +268,7 @@ pub fn on_fiora_r(
     commands
         .entity(target)
         .with_related::<BuffOf>(BuffFioraR::new(
+            entity,
             skill.level,
             duration,
             FIORA_R_ACTIVE_DURATION,
@@ -203,6 +277,20 @@ pub fn on_fiora_r(
             heal_duration,
             heal_radius,
         ));
+
+    // 标记生效前：目标身上挂全方位预警粒子（键在菲奥娜 resolver 里）
+    commands.trigger(CommandSkinParticleSpawn {
+        entity: target,
+        hash: "Fiora_R_ALL_Warning".to_string(),
+        rotation: None,
+        resolver_entity: Some(entity),
+    });
+    // R 施放（标记出现）音效：FioraRMark
+    commands.trigger(CommandSkinSoundPlay {
+        entity,
+        key: "FioraRMark".to_string(),
+        hit: false,
+    });
 
     commands
         .entity(entity)
@@ -266,9 +354,27 @@ pub fn on_r_damage_create(
         }
     });
 
-    let Some(_direction) = hit_direction else {
+    let Some(direction) = hit_direction else {
         return;
     };
+
+    // 击破：撤下该方向当前标记，播放朝向要害方向的击破粒子
+    commands.trigger(CommandSkinParticleDespawn {
+        entity: target_entity,
+        hash: r_current_key(&direction, buff_fiora_r.timeout_red_triggered),
+        resolver_entity: Some(trigger.source),
+    });
+    commands.trigger(CommandSkinParticleSpawn {
+        entity: target_entity,
+        hash: "Fiora_R_Hit_Tar".to_string(),
+        rotation: Some(hit_particle_rotation(&direction)),
+        resolver_entity: Some(trigger.source),
+    });
+    commands.trigger(CommandSkinSoundPlay {
+        entity: trigger.source,
+        key: "FioraRHitSound".to_string(),
+        hit: true,
+    });
 
     let true_damage = hp.max * buff_fiora_r.vital_pct;
     commands
@@ -284,16 +390,43 @@ pub fn on_r_damage_create(
     let all_broken = buff_fiora_r.vitals.is_empty();
     let target_dead = hp.value <= 0.0;
     if all_broken || target_dead {
-        commands
-            .entity(trigger.source)
-            .with_related::<BuffOf>(BuffFioraRHeal {
-                center: Vec3::new(target_position.x, 0.0, target_position.y),
-                team: *source_team,
-                timer: Timer::from_seconds(buff_fiora_r.heal_duration, TimerMode::Once),
-                tick: Timer::from_seconds(1.0, TimerMode::Repeating),
-                heal_per_second: buff_fiora_r.heal_per_second,
-                heal_radius: buff_fiora_r.heal_radius,
+        // 提前结束：撤下剩余标记粒子
+        for direction in &buff_fiora_r.vitals {
+            commands.trigger(CommandSkinParticleDespawn {
+                entity: target_entity,
+                hash: r_current_key(direction, buff_fiora_r.timeout_red_triggered),
+                resolver_entity: Some(trigger.source),
             });
+        }
+        // 光环实体自带位置，Heal_Zone 粒子锚定其上、随实体销毁而消失
+        let center = Vec3::new(target_position.x, 0.0, target_position.y);
+        let heal_entity = commands
+            .spawn((
+                BuffFioraRHeal {
+                    center,
+                    team: *source_team,
+                    timer: Timer::from_seconds(buff_fiora_r.heal_duration, TimerMode::Once),
+                    tick: Timer::from_seconds(1.0, TimerMode::Repeating),
+                    heal_per_second: buff_fiora_r.heal_per_second,
+                    heal_radius: buff_fiora_r.heal_radius,
+                },
+                BuffOf(trigger.source),
+                Transform::from_translation(center),
+                GlobalTransform::from_translation(center),
+            ))
+            .id();
+        commands.trigger(CommandSkinParticleSpawn {
+            entity: heal_entity,
+            hash: "Fiora_R_Heal_Zone".to_string(),
+            rotation: None,
+            resolver_entity: Some(trigger.source),
+        });
+        // 四要害全破触发治疗光环音效：FioraRHeal
+        commands.trigger(CommandSkinSoundPlay {
+            entity: trigger.source,
+            key: "FioraRHeal".to_string(),
+            hit: false,
+        });
         commands.entity(buff_entity).despawn();
     }
 }

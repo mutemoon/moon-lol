@@ -38,7 +38,7 @@ impl From<ParticleMeshDistortion> for Mesh {
 
             let values = values
                 .into_iter()
-                .map(|v| [1. - v[0], 1. - v[1], value.frame as f32, 0.0])
+                .map(|v| [1. - v[0], 1. - v[1], value.frame as f32])
                 .collect::<Vec<_>>();
 
             mesh.insert_attribute(ATTRIBUTE_UV_FRAME, values);

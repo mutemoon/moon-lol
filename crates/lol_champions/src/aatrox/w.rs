@@ -4,7 +4,7 @@
 
 use bevy::prelude::*;
 use lol_base::animation_names::ANIM_SPELL2;
-use lol_base::render_cmd::CommandAnimationPlay;
+use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleDespawn, CommandSkinParticleSpawn};
 use lol_base::spell::Spell;
 use lol_core::action::displace::{ActionDisplace, DisplaceMotion, DisplaceTargetSelection};
 use lol_core::base::buff::BuffOf;
@@ -64,6 +64,13 @@ pub fn on_aatrox_w(
         repeat: false,
         duration: None,
     });
+    // 施法光效
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: "Aatrox_W_Cas".to_string(),
+        rotation: None,
+        resolver_entity: None,
+    });
 
     let dmg = get_skill_value(spell_obj, "w_damage", skill.level, |stat| {
         if stat == 2 { ad } else { 0.0 }
@@ -107,6 +114,19 @@ pub fn on_aatrox_w(
                 AATROX_W_MARK_DURATION,
                 caster_pos,
             ));
+        // 命中光效 + 链刃标记光效（引爆时撤销）
+        commands.trigger(CommandSkinParticleSpawn {
+            entity: enemy,
+            hash: "Aatrox_W_Hit_Tar".to_string(),
+            rotation: None,
+            resolver_entity: Some(entity),
+        });
+        commands.trigger(CommandSkinParticleSpawn {
+            entity: enemy,
+            hash: "Aatrox_W_Beam_Tar".to_string(),
+            rotation: None,
+            resolver_entity: Some(entity),
+        });
     }
 }
 
@@ -135,6 +155,18 @@ pub fn update_aatrox_w_marks(
             commands
                 .entity(target)
                 .with_related::<BuffOf>(DebuffKnockup::new(0.5));
+            // 引爆：撤下链刃标记光效，播拉回光效
+            commands.trigger(CommandSkinParticleDespawn {
+                entity: target,
+                hash: "Aatrox_W_Beam_Tar".to_string(),
+                resolver_entity: Some(source),
+            });
+            commands.trigger(CommandSkinParticleSpawn {
+                entity: target,
+                hash: "Aatrox_W_Beam_Tar_Pull".to_string(),
+                rotation: None,
+                resolver_entity: Some(source),
+            });
             // 拉回 W 中心（椿距离 = 1.5x W 有效范围，确保能拉到）
             commands.trigger(ActionDisplace {
                 entity: source,

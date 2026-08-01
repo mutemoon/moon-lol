@@ -8,7 +8,7 @@
 
 use bevy::prelude::*;
 use lol_base::animation_names::ANIM_SPELL1;
-use lol_base::render_cmd::CommandAnimationPlay;
+use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
 use lol_base::spell::Spell;
 use lol_core::action::damage::{ActionDamageEffect, DamageShape, TargetDamage, TargetFilter};
 use lol_core::action::delayed_damage::{ActionDelayedDamage, AoEIndicator, AoEOrigin};
@@ -57,6 +57,16 @@ pub fn on_darius_q(
         repeat: false,
         duration: None,
     });
+
+    // 旋斤蓄力环 + 施法刀光
+    for key in ["Darius_Q_Ring_Windup", "darius_Q_aoe_cast"] {
+        commands.trigger(CommandSkinParticleSpawn {
+            entity,
+            hash: key.to_string(),
+            rotation: None,
+            resolver_entity: None,
+        });
+    }
     // 插入待回血结算组件（新 Q 重制计数）
     let heal_pct =
         get_skill_data_value(spell_obj, "MissingHealthHeal", skill.level).unwrap_or(17.0);
@@ -132,8 +142,31 @@ pub fn on_darius_q_outer_hit(
     pending.hit_count = (pending.hit_count + 1).min(3);
 }
 
+/// Q 命中粒子：按内/外圈标签在目标身上播放对应命中粒子。
+pub fn on_darius_q_hit_particles(
+    trigger: On<EventDamageCreate>,
+    mut commands: Commands,
+    q_darius: Query<(), With<Darius>>,
+) {
+    let key = match trigger.tag {
+        Some(DARIUS_Q_INNER_TAG) => "Darius_Q_tar_inner",
+        Some(DARIUS_Q_OUTER_TAG) => "Darius_Q_tar",
+        _ => return,
+    };
+    if q_darius.get(trigger.source).is_err() {
+        return;
+    }
+    commands.trigger(CommandSkinParticleSpawn {
+        entity: trigger.event_target(),
+        hash: key.to_string(),
+        rotation: None,
+        resolver_entity: Some(trigger.source),
+    });
+}
+
 /// FixedUpdate：结算 Q 回血。
 pub fn apply_darius_q_heal(
+    mut commands: Commands,
     darius_query: Query<Entity, With<Darius>>,
     mut q_pending: Query<&mut DariusQHealPending>,
     mut q_health: Query<&mut Health>,
@@ -155,6 +188,14 @@ pub fn apply_darius_q_heal(
     let heal = missing * pending.heal_pct_normalized * (pending.hit_count as f32);
     health.value = (health.value + heal).min(health.max);
     pending.hit_count = 0;
+
+    // 外圈命中英雄回血粒子
+    commands.trigger(CommandSkinParticleSpawn {
+        entity: darius,
+        hash: "Darius_Q_Heal".to_string(),
+        rotation: None,
+        resolver_entity: None,
+    });
 }
 
 #[cfg(test)]

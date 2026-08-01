@@ -4,7 +4,9 @@ use bevy::asset::RenderAssetUsages;
 use bevy::ecs::relationship::Relationship;
 use bevy::prelude::*;
 use bevy::render::mesh::{Indices, PrimitiveTopology};
-use lol_base::render_cmd::{CommandSkinParticleDespawn, CommandSkinParticleSpawn};
+use lol_base::render_cmd::{
+    CommandSkinParticleDespawn, CommandSkinParticleSpawn, CommandSkinSoundPlay,
+};
 use lol_core::base::buff::BuffOf;
 use lol_core::base::direction::{Direction, is_in_direction};
 use lol_core::buffs::common_buffs::{BuffMoveSpeed, BuffSelfHeal};
@@ -90,6 +92,11 @@ fn vital_particle_suffix(direction: &Direction) -> &'static str {
         Direction::NegZ => "SW",
         Direction::NegX => "SE",
     }
+}
+
+/// 方向 → 方位后缀（NE/NW/SE/SW），供 R 标记等其它模块拼接自己的粒子键。
+pub(crate) fn direction_particle_suffix(direction: &Direction) -> &'static str {
+    vital_particle_suffix(direction)
 }
 
 /// 拼出 skin resolver 中的触发键，variant 传 ""、"_Warning" 或 "_Timeout"。
@@ -191,10 +198,12 @@ pub fn update_add_vital(
                 FIORA_PASSIVE_DURATION,
             ));
 
-            // 预备生成期：挂上预警粒子
+            // 预备生成期：挂上预警粒子（键只在菲奥娜的 resolver 里，查表用菲奥娜）
             commands.trigger(CommandSkinParticleSpawn {
                 entity: target_entity,
                 hash: vital_particle_key(&direction, "_Warning"),
+                rotation: None,
+                resolver_entity: Some(entity),
             });
         }
     }
@@ -233,6 +242,7 @@ pub fn update_remove_vital(
                 commands.trigger(CommandSkinParticleDespawn {
                     entity: target_entity,
                     hash: vital_current_particle_key(&vital),
+                    resolver_entity: Some(entity),
                 });
                 commands.entity(target_entity).remove::<Vital>();
                 continue;
@@ -245,10 +255,19 @@ pub fn update_remove_vital(
                     commands.trigger(CommandSkinParticleDespawn {
                         entity: target_entity,
                         hash: vital_particle_key(&vital.direction, "_Warning"),
+                        resolver_entity: Some(entity),
                     });
                     commands.trigger(CommandSkinParticleSpawn {
                         entity: target_entity,
                         hash: vital_particle_key(&vital.direction, ""),
+                        rotation: None,
+                        resolver_entity: Some(entity),
+                    });
+                    // 破绽真正生成（预警转激活）瞬间音效
+                    commands.trigger(CommandSkinSoundPlay {
+                        entity,
+                        key: "FioraPassiveReadySound".to_string(),
+                        hit: false,
                     });
                 }
                 continue;
@@ -261,10 +280,13 @@ pub fn update_remove_vital(
                 commands.trigger(CommandSkinParticleDespawn {
                     entity: target_entity,
                     hash: vital_particle_key(&vital.direction, ""),
+                    resolver_entity: Some(entity),
                 });
                 commands.trigger(CommandSkinParticleSpawn {
                     entity: target_entity,
                     hash: vital_particle_key(&vital.direction, "_Timeout"),
+                    rotation: None,
+                    resolver_entity: Some(entity),
                 });
             }
 
@@ -274,6 +296,7 @@ pub fn update_remove_vital(
                 commands.trigger(CommandSkinParticleDespawn {
                     entity: target_entity,
                     hash: vital_current_particle_key(&vital),
+                    resolver_entity: Some(entity),
                 });
                 commands.entity(target_entity).remove::<Vital>();
             }
@@ -324,10 +347,24 @@ pub fn on_passive_damage_create(
         return;
     }
 
-    // 击破：撤下旧 Vital 当前阶段的粒子
+    // 击破：撤下旧 Vital 当前阶段的粒子，并在受击者身上播击破命中粒子
+    // （Hit_Tar 为一次性粒子，发射器到期自动销毁，无需手动撤下）
     commands.trigger(CommandSkinParticleDespawn {
         entity: target_entity,
         hash: vital_current_particle_key(vital),
+        resolver_entity: Some(trigger.source),
+    });
+    commands.trigger(CommandSkinParticleSpawn {
+        entity: target_entity,
+        hash: "Fiora_Passive_Hit_Tar".to_string(),
+        // Hit_Tar 粒子有方向：朝向被击破破绽的方向（含 180° 基准修正）
+        rotation: Some(hit_particle_rotation(&vital.direction)),
+        resolver_entity: Some(trigger.source),
+    });
+    commands.trigger(CommandSkinSoundPlay {
+        entity: trigger.source,
+        key: "FioraPassiveHitSound".to_string(),
+        hit: true,
     });
 
     let direction = match last_direction.entity_to_last_direction.get(&target_entity) {
@@ -370,6 +407,8 @@ pub fn on_passive_damage_create(
     commands.trigger(CommandSkinParticleSpawn {
         entity: target_entity,
         hash: vital_particle_key(&direction, "_Warning"),
+        rotation: None,
+        resolver_entity: Some(trigger.source),
     });
 
     commands.trigger(CommandDamageCreate {
@@ -380,7 +419,21 @@ pub fn on_passive_damage_create(
         tag: None,
     });
 
-    // 击破要害：治疗菲奥娜 + 8% 移速（1.5s），均走通用 buff 原语
+    // 击破要害：治疗菲奥娜 + 8% 移速（1.5s），均走通用 buff 原语；
+    // 同时在菲奥娜自身播治疗粒子（一次性，自动到期）
+    commands.trigger(CommandSkinParticleSpawn {
+        entity: trigger.source,
+        hash: "Fiora_Passive_Heal".to_string(),
+        rotation: None,
+        resolver_entity: None,
+    });
+    // 击破同时获得短暂移速：配套播移速 buff 粒子（一次性，自动到期）
+    commands.trigger(CommandSkinParticleSpawn {
+        entity: trigger.source,
+        hash: "Fiora_Passive_Speed_Buf".to_string(),
+        rotation: None,
+        resolver_entity: None,
+    });
     commands
         .entity(trigger.source)
         .with_related::<BuffOf>(BuffSelfHeal::new(FIORA_PASSIVE_HEAL));
@@ -420,6 +473,12 @@ fn vital_direction_rotation(direction: &Direction) -> Quat {
         Direction::NegZ => Quat::from_rotation_y(PI),         // -Z
         Direction::NegX => Quat::from_rotation_y(-FRAC_PI_2), // -X
     }
+}
+
+/// 方向 → 定向击破粒子（Hit_Tar 系）的发射器朝向：因为粒子资源的飞行
+/// 基准与扇形 +Z 基准相差 180°，所以在方向旋转基础上再绕 Y 轴翻转半圈。
+pub(crate) fn hit_particle_rotation(direction: &Direction) -> Quat {
+    vital_direction_rotation(direction) * Quat::from_rotation_y(std::f32::consts::PI)
 }
 
 /// 构造一个平铺在地面（XZ 平面，法线 +Y）、朝 +Z 的扇形（饼形）网格。

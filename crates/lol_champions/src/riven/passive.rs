@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 use bevy::time::{Timer, TimerMode};
+use lol_base::render_cmd::{CommandSkinParticleDespawn, CommandSkinParticleSpawn};
 use lol_core::attack::EventAttackEnd;
 use lol_core::base::buff::{Buff, BuffOf, Buffs};
 use lol_core::base::level::Level;
@@ -38,6 +39,30 @@ fn fresh_timer() -> Timer {
     Timer::from_seconds(RIVEN_PASSIVE_DURATION, TimerMode::Once)
 }
 
+/// 被动充能光效：身体 + 武器两处粒子成对挂撤
+const RIVEN_PASSIVE_PARTICLES: [&str; 2] = ["Riven_P_Buff", "Riven_P_Buff_Wpn"];
+
+fn spawn_passive_particles(commands: &mut Commands, entity: Entity) {
+    for key in RIVEN_PASSIVE_PARTICLES {
+        commands.trigger(CommandSkinParticleSpawn {
+            entity,
+            hash: key.to_string(),
+            rotation: None,
+            resolver_entity: None,
+        });
+    }
+}
+
+fn despawn_passive_particles(commands: &mut Commands, entity: Entity) {
+    for key in RIVEN_PASSIVE_PARTICLES {
+        commands.trigger(CommandSkinParticleDespawn {
+            entity,
+            hash: key.to_string(),
+            resolver_entity: None,
+        });
+    }
+}
+
 /// 按等级计算被动额外伤害倍率（1级 30% -> 18级 46.76%，线性插值）
 pub(crate) fn passive_ratio_for_level(level: u32) -> f32 {
     let t = level.saturating_sub(1) as f32 / 17.0;
@@ -58,6 +83,10 @@ pub fn on_riven_skill_cast_charge_passive(
     if let Ok(buffs) = q_riven.get(caster) {
         for buff_entity in buffs.iter() {
             if let Ok(mut passive) = q_passive.get_mut(buff_entity) {
+                // 层数从 0 回升：重新点亮充能光效
+                if passive.charges == 0 {
+                    spawn_passive_particles(&mut commands, caster);
+                }
                 passive.charges = (passive.charges + 1).min(RIVEN_PASSIVE_MAX_CHARGES);
                 passive.timer = fresh_timer();
                 return;
@@ -66,6 +95,7 @@ pub fn on_riven_skill_cast_charge_passive(
     }
 
     // 无被动：新建1层（with_related 会自动为角色建立 Buffs 关系目标）
+    spawn_passive_particles(&mut commands, caster);
     commands
         .entity(caster)
         .with_related::<BuffOf>(BuffRivenPassive {
@@ -112,6 +142,10 @@ pub fn on_damage_create_trigger_bonus(
         });
 
         passive.charges -= 1;
+        // 层数耗尽：撤下充能光效
+        if passive.charges == 0 {
+            despawn_passive_particles(&mut commands, source);
+        }
         info!(
             "{:?} 锐雯被动触发，额外伤害: {:.1}（剩余 {} 层）",
             source, bonus_damage, passive.charges
@@ -124,12 +158,16 @@ pub fn on_damage_create_trigger_bonus(
 pub fn update_riven_passive_timer(
     mut commands: Commands,
     time: Res<Time<Fixed>>,
-    mut q_passive: Query<(Entity, &mut BuffRivenPassive)>,
+    mut q_passive: Query<(Entity, &BuffOf, &mut BuffRivenPassive)>,
 ) {
     let mut expired = Vec::new();
-    for (entity, mut passive) in q_passive.iter_mut() {
+    for (entity, buff_of, mut passive) in q_passive.iter_mut() {
         passive.timer.tick(time.delta());
         if passive.timer.is_finished() {
+            // 到期时若仍有层数，充能光效还亮着，一并撤下
+            if passive.charges > 0 {
+                despawn_passive_particles(&mut commands, buff_of.0);
+            }
             expired.push(entity);
         }
     }

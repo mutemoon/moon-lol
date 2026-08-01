@@ -13,7 +13,9 @@
 use bevy::prelude::*;
 use bevy::time::{Timer, TimerMode};
 use lol_base::animation_names::ANIM_SPELL3;
-use lol_base::render_cmd::CommandAnimationPlay;
+use lol_base::render_cmd::{
+    CommandAnimationPlay, CommandSkinParticleDespawn, CommandSkinParticleSpawn,
+};
 use lol_base::spell::Spell;
 use lol_core::action::dash::{ActionDash, DashDamage, DashDamageIntent, DashMoveType};
 use lol_core::action::displace::{
@@ -134,7 +136,7 @@ pub fn on_camille_e(
             spell: skill.spell.clone(),
             damage: 0.0,
             speed: Some(CAMILLE_E_MISSILE_SPEED),
-            particle_hash: None,
+            particle_key: Some("Camille_E_mis_shoot_center".to_string()),
             sticky: true,
             pass_through: false,
             collision_target: MissileCollisionTarget::WallOnly,
@@ -223,6 +225,14 @@ pub fn on_camille_e(
             skill: skill.spell.clone(),
         });
 
+        // E2 冲刺光效（冲刺结束时撤除）
+        commands.trigger(CommandSkinParticleSpawn {
+            entity,
+            hash: "Camille_E_buf".to_string(),
+            rotation: None,
+            resolver_entity: None,
+        });
+
         // 触发冲刺
         commands.trigger(ActionDash {
             entity,
@@ -265,10 +275,21 @@ pub fn on_camille_e_missile_hit(
 
     let wall_point = trigger.point;
 
-    // 挂墙壁锚点
-    commands
-        .entity(entity)
-        .with_related::<BuffOf>(BuffCamilleWallCling { wall_point });
+    // 挂墙壁锚点（显式生成带 Transform 的实体，供墙面命中粒子锚定）
+    let cling_entity = commands
+        .spawn((
+            BuffCamilleWallCling { wall_point },
+            BuffOf(entity),
+            Transform::from_translation(wall_point),
+            GlobalTransform::from_translation(wall_point),
+        ))
+        .id();
+    commands.trigger(CommandSkinParticleSpawn {
+        entity: cling_entity,
+        hash: "Camille_E_hit_wall".to_string(),
+        rotation: None,
+        resolver_entity: Some(entity),
+    });
 
     // 拉向墙壁
     commands.trigger(ActionDash {
@@ -297,12 +318,25 @@ pub fn on_camille_e_dash_end(
         return;
     }
 
+    // 撤除 E2 冲刺光效（其他冲刺结束时为无害空操作）
+    commands.trigger(CommandSkinParticleDespawn {
+        entity,
+        hash: "Camille_E_buf".to_string(),
+        resolver_entity: None,
+    });
+
     let Ok(e2_state) = q_e2_state.get(entity) else {
         return;
     };
 
     // 对目标施加眩晕 + 伤害
     if let Some(target) = e2_state.target {
+        commands.trigger(CommandSkinParticleSpawn {
+            entity: target,
+            hash: "Camille_E_hit".to_string(),
+            rotation: None,
+            resolver_entity: Some(entity),
+        });
         commands.trigger(ActionDisplace {
             entity,
             targets: DisplaceTargetSelection::Explicit(vec![target]),

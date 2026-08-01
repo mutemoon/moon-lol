@@ -1,0 +1,216 @@
+(
+    basic_attack: (
+        on_cast: [
+            "characters/Fiora/sounds/100148878.ogg",
+            "characters/Fiora/sounds/216066493.ogg",
+            "characters/Fiora/sounds/227402369.ogg",
+            "characters/Fiora/sounds/248165938.ogg",
+            "characters/Fiora/sounds/26194829.ogg",
+            "characters/Fiora/sounds/435526453.ogg",
+            "characters/Fiora/sounds/57757882.ogg",
+            "characters/Fiora/sounds/75598154.ogg",
+        ],
+        on_hit: [
+            "characters/Fiora/sounds/110617456.ogg",
+            "characters/Fiora/sounds/123621399.ogg",
+            "characters/Fiora/sounds/139913649.ogg",
+            "characters/Fiora/sounds/15982667.ogg",
+            "characters/Fiora/sounds/162873079.ogg",
+            "characters/Fiora/sounds/165480274.ogg",
+            "characters/Fiora/sounds/177185538.ogg",
+            "characters/Fiora/sounds/220292153.ogg",
+            "characters/Fiora/sounds/22895149.ogg",
+            "characters/Fiora/sounds/29059332.ogg",
+            "characters/Fiora/sounds/33236861.ogg",
+            "characters/Fiora/sounds/35268648.ogg",
+            "characters/Fiora/sounds/41433963.ogg",
+            "characters/Fiora/sounds/492333429.ogg",
+            "characters/Fiora/sounds/51492454.ogg",
+            "characters/Fiora/sounds/54245804.ogg",
+            "characters/Fiora/sounds/62868466.ogg",
+            "characters/Fiora/sounds/69841356.ogg",
+            "characters/Fiora/sounds/70963861.ogg",
+            "characters/Fiora/sounds/83893563.ogg",
+        ],
+    ),
+    spells: {
+        "FioraE": (
+            on_cast: [
+                "characters/Fiora/sounds/307047090.ogg",
+                "characters/Fiora/sounds/60102032.ogg",
+                "characters/Fiora/sounds/608295856.ogg",
+                "characters/Fiora/sounds/687216270.ogg",
+                "characters/Fiora/sounds/914004755.ogg",
+            ],
+            on_hit: [],
+        ),
+        "FioraE2": (
+            on_cast: [
+                "characters/Fiora/sounds/914004755.ogg",
+            ],
+            on_hit: [],
+        ),
+        "FioraEAttack": (
+            on_cast: [],
+            on_hit: [
+                "characters/Fiora/sounds/404168632.ogg",
+                "characters/Fiora/sounds/732980041.ogg",
+                "characters/Fiora/sounds/751359322.ogg",
+                "characters/Fiora/sounds/751886416.ogg",
+            ],
+        ),
+        "FioraEAttack2": (
+            on_cast: [],
+            on_hit: [
+                "characters/Fiora/sounds/135482577.ogg",
+                "characters/Fiora/sounds/813003588.ogg",
+                "characters/Fiora/sounds/855718699.ogg",
+                "characters/Fiora/sounds/921555713.ogg",
+            ],
+        ),
+        "FioraPassiveHitSound": (
+            on_cast: [],
+            on_hit: [
+                "characters/Fiora/sounds/115487795.ogg",
+                "characters/Fiora/sounds/140205840.ogg",
+                "characters/Fiora/sounds/869559776.ogg",
+            ],
+        ),
+        "FioraPassiveManager": (
+            on_cast: [
+                "characters/Fiora/sounds/163049094.ogg",
+                "characters/Fiora/sounds/348654998.ogg",
+                "characters/Fiora/sounds/39044983.ogg",
+                "characters/Fiora/sounds/739934189.ogg",
+            ],
+            on_hit: [],
+        ),
+        "FioraPassiveReadySound": (
+            on_cast: [
+                "characters/Fiora/sounds/1050792220.ogg",
+                "characters/Fiora/sounds/248220733.ogg",
+                "characters/Fiora/sounds/517644423.ogg",
+                "characters/Fiora/sounds/531862447.ogg",
+            ],
+            on_hit: [],
+        ),
+        "FioraPassiveSpeed": (
+            on_cast: [
+                "characters/Fiora/sounds/174563743.ogg",
+                "characters/Fiora/sounds/31037918.ogg",
+                "characters/Fiora/sounds/512697418.ogg",
+                "characters/Fiora/sounds/755717700.ogg",
+                "characters/Fiora/sounds/774774469.ogg",
+                "characters/Fiora/sounds/842337916.ogg",
+            ],
+            on_hit: [],
+        ),
+        "FioraQ": (
+            on_cast: [
+                "characters/Fiora/sounds/1008513625.ogg",
+                "characters/Fiora/sounds/1069034273.ogg",
+                "characters/Fiora/sounds/169047149.ogg",
+                "characters/Fiora/sounds/296982738.ogg",
+                "characters/Fiora/sounds/405634485.ogg",
+                "characters/Fiora/sounds/4179099.ogg",
+                "characters/Fiora/sounds/843519807.ogg",
+                "characters/Fiora/sounds/96877161.ogg",
+            ],
+            on_hit: [],
+        ),
+        "FioraQAttack": (
+            on_cast: [],
+            on_hit: [
+                "characters/Fiora/sounds/1002504061.ogg",
+                "characters/Fiora/sounds/312864776.ogg",
+                "characters/Fiora/sounds/751089676.ogg",
+                "characters/Fiora/sounds/759936634.ogg",
+            ],
+        ),
+        "FioraRHeal": (
+            on_cast: [
+                "characters/Fiora/sounds/168382624.ogg",
+                "characters/Fiora/sounds/318142483.ogg",
+                "characters/Fiora/sounds/45821837.ogg",
+            ],
+            on_hit: [],
+        ),
+        "FioraRHitSound": (
+            on_cast: [],
+            on_hit: [
+                "characters/Fiora/sounds/256752726.ogg",
+                "characters/Fiora/sounds/303450905.ogg",
+                "characters/Fiora/sounds/328194144.ogg",
+                "characters/Fiora/sounds/355315504.ogg",
+                "characters/Fiora/sounds/489521047.ogg",
+                "characters/Fiora/sounds/57146704.ogg",
+                "characters/Fiora/sounds/829319661.ogg",
+                "characters/Fiora/sounds/864267879.ogg",
+            ],
+        ),
+        "FioraRMark": (
+            on_cast: [
+                "characters/Fiora/sounds/124286617.ogg",
+                "characters/Fiora/sounds/172374818.ogg",
+                "characters/Fiora/sounds/447604756.ogg",
+                "characters/Fiora/sounds/556270684.ogg",
+            ],
+            on_hit: [],
+        ),
+        "FioraW": (
+            on_cast: [
+                "characters/Fiora/sounds/51453556.ogg",
+                "characters/Fiora/sounds/523502590.ogg",
+                "characters/Fiora/sounds/621168171.ogg",
+                "characters/Fiora/sounds/647960477.ogg",
+            ],
+            on_hit: [],
+        ),
+        "FioraWBlockCCSound": (
+            on_cast: [
+                "characters/Fiora/sounds/164745483.ogg",
+                "characters/Fiora/sounds/214257380.ogg",
+                "characters/Fiora/sounds/656883093.ogg",
+                "characters/Fiora/sounds/664510781.ogg",
+            ],
+            on_hit: [],
+        ),
+        "FioraWBlockHitSound": (
+            on_cast: [],
+            on_hit: [
+                "characters/Fiora/sounds/1071598089.ogg",
+                "characters/Fiora/sounds/234915258.ogg",
+                "characters/Fiora/sounds/598738649.ogg",
+                "characters/Fiora/sounds/632277432.ogg",
+            ],
+        ),
+        "FioraWMinionSound": (
+            on_cast: [],
+            on_hit: [
+                "characters/Fiora/sounds/1005647268.ogg",
+                "characters/Fiora/sounds/259052099.ogg",
+                "characters/Fiora/sounds/358896859.ogg",
+                "characters/Fiora/sounds/363218782.ogg",
+                "characters/Fiora/sounds/760989263.ogg",
+            ],
+        ),
+        "FioraWSlow": (
+            on_cast: [],
+            on_hit: [
+                "characters/Fiora/sounds/138233965.ogg",
+                "characters/Fiora/sounds/263512436.ogg",
+                "characters/Fiora/sounds/364954599.ogg",
+                "characters/Fiora/sounds/807596886.ogg",
+            ],
+        ),
+        "FioraWStun": (
+            on_cast: [],
+            on_hit: [
+                "characters/Fiora/sounds/1022722360.ogg",
+                "characters/Fiora/sounds/198625716.ogg",
+                "characters/Fiora/sounds/248935313.ogg",
+                "characters/Fiora/sounds/493726312.ogg",
+            ],
+        ),
+    },
+)

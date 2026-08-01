@@ -1,5 +1,7 @@
 use bevy::prelude::*;
-use lol_base::render_cmd::CommandAnimationPlay;
+use lol_base::render_cmd::{
+    CommandAnimationPlay, CommandSkinParticleDespawn, CommandSkinParticleSpawn,
+};
 use lol_base::spell::Spell;
 use lol_core::attack::Attack;
 use lol_core::base::buff::{BuffOf, Buffs};
@@ -65,6 +67,13 @@ pub fn on_riven_r(
             commands
                 .entity(trigger.skill_entity)
                 .remove::<SkillRecastWindow>();
+
+            // 风斩出手后大剑光效结束
+            commands.trigger(CommandSkinParticleDespawn {
+                entity,
+                hash: "Riven_R_Sword".to_string(),
+                resolver_entity: None,
+            });
         }
         _ => {
             // 初次 R — 从 RON 读取增伤、攻击距离加成、持续时间，开启连招窗口
@@ -109,6 +118,20 @@ pub fn on_riven_r(
                 repeat: false,
                 duration: None,
             });
+
+            // 开大瞬间爆发 + 持续期间的大剑光效（风斩/到期时撤下）
+            commands.trigger(CommandSkinParticleSpawn {
+                entity,
+                hash: "Riven_R_Cas".to_string(),
+                rotation: None,
+                resolver_entity: None,
+            });
+            commands.trigger(CommandSkinParticleSpawn {
+                entity,
+                hash: "Riven_R_Sword".to_string(),
+                rotation: None,
+                resolver_entity: None,
+            });
         }
     }
 }
@@ -148,10 +171,15 @@ fn cast_riven_wind_slash(
     let spread_angle = 7.0_f32.to_radians();
     let origin = transform.translation;
 
-    // 三枚导弹：左、中、右（相对于 forward 方向的偏移角度）
+    // 三枚导弹：左、中、右（相对于 forward 方向的偏移角度），各自携带风斩粒子
     let angles = [-spread_angle, 0.0, spread_angle];
+    let particle_keys = ["Riven_R_Mis_Right", "Riven_R_Mis_Middle", "Riven_R_Mis_Left"];
 
-    for (angle, handle) in angles.iter().zip(missile_handles.iter()) {
+    for ((angle, handle), particle_key) in angles
+        .iter()
+        .zip(missile_handles.iter())
+        .zip(particle_keys.iter())
+    {
         let rot = Quat::from_axis_angle(Vec3::Y, *angle);
         let world_dir = rot * forward;
         let destination = origin + world_dir * range;
@@ -163,7 +191,7 @@ fn cast_riven_wind_slash(
             spell: handle.clone(),
             damage: min_damage,
             speed: None,
-            particle_hash: None,
+            particle_key: Some(particle_key.to_string()),
             sticky: false,
             pass_through: true,
             collision_target: default(),
@@ -175,7 +203,7 @@ fn cast_riven_wind_slash(
 /// 更新 R buff 计时器，到期后移除并恢复属性
 pub fn update_riven_buffs(
     mut commands: Commands,
-    mut q_champion: Query<(&Buffs, &mut Damage, &mut Attack), With<Riven>>,
+    mut q_champion: Query<(Entity, &Buffs, &mut Damage, &mut Attack), With<Riven>>,
     mut q_buff_r: Query<(Entity, &mut BuffRivenR)>,
     time: Res<Time<Fixed>>,
 ) {
@@ -196,7 +224,7 @@ pub fn update_riven_buffs(
     let expired_entities: Vec<Entity> = expired.iter().map(|(e, _, _)| *e).collect();
 
     // 遍历所有 Riven 实体，检查它们的 buffs 是否有过期的 R 被动
-    for (buffs, mut damage, mut attack) in q_champion.iter_mut() {
+    for (champion, buffs, mut damage, mut attack) in q_champion.iter_mut() {
         for buff_entity in buffs.iter() {
             if let Some((_, bonus_ad_ratio, bonus_range)) =
                 expired.iter().find(|(e, _, _)| *e == buff_entity)
@@ -204,6 +232,12 @@ pub fn update_riven_buffs(
                 // R 到期，用 BuffRivenR 中存储的数值恢复属性
                 damage.0 /= 1.0 + bonus_ad_ratio;
                 attack.range -= bonus_range;
+                // R 到期未放风斩：撤下大剑光效
+                commands.trigger(CommandSkinParticleDespawn {
+                    entity: champion,
+                    hash: "Riven_R_Sword".to_string(),
+                    resolver_entity: None,
+                });
                 break;
             }
         }

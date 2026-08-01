@@ -1,4 +1,7 @@
 use bevy::prelude::*;
+use lol_base::render_cmd::{
+    CommandSkinParticleDespawn, CommandSkinParticleSpawn, CommandSkinSoundPlay,
+};
 use lol_base::spell::Spell;
 use lol_core::attack::{BuffAttack, CommandAttackReset, EventAttackEnd};
 use lol_core::base::buff::{Buff, BuffOf, Buffs};
@@ -13,12 +16,18 @@ const FIORA_E_DURATION: f32 = 3.0;
 const FIORA_E_SLOW_PERCENT: f32 = 0.4;
 const FIORA_E_SLOW_DURATION: f32 = 1.0;
 
+/// E 光效挂载的骨骼名：GLB 中 Fiora 的标准武器骨骼
+/// （spell 数据里没有骨骼字段，绑定点按骨骼名在角色后代中查找）。
+const FIORA_E_GLOW_BONE: &str = "BUFFBONE_GLB_WEAPON_1";
+
 #[derive(Component, Clone, Debug)]
 #[require(Buff = Buff { name: "FioraE" })]
 pub struct BuffFioraE {
     pub left: i32,
     pub crit_bonus_ratio: f32,
     pub timer: Timer,
+    /// 剑身光效挂载的骨骼实体；未找到骨骼时为 PLACEHOLDER（退回角色根实体）。
+    pub glow_anchor: Entity,
 }
 
 impl Default for BuffFioraE {
@@ -27,6 +36,7 @@ impl Default for BuffFioraE {
             left: 2,
             crit_bonus_ratio: 0.5,
             timer: Timer::from_seconds(FIORA_E_DURATION, TimerMode::Once),
+            glow_anchor: Entity::PLACEHOLDER,
         }
     }
 }
@@ -36,6 +46,8 @@ pub fn on_fiora_e(
     mut commands: Commands,
     q_fiora: Query<(), With<Fiora>>,
     q_skill: Query<&Skill>,
+    q_children: Query<&Children>,
+    q_name: Query<&Name>,
     res_spells: Res<Assets<Spell>>,
 ) {
     let entity = trigger.event_target();
@@ -63,10 +75,32 @@ pub fn on_fiora_e(
     commands.entity(entity).insert(BuffAttack {
         bonus_attack_speed: as_percent,
     });
+    // E 期间剑身发光（持续型，buff 结束时撤销）：挂到武器骨骼实体上，粒子每帧跟随骨骼
+    let mut glow_anchor = Entity::PLACEHOLDER;
+    for child in q_children.iter_descendants(entity) {
+        if let Ok(name) = q_name.get(child) {
+            if name.as_str() == FIORA_E_GLOW_BONE {
+                glow_anchor = child;
+                break;
+            }
+        }
+    }
+    let glow_entity = if glow_anchor == Entity::PLACEHOLDER {
+        entity
+    } else {
+        glow_anchor
+    };
+    commands.trigger(CommandSkinParticleSpawn {
+        entity: glow_entity,
+        hash: "Fiora_E_Sword_Glow".to_string(),
+        rotation: None,
+        resolver_entity: Some(entity),
+    });
     commands.entity(entity).with_related::<BuffOf>(BuffFioraE {
         left: 2,
         crit_bonus_ratio: crit_ratio,
         timer: Timer::from_seconds(FIORA_E_DURATION, TimerMode::Once),
+        glow_anchor,
     });
     commands.trigger(CommandAttackReset { entity });
 }
@@ -93,6 +127,25 @@ pub fn on_event_attack_end(
 
         let was = buff_fiora_e.left;
         buff_fiora_e.left -= 1;
+
+        // 强化普攻命中特效：键在菲奥娜的 resolver 里，挂到受击目标身上
+        if was > 0 {
+            commands.trigger(CommandSkinParticleSpawn {
+                entity: target,
+                hash: "Fiora_E_Hit_tar".to_string(),
+                rotation: None,
+                resolver_entity: Some(entity),
+            });
+            commands.trigger(CommandSkinSoundPlay {
+                entity,
+                key: if was == 2 {
+                    "FioraEAttack".to_string()
+                } else {
+                    "FioraEAttack2".to_string()
+                },
+                hit: true,
+            });
+        }
 
         match was {
             2 => {
@@ -121,6 +174,17 @@ pub fn on_event_attack_end(
         if buff_fiora_e.left <= 0 {
             commands.entity(buff).despawn();
             commands.entity(entity).remove::<BuffAttack>();
+            // 两击耗尽：撤下剑身发光
+            let glow_entity = if buff_fiora_e.glow_anchor == Entity::PLACEHOLDER {
+                entity
+            } else {
+                buff_fiora_e.glow_anchor
+            };
+            commands.trigger(CommandSkinParticleDespawn {
+                entity: glow_entity,
+                hash: "Fiora_E_Sword_Glow".to_string(),
+                resolver_entity: Some(entity),
+            });
         }
     }
 }
@@ -136,6 +200,17 @@ pub fn update_fiora_e_buff(
         if buff.timer.is_finished() {
             commands.entity(buff_of.0).remove::<BuffAttack>();
             commands.entity(buff_entity).despawn();
+            // E 到期未用完两击：同样撤下剑身发光
+            let glow_entity = if buff.glow_anchor == Entity::PLACEHOLDER {
+                buff_of.0
+            } else {
+                buff.glow_anchor
+            };
+            commands.trigger(CommandSkinParticleDespawn {
+                entity: glow_entity,
+                hash: "Fiora_E_Sword_Glow".to_string(),
+                resolver_entity: Some(buff_of.0),
+            });
         }
     }
 }

@@ -107,6 +107,7 @@ impl ChampionTestHarness {
                     bevy::world_serialization::WorldSerializationPlugin,
                     log_plugin,
                 ));
+                app.add_plugins(lol_core::PluginCore);
             }
             HarnessMode::Render => {
                 app.add_plugins(
@@ -117,6 +118,9 @@ impl ChampionTestHarness {
                         .disable::<WinitPlugin>(),
                 );
                 app.add_plugins(PluginRender);
+                // PluginParticle 会在 PluginLifetime 缺失时自行注册；先加 PluginCore，
+                // 让粒子插件检测到已注册而跳过，避免渲染测试重复添加插件 panic。
+                app.add_plugins(lol_core::PluginCore);
                 app.add_plugins(lol_particle::PluginParticle);
                 app.add_plugins(PluginSkillTestRender);
 
@@ -139,7 +143,6 @@ impl ChampionTestHarness {
                 });
             }
         }
-        app.add_plugins(lol_core::PluginCore);
         (config.add_champion_plugin)(&mut app);
 
         app.insert_resource(lol_base::map::MapPaths::new("test"));

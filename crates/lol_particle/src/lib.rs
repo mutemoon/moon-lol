@@ -3,11 +3,6 @@ pub mod loaders;
 pub mod particle;
 pub mod utils;
 
-/// 因为粒子命令事件与 shader 布局描述已下沉到 lol_base_render，
-/// 所以在 crate 根部 re-export 保持调用方路径稳定。
-pub use lol_base_render::particle::{CommandParticleDespawn, CommandParticleSpawn};
-pub use lol_base_render::shader_layout;
-
 use bevy::mesh::{MeshVertexAttribute, VertexFormat};
 use bevy::platform::collections::HashMap;
 use bevy::prelude::*;
@@ -16,10 +11,15 @@ use bevy::transform::systems::{
 };
 use league_utils::{LeagueShader, hash_wad};
 use lol_base::hash_key::{HashKey, LoadHashKeyTrait};
+/// 因为粒子命令事件与 shader 布局描述已下沉到 lol_base_render，
+/// 所以在 crate 根部 re-export 保持调用方路径稳定。
+pub use lol_base_render::particle::{CommandParticleDespawn, CommandParticleSpawn};
 use lol_base_render::particle::{
     ConfigResourceResolver, ConfigVfx, ConfigVfxEmitterDefinition, ConfigVfxHandle,
     ConfigVfxSystemDefinition,
 };
+use lol_base_render::shader::{DebugShaderHandles, ShaderMap, startup_load_shaders};
+pub use lol_base_render::shader_layout;
 use lol_core::lifetime::{Lifetime, LifetimeMode, PluginLifetime};
 
 use crate::emitters::decal::update_decal_intersections;
@@ -31,7 +31,6 @@ use crate::particle::{
     update_particle, update_particle_skinned_mesh_particle, update_particle_transform,
 };
 use crate::utils::ResourceCache;
-use lol_base_render::shader::{DebugShaderHandles, ShaderMap, startup_load_shaders};
 
 pub const ATTRIBUTE_WORLD_POSITION: MeshVertexAttribute =
     MeshVertexAttribute::new("ATTRIBUTE_WORLD_POSITION", 2020, VertexFormat::Float32x3);
@@ -183,6 +182,13 @@ fn on_command_particle_spawn(
         return;
     };
 
+    // 因为发射器 Transform 后续每帧由 update_emitter_position 覆写，所以
+    // 朝向覆盖除存进发射器状态外，也要写进初始变换，避免首帧朝向错误
+    let mut global_transform = global_transform;
+    if let Some(rotation) = trigger.rotation {
+        global_transform.rotation = rotation;
+    }
+
     let Some(vfx_system_def) = res_assets_vfx_system_definition_data.load_hash(trigger.vfx_handle)
     else {
         info!(
@@ -231,7 +237,7 @@ fn on_command_particle_spawn(
                 vfx_handle: trigger.vfx_handle,
                 index: i,
             },
-            ParticleEmitterState::new(vfx_emitter_definition_data, global_transform),
+            ParticleEmitterState::new(vfx_emitter_definition_data, global_transform, trigger.rotation),
             Lifetime::new(
                 vfx_emitter_definition_data.lifetime.unwrap_or(1.0),
                 LifetimeMode::TimerAndNoChildren,
@@ -276,7 +282,8 @@ fn inject_vfx_assets(
     mut res_assets_vfx_resolver: ResMut<Assets<ConfigResourceResolver>>,
 ) {
     for event in events.read() {
-        let (AssetEvent::LoadedWithDependencies { id } | AssetEvent::Modified { id }) = event else {
+        let (AssetEvent::LoadedWithDependencies { id } | AssetEvent::Modified { id }) = event
+        else {
             continue;
         };
         let Some(config_vfx) = res_assets_vfx.get(*id) else {
@@ -288,18 +295,9 @@ fn inject_vfx_assets(
             config_vfx.resolvers.len(),
         );
         for (&hash, system_def) in &config_vfx.systems {
-            info!(
-                "  注入 system hash={:08x} name={:?}",
-                hash, system_def.particle_name
-            );
             res_assets_vfx_system.add_hash(hash, system_def.clone());
         }
         for (&hash, resolver) in &config_vfx.resolvers {
-            info!(
-                "  注入 resolver hash={:08x} 条目数={}",
-                hash,
-                resolver.resource_map.len(),
-            );
             res_assets_vfx_resolver.add_hash(hash, resolver.clone());
         }
     }

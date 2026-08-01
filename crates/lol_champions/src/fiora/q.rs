@@ -6,7 +6,9 @@
 
 use bevy::prelude::*;
 use lol_base::animation_names::ANIM_SPELL1;
-use lol_base::render_cmd::CommandAnimationPlay;
+use lol_base::render_cmd::{
+    CommandAnimationPlay, CommandSkinParticleSpawn, CommandSkinSoundPlay,
+};
 use lol_base::spell::Spell;
 use lol_core::action::dash::{ActionDash, DashMoveType};
 use lol_core::attack::CommandAttackReset;
@@ -67,6 +69,20 @@ pub fn on_fiora_q(
         hash: ANIM_SPELL1.to_string(),
         repeat: false,
         duration: None,
+    });
+
+    // 施法视觉：挥斩特效 + 位移地面拖尾（均为一次性粒子，发射器到期自销）
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: "Fiora_Q_Slash_Cas".to_string(),
+        rotation: None,
+        resolver_entity: None,
+    });
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: "Fiora_Q_Dash_Trail_ground".to_string(),
+        rotation: None,
+        resolver_entity: None,
     });
 
     commands.trigger(ActionDash {
@@ -169,6 +185,20 @@ pub fn on_fiora_q_dash_end(
                 damage_type: DamageType::Physical,
                 amount,
                 tag: None,
+            });
+
+            // 戳刺命中特效：键在菲奥娜的 resolver 里，挂到受击目标身上
+            commands.trigger(CommandSkinParticleSpawn {
+                entity: target,
+                hash: "Fiora_Q_Hit_Tar".to_string(),
+                rotation: None,
+                resolver_entity: Some(entity),
+            });
+            // Q 命中音效（FioraQAttack 独立 cue），只在命中时播
+            commands.trigger(CommandSkinSoundPlay {
+                entity,
+                key: "FioraQAttack".to_string(),
+                hit: true,
             });
 
             let refund = get_skill_data_value(spell_object, FIORA_Q_CD_REFUND_KEY, pending.level)

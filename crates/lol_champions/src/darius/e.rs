@@ -7,7 +7,7 @@
 
 use bevy::prelude::*;
 use lol_base::animation_names::ANIM_SPELL3;
-use lol_base::render_cmd::CommandAnimationPlay;
+use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
 use lol_core::action::displace::{
     ActionDisplace, DisplaceEffect, DisplaceMotion, DisplaceTargetSelection,
 };
@@ -52,6 +52,14 @@ pub fn on_darius_e(
         hash: ANIM_SPELL3.to_string(),
         repeat: false,
         duration: None,
+    });
+
+    // E 钩斧挥舞光效
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: "darius_E_weapon_trigger".to_string(),
+        rotation: None,
+        resolver_entity: None,
     });
 
     let Ok(transform) = q_transform.get(entity) else {

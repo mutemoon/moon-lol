@@ -1,9 +1,8 @@
 use bevy::asset::{AssetLoader, LoadContext};
 use bevy::image::ImageLoaderSettings;
 use bevy::reflect::TypePath;
-use lol_base_render::particle::{ConfigVfx, VfxTexture};
-
 use lol_base_render::error::Error;
+use lol_base_render::particle::{ConfigVfx, VfxTexture};
 
 /// skin{N}_vfx.ron 的自定义加载器。
 ///
@@ -40,7 +39,7 @@ impl AssetLoader for ConfigVfxLoader {
             ];
             for emitters in emitter_lists.into_iter().flatten() {
                 for emitter in emitters.iter_mut() {
-                    resolve_texture(&mut emitter.texture, load_context, false);
+                    resolve_texture(&mut emitter.texture, load_context, true);
                     resolve_texture(&mut emitter.particle_color_texture, load_context, false);
 
                     if let Some(distortion) = emitter.distortion_definition.as_mut() {

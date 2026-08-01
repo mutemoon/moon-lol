@@ -3,7 +3,7 @@
 use bevy::prelude::*;
 use bevy::time::{Timer, TimerMode};
 use lol_base::animation_names::ANIM_SPELL3;
-use lol_base::render_cmd::CommandAnimationPlay;
+use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
 use lol_base::spell::Spell;
 use lol_core::damage::{CommandDamageCreate, Damage, DamageType};
 use lol_core::entities::champion::Champion;
@@ -47,6 +47,18 @@ pub fn on_irelia_e(
         hash: ANIM_SPELL3.to_string(),
         repeat: false,
         duration: None,
+    });
+
+    // 两段施法各自的刀刃光效
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: if stage == 1 {
+            "Irelia_E_cas".to_string()
+        } else {
+            "Irelia_E_cas_02".to_string()
+        },
+        rotation: None,
+        resolver_entity: None,
     });
 
     if stage == 1 {

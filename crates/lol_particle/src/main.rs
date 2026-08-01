@@ -175,6 +175,7 @@ fn on_play_particle(
         .trigger(move |entity| CommandParticleSpawn {
             entity,
             vfx_handle: HashKey::<ConfigVfxSystemDefinition>::from(hash),
+            rotation: None,
         });
     playing.current = Some(hash);
     info!("播放粒子 name={particle_name:?} hash={hash:08x}");

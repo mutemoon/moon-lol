@@ -41,11 +41,16 @@ pub fn update_emitter_position(
 
         if is_local_orientation {
             character_global_transform.translation += emitter_position;
+            // 朝向覆盖：定向粒子（如受击粒子朝向破绽方向）用指定朝向
+            // 替换锚点自身朝向
+            if let Some(rotation) = emitter.rotation_override {
+                character_global_transform.rotation = rotation;
+            }
             *transform = character_global_transform;
         } else {
             *transform = Transform::from_matrix(Mat4::from_scale_rotation_translation(
                 character_global_transform.scale,
-                Quat::default(),
+                emitter.rotation_override.unwrap_or_default(),
                 character_global_transform.translation + emitter_position,
             ));
         }

@@ -1,6 +1,7 @@
 //! Darius 被动 - 出血 (Hemorrhage) + 诺克萨斯之力 (Noxian Might)
 
 use bevy::prelude::*;
+use lol_base::render_cmd::{CommandSkinParticleDespawn, CommandSkinParticleSpawn};
 use lol_core::base::buff::{BuffOf, Buffs};
 use lol_core::damage::{CommandDamageCreate, Damage, DamageType, EventDamageCreate};
 
@@ -11,6 +12,20 @@ use crate::darius::buffs::{
 
 /// 标记出血 DoT 伤害，避免再次叠层。
 pub const DARIUS_BLEED_DOT_TAG: u32 = 1;
+
+/// 诺克萨斯之力自身光效键。
+const DARIUS_MIGHT_PARTICLE: &str = "Darius_P_enraged";
+
+/// 出血层数计数器粒子键（1~5 层）。
+fn hemo_counter_key(stacks: u8) -> &'static str {
+    match stacks {
+        1 => "Darius_hemo_counter_01",
+        2 => "Darius_hemo_counter_02",
+        3 => "Darius_hemo_counter_03",
+        4 => "Darius_hemo_counter_04",
+        _ => "Darius_hemo_counter_05",
+    }
+}
 
 /// 监听 Darius 造成的伤害，给目标叠加出血；叠满 5 层触发诺克萨斯之力。
 pub fn on_darius_damage_hit(
@@ -42,11 +57,24 @@ pub fn on_darius_damage_hit(
     if let Ok(buffs) = q_buffs.get(target) {
         for b in buffs.iter() {
             if let Ok(mut bleed) = q_bleed.get_mut(b) {
+                let old_stacks = bleed.stacks;
                 let was_below_max = bleed.stacks < DARIUS_BLEED_MAX_STACKS;
                 bleed.add_stack();
                 if was_below_max && bleed.stacks >= DARIUS_BLEED_MAX_STACKS {
                     reached_five = true;
                 }
+                // 层数变化：换计数器粒子（先撤旧层再挂新层）
+                commands.trigger(CommandSkinParticleDespawn {
+                    entity: target,
+                    hash: hemo_counter_key(old_stacks).to_string(),
+                    resolver_entity: Some(source),
+                });
+                commands.trigger(CommandSkinParticleSpawn {
+                    entity: target,
+                    hash: hemo_counter_key(bleed.stacks).to_string(),
+                    rotation: None,
+                    resolver_entity: Some(source),
+                });
                 found_existing = true;
                 break;
             }
@@ -56,6 +84,12 @@ pub fn on_darius_damage_hit(
         commands
             .entity(target)
             .with_related::<BuffOf>(BuffDariusBleed::new(source));
+        commands.trigger(CommandSkinParticleSpawn {
+            entity: target,
+            hash: hemo_counter_key(1).to_string(),
+            rotation: None,
+            resolver_entity: Some(source),
+        });
     }
 
     // 叠满 5 层 -> 诺克萨斯之力（+50% AD），已存在则不重复施加
@@ -70,6 +104,13 @@ pub fn on_darius_damage_hit(
                 .entity(source)
                 .with_related::<BuffOf>(BuffDariusMight::new(bonus));
             commands.entity(source).insert(Damage(ad + bonus));
+            // 诺克萨斯之力光效（到期由 update_darius_might 撤除）
+            commands.trigger(CommandSkinParticleSpawn {
+                entity: source,
+                hash: DARIUS_MIGHT_PARTICLE.to_string(),
+                rotation: None,
+                resolver_entity: None,
+            });
         }
     }
 }
@@ -86,6 +127,12 @@ pub fn update_darius_bleed(
     for (entity, mut bleed, bo) in q_bleed.iter_mut() {
         bleed.duration_timer.tick(dt);
         if bleed.duration_timer.is_finished() {
+            // 出血到期：撤除当前层数计数器粒子
+            commands.trigger(CommandSkinParticleDespawn {
+                entity: bo.0,
+                hash: hemo_counter_key(bleed.stacks).to_string(),
+                resolver_entity: Some(bleed.source),
+            });
             expired.push(entity);
             continue;
         }
@@ -126,6 +173,12 @@ pub fn update_darius_might(
         if let Ok(mut d) = q_damage.get_mut(darius) {
             d.0 -= bonus;
         }
+        // 到期：撤除诺克萨斯之力光效
+        commands.trigger(CommandSkinParticleDespawn {
+            entity: darius,
+            hash: DARIUS_MIGHT_PARTICLE.to_string(),
+            resolver_entity: None,
+        });
         commands.entity(entity).despawn();
     }
 }

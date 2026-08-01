@@ -12,12 +12,14 @@ use league_file::skeleton::LeagueSkeleton;
 use league_loader::game::{Data, LeagueLoader, PropGroup};
 use league_loader::prop_bin::LeagueWadLoaderTrait;
 use lol_base_render::animation::{ConfigAnimationClip, LOLAnimationGraph, LOLAnimationGraphHandle};
+use lol_base::audio::{AudioBank, ConfigAudio};
 use lol_base::character::{HealthBar, Skin};
 use lol_base_render::particle::{ConfigVfx, ConfigVfxHandle};
 use ron::ser::{PrettyConfig, to_string_pretty};
 
 use crate::animation::load_animation_file;
 use crate::extract::animation::animation_graph_to_config;
+use crate::extract::audio::export_audio_for_skin;
 use crate::extract::utils::{extract_particle_texture, extract_texture, get_texture_path, write_to_file};
 use crate::skin_gltf_export::export_skin_to_glb;
 use crate::utils::decode_texture_to_png;
@@ -28,6 +30,8 @@ pub fn extract_skin_for_champion(
     champ_name: &str,
     skin_bin_path: Option<&str>,
     hashes: &HashMap<u32, String>,
+    all_spell_names: &[String],
+    basic_attack_names: &[String],
 ) {
     let Some(skin_bin_path) = skin_bin_path else {
         return;
@@ -214,6 +218,8 @@ pub fn extract_skin_for_champion(
     // 注册 ConfigVfx 资产与 ConfigVfxHandle 资源类型，使 skin{N}.ron 能承载指向 skin{N}_vfx.ron 的句柄
     app.init_asset::<ConfigVfx>();
     app.register_type::<ConfigVfxHandle>();
+    // 注册 ConfigAudio 资产，使 skin{N}.ron 能承载指向 skin{N}_audio.ron 的 AudioBank 句柄
+    app.init_asset::<ConfigAudio>();
 
     app.finish();
     app.cleanup();
@@ -248,6 +254,20 @@ pub fn extract_skin_for_champion(
         hashes,
     );
 
+    // 导出音效配置，序列化为 skin{N}_audio.ron，并通过 AudioBank 组件挂到皮肤实体
+    let config_audio = export_audio_for_skin(
+        loader,
+        champ_name,
+        skin_id,
+        &skin_data,
+        all_spell_names,
+        basic_attack_names,
+    );
+    let output_audio_path = format!("characters/{}/skins/{}_audio.ron", champ_name, skin_id);
+    let serialized_audio = to_string_pretty(&config_audio, PrettyConfig::default()).unwrap();
+    super::utils::write_to_file(&output_audio_path, &serialized_audio);
+    let audio_handle: Handle<ConfigAudio> = asset_server.load(&output_audio_path);
+
     // 如果有动画，创建 AnimationHandler
     let animation_handler = animation_ron_path.map(|anim_path| {
         let anim_handle = asset_server.load(&anim_path);
@@ -269,6 +289,7 @@ pub fn extract_skin_for_champion(
         HealthBar { bar_type },
         Visibility::default(),
         WorldAssetRoot(skin_handle),
+        AudioBank(audio_handle),
     ));
     if let Some(handler) = animation_handler {
         entity_builder.insert(handler);

@@ -5,6 +5,7 @@ use lol_base::debug_missile::DebugMissile;
 use lol_base::debug_sphere::DebugSphere;
 use lol_base::grid::ConfigNavigationGrid;
 use lol_base::movement::{MissileBehavior, MovementType};
+use lol_base::render_cmd::CommandSkinParticleSpawn;
 use lol_base::spell::Spell;
 use serde::{Deserialize, Serialize};
 
@@ -111,8 +112,8 @@ pub struct CommandMissileCreate {
     pub damage: f32,
     /// 覆盖导弹飞行速度（None 则使用 spell data 中的 missileSpeed）
     pub speed: Option<f32>,
-    /// 覆盖 missile effect particle（None 则使用 spell data 中的 missileEffectKey）
-    pub particle_hash: Option<u32>,
+    /// 导弹粒子触发键（经施法者 resolver 查表，挂到导弹实体上随导弹销毁）
+    pub particle_key: Option<String>,
     /// 粘性飞弹：碰墙锚定并发出 `EventMissileHit`，用于青钢影 E 钩索等
     pub sticky: bool,
     /// 穿透飞弹：碰撞敌人后不销毁，继续飞行（刀妹 R 飞弹）。
@@ -443,6 +444,16 @@ fn on_command_missile_create(
 
         let missile_entity = cmd.id();
 
+        // 导弹粒子：键在施法者 resolver 里，挂到导弹实体上随其销毁
+        if let Some(particle_key) = &trigger.particle_key {
+            commands.trigger(CommandSkinParticleSpawn {
+                entity: missile_entity,
+                hash: particle_key.clone(),
+                rotation: None,
+                resolver_entity: Some(entity),
+            });
+        }
+
         commands.trigger(CommandMovement {
             entity: missile_entity,
             priority: 0,
@@ -504,6 +515,16 @@ fn on_command_missile_create(
     }
 
     let missile_entity = cmd.id();
+
+    // 导弹粒子：键在施法者 resolver 里，挂到导弹实体上随其销毁
+    if let Some(particle_key) = &trigger.particle_key {
+        commands.trigger(CommandSkinParticleSpawn {
+            entity: missile_entity,
+            hash: particle_key.clone(),
+            rotation: None,
+            resolver_entity: Some(entity),
+        });
+    }
 
     q_children.iter_descendants(entity);
 
@@ -747,7 +768,7 @@ mod tests {
                 spell,
                 damage: 0.0,
                 speed: Some(1200.0),
-                particle_hash: None,
+                particle_key: None,
                 sticky: true,
                 pass_through: false,
                 collision_target: MissileCollisionTarget::Enemy,
@@ -791,7 +812,7 @@ mod tests {
                 spell,
                 damage: 0.0,
                 speed: Some(1200.0),
-                particle_hash: None,
+                particle_key: None,
                 sticky: false,
                 pass_through: false,
                 collision_target: MissileCollisionTarget::Enemy,

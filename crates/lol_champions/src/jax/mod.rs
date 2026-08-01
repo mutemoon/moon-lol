@@ -2,7 +2,7 @@ pub mod buffs;
 
 use bevy::prelude::*;
 use lol_base::animation_names::{ANIM_SPELL1, ANIM_SPELL2, ANIM_SPELL3, ANIM_SPELL4};
-use lol_base::render_cmd::CommandAnimationPlay;
+use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
 };
@@ -66,6 +66,15 @@ fn on_jax_q(
         repeat: false,
         duration: None,
     });
+    // 跳跃施法 + 手上发光 + 跳跃残影光效
+    for key in ["Jax_Q_cas", "Jax_Q_HandGlow", "Jax_Q_Avatar"] {
+        commands.trigger(CommandSkinParticleSpawn {
+            entity,
+            hash: key.to_string(),
+            rotation: None,
+            resolver_entity: None,
+        });
+    }
     commands.trigger(ActionDash {
         entity,
         point: point,
@@ -97,6 +106,13 @@ fn on_jax_w(
         hash: ANIM_SPELL2.to_string(),
         repeat: false,
         duration: None,
+    });
+    // 武器发光光效（强化普攻状态）
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: "Jax_W_buf".to_string(),
+        rotation: None,
+        resolver_entity: None,
     });
     // W 组合：攻击重置 + 强化下次普攻（50 额外伤害）
     commands.trigger(CommandAttackReset { entity });
@@ -133,6 +149,15 @@ fn on_jax_e(
         repeat: false,
         duration: None,
     });
+    // 反击风暴：施法 + 地面圈 + 持续闪避光环光效
+    for key in ["Jax_E_cas", "Jax_E_cas_ground", "Jax_E_buf"] {
+        commands.trigger(CommandSkinParticleSpawn {
+            entity,
+            hash: key.to_string(),
+            rotation: None,
+            resolver_entity: None,
+        });
+    }
     // E provides dodge buff
     commands
         .entity(entity)
@@ -175,6 +200,15 @@ fn on_jax_r(
         repeat: false,
         duration: None,
     });
+    // 宗师之威：施法冲击波 + AoE 圈 + 法杖发光 + 持续增益光效
+    for key in ["Jax_R_cas", "Jax_R_AOE", "Jax_R_StaffGlow", "Jax_R_buf"] {
+        commands.trigger(CommandSkinParticleSpawn {
+            entity,
+            hash: key.to_string(),
+            rotation: None,
+            resolver_entity: None,
+        });
+    }
     // R is a self-cast that deals AoE damage and grants armor/mr
     commands.trigger(ActionDamage {
         entity,

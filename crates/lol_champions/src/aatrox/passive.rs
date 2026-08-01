@@ -3,6 +3,7 @@
 //! 就绪时下次普攻附带目标最大生命值 15% 额外魔法伤害 + 治疗；冷却 22s。
 
 use bevy::prelude::*;
+use lol_base::render_cmd::{CommandSkinParticleDespawn, CommandSkinParticleSpawn};
 use lol_core::attack::EventAttackEnd;
 use lol_core::damage::{CommandDamageCreate, DamageType};
 use lol_core::life::Health;
@@ -63,20 +64,41 @@ pub fn on_aatrox_attack_end(
 
     passive.ready = false;
     passive.timer.reset();
+
+    // 消耗被动：撤下就绪光效，目标上播命中光效
+    commands.trigger(CommandSkinParticleDespawn {
+        entity: attacker,
+        hash: "Aatrox_P_Ready".to_string(),
+        resolver_entity: None,
+    });
+    commands.trigger(CommandSkinParticleSpawn {
+        entity: target,
+        hash: "Aatrox_P_Hit_Tar".to_string(),
+        rotation: None,
+        resolver_entity: Some(attacker),
+    });
 }
 
 /// 被动冷却倒计时：到时再次就绪。
 pub fn update_aatrox_passive(
     time: Res<Time>,
-    mut q_aatrox: Query<&mut AatroxPassiveState, With<Aatrox>>,
+    mut commands: Commands,
+    mut q_aatrox: Query<(Entity, &mut AatroxPassiveState), With<Aatrox>>,
 ) {
-    for mut passive in q_aatrox.iter_mut() {
+    for (entity, mut passive) in q_aatrox.iter_mut() {
         if passive.ready {
             continue;
         }
         passive.timer.tick(time.delta());
         if passive.timer.just_finished() {
             passive.ready = true;
+            // 再次就绪：挂上就绪光效
+            commands.trigger(CommandSkinParticleSpawn {
+                entity,
+                hash: "Aatrox_P_Ready".to_string(),
+                rotation: None,
+                resolver_entity: None,
+            });
         }
     }
 }

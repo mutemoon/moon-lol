@@ -48,6 +48,7 @@ impl Plugin for PluginFiora {
         app.add_observer(e::on_event_attack_end);
         app.add_observer(r::on_r_damage_create);
         app.add_observer(w::on_fiora_w_parried_cc);
+        app.add_observer(w::on_fiora_w_block_damage);
     }
 }
 

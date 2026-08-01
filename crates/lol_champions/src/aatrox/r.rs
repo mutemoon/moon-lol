@@ -4,7 +4,7 @@
 
 use bevy::prelude::*;
 use lol_base::animation_names::ANIM_SPELL4;
-use lol_base::render_cmd::CommandAnimationPlay;
+use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleDespawn, CommandSkinParticleSpawn};
 use lol_base::spell::Spell;
 use lol_core::base::buff::BuffOf;
 use lol_core::buffs::common_buffs::BuffMoveSpeed;
@@ -46,6 +46,19 @@ pub fn on_aatrox_r(
         repeat: false,
         duration: None,
     });
+    // 开大冲击波光效 + 持续期加速光效（到期撤销）
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: "Aatrox_R_Attack_01".to_string(),
+        rotation: None,
+        resolver_entity: None,
+    });
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: "Aatrox_R_SpeedBuff".to_string(),
+        rotation: None,
+        resolver_entity: None,
+    });
     let duration = get_skill_data_value(spell_obj, "RDuration", skill.level).unwrap_or(10.0);
     let ms_bonus =
         get_skill_data_value(spell_obj, "RMovementSpeedBonus", skill.level).unwrap_or(0.4);
@@ -81,6 +94,12 @@ pub fn update_aatrox_r(
                 }
             });
             commands.entity(entity).remove::<AatroxRState>();
+            // R 到期：撤下加速光效
+            commands.trigger(CommandSkinParticleDespawn {
+                entity,
+                hash: "Aatrox_R_SpeedBuff".to_string(),
+                resolver_entity: None,
+            });
         }
     }
 }

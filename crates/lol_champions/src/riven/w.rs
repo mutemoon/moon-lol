@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use lol_base::animation_names::ANIM_SPELL2;
-use lol_base::render_cmd::CommandAnimationPlay;
+use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
 use lol_base::spell::Spell;
 use lol_core::base::buff::BuffOf;
 use lol_core::buffs::cc_debuffs::DebuffStun;
@@ -59,6 +59,14 @@ pub fn on_riven_w(
         hash: ANIM_SPELL2.to_string(),
         repeat: false,
         duration: None,
+    });
+
+    // W 施法冲击波粒子
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: "Riven_W_Cast".to_string(),
+        rotation: None,
+        resolver_entity: None,
     });
 
     commands.trigger(CommandAttachedFieldCreate {

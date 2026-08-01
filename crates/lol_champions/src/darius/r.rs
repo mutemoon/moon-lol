@@ -5,7 +5,7 @@
 
 use bevy::prelude::*;
 use lol_base::animation_names::ANIM_SPELL4;
-use lol_base::render_cmd::CommandAnimationPlay;
+use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
 use lol_base::spell::Spell;
 use lol_core::action::dash::{ActionDash, DashMoveType};
 use lol_core::base::buff::{BuffOf, Buffs};
@@ -80,6 +80,14 @@ pub fn on_darius_r(
         hash: ANIM_SPELL4.to_string(),
         repeat: false,
         duration: None,
+    });
+
+    // R 断头台举斧光效
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: "Darius_R_cast_axe".to_string(),
+        rotation: None,
+        resolver_entity: None,
     });
 
     // 跃起不可选中
@@ -183,6 +191,20 @@ pub fn on_darius_r_arrival(
         tag: None,
     });
 
+    // 斜斩命中目标 + 自身溅血粒子
+    commands.trigger(CommandSkinParticleSpawn {
+        entity: target,
+        hash: "Darius_R_tar".to_string(),
+        rotation: None,
+        resolver_entity: Some(entity),
+    });
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: "Darius_R_blood_spatter_self".to_string(),
+        rotation: None,
+        resolver_entity: None,
+    });
+
     // 延迟击杀检测
     commands.entity(entity).insert(DariusRKillPending {
         skill_entity: pending.skill_entity,
@@ -203,6 +225,13 @@ pub fn check_darius_r_kill(
         let killed = q_health.get(pending.target).is_ok_and(|h| h.value <= 0.0);
 
         if killed {
+            // 击杀刷新光效
+            commands.trigger(CommandSkinParticleSpawn {
+                entity: attacker,
+                hash: "darius_r_refresh_01".to_string(),
+                rotation: None,
+                resolver_entity: None,
+            });
             // 清除冷却
             if let Ok(mut cooldown) = q_cooldown.get_mut(pending.skill_entity) {
                 cooldown.timer = None;

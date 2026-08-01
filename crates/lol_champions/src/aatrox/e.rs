@@ -4,7 +4,7 @@
 
 use bevy::prelude::*;
 use lol_base::animation_names::ANIM_SPELL3;
-use lol_base::render_cmd::CommandAnimationPlay;
+use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
 use lol_base::spell::Spell;
 use lol_core::action::dash::{ActionDash, DashMoveType};
 use lol_core::skill::{EventSkillCast, Skill, SkillSlot, get_skill_data_value};
@@ -43,6 +43,15 @@ pub fn on_aatrox_e(
         repeat: false,
         duration: None,
     });
+    // 突进光效与拖尾
+    for key in ["Aatrox_E_Dash", "Aatrox_E_Dash_trail"] {
+        commands.trigger(CommandSkinParticleSpawn {
+            entity,
+            hash: key.to_string(),
+            rotation: None,
+            resolver_entity: None,
+        });
+    }
     let max_range =
         get_skill_data_value(spell_obj, "EMaxRange", skill.level).unwrap_or(AATROX_E_MAX_RANGE);
     let speed =

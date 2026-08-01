@@ -5,9 +5,11 @@
 
 use bevy::prelude::*;
 use lol_base::animation_names::ANIM_SPELL1;
-use lol_base::render_cmd::CommandAnimationPlay;
+use lol_base::render_cmd::{
+    CommandAnimationPlay, CommandSkinParticleDespawn, CommandSkinParticleSpawn,
+};
 use lol_base::spell::Spell;
-use lol_core::attack::CommandAttackReset;
+use lol_core::attack::{CommandAttackReset, EventAttackEnd};
 use lol_core::base::buff::BuffOf;
 use lol_core::buffs::on_hit::{BuffOnHitBonusDamage, BuffOnHitCounter};
 use lol_core::skill::{
@@ -15,6 +17,20 @@ use lol_core::skill::{
 };
 
 use crate::camille::Camille;
+
+/// Q 强化普攻自身光效键（Q1/Q2 各一个，刷新/命中时成对撤除）。
+const CAMILLE_Q_PARTICLES: [&str; 2] = ["Camille_Q_buf", "Camille_Q_2_cas"];
+
+/// 撤除角色身上的 Q 强化光效。
+fn despawn_camille_q_particles(commands: &mut Commands, camille: Entity) {
+    for key in CAMILLE_Q_PARTICLES {
+        commands.trigger(CommandSkinParticleDespawn {
+            entity: camille,
+            hash: key.to_string(),
+            resolver_entity: None,
+        });
+    }
+}
 
 /// 清除角色上既存的强化普攻计数器与额外伤害 buff（Q1→Q2 切换时刷新用）。
 fn clear_camille_on_hit(
@@ -80,8 +96,21 @@ pub fn on_camille_q(
         &q_onhit_counter,
         &q_onhit_bonus,
     );
+    despawn_camille_q_particles(&mut commands, entity);
 
     commands.trigger(CommandAttackReset { entity });
+
+    // 当前段位强化光效
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: if stage == 1 {
+            "Camille_Q_buf".to_string()
+        } else {
+            "Camille_Q_2_cas".to_string()
+        },
+        rotation: None,
+        resolver_entity: None,
+    });
 
     if stage == 1 {
         commands
@@ -110,4 +139,34 @@ pub fn on_camille_q(
             timer: Some(Timer::from_seconds(cooldown.duration, TimerMode::Once)),
         },));
     }
+}
+
+/// 强化普攻命中：撤除自身强化光效，在目标身上播放命中粒子。
+///
+/// 因为 on-hit 消费在 lol_core 的通用观察者里完成，所以这里只能用
+/// 同一个 `EventAttackEnd` 判断“攻击时身上还挂着计数器”来近似强化命中。
+pub fn on_camille_q_attack_end(
+    trigger: On<EventAttackEnd>,
+    mut commands: Commands,
+    q_camille: Query<(), With<Camille>>,
+    q_buffof: Query<(Entity, &BuffOf)>,
+    q_onhit_counter: Query<&BuffOnHitCounter>,
+) {
+    let attacker = trigger.event_target();
+    if q_camille.get(attacker).is_err() {
+        return;
+    }
+    let has_counter = q_buffof
+        .iter()
+        .any(|(e, bo)| bo.0 == attacker && q_onhit_counter.get(e).is_ok());
+    if !has_counter {
+        return;
+    }
+    despawn_camille_q_particles(&mut commands, attacker);
+    commands.trigger(CommandSkinParticleSpawn {
+        entity: trigger.target,
+        hash: "Camille_Q_tar".to_string(),
+        rotation: None,
+        resolver_entity: Some(attacker),
+    });
 }

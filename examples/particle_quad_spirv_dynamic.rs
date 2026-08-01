@@ -142,5 +142,6 @@ fn setup(
         .trigger(move |entity| CommandParticleSpawn {
             entity,
             vfx_handle: test_vfx_handle,
+            rotation: None,
         });
 }

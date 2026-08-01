@@ -6,6 +6,7 @@
 
 use bevy::prelude::*;
 use bevy::time::{Timer, TimerMode};
+use lol_base::render_cmd::{CommandSkinParticleDespawn, CommandSkinParticleSpawn};
 use lol_core::attack::EventAttackEnd;
 use lol_core::base::buff::{Buff, BuffOf};
 use lol_core::buffs::cc_debuffs::DebuffSlow;
@@ -22,6 +23,8 @@ use crate::camille::w::CAMILLE_W_OUTER_TAG;
 pub const CAMILLE_PASSIVE_SHIELD_RATIO: f32 = 0.06;
 /// 被动护盾持续时间（wiki：2s）。
 pub const CAMILLE_PASSIVE_DURATION: f32 = 2.0;
+/// 被动护盾光效粒子键。
+const CAMILLE_PASSIVE_PARTICLE: &str = "Camille_P_buf_ready";
 
 /// 被动护盾计时器：到期回收护盾。
 #[derive(Component, Debug, Clone)]
@@ -78,6 +81,19 @@ pub fn on_camille_attack_end(
         .entity(attacker)
         .with_related::<BuffOf>(BuffShieldWhite::new(shield_amount))
         .with_related::<BuffOf>(BuffCamillePassiveTimer::new());
+
+    // 护盾光效（先撤后挂，刷新时不叠加）
+    commands.trigger(CommandSkinParticleDespawn {
+        entity: attacker,
+        hash: CAMILLE_PASSIVE_PARTICLE.to_string(),
+        resolver_entity: None,
+    });
+    commands.trigger(CommandSkinParticleSpawn {
+        entity: attacker,
+        hash: CAMILLE_PASSIVE_PARTICLE.to_string(),
+        rotation: None,
+        resolver_entity: None,
+    });
 }
 
 /// 被动护盾计时：到期回收护盾与计时器。
@@ -99,6 +115,12 @@ pub fn update_camille_passive(
                 commands.entity(e).despawn();
             }
         }
+        // 护盾到期，撤除护盾光效
+        commands.trigger(CommandSkinParticleDespawn {
+            entity: camille,
+            hash: CAMILLE_PASSIVE_PARTICLE.to_string(),
+            resolver_entity: None,
+        });
         commands.entity(timer_entity).despawn();
     }
 }
@@ -121,4 +143,11 @@ pub fn on_camille_damage_hit(
     commands
         .entity(target)
         .with_related::<BuffOf>(DebuffSlow::new(0.8, 2.0));
+    // W 外圈命中目标粒子
+    commands.trigger(CommandSkinParticleSpawn {
+        entity: target,
+        hash: "Camille_W_Tar".to_string(),
+        rotation: None,
+        resolver_entity: Some(source),
+    });
 }

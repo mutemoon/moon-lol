@@ -4,7 +4,7 @@
 
 use bevy::prelude::*;
 use lol_base::animation_names::ANIM_SPELL2;
-use lol_base::render_cmd::CommandAnimationPlay;
+use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
 use lol_base::spell::Spell;
 use lol_core::action::damage::{ActionDamageEffect, DamageShape, TargetDamage, TargetFilter};
 use lol_core::action::delayed_damage::{ActionDelayedDamage, AoEIndicator, AoEOrigin};
@@ -48,6 +48,16 @@ pub fn on_camille_w(
         repeat: false,
         duration: None,
     });
+
+    // 蓄力光效 + 腿部扫击光效（均为 burst 型，施法时一次性播放）
+    for key in ["Camille_W_Buf", "Camille_W_cas_shin"] {
+        commands.trigger(CommandSkinParticleSpawn {
+            entity,
+            hash: key.to_string(),
+            rotation: None,
+            resolver_entity: None,
+        });
+    }
 
     commands.trigger(ActionDelayedDamage {
         entity,

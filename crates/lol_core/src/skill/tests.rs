@@ -136,7 +136,7 @@ impl ActionSkillHarness {
         Self { app, caster, enemy }
     }
 
-    fn register_spell(&mut self, _mana_cost: f32, base_damage: f32) -> &mut Self {
+    fn register_spell(&mut self, mana_cost: f32, base_damage: f32) -> &mut Self {
         use lol_base::spell_calc::CalculationPart;
 
         let mut calculations = BTreeMap::new();
@@ -153,11 +153,21 @@ impl ActionSkillHarness {
             }),
         );
 
-        let _effect_values = ValuesEffect {
+        let effect_values = ValuesEffect {
             values: Some(vec![base_damage; 6]),
         };
 
-        self.app.world_mut().resource_mut::<Assets<Spell>>();
+        self.app.world_mut().resource_mut::<Assets<Spell>>().insert(
+            spell_handle(SPELL_KEY).id(),
+            Spell {
+                spell_data: Some(DataSpell {
+                    calculations: Some(calculations),
+                    effect_amounts: Some(vec![effect_values]),
+                    mana: Some(vec![mana_cost; 6]),
+                    ..Default::default()
+                }),
+            },
+        );
         self
     }
 

@@ -1,5 +1,6 @@
 pub mod animation;
 pub mod aoe_visual;
+pub mod audio;
 pub mod controller;
 pub mod cursor;
 pub mod debug_area;
@@ -18,6 +19,7 @@ pub use lol_base_render::{camera, error, shader};
 
 use animation::PluginAnimation;
 use aoe_visual::PluginAoEVisual;
+use audio::PluginAudio;
 use bevy::prelude::{App, Plugin};
 use controller::PluginController;
 use cursor::PluginCursor;
@@ -38,6 +40,7 @@ impl Plugin for PluginRender {
         league_core::register::init_league_asset(app);
         app.add_plugins(PluginAnimation);
         app.add_plugins(PluginAoEVisual);
+        app.add_plugins(PluginAudio);
         app.add_plugins(PluginCamera);
         app.add_plugins(PluginController);
         app.add_plugins(PluginCursor);

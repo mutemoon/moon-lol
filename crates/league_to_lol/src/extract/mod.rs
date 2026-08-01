@@ -1,4 +1,5 @@
 pub mod animation;
+pub mod audio;
 pub mod champion;
 pub mod item;
 pub mod map;
@@ -9,6 +10,7 @@ pub mod utils;
 pub mod vfx;
 
 pub use animation::*;
+pub use audio::*;
 pub use champion::*;
 pub use item::*;
 pub use map::*;

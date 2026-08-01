@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use lol_base::animation_names::ANIM_SPELL3;
 use lol_base::debug_sphere::DebugSphere;
-use lol_base::render_cmd::CommandAnimationPlay;
+use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
 use lol_base::spell::Spell;
 use lol_core::action::dash::{ActionDash, DashMoveType};
 use lol_core::base::buff::BuffOf;
@@ -48,6 +48,20 @@ pub fn on_riven_e(
         hash: ANIM_SPELL3.to_string(),
         repeat: false,
         duration: None,
+    });
+
+    // 位移瞬间的冲刺粒子 + 护盾粒子（盾破/到期时在 cleanup_shield_visuals 撤下）
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: "Riven_E_Mis".to_string(),
+        rotation: None,
+        resolver_entity: None,
+    });
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: "Riven_E_Shield".to_string(),
+        rotation: None,
+        resolver_entity: None,
     });
 
     // 创建护盾 buff 实体并建立关系

@@ -1,5 +1,6 @@
 pub mod animation_names;
 pub mod barrack;
+pub mod audio;
 pub mod character;
 pub mod character_record;
 pub mod debug_area;

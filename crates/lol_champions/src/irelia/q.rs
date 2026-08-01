@@ -2,7 +2,7 @@
 
 use bevy::prelude::*;
 use lol_base::animation_names::ANIM_SPELL1;
-use lol_base::render_cmd::CommandAnimationPlay;
+use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
 use lol_base::spell::Spell;
 use lol_core::action::dash::{ActionDash, DashMoveType};
 use lol_core::attack::CommandAttackReset;
@@ -53,6 +53,14 @@ pub fn on_irelia_q(
     });
     commands.trigger(CommandAttackReset { entity });
 
+    // Q 冲刺刀光拖尾
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: "Irelia_Q_Dash".to_string(),
+        rotation: None,
+        resolver_entity: None,
+    });
+
     let point = trigger.point;
     let nearest = q_enemies
         .iter()
@@ -82,7 +90,29 @@ pub fn on_irelia_q(
             .get(target)
             .map(|buffs| buffs.iter().any(|b| q_unsteady.get(b).is_ok()))
             .unwrap_or(false);
+
+        // 命中目标粒子 + 自身回复粒子
+        commands.trigger(CommandSkinParticleSpawn {
+            entity: target,
+            hash: "Irelia_Q_tar".to_string(),
+            rotation: None,
+            resolver_entity: Some(entity),
+        });
+        commands.trigger(CommandSkinParticleSpawn {
+            entity,
+            hash: "Irelia_Q_heal".to_string(),
+            rotation: None,
+            resolver_entity: None,
+        });
+
         if is_unsteady {
+            // 标记引爆粒子
+            commands.trigger(CommandSkinParticleSpawn {
+                entity: target,
+                hash: "Irelia_Q_Proc".to_string(),
+                rotation: None,
+                resolver_entity: Some(entity),
+            });
             commands.entity(trigger.skill_entity).insert(CoolDown {
                 duration: cooldown.duration,
                 timer: None,

@@ -4,7 +4,7 @@
 
 use bevy::prelude::*;
 use lol_base::animation_names::ANIM_SPELL3;
-use lol_base::render_cmd::CommandAnimationPlay;
+use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
 use lol_core::action::dash::{ActionDash, DashMoveType};
 use lol_core::skill::{CoolDown, EventSkillCast, Skill, SkillRecastWindow, SkillSlot};
 
@@ -41,6 +41,13 @@ pub fn on_renekton_e(
         hash: ANIM_SPELL3.to_string(),
         repeat: false,
         duration: None,
+    });
+    // 突进光效（两段共用）
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: "Renekton_E_cas".to_string(),
+        rotation: None,
+        resolver_entity: None,
     });
 
     if stage == 1 {

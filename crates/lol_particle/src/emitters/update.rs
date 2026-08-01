@@ -19,6 +19,7 @@ use std::sync::Arc;
 
 use bevy::animation::AnimationTargetId;
 use bevy::camera::visibility::RenderLayers;
+use bevy::ecs::system::SystemParam;
 use bevy::mesh::skinning::SkinnedMesh;
 use bevy::prelude::*;
 use lol_base_render::particle::{
@@ -44,6 +45,16 @@ use crate::utils::{ResourceCache, create_black_pixel_texture};
 use lol_base_render::shader::ShaderMap;
 use lol_base_render::mesh_shadow::spawn_shadow_skin_entity;
 
+/// 皮肤网格相关查询打包，避免系统参数超过 Bevy 的 16 个上限。
+#[derive(SystemParam)]
+pub struct SkinMeshQueries<'w, 's> {
+    q_mesh3d: Query<'w, 's, &'static Mesh3d>,
+    q_skinned_mesh: Query<'w, 's, &'static SkinnedMesh>,
+    q_children: Query<'w, 's, &'static Children>,
+    q_animation_target: Query<'w, 's, (Entity, &'static Transform, &'static AnimationTargetId)>,
+    q_parent: Query<'w, 's, &'static ChildOf>,
+}
+
 /// 统一发射器更新系统：取代原先按材质拆分的 quad / mesh / decal /
 /// skinned_mesh / distortion 五个系统
 pub fn update_emitters(
@@ -64,10 +75,7 @@ pub fn update_emitters(
         &mut ParticleEmitterState,
         &ParticleId,
     )>,
-    q_mesh3d: Query<&Mesh3d>,
-    q_skinned_mesh: Query<&SkinnedMesh>,
-    q_children: Query<&Children>,
-    q_animation_target: Query<(Entity, &Transform, &AnimationTargetId)>,
+    skin_mesh_queries: SkinMeshQueries,
     time: Res<Time>,
 ) {
     let Some(shader_map) = res_shader_map.as_deref() else {
@@ -252,10 +260,11 @@ pub fn update_emitters(
                     Some(color_remap_ramp.clone()),
                     &mut res_dynamic_material,
                     shader_map,
-                    q_mesh3d,
-                    q_skinned_mesh,
-                    q_children,
-                    q_animation_target,
+                    &skin_mesh_queries.q_mesh3d,
+                    &skin_mesh_queries.q_skinned_mesh,
+                    &skin_mesh_queries.q_children,
+                    &skin_mesh_queries.q_animation_target,
+                    &skin_mesh_queries.q_parent,
                 ),
                 EmitterType::Unknown => unreachable!(),
             }
@@ -448,10 +457,11 @@ pub fn attach_skinned_mesh_visuals(
     color_remap_ramp: Option<Handle<Image>>,
     res_dynamic_material: &mut ResMut<Assets<ParticleMaterialDynamic>>,
     shader_map: &ShaderMap,
-    q_mesh3d: Query<&Mesh3d>,
-    q_skinned_mesh: Query<&SkinnedMesh>,
-    q_children: Query<&Children>,
-    q_animation_target: Query<(Entity, &Transform, &AnimationTargetId)>,
+    q_mesh3d: &Query<&Mesh3d>,
+    q_skinned_mesh: &Query<&SkinnedMesh>,
+    q_children: &Query<&Children>,
+    q_animation_target: &Query<(Entity, &Transform, &AnimationTargetId)>,
+    q_parent: &Query<&ChildOf>,
 ) {
     // Handle material overrides
     let final_texture = if let Some(material_override_definitions) =
@@ -492,5 +502,6 @@ pub fn attach_skinned_mesh_visuals(
         q_skinned_mesh,
         q_children,
         q_animation_target,
+        q_parent,
     );
 }

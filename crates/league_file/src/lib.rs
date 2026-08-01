@@ -1,4 +1,5 @@
 pub mod animation;
+pub mod bnk;
 pub mod common;
 pub mod grid;
 pub mod inibin;
@@ -8,3 +9,4 @@ pub mod mesh_static;
 pub mod shader;
 pub mod skeleton;
 pub mod texture;
+pub mod wpk;

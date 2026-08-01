@@ -36,3 +36,4 @@ __pycache__
 .zcode
 
 .playwright-cli
+*.ogg

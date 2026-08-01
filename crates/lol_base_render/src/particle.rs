@@ -404,6 +404,11 @@ pub struct CommandParticleSpawn {
     pub entity: Entity,
     /// 指向 ConfigVfx Resource 中某个系统定义的 hash 句柄
     pub vfx_handle: HashKey<ConfigVfxSystemDefinition>,
+    /// 可选的发射器世界朝向覆盖；因为发射器 Transform 每帧被
+    /// update_emitter_position 从锚点全局变换覆写，所以定向粒子（如朝向
+    /// 破绽方向的受击粒子）需要把朝向存进发射器状态逐帧应用，而非
+    /// 只改初始 Transform
+    pub rotation: Option<Quat>,
 }
 
 #[derive(EntityEvent)]

@@ -19,10 +19,18 @@ pub struct ParticleEmitterState {
     pub rate: StochasticSampler<f32>,
     pub emitter_position: StochasticSampler<Vec3>,
     pub global_transform: Transform,
+    /// 发射器世界朝向覆盖（来自 CommandParticleSpawn.rotation）；
+    /// Some 时 update_emitter_position 用它替换锚点朝向，使定向粒子
+    /// 始终朝向指定方向
+    pub rotation_override: Option<Quat>,
 }
 
 impl ParticleEmitterState {
-    pub fn new(def: &ConfigVfxEmitterDefinition, global_transform: Transform) -> Self {
+    pub fn new(
+        def: &ConfigVfxEmitterDefinition,
+        global_transform: Transform,
+        rotation_override: Option<Quat>,
+    ) -> Self {
         Self {
             birth_acceleration: def.birth_acceleration.clone(),
             birth_color: def.birth_color.clone(),
@@ -39,6 +47,7 @@ impl ParticleEmitterState {
             rate: def.rate.clone(),
             emitter_position: def.emitter_position.clone(),
             global_transform,
+            rotation_override,
         }
     }
 }

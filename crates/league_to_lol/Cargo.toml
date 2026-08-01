@@ -24,5 +24,6 @@ serde_json.workspace = true
 image.workspace = true
 png.workspace = true
 texpresso.workspace = true
+ww2ogg.workspace = true
 
 rayon.workspace = true

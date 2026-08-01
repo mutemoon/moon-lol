@@ -4,7 +4,7 @@
 
 use bevy::prelude::*;
 use lol_base::animation_names::ANIM_SPELL4;
-use lol_base::render_cmd::CommandAnimationPlay;
+use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
 };
@@ -40,6 +40,15 @@ pub fn on_renekton_r(
         repeat: false,
         duration: None,
     });
+    // 变身施法 + 持续增益 + 武器发光光效
+    for key in ["Renekton_R_cas", "Renekton_R_buf", "Renekton_R_weapon"] {
+        commands.trigger(CommandSkinParticleSpawn {
+            entity,
+            hash: key.to_string(),
+            rotation: None,
+            resolver_entity: None,
+        });
+    }
     commands.trigger(ActionDamage {
         entity,
         skill: skill_spell,

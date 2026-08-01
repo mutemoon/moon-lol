@@ -131,6 +131,7 @@ fn setup(
         .trigger(move |entity| CommandParticleSpawn {
             entity,
             vfx_handle: HashKey::<ConfigVfxSystemDefinition>::from(test_vfx_hash),
+            rotation: None,
         });
     info!("[mesh-check] 已手动 spawn 常驻 Mesh 粒子");
 }

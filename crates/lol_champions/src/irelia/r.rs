@@ -2,7 +2,7 @@
 
 use bevy::prelude::*;
 use lol_base::animation_names::ANIM_SPELL4;
-use lol_base::render_cmd::CommandAnimationPlay;
+use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
 use lol_base::spell::Spell;
 use lol_core::damage::{CommandDamageCreate, Damage, DamageType};
 use lol_core::entities::champion::Champion;
@@ -42,6 +42,14 @@ pub fn on_irelia_r(
         hash: ANIM_SPELL4.to_string(),
         repeat: false,
         duration: None,
+    });
+
+    // R 施法刀阵展开光效
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: "Irelia_R_cas".to_string(),
+        rotation: None,
+        resolver_entity: None,
     });
 
     let amount = get_skill_value(spell, "missile_damage", skill.level, |stat| {

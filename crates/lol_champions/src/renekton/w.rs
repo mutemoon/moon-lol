@@ -4,7 +4,7 @@
 
 use bevy::prelude::*;
 use lol_base::animation_names::ANIM_SPELL2;
-use lol_base::render_cmd::CommandAnimationPlay;
+use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
 };
@@ -39,6 +39,15 @@ pub fn on_renekton_w(
         repeat: false,
         duration: None,
     });
+    // 武器变热 + 状态遮罩光效
+    for key in ["Renekton_W_Weapon_Hot_01", "Renekton_W_Overlay"] {
+        commands.trigger(CommandSkinParticleSpawn {
+            entity,
+            hash: key.to_string(),
+            rotation: None,
+            resolver_entity: None,
+        });
+    }
     // W is an empowered auto attack that stuns
     commands.trigger(CommandAttackReset { entity });
     commands.trigger(ActionDamage {

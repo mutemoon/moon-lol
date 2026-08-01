@@ -276,11 +276,19 @@ mod tests {
 
         // 2. 创建两个敌人，一个近(10m)，一个远(20m)
         let enemy_near = world
-            .spawn((Team::Chaos, Transform::from_xyz(10.0, 0.0, 0.0)))
+            .spawn((
+                Team::Chaos,
+                Transform::from_xyz(10.0, 0.0, 0.0),
+                Health::new(100.0),
+            ))
             .id();
 
         let _enemy_far = world
-            .spawn((Team::Chaos, Transform::from_xyz(20.0, 0.0, 0.0)))
+            .spawn((
+                Team::Chaos,
+                Transform::from_xyz(20.0, 0.0, 0.0),
+                Health::new(100.0),
+            ))
             .id();
 
         // 运行系统
@@ -301,11 +309,19 @@ mod tests {
             .id();
 
         let enemy_near = world
-            .spawn((Team::Chaos, Transform::from_xyz(10.0, 0.0, 0.0)))
+            .spawn((
+                Team::Chaos,
+                Transform::from_xyz(10.0, 0.0, 0.0),
+                Health::new(100.0),
+            ))
             .id();
 
         let enemy_far = world
-            .spawn((Team::Chaos, Transform::from_xyz(50.0, 0.0, 0.0)))
+            .spawn((
+                Team::Chaos,
+                Transform::from_xyz(50.0, 0.0, 0.0),
+                Health::new(100.0),
+            ))
             .id();
 
         // 手动注入仇恨值：远处的仇恨极高
@@ -329,7 +345,11 @@ mod tests {
         world.spawn((Team::Order, Transform::default(), Aggro { range: 10.0 }));
 
         // 敌人在 20 处
-        world.spawn((Team::Chaos, Transform::from_xyz(20.0, 0.0, 0.0)));
+        world.spawn((
+            Team::Chaos,
+            Transform::from_xyz(20.0, 0.0, 0.0),
+            Health::new(100.0),
+        ));
 
         app.update();
 
@@ -419,7 +439,12 @@ mod tests {
         // 2. 创建英雄和英雄
         let enemy_hero = app
             .world_mut()
-            .spawn((Team::Chaos, Transform::from_xyz(10.0, 0.0, 0.0), Champion))
+            .spawn((
+                Team::Chaos,
+                Transform::from_xyz(10.0, 0.0, 0.0),
+                Champion,
+                Health::new(1000.0),
+            ))
             .id();
 
         let enemy_minion = app
@@ -428,6 +453,7 @@ mod tests {
                 Team::Chaos,
                 Transform::from_xyz(15.0, 0.0, 0.0),
                 Minion::Melee,
+                Health::new(500.0),
             ))
             .id();
 

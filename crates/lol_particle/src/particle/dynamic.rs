@@ -21,26 +21,24 @@ use bevy::prelude::*;
 use bevy::render::render_asset::RenderAssets;
 use bevy::render::render_resource::{
     AddressMode, AsBindGroup, AsBindGroupError, BindGroupEntry, BindGroupLayout,
-    BindGroupLayoutDescriptor, BindGroupLayoutEntry, BindingResource, BindingResources, BindingType,
-    BlendComponent, BlendFactor, BlendOperation, BlendState, Buffer, BufferBindingType,
-    BufferInitDescriptor, BufferUsages, FilterMode, MipmapFilterMode, PipelineCache,
-    PreparedBindGroup, RenderPipelineDescriptor, Sampler, SamplerBindingType, SamplerDescriptor,
-    ShaderStages,
-    SpecializedMeshPipelineError, TextureSampleType, TextureViewDimension, UnpreparedBindGroup,
+    BindGroupLayoutDescriptor, BindGroupLayoutEntry, BindingResource, BindingResources,
+    BindingType, BlendComponent, BlendFactor, BlendOperation, BlendState, Buffer,
+    BufferBindingType, BufferInitDescriptor, BufferUsages, FilterMode, MipmapFilterMode,
+    PipelineCache, PreparedBindGroup, RenderPipelineDescriptor, Sampler, SamplerBindingType,
+    SamplerDescriptor, ShaderStages, SpecializedMeshPipelineError, TextureSampleType,
+    TextureViewDimension, UnpreparedBindGroup,
 };
 use bevy::render::renderer::RenderDevice;
 use bevy::render::texture::{FallbackImage, GpuImage};
 use bevy::render::{Extract, ExtractSchedule, Render, RenderApp, RenderSystems};
 use league_utils::LeagueShader;
 use lol_base_render::particle::ConfigVfxEmitterDefinition;
-
-use lol_base_render::shader::{SharedRenderData, SharedSamplerDef};
-
+use lol_base_render::shader::{ShaderMap, SharedRenderData, SharedSamplerDef};
 use lol_base_render::shader_layout::{BindingTypeDesc, ShaderLayoutDescriptor};
+
 use crate::{
     ATTRIBUTE_LIFETIME, ATTRIBUTE_UV_FRAME, ATTRIBUTE_WORLD_POSITION, ATTRIBUTE_WORLD_POSITION_VEC4,
 };
-use lol_base_render::shader::ShaderMap;
 
 // ---------------------------------------------------------------------------
 // 渲染几何族
@@ -153,7 +151,11 @@ fn create_shared_sampler(render_device: &RenderDevice, def: &SharedSamplerDef) -
     let no_mip = def.mip_filter == 0;
     let anisotropy = (def.max_anisotropy as u16).max(1);
     // 各向异性要求 min/mag/mipmap 全为 Linear，无 mip 时禁用
-    let anisotropy_clamp = if !no_mip && anisotropy > 1 { anisotropy } else { 1 };
+    let anisotropy_clamp = if !no_mip && anisotropy > 1 {
+        anisotropy
+    } else {
+        1
+    };
     render_device.create_sampler(&SamplerDescriptor {
         label: Some("SharedSampler"),
         address_mode_u: to_address(def.address_mode_u),
@@ -360,8 +362,7 @@ impl ParticleMaterialDynamic {
                 (LeagueShader::UnlitDecalVs, LeagueShader::UnlitDecalPs)
             }
         };
-        info!("vert_shader: {:?}", vert_shader);
-        info!("frag_shader: {:?}", frag_shader);
+
         let blend_mode = emitter_def.blend_mode.unwrap_or(4);
 
         // 本轮 defs 默认全关（对应已抽取 SPIR-V 的 BASE 变体）；

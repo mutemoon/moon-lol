@@ -26,6 +26,7 @@ impl Plugin for PluginDarius {
     fn build(&self, app: &mut App) {
         app.add_observer(q::on_darius_q);
         app.add_observer(q::on_darius_q_outer_hit);
+        app.add_observer(q::on_darius_q_hit_particles);
         app.add_observer(w::on_darius_w);
         app.add_observer(w::on_darius_w_attack_end);
         app.add_observer(e::on_darius_e);

@@ -4,7 +4,7 @@
 
 use bevy::prelude::*;
 use lol_base::animation_names::ANIM_SPELL1;
-use lol_base::render_cmd::CommandAnimationPlay;
+use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
 };
@@ -52,6 +52,15 @@ pub fn on_renekton_q(
         if let Ok(mut resource) = q_ability_resource.get_mut(entity) {
             resource.value -= 50.0;
         }
+        // 强化施法 + 强化地面圈光效
+        for key in ["Renekton_Q_cas_rage", "Renekton_Q_Floor_AoE_rage_big"] {
+            commands.trigger(CommandSkinParticleSpawn {
+                entity,
+                hash: key.to_string(),
+                rotation: None,
+                resolver_entity: None,
+            });
+        }
         commands.trigger(ActionDamage {
             entity,
             skill: skill_spell,
@@ -70,6 +79,15 @@ pub fn on_renekton_q(
             .entity(entity)
             .with_related::<BuffOf>(BuffSelfHeal::new(80.0)); // 翻倍治疗
     } else {
+        // 普通施法 + 普通地面圈光效
+        for key in ["Renekton_Q_cas", "Renekton_Q_Floor_AoE"] {
+            commands.trigger(CommandSkinParticleSpawn {
+                entity,
+                hash: key.to_string(),
+                rotation: None,
+                resolver_entity: None,
+            });
+        }
         commands.trigger(ActionDamage {
             entity,
             skill: skill_spell,

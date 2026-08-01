@@ -6,7 +6,7 @@
 
 use bevy::prelude::*;
 use lol_base::animation_names::ANIM_SPELL2;
-use lol_base::render_cmd::CommandAnimationPlay;
+use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
 use lol_base::spell::Spell;
 use lol_core::attack::{CommandAttackReset, EventAttackEnd};
 use lol_core::base::ability_resource::AbilityResource;
@@ -47,6 +47,14 @@ pub fn on_darius_w(
         duration: None,
     });
     commands.trigger(CommandAttackReset { entity });
+
+    // W 武器充能光效
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: "Darius_W_weapon_01".to_string(),
+        rotation: None,
+        resolver_entity: None,
+    });
 
     // 从 RON 读取总伤害倍率（empowered_attack_damage = total_AD * total_multiplier），
     // 减去 1.0（基础普攻）得到额外伤害比例
@@ -94,6 +102,14 @@ pub fn on_darius_w_attack_end(
         skill_entity: pending.skill_entity,
     });
     commands.entity(attacker).remove::<DariusWRefundPending>();
+
+    // W 强化普攻命中目标粒子
+    commands.trigger(CommandSkinParticleSpawn {
+        entity: trigger.target,
+        hash: "Darius_W_tar".to_string(),
+        rotation: None,
+        resolver_entity: Some(attacker),
+    });
 }
 
 /// FixedUpdate 中延迟检测 W 击杀：此时延迟伤害已应用，health.value 已更新。

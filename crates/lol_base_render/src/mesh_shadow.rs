@@ -9,14 +9,30 @@ pub fn spawn_shadow_skin_entity<M: Material>(
     target: Entity,
     skin_entity: Entity,
     material: MeshMaterial3d<M>,
-    q_mesh3d: Query<&Mesh3d>,
-    q_skinned_mesh: Query<&SkinnedMesh>,
-    q_children: Query<&Children>,
-    q_animation_target: Query<(Entity, &Transform, &AnimationTargetId)>,
+    q_mesh3d: &Query<&Mesh3d>,
+    q_skinned_mesh: &Query<&SkinnedMesh>,
+    q_children: &Query<&Children>,
+    q_animation_target: &Query<(Entity, &Transform, &AnimationTargetId)>,
+    q_parent: &Query<&ChildOf>,
 ) {
-    let children = q_children.get(skin_entity).unwrap();
+    // 粒子可能挂在英雄根实体或骨骼实体上，蒙皮网格实体不一定是源实体本身；
+    // 先向上/向下解析出真正的 SkinnedMesh 实体，找不到则跳过阴影皮肤（不 panic）。
+    let Some(skin_entity) = resolve_skinned_entity(skin_entity, q_skinned_mesh, q_children, q_parent)
+    else {
+        warn!(
+            "{skin_entity} 附近未找到 SkinnedMesh，跳过粒子阴影皮肤",
+        );
+        return;
+    };
 
-    let skinned_mesh = q_skinned_mesh.get(skin_entity).unwrap();
+    let Ok(children) = q_children.get(skin_entity) else {
+        warn!("{skin_entity} 蒙皮网格没有 Children，跳过粒子阴影皮肤");
+        return;
+    };
+
+    let Ok(skinned_mesh) = q_skinned_mesh.get(skin_entity) else {
+        return;
+    };
 
     commands.entity(target).insert(material.clone());
 
@@ -34,8 +50,8 @@ pub fn spawn_shadow_skin_entity<M: Material>(
         commands,
         target,
         joints,
-        &q_children,
-        &q_animation_target,
+        q_children,
+        q_animation_target,
         &mut joint_map,
     );
 
@@ -61,6 +77,30 @@ pub fn spawn_shadow_skin_entity<M: Material>(
             ));
         }
     }
+}
+
+/// 从源实体出发，先看自身，再沿祖先向上、沿后代向下查找最近的 SkinnedMesh 实体。
+fn resolve_skinned_entity(
+    entity: Entity,
+    q_skinned_mesh: &Query<&SkinnedMesh>,
+    q_children: &Query<&Children>,
+    q_parent: &Query<&ChildOf>,
+) -> Option<Entity> {
+    if q_skinned_mesh.get(entity).is_ok() {
+        return Some(entity);
+    }
+
+    let mut cur = entity;
+    while let Ok(parent) = q_parent.get(cur) {
+        cur = parent.parent();
+        if q_skinned_mesh.get(cur).is_ok() {
+            return Some(cur);
+        }
+    }
+
+    q_children
+        .iter_descendants(entity)
+        .find(|descendant| q_skinned_mesh.get(*descendant).is_ok())
 }
 
 pub fn duplicate_joints_to_target(

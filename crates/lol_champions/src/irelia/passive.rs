@@ -8,6 +8,7 @@
 
 use bevy::prelude::*;
 use bevy::time::{Timer, TimerMode};
+use lol_base::render_cmd::{CommandSkinParticleDespawn, CommandSkinParticleSpawn};
 use lol_core::attack::{BuffAttack, EventAttackEnd};
 use lol_core::base::buff::{Buff, BuffOf, Buffs};
 use lol_core::buffs::cc_debuffs::{DebuffSlow, DebuffStun};
@@ -141,17 +142,52 @@ pub fn on_irelia_damage_hit(
     };
     let target = trigger.event_target();
 
+    // 不稳标记粒子：先撤后挂，刷新时不叠加（到期由 update_irelia_unsteady 撤除）
+    let respawn_mark = |commands: &mut Commands| {
+        commands.trigger(CommandSkinParticleDespawn {
+            entity: target,
+            hash: "Irelia_Q_Mark".to_string(),
+            resolver_entity: Some(source),
+        });
+        commands.trigger(CommandSkinParticleSpawn {
+            entity: target,
+            hash: "Irelia_Q_Mark".to_string(),
+            rotation: None,
+            resolver_entity: Some(source),
+        });
+    };
+
     if tag == super::IRELIA_E2_DAMAGE_TAG {
+        commands.trigger(CommandSkinParticleSpawn {
+            entity: target,
+            hash: "Irelia_E_hit_Avatar".to_string(),
+            rotation: None,
+            resolver_entity: Some(source),
+        });
+        respawn_mark(&mut commands);
         commands
             .entity(target)
             .with_related::<BuffOf>(DebuffStun::new(super::IRELIA_E_STUN_DURATION));
         commands
             .entity(target)
-            .with_related::<BuffOf>(DebuffIreliaUnsteady::new(super::IRELIA_MARK_DURATION));
+            .with_related::<BuffOf>(DebuffIreliaUnsteady::new(
+                source,
+                super::IRELIA_MARK_DURATION,
+            ));
     } else if tag == super::IRELIA_R_DAMAGE_TAG {
+        commands.trigger(CommandSkinParticleSpawn {
+            entity: target,
+            hash: "Irelia_R_Hit_Aoe".to_string(),
+            rotation: None,
+            resolver_entity: Some(source),
+        });
+        respawn_mark(&mut commands);
         commands
             .entity(target)
-            .with_related::<BuffOf>(DebuffIreliaUnsteady::new(super::IRELIA_MARK_DURATION));
+            .with_related::<BuffOf>(DebuffIreliaUnsteady::new(
+                source,
+                super::IRELIA_MARK_DURATION,
+            ));
         commands
             .entity(target)
             .with_related::<BuffOf>(DebuffSlow::new(

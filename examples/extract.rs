@@ -6,6 +6,12 @@ use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 fn main() {
     let args: Vec<String> = std::env::args().collect();
     let skip_map_geo = args.iter().any(|arg| arg == "--no-mapgeo");
+    let only_post = args.iter().any(|arg| arg == "--only-post");
+
+    if only_post {
+        post_process_mapgeo();
+        return;
+    }
 
     let game_path = r"D:\WeGameApps\英雄联盟\Game";
     let hashes_dir = "assets/CommunityDragon-Data/hashes/lol";
@@ -27,10 +33,10 @@ fn post_process_mapgeo() {
     let input_glb = format!("assets/maps/{}/mapgeo.glb", map_name);
     let output_gltf = "assets/maps/output.gltf";
 
-    // Step 1: gltf-transform optimize
-    println!("[POST] 1. 优化 GLTF (draco + ktx2)...");
+    // Step 1: gltf-transform webp
+    println!("[POST] 1. 优化 GLTF (webp)...");
     let cmd = format!(
-        "npx gltf-transform optimize {} {} --compress draco --texture-compress ktx2",
+        "npx gltf-transform webp {} {}",
         input_glb, output_gltf
     );
     #[cfg(target_os = "windows")]
@@ -132,10 +138,10 @@ fn post_process_all_skin_glb() {
         let input_glb = glb_path;
         let output_gltf = format!("{}.gltf", glb_path);
 
-        // Step 1: gltf-transform optimize
+        // Step 1: gltf-transform webp
         print!("[POST] 优化 {}...", input_glb);
         let cmd = format!(
-            "npx gltf-transform optimize {} {} --compress draco --texture-compress ktx2",
+            "npx gltf-transform webp {} {}",
             input_glb, output_gltf
         );
         let status = Command::new("cmd").args(["/C", &cmd]).status();

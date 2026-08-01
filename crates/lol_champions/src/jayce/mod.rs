@@ -2,7 +2,7 @@ pub mod buffs;
 
 use bevy::prelude::*;
 use lol_base::animation_names::{ANIM_SPELL1, ANIM_SPELL2, ANIM_SPELL3, ANIM_SPELL4};
-use lol_base::render_cmd::CommandAnimationPlay;
+use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
 };
@@ -57,6 +57,15 @@ fn on_jayce_q(
         repeat: false,
         duration: None,
     });
+    // 电能震荡：电球 + 弹道光效
+    for key in ["Jayce_OrbLightning", "Jayce_Q_range_xp"] {
+        commands.trigger(CommandSkinParticleSpawn {
+            entity,
+            hash: key.to_string(),
+            rotation: None,
+            resolver_entity: None,
+        });
+    }
     // Q is a skillshot
     commands.trigger(ActionDamage {
         entity,
@@ -102,6 +111,15 @@ fn on_jayce_w(
         repeat: false,
         duration: None,
     });
+    // 闪电领域：电击冲击 + 持续静电场光效
+    for key in ["Jayce_StaticStormShock", "Jayce_StaticStorm_aura"] {
+        commands.trigger(CommandSkinParticleSpawn {
+            entity,
+            hash: key.to_string(),
+            rotation: None,
+            resolver_entity: None,
+        });
+    }
     // W is an area slow
     commands.trigger(ActionDamage {
         entity,
@@ -146,6 +164,15 @@ fn on_jayce_e(
         repeat: false,
         duration: None,
     });
+    // 雷霆一击：击退命中光效
+    for key in ["Jayce_ThunderingBlow_tar", "Jayce_ThunderingBlow_Hit"] {
+        commands.trigger(CommandSkinParticleSpawn {
+            entity,
+            hash: key.to_string(),
+            rotation: None,
+            resolver_entity: None,
+        });
+    }
     // E is a knockback
     commands.trigger(ActionDash {
         entity,
@@ -179,6 +206,15 @@ fn on_jayce_r(
         repeat: false,
         duration: None,
     });
+    // 形态切换：锤↔炮变形光效
+    for key in ["Jayce_Model_Swap", "Jayce_Model_Swap2"] {
+        commands.trigger(CommandSkinParticleSpawn {
+            entity,
+            hash: key.to_string(),
+            rotation: None,
+            resolver_entity: None,
+        });
+    }
     // R transforms between hammer and cannon forms;
 }
 
@@ -193,6 +229,14 @@ fn on_jayce_damage_hit(
     }
 
     let target = trigger.event_target();
+
+    // 被动破甲减抗 debuff 光效（挂在目标上）
+    commands.trigger(CommandSkinParticleSpawn {
+        entity: target,
+        hash: "Jayce_P_Debuff_Armor_MR_Shred".to_string(),
+        rotation: None,
+        resolver_entity: Some(source),
+    });
 
     // Apply passive
     commands

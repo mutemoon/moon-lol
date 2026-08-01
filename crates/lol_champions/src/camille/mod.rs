@@ -35,6 +35,7 @@ impl Plugin for PluginCamille {
             ),
         );
         app.add_observer(q::on_camille_q);
+        app.add_observer(q::on_camille_q_attack_end);
         app.add_observer(w::on_camille_w);
         app.add_observer(e::on_camille_e);
         app.add_observer(e::on_camille_e_missile_hit);

@@ -3,7 +3,9 @@
 use bevy::prelude::*;
 use bevy::time::{Timer, TimerMode};
 use lol_base::animation_names::ANIM_SPELL2;
-use lol_base::render_cmd::CommandAnimationPlay;
+use lol_base::render_cmd::{
+    CommandAnimationPlay, CommandSkinParticleDespawn, CommandSkinParticleSpawn,
+};
 use lol_base::spell::Spell;
 use lol_core::base::buff::{Buff, BuffOf, Buffs};
 use lol_core::buffs::damage_reduction::BuffDamageReduction;
@@ -98,6 +100,13 @@ pub fn on_irelia_w(
         commands
             .entity(entity)
             .with_related::<BuffOf>(BuffIreliaW::new());
+        // 蓄力格挡光效（释放/到期时撤除）
+        commands.trigger(CommandSkinParticleSpawn {
+            entity,
+            hash: "Irelia_W_Block".to_string(),
+            rotation: None,
+            resolver_entity: None,
+        });
         commands
             .entity(trigger.skill_entity)
             .insert(SkillRecastWindow::new(2, 2, IRELIA_W_MAX_DURATION));
@@ -112,6 +121,23 @@ pub fn on_irelia_w(
         .unwrap_or(0.0);
     let frac = (charge / IRELIA_W_CHARGE_FOR_MAX).clamp(0.0, 1.0);
 
+    // 释放：撤除蓄力光效，按蓄力程度选扫击粒子
+    commands.trigger(CommandSkinParticleDespawn {
+        entity,
+        hash: "Irelia_W_Block".to_string(),
+        resolver_entity: None,
+    });
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: if frac >= 1.0 {
+            "Irelia_W_Swipe_Empowered".to_string()
+        } else {
+            "Irelia_W_Swipe".to_string()
+        },
+        rotation: None,
+        resolver_entity: None,
+    });
+
     let stat_getter = |stat: u8| if stat == 2 { ad } else { 0.0 };
     let min = get_skill_value(spell, "min_damage_calc", skill.level, stat_getter).unwrap_or(0.0);
     let max = get_skill_value(spell, "max_damage_calc", skill.level, stat_getter).unwrap_or(0.0);
@@ -124,6 +150,12 @@ pub fn on_irelia_w(
         if tf.translation.xz().distance(trigger.point) > IRELIA_W_RADIUS {
             continue;
         }
+        commands.trigger(CommandSkinParticleSpawn {
+            entity: target,
+            hash: "Irelia_W_Hit".to_string(),
+            rotation: None,
+            resolver_entity: Some(entity),
+        });
         commands.entity(target).trigger(|e| CommandDamageCreate {
             entity: e,
             source: entity,
@@ -158,6 +190,12 @@ pub fn update_irelia_w(
         }
     }
     for (w_entity, parent) in expired {
+        // 到期：撤除蓄力格挡光效
+        commands.trigger(CommandSkinParticleDespawn {
+            entity: parent,
+            hash: "Irelia_W_Block".to_string(),
+            resolver_entity: None,
+        });
         commands.entity(w_entity).despawn();
         if let Ok(buffs) = q_buffs.get(parent) {
             for b in buffs.iter() {

@@ -7,7 +7,9 @@
 use bevy::prelude::*;
 use bevy::time::{Timer, TimerMode};
 use lol_base::animation_names::ANIM_SPELL4;
-use lol_base::render_cmd::CommandAnimationPlay;
+use lol_base::render_cmd::{
+    CommandAnimationPlay, CommandSkinParticleDespawn, CommandSkinParticleSpawn,
+};
 use lol_base::spell::Spell;
 use lol_core::action::dash::{ActionDash, DashMoveType};
 use lol_core::action::displace::{ActionDisplace, DisplaceMotion, DisplaceTargetSelection};
@@ -36,17 +38,22 @@ const CAMILLE_R_KNOCKBACK_SPEED: f32 = 800.0;
 /// R 搜索附近敌人的半径（用于击退）。
 const CAMILLE_R_KNOCKBACK_RADIUS: f32 = 450.0;
 
-/// R 标记：记录额外伤害百分比与持续时间。
+/// R 标记：记录施法者、额外伤害百分比与持续时间。
+///
+/// `caster` 用于到期回收时撤除施法者/目标身上的 R 粒子
+/// （fixed_update 里拿不到施法者，所以随 buff 记录）。
 #[derive(Component, Debug, Clone)]
 #[require(Buff = Buff { name: "CamilleRMark" })]
 pub struct BuffCamilleRMark {
+    pub caster: Entity,
     pub percent: f32,
     pub timer: Timer,
 }
 
 impl BuffCamilleRMark {
-    pub fn new(percent: f32, duration: f32) -> Self {
+    pub fn new(caster: Entity, percent: f32, duration: f32) -> Self {
         Self {
+            caster,
             percent,
             timer: Timer::from_seconds(duration, TimerMode::Once),
         }
@@ -54,10 +61,16 @@ impl BuffCamilleRMark {
 }
 
 /// 标记目标（R 施法时调用）。
-pub fn apply_camille_r_mark(commands: &mut Commands, target: Entity, percent: f32, duration: f32) {
+pub fn apply_camille_r_mark(
+    commands: &mut Commands,
+    caster: Entity,
+    target: Entity,
+    percent: f32,
+    duration: f32,
+) {
     commands
         .entity(target)
-        .with_related::<BuffOf>(BuffCamilleRMark::new(percent, duration));
+        .with_related::<BuffOf>(BuffCamilleRMark::new(caster, percent, duration));
 }
 
 /// R 施放：跃向最近敌方英雄，跃起期间不可选中。
@@ -114,7 +127,27 @@ pub fn on_camille_r(
     };
 
     // 标记目标（立即生效，不等达阵）
-    apply_camille_r_mark(&mut commands, target, percent, duration);
+    apply_camille_r_mark(&mut commands, entity, target, percent, duration);
+
+    // R 施法/自身光效 + 目标标记粒子（R_buf/R_tar 在标记到期时撤除）
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: "Camille_R_cas".to_string(),
+        rotation: None,
+        resolver_entity: None,
+    });
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: "Camille_R_buf".to_string(),
+        rotation: None,
+        resolver_entity: None,
+    });
+    commands.trigger(CommandSkinParticleSpawn {
+        entity: target,
+        hash: "Camille_R_tar".to_string(),
+        rotation: None,
+        resolver_entity: Some(entity),
+    });
 
     // 跃起不可选中
     commands.entity(entity).insert(ImmuneToCC);
@@ -234,6 +267,13 @@ pub fn on_camille_r_attack_end(
     if bonus <= 0.0 {
         return;
     }
+    // 强化普攻命中被标记目标粒子
+    commands.trigger(CommandSkinParticleSpawn {
+        entity: target,
+        hash: "Camille_R_BA_tar".to_string(),
+        rotation: None,
+        resolver_entity: Some(attacker),
+    });
     commands.entity(target).trigger(|e| CommandDamageCreate {
         entity: e,
         source: attacker,
@@ -243,15 +283,25 @@ pub fn on_camille_r_attack_end(
     });
 }
 
-/// R 标记计时：到期回收标记。
+/// R 标记计时：到期回收标记，并撤除施法者/目标身上的 R 粒子。
 pub fn update_camille_r_mark(
     mut commands: Commands,
-    mut q: Query<(Entity, &mut BuffCamilleRMark)>,
+    mut q: Query<(Entity, &BuffOf, &mut BuffCamilleRMark)>,
     time: Res<Time<Fixed>>,
 ) {
-    for (e, mut mark) in q.iter_mut() {
+    for (e, buffof, mut mark) in q.iter_mut() {
         mark.timer.tick(time.delta());
         if mark.timer.is_finished() {
+            commands.trigger(CommandSkinParticleDespawn {
+                entity: buffof.0,
+                hash: "Camille_R_tar".to_string(),
+                resolver_entity: Some(mark.caster),
+            });
+            commands.trigger(CommandSkinParticleDespawn {
+                entity: mark.caster,
+                hash: "Camille_R_buf".to_string(),
+                resolver_entity: None,
+            });
             commands.entity(e).despawn();
         }
     }

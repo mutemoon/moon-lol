@@ -4,7 +4,7 @@
 
 use bevy::prelude::*;
 use bevy::time::{Timer, TimerMode};
-use lol_base::render_cmd::CommandAnimationPlay;
+use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
 use lol_base::spell::Spell;
 use lol_core::base::buff::BuffOf;
 use lol_core::buffs::cc_debuffs::DebuffKnockup;
@@ -73,6 +73,20 @@ pub fn on_aatrox_q(
         repeat: false,
         duration: None,
     });
+    // 按段位播施法光效与剑刃拖尾
+    let (cas_key, trail_key) = match stage {
+        2 => ("Aatrox_Q_cas2", "Aatrox_Q_Trail_02"),
+        3 => ("Aatrox_Q_cas3", "Aatrox_Q_Trail_03"),
+        _ => ("Aatrox_Q_cas1", "Aatrox_Q_Trail_01"),
+    };
+    for key in [cas_key, trail_key] {
+        commands.trigger(CommandSkinParticleSpawn {
+            entity,
+            hash: key.to_string(),
+            rotation: None,
+            resolver_entity: None,
+        });
+    }
 
     let base = get_skill_value(spell_obj, "q_damage", skill.level, |stat| {
         if stat == 2 { ad } else { 0.0 }
@@ -120,6 +134,18 @@ pub fn on_aatrox_q(
                 .entity(enemy)
                 .with_related::<BuffOf>(DebuffKnockup::new(knockup_dur));
         }
+        // 命中光效：sweet spot 用强化版
+        let hit_key = if is_sweet {
+            "Aatrox_Q_Sweet_hit_tar"
+        } else {
+            "Aatrox_Q_Hit_Tar"
+        };
+        commands.trigger(CommandSkinParticleSpawn {
+            entity: enemy,
+            hash: hit_key.to_string(),
+            rotation: None,
+            resolver_entity: Some(entity),
+        });
     }
 
     if stage >= 3 {

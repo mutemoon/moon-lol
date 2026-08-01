@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use lol_base::render_cmd::CommandAnimationPlay;
+use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
 use lol_base::spell::Spell;
 use lol_core::action::dash::{ActionDash, DashMoveType};
 use lol_core::action::displace::{
@@ -53,11 +53,34 @@ pub fn on_riven_q(
     .unwrap_or(0.0);
 
     let stage = recast.map(|window| window.stage).unwrap_or(1);
-    let (animation_hash, radius) = match stage {
-        1 => ("Spell1A".to_string(), RIVEN_Q_RADII[0]),
-        2 => ("Spell1B".to_string(), RIVEN_Q_RADII[1]),
-        _ => ("Spell1C".to_string(), RIVEN_Q_RADII[2]),
+    let (animation_hash, radius, trail_key, detonate_key) = match stage {
+        1 => (
+            "Spell1A".to_string(),
+            RIVEN_Q_RADII[0],
+            "Riven_Q_01_Wpn_Trail",
+            "Riven_Q_01_Detonate",
+        ),
+        2 => (
+            "Spell1B".to_string(),
+            RIVEN_Q_RADII[1],
+            "Riven_Q_02_Wpn_Trail",
+            "Riven_Q_02_Detonate",
+        ),
+        _ => (
+            "Spell1C".to_string(),
+            RIVEN_Q_RADII[2],
+            "Riven_Q_03_Wpn_Trail",
+            "Riven_Q_03_Detonate",
+        ),
     };
+
+    // 每段各自的武器拖尾粒子
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: trail_key.to_string(),
+        rotation: None,
+        resolver_entity: None,
+    });
 
     commands.trigger(CommandAnimationPlay {
         entity,
@@ -83,6 +106,13 @@ pub fn on_riven_q(
             .entity(trigger.skill_entity)
             .remove::<SkillRecastWindow>();
     } else {
+        // 前两段：斩击落地瞬间的起爆粒子
+        commands.trigger(CommandSkinParticleSpawn {
+            entity,
+            hash: detonate_key.to_string(),
+            rotation: None,
+            resolver_entity: None,
+        });
         commands.trigger(CommandAttachedFieldCreate {
             entity,
             radius,
@@ -111,6 +141,14 @@ pub fn on_riven_dash_end(
     let Ok(pending) = q_pending.get(entity) else {
         return;
     };
+
+    // Q3 落地起爆粒子
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: "Riven_Q_03_Detonate".to_string(),
+        rotation: None,
+        resolver_entity: None,
+    });
 
     // 使用统一位移体系：Circle + PushAway + Knockup + Damage
     commands.trigger(ActionDisplace {

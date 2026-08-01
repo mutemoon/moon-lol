@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use lol_base::render_cmd::CommandSkinParticleDespawn;
 use lol_core::base::buff::Buff;
 use lol_core::buffs::shield_white::BuffShieldWhite;
 
@@ -62,6 +63,11 @@ pub fn cleanup_shield_visuals(
     for (entity, visual) in q.iter() {
         if q_buff.get(visual.buff_entity).is_err() {
             // 护盾 buff 已消失，清理视觉
+            commands.trigger(CommandSkinParticleDespawn {
+                entity,
+                hash: "Riven_E_Shield".to_string(),
+                resolver_entity: None,
+            });
             for &child in visual.children.iter() {
                 commands.entity(child).despawn();
             }

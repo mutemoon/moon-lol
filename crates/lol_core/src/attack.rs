@@ -425,7 +425,7 @@ fn fixed_update(
                                 spell: spell_handle.clone(),
                                 damage: 0.0,
                                 speed: None,
-                                particle_hash: None,
+                                particle_key: None,
                                 sticky: false,
                                 pass_through: false,
                                 collision_target: default(),

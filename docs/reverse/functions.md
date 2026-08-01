@@ -81,6 +81,16 @@
 | sub_1412B6FD0 | `ParticleEmitterFactory_Create` | 按类型(0-12)创建粒子发射器对象（分配内存+设置vtable） |
 | sub_1412A4530 | `ParticleEmitterDescriptor_Init` | 粒子发射器描述符构造函数：分配24字节子对象，主vtable=off_141B28B98(FillQuadVertices所在)，子vtable=off_141B28CC8；初始化默认贴图(DefaultColorOverlifetime/Falloff)及各曲线参数。默认值表见 [shader/deserialization.md](shader/deserialization.md) |
 
+## VFX 触发 / ResourceResolver 相关函数
+
+> 详细分析（源粒子 vs 目标粒子 `*_tar` 的触发机制、Fiora_BA1_tar 调查）见 [vfx-trigger.md](vfx-trigger.md)。
+
+| 函数 | 命名 | 说明 |
+|------|------|------|
+| sub_1401A3980 | `ParticleEventData_registerType` | ParticleEventData 反射注册。type hash=88265757 size=88；字段 mEffectKey@24(0xF6386280)、mEnemyEffectKey@28(0x98DF0FB4)、mEffectName@32、mParticleEventDataPairList@48 |
+| sub_1401A85B0 | `ResourceResolver_registerType` | ResourceResolver 反射注册。type hash=1923179998；resourceMap@8(0xD2F58721)=map<触发名Hash,粒子系统>，`Fiora_BA1_tar`(0x4E7E421B) 即在此解析 |
+| sub_1411C4280 | `ParticleEventData_ctor` | ParticleEventData 构造，vtable=off_141B1D1A8；"fire" 为虚函数，由动画 clip 播放引擎间接调用（无数据 xref） |
+
 ## 关键数据结构
 
 | 地址 | 命名 | 说明 |

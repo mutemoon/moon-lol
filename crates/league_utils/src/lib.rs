@@ -59,6 +59,14 @@ pub fn hash_bin(s: &str) -> u32 {
     })
 }
 
+/// Wwise 事件/对象名的哈希：32bit FNV-1（先乘后异或，小写字符串）。
+/// 注意与 `hash_bin`（FNV-1a，先异或后乘）不同，二者不可互换。
+pub fn hash_wwise(s: &str) -> u32 {
+    s.to_ascii_lowercase().bytes().fold(0x811c9dc5_u32, |h, b| {
+        h.wrapping_mul(0x01000193) ^ b as u32
+    })
+}
+
 pub fn hash_joint(s: &str) -> u32 {
     let mut hash = 0u32;
     for b in s.to_ascii_lowercase().bytes() {
