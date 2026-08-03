@@ -1,8 +1,10 @@
 (
     spellData: Some((
         calculations: None,
-        effectAmounts: Some([
+        effectAmounts: None,
+        dataValues: Some([
             (
+                name: "DRAmount",
                 values: Some([
                     30.0,
                     35.0,
@@ -14,6 +16,7 @@
                 ]),
             ),
             (
+                name: "DRDuration",
                 values: Some([
                     2.75,
                     2.75,
@@ -25,6 +28,7 @@
                 ]),
             ),
             (
+                name: "RecastDelay",
                 values: Some([
                     1.0,
                     1.0,
@@ -36,6 +40,7 @@
                 ]),
             ),
             (
+                name: "FearDuration",
                 values: Some([
                     1.0,
                     1.0,
@@ -47,51 +52,15 @@
                 ]),
             ),
             (
+                name: "DRDurationTooltipOnly",
                 values: Some([
-                    800.0,
-                    800.0,
-                    800.0,
-                    800.0,
-                    800.0,
-                    800.0,
-                    800.0,
-                ]),
-            ),
-            (
-                values: Some([
-                    400.0,
-                    400.0,
-                    400.0,
-                    400.0,
-                    400.0,
-                    400.0,
-                    400.0,
-                ]),
-            ),
-            (
-                values: None,
-            ),
-            (
-                values: None,
-            ),
-            (
-                values: None,
-            ),
-            (
-                values: None,
-            ),
-        ]),
-        dataValues: Some([
-            (
-                name: "CherryNegaHaste",
-                values: Some([
-                    -20.0,
-                    -20.0,
-                    -20.0,
-                    -20.0,
-                    -20.0,
-                    -20.0,
-                    -20.0,
+                    2.5,
+                    2.5,
+                    2.5,
+                    2.5,
+                    2.5,
+                    2.5,
+                    2.5,
                 ]),
             ),
         ]),

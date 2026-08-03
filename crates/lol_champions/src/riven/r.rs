@@ -11,6 +11,7 @@ use lol_core::skill::{
     CoolDown, EventSkillCast, Skill, SkillRecastWindow, SkillSlot, get_skill_data_value,
     get_skill_value,
 };
+use lol_core::utils::direction_to_angle;
 
 use crate::riven::Riven;
 use crate::riven::buffs::BuffRivenR;
@@ -22,7 +23,7 @@ pub fn on_riven_r(
     mut q_skill: Query<(&Skill, &mut CoolDown, Option<&SkillRecastWindow>)>,
     mut q_damage: Query<&mut Damage>,
     mut q_attack: Query<&mut Attack>,
-    q_transform: Query<&Transform>,
+    mut q_transform: Query<&mut Transform>,
     res_spells: Res<Assets<Spell>>,
     res_asset_server: Res<AssetServer>,
 ) {
@@ -58,7 +59,8 @@ pub fn on_riven_r(
                 &mut commands,
                 entity,
                 &missile_handles,
-                &q_transform,
+                &mut q_transform,
+                trigger.point,
                 spell_obj,
                 skill.level,
                 damage_value,
@@ -140,15 +142,24 @@ fn cast_riven_wind_slash(
     commands: &mut Commands,
     entity: Entity,
     missile_handles: &[Handle<Spell>; 3],
-    q_transform: &Query<&Transform>,
+    q_transform: &mut Query<&mut Transform>,
+    target_point: Vec2,
     spell_obj: &Spell,
     skill_level: usize,
     total_ad: f32,
 ) {
-    let Ok(transform) = q_transform.get(entity) else {
+    let Ok(mut transform) = q_transform.get_mut(entity) else {
         return;
     };
-    let forward = transform.forward();
+    let origin = transform.translation;
+    let dir_xz = (target_point - origin.xz()).normalize_or_zero();
+    let forward: Vec3 = if dir_xz != Vec2::ZERO {
+        let target_angle = direction_to_angle(dir_xz);
+        transform.rotation = Quat::from_rotation_y(target_angle);
+        Vec3::new(dir_xz.x, 0.0, dir_xz.y)
+    } else {
+        *transform.forward()
+    };
 
     let min_damage = get_skill_value(spell_obj, "min_damage", skill_level, |stat| {
         if stat == 2 { total_ad } else { 0.0 }
@@ -173,7 +184,11 @@ fn cast_riven_wind_slash(
 
     // 三枚导弹：左、中、右（相对于 forward 方向的偏移角度），各自携带风斩粒子
     let angles = [-spread_angle, 0.0, spread_angle];
-    let particle_keys = ["Riven_R_Mis_Right", "Riven_R_Mis_Middle", "Riven_R_Mis_Left"];
+    let particle_keys = [
+        "Riven_R_Mis_Right",
+        "Riven_R_Mis_Middle",
+        "Riven_R_Mis_Left",
+    ];
 
     for ((angle, handle), particle_key) in angles
         .iter()

@@ -270,6 +270,8 @@ pub struct ConfigVfxSystemDefinition {
     pub particle_path: String,
     pub complex_emitter_definition_data: Option<Vec<ConfigVfxEmitterDefinition>>,
     pub simple_emitter_definition_data: Option<Vec<ConfigVfxEmitterDefinition>>,
+    pub sound_on_create_default: Option<String>,
+    pub sound_persistent_default: Option<String>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -294,11 +296,14 @@ pub struct ConfigVfxEmitterDefinition {
     pub num_frames: Option<u16>,
     pub blend_mode: Option<u8>,
     pub material_override_definitions: Option<Vec<ConfigVfxMaterialOverride>>,
+    pub sound_on_create: Option<String>,
+    pub sound_persistent: Option<String>,
     pub primitive: Option<ConfigVfxPrimitive>,
     pub is_single_particle: Option<bool>,
     pub is_uniform_scale: Option<bool>,
     pub is_random_start_frame: Option<bool>,
     pub is_local_orientation: Option<bool>,
+    pub is_direction_oriented: Option<bool>,
     pub texture: Option<VfxTexture>,
     pub particle_color_texture: Option<VfxTexture>,
     pub tex_div: Option<Vec2>,
@@ -306,6 +311,33 @@ pub struct ConfigVfxEmitterDefinition {
     pub texture_mult: Option<ConfigVfxTextureMult>,
     pub alpha_ref: Option<u8>,
     pub spawn_shape: Option<ConfigVfxShape>,
+    pub flex_shape_definition: Option<ConfigVfxFlexShapeDefinition>,
+    pub alpha_erosion_definition: Option<ConfigVfxAlphaErosionDefinition>,
+    pub color_look_up_type_y: Option<u8>,
+    pub color_render_flags: Option<u8>,
+    pub soft_particle_definition: Option<bool>,
+    pub palette_definition: Option<VfxTexture>,
+    pub reflection_definition: Option<VfxTexture>,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct ConfigVfxAlphaErosionDefinition {
+    pub erosion_drive_curve: StochasticSampler<f32>,
+    pub erosion_map: Option<VfxTexture>,
+    pub erosion_map_channel_mixer: Vec4,
+    pub feather_in: Option<f32>,
+    pub feather_out: Option<f32>,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct ConfigVfxFlexShapeDefinition {
+    pub scale_birth_scale_by_bound_object_size: Option<f32>,
+    pub scale_birth_scale_by_bound_object_height: Option<f32>,
+    pub scale_birth_scale_by_bound_object_radius: Option<f32>,
+    pub scale_birth_translation_by_bound_object_size: Option<f32>,
+    pub scale_emit_offset_by_bound_object_height: Option<f32>,
+    pub scale_emit_offset_by_bound_object_radius: Option<f32>,
+    pub scale_emit_offset_by_bound_object_size: Option<f32>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

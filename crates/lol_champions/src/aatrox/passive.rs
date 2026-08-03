@@ -3,7 +3,9 @@
 //! 就绪时下次普攻附带目标最大生命值 15% 额外魔法伤害 + 治疗；冷却 22s。
 
 use bevy::prelude::*;
-use lol_base::render_cmd::{CommandSkinParticleDespawn, CommandSkinParticleSpawn, CommandSkinSoundPlay};
+use lol_base::render_cmd::{
+    CommandSkinParticleDespawn, CommandSkinParticleSpawn, CommandSkinSoundPlay,
+};
 use lol_core::attack::EventAttackEnd;
 use lol_core::damage::{CommandDamageCreate, DamageType};
 use lol_core::life::Health;

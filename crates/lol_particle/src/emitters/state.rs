@@ -23,6 +23,7 @@ pub struct ParticleEmitterState {
     /// Some 时 update_emitter_position 用它替换锚点朝向，使定向粒子
     /// 始终朝向指定方向
     pub rotation_override: Option<Quat>,
+    pub is_direction_oriented: bool,
 }
 
 impl ParticleEmitterState {
@@ -48,6 +49,7 @@ impl ParticleEmitterState {
             emitter_position: def.emitter_position.clone(),
             global_transform,
             rotation_override,
+            is_direction_oriented: def.is_direction_oriented.unwrap_or(false),
         }
     }
 }

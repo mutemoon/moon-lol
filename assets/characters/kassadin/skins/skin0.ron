@@ -3,12 +3,12 @@
     "lol_base_render::particle::ConfigVfxHandle": (Path("characters/Kassadin/skins/skin0_vfx.ron")),
   },
   entities: {
-    4294967259: (
+    4294967256: (
       components: {
-        "lol_base::audio::AudioBank": (Path("characters/kassadin/skins/skin0_audio.ron")),
         "bevy_animation::graph::AnimationGraphHandle": (Path("characters/Kassadin/animations/skin0.ron")),
         "bevy_camera::visibility::Visibility": Inherited,
         "bevy_world_serialization::components::WorldAssetRoot": (Path("characters/Kassadin/skins/skin0.glb#Scene0")),
+        "lol_base::audio::AudioBank": (Path("characters/Kassadin/skins/skin0_audio.ron")),
         "lol_base::character::HealthBar": (
           bar_type: 12,
         ),

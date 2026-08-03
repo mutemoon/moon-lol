@@ -286,6 +286,7 @@ pub struct ParticleTextureInputs {
     pub color_remap_ramp: Option<Handle<Image>>,
     pub normal_map: Option<Handle<Image>>,
     pub back_buffer: Option<Handle<Image>>,
+    pub erosion_map: Option<Handle<Image>>,
 }
 
 #[derive(Asset, TypePath, Clone, Debug)]
@@ -365,10 +366,12 @@ impl ParticleMaterialDynamic {
 
         let blend_mode = emitter_def.blend_mode.unwrap_or(4);
 
-        // 本轮 defs 默认全关（对应已抽取 SPIR-V 的 BASE 变体）；
-        // 后续由 assembly::derive_defs 按逆向宏表派生具体组合
-        let vert_defs: Vec<String> = vec![];
-        let frag_defs: Vec<String> = vec![];
+        // 由 assembly::derive_defs 按逆向宏表派生具体组合（如 ALPHA_EROSION）
+        let (vert_defs, frag_defs) = crate::particle::assembly::derive_defs(
+            &emitter_def,
+            kind,
+            crate::particle::assembly::ParticleRenderPass::Normal,
+        );
 
         let vert_hash = league_utils::hash_shader_spec(&vert_defs);
         let frag_hash = league_utils::hash_shader_spec(&frag_defs);
@@ -448,6 +451,11 @@ impl ParticleMaterialDynamic {
                 texture,
             );
         }
+        if let Some(texture) = textures_in.erosion_map {
+            textures.insert("sAlphaErosionTexture".to_string(), texture.clone());
+            textures.insert("sAlphaErosionTexture__TX".to_string(), texture.clone());
+            textures.insert("sAlphaErosionTexture_SharedTexture".to_string(), texture);
+        }
 
         let mut material = Self {
             kind,
@@ -466,6 +474,21 @@ impl ParticleMaterialDynamic {
             uniforms,
             textures,
         };
+
+        // Alpha Erosion 采样器与驱动参数一次性写值
+        if let Some(erosion) = material.emitter_def.alpha_erosion_definition.clone() {
+            let drive_val = erosion.erosion_drive_curve.sample_clamped(0.0);
+            let feather_in = erosion.feather_in.unwrap_or(0.1);
+            let feather_out = erosion.feather_out.unwrap_or(0.1);
+            material.set_param(
+                "cAlphaErosionParams",
+                Vec4::new(drive_val, feather_in, feather_out, 0.0),
+            );
+            material.set_param(
+                "cAlphaErosionTextureMixer",
+                erosion.erosion_map_channel_mixer,
+            );
+        }
 
         // 一次性常量上传对齐逆向 SetupParticleShader：sliceTechniqueRange > 0 时
         // 上传 SLICE_RANGE = (r, 1/r², 0, 0)；不写则 uniform 全零，切片遮罩会裁掉

@@ -24,7 +24,11 @@ fn main() {
     // 加载游戏目录下所有 wad 文件
     let loader = LeagueLoader::full(root_dir).unwrap();
 
-    println!("加载 {} 个 wad 耗时: {:?}", loader.wads.len(), start.elapsed());
+    println!(
+        "加载 {} 个 wad 耗时: {:?}",
+        loader.wads.len(),
+        start.elapsed()
+    );
 
     let start = Instant::now();
 
@@ -38,7 +42,12 @@ fn main() {
 
     // wad 路径 hash 表（u64，xxhash64），用于还原 prop 文件原始路径
     let game_hash_paths: Vec<String> = (0..9)
-        .map(|i| format!("assets/CommunityDragon-Data/hashes/lol/hashes.game.txt.{}", i))
+        .map(|i| {
+            format!(
+                "assets/CommunityDragon-Data/hashes/lol/hashes.game.txt.{}",
+                i
+            )
+        })
         .collect();
     let game_hashes = get_game_hashes(&game_hash_paths);
 
@@ -92,7 +101,10 @@ fn main() {
         // 只处理 PROP 文件（PTCH 文件内嵌 PROP，跳过 12 字节头）
         let prop_bytes: &[u8] = if buffer.starts_with(b"PROP") {
             &buffer
-        } else if buffer.starts_with(b"PTCH") && buffer.len() > 12 && buffer[12..].starts_with(b"PROP") {
+        } else if buffer.starts_with(b"PTCH")
+            && buffer.len() > 12
+            && buffer[12..].starts_with(b"PROP")
+        {
             &buffer[12..]
         } else {
             return;
@@ -219,11 +231,7 @@ fn bin_type_name(vtype: BinType) -> &'static str {
 
 /// 字段声明的完整类型名，容器类型需从值切片中读取内部类型
 fn type_decl(vtype: BinType, slice: &[u8]) -> String {
-    let inner = |b: u8| {
-        BinType::try_from(b)
-            .map(bin_type_name)
-            .unwrap_or("unknown")
-    };
+    let inner = |b: u8| BinType::try_from(b).map(bin_type_name).unwrap_or("unknown");
     match vtype {
         BinType::List if !slice.is_empty() => format!("list[{}]", inner(slice[0])),
         BinType::List2 if !slice.is_empty() => format!("list2[{}]", inner(slice[0])),

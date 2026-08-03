@@ -16,6 +16,7 @@
 | [shader/assembly-full.md](shader/assembly-full.md) | Full 版完整装配逻辑（Rust 伪代码：主链/宏开关/BindTextureSlot/逐-pass 渲染态） |
 | [shader/constants.md](shader/constants.md) | 深度转换 & 软粒子 & 切片 & PIXEL_COLOR_REMAP_RAMP 默认纹理/采样器常量 |
 | [shader/dxbc.md](shader/dxbc.md) | DXBC 预编译字节码加载流程 |
+| [particle_motion.md](particle_motion.md) | 粒子运动与发射属性逆向分析：包含解析函数、反编译代码、运动积分公式与 Billboard 顶点装配 |
 
 ## 资源
 

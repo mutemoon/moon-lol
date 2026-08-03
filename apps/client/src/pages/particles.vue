@@ -126,8 +126,8 @@ onBeforeUnmount(() => disconnect());
 </script>
 
 <template>
-  <div class="mx-auto flex h-full w-full max-w-5xl flex-col gap-5 px-8 py-8">
-    <header class="space-y-1">
+  <div class="mx-auto flex h-full w-full max-w-5xl flex-col gap-5 px-8 py-8 min-h-0 overflow-hidden">
+    <header class="space-y-1 shrink-0">
       <h1 class="flex items-center gap-2 text-2xl font-semibold tracking-tight">
         <SparklesIcon class="size-6" />
         粒子播放
@@ -138,7 +138,7 @@ onBeforeUnmount(() => disconnect());
     </header>
 
     <!-- 连接栏 -->
-    <div class="flex items-center gap-2">
+    <div class="flex shrink-0 items-center gap-2">
       <Input v-model="url" placeholder="ws://127.0.0.1:9002" class="max-w-xs" :disabled="connected" />
       <Button v-if="!connected" :disabled="connecting" @click="onConnect">
         <Loader2Icon v-if="connecting" class="size-4 animate-spin" />
@@ -158,26 +158,26 @@ onBeforeUnmount(() => disconnect());
       <Badge v-if="connected" variant="outline" class="text-emerald-600">已连接</Badge>
     </div>
 
-    <p v-if="lastError || actionError" class="text-destructive text-sm">
+    <p v-if="lastError || actionError" class="text-destructive text-sm shrink-0">
       {{ actionError || lastError }}
     </p>
 
     <!-- 未连接占位 -->
     <div
       v-if="!connected"
-      class="text-muted-foreground flex flex-1 items-center justify-center rounded-lg border border-dashed text-sm"
+      class="text-muted-foreground flex flex-1 items-center justify-center rounded-lg border border-dashed text-sm min-h-0"
     >
       先启动 lol_particle server，再点击「连接」
     </div>
 
     <!-- 英雄 × 粒子 双栏 -->
-    <div v-else class="grid flex-1 grid-cols-[240px_1fr] gap-4 overflow-hidden">
+    <div v-else class="grid min-h-0 flex-1 grid-cols-[240px_1fr] gap-4 overflow-hidden">
       <!-- 英雄列表 -->
-      <div class="flex flex-col overflow-hidden rounded-lg border">
-        <div class="border-b px-3 py-2 text-xs font-semibold tracking-wider uppercase">
+      <div class="flex min-h-0 flex-col overflow-hidden rounded-lg border">
+        <div class="border-b px-3 py-2 text-xs font-semibold tracking-wider uppercase shrink-0">
           英雄 ({{ heroes.length }})
         </div>
-        <ScrollArea class="flex-1">
+        <ScrollArea class="min-h-0 flex-1">
           <div class="flex flex-col p-1">
             <button
               v-for="h in heroes"
@@ -200,8 +200,8 @@ onBeforeUnmount(() => disconnect());
       </div>
 
       <!-- 粒子系统列表 -->
-      <div class="flex flex-col overflow-hidden rounded-lg border">
-        <div class="flex items-center justify-between border-b px-3 py-2">
+      <div class="flex min-h-0 flex-col overflow-hidden rounded-lg border">
+        <div class="flex shrink-0 items-center justify-between border-b px-3 py-2">
           <span class="text-xs font-semibold tracking-wider uppercase">
             {{ selectedHero ? `${selectedHero} · 粒子系统` : "粒子系统" }}
           </span>
@@ -213,30 +213,30 @@ onBeforeUnmount(() => disconnect());
 
         <div
           v-if="!selectedHero"
-          class="text-muted-foreground flex flex-1 items-center justify-center text-sm"
+          class="text-muted-foreground flex flex-1 items-center justify-center text-sm min-h-0"
         >
           从左侧选择一个英雄
         </div>
         <div
           v-else-if="loadErrors[selectedHero]"
-          class="text-destructive flex flex-1 items-center justify-center px-4 text-center text-sm"
+          class="text-destructive flex flex-1 items-center justify-center px-4 text-center text-sm min-h-0"
         >
           {{ loadErrors[selectedHero] }}
         </div>
         <div
           v-else-if="loadingHero === selectedHero"
-          class="text-muted-foreground flex flex-1 items-center justify-center gap-2 text-sm"
+          class="text-muted-foreground flex flex-1 items-center justify-center gap-2 text-sm min-h-0"
         >
           <Loader2Icon class="size-4 animate-spin" />
           加载中…
         </div>
         <div
           v-else-if="currentSystems.length === 0"
-          class="text-muted-foreground flex flex-1 items-center justify-center text-sm"
+          class="text-muted-foreground flex flex-1 items-center justify-center text-sm min-h-0"
         >
           该英雄没有粒子系统
         </div>
-        <ScrollArea v-else class="flex-1">
+        <ScrollArea v-else class="min-h-0 flex-1">
           <div class="flex flex-col gap-1 p-2">
             <div
               v-for="sys in currentSystems"

@@ -22,10 +22,13 @@ use bevy::camera::visibility::RenderLayers;
 use bevy::ecs::system::SystemParam;
 use bevy::mesh::skinning::SkinnedMesh;
 use bevy::prelude::*;
+use lol_base_render::camera::TargetImage;
+use lol_base_render::mesh_shadow::spawn_shadow_skin_entity;
 use lol_base_render::particle::{
     ConfigVfxDistortionDefinition, ConfigVfxEmitterDefinition, ConfigVfxPrimitive,
     ConfigVfxSystemDefinition,
 };
+use lol_base_render::shader::ShaderMap;
 use lol_core::lifetime::Lifetime;
 
 use super::decal::ParticleDecal;
@@ -34,7 +37,6 @@ use super::utils::{
     EmissionParams, EmitterType, ParticleBirthParams, calculate_emission_params,
     calculate_particle_transform_frame, get_emitter_type, spawn_particle_entity,
 };
-use lol_base_render::camera::TargetImage;
 use crate::ParticleId;
 use crate::particle::distortion::ParticleMeshDistortion;
 use crate::particle::dynamic::{
@@ -42,8 +44,6 @@ use crate::particle::dynamic::{
 };
 use crate::particle::quad::ParticleMeshQuad;
 use crate::utils::{ResourceCache, create_black_pixel_texture};
-use lol_base_render::shader::ShaderMap;
-use lol_base_render::mesh_shadow::spawn_shadow_skin_entity;
 
 /// 皮肤网格相关查询打包，避免系统参数超过 Bevy 的 16 个上限。
 #[derive(SystemParam)]
@@ -67,7 +67,7 @@ pub fn update_emitters(
     mut res_dynamic_material: ResMut<Assets<ParticleMaterialDynamic>>,
     res_shader_map: Option<Res<ShaderMap>>,
     res_target_image: Option<Res<TargetImage>>,
-    mut transparent_ramp: Local<Option<Handle<Image>>>,
+    mut black_texture_cache: Local<Option<Handle<Image>>>,
     mut query: Query<(
         Entity,
         &EmitterOf,
@@ -82,14 +82,11 @@ pub fn update_emitters(
         return;
     };
 
-    // PIXEL_COLOR_REMAP_RAMP 缺省绑定：透明（alpha=0）1×1 贴图（全局缓存一次）。
-    // 因为 QuadPs/MeshPs/SkinnedMeshParticlePs 无条件采样该斜坡并在 alpha>0 时
-    // 用其 rgb 替换最终色，而 Bevy 默认 fallback 是不透明白，会把粒子整片替换成
-    // 白 → 失色变黑白；所以绑定 alpha=0 贴图使 remap_color.w==0，shader 跳过替换、
-    // 保留原色。
-    let color_remap_ramp = transparent_ramp
+    // PARTICLE_COLOR_TEXTURE 与 PIXEL_COLOR_REMAP_RAMP 缺省绑定：1×1 黑色贴图（全局缓存一次）。
+    let black_texture = black_texture_cache
         .get_or_insert_with(|| res_images.add(create_black_pixel_texture()))
         .clone();
+    let color_remap_ramp = black_texture.clone();
 
     for (emitter_entity, emitter_of, mut lifetime, mut emitter, particle_id) in query.iter_mut() {
         let vfx_emitter_definition_data =
@@ -129,8 +126,6 @@ pub fn update_emitters(
             .is_uniform_scale
             .unwrap_or(false);
 
-        // 贴图：VfxTexture 已由 ConfigVfxLoader 解析出 handle（加载时 is_srgb=false，线性采样），
-        // 这里取 handle 克隆供动态材质按 binding 名绑定
         let texture = vfx_emitter_definition_data
             .texture
             .as_ref()
@@ -143,6 +138,11 @@ pub fn update_emitters(
             .texture_mult
             .as_ref()
             .and_then(|tm| tm.texture_mult.as_ref())
+            .map(|t| t.handle.clone());
+        let erosion_map = vfx_emitter_definition_data
+            .alpha_erosion_definition
+            .as_ref()
+            .and_then(|e| e.erosion_map.as_ref())
             .map(|t| t.handle.clone());
 
         for _ in 0..particles_to_spawn {
@@ -174,7 +174,6 @@ pub fn update_emitters(
                 adjusted_birth_scale0,
             );
 
-            // 唯一按族分支的一步：几何组件 + 贴图集合 + 一次性 uniform
             match emitter_type {
                 EmitterType::Quad => attach_quad_visuals(
                     &mut commands,
@@ -184,6 +183,7 @@ pub fn update_emitters(
                     texture.clone(),
                     particle_color_texture.clone(),
                     texture_mult.clone(),
+                    erosion_map.clone(),
                     Some(color_remap_ramp.clone()),
                     &mut res_mesh,
                     &mut res_dynamic_material,
@@ -203,6 +203,7 @@ pub fn update_emitters(
                         simple_mesh_name,
                         texture.clone(),
                         particle_color_texture.clone(),
+                        erosion_map.clone(),
                         Some(color_remap_ramp.clone()),
                         &mut res_dynamic_material,
                         &mut res_resource_cache,
@@ -222,14 +223,13 @@ pub fn update_emitters(
                             *y_range,
                             texture.clone(),
                             particle_color_texture.clone(),
+                            erosion_map.clone(),
                             &mut res_dynamic_material,
                             shader_map,
                         );
                     }
                 }
                 EmitterType::Distortion => {
-                    // get_emitter_type 已保证 distortion_definition 存在；
-                    // back-buffer 拷贝来自相机插件，缺失时跳过附加（粒子不可见）
                     let (Some(distortion_definition), Some(res_target_image)) = (
                         vfx_emitter_definition_data.distortion_definition.as_ref(),
                         res_target_image.as_ref(),
@@ -243,6 +243,7 @@ pub fn update_emitters(
                         distortion_definition,
                         texture.clone(),
                         particle_color_texture.clone(),
+                        erosion_map.clone(),
                         frame,
                         &mut res_mesh,
                         &mut res_dynamic_material,
@@ -257,6 +258,7 @@ pub fn update_emitters(
                     vfx_emitter_definition_data,
                     texture.clone(),
                     particle_color_texture.clone(),
+                    erosion_map.clone(),
                     Some(color_remap_ramp.clone()),
                     &mut res_dynamic_material,
                     shader_map,
@@ -280,6 +282,7 @@ pub fn attach_quad_visuals(
     texture: Option<Handle<Image>>,
     particle_color_texture: Option<Handle<Image>>,
     texture_mult: Option<Handle<Image>>,
+    erosion_map: Option<Handle<Image>>,
     color_remap_ramp: Option<Handle<Image>>,
     res_mesh: &mut ResMut<Assets<Mesh>>,
     res_dynamic_material: &mut ResMut<Assets<ParticleMaterialDynamic>>,
@@ -298,6 +301,7 @@ pub fn attach_quad_visuals(
             particle_color_texture,
             texture_mult,
             color_remap_ramp,
+            erosion_map,
             ..default()
         },
         shader_map,
@@ -314,6 +318,7 @@ pub fn attach_mesh_visuals(
     mesh_name: Option<&str>,
     texture: Option<Handle<Image>>,
     particle_color_texture: Option<Handle<Image>>,
+    erosion_map: Option<Handle<Image>>,
     color_remap_ramp: Option<Handle<Image>>,
     res_dynamic_material: &mut ResMut<Assets<ParticleMaterialDynamic>>,
     res_resource_cache: &mut ResMut<ResourceCache>,
@@ -337,6 +342,7 @@ pub fn attach_mesh_visuals(
             texture,
             particle_color_texture,
             color_remap_ramp,
+            erosion_map,
             ..default()
         },
         shader_map,
@@ -355,6 +361,7 @@ pub fn attach_unlit_decal_visuals(
     y_range: f32,
     texture: Option<Handle<Image>>,
     particle_color_texture: Option<Handle<Image>>,
+    erosion_map: Option<Handle<Image>>,
     res_dynamic_material: &mut ResMut<Assets<ParticleMaterialDynamic>>,
     shader_map: &ShaderMap,
 ) {
@@ -367,6 +374,7 @@ pub fn attach_unlit_decal_visuals(
         ParticleTextureInputs {
             texture,
             particle_color_texture,
+            erosion_map,
             ..default()
         },
         shader_map,
@@ -393,6 +401,7 @@ pub fn attach_distortion_visuals(
     distortion_definition: &ConfigVfxDistortionDefinition,
     texture: Option<Handle<Image>>,
     particle_color_texture: Option<Handle<Image>>,
+    erosion_map: Option<Handle<Image>>,
     frame: f32,
     res_mesh: &mut ResMut<Assets<Mesh>>,
     res_dynamic_material: &mut ResMut<Assets<ParticleMaterialDynamic>>,
@@ -418,6 +427,7 @@ pub fn attach_distortion_visuals(
             particle_color_texture,
             normal_map,
             back_buffer: Some(res_target_image.0.clone()),
+            erosion_map,
             ..default()
         },
         shader_map,
@@ -454,6 +464,7 @@ pub fn attach_skinned_mesh_visuals(
     vfx_emitter_definition_data: &ConfigVfxEmitterDefinition,
     texture: Option<Handle<Image>>,
     particle_color_texture: Option<Handle<Image>>,
+    erosion_map: Option<Handle<Image>>,
     color_remap_ramp: Option<Handle<Image>>,
     res_dynamic_material: &mut ResMut<Assets<ParticleMaterialDynamic>>,
     shader_map: &ShaderMap,
@@ -463,7 +474,6 @@ pub fn attach_skinned_mesh_visuals(
     q_animation_target: &Query<(Entity, &Transform, &AnimationTargetId)>,
     q_parent: &Query<&ChildOf>,
 ) {
-    // Handle material overrides
     let final_texture = if let Some(material_override_definitions) =
         &vfx_emitter_definition_data.material_override_definitions
     {
@@ -478,8 +488,6 @@ pub fn attach_skinned_mesh_visuals(
         texture
     };
 
-    // blend_mode 由 emitter_def 内部推导；kColorFactor / UV 变换等逐帧参数在
-    // update_particle_skinned_mesh_particle 按成员名写入
     let emitter_def = Arc::new(vfx_emitter_definition_data.clone());
     let material = MeshMaterial3d(res_dynamic_material.add(ParticleMaterialDynamic::create(
         ParticleRenderKind::SkinnedMesh,
@@ -488,6 +496,7 @@ pub fn attach_skinned_mesh_visuals(
             texture: final_texture,
             particle_color_texture,
             color_remap_ramp,
+            erosion_map,
             ..default()
         },
         shader_map,

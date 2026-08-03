@@ -123,18 +123,6 @@
                 ]),
             ),
             (
-                name: "CherryMaidenHealthMod",
-                values: Some([
-                    0.7,
-                    0.7,
-                    0.7,
-                    0.7,
-                    0.7,
-                    0.7,
-                    0.7,
-                ]),
-            ),
-            (
                 name: "MinionDamageTakenModifier",
                 values: Some([
                     0.3,

@@ -57,7 +57,7 @@
         hitEffectKey: None,
         selectionPriority: None,
         iconPath: Some([
-            "ASSETS/Characters/Locke/HUD/Icons2D/Locke_R.Locke.dds",
+            "ASSETS/Characters/Locke/HUD/Icons2D/Locke_R.dds",
         ]),
         useAnimatorFramerate: None,
     )),

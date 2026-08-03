@@ -9,10 +9,9 @@
                         dataValue: "base_dash_damage",
                     ),
                     (
-                        type: "CalculationPartStatCoefficient",
+                        type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        coefficient: Some(0.4),
-                        statFormula: None,
+                        dataValue: "ap_ratio",
                     ),
                 ]),
                 multiplier: None,
@@ -110,6 +109,18 @@
                     0.1,
                 ]),
             ),
+            (
+                name: "APRatio",
+                values: Some([
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                ]),
+            ),
         ]),
         mana: Some([
             30.0,
@@ -148,8 +159,8 @@
         hitEffectKey: None,
         selectionPriority: None,
         iconPath: Some([
-            "ASSETS/Characters/Locke/HUD/Icons2D/Locke_E.Locke.dds",
-            "ASSETS/Characters/Locke/HUD/Icons2D/Locke_E2.Locke.dds",
+            "ASSETS/Characters/Locke/HUD/Icons2D/Locke_E.dds",
+            "ASSETS/Characters/Locke/HUD/Icons2D/Locke_E2.dds",
         ]),
         useAnimatorFramerate: Some(true),
     )),

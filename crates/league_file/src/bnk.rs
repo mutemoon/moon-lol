@@ -154,9 +154,24 @@ impl Bnk {
             if base + 12 > input.len() {
                 break;
             }
-            let id = u32::from_le_bytes([input[base], input[base + 1], input[base + 2], input[base + 3]]);
-            let off = u32::from_le_bytes([input[base + 4], input[base + 5], input[base + 6], input[base + 7]]) as usize;
-            let len = u32::from_le_bytes([input[base + 8], input[base + 9], input[base + 10], input[base + 11]]) as usize;
+            let id = u32::from_le_bytes([
+                input[base],
+                input[base + 1],
+                input[base + 2],
+                input[base + 3],
+            ]);
+            let off = u32::from_le_bytes([
+                input[base + 4],
+                input[base + 5],
+                input[base + 6],
+                input[base + 7],
+            ]) as usize;
+            let len = u32::from_le_bytes([
+                input[base + 8],
+                input[base + 9],
+                input[base + 10],
+                input[base + 11],
+            ]) as usize;
             let start = data_start + off;
             let end = start + len;
             if end <= input.len() && end <= data_start + data_size {

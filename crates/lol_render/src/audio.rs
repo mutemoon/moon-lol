@@ -4,8 +4,8 @@
 
 use bevy::audio::{AudioPlayer, AudioSource, PlaybackSettings};
 use bevy::prelude::*;
-use lol_base::render_cmd::CommandSkinSoundPlay;
 use lol_base::audio::{AudioBank, ConfigAudio};
+use lol_base::render_cmd::CommandSkinSoundPlay;
 use lol_base::spell::Spell;
 use lol_core::attack::{EventAttackEnd, EventAttackStart};
 use lol_core::skill::{EventSkillCast, Skill};
@@ -27,6 +27,57 @@ impl Plugin for PluginAudio {
     }
 }
 
+fn strip_play_sfx_prefix(name: &str) -> &str {
+    if let Some(rest) = name.strip_prefix("Play_sfx_") {
+        if let Some((_champ, real_name)) = rest.split_once('_') {
+            real_name
+        } else {
+            rest
+        }
+    } else {
+        name
+    }
+}
+
+/// 按候选后缀顺序匹配事件 key，命中第一个即返回其 ogg 列表，避免误匹配和无关音效混合。
+fn find_event_by_candidates<'a>(
+    config: &'a ConfigAudio,
+    base_name: &str,
+    suffixes: &[&str],
+) -> Option<&'a Vec<String>> {
+    let cleaned = strip_play_sfx_prefix(base_name);
+    let name_options = if cleaned != base_name {
+        vec![base_name, cleaned]
+    } else {
+        vec![base_name]
+    };
+
+    for name in &name_options {
+        for suffix in suffixes {
+            let candidate = format!("{}{}", name, suffix);
+            if let Some(paths) = config.events.get(&candidate) {
+                return Some(paths);
+            }
+        }
+    }
+
+    for name in &name_options {
+        let lower_base = name.to_lowercase();
+        for suffix in suffixes {
+            let lower_candidate = format!("{}{}", lower_base, suffix.to_lowercase());
+            if let Some((_, paths)) = config
+                .events
+                .iter()
+                .find(|(k, _)| k.to_lowercase() == lower_candidate)
+            {
+                return Some(paths);
+            }
+        }
+    }
+
+    None
+}
+
 /// 技能/被动命中或触发音效：由英雄代码在对应时机显式触发（通过 CommandSkinSoundPlay）。
 fn on_skin_sound_play(
     trigger: On<CommandSkinSoundPlay>,
@@ -39,18 +90,15 @@ fn on_skin_sound_play(
     let Some(config) = config_of(&q_bank, &res_audio, entity) else {
         return;
     };
-    if let Some(paths) = config.events.get(&trigger.key) {
+    let suffixes = [""];
+    if let Some(paths) = find_event_by_candidates(config, &trigger.key, &suffixes) {
         play_random(&mut commands, &asset_server, paths);
     } else {
-        // Fallback: 忽略大小写查找 key
-        let lower_key = trigger.key.to_lowercase();
-        if let Some((_, paths)) = config.events.iter().find(|(k, _)| k.to_lowercase() == lower_key) {
-            play_random(&mut commands, &asset_server, paths);
-        }
+        info!("{}", trigger.key);
     }
 }
 
-/// 普攻出手：播放包含 BasicAttack 和 OnCast 的音效
+/// 普攻出手：播放包含 BasicAttack 的 Cast 音效
 fn on_attack_cast_play_sound(
     trigger: On<EventAttackStart>,
     mut commands: Commands,
@@ -62,19 +110,13 @@ fn on_attack_cast_play_sound(
     let Some(config) = config_of(&q_bank, &res_audio, attacker) else {
         return;
     };
-    let paths: Vec<String> = config
-        .events
-        .iter()
-        .filter(|(k, _)| {
-            let l = k.to_lowercase();
-            l.contains("basicattack") && (l.contains("oncast") || l.contains("cast"))
-        })
-        .flat_map(|(_, p)| p.iter().cloned())
-        .collect();
-    play_random(&mut commands, &asset_server, &paths);
+    let suffixes = ["_OnCast", "_Cast"];
+    if let Some(paths) = find_event_by_candidates(config, "BasicAttack", &suffixes) {
+        play_random(&mut commands, &asset_server, paths);
+    }
 }
 
-/// 普攻命中：播放包含 BasicAttack 和 OnHit 的音效
+/// 普攻命中：播放包含 BasicAttack 的 Hit 音效
 fn on_attack_hit_play_sound(
     trigger: On<EventAttackEnd>,
     mut commands: Commands,
@@ -86,16 +128,10 @@ fn on_attack_hit_play_sound(
     let Some(config) = config_of(&q_bank, &res_audio, attacker) else {
         return;
     };
-    let paths: Vec<String> = config
-        .events
-        .iter()
-        .filter(|(k, _)| {
-            let l = k.to_lowercase();
-            l.contains("basicattack") && (l.contains("onhit") || l.contains("hit"))
-        })
-        .flat_map(|(_, p)| p.iter().cloned())
-        .collect();
-    play_random(&mut commands, &asset_server, &paths);
+    let suffixes = ["_OnHit", "_Hit"];
+    if let Some(paths) = find_event_by_candidates(config, "BasicAttack", &suffixes) {
+        play_random(&mut commands, &asset_server, paths);
+    }
 }
 
 /// 技能施放：按技能对象名（如 AatroxQ）查找并播放对应 OnCast 音效
@@ -117,17 +153,18 @@ fn on_skill_cast_play_sound(
     let Some(name) = spell_name_from_handle(&asset_server, &skill.spell) else {
         return;
     };
-    let lower_name = name.to_lowercase();
-    let paths: Vec<String> = config
-        .events
-        .iter()
-        .filter(|(k, _)| {
-            let l = k.to_lowercase();
-            l.contains(&lower_name) && (l.contains("oncast") || l.contains("cast") || l.contains("onbuffactivate"))
-        })
-        .flat_map(|(_, p)| p.iter().cloned())
-        .collect();
-    play_random(&mut commands, &asset_server, &paths);
+
+    let suffixes = [
+        "_OnCast",
+        "_Cast",
+        "_OnBuffActivate",
+        "_OnBuffCast",
+        "_buffactivate",
+        "_buffcast",
+    ];
+    if let Some(paths) = find_event_by_candidates(config, &name, &suffixes) {
+        play_random(&mut commands, &asset_server, paths);
+    }
 }
 
 /// 从实体读取 AudioBank 并拿到已加载的 ConfigAudio

@@ -11,7 +11,7 @@
                     (
                         type: "CalculationPartStatCoefficient",
                         stat: None,
-                        coefficient: Some(0.4),
+                        coefficient: Some(0.45),
                         statFormula: None,
                     ),
                 ]),
@@ -24,13 +24,13 @@
             (
                 name: "Damage",
                 values: Some([
-                    45.0,
+                    40.0,
                     60.0,
-                    75.0,
-                    90.0,
-                    105.0,
+                    80.0,
+                    100.0,
                     120.0,
-                    135.0,
+                    140.0,
+                    160.0,
                 ]),
             ),
             (

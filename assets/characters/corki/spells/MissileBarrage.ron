@@ -7,7 +7,7 @@
                     (
                         type: "CalculationPartStatCoefficient",
                         stat: Some(8),
-                        coefficient: Some(1.0),
+                        coefficient: Some(2.0),
                         statFormula: None,
                     ),
                 ]),

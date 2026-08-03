@@ -31,3 +31,7 @@
 ```sh
 cargo check --all-targets
 ```
+
+# 项目结构
+
+- `assets/props`: 从 WAD 中解包出的所有 PROP 文件，大约几万个

@@ -595,7 +595,9 @@ fn convert_ui_button_data(
 }
 
 /// 转换 UiElementRegionData 到 lol_base 稳定类型
-fn convert_ui_region_data(region: &UiElementRegionData) -> lol_base_render::ui::LOLUiElementRegionData {
+fn convert_ui_region_data(
+    region: &UiElementRegionData,
+) -> lol_base_render::ui::LOLUiElementRegionData {
     lol_base_render::ui::LOLUiElementRegionData {
         name: region.name.clone(),
         position: region.position.as_ref().map(convert_ui_position),
@@ -1196,14 +1198,18 @@ fn convert_health_bar_extra_bars_data(
     }
 }
 
-fn convert_health_bar_fade_data(data: &HealthBarFadeData) -> lol_base_render::ui::LOLHealthBarFadeData {
+fn convert_health_bar_fade_data(
+    data: &HealthBarFadeData,
+) -> lol_base_render::ui::LOLHealthBarFadeData {
     lol_base_render::ui::LOLHealthBarFadeData {
         fade_bar: convert_bar_type_map(&data.fade_bar),
         fade_speed: data.fade_speed,
     }
 }
 
-fn convert_health_bar_text_data(data: &HealthBarTextData) -> lol_base_render::ui::LOLHealthBarTextData {
+fn convert_health_bar_text_data(
+    data: &HealthBarTextData,
+) -> lol_base_render::ui::LOLHealthBarTextData {
     lol_base_render::ui::LOLHealthBarTextData {
         health_value_text: data.health_value_text.into(),
         include_max_health: data.include_max_health,

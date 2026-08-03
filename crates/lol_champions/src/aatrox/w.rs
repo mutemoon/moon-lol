@@ -4,7 +4,9 @@
 
 use bevy::prelude::*;
 use lol_base::animation_names::ANIM_SPELL2;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleDespawn, CommandSkinParticleSpawn};
+use lol_base::render_cmd::{
+    CommandAnimationPlay, CommandSkinParticleDespawn, CommandSkinParticleSpawn,
+};
 use lol_base::spell::Spell;
 use lol_core::action::displace::{ActionDisplace, DisplaceMotion, DisplaceTargetSelection};
 use lol_core::base::buff::BuffOf;

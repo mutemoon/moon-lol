@@ -55,7 +55,7 @@
             movementComponent: (
                 type: "MovementTypeFixedSpeed",
                 speed: Some(2000.0),
-                startBoneName: Some("weapon"),
+                startBoneName: Some(""),
                 tracksTarget: Some(false),
                 projectTargetToCastRange: Some(true),
                 useHeightOffsetAtEnd: Some(true),

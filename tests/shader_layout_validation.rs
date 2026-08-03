@@ -149,7 +149,10 @@ fn unified_and_variant_binding_tables_are_consistent() {
                         ub.binding_index, vb.binding_index
                     ));
                 }
-                let BindingTypeDesc::UniformBuffer { total_size: u_total, .. } = &ub.type_desc
+                let BindingTypeDesc::UniformBuffer {
+                    total_size: u_total,
+                    ..
+                } = &ub.type_desc
                 else {
                     critical.push(format!(
                         "{family:?} #{hash}: \"{name}\" 在并集布局里不是 UniformBuffer"
@@ -344,6 +347,9 @@ fn report_lost_member_names() {
     let report_path = root.join("target/lost_member_names_report.txt");
     let _ = std::fs::create_dir_all(root.join("target"));
     let _ = std::fs::write(&report_path, &report);
-    println!("丢名成员引用共 {affected} 处，详见 {}", report_path.display());
+    println!(
+        "丢名成员引用共 {affected} 处，详见 {}",
+        report_path.display()
+    );
     println!("{report}");
 }

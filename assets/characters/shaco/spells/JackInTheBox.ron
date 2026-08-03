@@ -37,8 +37,8 @@
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
-                        type: "CalculationPartEffectValue",
-                        effectIndex: Some(4),
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "box_duration",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -218,6 +218,30 @@
                     0.18,
                     0.18,
                     0.18,
+                ]),
+            ),
+            (
+                name: "BoxDuration",
+                values: Some([
+                    40.0,
+                    40.0,
+                    40.0,
+                    40.0,
+                    40.0,
+                    40.0,
+                    40.0,
+                ]),
+            ),
+            (
+                name: "ArmTime",
+                values: Some([
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
                 ]),
             ),
         ]),

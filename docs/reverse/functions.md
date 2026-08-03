@@ -79,6 +79,7 @@
 | sub_1411847B0 | `Vec3_Normalize` | 归一化 vec3 |
 | sub_14116D130 | `Color_PackToDWORD` | 将颜色打包为 DWORD（用作顶点色） |
 | sub_1412B6FD0 | `ParticleEmitterFactory_Create` | 按类型(0-12)创建粒子发射器对象（分配内存+设置vtable） |
+| sub_1412C85A0 | `ParticleEmitter_EvaluateSplineCurve` | 三次 Hermite 样条插值与概率曲线 3D 向量采样评估计算 |
 | sub_1412A4530 | `ParticleEmitterDescriptor_Init` | 粒子发射器描述符构造函数：分配24字节子对象，主vtable=off_141B28B98(FillQuadVertices所在)，子vtable=off_141B28CC8；初始化默认贴图(DefaultColorOverlifetime/Falloff)及各曲线参数。默认值表见 [shader/deserialization.md](shader/deserialization.md) |
 
 ## VFX 触发 / ResourceResolver 相关函数

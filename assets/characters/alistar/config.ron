@@ -115,7 +115,7 @@
           regen_per_level: 0.17,
         ),
         "lol_core::movement::Movement": (
-          speed: 330.0,
+          speed: 335.0,
         ),
         "lol_core::skill::LOLSpells": ({
           "AlistarBasicAttack": Path("characters/Alistar/spells/AlistarBasicAttack.ron"),

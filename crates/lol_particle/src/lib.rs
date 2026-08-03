@@ -11,6 +11,7 @@ use bevy::transform::systems::{
 };
 use league_utils::{LeagueShader, hash_wad};
 use lol_base::hash_key::{HashKey, LoadHashKeyTrait};
+use lol_base::render_cmd::CommandSkinSoundPlay;
 /// 因为粒子命令事件与 shader 布局描述已下沉到 lol_base_render，
 /// 所以在 crate 根部 re-export 保持调用方路径稳定。
 pub use lol_base_render::particle::{CommandParticleDespawn, CommandParticleSpawn};
@@ -188,7 +189,6 @@ fn on_command_particle_spawn(
     if let Some(rotation) = trigger.rotation {
         global_transform.rotation = rotation;
     }
-
     let Some(vfx_system_def) = res_assets_vfx_system_definition_data.load_hash(trigger.vfx_handle)
     else {
         info!(
@@ -201,6 +201,16 @@ fn on_command_particle_spawn(
         "{entity} VFX 系统定义已加载，粒子名称={:?}，路径={:?}",
         vfx_system_def.particle_name, vfx_system_def.particle_path
     );
+
+    // 自动播放粒子系统关联的创建音效（soundOnCreateDefault）
+    if let Some(sound_name) = &vfx_system_def.sound_on_create_default {
+        if !sound_name.is_empty() {
+            commands.trigger(CommandSkinSoundPlay {
+                entity,
+                key: sound_name.clone(),
+            });
+        }
+    }
 
     let complex_count = vfx_system_def
         .complex_emitter_definition_data
@@ -237,7 +247,11 @@ fn on_command_particle_spawn(
                 vfx_handle: trigger.vfx_handle,
                 index: i,
             },
-            ParticleEmitterState::new(vfx_emitter_definition_data, global_transform, trigger.rotation),
+            ParticleEmitterState::new(
+                vfx_emitter_definition_data,
+                global_transform,
+                trigger.rotation,
+            ),
             Lifetime::new(
                 vfx_emitter_definition_data.lifetime.unwrap_or(1.0),
                 LifetimeMode::TimerAndNoChildren,

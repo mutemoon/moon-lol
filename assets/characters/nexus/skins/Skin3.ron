@@ -3,11 +3,12 @@
     "lol_base_render::particle::ConfigVfxHandle": (Path("characters/Nexus/skins/Skin3_vfx.ron")),
   },
   entities: {
-    4294967259: (
+    4294967256: (
       components: {
         "bevy_animation::graph::AnimationGraphHandle": (Path("characters/Nexus/animations/Skin3.ron")),
         "bevy_camera::visibility::Visibility": Inherited,
         "bevy_world_serialization::components::WorldAssetRoot": (Path("characters/Nexus/skins/Skin3.glb#Scene0")),
+        "lol_base::audio::AudioBank": (Path("characters/Nexus/skins/Skin3_audio.ron")),
         "lol_base::character::HealthBar": (
           bar_type: 8,
         ),

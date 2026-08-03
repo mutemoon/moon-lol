@@ -465,11 +465,11 @@ fn on_command_missile_create(
         });
 
         // 用矩形条显示导弹的碰撞宽度
-        commands.entity(missile_entity).insert(DebugMissile {
-            width: missile_width.unwrap_or(100.0),
-            length: 100.0,
-            color: Color::srgba(1.0, 0.3, 0.3, 0.6),
-        });
+        // commands.entity(missile_entity).insert(DebugMissile {
+        //     width: missile_width.unwrap_or(100.0),
+        //     length: 100.0,
+        //     color: Color::srgba(1.0, 0.3, 0.3, 0.6),
+        // });
 
         return;
     }

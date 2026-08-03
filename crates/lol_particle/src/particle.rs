@@ -6,10 +6,10 @@ pub mod quad;
 use bevy::mesh::VertexAttributeValues;
 use bevy::mesh::skinning::SkinnedMesh;
 use bevy::prelude::*;
+use lol_base_render::camera::CameraState;
 use lol_base_render::particle::{ConfigVfxPrimitive, ConfigVfxSystemDefinition};
 use lol_core::lifetime::Lifetime;
 
-use lol_base_render::camera::CameraState;
 use crate::emitters::state::ParticleEmitterState;
 use crate::particle::dynamic::{ParticleMaterialDynamic, ParticleRenderKind};
 use crate::{
@@ -23,6 +23,7 @@ pub struct ParticleState {
     pub birth_uv_scroll_rate: Vec2,
     pub birth_color: Vec4,
     pub birth_scale0: Vec3,
+    pub initial_rotation: Quat,
     pub velocity: Vec3,
     pub acceleration: Vec3,
     pub frame: f32,
@@ -90,6 +91,17 @@ pub fn update_particle(
                 if let Some((clip_from_world, cam_pos)) = &cam_data {
                     material.set_param("mProj", clip_from_world.transpose());
                     material.set_param("vCamera", *cam_pos);
+                }
+
+                // 逐帧更新 Alpha Erosion 驱动值
+                if let Some(erosion) = &vfx_emitter_definition_data.alpha_erosion_definition {
+                    let drive_val = erosion.erosion_drive_curve.sample_clamped(life);
+                    let feather_in = erosion.feather_in.unwrap_or(0.1);
+                    let feather_out = erosion.feather_out.unwrap_or(0.1);
+                    material.set_param(
+                        "cAlphaErosionParams",
+                        Vec4::new(drive_val, feather_in, feather_out, 0.0),
+                    );
                 }
 
                 match material.kind {
@@ -260,6 +272,15 @@ pub fn update_particle_transform(
         let life = lifetime.progress();
 
         let emitter = q_particle_emitter_state.get(parent).unwrap();
+
+        if emitter.is_direction_oriented {
+            let speed_sq = particle.velocity.length_squared();
+            if speed_sq > 0.0001 {
+                let dir = particle.velocity / speed_sq.sqrt();
+                let q_vel = Quat::from_rotation_arc(Vec3::Z, dir);
+                transform.rotation = q_vel * particle.initial_rotation;
+            }
+        }
 
         let scale0 = emitter.scale0.sample_clamped(life);
 

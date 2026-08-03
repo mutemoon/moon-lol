@@ -2,11 +2,11 @@ use std::ops::Deref;
 use std::time::Duration;
 
 use bevy::prelude::*;
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base_render::animation::{
     AnimationConfig, AnimationConfigOf, ConfigParametricUpdater, LOLAnimationGraph,
     LOLAnimationGraphHandle, LOLAnimationState,
 };
-use lol_base::render_cmd::CommandAnimationPlay;
 use lol_core::attack::Attack;
 use lol_core::base::state::State;
 use lol_core::movement::Movement;

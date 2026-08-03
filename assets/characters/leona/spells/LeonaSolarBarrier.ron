@@ -5,8 +5,8 @@
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
-                        type: "CalculationPartEffectValue",
-                        effectIndex: Some(4),
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "armor_base_bonus",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -22,8 +22,8 @@
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
-                        type: "CalculationPartEffectValue",
-                        effectIndex: Some(4),
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "armor_base_bonus",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -39,8 +39,8 @@
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
-                        type: "CalculationPartEffectValue",
-                        effectIndex: Some(1),
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "explosion_base_damage",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
@@ -151,6 +151,54 @@
                     0.4,
                     0.4,
                     0.4,
+                ]),
+            ),
+            (
+                name: "ExplosionBaseDamage",
+                values: Some([
+                    25.0,
+                    55.0,
+                    85.0,
+                    115.0,
+                    145.0,
+                    175.0,
+                    205.0,
+                ]),
+            ),
+            (
+                name: "MRBaseBonus",
+                values: Some([
+                    12.5,
+                    20.0,
+                    27.5,
+                    35.0,
+                    42.5,
+                    50.0,
+                    57.5,
+                ]),
+            ),
+            (
+                name: "ArmorBaseBonus",
+                values: Some([
+                    12.5,
+                    20.0,
+                    27.5,
+                    35.0,
+                    42.5,
+                    50.0,
+                    57.5,
+                ]),
+            ),
+            (
+                name: "ArmorMRDuration",
+                values: Some([
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
                 ]),
             ),
         ]),

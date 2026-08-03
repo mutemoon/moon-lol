@@ -151,3 +151,29 @@ fn riven_r_starts_cooldown_without_moving_or_damaging() {
 
     h.finish();
 }
+
+#[test]
+fn riven_r_wind_slash_follows_pointer_direction() {
+    let mut h = build_headless("riven_r_wind_slash_pointer");
+    // 在 +X 方向放置敌人，在 -Z 方向放置敌人
+    let enemy_east = h.add_enemy(Vec3::new(300.0, 0.0, 0.0));
+    let enemy_north = h.add_enemy(Vec3::new(0.0, 0.0, -300.0));
+    let initial_hp_east = h.health(enemy_east);
+    let initial_hp_north = h.health(enemy_north);
+
+    // R 初次
+    h.cast_skill(3, Vec2::ZERO).advance(0.2);
+    // Wind Slash（R 重施），指向 +X 方向 (300, 0)
+    h.cast_skill(3, Vec2::new(300.0, 0.0)).advance(0.2);
+
+    assert!(
+        h.health(enemy_east) < initial_hp_east,
+        "Wind Slash 应朝着指针方向 (+X) 发射并对 +X 敌人造成伤害"
+    );
+    assert!(
+        (h.health(enemy_north) - initial_hp_north).abs() < EPSILON,
+        "Wind Slash 指向 +X 时不应伤害 -Z 方向敌人"
+    );
+
+    h.finish();
+}

@@ -1,0 +1,29 @@
+(
+    events: {
+        "Play_vo_SRU_Dragon_Ocean_Attack_OnCast": [
+            "characters/sru_dragon_water/sounds/32387230.ogg",
+            "characters/sru_dragon_water/sounds/433104900.ogg",
+            "characters/sru_dragon_water/sounds/512189613.ogg",
+            "characters/sru_dragon_water/sounds/845970330.ogg",
+        ],
+        "SRU_Dragon_Ocean_Attack_OnCast": [
+            "characters/sru_dragon_water/sounds/1032691145.ogg",
+            "characters/sru_dragon_water/sounds/244954377.ogg",
+            "characters/sru_dragon_water/sounds/522214128.ogg",
+            "characters/sru_dragon_water/sounds/527650693.ogg",
+            "characters/sru_dragon_water/sounds/895243445.ogg",
+            "characters/sru_dragon_water/sounds/93929681.ogg",
+        ],
+        "SRU_Dragon_Ocean_Attack_hit": [
+            "characters/sru_dragon_water/sounds/1021298249.ogg",
+            "characters/sru_dragon_water/sounds/35113664.ogg",
+            "characters/sru_dragon_water/sounds/429382405.ogg",
+            "characters/sru_dragon_water/sounds/725381198.ogg",
+            "characters/sru_dragon_water/sounds/73374354.ogg",
+            "characters/sru_dragon_water/sounds/7986786.ogg",
+            "characters/sru_dragon_water/sounds/88641281.ogg",
+            "characters/sru_dragon_water/sounds/894348503.ogg",
+            "characters/sru_dragon_water/sounds/937932424.ogg",
+        ],
+    },
+)

@@ -330,8 +330,8 @@ fn update_single_skill_rank_pips(
         };
         let pip_y = base_y;
 
-        let new_pos =
-            lol_base_render::ui::LOLEnumUiPosition::UiPositionRect(lol_base_render::ui::LOLUiPositionRect {
+        let new_pos = lol_base_render::ui::LOLEnumUiPosition::UiPositionRect(
+            lol_base_render::ui::LOLUiPositionRect {
                 anchors: Some(lol_base_render::ui::LOLEnumAnchor::AnchorSingle(
                     lol_base_render::ui::LOLAnchorSingle {
                         anchor: Vec2::new(0.5, 1.0),
@@ -348,7 +348,8 @@ fn update_single_skill_rank_pips(
                 disable_resolution_downscale: None,
                 ignore_global_scale: None,
                 ignore_safe_zone: None,
-            });
+            },
+        );
 
         // 仅在坐标真正发生变化时才修改 icon_assets 以触发重新布局计算，并且极为安全高效
         if let Ok(UIElement::Icon(empty_handle)) = q_ui_element.get(empty_entity) {

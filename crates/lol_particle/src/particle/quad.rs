@@ -3,9 +3,7 @@ use std::f32::consts::PI;
 use bevy::mesh::VertexAttributeValues;
 use bevy::prelude::*;
 
-use crate::{
-    ATTRIBUTE_LIFETIME, ATTRIBUTE_UV_FRAME, ATTRIBUTE_UV_MULT, ATTRIBUTE_WORLD_POSITION,
-};
+use crate::{ATTRIBUTE_LIFETIME, ATTRIBUTE_UV_FRAME, ATTRIBUTE_UV_MULT, ATTRIBUTE_WORLD_POSITION};
 
 // ---------------------------------------------------------------------------
 // 网格构建
@@ -22,7 +20,7 @@ impl From<ParticleMeshQuad> for Mesh {
     fn from(value: ParticleMeshQuad) -> Self {
         let mut mesh: Mesh = Plane3d::new(Vec3::NEG_Z, Vec2::splat(1.0)).into();
 
-        let transform = Transform::from_rotation(Quat::from_rotation_z(-PI / 2.));
+        let transform = Transform::from_rotation(Quat::from_rotation_z(PI / 2.));
 
         if let VertexAttributeValues::Float32x3(values) =
             mesh.attribute(Mesh::ATTRIBUTE_POSITION).unwrap()
@@ -43,7 +41,7 @@ impl From<ParticleMeshQuad> for Mesh {
 
             let values = values
                 .into_iter()
-                .map(|v| [1. - v[0], 1. - v[1], value.frame as f32])
+                .map(|v| [v[0], v[1], value.frame as f32])
                 .collect::<Vec<_>>();
 
             mesh.insert_attribute(ATTRIBUTE_UV_FRAME, values);

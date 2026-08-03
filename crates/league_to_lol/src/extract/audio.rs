@@ -54,7 +54,12 @@ pub fn export_audio_for_skin(
     // 主 loader 只加载基础 WAD，首次未命中时懒加载语言包 WAD 兜底。
     let mut locale_wads: Vec<LeagueWadLoader> = Vec::new();
 
-    println!("[AUDIO] {} {}: 共 {} 个 bank_unit", champ_name, skin_id, bank_units.len());
+    println!(
+        "[AUDIO] {} {}: 共 {} 个 bank_unit",
+        champ_name,
+        skin_id,
+        bank_units.len()
+    );
     for (ui, unit) in bank_units.iter().enumerate() {
         let n_events = unit.events.as_ref().map(|e| e.len()).unwrap_or(0);
         let n_paths = unit.bank_path.as_ref().map(|p| p.len()).unwrap_or(0);
@@ -79,8 +84,13 @@ pub fn export_audio_for_skin(
                 Err(_) => {
                     if locale_wads.is_empty() {
                         for locale in ["en_US", "zh_CN"] {
-                            let rel = format!("DATA/FINAL/Champions/{}.{}.wad.client", champ_name, locale);
-                            if let Ok(wad) = LeagueWadLoader::from_relative_path(&loader.root_dir, &rel) {
+                            let rel = format!(
+                                "DATA/FINAL/Champions/{}.{}.wad.client",
+                                champ_name, locale
+                            );
+                            if let Ok(wad) =
+                                LeagueWadLoader::from_relative_path(&loader.root_dir, &rel)
+                            {
                                 locale_wads.push(wad);
                             }
                         }
@@ -128,7 +138,11 @@ pub fn export_audio_for_skin(
                     println!("[AUDIO]       wpk 解析失败: {}", path);
                 }
             } else {
-                println!("[AUDIO]       ！未知文件类型: {} (前 4 字节 {:?})", path, &buf[..4.min(buf.len())]);
+                println!(
+                    "[AUDIO]       ！未知文件类型: {} (前 4 字节 {:?})",
+                    path,
+                    &buf[..4.min(buf.len())]
+                );
             }
         }
     }
@@ -172,7 +186,12 @@ pub fn export_audio_for_skin(
         wems.sort_unstable();
         wems.dedup();
         if wems.is_empty() {
-            println!("[AUDIO]     [{}/{}] 没有解析到任何 wem: {}", ei + 1, all_events.len(), event);
+            println!(
+                "[AUDIO]     [{}/{}] 没有解析到任何 wem: {}",
+                ei + 1,
+                all_events.len(),
+                event
+            );
             continue;
         }
 
@@ -232,7 +251,11 @@ fn transcode_wem(
             println!("[AUDIO]     wem {} 已存在 ogg，复用", wem_id);
         } else {
             let t0 = std::time::Instant::now();
-            println!("[AUDIO]     wem {} 开始转码 ({} bytes)...", wem_id, data.len());
+            println!(
+                "[AUDIO]     wem {} 开始转码 ({} bytes)...",
+                wem_id,
+                data.len()
+            );
             // LoL 的 Wwise 2016 wem 使用 aoTuV 6.03 码本；默认码本会解码成噪声
             // （ww2ogg::validate 会报 "likely wrong codebook"）。
             let codebooks = CodebookLibrary::aotuv_codebooks().ok()?;

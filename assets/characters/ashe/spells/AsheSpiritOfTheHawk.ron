@@ -85,6 +85,18 @@
                     40.0,
                 ]),
             ),
+            (
+                name: "VisionDuration",
+                values: Some([
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                ]),
+            ),
         ]),
         mana: None,
         missileSpec: Some((

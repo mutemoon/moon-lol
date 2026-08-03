@@ -83,6 +83,7 @@ pub fn spawn_particle_entity(
         birth_uv_scroll_rate: birth_params.birth_uv_scroll_rate,
         birth_color: birth_params.birth_color,
         birth_scale0: adjusted_birth_scale0,
+        initial_rotation: transform.rotation,
         velocity: birth_params.birth_velocity,
         acceleration: birth_params.birth_acceleration,
         frame,
@@ -158,26 +159,60 @@ pub fn calculate_particle_transform_frame(
         birth_params.birth_scale0
     };
 
-    let translation = vfx_emitter_definition_data
-        .spawn_shape
-        .clone()
-        .and_then(|v| match v {
-            ConfigVfxShape::Unk0xee39916f { emit_offset } => emit_offset,
-            ConfigVfxShape::Legacy { emit_offset, .. } => {
-                Some(emit_offset.sample_clamped(progress))
-            }
-            ConfigVfxShape::Box { size, .. } => size,
-            ConfigVfxShape::Cylinder { .. } => Some(Vec3::ZERO),
-            _ => Some(Vec3::ZERO),
-        })
-        .unwrap_or(Vec3::ZERO);
+    if let Some(flex) = &vfx_emitter_definition_data.flex_shape_definition {
+        if let Some(scale_size) = flex.scale_birth_scale_by_bound_object_size {
+            birth_scale0 *= 1.0 + scale_size;
+        }
+        if let Some(scale_height) = flex.scale_birth_scale_by_bound_object_height {
+            birth_scale0.y *= 1.0 + scale_height;
+        }
+        if let Some(scale_radius) = flex.scale_birth_scale_by_bound_object_radius {
+            birth_scale0.x *= 1.0 + scale_radius;
+            birth_scale0.z *= 1.0 + scale_radius;
+        }
+    }
 
-    let rotation_quat = Quat::from_euler(
+    let mut shape_rotation = Quat::IDENTITY;
+    let mut raw_translation = Vec3::ZERO;
+
+    if let Some(shape) = &vfx_emitter_definition_data.spawn_shape {
+        match shape {
+            ConfigVfxShape::Unk0xee39916f { emit_offset } => {
+                raw_translation = emit_offset.unwrap_or(Vec3::ZERO);
+            }
+            ConfigVfxShape::Legacy {
+                emit_offset,
+                emit_rotation_angles,
+                emit_rotation_axes,
+            } => {
+                raw_translation = emit_offset.sample_clamped(progress);
+                // for (angle_sampler, axis) in
+                //     emit_rotation_angles.iter().zip(emit_rotation_axes.iter())
+                // {
+                //     let deg = angle_sampler.sample_clamped(progress);
+                //     if deg != 0.0 && *axis != Vec3::ZERO {
+                //         let normalized_axis = axis.normalize();
+                //         let q = Quat::from_axis_angle(normalized_axis, deg.to_radians());
+                //         shape_rotation = shape_rotation * q;
+                //     }
+                // }
+            }
+            ConfigVfxShape::Box { size, .. } => {
+                raw_translation = size.unwrap_or(Vec3::ZERO);
+            }
+            _ => {}
+        }
+    }
+
+    let translation = shape_rotation * raw_translation;
+
+    let base_rotation_quat = Quat::from_euler(
         EulerRot::XYZEx,
         birth_params.birth_rotation0.x.to_radians(),
-        (birth_params.birth_rotation0.y - birth_params.birth_rotation0.z).to_radians(),
-        0.,
+        birth_params.birth_rotation0.y.to_radians(),
+        birth_params.birth_rotation0.z.to_radians(),
     );
+    let rotation_quat = shape_rotation * base_rotation_quat;
 
     if let ConfigVfxPrimitive::VfxPrimitivePlanarProjection { y_range } = primitive {
         birth_scale0.x = birth_scale0.x * 2.;

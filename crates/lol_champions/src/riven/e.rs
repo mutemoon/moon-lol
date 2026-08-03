@@ -1,6 +1,5 @@
 use bevy::prelude::*;
 use lol_base::animation_names::ANIM_SPELL3;
-use lol_base::debug_sphere::DebugSphere;
 use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
 use lol_base::spell::Spell;
 use lol_core::action::dash::{ActionDash, DashMoveType};
@@ -10,7 +9,6 @@ use lol_core::damage::Damage;
 use lol_core::skill::{EventSkillCast, Skill, SkillSlot, get_skill_value};
 
 use crate::riven::Riven;
-use crate::riven::buffs::ShieldVisual;
 
 pub fn on_riven_e(
     trigger: On<EventSkillCast>,
@@ -69,33 +67,6 @@ pub fn on_riven_e(
     commands
         .entity(entity)
         .add_related::<BuffOf>(&[buff_entity]);
-
-    // 创建 3 个环绕球体
-    let mut c0 = Entity::PLACEHOLDER;
-    let mut c1 = Entity::PLACEHOLDER;
-    let mut c2 = Entity::PLACEHOLDER;
-    for (i, child) in [&mut c0, &mut c1, &mut c2].into_iter().enumerate() {
-        let orb = commands
-            .spawn((
-                DebugSphere {
-                    radius: 8.0,
-                    color: Color::WHITE,
-                },
-                Transform::from_translation(Vec3::new(
-                    100.0 * (i as f32 * core::f32::consts::TAU / 3.0).cos(),
-                    50.0,
-                    100.0 * (i as f32 * core::f32::consts::TAU / 3.0).sin(),
-                )),
-            ))
-            .id();
-        commands.entity(entity).add_child(orb);
-        *child = orb;
-    }
-    commands.entity(entity).insert(ShieldVisual {
-        children: [c0, c1, c2],
-        angle: 0.0,
-        buff_entity,
-    });
 
     commands.trigger(ActionDash {
         entity,

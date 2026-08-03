@@ -35,7 +35,7 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 20.0,
+          duration: 24.0,
         ),
         "lol_core::skill::Skill": (
           spell: Path("characters/Belveth/spells/BelvethE.ron"),
@@ -65,7 +65,7 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 1.0,
+          duration: 4.0,
         ),
         "lol_core::skill::Skill": (
           spell: Path("characters/Belveth/spells/BelvethQ.ron"),
@@ -81,22 +81,22 @@
         "bevy_ecs::name::Name": "Belveth",
         "lol_core::attack::Attack": (
           range: 150.0,
-          base_attack_speed: 0.990099,
+          base_attack_speed: 0.66979235,
           bonus_attack_speed: 0.0,
           buff_bonus_attack_speed: 0.0,
           attack_speed_cap: 2.5,
           windup_config: Modern(
-            attack_cast_time: 0.25,
-            attack_total_time: 1.01,
+            attack_cast_time: 0.22,
+            attack_total_time: 1.493,
           ),
           windup_modifier: 1.0,
           spell: Path("characters/Belveth/spells/BelvethBasicAttack.ron"),
         ),
         "lol_core::base::ability_resource::AbilityResource": (
           ar_type: Unknown(14),
-          value: 60.0,
-          max: 60.0,
-          base: 60.0,
+          value: 45.0,
+          max: 45.0,
+          base: 45.0,
           per_level: 0.0,
           base_static_regen: 0.0,
           regen_per_level: 0.0,
@@ -106,12 +106,12 @@
           height: 90.0,
         ),
         "lol_core::character::Character": (),
-        "lol_core::damage::Armor": (32.0),
-        "lol_core::damage::Damage": (60.0),
+        "lol_core::damage::Armor": (28.0),
+        "lol_core::damage::Damage": (55.0),
         "lol_core::entities::champion::Champion": (),
         "lol_core::life::Health": (
-          value: 610.0,
-          max: 610.0,
+          value: 580.0,
+          max: 580.0,
           base_static_regen: 1.2,
           regen_per_level: 0.12,
         ),
@@ -129,6 +129,7 @@
           "BelvethPassiveMissile2": Path("characters/Belveth/spells/BelvethPassiveMissile2.ron"),
           "BelvethPassiveMissile3": Path("characters/Belveth/spells/BelvethPassiveMissile3.ron"),
           "BelvethPassiveMissile4": Path("characters/Belveth/spells/BelvethPassiveMissile4.ron"),
+          "BelvethPassiveSheen": Path("characters/Belveth/spells/BelvethPassiveSheen.ron"),
           "BelvethPassiveStacks": Path("characters/Belveth/spells/BelvethPassiveStacks.ron"),
           "BelvethQ": Path("characters/Belveth/spells/BelvethQ.ron"),
           "BelvethQDummySpellCast": Path("characters/Belveth/spells/BelvethQDummySpellCast.ron"),

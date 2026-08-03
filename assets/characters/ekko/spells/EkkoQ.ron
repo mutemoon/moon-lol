@@ -141,6 +141,46 @@
                     165.0,
                 ]),
             ),
+            (
+                name: "SlowPercent",
+                values: Some([
+                    -0.25,
+                    -0.4,
+                    -0.45,
+                    -0.5,
+                    -0.55,
+                    -0.6,
+                    -0.67,
+                ]),
+            ),
+            (
+                name: "SlowAPRatio",
+                values: None,
+            ),
+            (
+                name: "SlowZoneRadius",
+                values: Some([
+                    165.0,
+                    165.0,
+                    165.0,
+                    165.0,
+                    165.0,
+                    165.0,
+                    165.0,
+                ]),
+            ),
+            (
+                name: "ExpandDuration",
+                values: Some([
+                    1.75,
+                    1.75,
+                    1.75,
+                    1.75,
+                    1.75,
+                    1.75,
+                    1.75,
+                ]),
+            ),
         ]),
         mana: Some([
             50.0,

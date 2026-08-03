@@ -46,15 +46,7 @@
                 values: None,
             ),
             (
-                values: Some([
-                    30.0,
-                    30.0,
-                    30.0,
-                    30.0,
-                    30.0,
-                    30.0,
-                    30.0,
-                ]),
+                values: None,
             ),
             (
                 values: None,

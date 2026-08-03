@@ -154,6 +154,8 @@ pub struct ConfigVfxSystemDefinition {
     pub particle_path: String,
     pub complex_emitter_definition_data: Option<Vec<ConfigVfxEmitterDefinition>>,
     pub simple_emitter_definition_data: Option<Vec<ConfigVfxEmitterDefinition>>,
+    pub sound_on_create_default: Option<String>,
+    pub sound_persistent_default: Option<String>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -178,6 +180,8 @@ pub struct ConfigVfxEmitterDefinition {
     pub num_frames: Option<u16>,
     pub blend_mode: Option<u8>,
     pub material_override_definitions: Option<Vec<ConfigVfxMaterialOverride>>,
+    pub sound_on_create: Option<String>,
+    pub sound_persistent: Option<String>,
     pub primitive: Option<ConfigVfxPrimitive>,
     pub is_single_particle: Option<bool>,
     pub is_uniform_scale: Option<bool>,

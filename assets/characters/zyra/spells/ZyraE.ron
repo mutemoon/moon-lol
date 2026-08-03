@@ -140,6 +140,30 @@
                     235.0,
                 ]),
             ),
+            (
+                name: "SlowAmountPlantAttack",
+                values: Some([
+                    30.0,
+                    30.0,
+                    30.0,
+                    30.0,
+                    30.0,
+                    30.0,
+                    30.0,
+                ]),
+            ),
+            (
+                name: "SlowDurationPlantAttack",
+                values: Some([
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                ]),
+            ),
         ]),
         mana: Some([
             70.0,

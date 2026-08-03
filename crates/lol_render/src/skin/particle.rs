@@ -3,8 +3,9 @@ use lol_base::character::Skin;
 use lol_base::hash_key::LoadHashKeyTrait;
 use lol_base::render_cmd::{CommandSkinParticleDespawn, CommandSkinParticleSpawn};
 use lol_base::spell::Spell;
-use lol_base_render::particle::ConfigResourceResolver;
-use lol_base_render::particle::{CommandParticleDespawn, CommandParticleSpawn};
+use lol_base_render::particle::{
+    CommandParticleDespawn, CommandParticleSpawn, ConfigResourceResolver,
+};
 use lol_core::attack::{Attack, EventAttackEnd};
 
 /// 判断 resolver 触发名是否为普攻受击粒子（`*_tar`）。

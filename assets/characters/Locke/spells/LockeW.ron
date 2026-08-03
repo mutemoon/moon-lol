@@ -30,7 +30,7 @@
                     (
                         type: "CalculationPartStatCoefficient",
                         stat: None,
-                        coefficient: Some(1.2),
+                        coefficient: Some(1.0),
                         statFormula: None,
                     ),
                 ]),
@@ -67,10 +67,9 @@
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
-                        type: "CalculationPartStatCoefficient",
+                        type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        coefficient: Some(0.6),
-                        statFormula: None,
+                        dataValue: "heal_cap_ap_ratio",
                     ),
                 ]),
                 multiplier: None,
@@ -99,13 +98,13 @@
             (
                 name: "BaseMoveSpeed",
                 values: Some([
-                    0.35,
                     0.4,
-                    0.45,
-                    0.5,
-                    0.55,
-                    0.6,
-                    0.65,
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
                 ]),
             ),
             (
@@ -135,13 +134,13 @@
             (
                 name: "BaseDamageRestoreAmount",
                 values: Some([
-                    0.0,
+                    20.0,
                     40.0,
+                    60.0,
                     80.0,
+                    100.0,
                     120.0,
-                    160.0,
-                    200.0,
-                    240.0,
+                    140.0,
                 ]),
             ),
             (
@@ -192,6 +191,42 @@
                     1.0,
                 ]),
             ),
+            (
+                name: "HealCapAPRatio",
+                values: Some([
+                    0.6,
+                    0.6,
+                    0.6,
+                    0.6,
+                    0.6,
+                    0.6,
+                    0.6,
+                ]),
+            ),
+            (
+                name: "HealCapLevel1Value",
+                values: Some([
+                    150.0,
+                    150.0,
+                    150.0,
+                    150.0,
+                    150.0,
+                    150.0,
+                    150.0,
+                ]),
+            ),
+            (
+                name: "HealCapLevel18Value",
+                values: Some([
+                    450.0,
+                    450.0,
+                    450.0,
+                    450.0,
+                    450.0,
+                    450.0,
+                    450.0,
+                ]),
+            ),
         ]),
         mana: Some([
             50.0,
@@ -238,7 +273,7 @@
         hitEffectKey: None,
         selectionPriority: None,
         iconPath: Some([
-            "ASSETS/Characters/Locke/HUD/Icons2D/Locke_W.Locke.dds",
+            "ASSETS/Characters/Locke/HUD/Icons2D/Locke_W.dds",
         ]),
         useAnimatorFramerate: None,
     )),

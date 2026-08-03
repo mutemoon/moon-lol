@@ -1,0 +1,101 @@
+(
+    events: {
+        "Boss_BasicAttack_cast": [
+            "characters/SRU_Horde/sounds/104876951.ogg",
+            "characters/SRU_Horde/sounds/123711830.ogg",
+            "characters/SRU_Horde/sounds/464810878.ogg",
+            "characters/SRU_Horde/sounds/579357194.ogg",
+            "characters/SRU_Horde/sounds/610622103.ogg",
+            "characters/SRU_Horde/sounds/624235584.ogg",
+            "characters/SRU_Horde/sounds/645421807.ogg",
+            "characters/SRU_Horde/sounds/758583137.ogg",
+            "characters/SRU_Horde/sounds/837092345.ogg",
+        ],
+        "Boss_BasicAttack_hit": [
+            "characters/SRU_Horde/sounds/219479957.ogg",
+            "characters/SRU_Horde/sounds/401882956.ogg",
+            "characters/SRU_Horde/sounds/647803507.ogg",
+            "characters/SRU_Horde/sounds/839402476.ogg",
+            "characters/SRU_Horde/sounds/94729009.ogg",
+        ],
+        "Boss_BuffDamage1_hit": [
+            "characters/SRU_Horde/sounds/918596751.ogg",
+        ],
+        "Boss_BuffDamage2_hit": [
+            "characters/SRU_Horde/sounds/114183666.ogg",
+        ],
+        "Boss_BuffDamage3_hit": [
+            "characters/SRU_Horde/sounds/583404702.ogg",
+        ],
+        "Boss_BuffDamage4_hit": [
+            "characters/SRU_Horde/sounds/663693656.ogg",
+        ],
+        "Boss_BuffDamage5_hit": [
+            "characters/SRU_Horde/sounds/609622108.ogg",
+        ],
+        "Boss_Death1_buffactivate": [
+            "characters/SRU_Horde/sounds/243384891.ogg",
+            "characters/SRU_Horde/sounds/53717594.ogg",
+            "characters/SRU_Horde/sounds/554119004.ogg",
+            "characters/SRU_Horde/sounds/842480659.ogg",
+        ],
+        "Boss_Death_vox_cast": [
+            "characters/SRU_Horde/sounds/174618104.ogg",
+            "characters/SRU_Horde/sounds/365489650.ogg",
+            "characters/SRU_Horde/sounds/522601041.ogg",
+            "characters/SRU_Horde/sounds/902404419.ogg",
+        ],
+        "Boss_Death_vox_reverb": [
+            "characters/SRU_Horde/sounds/794585596.ogg",
+        ],
+        "Boss_Idle_01_buffactivate": [
+            "characters/SRU_Horde/sounds/115640157.ogg",
+            "characters/SRU_Horde/sounds/343422551.ogg",
+            "characters/SRU_Horde/sounds/921639351.ogg",
+        ],
+        "Boss_Idle_02_buffactivate": [
+            "characters/SRU_Horde/sounds/428632868.ogg",
+            "characters/SRU_Horde/sounds/790976395.ogg",
+        ],
+        "Boss_Idle_03_buffactivate": [
+            "characters/SRU_Horde/sounds/689132991.ogg",
+            "characters/SRU_Horde/sounds/863464998.ogg",
+        ],
+        "Boss_Idle_Aggro_In_buffactivate": [
+            "characters/SRU_Horde/sounds/576528505.ogg",
+            "characters/SRU_Horde/sounds/581801829.ogg",
+            "characters/SRU_Horde/sounds/700742081.ogg",
+        ],
+        "Boss_Idle_Aggro_Out_buffactivate": [
+            "characters/SRU_Horde/sounds/370271861.ogg",
+            "characters/SRU_Horde/sounds/704047310.ogg",
+        ],
+        "Boss_MiniSpawn_cast": [
+            "characters/SRU_Horde/sounds/130398812.ogg",
+            "characters/SRU_Horde/sounds/24830184.ogg",
+            "characters/SRU_Horde/sounds/605138656.ogg",
+            "characters/SRU_Horde/sounds/955970650.ogg",
+        ],
+        "Boss_MiniSpawn_vox": [
+            "characters/SRU_Horde/sounds/1012717507.ogg",
+            "characters/SRU_Horde/sounds/24726597.ogg",
+            "characters/SRU_Horde/sounds/724912990.ogg",
+        ],
+        "Boss_SpawnIn_cast": [
+            "characters/SRU_Horde/sounds/1001161924.ogg",
+        ],
+        "Boss_SpawnOut_cast": [
+            "characters/SRU_Horde/sounds/309003728.ogg",
+        ],
+        "Boss_SpawnOut_cast_vox": [
+            "characters/SRU_Horde/sounds/334773869.ogg",
+            "characters/SRU_Horde/sounds/628436550.ogg",
+        ],
+        "Boss_footstep_buffactivate": [
+            "characters/SRU_Horde/sounds/522066987.ogg",
+            "characters/SRU_Horde/sounds/685913176.ogg",
+            "characters/SRU_Horde/sounds/771017580.ogg",
+            "characters/SRU_Horde/sounds/943736222.ogg",
+        ],
+    },
+)

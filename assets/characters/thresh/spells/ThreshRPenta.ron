@@ -5,8 +5,8 @@
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
-                        type: "CalculationPartEffectValue",
-                        effectIndex: Some(1),
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "damage",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
@@ -129,6 +129,54 @@
                     1.0,
                     1.0,
                     1.0,
+                ]),
+            ),
+            (
+                name: "Damage",
+                values: Some([
+                    0.0,
+                    250.0,
+                    400.0,
+                    550.0,
+                    175.0,
+                    175.0,
+                    0.0,
+                ]),
+            ),
+            (
+                name: "SlowDuration",
+                values: Some([
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                ]),
+            ),
+            (
+                name: "SlowAmount",
+                values: Some([
+                    99.0,
+                    99.0,
+                    99.0,
+                    99.0,
+                    99.0,
+                    99.0,
+                    99.0,
+                ]),
+            ),
+            (
+                name: "WallDuration",
+                values: Some([
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
                 ]),
             ),
         ]),

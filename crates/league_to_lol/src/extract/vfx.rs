@@ -1,15 +1,17 @@
 use bevy::prelude::*;
 use league_core::extract::{
     EnumVfxPrimitive, EnumVfxShape, Unk0xee39916f, ValueColor, ValueFloat, ValueVector2,
-    ValueVector3, VfxDistortionDefinitionData, VfxEmitterDefinitionData,
-    VfxMaterialOverrideDefinitionData, VfxPrimitiveAttachedMesh, VfxPrimitiveMesh,
-    VfxPrimitivePlanarProjection, VfxProbabilityTableData, VfxShapeBox, VfxShapeCylinder,
-    VfxShapeLegacy, VfxShapeSphere, VfxSystemDefinitionData, VfxTextureMultDefinitionData,
+    ValueVector3, VfxAlphaErosionDefinitionData, VfxDistortionDefinitionData,
+    VfxEmitterDefinitionData, VfxFlexShapeDefinitionData, VfxMaterialOverrideDefinitionData,
+    VfxPrimitiveAttachedMesh, VfxPrimitiveMesh, VfxPrimitivePlanarProjection,
+    VfxProbabilityTableData, VfxShapeBox, VfxShapeCylinder, VfxShapeLegacy, VfxShapeSphere,
+    VfxSystemDefinitionData, VfxTextureMultDefinitionData,
 };
 use lol_base_render::particle::{
-    ConfigVfxDistortionDefinition, ConfigVfxEmitterDefinition, ConfigVfxMaterialOverride,
-    ConfigVfxPrimitive, ConfigVfxShape, ConfigVfxSystemDefinition, ConfigVfxTextureMult,
-    ProbabilityCurve, Sampler, StochasticSampler, VfxTexture,
+    ConfigVfxAlphaErosionDefinition, ConfigVfxDistortionDefinition, ConfigVfxEmitterDefinition,
+    ConfigVfxFlexShapeDefinition, ConfigVfxMaterialOverride, ConfigVfxPrimitive, ConfigVfxShape,
+    ConfigVfxSystemDefinition, ConfigVfxTextureMult, ProbabilityCurve, Sampler, StochasticSampler,
+    VfxTexture,
 };
 
 fn convert_sampler_float(value: &ValueFloat, default: f32) -> Sampler<f32> {
@@ -344,6 +346,42 @@ fn convert_material_override(
     })
 }
 
+fn convert_flex_shape_definition(
+    def: &Option<VfxFlexShapeDefinitionData>,
+) -> Option<ConfigVfxFlexShapeDefinition> {
+    def.as_ref().map(|d| ConfigVfxFlexShapeDefinition {
+        scale_birth_scale_by_bound_object_size: d.scale_birth_scale_by_bound_object_size,
+        scale_birth_scale_by_bound_object_height: d.scale_birth_scale_by_bound_object_height,
+        scale_birth_scale_by_bound_object_radius: d.scale_birth_scale_by_bound_object_radius,
+        scale_birth_translation_by_bound_object_size: d
+            .scale_birth_translation_by_bound_object_size,
+        scale_emit_offset_by_bound_object_height: d.scale_emit_offset_by_bound_object_height,
+        scale_emit_offset_by_bound_object_radius: d.scale_emit_offset_by_bound_object_radius,
+        scale_emit_offset_by_bound_object_size: d.scale_emit_offset_by_bound_object_size,
+    })
+}
+
+fn convert_alpha_erosion(
+    def: &Option<VfxAlphaErosionDefinitionData>,
+    load_texture: &mut dyn FnMut(&str) -> VfxTexture,
+) -> Option<ConfigVfxAlphaErosionDefinition> {
+    def.as_ref().map(|d| ConfigVfxAlphaErosionDefinition {
+        erosion_drive_curve: convert_stochastic_float(&d.erosion_drive_curve, 0.0),
+        erosion_map: d
+            .erosion_map_name
+            .as_deref()
+            .filter(|p| !p.is_empty())
+            .map(|p| load_texture(p)),
+        erosion_map_channel_mixer: d
+            .erosion_map_channel_mixer
+            .as_ref()
+            .and_then(|c| c.constant_value)
+            .unwrap_or(Vec4::new(1.0, 0.0, 0.0, 0.0)),
+        feather_in: None,
+        feather_out: None,
+    })
+}
+
 /// 转换发射器定义；`load_texture` 负责提取贴图并返回仅含路径的 `VfxTexture`（handle 由 loader 运行时填充）
 pub fn convert_emitter(
     def: &VfxEmitterDefinitionData,
@@ -378,6 +416,9 @@ pub fn convert_emitter(
         is_uniform_scale: def.is_uniform_scale,
         is_random_start_frame: def.is_random_start_frame,
         is_local_orientation: def.is_local_orientation,
+        is_direction_oriented: def.is_direction_oriented,
+        sound_on_create: def.audio.as_ref().and_then(|a| a.sound_on_create.clone()),
+        sound_persistent: def.audio.as_ref().and_then(|a| a.sound_persistent.clone()),
         texture: def
             .texture
             .as_deref()
@@ -393,6 +434,26 @@ pub fn convert_emitter(
         texture_mult: convert_texture_mult(&def.texture_mult, load_texture),
         alpha_ref: def.alpha_ref,
         spawn_shape: convert_shape(&def.spawn_shape),
+        flex_shape_definition: convert_flex_shape_definition(&def.flex_shape_definition),
+        alpha_erosion_definition: convert_alpha_erosion(
+            &def.alpha_erosion_definition,
+            load_texture,
+        ),
+        color_look_up_type_y: def.color_look_up_type_y,
+        color_render_flags: def.color_render_flags,
+        soft_particle_definition: def.soft_particle_params.as_ref().map(|_| true),
+        palette_definition: def
+            .palette_definition
+            .as_ref()
+            .and_then(|p| p.palette_texture.as_deref())
+            .filter(|p| !p.is_empty())
+            .map(|p| load_texture(p)),
+        reflection_definition: def
+            .reflection_definition
+            .as_ref()
+            .and_then(|r| r.reflection_map_texture.as_deref())
+            .filter(|p| !p.is_empty())
+            .map(|p| load_texture(p)),
     }
 }
 
@@ -415,5 +476,7 @@ pub fn convert_system_definition(
         particle_path: def.particle_path.clone(),
         complex_emitter_definition_data: complex,
         simple_emitter_definition_data: simple,
+        sound_on_create_default: def.sound_on_create_default.clone(),
+        sound_persistent_default: def.sound_persistent_default.clone(),
     }
 }

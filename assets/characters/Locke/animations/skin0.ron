@@ -465,11 +465,26 @@
         ("Attack1", "Unk0xc5353d37"): Time(
             time: 0.0,
         ),
+        ("Attack1ToIdle", "RunBase"): TransitionClip(
+            clip_name: "Attack1Torun",
+        ),
+        ("Attack1ToIdle", "RunFast"): TransitionClip(
+            clip_name: "Attack1Torun",
+        ),
+        ("Attack1ToIdle", "RunVariation"): TransitionClip(
+            clip_name: "Attack1Torun",
+        ),
         ("Attack1ToIdle", "Spell1Left"): Time(
             time: 0.0,
         ),
         ("Attack1ToIdle", "Spell1Right"): Time(
             time: 0.0,
+        ),
+        ("Attack1ToIdle", "Spell2Run"): TransitionClip(
+            clip_name: "Attack1Torun",
+        ),
+        ("Attack1ToIdle", "Unk0x47cc11b3"): TransitionClip(
+            clip_name: "Attack1Torun",
         ),
         ("Attack1ToIdle", "Unk0x825b23b9"): Time(
             time: 0.0,
@@ -723,11 +738,26 @@
         ("Attack2ToIdle", "Recall"): Time(
             time: 0.1,
         ),
+        ("Attack2ToIdle", "RunBase"): TransitionClip(
+            clip_name: "Attack2Torun",
+        ),
+        ("Attack2ToIdle", "RunFast"): TransitionClip(
+            clip_name: "Attack2Torun",
+        ),
+        ("Attack2ToIdle", "RunVariation"): TransitionClip(
+            clip_name: "Attack2Torun",
+        ),
         ("Attack2ToIdle", "Spell1Left"): Time(
             time: 0.0,
         ),
         ("Attack2ToIdle", "Spell1Right"): Time(
             time: 0.0,
+        ),
+        ("Attack2ToIdle", "Spell2Run"): TransitionClip(
+            clip_name: "Attack2Torun",
+        ),
+        ("Attack2ToIdle", "Unk0x47cc11b3"): TransitionClip(
+            clip_name: "Attack2Torun",
         ),
         ("Attack2ToIdle", "Unk0x825b23b9"): Time(
             time: 0.0,

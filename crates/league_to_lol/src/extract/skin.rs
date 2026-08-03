@@ -11,16 +11,18 @@ use league_file::mesh_skinned::LeagueSkinnedMesh;
 use league_file::skeleton::LeagueSkeleton;
 use league_loader::game::{Data, LeagueLoader, PropGroup};
 use league_loader::prop_bin::LeagueWadLoaderTrait;
-use lol_base_render::animation::{ConfigAnimationClip, LOLAnimationGraph, LOLAnimationGraphHandle};
 use lol_base::audio::{AudioBank, ConfigAudio};
 use lol_base::character::{HealthBar, Skin};
+use lol_base_render::animation::{ConfigAnimationClip, LOLAnimationGraph, LOLAnimationGraphHandle};
 use lol_base_render::particle::{ConfigVfx, ConfigVfxHandle};
 use ron::ser::{PrettyConfig, to_string_pretty};
 
 use crate::animation::load_animation_file;
 use crate::extract::animation::animation_graph_to_config;
 use crate::extract::audio::export_audio_for_skin;
-use crate::extract::utils::{extract_particle_texture, extract_texture, get_texture_path, write_to_file};
+use crate::extract::utils::{
+    extract_particle_texture, extract_texture, get_texture_path, write_to_file,
+};
 use crate::skin_gltf_export::export_skin_to_glb;
 use crate::utils::decode_texture_to_png;
 
@@ -245,21 +247,10 @@ pub fn extract_skin_for_champion(
     );
 
     // 导出粒子系统/VFX 配置，作为 Resource 单独序列化为 skin{N}_vfx.ron
-    let config_vfx = export_vfx_for_skin(
-        loader,
-        champ_name,
-        &skin_prop_group,
-        &skin_data,
-        hashes,
-    );
+    let config_vfx = export_vfx_for_skin(loader, champ_name, &skin_prop_group, &skin_data, hashes);
 
     // 导出音效配置，序列化为 skin{N}_audio.ron，并通过 AudioBank 组件挂到皮肤实体
-    let config_audio = export_audio_for_skin(
-        loader,
-        champ_name,
-        skin_id,
-        &skin_data,
-    );
+    let config_audio = export_audio_for_skin(loader, champ_name, skin_id, &skin_data);
     let output_audio_path = format!("characters/{}/skins/{}_audio.ron", champ_name, skin_id);
     let serialized_audio = to_string_pretty(&config_audio, PrettyConfig::default()).unwrap();
     super::utils::write_to_file(&output_audio_path, &serialized_audio);

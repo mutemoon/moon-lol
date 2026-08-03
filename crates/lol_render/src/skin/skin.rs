@@ -3,8 +3,8 @@ use bevy::asset::RecursiveDependencyLoadState;
 use bevy::ecs::entity::EntityHashMap;
 use bevy::prelude::*;
 use bevy::world_serialization::{WorldInstanceReady, WorldInstanceSpawnError};
-use lol_base_render::animation::AnimationConfigOf;
 use lol_base::character::{ConfigSkin, Skin};
+use lol_base_render::animation::AnimationConfigOf;
 
 pub fn update_skin_scale(mut query: Query<(&Skin, &mut Transform)>) {
     for (skin, mut transform) in query.iter_mut() {

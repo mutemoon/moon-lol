@@ -48,9 +48,71 @@ pub fn derive_kind(def: &ConfigVfxEmitterDefinition) -> ParticleRenderKind {
 /// `ConfigVfxEmitterDefinition` 中尚未补全，全部默认关闭——与逆向默认
 /// 描述符（全零）装配出的 BASE 变体一致。字段补全后在此按矩阵逐项接入。
 pub fn derive_defs(
-    _def: &ConfigVfxEmitterDefinition,
-    _kind: ParticleRenderKind,
+    def: &ConfigVfxEmitterDefinition,
+    kind: ParticleRenderKind,
     _pass: ParticleRenderPass,
 ) -> (Vec<String>, Vec<String>) {
-    (vec![], vec![])
+    let mut vs_defs = Vec::new();
+    let mut ps_defs = Vec::new();
+
+    // 1. ALPHA_EROSION (侵蚀/消融) - 明确配置才开启
+    if def.alpha_erosion_definition.is_some() {
+        ps_defs.push("ALPHA_EROSION".to_string());
+        vs_defs.push("ALPHA_EROSION".to_string());
+    }
+
+    // 2. PALETTIZE_TEXTURES (调色板) - 明确配置才开启
+    if def.palette_definition.is_some() {
+        ps_defs.push("PALETTIZE_TEXTURES".to_string());
+    }
+
+    // 3. SOFT_PARTICLES (软粒子) - 明确配置才开启
+    if def.soft_particle_definition == Some(true) {
+        ps_defs.push("SOFT_PARTICLES".to_string());
+    }
+
+    // 4. MASKED (遮罩模式) - 仅在明确设置 0x4 标志时开启
+    if let Some(flags) = def.color_render_flags {
+        if (flags & 0x4) != 0 {
+            ps_defs.push("MASKED".to_string());
+        }
+    }
+
+    // 5. UV 空间变体 - 对齐逆向 0x1412DD450 中 v14 判定：LOCAL_SPACE_UV 仅在 Mesh/SkinnedMesh 时启用
+    if let Some(uv_type) = def.color_look_up_type_y {
+        match uv_type {
+            1 => {
+                vs_defs.push("SCREEN_SPACE_UV".to_string());
+                ps_defs.push("SCREEN_SPACE_UV".to_string());
+            }
+            2 => {
+                vs_defs.push("SEPARATE_ALPHA_UV".to_string());
+                ps_defs.push("SEPARATE_ALPHA_UV".to_string());
+            }
+            3..=5 => {
+                // 逆向代码 0x1412DD450: if (v14) 仅对 Mesh/Skin (非 Quad) 导出 LOCAL_SPACE_UV，避免 QuadVs/Ps Location 3 错位
+                if !matches!(kind, ParticleRenderKind::Quad) {
+                    vs_defs.push("LOCAL_SPACE_UV".to_string());
+                    ps_defs.push("LOCAL_SPACE_UV".to_string());
+                }
+            }
+            _ => {}
+        }
+    }
+
+    // // 6. REFLECTIVE (反射) - 明确配置才开启
+    // if def.reflection_definition.is_some() {
+    //     vs_defs.push("REFLECTIVE".to_string());
+    //     ps_defs.push("REFLECTIVE".to_string());
+    // }
+
+    // // 7. MULT_PASS (多 pass 变体)
+    // if let Some(overrides) = &def.material_override_definitions {
+    //     if overrides.len() > 1 {
+    //         vs_defs.push("MULT_PASS".to_string());
+    //         ps_defs.push("MULT_PASS".to_string());
+    //     }
+    // }
+
+    (vs_defs, ps_defs)
 }

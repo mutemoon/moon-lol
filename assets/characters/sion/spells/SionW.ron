@@ -5,8 +5,8 @@
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
-                        type: "CalculationPartEffectValue",
-                        effectIndex: Some(2),
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "base_damage",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
@@ -21,8 +21,8 @@
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
-                        type: "CalculationPartEffectValue",
-                        effectIndex: Some(1),
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "base_shield",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
@@ -226,6 +226,66 @@
                     0.4,
                     0.4,
                     0.4,
+                ]),
+            ),
+            (
+                name: "BaseShield",
+                values: Some([
+                    60.0,
+                    60.0,
+                    75.0,
+                    90.0,
+                    105.0,
+                    120.0,
+                    120.0,
+                ]),
+            ),
+            (
+                name: "BaseDamage",
+                values: Some([
+                    15.0,
+                    40.0,
+                    65.0,
+                    90.0,
+                    115.0,
+                    140.0,
+                    165.0,
+                ]),
+            ),
+            (
+                name: "MaxHPDamageRatio",
+                values: Some([
+                    14.0,
+                    14.0,
+                    14.0,
+                    14.0,
+                    14.0,
+                    14.0,
+                    14.0,
+                ]),
+            ),
+            (
+                name: "DetonateRecastCooldown",
+                values: Some([
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                ]),
+            ),
+            (
+                name: "ShieldDuration",
+                values: Some([
+                    6.0,
+                    6.0,
+                    6.0,
+                    6.0,
+                    6.0,
+                    6.0,
+                    6.0,
                 ]),
             ),
         ]),

@@ -190,7 +190,7 @@
         hitEffectKey: None,
         selectionPriority: None,
         iconPath: Some([
-            "ASSETS/Characters/Locke/HUD/Icons2D/Locke_W2.Locke.dds",
+            "ASSETS/Characters/Locke/HUD/Icons2D/Locke_W2.dds",
         ]),
         useAnimatorFramerate: Some(true),
     )),

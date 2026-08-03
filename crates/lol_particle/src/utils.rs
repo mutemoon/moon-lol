@@ -81,4 +81,6 @@ impl ResourceCache {
     }
 }
 
-pub use lol_base_render::particle::{CombineMultiplicative, ProbabilityCurve, Sampler, StochasticSampler};
+pub use lol_base_render::particle::{
+    CombineMultiplicative, ProbabilityCurve, Sampler, StochasticSampler,
+};

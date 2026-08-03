@@ -3,10 +3,9 @@ use std::collections::{BTreeMap, HashMap};
 use bevy::asset::Asset;
 use bevy::math::{Vec2, Vec4};
 use bevy::prelude::{Handle, Reflect, ReflectResource, Resource};
-use serde::{Deserialize, Serialize};
-
 use lol_base::hash::hash_bin;
 use lol_base::hash_key::HashKey;
+use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, Clone, Resource, Asset, Reflect, Default)]
 #[reflect(Resource)]

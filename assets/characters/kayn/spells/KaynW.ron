@@ -5,8 +5,8 @@
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
-                        type: "CalculationPartEffectValue",
-                        effectIndex: Some(1),
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "base_damage",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -99,7 +99,80 @@
                 values: None,
             ),
         ]),
-        dataValues: None,
+        dataValues: Some([
+            (
+                name: "BaseDamage",
+                values: Some([
+                    85.0,
+                    85.0,
+                    130.0,
+                    175.0,
+                    220.0,
+                    265.0,
+                    265.0,
+                ]),
+            ),
+            (
+                name: "KnockupDuration",
+                values: Some([
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                ]),
+            ),
+            (
+                name: "SlowIntensity",
+                values: Some([
+                    -0.9,
+                    -0.9,
+                    -0.9,
+                    -0.9,
+                    -0.9,
+                    -0.9,
+                    -0.9,
+                ]),
+            ),
+            (
+                name: "BoxWidth",
+                values: Some([
+                    160.0,
+                    160.0,
+                    160.0,
+                    160.0,
+                    160.0,
+                    160.0,
+                    160.0,
+                ]),
+            ),
+            (
+                name: "SlowDuration",
+                values: Some([
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                ]),
+            ),
+            (
+                name: "AssRange",
+                values: Some([
+                    900.0,
+                    900.0,
+                    900.0,
+                    900.0,
+                    900.0,
+                    900.0,
+                    900.0,
+                ]),
+            ),
+        ]),
         mana: Some([
             40.0,
             45.0,

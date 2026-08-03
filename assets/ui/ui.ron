@@ -521,7 +521,13 @@
         (
             button: 2791057480,
             stat_page_view_controller: 2717361632,
-            categories: None,
+            categories: Some({
+                2905843272: (
+                    button: 2791057480,
+                    stat_page_view_controller: 1375792844,
+                    is_selected: None,
+                ),
+            }),
         ),
         (
             button: 3124848438,
@@ -531,6 +537,11 @@
                     button: 2151586481,
                     stat_page_view_controller: 3144346747,
                     is_selected: None,
+                ),
+                2905843272: (
+                    button: 2151586481,
+                    stat_page_view_controller: 3520093756,
+                    is_selected: Some(true),
                 ),
                 3221091481: (
                     button: 2151586481,

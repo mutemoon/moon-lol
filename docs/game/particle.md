@@ -1,3 +1,41 @@
+# 英雄联盟左手坐标系的粒子旋转
+
+原图
+
+```
+#
+#
+#
+#
+#####
+```
+
+旋转: 0, 0, 0
+
+```
+#
+#
+#########
+```
+
+旋转: 90, 0, 0
+
+```
+#
+#
+#########
+```
+
+旋转: 90, 90, 0
+
+```
+#####
+#
+#
+#
+#
+```
+
 # 粒子与 Shader 系统
 
 ## 1. Shader 系统简史
@@ -81,6 +119,7 @@ map.ron（ShaderMap 序列化）
 - PS：`--set 3 --binding-shift 100`
 
 `binding_index` 公式：`shift + typeBase + regIndex`
+
 - `typeBase`: cbv=0, srv=16, sampler=32, uav=48
 - VS shift=0, PS shift=100
 
@@ -159,6 +198,7 @@ spawn emitter entity（emitter + particles + 材质）
 ```
 
 `derive_defs` 按 `ParticleRenderKind` 选择 shader 家族：
+
 - Quad → `QuadVs` / `QuadPs`（含 slice 时 → `QuadPsSlice`）
 - Mesh → `MeshVs` / `MeshPs`
 - Distortion → `DistortionVs` / `DistortionPs`
@@ -194,10 +234,12 @@ ParticleMaterialDynamic             ExtractedMaterialKeys
 ```
 
 **布局缓存键** `PipelineLayoutKey`：
+
 ```
 (vert_shader: LeagueShader, vert_defs: Vec<String>,
  frag_shader: LeagueShader, frag_defs: Vec<String>)
 ```
+
 defs 在构造时排序归一化，相同内容命中同一份 `BindGroupLayout`。
 
 ### 3.3 set_param：按名写入 uniform
@@ -208,6 +250,7 @@ material.set_param("TEXTURE_INFO", num_cols);
 ```
 
 实现逻辑：
+
 1. 遍历 `vert_variant_layout` 和 `frag_variant_layout`
 2. 在 `UniformBuffer.members` 中按名查找目标成员
 3. 按 `member.offset` 写入材质内部的 CPU 字节 blob（`BTreeMap<u32, Vec<u8>>`）
@@ -248,13 +291,13 @@ GPU 执行
 
 动态材质在 `as_bind_group` 中按 binding 名解析纹理/采样器：
 
-| 后缀 | 含义 | 处理方式 |
-|------|------|---------|
-| `__TX` | 纹理（OpTypeImage） | 从 `textures` map 取 Handle，缺失则 fallback |
-| `__SMP` | 采样器（OpTypeSampler） | 与对应 `__TX` 配对，相同过滤/寻址参数 |
-| `_SharedSampler` | 共享采样器状态 | 从 `SharedSamplerCache` 按名取 wgpu Sampler |
-| `_SharedTexture` | 共享纹理 | 从 `SharedRenderData` 按名取 Handle |
-| 无后缀 | cbuffer | 不做纹理解析 |
+| 后缀             | 含义                    | 处理方式                                     |
+| ---------------- | ----------------------- | -------------------------------------------- |
+| `__TX`           | 纹理（OpTypeImage）     | 从 `textures` map 取 Handle，缺失则 fallback |
+| `__SMP`          | 采样器（OpTypeSampler） | 与对应 `__TX` 配对，相同过滤/寻址参数        |
+| `_SharedSampler` | 共享采样器状态          | 从 `SharedSamplerCache` 按名取 wgpu Sampler  |
+| `_SharedTexture` | 共享纹理                | 从 `SharedRenderData` 按名取 Handle          |
+| 无后缀           | cbuffer                 | 不做纹理解析                                 |
 
 ```rust
 // 族 × unified 纹理绑定名表
@@ -308,13 +351,13 @@ spawn emitter entity
 
 ## 4. 关键设计决策
 
-| 决策 | 原因 |
-|------|------|
-| SPIR-V 直通而非 naga | 386/4397 个变体 naga 不可解析；DXC 产出标准合规 |
-| 并集布局 + 变体布局双轨 | 并集保证 bind group 槽位完整，变体保证 set_param offset 正确 |
-| RDEF 替代 spirv-reflect | 新 dxbc-compiler 不产 OpName，语义名只能从 DXBC源头获取 |
-| cbuffer 布局去重 | 4397 变体仅 323 套不同 cbuffer 布局，map.ron 大幅缩小 |
-| 按名查 offset | 不依赖 binding_index 做 offset 定位，因同一 cbuffer 在不同变体 binding 号不同 |
+| 决策                    | 原因                                                                          |
+| ----------------------- | ----------------------------------------------------------------------------- |
+| SPIR-V 直通而非 naga    | 386/4397 个变体 naga 不可解析；DXC 产出标准合规                               |
+| 并集布局 + 变体布局双轨 | 并集保证 bind group 槽位完整，变体保证 set_param offset 正确                  |
+| RDEF 替代 spirv-reflect | 新 dxbc-compiler 不产 OpName，语义名只能从 DXBC 源头获取                      |
+| cbuffer 布局去重        | 4397 变体仅 323 套不同 cbuffer 布局，map.ron 大幅缩小                         |
+| 按名查 offset           | 不依赖 binding_index 做 offset 定位，因同一 cbuffer 在不同变体 binding 号不同 |
 
 ---
 

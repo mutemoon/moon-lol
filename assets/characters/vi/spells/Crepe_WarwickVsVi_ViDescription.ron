@@ -25,7 +25,7 @@
         hitEffectKey: None,
         selectionPriority: None,
         iconPath: Some([
-            "ASSETS/Characters/Vi/HUD/Icons2D/ViWarwick64.HA_CREPE.dds",
+            "ASSETS/Characters/Vi/HUD/Icons2D/ViWarwick64.dds",
         ]),
         useAnimatorFramerate: None,
     )),

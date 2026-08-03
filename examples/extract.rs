@@ -35,10 +35,7 @@ fn post_process_mapgeo() {
 
     // Step 1: gltf-transform webp
     println!("[POST] 1. 优化 GLTF (webp)...");
-    let cmd = format!(
-        "npx gltf-transform webp {} {}",
-        input_glb, output_gltf
-    );
+    let cmd = format!("npx gltf-transform webp {} {}", input_glb, output_gltf);
     #[cfg(target_os = "windows")]
     let status = Command::new("cmd")
         .args(["/C", &cmd])
@@ -140,10 +137,7 @@ fn post_process_all_skin_glb() {
 
         // Step 1: gltf-transform webp
         print!("[POST] 优化 {}...", input_glb);
-        let cmd = format!(
-            "npx gltf-transform webp {} {}",
-            input_glb, output_gltf
-        );
+        let cmd = format!("npx gltf-transform webp {} {}", input_glb, output_gltf);
         let status = Command::new("cmd").args(["/C", &cmd]).status();
         if !status.map(|s| s.success()).unwrap_or(false) {
             println!(" 失败");

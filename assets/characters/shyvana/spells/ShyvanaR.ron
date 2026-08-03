@@ -298,7 +298,7 @@
         hitEffectKey: None,
         selectionPriority: None,
         iconPath: Some([
-            "ASSETS/Characters/Shyvana/HUD/Icons2D/Shyvana_R.Shyvana_Rework.dds",
+            "ASSETS/Characters/Shyvana/HUD/Icons2D/Shyvana_R.dds",
         ]),
         useAnimatorFramerate: None,
     )),

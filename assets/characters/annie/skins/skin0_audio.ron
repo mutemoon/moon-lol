@@ -228,11 +228,31 @@
             "characters/Annie/sounds/876917294.ogg",
             "characters/Annie/sounds/924495944.ogg",
         ],
+        "Play_vo_Annie_Spell3DBasic": [
+            "characters/Annie/sounds/140390185.ogg",
+            "characters/Annie/sounds/20559890.ogg",
+            "characters/Annie/sounds/392620686.ogg",
+            "characters/Annie/sounds/911292330.ogg",
+        ],
         "Play_vo_Annie_Spell3DPCast": [
             "characters/Annie/sounds/1008268940.ogg",
             "characters/Annie/sounds/505680323.ogg",
             "characters/Annie/sounds/74690707.ogg",
             "characters/Annie/sounds/818086514.ogg",
+        ],
+        "Play_vo_Annie_Spell3DQCast": [
+            "characters/Annie/sounds/34279363.ogg",
+            "characters/Annie/sounds/347178168.ogg",
+            "characters/Annie/sounds/5498444.ogg",
+            "characters/Annie/sounds/732530918.ogg",
+        ],
+        "Play_vo_Annie_Spell3DRCast": [
+            "characters/Annie/sounds/260530008.ogg",
+            "characters/Annie/sounds/399760730.ogg",
+            "characters/Annie/sounds/43903710.ogg",
+            "characters/Annie/sounds/813761045.ogg",
+            "characters/Annie/sounds/965805421.ogg",
+            "characters/Annie/sounds/991218345.ogg",
         ],
         "Play_vo_Annie_Taunt3DGeneral": [
             "characters/Annie/sounds/53646325.ogg",

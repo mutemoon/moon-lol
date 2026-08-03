@@ -23,7 +23,7 @@
                     (
                         type: "CalculationPartStatCoefficient",
                         stat: Some(2),
-                        coefficient: Some(1.8),
+                        coefficient: Some(1.65),
                         statFormula: Some(2),
                     ),
                 ]),
@@ -40,7 +40,7 @@
                     (
                         type: "CalculationPartStatCoefficient",
                         stat: Some(2),
-                        coefficient: Some(0.6),
+                        coefficient: Some(0.55),
                         statFormula: Some(2),
                     ),
                 ]),
@@ -160,13 +160,13 @@
             (
                 name: "PercentBonusAD",
                 values: Some([
-                    0.25,
-                    0.25,
-                    0.25,
-                    0.25,
-                    0.25,
-                    0.25,
-                    0.25,
+                    0.2,
+                    0.2,
+                    0.2,
+                    0.2,
+                    0.2,
+                    0.2,
+                    0.2,
                 ]),
             ),
             (

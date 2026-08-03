@@ -4,6 +4,16 @@
     {
       "type": "lldb",
       "request": "launch",
+      "name": "Debug particle_quad_spirv_dynamic",
+      "cargo": {
+        "args": ["run", "--example", "particle_quad_spirv_dynamic"]
+      },
+      "args": [],
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
       "name": "Debug example lol",
       "cargo": {
         "args": ["run", "--example", "lol"]

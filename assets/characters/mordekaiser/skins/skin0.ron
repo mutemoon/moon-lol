@@ -3,12 +3,12 @@
     "lol_base_render::particle::ConfigVfxHandle": (Path("characters/Mordekaiser/skins/skin0_vfx.ron")),
   },
   entities: {
-    4294967259: (
+    4294967256: (
       components: {
-        "lol_base::audio::AudioBank": (Path("characters/mordekaiser/skins/skin0_audio.ron")),
         "bevy_animation::graph::AnimationGraphHandle": (Path("characters/Mordekaiser/animations/skin0.ron")),
         "bevy_camera::visibility::Visibility": Inherited,
         "bevy_world_serialization::components::WorldAssetRoot": (Path("characters/Mordekaiser/skins/skin0.glb#Scene0")),
+        "lol_base::audio::AudioBank": (Path("characters/Mordekaiser/skins/skin0_audio.ron")),
         "lol_base::character::HealthBar": (
           bar_type: 12,
         ),

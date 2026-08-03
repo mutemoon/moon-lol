@@ -15,8 +15,6 @@ pub mod ui;
 
 // 因为 camera / shader / error 已下沉到 lol_base_render（供 lol_particle 等下游复用以避免循环依赖），
 // 所以在此 re-export 保持 crate::camera / crate::shader / crate::error 调用路径稳定。
-pub use lol_base_render::{camera, error, shader};
-
 use animation::PluginAnimation;
 use aoe_visual::PluginAoEVisual;
 use audio::PluginAudio;
@@ -27,6 +25,7 @@ use debug_area::PluginDebugArea;
 use debug_missile::PluginDebugMissile;
 use debug_sphere::PluginDebugSphere;
 use lol_base_render::camera::PluginCamera;
+pub use lol_base_render::{camera, error, shader};
 use map::PluginRenderMap;
 use navigation::PluginRenderNavigation;
 use skin::PluginSkin;

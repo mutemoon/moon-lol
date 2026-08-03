@@ -1,0 +1,264 @@
+(
+    events: {
+        "EyeShrineBuff_OnBuffActivate": [
+            "characters/SRU_RiftHerald/sounds/100217965.ogg",
+            "characters/SRU_RiftHerald/sounds/237574315.ogg",
+        ],
+        "EyeShrineBuff_OnBuffDeactivate": [
+            "characters/SRU_RiftHerald/sounds/315536201.ogg",
+        ],
+        "EyeShrineBuff_buffactivate": [
+            "characters/SRU_RiftHerald/sounds/648233814.ogg",
+            "characters/SRU_RiftHerald/sounds/979126135.ogg",
+        ],
+        "Eye_Vulnerable_buffactivate": [
+            "characters/SRU_RiftHerald/sounds/1061772359.ogg",
+            "characters/SRU_RiftHerald/sounds/156459351.ogg",
+            "characters/SRU_RiftHerald/sounds/177602521.ogg",
+        ],
+        "FS": [
+            "characters/SRU_RiftHerald/sounds/228438286.ogg",
+            "characters/SRU_RiftHerald/sounds/431699200.ogg",
+            "characters/SRU_RiftHerald/sounds/545047244.ogg",
+            "characters/SRU_RiftHerald/sounds/569908692.ogg",
+            "characters/SRU_RiftHerald/sounds/630799599.ogg",
+            "characters/SRU_RiftHerald/sounds/911826125.ogg",
+            "characters/SRU_RiftHerald/sounds/92063694.ogg",
+            "characters/SRU_RiftHerald/sounds/960390726.ogg",
+        ],
+        "Idle_01": [
+            "characters/SRU_RiftHerald/sounds/333030835.ogg",
+        ],
+        "Idle_02": [
+            "characters/SRU_RiftHerald/sounds/371284572.ogg",
+        ],
+        "Idle_03": [
+            "characters/SRU_RiftHerald/sounds/70794572.ogg",
+        ],
+        "ItemVoidCrusher_ChannelingSuccessStop_cast": [
+            "characters/SRU_RiftHerald/sounds/143125527.ogg",
+            "characters/SRU_RiftHerald/sounds/863047682.ogg",
+        ],
+        "ItemVoidCrusher_cast": [
+            "characters/SRU_RiftHerald/sounds/193521364.ogg",
+        ],
+        "MercenaryBasicAttack2_OnCast": [
+            "characters/SRU_RiftHerald/sounds/1039231085.ogg",
+            "characters/SRU_RiftHerald/sounds/155093913.ogg",
+            "characters/SRU_RiftHerald/sounds/369093888.ogg",
+            "characters/SRU_RiftHerald/sounds/467874364.ogg",
+            "characters/SRU_RiftHerald/sounds/8894421.ogg",
+        ],
+        "MercenaryBasicAttack2_OnHit": [
+            "characters/SRU_RiftHerald/sounds/194828825.ogg",
+            "characters/SRU_RiftHerald/sounds/641280885.ogg",
+        ],
+        "MercenaryBasicAttack3_OnCast": [
+            "characters/SRU_RiftHerald/sounds/155093913.ogg",
+            "characters/SRU_RiftHerald/sounds/162743351.ogg",
+            "characters/SRU_RiftHerald/sounds/369093888.ogg",
+            "characters/SRU_RiftHerald/sounds/427196178.ogg",
+            "characters/SRU_RiftHerald/sounds/791768377.ogg",
+            "characters/SRU_RiftHerald/sounds/8894421.ogg",
+        ],
+        "MercenaryBasicAttack3_OnHit": [
+            "characters/SRU_RiftHerald/sounds/14718971.ogg",
+            "characters/SRU_RiftHerald/sounds/321844646.ogg",
+        ],
+        "MercenaryBasicAttack_OnCast": [
+            "characters/SRU_RiftHerald/sounds/155093913.ogg",
+            "characters/SRU_RiftHerald/sounds/369093888.ogg",
+            "characters/SRU_RiftHerald/sounds/485775631.ogg",
+            "characters/SRU_RiftHerald/sounds/69759241.ogg",
+            "characters/SRU_RiftHerald/sounds/803053261.ogg",
+            "characters/SRU_RiftHerald/sounds/8894421.ogg",
+        ],
+        "MercenaryBasicAttack_OnHit": [
+            "characters/SRU_RiftHerald/sounds/1020779596.ogg",
+            "characters/SRU_RiftHerald/sounds/741527545.ogg",
+        ],
+        "MiniBaronVulnerable_OnBuffDeactivate": [
+            "characters/SRU_RiftHerald/sounds/610877946.ogg",
+            "characters/SRU_RiftHerald/sounds/678373154.ogg",
+            "characters/SRU_RiftHerald/sounds/726196376.ogg",
+        ],
+        "MiniBaronVulnerable_buffactivate": [
+            "characters/SRU_RiftHerald/sounds/2318513.ogg",
+            "characters/SRU_RiftHerald/sounds/305847309.ogg",
+            "characters/SRU_RiftHerald/sounds/405482481.ogg",
+            "characters/SRU_RiftHerald/sounds/514233813.ogg",
+            "characters/SRU_RiftHerald/sounds/780631080.ogg",
+            "characters/SRU_RiftHerald/sounds/838836317.ogg",
+            "characters/SRU_RiftHerald/sounds/959638995.ogg",
+        ],
+        "Relic_EyeShrineBuff_hit": [
+            "characters/SRU_RiftHerald/sounds/333691786.ogg",
+            "characters/SRU_RiftHerald/sounds/873782655.ogg",
+        ],
+        "SRU_RiftHeraldBasicAttack2_OnCast": [
+            "characters/SRU_RiftHerald/sounds/1039231085.ogg",
+            "characters/SRU_RiftHerald/sounds/155093913.ogg",
+            "characters/SRU_RiftHerald/sounds/369093888.ogg",
+            "characters/SRU_RiftHerald/sounds/467874364.ogg",
+            "characters/SRU_RiftHerald/sounds/8894421.ogg",
+        ],
+        "SRU_RiftHeraldBasicAttack2_OnHit": [
+            "characters/SRU_RiftHerald/sounds/194828825.ogg",
+            "characters/SRU_RiftHerald/sounds/641280885.ogg",
+        ],
+        "SRU_RiftHeraldBasicAttack3_OnCast": [
+            "characters/SRU_RiftHerald/sounds/155093913.ogg",
+            "characters/SRU_RiftHerald/sounds/162743351.ogg",
+            "characters/SRU_RiftHerald/sounds/369093888.ogg",
+            "characters/SRU_RiftHerald/sounds/427196178.ogg",
+            "characters/SRU_RiftHerald/sounds/791768377.ogg",
+            "characters/SRU_RiftHerald/sounds/8894421.ogg",
+        ],
+        "SRU_RiftHeraldBasicAttack3_OnHit": [
+            "characters/SRU_RiftHerald/sounds/14718971.ogg",
+            "characters/SRU_RiftHerald/sounds/321844646.ogg",
+        ],
+        "SRU_RiftHeraldBasicAttack_OnCast": [
+            "characters/SRU_RiftHerald/sounds/155093913.ogg",
+            "characters/SRU_RiftHerald/sounds/369093888.ogg",
+            "characters/SRU_RiftHerald/sounds/485775631.ogg",
+            "characters/SRU_RiftHerald/sounds/69759241.ogg",
+            "characters/SRU_RiftHerald/sounds/803053261.ogg",
+            "characters/SRU_RiftHerald/sounds/8894421.ogg",
+        ],
+        "SRU_RiftHeraldBasicAttack_OnHit": [
+            "characters/SRU_RiftHerald/sounds/1020779596.ogg",
+            "characters/SRU_RiftHerald/sounds/741527545.ogg",
+        ],
+        "SpinAttack_cast": [
+            "characters/SRU_RiftHerald/sounds/396551198.ogg",
+        ],
+        "SpinAttack_hit": [
+            "characters/SRU_RiftHerald/sounds/194828825.ogg",
+            "characters/SRU_RiftHerald/sounds/641280885.ogg",
+        ],
+        "SpinAttack_hit_ground": [
+            "characters/SRU_RiftHerald/sounds/14718971.ogg",
+            "characters/SRU_RiftHerald/sounds/321844646.ogg",
+        ],
+        "SpinAttack_vox": [
+            "characters/SRU_RiftHerald/sounds/712471504.ogg",
+            "characters/SRU_RiftHerald/sounds/790264279.ogg",
+        ],
+        "capture": [
+            "characters/SRU_RiftHerald/sounds/243419620.ogg",
+            "characters/SRU_RiftHerald/sounds/327918057.ogg",
+            "characters/SRU_RiftHerald/sounds/643172817.ogg",
+        ],
+        "charge_fs": [
+            "characters/SRU_RiftHerald/sounds/189029695.ogg",
+            "characters/SRU_RiftHerald/sounds/374166169.ogg",
+            "characters/SRU_RiftHerald/sounds/449579213.ogg",
+            "characters/SRU_RiftHerald/sounds/479856604.ogg",
+            "characters/SRU_RiftHerald/sounds/700063188.ogg",
+        ],
+        "charge_hit": [
+            "characters/SRU_RiftHerald/sounds/1028318499.ogg",
+        ],
+        "charge_hit_champion": [
+            "characters/SRU_RiftHerald/sounds/1028318499.ogg",
+        ],
+        "charge_hit_minion": [
+            "characters/SRU_RiftHerald/sounds/449553040.ogg",
+            "characters/SRU_RiftHerald/sounds/696025361.ogg",
+            "characters/SRU_RiftHerald/sounds/816696460.ogg",
+            "characters/SRU_RiftHerald/sounds/955496193.ogg",
+        ],
+        "charge_no_hit": [
+            "characters/SRU_RiftHerald/sounds/31733709.ogg",
+        ],
+        "charge_steer": [
+            "characters/SRU_RiftHerald/sounds/583462270.ogg",
+            "characters/SRU_RiftHerald/sounds/914684945.ogg",
+        ],
+        "dance": [
+            "characters/SRU_RiftHerald/sounds/639888864.ogg",
+            "characters/SRU_RiftHerald/sounds/830402139.ogg",
+        ],
+        "dash_ground_hit": [
+            "characters/SRU_RiftHerald/sounds/921041937.ogg",
+        ],
+        "dash_hit": [
+            "characters/SRU_RiftHerald/sounds/168920450.ogg",
+            "characters/SRU_RiftHerald/sounds/352792633.ogg",
+            "characters/SRU_RiftHerald/sounds/559099630.ogg",
+            "characters/SRU_RiftHerald/sounds/813595593.ogg",
+        ],
+        "dash_hit_vox": [
+            "characters/SRU_RiftHerald/sounds/643172817.ogg",
+        ],
+        "dash_run_fs": [
+            "characters/SRU_RiftHerald/sounds/106955380.ogg",
+            "characters/SRU_RiftHerald/sounds/40469899.ogg",
+            "characters/SRU_RiftHerald/sounds/468426812.ogg",
+            "characters/SRU_RiftHerald/sounds/54000975.ogg",
+        ],
+        "dash_sonicboom": [
+            "characters/SRU_RiftHerald/sounds/122518713.ogg",
+        ],
+        "dash_windup_vox": [
+            "characters/SRU_RiftHerald/sounds/243419620.ogg",
+            "characters/SRU_RiftHerald/sounds/440305675.ogg",
+        ],
+        "death": [
+            "characters/SRU_RiftHerald/sounds/336682633.ogg",
+            "characters/SRU_RiftHerald/sounds/65657948.ogg",
+        ],
+        "death_reverb": [
+            "characters/SRU_RiftHerald/sounds/963276642.ogg",
+        ],
+        "idle_angry_ground_hit": [
+            "characters/SRU_RiftHerald/sounds/711325356.ogg",
+        ],
+        "idle_angry_vox": [
+            "characters/SRU_RiftHerald/sounds/214794517.ogg",
+            "characters/SRU_RiftHerald/sounds/380713775.ogg",
+            "characters/SRU_RiftHerald/sounds/555748399.ogg",
+            "characters/SRU_RiftHerald/sounds/630272079.ogg",
+            "characters/SRU_RiftHerald/sounds/64537936.ogg",
+            "characters/SRU_RiftHerald/sounds/706292621.ogg",
+        ],
+        "idle_angry_vox_roar": [
+            "characters/SRU_RiftHerald/sounds/243419620.ogg",
+            "characters/SRU_RiftHerald/sounds/497728129.ogg",
+        ],
+        "idle_base_vox": [
+            "characters/SRU_RiftHerald/sounds/22439503.ogg",
+            "characters/SRU_RiftHerald/sounds/257029497.ogg",
+            "characters/SRU_RiftHerald/sounds/432471772.ogg",
+            "characters/SRU_RiftHerald/sounds/484807569.ogg",
+            "characters/SRU_RiftHerald/sounds/554413512.ogg",
+            "characters/SRU_RiftHerald/sounds/982756618.ogg",
+        ],
+        "idle_trans": [
+            "characters/SRU_RiftHerald/sounds/255142064.ogg",
+        ],
+        "pilot_absorb_orb": [
+            "characters/SRU_RiftHerald/sounds/974149615.ogg",
+        ],
+        "pilot_beam": [
+            "characters/SRU_RiftHerald/sounds/606787609.ogg",
+        ],
+        "pilot_enter": [
+            "characters/SRU_RiftHerald/sounds/535649085.ogg",
+        ],
+        "spawn": [
+            "characters/SRU_RiftHerald/sounds/250218266.ogg",
+        ],
+        "spawn_void": [
+            "characters/SRU_RiftHerald/sounds/1039072591.ogg",
+        ],
+        "spawn_vox": [
+            "characters/SRU_RiftHerald/sounds/495621595.ogg",
+            "characters/SRU_RiftHerald/sounds/592846879.ogg",
+        ],
+        "taunt": [
+            "characters/SRU_RiftHerald/sounds/1022607612.ogg",
+        ],
+    },
+)

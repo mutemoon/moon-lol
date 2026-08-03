@@ -1,0 +1,121 @@
+(
+    events: {
+        "Play_vo_SRU_Dragon_Cloud_Attack_OnCast": [
+            "characters/sru_dragon_air/sounds/104885902.ogg",
+            "characters/sru_dragon_air/sounds/218682923.ogg",
+            "characters/sru_dragon_air/sounds/820538722.ogg",
+        ],
+        "SRU_Dragon_Cloud_Attack_OnCast": [
+            "characters/sru_dragon_air/sounds/1049326611.ogg",
+            "characters/sru_dragon_air/sounds/202733887.ogg",
+            "characters/sru_dragon_air/sounds/406013358.ogg",
+            "characters/sru_dragon_air/sounds/426843233.ogg",
+            "characters/sru_dragon_air/sounds/519071615.ogg",
+            "characters/sru_dragon_air/sounds/709777730.ogg",
+            "characters/sru_dragon_air/sounds/714090056.ogg",
+            "characters/sru_dragon_air/sounds/889369013.ogg",
+            "characters/sru_dragon_air/sounds/984892836.ogg",
+        ],
+        "SRU_Dragon_Cloud_Attack_OnMissileLaunch": [
+            "characters/sru_dragon_air/sounds/43223337.ogg",
+            "characters/sru_dragon_air/sounds/631679243.ogg",
+            "characters/sru_dragon_air/sounds/823149345.ogg",
+            "characters/sru_dragon_air/sounds/932884016.ogg",
+        ],
+        "SRU_Dragon_DragonFireball2_OnMissileCast": [
+            "characters/sru_dragon_air/sounds/167461397.ogg",
+            "characters/sru_dragon_air/sounds/29670348.ogg",
+            "characters/sru_dragon_air/sounds/954419424.ogg",
+        ],
+        "SRU_Dragon_DragonFireball2_OnMissileLaunch": [
+            "characters/sru_dragon_air/sounds/13406881.ogg",
+            "characters/sru_dragon_air/sounds/572711089.ogg",
+            "characters/sru_dragon_air/sounds/830741793.ogg",
+        ],
+        "SRU_Dragon_DragonFireball_OnCast": [
+            "characters/sru_dragon_air/sounds/212977317.ogg",
+            "characters/sru_dragon_air/sounds/23153942.ogg",
+            "characters/sru_dragon_air/sounds/523432270.ogg",
+            "characters/sru_dragon_air/sounds/527235801.ogg",
+            "characters/sru_dragon_air/sounds/588367252.ogg",
+            "characters/sru_dragon_air/sounds/7224932.ogg",
+            "characters/sru_dragon_air/sounds/97151935.ogg",
+        ],
+        "SRU_Dragon_DragonFireball_hit": [
+            "characters/sru_dragon_air/sounds/151484866.ogg",
+            "characters/sru_dragon_air/sounds/793944468.ogg",
+            "characters/sru_dragon_air/sounds/970707887.ogg",
+        ],
+        "SRU_Dragon_DragonTakeOff_cast": [
+            "characters/sru_dragon_air/sounds/1042559291.ogg",
+            "characters/sru_dragon_air/sounds/1048906340.ogg",
+            "characters/sru_dragon_air/sounds/172185744.ogg",
+            "characters/sru_dragon_air/sounds/195844850.ogg",
+            "characters/sru_dragon_air/sounds/475572154.ogg",
+            "characters/sru_dragon_air/sounds/47679386.ogg",
+            "characters/sru_dragon_air/sounds/70094813.ogg",
+            "characters/sru_dragon_air/sounds/752773315.ogg",
+            "characters/sru_dragon_air/sounds/759862608.ogg",
+            "characters/sru_dragon_air/sounds/840776892.ogg",
+            "characters/sru_dragon_air/sounds/86209820.ogg",
+        ],
+        "SRU_Dragon_ag2al_buffactive": [
+            "characters/sru_dragon_air/sounds/565891447.ogg",
+        ],
+        "SRU_Dragon_aggro1_buffactive": [
+            "characters/sru_dragon_air/sounds/182952867.ogg",
+        ],
+        "SRU_Dragon_aggro3_buffactive": [
+            "characters/sru_dragon_air/sounds/654799448.ogg",
+        ],
+        "SRU_Dragon_aggro4_buffactive": [
+            "characters/sru_dragon_air/sounds/39491866.ogg",
+        ],
+        "SRU_Dragon_aggro5_buffactive": [
+            "characters/sru_dragon_air/sounds/503976029.ogg",
+        ],
+        "SRU_Dragon_aggro6_buffactive": [
+            "characters/sru_dragon_air/sounds/800617802.ogg",
+        ],
+        "SRU_Dragon_aggro7_buffactive": [
+            "characters/sru_dragon_air/sounds/581566982.ogg",
+        ],
+        "SRU_Dragon_al2ag_buffactive": [
+            "characters/sru_dragon_air/sounds/834501805.ogg",
+        ],
+        "SRU_Dragon_al2n_buffactive": [
+            "characters/sru_dragon_air/sounds/561091320.ogg",
+        ],
+        "SRU_Dragon_alert2_buffactive": [
+            "characters/sru_dragon_air/sounds/873559993.ogg",
+        ],
+        "SRU_Dragon_alert3_buffactive": [
+            "characters/sru_dragon_air/sounds/538938923.ogg",
+        ],
+        "SRU_Dragon_death_cast": [
+            "characters/sru_dragon_air/sounds/162887946.ogg",
+            "characters/sru_dragon_air/sounds/258615587.ogg",
+        ],
+        "SRU_Dragon_death_reverb": [
+            "characters/sru_dragon_air/sounds/410666450.ogg",
+        ],
+        "SRU_Dragon_hover_buffactive": [
+            "characters/sru_dragon_air/sounds/189010918.ogg",
+        ],
+        "SRU_Dragon_landing_buffactive": [
+            "characters/sru_dragon_air/sounds/363977452.ogg",
+        ],
+        "SRU_Dragon_n2al_buffactive": [
+            "characters/sru_dragon_air/sounds/876991676.ogg",
+        ],
+        "SRU_Dragon_spawn_cast": [
+            "characters/sru_dragon_air/sounds/723525234.ogg",
+        ],
+        "SRU_Dragon_spawn_cast_vox": [
+            "characters/sru_dragon_air/sounds/742085348.ogg",
+            "characters/sru_dragon_air/sounds/858495822.ogg",
+            "characters/sru_dragon_air/sounds/923314404.ogg",
+            "characters/sru_dragon_air/sounds/942100318.ogg",
+        ],
+    },
+)

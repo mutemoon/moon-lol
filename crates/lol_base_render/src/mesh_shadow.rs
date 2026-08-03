@@ -17,11 +17,10 @@ pub fn spawn_shadow_skin_entity<M: Material>(
 ) {
     // 粒子可能挂在英雄根实体或骨骼实体上，蒙皮网格实体不一定是源实体本身；
     // 先向上/向下解析出真正的 SkinnedMesh 实体，找不到则跳过阴影皮肤（不 panic）。
-    let Some(skin_entity) = resolve_skinned_entity(skin_entity, q_skinned_mesh, q_children, q_parent)
+    let Some(skin_entity) =
+        resolve_skinned_entity(skin_entity, q_skinned_mesh, q_children, q_parent)
     else {
-        warn!(
-            "{skin_entity} 附近未找到 SkinnedMesh，跳过粒子阴影皮肤",
-        );
+        warn!("{skin_entity} 附近未找到 SkinnedMesh，跳过粒子阴影皮肤",);
         return;
     };
 

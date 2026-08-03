@@ -2,6 +2,7 @@
 //! 并自动向各英雄的 skin0.ron 挂载 AudioBank 组件。
 
 use std::fs;
+
 use league_core::extract::SkinCharacterDataProperties;
 use league_loader::game::{Data, LeagueLoader};
 use league_to_lol::extract::audio::export_audio_for_skin;
@@ -23,11 +24,11 @@ fn main() {
             if entry.path().is_dir() {
                 let name = entry.file_name().to_string_lossy().to_string();
                 // 排除非英雄目录（如地图单位/建筑/野怪等）
-                if !name.starts_with("SRU") 
-                    && !name.starts_with("sru") 
-                    && name != "Locke" 
-                    && name != "inhibitor" 
-                    && name != "nexus" 
+                if !name.starts_with("SRU")
+                    && !name.starts_with("sru")
+                    && name != "Locke"
+                    && name != "inhibitor"
+                    && name != "nexus"
                     && name != "turret"
                     && name != "tftchampion"
                 {
@@ -38,7 +39,10 @@ fn main() {
     }
     character_dirs.sort();
 
-    println!("[AUDIO] 共找到 {} 个英雄目录，准备批量提取音效...", character_dirs.len());
+    println!(
+        "[AUDIO] 共找到 {} 个英雄目录，准备批量提取音效...",
+        character_dirs.len()
+    );
 
     let mut success_count = 0;
     for (idx, champ_dir) in character_dirs.iter().enumerate() {
@@ -46,7 +50,12 @@ fn main() {
         // 格式化为 首字母大写（如 aatrox -> Aatrox），以便匹配技能/事件名前缀
         let display_name = format!("{}{}", lower_name[..1].to_uppercase(), &lower_name[1..]);
 
-        println!("\n[{}/{}] 正在处理音效: {}", idx + 1, character_dirs.len(), display_name);
+        println!(
+            "\n[{}/{}] 正在处理音效: {}",
+            idx + 1,
+            character_dirs.len(),
+            display_name
+        );
         let skin_bin_path = format!("data/characters/{}/skins/skin0.bin", lower_name);
 
         let Ok(skin_prop_group) = loader.get_prop_group_by_paths(vec![&skin_bin_path]) else {
@@ -54,16 +63,15 @@ fn main() {
             continue;
         };
         let Some(skin_data) = skin_prop_group.get_by_class::<SkinCharacterDataProperties>() else {
-            eprintln!("  [SKIP] 无法获取 SkinCharacterDataProperties: {}", display_name);
+            eprintln!(
+                "  [SKIP] 无法获取 SkinCharacterDataProperties: {}",
+                display_name
+            );
             continue;
         };
 
-        let config: ConfigAudio = export_audio_for_skin(
-            &loader,
-            &display_name,
-            "skin0",
-            &skin_data,
-        );
+        let config: ConfigAudio =
+            export_audio_for_skin(&loader, &display_name, "skin0", &skin_data);
 
         let output_audio_path = format!("characters/{}/skins/skin0_audio.ron", champ_dir);
         let serialized = to_string_pretty(&config, PrettyConfig::default()).unwrap();
@@ -73,11 +81,18 @@ fn main() {
         ensure_audio_bank_in_skin0(champ_dir);
 
         success_count += 1;
-        println!("  [DONE] 音频配置已写入 {} (包含 {} 个音效事件)", 
-            output_audio_path, config.events.len());
+        println!(
+            "  [DONE] 音频配置已写入 {} (包含 {} 个音效事件)",
+            output_audio_path,
+            config.events.len()
+        );
     }
 
-    println!("\n[ALL DONE] 完成全英雄音效提取: 成功 {}/{}", success_count, character_dirs.len());
+    println!(
+        "\n[ALL DONE] 完成全英雄音效提取: 成功 {}/{}",
+        success_count,
+        character_dirs.len()
+    );
 }
 
 fn ensure_audio_bank_in_skin0(champ_dir: &str) {
@@ -88,7 +103,10 @@ fn ensure_audio_bank_in_skin0(champ_dir: &str) {
     if content.contains("AudioBank") {
         return;
     }
-    let bank_str = format!("        \"lol_base::audio::AudioBank\": (Path(\"characters/{}/skins/skin0_audio.ron\")),\n", champ_dir);
+    let bank_str = format!(
+        "        \"lol_base::audio::AudioBank\": (Path(\"characters/{}/skins/skin0_audio.ron\")),\n",
+        champ_dir
+    );
     if let Some(pos) = content.find("components: {") {
         let insert_pos = pos + "components: {\n".len();
         let mut new_content = content.clone();

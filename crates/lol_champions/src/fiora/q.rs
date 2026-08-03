@@ -6,9 +6,7 @@
 
 use bevy::prelude::*;
 use lol_base::animation_names::ANIM_SPELL1;
-use lol_base::render_cmd::{
-    CommandAnimationPlay, CommandSkinParticleSpawn, CommandSkinSoundPlay,
-};
+use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn, CommandSkinSoundPlay};
 use lol_base::spell::Spell;
 use lol_core::action::dash::{ActionDash, DashMoveType};
 use lol_core::attack::CommandAttackReset;

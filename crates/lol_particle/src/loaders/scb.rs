@@ -3,7 +3,6 @@ use bevy::prelude::Mesh;
 use bevy::reflect::TypePath;
 use league_file::mesh_static::LeagueMeshStatic;
 use league_to_lol::mesh_static::mesh_static_to_bevy_mesh;
-
 use lol_base_render::error::Error;
 
 #[derive(Default, TypePath)]

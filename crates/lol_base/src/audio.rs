@@ -1,7 +1,8 @@
+use std::collections::BTreeMap;
+
 use bevy::prelude::*;
 use bevy::reflect::TypePath;
 use serde::{Deserialize, Serialize};
-use std::collections::BTreeMap;
 
 /// 皮肤音效配置，作为可正反序列化的 Asset 存放在 skins/skin{N}_audio.ron 中。
 ///

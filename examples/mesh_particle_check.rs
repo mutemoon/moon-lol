@@ -8,11 +8,11 @@ use bevy::render::RenderPlugin;
 use bevy::render::settings::{RenderCreation, WgpuFeatures, WgpuSettings};
 use bevy::render::view::window::screenshot::{Screenshot, save_to_disk};
 use lol_base::hash_key::{HashKey, LoadHashKeyTrait};
+use lol_base_render::camera::PluginCamera;
 use lol_base_render::particle::{
     ConfigVfxEmitterDefinition, ConfigVfxPrimitive, ConfigVfxShape, ConfigVfxSystemDefinition,
     Sampler, StochasticSampler, VfxTexture,
 };
-use lol_base_render::camera::PluginCamera;
 use lol_particle::{CommandParticleSpawn, PluginParticle};
 
 fn const_sampler<T: Clone>(v: T) -> StochasticSampler<T> {
@@ -79,6 +79,8 @@ fn setup(
         num_frames: None,
         blend_mode: Some(4),
         material_override_definitions: None,
+        sound_on_create: None,
+        sound_persistent: None,
         primitive: Some(ConfigVfxPrimitive::VfxPrimitiveMesh {
             align_pitch_to_camera: None,
             align_yaw_to_camera: None,
@@ -89,7 +91,8 @@ fn setup(
         is_single_particle: Some(true),
         is_uniform_scale: None,
         is_random_start_frame: None,
-        is_local_orientation: None,
+        is_local_orientation: Some(false),
+        is_direction_oriented: None,
         // 因为绕过 ConfigVfxLoader 直接注入 Assets，所以需手动以线性方式加载贴图
         texture: Some(VfxTexture {
             path: "ASSETS/Characters/Fiora/Skins/Base/Particles/Fiora_mesh_Weapontrail.png".into(),
@@ -112,6 +115,13 @@ fn setup(
         spawn_shape: Some(ConfigVfxShape::Unk0xee39916f {
             emit_offset: Some(Vec3::new(50.0, 100.0, -50.0)),
         }),
+        flex_shape_definition: None,
+        alpha_erosion_definition: None,
+        color_look_up_type_y: None,
+        color_render_flags: None,
+        soft_particle_definition: None,
+        palette_definition: None,
+        reflection_definition: None,
     };
 
     let test_vfx_hash = league_utils::hash_bin("mesh_check_manual");
@@ -120,6 +130,8 @@ fn setup(
         particle_path: "".into(),
         complex_emitter_definition_data: Some(vec![emitter_def]),
         simple_emitter_definition_data: None,
+        sound_on_create_default: None,
+        sound_persistent_default: None,
     };
     vfx_system_assets.add_hash(test_vfx_hash, system_def);
 

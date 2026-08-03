@@ -99,6 +99,42 @@
                     0.75,
                 ]),
             ),
+            (
+                name: "MaxTravelDistance",
+                values: Some([
+                    625.0,
+                    625.0,
+                    625.0,
+                    625.0,
+                    625.0,
+                    625.0,
+                    625.0,
+                ]),
+            ),
+            (
+                name: "DashSpeed",
+                values: Some([
+                    1000.0,
+                    1000.0,
+                    1000.0,
+                    1000.0,
+                    1000.0,
+                    1000.0,
+                    1000.0,
+                ]),
+            ),
+            (
+                name: "KnockupDurationTOOLTIPONLY",
+                values: Some([
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                ]),
+            ),
         ]),
         mana: Some([
             60.0,

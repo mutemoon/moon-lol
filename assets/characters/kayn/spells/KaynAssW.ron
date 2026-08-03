@@ -65,7 +65,44 @@
                 values: None,
             ),
         ]),
-        dataValues: None,
+        dataValues: Some([
+            (
+                name: "BaseDamage",
+                values: Some([
+                    90.0,
+                    90.0,
+                    135.0,
+                    180.0,
+                    225.0,
+                    270.0,
+                    315.0,
+                ]),
+            ),
+            (
+                name: "KnockupDuration",
+                values: Some([
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                ]),
+            ),
+            (
+                name: "SlowAmount",
+                values: Some([
+                    -0.6,
+                    -0.6,
+                    -0.6,
+                    -0.6,
+                    -0.6,
+                    -0.6,
+                    -0.6,
+                ]),
+            ),
+        ]),
         mana: Some([
             40.0,
             45.0,
