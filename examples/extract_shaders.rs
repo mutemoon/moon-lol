@@ -332,33 +332,6 @@ fn main() -> anyhow::Result<()> {
         std::process::exit(1);
     }
 
-    // 当未指定 --toc-paths 时，默认提取 startup_load_shaders 中使用的全部 shader TOC
-    // 对应 lol_render/src/shader.rs 中 startup_load_shaders 里的路径，
-    // 后缀从旧版 .glsl 改为新版 .dx11
-    let toc_paths: Vec<String> = if args.toc_paths.is_empty() {
-        vec![
-            // QuadPsSlice 家族
-            "assets/shaders/hlsl/particlesystem/quad_ps_slice.ps.dx11".to_string(),
-            "assets/shaders/hlsl/particlesystem/quad_vs.vs.dx11".to_string(),
-            // QuadPs 家族（VS 与 QuadPsSlice 相同）
-            "assets/shaders/hlsl/particlesystem/quad_ps.ps.dx11".to_string(),
-            // UnlitDecal 家族
-            "assets/shaders/hlsl/environment/unlit_decal_ps.ps.dx11".to_string(),
-            "assets/shaders/hlsl/environment/unlit_decal_vs.vs.dx11".to_string(),
-            // Distortion 家族
-            "assets/shaders/hlsl/particlesystem/distortion_ps.ps.dx11".to_string(),
-            "assets/shaders/hlsl/particlesystem/distortion_vs.vs.dx11".to_string(),
-            // Mesh 家族
-            "assets/shaders/hlsl/particlesystem/mesh_ps.ps.dx11".to_string(),
-            "assets/shaders/hlsl/particlesystem/mesh_vs.vs.dx11".to_string(),
-            // SkinnedMeshParticle 家族
-            "assets/shaders/hlsl/skinnedmesh/particle_ps.ps.dx11".to_string(),
-            "assets/shaders/hlsl/skinnedmesh/particle_vs.vs.dx11".to_string(),
-        ]
-    } else {
-        args.toc_paths.clone()
-    };
-
     // 加载 ShaderCache WAD
     let wad_relative = "DATA/FINAL/ShaderCache.dx11.wad.client";
     println!("[INFO] 加载 WAD: {}/{}", args.game_path, wad_relative);
@@ -376,6 +349,24 @@ fn main() -> anyhow::Result<()> {
 
     let out_dir = Path::new(&args.out_dir);
     fs::create_dir_all(out_dir)?;
+
+    let toc_paths: Vec<String> = if args.toc_paths.is_empty() {
+        vec![
+            "assets/shaders/hlsl/particlesystem/quad_ps_slice.ps-dx11".to_string(),
+            "assets/shaders/hlsl/particlesystem/quad_vs.vs-dx11".to_string(),
+            "assets/shaders/hlsl/particlesystem/quad_ps.ps-dx11".to_string(),
+            "assets/shaders/hlsl/environment/unlit_decal_ps.ps-dx11".to_string(),
+            "assets/shaders/hlsl/environment/unlit_decal_vs.vs-dx11".to_string(),
+            "assets/shaders/hlsl/particlesystem/distortion_ps.ps-dx11".to_string(),
+            "assets/shaders/hlsl/particlesystem/distortion_vs.vs-dx11".to_string(),
+            "assets/shaders/hlsl/particlesystem/mesh_ps.ps-dx11".to_string(),
+            "assets/shaders/hlsl/particlesystem/mesh_vs.vs-dx11".to_string(),
+            "assets/shaders/hlsl/skinnedmesh/particle_ps.ps-dx11".to_string(),
+            "assets/shaders/hlsl/skinnedmesh/particle_vs.vs-dx11".to_string(),
+        ]
+    } else {
+        args.toc_paths.clone()
+    };
 
     let mut global_entries = HashMap::new();
     // 每个家族的变体 hash → def 名字集合，供接口对齐 pass 做 VS/PS 变体配对
@@ -688,11 +679,12 @@ fn process_toc(
     HashMap<u64, Vec<String>>,
     HashMap<PathBuf, ShaderLayoutDescriptor>,
 )> {
-    // 读取 TOC 文件
     let toc_hash = hash_wad(toc_path);
     let mut toc_reader = wad_loader
         .get_wad_entry_reader_by_hash(toc_hash)
-        .map_err(|e| anyhow::anyhow!("找不到 TOC 文件 (hash={:x}): {}", toc_hash, e))?;
+        .map_err(|e| {
+            anyhow::anyhow!("找不到 TOC 文件 {} (hash={:x}): {}", toc_path, toc_hash, e)
+        })?;
 
     let mut toc_bytes = Vec::new();
     toc_reader.read_to_end(&mut toc_bytes)?;
@@ -710,8 +702,6 @@ fn process_toc(
         shader_toc.shader_count, shader_toc.bundled_shader_count, shader_type_str
     );
 
-    // chunk 路径格式: "{toc_path}_{i*100}"
-    // 例如: "shaders/unlit_decal_ps.ps.dx11_0", "shaders/unlit_decal_ps.ps.dx11_100", ...
     let chunk_count = ((shader_toc.bundled_shader_count as f32 / 100.0).ceil() as usize).max(1);
     println!("  [TOC] 需要读取 {} 个 chunk 文件", chunk_count);
 
@@ -730,7 +720,6 @@ fn process_toc(
         let mut chunk_bytes = Vec::new();
         chunk_reader.read_to_end(&mut chunk_bytes)?;
 
-        // 解析 chunk: 每个 shader 是 4字节 LE 长度 + DXBC 数据(length-1字节) + null
         let blobs = parse_dxbc_chunk(&chunk_bytes)?;
         println!("  [CHUNK] {} → {} 个 shader blobs", chunk_path, blobs.len());
         dxbc_blobs.extend(blobs);
@@ -741,7 +730,6 @@ fn process_toc(
         dxbc_blobs.len()
     );
 
-    // 创建输出子目录
     let toc_name = sanitize_name(toc_path);
     let toc_out_dir = out_dir.join(&toc_name);
     fs::create_dir_all(&toc_out_dir)?;
@@ -826,6 +814,11 @@ fn process_toc(
                 }
             }
 
+            if save_dxbc {
+                let dxbc_path = toc_out_dir.join(format!("{}.dxbc", stem));
+                let _ = fs::write(&dxbc_path, &dxbc_blobs[idx]);
+            }
+
             if skip_existing && spv_path.exists() {
                 return Some(spv_relative);
             }
@@ -840,18 +833,24 @@ fn process_toc(
                 is_pixel,
                 save_dxbc,
             ) {
-                Ok(spv_bytes) => match fs::write(&spv_path, &spv_bytes) {
-                    Ok(()) => Some(spv_relative),
-                    Err(e) => {
-                        pb_compile.println(format!(
-                            "  {} shader_{:04} 写入失败: {}",
-                            style("[ERROR]").red().bold(),
-                            idx,
-                            e
-                        ));
-                        None
+                Ok(spv_bytes) => {
+                    if save_dxbc {
+                        let dxbc_path = toc_out_dir.join(format!("{}.dxbc", stem));
+                        let _ = fs::write(&dxbc_path, &dxbc_blobs[idx]);
                     }
-                },
+                    match fs::write(&spv_path, &spv_bytes) {
+                        Ok(()) => Some(spv_relative),
+                        Err(e) => {
+                            pb_compile.println(format!(
+                                "  {} shader_{:04} 写入失败: {}",
+                                style("[ERROR]").red().bold(),
+                                idx,
+                                e
+                            ));
+                            None
+                        }
+                    }
+                }
                 Err(e) => {
                     pb_compile.println(format!(
                         "  {} shader_{:04} 编译失败: {}",
@@ -985,10 +984,7 @@ fn compile_dxbc_to_spirv(
 
     // 如果指定了 save_dxbc 参数，则保存原始 dxbc 文件
     if save_dxbc {
-        let _ = fs::copy(
-            &dxbc_path_tmp,
-            work_dir.join(format!("shader_{:04}.dxbc", idx)),
-        );
+        let _ = fs::copy(&dxbc_path_tmp, work_dir.join(format!("{}.dxbc", prefix)));
     }
     let _ = fs::remove_file(&dxbc_path_tmp);
 
@@ -1020,9 +1016,9 @@ fn sanitize_name(path: &str) -> String {
         .strip_prefix("assets/shaders/")
         .unwrap_or(&normalized);
 
-    let shader_type = if relative.contains(".ps.") {
+    let shader_type = if relative.contains(".ps.") || relative.contains(".ps-") {
         "ps"
-    } else if relative.contains(".vs.") {
+    } else if relative.contains(".vs.") || relative.contains(".vs-") {
         "vs"
     } else {
         ""

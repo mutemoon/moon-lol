@@ -167,6 +167,9 @@ fn setup(
         }),
         alpha_erosion_definition: Some(ConfigVfxAlphaErosionDefinition {
             erosion_drive_curve: curve_sampler(vec![(0.0, 0.0), (0.3, 0.0), (1.0, 0.7)]),
+            erosion_drive_source: None,
+            erosion_feather_in: None,
+            erosion_feather_out: None,
             erosion_map: Some(VfxTexture {
                 path: "ASSETS/Characters/Riven/Skins/Base/Particles/Riven_Base_Z_Erosion.png"
                     .into(),
@@ -175,9 +178,11 @@ fn setup(
                     |settings: &mut ImageLoaderSettings| settings.is_srgb = false,
                 ),
             }),
-            erosion_map_channel_mixer: Vec4::new(1.0, 0.0, 0.0, 0.0),
-            feather_in: None,
-            feather_out: None,
+            erosion_map_address_mode: None,
+            erosion_map_channel_mixer: const_sampler(Vec4::new(1.0, 0.0, 0.0, 0.0)),
+            erosion_slice_width: None,
+            linger_erosion_drive_curve: None,
+            use_linger_erosion_drive_curve: None,
         }),
         color_look_up_type_y: Some(3),
         color_render_flags: None,

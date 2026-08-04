@@ -8720,6 +8720,7 @@ dependencies = [
  "lol_base",
  "lol_base_render",
  "lol_core",
+ "lol_render",
  "lol_rpc",
  "lol_server",
  "rand 0.9.4",

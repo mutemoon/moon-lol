@@ -7,19 +7,20 @@
 
 use std::path::PathBuf;
 
-use lol_share::ConfigVfx;
-use serde::Serialize;
+use lol_share::{ConfigVfx, ConfigVfxSystemDefinition};
+use serde::{Deserialize, Serialize};
 
 use crate::error::AppError;
 
-/// 单个粒子系统：hash、粒子名称，以及可直接发给 server 播放的
-/// ConfigVfxSystemDefinition RON 字符串。
-#[derive(Serialize, Clone)]
+/// 单个粒子系统：hash、粒子名称，可直接发给 server 播放的 RON 字符串，
+/// 以及可供前端调整的结构化定义。
+#[derive(Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct ParticleSystemDef {
     pub hash: u32,
     pub name: String,
     pub def_ron: String,
+    pub def: ConfigVfxSystemDefinition,
 }
 
 /// 定位 assets/characters 目录（复用 lol_client 的 workspace 根探测）。
@@ -84,8 +85,16 @@ pub fn load_hero_particles(hero: String) -> Result<Vec<ParticleSystemDef>, AppEr
             hash,
             name: def.particle_name.clone(),
             def_ron,
+            def: def.clone(),
         });
     }
     systems.sort_by(|a, b| a.name.cmp(&b.name));
     Ok(systems)
+}
+
+/// 将前端调整后的 ConfigVfxSystemDefinition 重新序列化为 RON 字符串。
+#[tauri::command]
+pub fn serialize_vfx_system(def: ConfigVfxSystemDefinition) -> Result<String, AppError> {
+    ron::ser::to_string(&def)
+        .map_err(|e| AppError::Generic(format!("序列化 system 失败: {e}")))
 }

@@ -19,6 +19,7 @@
     "wasm:bindgen": "wasm-bindgen --out-name lol --out-dir packages/lol --target web target/wasm32-unknown-unknown/release/examples/lol.wasm",
     "wasm:win": "pnpm wasm && pnpm wasm:bindgen",
     "watch": "cargo watch -w src -w crates -w examples -- cargo run --example",
+    "watch:particle": "cargo watch -w src -w crates -- cargo run -p lol_particle",
     "watch:run": "cargo watch -w src -w crates -- cargo run --"
   },
   "devDependencies": {

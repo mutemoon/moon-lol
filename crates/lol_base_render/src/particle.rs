@@ -323,10 +323,15 @@ pub struct ConfigVfxEmitterDefinition {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ConfigVfxAlphaErosionDefinition {
     pub erosion_drive_curve: StochasticSampler<f32>,
+    pub erosion_drive_source: Option<u8>,
+    pub erosion_feather_in: Option<f32>,
+    pub erosion_feather_out: Option<f32>,
     pub erosion_map: Option<VfxTexture>,
-    pub erosion_map_channel_mixer: Vec4,
-    pub feather_in: Option<f32>,
-    pub feather_out: Option<f32>,
+    pub erosion_map_address_mode: Option<u8>,
+    pub erosion_map_channel_mixer: StochasticSampler<Vec4>,
+    pub erosion_slice_width: Option<f32>,
+    pub linger_erosion_drive_curve: Option<StochasticSampler<f32>>,
+    pub use_linger_erosion_drive_curve: Option<bool>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

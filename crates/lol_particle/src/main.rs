@@ -13,11 +13,13 @@ use bevy::render::RenderPlugin;
 use bevy::render::settings::{RenderCreation, WgpuFeatures, WgpuSettings};
 use clap::Parser;
 use lol_base::hash_key::{HashKey, LoadHashKeyTrait};
-use lol_base_render::camera::PluginCamera;
+use lol_base_render::camera::{Focus, PluginCamera};
 use lol_base_render::particle::{
     CommandParticleDespawn, CommandParticleSpawn, ConfigVfxSystemDefinition, VfxTexture,
 };
+use lol_core::map::{MAP_HEIGHT, MAP_WIDTH, PluginMap};
 use lol_particle::PluginParticle;
+use lol_render::map::PluginRenderMap;
 use lol_rpc::{CommandWsRequest, RpcAppExt, respond};
 use lol_server::PluginWsServer;
 use serde::Deserialize;
@@ -51,12 +53,16 @@ fn main() {
                 .set(WindowPlugin {
                     primary_window: Some(Window {
                         title: "粒子渲染 Server".to_string(),
+                        resolution: (300, 300).into(),
+                        position: WindowPosition::At((0, 1000).into()),
                         ..default()
                     }),
                     ..default()
                 }),
         )
         .add_plugins(PluginParticle)
+        .add_plugins(PluginMap)
+        .add_plugins(PluginRenderMap)
         .add_plugins(PluginCamera)
         .add_plugins(PluginWsServer {
             ws_port: args.ws_port,
@@ -108,20 +114,10 @@ struct PlayingVfx {
 #[derive(Component)]
 struct ParticleAnchor;
 
-fn setup_stage(
-    mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut std_materials: ResMut<Assets<StandardMaterial>>,
-) {
-    // 地面参照物
-    commands.spawn((
-        Mesh3d(meshes.add(Plane3d::new(Vec3::Y, Vec2::splat(50.0)))),
-        MeshMaterial3d(std_materials.add(Color::srgb(0.2, 0.2, 0.2))),
-        Transform::default().with_translation(Vec3::NEG_Y * 10.0),
-    ));
-
-    // 粒子播放锚点，放在原点
-    commands.spawn((ParticleAnchor, Transform::default()));
+fn setup_stage(mut commands: Commands) {
+    // 粒子播放锚点，放在地图中心，添加 Focus 聚焦视角
+    let center = Vec3::new(MAP_WIDTH / 2.0, 100.0, MAP_HEIGHT / 2.0);
+    commands.spawn((ParticleAnchor, Focus, Transform::from_translation(center)));
 }
 
 fn on_play_particle(

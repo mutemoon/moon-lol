@@ -15,11 +15,13 @@
 //!     + 一次性 uniform + RenderLayers(1)；
 //!   - SkinnedMesh：材质覆盖 + spawn_shadow_skin_entity 复制骨骼网格。
 
+use std::f32::consts::PI;
 use std::sync::Arc;
 
 use bevy::animation::AnimationTargetId;
 use bevy::camera::visibility::RenderLayers;
 use bevy::ecs::system::SystemParam;
+use bevy::mesh::VertexAttributeValues;
 use bevy::mesh::skinning::SkinnedMesh;
 use bevy::prelude::*;
 use lol_base_render::camera::TargetImage;
@@ -34,16 +36,87 @@ use lol_core::lifetime::Lifetime;
 use super::decal::ParticleDecal;
 use super::state::{EmitterOf, ParticleEmitterState};
 use super::utils::{
-    EmissionParams, EmitterType, ParticleBirthParams, calculate_emission_params,
-    calculate_particle_transform_frame, get_emitter_type, spawn_particle_entity,
+    EmissionParams, EmitterType, calculate_emission_params, calculate_particle_transform_frame,
+    get_emitter_type,
 };
-use crate::ParticleId;
-use crate::particle::distortion::ParticleMeshDistortion;
+use crate::particle::ParticleState;
 use crate::particle::dynamic::{
     ParticleMaterialDynamic, ParticleRenderKind, ParticleTextureInputs,
 };
-use crate::particle::quad::ParticleMeshQuad;
 use crate::utils::{ResourceCache, create_black_pixel_texture};
+use crate::{
+    ATTRIBUTE_LIFETIME, ATTRIBUTE_UV_FRAME, ATTRIBUTE_UV_MULT, ATTRIBUTE_WORLD_POSITION,
+    ATTRIBUTE_WORLD_POSITION_VEC4, ParticleId,
+};
+
+struct ParticleQuadMeshParams {
+    rotation_z: f32,
+    frame: f32,
+    color: Vec4,
+    is_distortion: bool,
+}
+
+fn build_particle_quad_mesh(params: ParticleQuadMeshParams) -> Mesh {
+    let mut mesh: Mesh = Plane3d::new(Vec3::NEG_Z, Vec2::splat(1.0)).into();
+
+    let transform = Transform::from_rotation(Quat::from_rotation_z(params.rotation_z));
+
+    if let VertexAttributeValues::Float32x3(values) =
+        mesh.attribute(Mesh::ATTRIBUTE_POSITION).unwrap()
+    {
+        let transformed = values
+            .into_iter()
+            .map(|v| transform.transform_point(Vec3::from_array(*v)))
+            .collect::<Vec<_>>();
+
+        if params.is_distortion {
+            let values = transformed
+                .iter()
+                .map(|v| v.extend(0.0).to_array())
+                .collect::<Vec<_>>();
+            mesh.insert_attribute(ATTRIBUTE_WORLD_POSITION_VEC4, values);
+        } else {
+            let values = transformed
+                .iter()
+                .map(|v| v.to_array())
+                .collect::<Vec<_>>();
+            mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, values.clone());
+            mesh.insert_attribute(ATTRIBUTE_WORLD_POSITION, values);
+        }
+    }
+
+    if let VertexAttributeValues::Float32x2(values) =
+        mesh.attribute(Mesh::ATTRIBUTE_UV_0).unwrap().clone()
+    {
+        mesh.insert_attribute(ATTRIBUTE_UV_MULT, values.clone());
+
+        let values = values
+            .into_iter()
+            .map(|v| {
+                if params.is_distortion {
+                    [1. - v[0], 1. - v[1], params.frame, params.frame]
+                } else {
+                    [v[0], v[1], params.frame, 0.0]
+                }
+            })
+            .collect::<Vec<_>>();
+
+        mesh.insert_attribute(ATTRIBUTE_UV_FRAME, values);
+    }
+
+    let values = Vec::from([[0.0; 2]; 4]);
+    mesh.insert_attribute(ATTRIBUTE_LIFETIME, values);
+
+    let values = Vec::from([[
+        params.color.z,
+        params.color.y,
+        params.color.x,
+        params.color.w,
+    ]; 4]);
+    mesh.insert_attribute(Mesh::ATTRIBUTE_COLOR, values);
+
+    mesh
+}
 
 /// 皮肤网格相关查询打包，避免系统参数超过 Bevy 的 16 个上限。
 #[derive(SystemParam)]
@@ -153,26 +226,45 @@ pub fn update_emitters(
                 particle_lifetime
             };
 
-            let birth_params = ParticleBirthParams::sample(&mut emitter, progress);
+            let raw_rotation0 = emitter.birth_rotation0.sample_clamped(progress);
+            let raw_scale0 = emitter.birth_scale0.sample_clamped(progress);
 
-            let (transform, adjusted_birth_scale0, frame) = calculate_particle_transform_frame(
-                &birth_params,
-                is_uniform_scale,
-                vfx_emitter_definition_data,
-                &primitive,
-                progress,
-            );
+            let (transform, shape_rotation, adjusted_birth_scale0, frame) =
+                calculate_particle_transform_frame(
+                    raw_rotation0,
+                    raw_scale0,
+                    is_uniform_scale,
+                    vfx_emitter_definition_data,
+                    &primitive,
+                    progress,
+                );
 
-            let particle_entity = spawn_particle_entity(
-                &mut commands,
-                particle_id,
-                emitter_entity,
-                particle_lifetime,
-                transform,
+            let raw_velocity = emitter.birth_velocity.sample_clamped(progress);
+            let velocity = shape_rotation * raw_velocity;
+
+            let birth_color = emitter.birth_color.sample_clamped(progress);
+
+            let particle_state = ParticleState {
+                birth_uv_offset: emitter.birth_uv_offset.sample_clamped(progress),
+                birth_uv_scroll_rate: emitter.birth_uv_scroll_rate.sample_clamped(progress),
+                birth_color,
+                birth_scale0: adjusted_birth_scale0,
+                initial_rotation: transform.rotation,
+                velocity,
+                acceleration: emitter.birth_acceleration.sample_clamped(progress),
                 frame,
-                &birth_params,
-                adjusted_birth_scale0,
-            );
+            };
+
+            let particle_entity = commands
+                .spawn((
+                    particle_id.clone(),
+                    particle_state,
+                    Lifetime::new_timer(particle_lifetime),
+                    transform,
+                    Pickable::IGNORE,
+                    ChildOf(emitter_entity),
+                ))
+                .id();
 
             match emitter_type {
                 EmitterType::Quad => attach_quad_visuals(
@@ -180,6 +272,7 @@ pub fn update_emitters(
                     particle_entity,
                     vfx_emitter_definition_data,
                     frame,
+                    birth_color,
                     texture.clone(),
                     particle_color_texture.clone(),
                     texture_mult.clone(),
@@ -245,6 +338,7 @@ pub fn update_emitters(
                         particle_color_texture.clone(),
                         erosion_map.clone(),
                         frame,
+                        birth_color,
                         &mut res_mesh,
                         &mut res_dynamic_material,
                         res_target_image,
@@ -279,6 +373,7 @@ pub fn attach_quad_visuals(
     particle_entity: Entity,
     vfx_emitter_definition_data: &ConfigVfxEmitterDefinition,
     frame: f32,
+    birth_color: Vec4,
     texture: Option<Handle<Image>>,
     particle_color_texture: Option<Handle<Image>>,
     texture_mult: Option<Handle<Image>>,
@@ -288,7 +383,12 @@ pub fn attach_quad_visuals(
     res_dynamic_material: &mut ResMut<Assets<ParticleMaterialDynamic>>,
     shader_map: &ShaderMap,
 ) {
-    let mesh = res_mesh.add(ParticleMeshQuad { frame });
+    let mesh = res_mesh.add(build_particle_quad_mesh(ParticleQuadMeshParams {
+        rotation_z: PI / 2.,
+        frame,
+        color: birth_color,
+        is_distortion: false,
+    }));
     commands.entity(particle_entity).insert(Mesh3d(mesh));
 
     // blend_mode / slice 家族由 emitter_def 内部推导；各贴图在发射器处解析后传入
@@ -403,12 +503,18 @@ pub fn attach_distortion_visuals(
     particle_color_texture: Option<Handle<Image>>,
     erosion_map: Option<Handle<Image>>,
     frame: f32,
+    birth_color: Vec4,
     res_mesh: &mut ResMut<Assets<Mesh>>,
     res_dynamic_material: &mut ResMut<Assets<ParticleMaterialDynamic>>,
     res_target_image: &Res<TargetImage>,
     shader_map: &ShaderMap,
 ) {
-    let mesh = res_mesh.add(ParticleMeshDistortion { frame });
+    let mesh = res_mesh.add(build_particle_quad_mesh(ParticleQuadMeshParams {
+        rotation_z: -PI / 2.,
+        frame,
+        color: birth_color,
+        is_distortion: true,
+    }));
     commands.entity(particle_entity).insert(Mesh3d(mesh));
 
     // 法线扰动贴图：VfxTexture 已由 loader 解析出 handle，取 handle 克隆使用
@@ -434,11 +540,6 @@ pub fn attach_distortion_visuals(
     );
 
     // 创建期一次性参数（成员名已按 DistortionVs/Ps 的 unified 布局核实）
-    let texture_info = match vfx_emitter_definition_data.tex_div {
-        Some(tex_div) => vec4(tex_div.x, 1.0 / tex_div.x, 1.0 / tex_div.y, 0.),
-        None => Vec4::ONE,
-    };
-    material.set_param("TEXTURE_INFO", texture_info);
     material.set_param("PARTICLE_DEPTH_PUSH_PULL", 0.0f32);
     // unified 并集里 AlphaTestReferenceValue 与 DistortionPower 同居 offset 0
     //（各变体独占其一），后写 DistortionPower 使扭曲强度生效

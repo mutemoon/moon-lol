@@ -1,7 +1,5 @@
 pub mod assembly;
-pub mod distortion;
 pub mod dynamic;
-pub mod quad;
 
 use bevy::mesh::VertexAttributeValues;
 use bevy::mesh::skinning::SkinnedMesh;
@@ -13,7 +11,8 @@ use lol_core::lifetime::Lifetime;
 use crate::emitters::state::ParticleEmitterState;
 use crate::particle::dynamic::{ParticleMaterialDynamic, ParticleRenderKind};
 use crate::{
-    ATTRIBUTE_LIFETIME, ATTRIBUTE_WORLD_POSITION, ATTRIBUTE_WORLD_POSITION_VEC4, ParticleId,
+    ATTRIBUTE_LIFETIME, ATTRIBUTE_UV_FRAME, ATTRIBUTE_WORLD_POSITION,
+    ATTRIBUTE_WORLD_POSITION_VEC4, ParticleId,
 };
 
 #[derive(Component)]
@@ -94,36 +93,10 @@ pub fn update_particle(
                 }
 
                 // 逐帧更新 Alpha Erosion 驱动值
-                if let Some(erosion) = &vfx_emitter_definition_data.alpha_erosion_definition {
-                    let drive_val = erosion.erosion_drive_curve.sample_clamped(life);
-                    let feather_in = erosion.feather_in.unwrap_or(0.1);
-                    let feather_out = erosion.feather_out.unwrap_or(0.1);
-                    material.set_param(
-                        "cAlphaErosionParams",
-                        Vec4::new(drive_val, feather_in, feather_out, 0.0),
-                    );
-                }
+                material.update_alpha_erosion_params(life);
 
                 match material.kind {
-                    ParticleRenderKind::Quad => {
-                        // 写入 TEXTURE_INFO 及其后面的匿名 uv_scale (offset 4)
-                        let tex_div = vfx_emitter_definition_data.tex_div.unwrap_or(Vec2::ONE);
-                        let num_cols = tex_div.x.max(1.0);
-                        let num_rows = tex_div.y.max(1.0);
-
-                        // 通过成员名 "TEXTURE_INFO" 查表写入列数
-                        if material.set_param("TEXTURE_INFO", num_cols) {
-                            // 紧接 TEXTURE_INFO 之后写入匿名 uv_scale [1/cols, 1/rows, 1] @ offset 4
-                            let uv_scale: [f32; 3] = [1.0 / num_cols, 1.0 / num_rows, 1.0];
-                            let uv_scale_bytes = unsafe {
-                                std::slice::from_raw_parts(
-                                    uv_scale.as_ptr() as *const u8,
-                                    std::mem::size_of::<[f32; 3]>(),
-                                )
-                            };
-                            material.write_after_member("TEXTURE_INFO", 4, uv_scale_bytes);
-                        }
-                    }
+                    ParticleRenderKind::Quad => {}
                     ParticleRenderKind::Mesh => {
                         // mWorld 位于 CharacterPerDrawVertexCB；row-major 存储需转置
                         material.set_param("mWorld", world_matrix.transpose());
@@ -179,79 +152,86 @@ pub fn update_particle(
             continue;
         };
 
-        let Some(lifetime_values) = mesh.attribute_mut(ATTRIBUTE_LIFETIME) else {
-            continue;
-        };
-
-        match lifetime_values {
-            VertexAttributeValues::Float32x2(items) => {
-                for item in items {
-                    item[0] = life;
-                    item[1] = 0.0;
-                }
-            }
-            _ => panic!(),
-        }
-
-        let VertexAttributeValues::Float32x3(postion_values) =
-            mesh.attribute_mut(Mesh::ATTRIBUTE_POSITION).unwrap()
-        else {
-            panic!();
-        };
-
-        if vfx_emitter_definition_data.primitive.is_none()
-            || matches!(
-                vfx_emitter_definition_data.primitive,
-                Some(ConfigVfxPrimitive::VfxPrimitiveCameraUnitQuad)
-            )
+        if let Some(VertexAttributeValues::Float32x4(values)) =
+            mesh.attribute_mut(Mesh::ATTRIBUTE_COLOR)
         {
-            let camera_transform = q_camera_transform.single().unwrap();
-            world_transform = world_transform.looking_at(camera_transform.translation, Vec3::ZERO);
-        }
-
-        // 世界坐标属性按几何族选择：Distortion 用 Vec4（w=0），其余用 Vec3
-        let is_distortion = q_particle_material_dynamic
-            .get(particle_entity)
-            .ok()
-            .and_then(|handle| res_particle_material_dynamic.get(handle.0.id()))
-            .is_some_and(|material| material.kind == ParticleRenderKind::Distortion);
-
-        if is_distortion {
-            // Distortion particles use ATTRIBUTE_WORLD_POSITION_VEC4
-            let postion_values = postion_values
+            let values = values
                 .iter()
-                .map(|v| {
-                    let vertext_position = Vec3::from_array(*v);
-                    world_transform
-                        .transform_point(vertext_position)
-                        .extend(0.0)
-                        .to_array()
-                })
+                .map(|_| [color.z, color.y, color.x, color.w])
                 .collect::<Vec<_>>();
 
-            mesh.insert_attribute(ATTRIBUTE_WORLD_POSITION_VEC4, postion_values);
-        } else {
-            // Other particles use ATTRIBUTE_WORLD_POSITION
-            let postion_values = postion_values
-                .iter()
-                .map(|v| {
-                    let vertext_position = Vec3::from_array(*v);
-                    world_transform.transform_point(vertext_position).to_array()
-                })
-                .collect::<Vec<_>>();
-
-            mesh.insert_attribute(ATTRIBUTE_WORLD_POSITION, postion_values);
+            mesh.insert_attribute(Mesh::ATTRIBUTE_COLOR, values);
         }
 
-        let VertexAttributeValues::Float32x4(values) =
-            mesh.attribute_mut(Mesh::ATTRIBUTE_COLOR).unwrap()
-        else {
-            panic!();
-        };
+        if let Some(VertexAttributeValues::Float32x2(items)) =
+            mesh.attribute_mut(ATTRIBUTE_LIFETIME)
+        {
+            for item in items {
+                item[0] = life;
+                item[1] = 0.0;
+            }
+        }
 
-        let values = values.iter().map(|_| color.to_array()).collect::<Vec<_>>();
+        if let Some(VertexAttributeValues::Float32x4(uv_frame_values)) =
+            mesh.attribute_mut(ATTRIBUTE_UV_FRAME)
+        {
+            let erosion_drive =
+                if let Some(erosion) = &vfx_emitter_definition_data.alpha_erosion_definition {
+                    erosion.erosion_drive_curve.sample_clamped(life)
+                } else {
+                    life
+                };
 
-        mesh.insert_attribute(Mesh::ATTRIBUTE_COLOR, values);
+            info!("{erosion_drive}");
+            for item in uv_frame_values {
+                item[3] = erosion_drive;
+            }
+        }
+
+        let is_vec4_world_pos = mesh.contains_attribute(ATTRIBUTE_WORLD_POSITION_VEC4);
+        let is_vec3_world_pos = mesh.contains_attribute(ATTRIBUTE_WORLD_POSITION);
+
+        if let Some(VertexAttributeValues::Float32x3(postion_values)) =
+            mesh.attribute(Mesh::ATTRIBUTE_POSITION)
+        {
+            if vfx_emitter_definition_data.primitive.is_none()
+                || matches!(
+                    vfx_emitter_definition_data.primitive,
+                    Some(ConfigVfxPrimitive::VfxPrimitiveCameraUnitQuad)
+                )
+            {
+                let camera_transform = q_camera_transform.single().unwrap();
+                world_transform =
+                    world_transform.looking_at(camera_transform.translation, Vec3::ZERO);
+            }
+
+            if is_vec4_world_pos {
+                // Distortion particles use ATTRIBUTE_WORLD_POSITION_VEC4
+                let postion_values = postion_values
+                    .iter()
+                    .map(|v| {
+                        let vertext_position = Vec3::from_array(*v);
+                        world_transform
+                            .transform_point(vertext_position)
+                            .extend(0.0)
+                            .to_array()
+                    })
+                    .collect::<Vec<_>>();
+
+                mesh.insert_attribute(ATTRIBUTE_WORLD_POSITION_VEC4, postion_values);
+            } else if is_vec3_world_pos {
+                // Other particles use ATTRIBUTE_WORLD_POSITION
+                let postion_values = postion_values
+                    .iter()
+                    .map(|v| {
+                        let vertext_position = Vec3::from_array(*v);
+                        world_transform.transform_point(vertext_position).to_array()
+                    })
+                    .collect::<Vec<_>>();
+
+                mesh.insert_attribute(ATTRIBUTE_WORLD_POSITION, postion_values);
+            }
+        }
     }
 }
 

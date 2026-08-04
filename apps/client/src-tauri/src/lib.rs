@@ -515,7 +515,8 @@ pub fn run() {
             switch_champion,
             set_script,
             particle::list_particle_heroes,
-            particle::load_hero_particles
+            particle::load_hero_particles,
+            particle::serialize_vfx_system
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

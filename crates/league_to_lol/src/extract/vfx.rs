@@ -367,18 +367,25 @@ fn convert_alpha_erosion(
 ) -> Option<ConfigVfxAlphaErosionDefinition> {
     def.as_ref().map(|d| ConfigVfxAlphaErosionDefinition {
         erosion_drive_curve: convert_stochastic_float(&d.erosion_drive_curve, 0.0),
+        erosion_drive_source: d.erosion_drive_source,
+        erosion_feather_in: d.erosion_feather_in,
+        erosion_feather_out: d.erosion_feather_out,
         erosion_map: d
             .erosion_map_name
             .as_deref()
             .filter(|p| !p.is_empty())
             .map(|p| load_texture(p)),
-        erosion_map_channel_mixer: d
-            .erosion_map_channel_mixer
+        erosion_map_address_mode: d.erosion_map_address_mode,
+        erosion_map_channel_mixer: convert_stochastic_color(
+            &d.erosion_map_channel_mixer,
+            Vec4::new(1.0, 0.0, 0.0, 0.0),
+        ),
+        erosion_slice_width: d.erosion_slice_width,
+        linger_erosion_drive_curve: d
+            .linger_erosion_drive_curve
             .as_ref()
-            .and_then(|c| c.constant_value)
-            .unwrap_or(Vec4::new(1.0, 0.0, 0.0, 0.0)),
-        feather_in: None,
-        feather_out: None,
+            .map(|c| convert_stochastic_float(&Some(c.clone()), 0.0)),
+        use_linger_erosion_drive_curve: d.use_linger_erosion_drive_curve,
     })
 }
 

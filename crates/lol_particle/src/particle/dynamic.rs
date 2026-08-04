@@ -476,39 +476,68 @@ impl ParticleMaterialDynamic {
         };
 
         // Alpha Erosion 采样器与驱动参数一次性写值
-        if let Some(erosion) = material.emitter_def.alpha_erosion_definition.clone() {
-            let drive_val = erosion.erosion_drive_curve.sample_clamped(0.0);
-            let feather_in = erosion.feather_in.unwrap_or(0.1);
-            let feather_out = erosion.feather_out.unwrap_or(0.1);
-            material.set_param(
-                "cAlphaErosionParams",
-                Vec4::new(drive_val, feather_in, feather_out, 0.0),
-            );
-            material.set_param(
-                "cAlphaErosionTextureMixer",
-                erosion.erosion_map_channel_mixer,
-            );
-        }
+        material.update_alpha_erosion_params(0.0);
 
+        // TEXTURE_INFO 贴图分割行列数参数一次性写值
+        material.update_texture_info_params();
+
+        // SLICE_RANGE 切片遮罩参数一次性写值
+        material.update_slice_range_params();
+
+        // 战争迷雾默认参数一次性写值
+        material.update_fow_edge_control_params();
+
+        material
+    }
+
+    /// 初始化或更新 TEXTURE_INFO 参数（包含贴图分割行列数与倒数）
+    pub fn update_texture_info_params(&mut self) {
+        let texture_info = match self.emitter_def.tex_div {
+            Some(tex_div) => vec4(tex_div.x, 1.0 / tex_div.x, 1.0 / tex_div.y, 0.0),
+            None => Vec4::ONE,
+        };
+        self.set_param("TEXTURE_INFO", texture_info);
+    }
+
+    /// 初始化 SLICE_RANGE 常量参数（切片遮罩范围）
+    pub fn update_slice_range_params(&mut self) {
         // 一次性常量上传对齐逆向 SetupParticleShader：sliceTechniqueRange > 0 时
         // 上传 SLICE_RANGE = (r, 1/r², 0, 0)；不写则 uniform 全零，切片遮罩会裁掉
         // 全部像素导致粒子不可见。无该成员的家族 set_param 安全 no-op
-        if let Some(range) = material.emitter_def.slice_technique_range {
+        if let Some(range) = self.emitter_def.slice_technique_range {
             if range > 0.0 {
-                material.set_param(
+                self.set_param(
                     "SLICE_RANGE",
                     Vec4::new(range, 1.0 / (range * range), 0.0, 0.0),
                 );
             }
         }
+    }
 
+    /// 初始化 FOW_EDGE_CONTROL 战争迷雾默认参数
+    pub fn update_fow_edge_control_params(&mut self) {
         // 战争迷雾默认参数：MeshPs 等家族的 RGB 输出会乘上 FOW 可见性因子
         // fma(fow_uv.z, fow_sample.w - FOW_EDGE_CONTROL.w, FOW_EDGE_CONTROL.w)，
         // uniform 全零时因子为 0，RGB 被整体抹黑（additive 混合下完全不可见）；
         // 写 w=1 表示“无迷雾全可见”，无该成员的家族安全 no-op
-        material.set_param("FOW_EDGE_CONTROL", Vec4::new(0.0, 0.0, 0.0, 1.0));
+        self.set_param("FOW_EDGE_CONTROL", Vec4::new(0.0, 0.0, 0.0, 1.0));
+    }
 
-        material
+    /// 逐帧或初始化更新 Alpha Erosion 驱动与采样器参数
+    pub fn update_alpha_erosion_params(&mut self, progress: f32) {
+        if let Some(erosion) = &self.emitter_def.alpha_erosion_definition {
+            let drive_val = erosion.erosion_drive_curve.sample_clamped(progress);
+            let slice_width = erosion.erosion_slice_width.unwrap_or(1.0);
+            let feather_in = erosion.erosion_feather_in.unwrap_or(0.1);
+            let feather_out = erosion.erosion_feather_out.unwrap_or(0.1);
+            let mixer_val = erosion.erosion_map_channel_mixer.sample_clamped(progress);
+
+            self.set_param(
+                "cAlphaErosionParams",
+                Vec4::new(drive_val, slice_width, 1.0 / feather_in, 1.0 / feather_out),
+            );
+            self.set_param("cAlphaErosionTextureMixer", mixer_val);
+        }
     }
 
     /// 按成员名写入 uniform：在 vert/frag 布局里查到该成员所属 binding 与 offset，
@@ -780,8 +809,8 @@ impl Material for ParticleMaterialDynamic {
 
     fn alpha_mode(&self) -> AlphaMode {
         match self.blend_mode {
-            1 | 4 => AlphaMode::Blend,
-            _ => AlphaMode::Opaque,
+            0 => AlphaMode::Opaque,
+            _ => AlphaMode::Blend,
         }
     }
 
@@ -807,16 +836,25 @@ impl Material for ParticleMaterialDynamic {
 
             // blend mode
             if let Some(Some(target)) = fragment.targets.get_mut(0).map(|t| t.as_mut()) {
-                if data.blend_mode == 4 {
-                    target.blend = Some(BlendState {
+                target.blend = match data.blend_mode {
+                    4 => Some(BlendState {
                         color: BlendComponent {
                             src_factor: BlendFactor::SrcAlpha,
                             dst_factor: BlendFactor::One,
                             operation: BlendOperation::Add,
                         },
                         alpha: BlendComponent::OVER,
-                    });
-                }
+                    }),
+                    5 => Some(BlendState {
+                        color: BlendComponent {
+                            src_factor: BlendFactor::Dst,
+                            dst_factor: BlendFactor::Zero,
+                            operation: BlendOperation::Add,
+                        },
+                        alpha: BlendComponent::OVER,
+                    }),
+                    _ => Some(BlendState::ALPHA_BLENDING),
+                };
             }
         }
 

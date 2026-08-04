@@ -3,8 +3,6 @@ use lol_base_render::particle::{ConfigVfxEmitterDefinition, ConfigVfxPrimitive, 
 use lol_core::lifetime::Lifetime;
 
 use super::state::ParticleEmitterState;
-use crate::ParticleId;
-use crate::particle::ParticleState;
 
 /// Emitter type classification for particle systems
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -42,63 +40,6 @@ pub fn get_emitter_type(vfx_emitter_definition_data: &ConfigVfxEmitterDefinition
         // Unknown/unsupported types
         _ => EmitterType::Unknown,
     }
-}
-
-pub struct ParticleBirthParams {
-    pub birth_color: Vec4,
-    pub birth_velocity: Vec3,
-    pub birth_acceleration: Vec3,
-    pub birth_rotation0: Vec3,
-    pub birth_scale0: Vec3,
-    pub birth_uv_offset: Vec2,
-    pub birth_uv_scroll_rate: Vec2,
-}
-
-impl ParticleBirthParams {
-    pub fn sample(emitter: &mut ParticleEmitterState, progress: f32) -> Self {
-        Self {
-            birth_color: emitter.birth_color.sample_clamped(progress),
-            birth_velocity: emitter.birth_velocity.sample_clamped(progress),
-            birth_acceleration: emitter.birth_acceleration.sample_clamped(progress),
-            birth_rotation0: emitter.birth_rotation0.sample_clamped(progress),
-            birth_scale0: emitter.birth_scale0.sample_clamped(progress),
-            birth_uv_offset: emitter.birth_uv_offset.sample_clamped(progress),
-            birth_uv_scroll_rate: emitter.birth_uv_scroll_rate.sample_clamped(progress),
-        }
-    }
-}
-
-pub fn spawn_particle_entity(
-    commands: &mut Commands,
-    particle_id: &ParticleId,
-    emitter_entity: Entity,
-    particle_lifetime: f32,
-    transform: Transform,
-    frame: f32,
-    birth_params: &ParticleBirthParams,
-    adjusted_birth_scale0: Vec3,
-) -> Entity {
-    let particle_state = ParticleState {
-        birth_uv_offset: birth_params.birth_uv_offset,
-        birth_uv_scroll_rate: birth_params.birth_uv_scroll_rate,
-        birth_color: birth_params.birth_color,
-        birth_scale0: adjusted_birth_scale0,
-        initial_rotation: transform.rotation,
-        velocity: birth_params.birth_velocity,
-        acceleration: birth_params.birth_acceleration,
-        frame,
-    };
-
-    commands
-        .spawn((
-            particle_id.clone(),
-            particle_state,
-            Lifetime::new_timer(particle_lifetime),
-            transform,
-            Pickable::IGNORE,
-            ChildOf(emitter_entity),
-        ))
-        .id()
 }
 
 /// Emission parameters calculated for spawning particles
@@ -146,17 +87,109 @@ pub fn calculate_emission_params(
     })
 }
 
+/// 计算发射位置和发射角度 (translation, shape_rotation)
+pub fn calculate_spawn_pose(spawn_shape: Option<&ConfigVfxShape>, progress: f32) -> (Vec3, Quat) {
+    let mut shape_rotation = Quat::IDENTITY;
+    let mut raw_translation = Vec3::ZERO;
+
+    if let Some(shape) = spawn_shape {
+        match shape {
+            ConfigVfxShape::Unk0xee39916f { emit_offset } => {
+                raw_translation = emit_offset.unwrap_or(Vec3::ZERO);
+            }
+            ConfigVfxShape::Legacy {
+                emit_offset,
+                emit_rotation_angles,
+                emit_rotation_axes,
+            } => {
+                raw_translation = emit_offset.sample_clamped(progress);
+                for (angle_sampler, axis) in
+                    emit_rotation_angles.iter().zip(emit_rotation_axes.iter())
+                {
+                    let deg = angle_sampler.sample_clamped(progress);
+                    if deg != 0.0 && *axis != Vec3::ZERO {
+                        let normalized_axis = axis.normalize();
+                        let q = Quat::from_axis_angle(normalized_axis, deg.to_radians());
+                        shape_rotation = shape_rotation * q;
+                    }
+                }
+            }
+            ConfigVfxShape::Box { size, .. } => {
+                let size = size.unwrap_or(Vec3::ZERO);
+                raw_translation = Vec3::new(
+                    (rand::random::<f32>() - 0.5) * size.x,
+                    (rand::random::<f32>() - 0.5) * size.y,
+                    (rand::random::<f32>() - 0.5) * size.z,
+                );
+            }
+            ConfigVfxShape::Sphere { radius, .. } => {
+                let radius = radius.unwrap_or(0.0);
+                if radius > 0.0 {
+                    let u: f32 = rand::random();
+                    let v: f32 = rand::random();
+                    let theta = u * std::f32::consts::TAU;
+                    let phi = (2.0 * v - 1.0_f32).acos();
+                    let r = radius * rand::random::<f32>().cbrt();
+                    let sin_phi = phi.sin();
+                    raw_translation = Vec3::new(
+                        r * sin_phi * theta.cos(),
+                        r * sin_phi * theta.sin(),
+                        r * phi.cos(),
+                    );
+                }
+            }
+            ConfigVfxShape::Cylinder { height, radius, .. } => {
+                let radius = radius.unwrap_or(0.0);
+                let height = height.unwrap_or(0.0);
+                let r_sample = radius * rand::random::<f32>().sqrt();
+                let theta = rand::random::<f32>() * std::f32::consts::TAU;
+                let y = (rand::random::<f32>() - 0.5) * height;
+                raw_translation = Vec3::new(r_sample * theta.cos(), y, r_sample * theta.sin());
+            }
+        }
+    }
+
+    let translation = shape_rotation * raw_translation;
+    (translation, shape_rotation)
+}
+
+/// 计算粒子的初始 Transform
+pub fn calculate_particle_transform(
+    birth_rotation0: Vec3,
+    mut birth_scale0: Vec3,
+    translation: Vec3,
+    primitive: &ConfigVfxPrimitive,
+) -> Transform {
+    let rotation_quat = Quat::from_euler(
+        EulerRot::XYZEx,
+        birth_rotation0.x.to_radians(),
+        birth_rotation0.y.to_radians(),
+        birth_rotation0.z.to_radians(),
+    );
+
+    if let ConfigVfxPrimitive::VfxPrimitivePlanarProjection { y_range } = primitive {
+        birth_scale0.x *= 2.0;
+        birth_scale0.y = y_range.unwrap_or(1.0);
+        birth_scale0.z *= 2.0;
+    }
+
+    Transform::from_rotation(rotation_quat)
+        .with_translation(translation)
+        .with_scale(birth_scale0)
+}
+
 pub fn calculate_particle_transform_frame(
-    birth_params: &ParticleBirthParams,
+    raw_rotation0: Vec3,
+    raw_scale0: Vec3,
     is_uniform_scale: bool,
     vfx_emitter_definition_data: &ConfigVfxEmitterDefinition,
     primitive: &ConfigVfxPrimitive,
     progress: f32,
-) -> (Transform, Vec3, f32) {
+) -> (Transform, Quat, Vec3, f32) {
     let mut birth_scale0 = if is_uniform_scale {
-        Vec3::splat(birth_params.birth_scale0.x)
+        Vec3::splat(raw_scale0.x)
     } else {
-        birth_params.birth_scale0
+        raw_scale0
     };
 
     if let Some(flex) = &vfx_emitter_definition_data.flex_shape_definition {
@@ -172,57 +205,13 @@ pub fn calculate_particle_transform_frame(
         }
     }
 
-    let mut shape_rotation = Quat::IDENTITY;
-    let mut raw_translation = Vec3::ZERO;
+    // 1. 计算发射位置和发射角度
+    let (translation, shape_rotation) =
+        calculate_spawn_pose(vfx_emitter_definition_data.spawn_shape.as_ref(), progress);
 
-    if let Some(shape) = &vfx_emitter_definition_data.spawn_shape {
-        match shape {
-            ConfigVfxShape::Unk0xee39916f { emit_offset } => {
-                raw_translation = emit_offset.unwrap_or(Vec3::ZERO);
-            }
-            ConfigVfxShape::Legacy {
-                emit_offset,
-                emit_rotation_angles,
-                emit_rotation_axes,
-            } => {
-                raw_translation = emit_offset.sample_clamped(progress);
-                // for (angle_sampler, axis) in
-                //     emit_rotation_angles.iter().zip(emit_rotation_axes.iter())
-                // {
-                //     let deg = angle_sampler.sample_clamped(progress);
-                //     if deg != 0.0 && *axis != Vec3::ZERO {
-                //         let normalized_axis = axis.normalize();
-                //         let q = Quat::from_axis_angle(normalized_axis, deg.to_radians());
-                //         shape_rotation = shape_rotation * q;
-                //     }
-                // }
-            }
-            ConfigVfxShape::Box { size, .. } => {
-                raw_translation = size.unwrap_or(Vec3::ZERO);
-            }
-            _ => {}
-        }
-    }
-
-    let translation = shape_rotation * raw_translation;
-
-    let base_rotation_quat = Quat::from_euler(
-        EulerRot::XYZEx,
-        birth_params.birth_rotation0.x.to_radians(),
-        birth_params.birth_rotation0.y.to_radians(),
-        birth_params.birth_rotation0.z.to_radians(),
-    );
-    let rotation_quat = shape_rotation * base_rotation_quat;
-
-    if let ConfigVfxPrimitive::VfxPrimitivePlanarProjection { y_range } = primitive {
-        birth_scale0.x = birth_scale0.x * 2.;
-        birth_scale0.y = y_range.unwrap_or(1.0);
-        birth_scale0.z = birth_scale0.z * 2.;
-    }
-
-    let transform = Transform::from_rotation(rotation_quat)
-        .with_translation(translation)
-        .with_scale(birth_scale0);
+    // 2. 计算粒子的初始 transform
+    let transform =
+        calculate_particle_transform(raw_rotation0, birth_scale0, translation, primitive);
 
     let num_frames = vfx_emitter_definition_data.num_frames.unwrap_or(0) as f32;
     let frame = if vfx_emitter_definition_data
@@ -234,5 +223,5 @@ pub fn calculate_particle_transform_frame(
         (num_frames * progress).floor()
     };
 
-    (transform, birth_scale0, frame)
+    (transform, shape_rotation, transform.scale, frame)
 }

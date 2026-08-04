@@ -43,7 +43,7 @@ pub const ATTRIBUTE_WORLD_POSITION_VEC4: MeshVertexAttribute = MeshVertexAttribu
 );
 
 pub const ATTRIBUTE_UV_FRAME: MeshVertexAttribute =
-    MeshVertexAttribute::new("ATTRIBUTE_UV_FRAME", 2022, VertexFormat::Float32x3);
+    MeshVertexAttribute::new("ATTRIBUTE_UV_FRAME", 2022, VertexFormat::Float32x4);
 
 pub const ATTRIBUTE_LIFETIME: MeshVertexAttribute =
     MeshVertexAttribute::new("ATTRIBUTE_LIFETIME", 2023, VertexFormat::Float32x2);

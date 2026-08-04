@@ -187,6 +187,7 @@ pub struct ConfigVfxEmitterDefinition {
     pub is_uniform_scale: Option<bool>,
     pub is_random_start_frame: Option<bool>,
     pub is_local_orientation: Option<bool>,
+    pub is_direction_oriented: Option<bool>,
     pub texture: Option<VfxTexture>,
     pub particle_color_texture: Option<VfxTexture>,
     pub tex_div: Option<Vec2>,
@@ -194,6 +195,38 @@ pub struct ConfigVfxEmitterDefinition {
     pub texture_mult: Option<ConfigVfxTextureMult>,
     pub alpha_ref: Option<u8>,
     pub spawn_shape: Option<ConfigVfxShape>,
+    pub flex_shape_definition: Option<ConfigVfxFlexShapeDefinition>,
+    pub alpha_erosion_definition: Option<ConfigVfxAlphaErosionDefinition>,
+    pub color_look_up_type_y: Option<u8>,
+    pub color_render_flags: Option<u8>,
+    pub soft_particle_definition: Option<bool>,
+    pub palette_definition: Option<VfxTexture>,
+    pub reflection_definition: Option<VfxTexture>,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct ConfigVfxAlphaErosionDefinition {
+    pub erosion_drive_curve: StochasticSampler<f32>,
+    pub erosion_drive_source: Option<u8>,
+    pub erosion_feather_in: Option<f32>,
+    pub erosion_feather_out: Option<f32>,
+    pub erosion_map: Option<VfxTexture>,
+    pub erosion_map_address_mode: Option<u8>,
+    pub erosion_map_channel_mixer: StochasticSampler<Vec4>,
+    pub erosion_slice_width: Option<f32>,
+    pub linger_erosion_drive_curve: Option<StochasticSampler<f32>>,
+    pub use_linger_erosion_drive_curve: Option<bool>,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct ConfigVfxFlexShapeDefinition {
+    pub scale_birth_scale_by_bound_object_size: Option<f32>,
+    pub scale_birth_scale_by_bound_object_height: Option<f32>,
+    pub scale_birth_scale_by_bound_object_radius: Option<f32>,
+    pub scale_birth_translation_by_bound_object_size: Option<f32>,
+    pub scale_emit_offset_by_bound_object_height: Option<f32>,
+    pub scale_emit_offset_by_bound_object_radius: Option<f32>,
+    pub scale_emit_offset_by_bound_object_size: Option<f32>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

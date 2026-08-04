@@ -12,6 +12,8 @@ export interface ParticleSystem {
   name: string;
   /** 可直接发给 server 播放的 ConfigVfxSystemDefinition RON 字符串。 */
   defRon: string;
+  /** 结构化的 ConfigVfxSystemDefinition 数据模型 */
+  def?: any;
 }
 
 interface PendingRequest {
@@ -175,6 +177,11 @@ export function useParticleWs() {
     return request("stop_particle");
   }
 
+  /** 将结构化的 ConfigVfxSystemDefinition 对象重新序列化为 RON 字符串。 */
+  function serializeVfxSystem(def: any): Promise<string> {
+    return invoke<string>("serialize_vfx_system", { def });
+  }
+
   return {
     connected,
     connecting,
@@ -188,5 +195,6 @@ export function useParticleWs() {
     loadHero,
     playParticle,
     stopParticle,
+    serializeVfxSystem,
   };
 }
