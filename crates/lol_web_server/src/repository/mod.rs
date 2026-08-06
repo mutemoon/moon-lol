@@ -4,6 +4,7 @@
 pub mod agent_repo;
 pub mod agent_snapshot_repo;
 pub mod essence_repo;
+pub mod history_repo;
 pub mod match_repo;
 pub mod model_provider_repo;
 pub mod rank_repo;
@@ -17,6 +18,7 @@ pub use agent_snapshot_repo::{AgentSnapshotRepo, PgAgentSnapshotRepo};
 pub use essence_repo::{
     EssenceRepo, PgEssenceRepo, PgSubscriptionRepo, Subscription, SubscriptionRepo,
 };
+pub use history_repo::{HistoryRepo, PgHistoryRepo};
 pub use match_repo::{
     MatchEventInput, MatchEventRepo, MatchInput, MatchParticipantRepo, MatchRepo, ParticipantInput,
     PgMatchEventRepo, PgMatchParticipantRepo, PgMatchRepo,

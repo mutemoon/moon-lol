@@ -137,6 +137,7 @@ impl CommunityService for CommunityServiceImpl {
 
 #[cfg(test)]
 mod tests {
+    use chrono::Utc;
     use mockall::mock;
     use mockall::predicate::*;
     use uuid::Uuid;
@@ -175,6 +176,8 @@ mod tests {
             visibility: vis,
             forked_from: None,
             upstream_agent_id: None,
+            created_at: Utc::now(),
+            updated_at: Utc::now(),
         }
     }
 
@@ -289,6 +292,8 @@ mod tests {
             visibility: Visibility::Private,
             forked_from: upstream,
             upstream_agent_id: upstream,
+            created_at: Utc::now(),
+            updated_at: Utc::now(),
         }
     }
 

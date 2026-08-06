@@ -137,6 +137,7 @@ pub struct RankQueueEntry {
     pub status: QueueStatus,
     pub enqueued_at: DateTime<Utc>,
     pub last_match_at: Option<DateTime<Utc>>,
+    pub rating: f64,
 }
 
 pub struct NewQueueEntry {
@@ -183,11 +184,18 @@ fn parse_queue(r: &sqlx::postgres::PgRow) -> RepoResult<RankQueueEntry> {
         status,
         enqueued_at: r.try_get("enqueued_at")?,
         last_match_at: r.try_get("last_match_at")?,
+        rating: r.try_get("rating")?,
     })
 }
 
-const QUEUE_COLS: &str = "id, agent_id, agent_snapshot_id, user_id, mode, season_id, \
-     status, enqueued_at, last_match_at";
+/// rating 派生列——LEFT JOIN elo_ratings 或 INSERT 时兜底 1200。
+const RATING_SUBQ: &str = "COALESCE((SELECT e.rating FROM elo_ratings e \
+       WHERE e.agent_id = q.agent_id \
+       AND e.mode = q.mode \
+       AND e.season_id = q.season_id), 1200.0) AS rating";
+
+const QUEUE_COLS: &str = "q.id, q.agent_id, q.agent_snapshot_id, q.user_id, q.mode, q.season_id, \
+     q.status, q.enqueued_at, q.last_match_at";
 
 #[async_trait]
 impl RankQueueRepo for PgRankQueueRepo {
@@ -195,7 +203,11 @@ impl RankQueueRepo for PgRankQueueRepo {
         let id = Uuid::new_v4();
         let row = sqlx::query(&format!(
             "INSERT INTO rank_queues (id, agent_id, agent_snapshot_id, user_id, mode, season_id, status) \
-             VALUES ($1, $2, $3, $4, $5, $6, 'queued') RETURNING {QUEUE_COLS}"
+             VALUES ($1, $2, $3, $4, $5, $6, 'queued') \
+             RETURNING id, agent_id, agent_snapshot_id, user_id, mode, season_id, \
+             status, enqueued_at, last_match_at, \
+             COALESCE((SELECT e.rating FROM elo_ratings e \
+               WHERE e.agent_id = agent_id AND e.mode = mode AND e.season_id = season_id), 1200.0) AS rating"
         ))
         .bind(id)
         .bind(entry.agent_id)
@@ -226,7 +238,7 @@ impl RankQueueRepo for PgRankQueueRepo {
 
     async fn find_by_agent(&self, agent_id: Uuid) -> RepoResult<Option<RankQueueEntry>> {
         let row = sqlx::query(&format!(
-            "SELECT {QUEUE_COLS} FROM rank_queues WHERE agent_id = $1 LIMIT 1"
+            "SELECT {QUEUE_COLS}, {RATING_SUBQ} FROM rank_queues q WHERE q.agent_id = $1 LIMIT 1"
         ))
         .bind(agent_id)
         .fetch_optional(&self.pool)
@@ -239,7 +251,8 @@ impl RankQueueRepo for PgRankQueueRepo {
 
     async fn list_by_user(&self, user_id: i32) -> RepoResult<Vec<RankQueueEntry>> {
         let rows = sqlx::query(&format!(
-            "SELECT {QUEUE_COLS} FROM rank_queues WHERE user_id = $1 ORDER BY enqueued_at DESC"
+            "SELECT {QUEUE_COLS}, {RATING_SUBQ} FROM rank_queues q \
+             WHERE q.user_id = $1 ORDER BY q.enqueued_at DESC"
         ))
         .bind(user_id)
         .fetch_all(&self.pool)
@@ -249,8 +262,8 @@ impl RankQueueRepo for PgRankQueueRepo {
 
     async fn list_queued(&self, mode: &str) -> RepoResult<Vec<RankQueueEntry>> {
         let rows = sqlx::query(&format!(
-            "SELECT {QUEUE_COLS} FROM rank_queues WHERE mode = $1 AND status = 'queued' \
-             ORDER BY enqueued_at"
+            "SELECT {QUEUE_COLS}, {RATING_SUBQ} FROM rank_queues q \
+             WHERE q.mode = $1 AND q.status = 'queued' ORDER BY q.enqueued_at"
         ))
         .bind(mode)
         .fetch_all(&self.pool)
@@ -279,9 +292,9 @@ impl RankQueueRepo for PgRankQueueRepo {
     ) -> RepoResult<Option<RankQueueEntry>> {
         // 简化版：按入队时间最早的对手匹配（ELO 过滤待后续优化）
         let row = sqlx::query(&format!(
-            "SELECT {QUEUE_COLS} FROM rank_queues \
-             WHERE mode = $1 AND status = 'queued' AND agent_id != $2 \
-             ORDER BY enqueued_at LIMIT 1"
+            "SELECT {QUEUE_COLS}, {RATING_SUBQ} FROM rank_queues q \
+             WHERE q.mode = $1 AND q.status = 'queued' AND q.agent_id != $2 \
+             ORDER BY q.enqueued_at LIMIT 1"
         ))
         .bind(mode)
         .bind(agent_id)
@@ -300,12 +313,14 @@ impl RankQueueRepo for PgRankQueueRepo {
 pub struct EloRating {
     pub id: Uuid,
     pub agent_id: Uuid,
+    pub agent_name: String,
     pub mode: String,
     pub season_id: Uuid,
     pub rating: f64,
     pub wins: i32,
     pub losses: i32,
     pub draws: i32,
+    pub daily_delta: f64,
 }
 
 #[async_trait]
@@ -342,18 +357,23 @@ pub struct PgEloRepo {
     pub pool: PgPool,
 }
 
-const ELO_COLS: &str = "id, agent_id, mode, season_id, rating, wins, losses, draws";
+const ELO_COLS: &str = "e.id, e.agent_id, COALESCE(a.name, '') AS agent_name, \
+     e.mode, e.season_id, e.rating, e.wins, e.losses, e.draws, 0.0::float8 AS daily_delta";
+
+const ELO_FROM: &str = "elo_ratings e LEFT JOIN agents a ON e.agent_id = a.id";
 
 fn parse_elo(r: &sqlx::postgres::PgRow) -> RepoResult<EloRating> {
     Ok(EloRating {
         id: r.try_get("id")?,
         agent_id: r.try_get("agent_id")?,
+        agent_name: r.try_get("agent_name")?,
         mode: r.try_get("mode")?,
         season_id: r.try_get("season_id")?,
         rating: r.try_get("rating")?,
         wins: r.try_get("wins")?,
         losses: r.try_get("losses")?,
         draws: r.try_get("draws")?,
+        daily_delta: r.try_get("daily_delta")?,
     })
 }
 
@@ -366,7 +386,8 @@ impl EloRepo for PgEloRepo {
         season_id: Uuid,
     ) -> RepoResult<Option<EloRating>> {
         let row = sqlx::query(&format!(
-            "SELECT {ELO_COLS} FROM elo_ratings WHERE agent_id = $1 AND mode = $2 AND season_id = $3"
+            "SELECT {ELO_COLS} FROM {ELO_FROM} \
+             WHERE e.agent_id = $1 AND e.mode = $2 AND e.season_id = $3"
         ))
         .bind(agent_id)
         .bind(mode)
@@ -386,12 +407,14 @@ impl EloRepo for PgEloRepo {
         season_id: Uuid,
     ) -> RepoResult<EloRating> {
         let id = Uuid::new_v4();
-        let row = sqlx::query(&format!(
+        let row = sqlx::query(
             "INSERT INTO elo_ratings (id, agent_id, mode, season_id, rating, wins, losses, draws) \
              VALUES ($1, $2, $3, $4, 1200, 0, 0, 0) \
              ON CONFLICT (agent_id, mode, season_id) DO UPDATE SET agent_id = elo_ratings.agent_id \
-             RETURNING {ELO_COLS}"
-        ))
+             RETURNING id, agent_id, \
+             (SELECT COALESCE(a.name, '') FROM agents a WHERE a.id = agent_id) AS agent_name, \
+             mode, season_id, rating, wins, losses, draws, 0.0::float8 AS daily_delta",
+        )
         .bind(id)
         .bind(agent_id)
         .bind(mode)
@@ -432,8 +455,9 @@ impl EloRepo for PgEloRepo {
         limit: i64,
     ) -> RepoResult<Vec<EloRating>> {
         let rows = sqlx::query(&format!(
-            "SELECT {ELO_COLS} FROM elo_ratings WHERE mode = $1 AND season_id = $2 \
-             ORDER BY rating DESC LIMIT $3"
+            "SELECT {ELO_COLS} FROM {ELO_FROM} \
+             WHERE e.mode = $1 AND e.season_id = $2 \
+             ORDER BY e.rating DESC LIMIT $3"
         ))
         .bind(mode)
         .bind(season_id)

@@ -1,6 +1,6 @@
 # 游戏控制 RPC — 待办
 
-分阶段、可回退。每阶段独立 `cargo check --all-targets` 通过，旧字符串事件路径在阶段五前一直可用作回退。详见 [架构设计](arch.md) 第六节。
+分阶段、可回退。每阶段独立 `cargo check --workspace --all-targets` 通过，旧字符串事件路径在阶段五前一直可用作回退。详见 [架构设计](arch.md) 第六节。
 
 ## 阶段一：建 lol_rpc 骨架
 
@@ -9,7 +9,7 @@
 - [ ] 定义入参类型：`ObserveParams` / `ActionParams` / `SetScriptParams` / `ObservePackedParams` / `ActionPackedParams` / `RlResetParams` / `RlStepParams` / `GetAgentsParams`，以及 debug 面 `SwitchChampionParams` / `GodModeParams` / `ToggleCooldownParams` / `ResetPositionParams` / `TogglePauseParams` / `SetSpeedParams` / `GetStateParams`
 - [ ] 共享 helper：`trigger<T>()`、`respond<T>()`、`resolve_target()`、`observe_packed_bytes()`
 - [ ] 确认 Bevy 版本支持泛型 `#[derive(Event)]` + `On<CommandWsRequest<T>>` observer
-- [ ] `cargo check --all-targets` 通过（无业务接入）
+- [ ] `cargo check --workspace --all-targets` 通过（无业务接入）
 
 ## 阶段二：dispatch 注册表
 
@@ -18,7 +18,7 @@
 - [ ] `poll_commands` 改调 `lol_rpc::dispatch`，替换旧 `handlers::dispatch`
 - [ ] 暴露 cmd 名常量供 `GameClient` 引用，防漂移
 - [ ] 此阶段 observer 尚未拆，新事件类型暂无 observer——确认 dispatch 能 trigger 即可
-- [ ] `cargo check --all-targets` 通过；旧 observer 仍工作（旧字符串事件保留）
+- [ ] `cargo check --workspace --all-targets` 通过；旧 observer 仍工作（旧字符串事件保留）
 
 ## 阶段三：迁 agent 面
 
@@ -31,7 +31,7 @@
 - [ ] `app.add_observer(...)` 注册 8 个 observer
 - [ ] 旧 `on_command_ws_request` observer 保留，标记 deprecated
 - [ ] 为纯函数 handler 写单测
-- [ ] `cargo check --all-targets` + `cargo test` 通过
+- [ ] `cargo check --workspace --all-targets` + `cargo test` 通过
 
 ## 阶段四：迁 debug 面
 
@@ -39,7 +39,7 @@
 - [ ] `GlobalDebugState` 资源保留，handler 读写之
 - [ ] debug observer 仅 debug 构建注册
 - [ ] 旧 debug observer 标记 deprecated
-- [ ] `cargo check --all-targets` 通过
+- [ ] `cargo check --workspace --all-targets` 通过
 
 ## 阶段五：删旧路径
 
@@ -49,7 +49,7 @@
 - [ ] 删 `lol_agent` / `lol_debug` 的 deprecated observer
 - [ ] 更新 [game-tools/arch.md](/docs/product/game-tools/arch.md)「cmd 字符串分发」描述与数据流图
 - [ ] 更新 [产品架构总览](/docs/product/CLAUDE.md) crate 分层（补 `lol_rpc`）
-- [ ] 全量 `cargo check --all-targets` + `cargo test` 通过
+- [ ] 全量 `cargo check --workspace --all-targets` + `cargo test` 通过
 
 ## 验证清单
 

@@ -1,5 +1,6 @@
 //! Agent 子系统的领域层（"选手" = 英雄 + 配置）。
 
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
 use super::spawn_preset::Visibility;
@@ -46,6 +47,8 @@ pub struct Agent {
     pub visibility: Visibility,
     pub forked_from: Option<uuid::Uuid>,
     pub upstream_agent_id: Option<uuid::Uuid>,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
 }
 
 /// 创建/更新输入。
@@ -133,6 +136,8 @@ mod tests {
             visibility: vis,
             forked_from: None,
             upstream_agent_id: None,
+            created_at: Utc::now(),
+            updated_at: Utc::now(),
         }
     }
 

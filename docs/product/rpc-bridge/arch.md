@@ -26,6 +26,7 @@ poll_commands 回写 out_tx → WS client
 ```
 
 权威文件：
+
 - [server.rs](/crates/lol_server/src/server.rs) — WS accept loop、channel、poll_commands
 - [handlers.rs](/crates/lol_server/src/handlers.rs) — dispatch：trigger 事件 + 等 response
 - [events.rs](/crates/lol_server/src/events.rs) — CommandWsRequest 事件
@@ -188,15 +189,15 @@ app.add_observer(on_switch_champion)
 
 ## 三、问题解决对照
 
-| 问题 | 解决? | 说明 |
-|---|---|---|
-| 1 双重分发 | ✅ | typed event 按 T 路由，只命中匹配 observer |
-| 2 闭合耦合 | ✅ | 收敛为 dispatch 注册表单一事实源 |
-| 3 response 样板/IIFE | ✅ | `respond()` helper + 拆纯函数 |
-| 4 entity_id 重复 | ✅ | `resolve_target` 收敛 |
-| 5 packed 重复 | ✅ | `observe_packed_bytes` 抽出 |
-| 6 类型擦除 | ✅ | params 在 T 里类型化 |
-| 7 响应与帧耦合 | ⚠️ 保留 | observer 在 trigger 内同步回填，能跑；不引入 channel 故不改 |
+| 问题                 | 解决?   | 说明                                                        |
+| -------------------- | ------- | ----------------------------------------------------------- |
+| 1 双重分发           | ✅      | typed event 按 T 路由，只命中匹配 observer                  |
+| 2 闭合耦合           | ✅      | 收敛为 dispatch 注册表单一事实源                            |
+| 3 response 样板/IIFE | ✅      | `respond()` helper + 拆纯函数                               |
+| 4 entity_id 重复     | ✅      | `resolve_target` 收敛                                       |
+| 5 packed 重复        | ✅      | `observe_packed_bytes` 抽出                                 |
+| 6 类型擦除           | ✅      | params 在 T 里类型化                                        |
+| 7 响应与帧耦合       | ⚠️ 保留 | observer 在 trigger 内同步回填，能跑；不引入 channel 故不改 |
 
 ## 四、选型对比
 
@@ -210,15 +211,15 @@ app.add_observer(on_switch_champion)
 
 新增 `crates/lol_rpc`：RPC 契约单一事实源（泛型事件、入参类型、dispatch 注册表、`respond`/`resolve_target`/`observe_packed_bytes` 共享 helper）。
 
-| 层 | 现状 | 去向 |
-|---|---|---|
-| `CommandWsRequest { cmd, params }` | `events.rs` | `CommandWsRequest<T>`，params 类型化 |
-| `dispatch` | `handlers.rs` trigger 字符串事件 | `lol_rpc::dispatch` 声明式注册表 |
-| `CMD_*` 常量 | `protocol.rs` | 删除（cmd 名在注册表里） |
-| agent match 分发 | `lol_agent/src/systems.rs::on_command_ws_request` | 8 个 typed observer + 纯函数 handler |
-| debug match 分发 | `lol_debug/src/lib.rs::on_command_ws_request` | 7 个 typed observer + 纯函数 handler |
-| `WsSession` / `GameClient` | `lol_client` | 不变（仍是 cmd 字符串客户端，契约不变） |
-| `WsEvent` / `WsResponse` | `protocol.rs` | 保留 |
+| 层                                 | 现状                                              | 去向                                    |
+| ---------------------------------- | ------------------------------------------------- | --------------------------------------- |
+| `CommandWsRequest { cmd, params }` | `events.rs`                                       | `CommandWsRequest<T>`，params 类型化    |
+| `dispatch`                         | `handlers.rs` trigger 字符串事件                  | `lol_rpc::dispatch` 声明式注册表        |
+| `CMD_*` 常量                       | `protocol.rs`                                     | 删除（cmd 名在注册表里）                |
+| agent match 分发                   | `lol_agent/src/systems.rs::on_command_ws_request` | 8 个 typed observer + 纯函数 handler    |
+| debug match 分发                   | `lol_debug/src/lib.rs::on_command_ws_request`     | 7 个 typed observer + 纯函数 handler    |
+| `WsSession` / `GameClient`         | `lol_client`                                      | 不变（仍是 cmd 字符串客户端，契约不变） |
+| `WsEvent` / `WsResponse`           | `protocol.rs`                                     | 保留                                    |
 
 客户端 `lol_client` 完全不动——它发的仍是 `{ id, cmd: String, params }`，dispatch 在服务端入口做字符串→类型映射。调用方零感知。
 
@@ -232,7 +233,7 @@ app.add_observer(on_switch_champion)
 4. **迁 debug 面**。7 条指令同理，debug `cfg` 门控。
 5. **删旧路径**。移除旧 `CommandWsRequest` 字符串事件、`CMD_*` 常量、旧 observer、IIFE。更新 [game-tools/arch.md](/docs/product/game-tools/arch.md)「cmd 字符串分发」描述与 [产品架构总览](/docs/product/CLAUDE.md) crate 分层。
 
-每阶段独立 `cargo check --all-targets`。旧路径在 step 5 前可用作回退。
+每阶段独立 `cargo check --workspace --all-targets`。旧路径在 step 5 前可用作回退。
 
 ## 七、风险与对策
 

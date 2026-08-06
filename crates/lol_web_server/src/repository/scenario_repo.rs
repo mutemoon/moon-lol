@@ -31,7 +31,11 @@ pub struct PgScenarioRepo {
     pub pool: PgPool,
 }
 
-const SELECT_COLS: &str = "id, owner_id, name, agents, created_at";
+const SELECT_COLS: &str = "s.id, s.owner_id, s.name, s.agents, s.created_at, s.updated_at, \
+     wc.condition AS win_condition";
+
+const SCENARIO_FROM: &str = "scenarios s LEFT JOIN scenario_win_conditions wc \
+     ON s.id = wc.scenario_id AND s.owner_id = wc.owner_id";
 
 fn parse_row(r: &sqlx::postgres::PgRow) -> RepoResult<Scenario> {
     Ok(Scenario {
@@ -39,14 +43,16 @@ fn parse_row(r: &sqlx::postgres::PgRow) -> RepoResult<Scenario> {
         owner_id: r.try_get("owner_id")?,
         name: r.try_get("name")?,
         agents: r.try_get("agents")?,
+        win_condition: r.try_get("win_condition")?,
         created_at: r.try_get("created_at")?,
+        updated_at: r.try_get("updated_at")?,
     })
 }
 
 #[async_trait]
 impl ScenarioRepo for PgScenarioRepo {
     async fn find_by_id(&self, id: Uuid) -> RepoResult<Option<Scenario>> {
-        let sql = format!("SELECT {SELECT_COLS} FROM scenarios WHERE id = $1");
+        let sql = format!("SELECT {SELECT_COLS} FROM {SCENARIO_FROM} WHERE s.id = $1");
         let row = sqlx::query(&sql)
             .bind(id)
             .fetch_optional(&self.pool)
@@ -59,7 +65,7 @@ impl ScenarioRepo for PgScenarioRepo {
 
     async fn list_by_owner(&self, owner_id: i32) -> RepoResult<Vec<Scenario>> {
         let sql = format!(
-            "SELECT {SELECT_COLS} FROM scenarios WHERE owner_id = $1 ORDER BY created_at DESC"
+            "SELECT {SELECT_COLS} FROM {SCENARIO_FROM} WHERE s.owner_id = $1 ORDER BY s.created_at DESC"
         );
         let rows = sqlx::query(&sql)
             .bind(owner_id)
@@ -71,7 +77,10 @@ impl ScenarioRepo for PgScenarioRepo {
     async fn insert(&self, owner_id: i32, input: &ScenarioInput) -> RepoResult<Scenario> {
         let id = Uuid::new_v4();
         let sql = format!(
-            "INSERT INTO scenarios (id, owner_id, name, agents) VALUES ($1, $2, $3, $4) RETURNING {SELECT_COLS}"
+            "INSERT INTO scenarios (id, owner_id, name, agents) \
+             VALUES ($1, $2, $3, $4) \
+             RETURNING id, owner_id, name, agents, created_at, updated_at, \
+             NULL::jsonb AS win_condition"
         );
         let row = sqlx::query(&sql)
             .bind(id)

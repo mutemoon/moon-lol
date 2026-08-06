@@ -287,12 +287,13 @@ impl RoomService for RoomServiceImpl {
 
 #[cfg(test)]
 mod tests {
+    use chrono::Utc;
     use mockall::mock;
     use mockall::predicate::*;
 
     use super::*;
-    use crate::domain::room::{Room, RoomConstraints, RoomStatus, TeamPolicy};
-    use crate::domain::{RepoError, RepoResult};
+    use crate::domain::RepoResult;
+    use crate::domain::room::{Room, RoomConstraints, RoomStatus};
 
     mock! {
         pub RoomRepo {}
@@ -332,6 +333,8 @@ mod tests {
             invite_code: "ABCDEF".into(),
             constraints: RoomConstraints::default(),
             status,
+            created_at: Utc::now(),
+            member_count: None,
         }
     }
 

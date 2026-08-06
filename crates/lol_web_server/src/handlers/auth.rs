@@ -2,29 +2,15 @@
 
 use axum::Json;
 use axum::extract::State;
-use serde::{Deserialize, Serialize};
+use lol_web_protocol::auth::UserInfo;
+// 导入并重新导出（保持 handlers::auth::Xxx 路径不变，供外部引用）
+pub use lol_web_protocol::auth::{
+    AuthResponse, CodeLoginRequest, LoginRequest, RegisterRequest, ResetPasswordRequest,
+    UserInfo as AuthUserDto,
+};
 
 use super::response::ApiResponse;
 use super::{AppState, AuthUser};
-
-#[derive(Deserialize)]
-pub struct RegisterRequest {
-    pub phone: String,
-    pub password: String,
-    pub code: String,
-}
-
-#[derive(Serialize, Deserialize)]
-pub struct AuthResponse {
-    pub token: String,
-    pub user: AuthUserDto,
-}
-
-#[derive(Serialize, Deserialize)]
-pub struct AuthUserDto {
-    pub id: i32,
-    pub phone: String,
-}
 
 pub async fn auth_register(
     State(s): State<AppState>,
@@ -37,19 +23,13 @@ pub async fn auth_register(
     {
         Ok(result) => ApiResponse::ok(AuthResponse {
             token: result.token,
-            user: AuthUserDto {
+            user: UserInfo {
                 id: result.user.id,
                 phone: result.user.phone,
             },
         }),
-        Err(e) => ApiResponse::from_error(e),
+        Err(e) => super::response::api_error(e),
     }
-}
-
-#[derive(Deserialize)]
-pub struct LoginRequest {
-    pub phone: String,
-    pub password: String,
 }
 
 pub async fn auth_login(
@@ -59,19 +39,13 @@ pub async fn auth_login(
     match s.user_service.login(&req.phone, &req.password).await {
         Ok(result) => ApiResponse::ok(AuthResponse {
             token: result.token,
-            user: AuthUserDto {
+            user: UserInfo {
                 id: result.user.id,
                 phone: result.user.phone,
             },
         }),
-        Err(e) => ApiResponse::from_error(e),
+        Err(e) => super::response::api_error(e),
     }
-}
-
-#[derive(Deserialize)]
-pub struct CodeLoginRequest {
-    pub phone: String,
-    pub code: String,
 }
 
 pub async fn auth_code_login(
@@ -81,20 +55,13 @@ pub async fn auth_code_login(
     match s.user_service.login_with_code(&req.phone, &req.code).await {
         Ok(result) => ApiResponse::ok(AuthResponse {
             token: result.token,
-            user: AuthUserDto {
+            user: UserInfo {
                 id: result.user.id,
                 phone: result.user.phone,
             },
         }),
-        Err(e) => ApiResponse::from_error(e),
+        Err(e) => super::response::api_error(e),
     }
-}
-
-#[derive(Deserialize)]
-pub struct ResetPasswordRequest {
-    pub phone: String,
-    pub new_password: String,
-    pub code: String,
 }
 
 pub async fn auth_reset_password(
@@ -107,7 +74,7 @@ pub async fn auth_reset_password(
         .await
     {
         Ok(_) => ApiResponse::ok(()),
-        Err(e) => ApiResponse::from_error(e),
+        Err(e) => super::response::api_error(e),
     }
 }
 
@@ -115,7 +82,7 @@ pub async fn auth_me(
     auth: AuthUser,
     headers: axum::http::HeaderMap,
     State(s): State<AppState>,
-) -> ApiResponse<AuthUserDto> {
+) -> ApiResponse<UserInfo> {
     use axum::http::header::AUTHORIZATION;
     if let Some(token) = headers
         .get(AUTHORIZATION)
@@ -123,13 +90,13 @@ pub async fn auth_me(
         .and_then(|v| v.strip_prefix("Bearer ").or(Some(v)))
     {
         if let Ok(user) = s.user_service.verify_token(token).await {
-            return ApiResponse::ok(AuthUserDto {
+            return ApiResponse::ok(UserInfo {
                 id: user.id,
                 phone: user.phone,
             });
         }
     }
-    ApiResponse::ok(AuthUserDto {
+    ApiResponse::ok(UserInfo {
         id: auth.user_id,
         phone: String::new(),
     })

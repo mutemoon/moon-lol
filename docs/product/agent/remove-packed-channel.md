@@ -15,11 +15,11 @@ RL 训练通道现有一套 msgpack + base64 的二进制编码，经 `observe_p
 
 ## 二、删除边界
 
-| 保留 | 删除 |
-|---|---|
-| `rl_reset` / `rl_step` 命令 | `observe_packed` / `action_packed` 命令 |
-| `MoonLoLEnv` / `RewardShaper` / `StepResult` / `RlEnvs` | msgpack + base64 编解码函数 |
-| `Observe` / `Action` 的 JSON 序列化路径 | `rmp-serde` / `base64` 依赖 |
+| 保留                                                    | 删除                                    |
+| ------------------------------------------------------- | --------------------------------------- |
+| `rl_reset` / `rl_step` 命令                             | `observe_packed` / `action_packed` 命令 |
+| `MoonLoLEnv` / `RewardShaper` / `StepResult` / `RlEnvs` | msgpack + base64 编解码函数             |
+| `Observe` / `Action` 的 JSON 序列化路径                 | `rmp-serde` / `base64` 依赖             |
 
 `rl_reset` / `rl_step` 的返回从 `observation_b64`（msgpack + base64 字符串）改为 `observation`（JSON 对象），由 `serde_json::to_value(&obs)` 直接序列化 `Observe`。
 
@@ -110,7 +110,7 @@ RL 训练通道现有一套 msgpack + base64 的二进制编码，经 `observe_p
 
 ## 五、验证
 
-1. `cargo check --all-targets` 全绿。
+1. `cargo check --workspace --all-targets` 全绿。
 2. `cargo test -p lol_agent -p lol_rpc` 通过，重点关注 `rl.rs` 剩余 reward / env 测试不受影响。
 3. `cargo check` 确认无残留对已删符号的引用。
 4. 若 Python 训练端在用，手动跑一次 `rl_reset` / `rl_step` 往返，确认 `observation` JSON 可被正常解析。

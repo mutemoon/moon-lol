@@ -238,6 +238,7 @@ mod tests {
                 reason: "checkin".into(),
                 reference: Some("checkin_2026-06-23".into()),
                 balance_after: DAILY_CHECKIN_REWARD,
+                created_at: Utc::now(),
             }))
         });
         repo.expect_add_transaction().times(0);

@@ -12,7 +12,9 @@ pub struct Scenario {
     pub name: String,
     /// 完整阵容编排（FrontAgentConfig 数组，结构由前端契约定义）。
     pub agents: serde_json::Value,
+    pub win_condition: Option<serde_json::Value>,
     pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
 }
 
 /// 创建 / 更新输入。created_at 由 DB 生成。
@@ -52,12 +54,15 @@ mod tests {
 
     #[test]
     fn scenario_serde_roundtrip() {
+        let now = Utc::now();
         let s = Scenario {
             id: Uuid::new_v4(),
             owner_id: 1,
             name: "阵容A".into(),
             agents: serde_json::json!([{"champion": "Riven"}]),
-            created_at: Utc::now(),
+            win_condition: None,
+            created_at: now,
+            updated_at: now,
         };
         let json = serde_json::to_string(&s).unwrap();
         let back: Scenario = serde_json::from_str(&json).unwrap();

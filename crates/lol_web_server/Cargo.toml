@@ -44,6 +44,8 @@ moka = { version = "0.12", features = ["future"] }
 thiserror = "2.0"
 rand.workspace = true
 
+lol_web_protocol = { workspace = true, features = ["axum"] }
+
 # Local crates in the workspace (we can depend on them if needed)
 lol_core = { path = "../lol_core" }
 lol_server = { path = "../lol_server" }

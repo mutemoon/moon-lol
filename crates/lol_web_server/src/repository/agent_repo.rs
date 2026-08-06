@@ -1,6 +1,7 @@
 //! Agent 子系统的持久层。
 
 use async_trait::async_trait;
+use chrono::{DateTime, Utc};
 use sqlx::{PgPool, Row};
 use uuid::Uuid;
 
@@ -37,7 +38,7 @@ pub struct PgAgentRepo {
 }
 
 const SELECT_COLS: &str = "id, owner_id, name, champion, agent_type, prompt, model, \
-     config_json, visibility, forked_from, upstream_agent_id";
+     config_json, visibility, forked_from, upstream_agent_id, created_at, updated_at";
 
 fn parse_row(r: &sqlx::postgres::PgRow) -> RepoResult<Agent> {
     let vis_str: String = r.try_get("visibility")?;
@@ -58,6 +59,8 @@ fn parse_row(r: &sqlx::postgres::PgRow) -> RepoResult<Agent> {
         visibility,
         forked_from: r.try_get("forked_from")?,
         upstream_agent_id: r.try_get("upstream_agent_id")?,
+        created_at: r.try_get::<DateTime<Utc>, _>("created_at")?,
+        updated_at: r.try_get::<DateTime<Utc>, _>("updated_at")?,
     })
 }
 

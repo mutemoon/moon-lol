@@ -30,7 +30,7 @@
 - `e_tests.rs` +4（新建）：等级攻速、第一击减速、第二击暴击额外伤害（用 `EventAttackEnd` 手动触发隔离）、3s 过期。
 - 攻击重置测试要点：`CommandAttackReset` 的语义是「移除 `AttackState` 并以保存目标立即重起一段全新 Windup」，故断言 `end_time` 刷新而非 `AttackState` 消失；且需先移除 `AttackAuto` 隔离 `update_attack_auto` 的自动重起。
 
-全量 `cargo check --all-targets` 干净，`cargo test -p lol_champions` 全绿（Fiora 21 项）。
+全量 `cargo check --workspace --all-targets` 干净，`cargo test -p lol_champions` 全绿（Fiora 21 项）。
 
 ### 局限性 / 未实现
 

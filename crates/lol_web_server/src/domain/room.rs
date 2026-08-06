@@ -1,5 +1,6 @@
 //! Room 子系统的领域层（房间 + 成员 + Agent 槽位 + 房主约束）。
 
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
 use super::spawn_preset::Team;
@@ -88,6 +89,8 @@ pub struct Room {
     pub invite_code: String,
     pub constraints: RoomConstraints,
     pub status: RoomStatus,
+    pub created_at: DateTime<Utc>,
+    pub member_count: Option<i32>,
 }
 
 /// 房间内 Agent 槽位。

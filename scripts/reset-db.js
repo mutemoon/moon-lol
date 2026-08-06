@@ -20,9 +20,16 @@ try {
     runCmd('docker exec -i moon-lol-postgres psql -U postgres -d postgres -c "DROP DATABASE IF EXISTS moon_lol WITH (FORCE);"');
     runCmd('docker exec -i moon-lol-postgres psql -U postgres -d postgres -c "CREATE DATABASE moon_lol;"');
 
-    // 2. 导入 Schema
+    // 2. 导入 Schema (web server)
     const schemaSql = fs.readFileSync(schemaPath, 'utf8');
     runCmd('docker exec -i moon-lol-postgres psql -U postgres -d moon_lol', schemaSql);
+
+    // 2b. 导入 RL Schema
+    const rlSchemaPath = path.resolve(__dirname, '../crates/lol_rl/migrations/schema.sql');
+    if (fs.existsSync(rlSchemaPath)) {
+        const rlSchemaSql = fs.readFileSync(rlSchemaPath, 'utf8');
+        runCmd('docker exec -i moon-lol-postgres psql -U postgres -d moon_lol', rlSchemaSql);
+    }
 
     // 3. 导入初始化套餐数据和默认赛季
     const seedSql = `

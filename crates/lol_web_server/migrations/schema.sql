@@ -78,8 +78,12 @@ CREATE TABLE IF NOT EXISTS scenarios (
     name       TEXT NOT NULL,
     agents     JSONB NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     UNIQUE (owner_id, name)
 );
+
+-- 幂等：为已存在的 scenarios 表补 updated_at 列
+ALTER TABLE scenarios ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP;
 
 CREATE TABLE IF NOT EXISTS scenario_win_conditions (
     owner_id    INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -251,3 +255,15 @@ CREATE TABLE IF NOT EXISTS subscriptions (
     created_at   TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX IF NOT EXISTS idx_subscriptions_user ON subscriptions(user_id, status);
+
+-- ── 游戏历史 ──
+CREATE TABLE IF NOT EXISTS game_histories (
+    id            UUID PRIMARY KEY,
+    user_id       INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    datetime      TIMESTAMPTZ NOT NULL,
+    game_duration BIGINT NOT NULL DEFAULT 0,
+    agents        JSONB NOT NULL,
+    histories     JSONB NOT NULL,
+    created_at    TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_game_histories_user ON game_histories(user_id, created_at DESC);

@@ -541,23 +541,12 @@ impl ParticleMaterialDynamic {
     }
 
     /// 按成员名写入 uniform：在 vert/frag 布局里查到该成员所属 binding 与 offset，
-    /// 写入对应 binding 的 CPU 字节 blob。返回是否至少命中一个成员。
+    /// 写入对应 binding 的 CPU 字节 blob。同名成员在 VS/PS 都存在时分别写入各自 blob。
+    /// offset 查表用变体自身布局：变体没反射出的成员即 shader 不读，跳过是安全 no-op。
     pub fn set_param<T: Copy>(&mut self, member_name: &str, value: T) -> bool {
         let bytes = unsafe {
             std::slice::from_raw_parts(&value as *const T as *const u8, std::mem::size_of::<T>())
         };
-        self.write_after_member(member_name, 0, bytes)
-    }
-
-    /// 在成员 offset + extra_offset 处写入原始字节（用于成员后紧跟的匿名字段，
-    /// 如 TEXTURE_INFO 之后的 uv_scale）。同名成员在 VS/PS 都存在时分别写入各自 blob。
-    /// offset 查表用变体自身布局：变体没反射出的成员即 shader 不读，跳过是安全 no-op。
-    pub fn write_after_member(
-        &mut self,
-        member_name: &str,
-        extra_offset: usize,
-        bytes: &[u8],
-    ) -> bool {
         let mut hit = false;
         for desc in [
             self.vert_variant_layout.clone(),
@@ -567,7 +556,7 @@ impl ParticleMaterialDynamic {
                 if let BindingTypeDesc::UniformBuffer { members, .. } = &binding.type_desc {
                     if let Some(member) = members.get(member_name) {
                         if let Some(blob) = self.uniforms.get_mut(&binding.binding_index) {
-                            let start = member.offset + extra_offset;
+                            let start = member.offset;
                             if start < blob.len() {
                                 let n = bytes.len().min(blob.len() - start);
                                 blob[start..start + n].copy_from_slice(&bytes[..n]);
@@ -809,7 +798,7 @@ impl Material for ParticleMaterialDynamic {
 
     fn alpha_mode(&self) -> AlphaMode {
         match self.blend_mode {
-            0 => AlphaMode::Opaque,
+            0 => AlphaMode::Blend,
             _ => AlphaMode::Blend,
         }
     }
@@ -845,14 +834,14 @@ impl Material for ParticleMaterialDynamic {
                         },
                         alpha: BlendComponent::OVER,
                     }),
-                    5 => Some(BlendState {
-                        color: BlendComponent {
-                            src_factor: BlendFactor::Dst,
-                            dst_factor: BlendFactor::Zero,
-                            operation: BlendOperation::Add,
-                        },
-                        alpha: BlendComponent::OVER,
-                    }),
+                    // 5 => Some(BlendState {
+                    //     color: BlendComponent {
+                    //         src_factor: BlendFactor::Dst,
+                    //         dst_factor: BlendFactor::OneMinusSrcAlpha,
+                    //         operation: BlendOperation::Add,
+                    //     },
+                    //     alpha: BlendComponent::OVER,
+                    // }),
                     _ => Some(BlendState::ALPHA_BLENDING),
                 };
             }

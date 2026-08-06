@@ -306,6 +306,7 @@ mod tests {
                 status: QueueStatus::Queued,
                 enqueued_at: Utc::now(),
                 last_match_at: None,
+                rating: 1200.0,
             })
         });
         let svc = build_service(sr, qr, MockEloRepo::new(), MockMatchCreator::new());
@@ -330,6 +331,7 @@ mod tests {
             status: QueueStatus::Queued,
             enqueued_at: Utc::now(),
             last_match_at: None,
+            rating: 1200.0,
         };
         let existing_clone = existing.clone();
         let mut sr = MockSeasonRepo::new();
@@ -358,6 +360,7 @@ mod tests {
             status: QueueStatus::Queued,
             enqueued_at: Utc::now(),
             last_match_at: None,
+            rating: 1200.0,
         };
         let entry_clone = entry.clone();
         let mut er = MockEloRepo::new();
@@ -384,6 +387,7 @@ mod tests {
             status: QueueStatus::Queued,
             enqueued_at: Utc::now(),
             last_match_at: None,
+            rating: 1200.0,
         };
         let opp = RankQueueEntry {
             id: Uuid::new_v4(),
@@ -395,6 +399,7 @@ mod tests {
             status: QueueStatus::Queued,
             enqueued_at: Utc::now(),
             last_match_at: None,
+            rating: 1200.0,
         };
         let opp_clone = opp.clone();
         let mut er = MockEloRepo::new();
@@ -414,7 +419,7 @@ mod tests {
     #[tokio::test]
     async fn record_result_updates_both_elo() {
         let season = sample_season();
-        let season_id = season.id;
+        let _season_id = season.id;
         let mut sr = MockSeasonRepo::new();
         current_season_mocks(&mut sr, season);
         let winner_id = Uuid::new_v4();
@@ -425,12 +430,14 @@ mod tests {
                 Ok(EloRating {
                     id: Uuid::new_v4(),
                     agent_id: aid,
+                    agent_name: String::new(),
                     mode: "top_solo".into(),
                     season_id: sid,
                     rating: 1200.0,
                     wins: 0,
                     losses: 0,
                     draws: 0,
+                    daily_delta: 0.0,
                 })
             });
         er.expect_update_after_match()

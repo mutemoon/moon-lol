@@ -191,6 +191,7 @@ impl AgentService for AgentServiceImpl {
 
 #[cfg(test)]
 mod tests {
+    use chrono::Utc;
     use mockall::mock;
     use mockall::predicate::*;
 
@@ -256,6 +257,8 @@ mod tests {
             visibility: Visibility::Private,
             forked_from: None,
             upstream_agent_id: None,
+            created_at: Utc::now(),
+            updated_at: Utc::now(),
         }
     }
 

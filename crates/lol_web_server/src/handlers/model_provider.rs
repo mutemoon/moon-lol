@@ -2,33 +2,19 @@
 
 use axum::Json;
 use axum::extract::{Path, State};
+use lol_web_protocol::model_provider::{
+    ModelProvider, ModelProviderInput, TestModelProviderInput, TestModelProviderResponse,
+};
 use uuid::Uuid;
 
-use super::response::ApiResponse;
+use super::response::{ApiResponse, api_error};
 use super::{AppState, AuthUser};
-
-#[derive(serde::Deserialize)]
-pub struct TestModelProviderInput {
-    pub provider_id: Option<Uuid>,
-    pub base_url: String,
-    pub api_key: Option<String>,
-    pub api_format: String,
-    pub model: String,
-    pub max_tokens: Option<u32>,
-}
-
-#[derive(serde::Serialize)]
-pub struct TestModelProviderResponse {
-    pub success: bool,
-    pub message: String,
-}
 
 pub async fn test_model_provider(
     auth: AuthUser,
     State(s): State<AppState>,
     Json(input): Json<TestModelProviderInput>,
 ) -> ApiResponse<TestModelProviderResponse> {
-    // 1. 获取并解密 API 密钥
     let api_key = if let Some(key) = input.api_key.filter(|k| !k.is_empty()) {
         key
     } else if let Some(provider_id) = input.provider_id {
@@ -55,7 +41,6 @@ pub async fn test_model_provider(
         "".to_string()
     };
 
-    // 2. 调用 lol_agent_runtime 中的测试方法进行连接测试
     match lol_agent_runtime::test_model_connection(
         &api_key,
         &input.base_url,
@@ -78,21 +63,26 @@ pub async fn test_model_provider(
 pub async fn list_model_providers(
     auth: AuthUser,
     State(s): State<AppState>,
-) -> ApiResponse<Vec<crate::domain::model_provider::ModelProviderDto>> {
+) -> ApiResponse<Vec<ModelProvider>> {
     match s.model_provider_service.list(auth.user_id).await {
-        Ok(list) => ApiResponse::ok(list),
-        Err(e) => ApiResponse::from_error(e),
+        Ok(list) => ApiResponse::ok(list.into_iter().map(Into::into).collect()),
+        Err(e) => api_error(e),
     }
 }
 
 pub async fn create_model_provider(
     auth: AuthUser,
     State(s): State<AppState>,
-    Json(input): Json<crate::domain::model_provider::ModelProviderInput>,
-) -> ApiResponse<crate::domain::model_provider::ModelProviderDto> {
-    match s.model_provider_service.create(auth.user_id, input).await {
-        Ok(dto) => ApiResponse::ok(dto),
-        Err(e) => ApiResponse::from_error(e),
+    Json(input): Json<ModelProviderInput>,
+) -> ApiResponse<ModelProvider> {
+    let domain_input = input.into();
+    match s
+        .model_provider_service
+        .create(auth.user_id, domain_input)
+        .await
+    {
+        Ok(dto) => ApiResponse::ok(dto.into()),
+        Err(e) => api_error(e),
     }
 }
 
@@ -100,15 +90,16 @@ pub async fn update_model_provider(
     auth: AuthUser,
     State(s): State<AppState>,
     Path(id): Path<Uuid>,
-    Json(input): Json<crate::domain::model_provider::ModelProviderInput>,
+    Json(input): Json<ModelProviderInput>,
 ) -> ApiResponse<()> {
+    let domain_input = input.into();
     match s
         .model_provider_service
-        .update(auth.user_id, id, input)
+        .update(auth.user_id, id, domain_input)
         .await
     {
         Ok(_) => ApiResponse::ok(()),
-        Err(e) => ApiResponse::from_error(e),
+        Err(e) => api_error(e),
     }
 }
 
@@ -119,6 +110,6 @@ pub async fn delete_model_provider(
 ) -> ApiResponse<()> {
     match s.model_provider_service.delete(auth.user_id, id).await {
         Ok(_) => ApiResponse::ok(()),
-        Err(e) => ApiResponse::from_error(e),
+        Err(e) => api_error(e),
     }
 }

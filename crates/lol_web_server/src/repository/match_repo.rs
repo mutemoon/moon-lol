@@ -1,6 +1,7 @@
 //! Match 子系统的持久层（matches + match_participants + match_events）。
 
 use async_trait::async_trait;
+use chrono::{DateTime, Utc};
 use sqlx::{PgPool, Row};
 use uuid::Uuid;
 
@@ -35,8 +36,8 @@ pub struct MatchEventInput {
     pub game_time_ms: i64,
 }
 
-const MATCH_COLS: &str =
-    "id, form, room_id, owner_id, mode, status, bevy_port, winner_team, abort_reason";
+const MATCH_COLS: &str = "id, form, room_id, owner_id, mode, status, bevy_port, winner_team, abort_reason, \
+     created_at, finished_at";
 
 fn parse_match(r: &sqlx::postgres::PgRow) -> RepoResult<Match> {
     let form_str: String = r.try_get("form")?;
@@ -62,6 +63,8 @@ fn parse_match(r: &sqlx::postgres::PgRow) -> RepoResult<Match> {
         bevy_port: r.try_get("bevy_port")?,
         winner_team,
         abort_reason: r.try_get("abort_reason")?,
+        created_at: r.try_get::<DateTime<Utc>, _>("created_at")?,
+        finished_at: r.try_get::<Option<DateTime<Utc>>, _>("finished_at")?,
     })
 }
 
@@ -359,15 +362,19 @@ impl MatchParticipantRepo for PgMatchParticipantRepo {
     }
 }
 
-const EVENT_COLS: &str = "seq, event_type, agent_id, payload, game_time_ms";
+const EVENT_COLS: &str =
+    "id, match_id, seq, event_type, agent_id, payload, game_time_ms, occurred_at";
 
 fn parse_event(r: &sqlx::postgres::PgRow) -> RepoResult<MatchEvent> {
     Ok(MatchEvent {
+        id: r.try_get("id")?,
+        match_id: r.try_get("match_id")?,
         seq: r.try_get("seq")?,
         event_type: r.try_get("event_type")?,
         agent_id: r.try_get("agent_id")?,
         payload: r.try_get("payload")?,
         game_time_ms: r.try_get("game_time_ms")?,
+        occurred_at: r.try_get::<DateTime<Utc>, _>("occurred_at")?,
     })
 }
 

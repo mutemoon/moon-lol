@@ -1,0 +1,29 @@
+[package]
+name = "lol_rl"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+candle-core = "0.8.2"
+candle-nn = "0.8.2"
+rand.workspace = true
+tracing.workspace = true
+lol_env.workspace = true
+anyhow = "1"
+tokio = { workspace = true, features = ["full"] }
+tokio-tungstenite = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+lol_rl_protocol.workspace = true
+bincode.workspace = true
+tracing-subscriber.workspace = true
+futures-util = { workspace = true }
+sqlx = { version = "0.8.3", default-features = false, features = ["runtime-tokio-native-tls", "postgres", "uuid", "chrono", "json"] }
+async-trait = "0.1"
+uuid = { version = "1", features = ["v4", "serde"] }
+chrono = "0.4"
+thiserror.workspace = true
+
+[features]
+default = []
+cuda = ["candle-core/cuda", "candle-nn/cuda"]

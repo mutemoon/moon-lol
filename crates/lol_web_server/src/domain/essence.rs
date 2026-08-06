@@ -1,5 +1,6 @@
 //! Essence（精粹）+ Subscription（订阅）子系统的领域层。
 
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
 /// 精粹交易原因。
@@ -41,6 +42,7 @@ pub struct EssenceTransaction {
     pub reason: String,
     pub reference: Option<String>,
     pub balance_after: i64,
+    pub created_at: DateTime<Utc>,
 }
 
 /// 每日签到奖励（固定值）。

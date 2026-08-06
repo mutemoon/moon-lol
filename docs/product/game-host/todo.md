@@ -40,6 +40,6 @@
 
 ### 验证
 
-- `cargo check --all-targets`。
+- `cargo check --workspace --all-targets`。
 - `cargo test -p lol_game_process_manager`。
 - 桌面手动：起多局本地调试对局，确认端口池分配（不再 9001）、多局并发、按 id 停局、AI 决策环、实时 sendWsCmd 调试、observe 回放（非 headless）。

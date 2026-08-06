@@ -96,6 +96,7 @@ impl AdminService for AdminServiceImpl {
 
 #[cfg(test)]
 mod tests {
+    use chrono::Utc;
     use mockall::mock;
     use mockall::predicate::*;
     use uuid::Uuid;
@@ -158,6 +159,8 @@ mod tests {
             bevy_port: None,
             winner_team: None,
             abort_reason: None,
+            created_at: Utc::now(),
+            finished_at: None,
         }
     }
 

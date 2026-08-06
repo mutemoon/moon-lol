@@ -76,10 +76,7 @@ fn build_particle_quad_mesh(params: ParticleQuadMeshParams) -> Mesh {
                 .collect::<Vec<_>>();
             mesh.insert_attribute(ATTRIBUTE_WORLD_POSITION_VEC4, values);
         } else {
-            let values = transformed
-                .iter()
-                .map(|v| v.to_array())
-                .collect::<Vec<_>>();
+            let values = transformed.iter().map(|v| v.to_array()).collect::<Vec<_>>();
             mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, values.clone());
             mesh.insert_attribute(ATTRIBUTE_WORLD_POSITION, values);
         }
@@ -107,12 +104,14 @@ fn build_particle_quad_mesh(params: ParticleQuadMeshParams) -> Mesh {
     let values = Vec::from([[0.0; 2]; 4]);
     mesh.insert_attribute(ATTRIBUTE_LIFETIME, values);
 
-    let values = Vec::from([[
-        params.color.z,
-        params.color.y,
-        params.color.x,
-        params.color.w,
-    ]; 4]);
+    let values = Vec::from(
+        [[
+            params.color.z,
+            params.color.y,
+            params.color.x,
+            params.color.w,
+        ]; 4],
+    );
     mesh.insert_attribute(Mesh::ATTRIBUTE_COLOR, values);
 
     mesh

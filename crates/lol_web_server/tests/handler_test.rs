@@ -218,6 +218,17 @@ mockall::mock! {
     }
 }
 
+mockall::mock! {
+    pub HistoryService {}
+    #[async_trait]
+    impl HistoryService for HistoryService {
+        async fn list(&self, user_id: i32) -> ServiceResult<Vec<lol_web_protocol::history::GameHistorySummary>>;
+        async fn get(&self, user_id: i32, id: Uuid) -> ServiceResult<Vec<lol_web_protocol::history::SavedAgentHistory>>;
+        async fn upload(&self, user_id: i32, req: lol_web_protocol::history::UploadHistoryRequest) -> ServiceResult<()>;
+        async fn delete(&self, user_id: i32, id: Uuid) -> ServiceResult<()>;
+    }
+}
+
 // ── Helper structures ──
 
 struct Mocks {
@@ -236,6 +247,7 @@ struct Mocks {
     admin: MockAdminService,
     log: MockLogService,
     model_provider: MockModelProviderService,
+    history: MockHistoryService,
 }
 
 impl Mocks {
@@ -256,6 +268,7 @@ impl Mocks {
             admin: MockAdminService::new(),
             log: MockLogService::new(),
             model_provider: MockModelProviderService::new(),
+            history: MockHistoryService::new(),
         }
     }
 }
@@ -283,6 +296,7 @@ where
         admin_service: Arc::new(mocks.admin),
         log_service: Arc::new(mocks.log),
         model_provider_service: Arc::new(mocks.model_provider),
+        history_service: Arc::new(mocks.history),
     }
 }
 
@@ -438,6 +452,8 @@ async fn test_list_agents_success() {
                     visibility: Visibility::Private,
                     forked_from: None,
                     upstream_agent_id: None,
+                    created_at: chrono::Utc::now(),
+                    updated_at: chrono::Utc::now(),
                 }])
             });
     });

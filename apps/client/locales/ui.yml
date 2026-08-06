@@ -1,0 +1,1844 @@
+_version: 2
+app:
+  placeholder:
+    current_view:
+      zh-CN: "当前视图: %{view}"
+      en: "Current view: %{view}"
+  # ── 侧边栏导航 ──
+  nav:
+    brand:
+      zh-CN: "Moon LOL"
+      en: "Moon LOL"
+    group_core:
+      zh-CN: "核心"
+      en: "Core"
+    group_match:
+      zh-CN: "对局"
+      en: "Match"
+    group_tools:
+      zh-CN: "工具"
+      en: "Tools"
+    group_system:
+      zh-CN: "系统"
+      en: "System"
+    menu_home:
+      zh-CN: "工作台首页"
+      en: "Workbench"
+    menu_launcher:
+      zh-CN: "新建对局"
+      en: "New Match"
+    menu_heroes:
+      zh-CN: "英雄预设"
+      en: "Heroes"
+    menu_rooms:
+      zh-CN: "房间"
+      en: "Rooms"
+    menu_games:
+      zh-CN: "对局管理"
+      en: "Games"
+    menu_rank:
+      zh-CN: "Rank 竞技"
+      en: "Rank"
+    menu_leaderboard:
+      zh-CN: "排行榜"
+      en: "Leaderboard"
+    menu_community:
+      zh-CN: "社区"
+      en: "Community"
+    menu_rl_training:
+      zh-CN: "RL 训练面板"
+      en: "RL Training"
+    menu_particles:
+      zh-CN: "粒子播放"
+      en: "Particles"
+    menu_logs_archive:
+      zh-CN: "日志归档"
+      en: "Logs Archive"
+    menu_billing:
+      zh-CN: "精粹与订阅"
+      en: "Essence & Subs"
+    menu_admin:
+      zh-CN: "对局池监控"
+      en: "Match Pool Monitor"
+    menu_settings:
+      zh-CN: "设置"
+      en: "Settings"
+    title_home:
+      zh-CN: "仿真工作台"
+      en: "Workbench"
+    title_launcher:
+      zh-CN: "对局编排"
+      en: "Match Orchestration"
+    title_heroes:
+      zh-CN: "英雄预设"
+      en: "Heroes"
+    title_rooms:
+      zh-CN: "房间"
+      en: "Rooms"
+    title_rank:
+      zh-CN: "Rank 竞技"
+      en: "Rank"
+    title_leaderboard:
+      zh-CN: "排行榜"
+      en: "Leaderboard"
+    title_community:
+      zh-CN: "社区"
+      en: "Community"
+    title_billing:
+      zh-CN: "精粹与订阅"
+      en: "Essence & Subscriptions"
+    title_rl_training:
+      zh-CN: "RL 强化学习中枢"
+      en: "RL Training Hub"
+    title_particles:
+      zh-CN: "粒子播放"
+      en: "Particles"
+    title_logs_archive:
+      zh-CN: "日志归档"
+      en: "Logs Archive"
+    title_admin:
+      zh-CN: "对局池监控"
+      en: "Match Pool Monitor"
+    title_settings:
+      zh-CN: "设置"
+      en: "Settings"
+    title_games:
+      zh-CN: "对局管理"
+      en: "Games"
+    title_history:
+      zh-CN: "对局历史"
+      en: "Match History"
+    title_blog:
+      zh-CN: "开发日志"
+      en: "Dev Blog"
+    title_debug:
+      zh-CN: "对局调试台"
+      en: "Match Debug"
+    title_mock:
+      zh-CN: "Mock 沙盒"
+      en: "Mock Sandbox"
+    title_observe:
+      zh-CN: "观战"
+      en: "Spectate"
+    title_room_detail:
+      zh-CN: "房间详情"
+      en: "Room Detail"
+    title_hero:
+      zh-CN: "英雄"
+      en: "Hero"
+    footer_settings:
+      zh-CN: "设置"
+      en: "Settings"
+    theme_light:
+      zh-CN: "浅色模式"
+      en: "Light mode"
+    theme_dark:
+      zh-CN: "深色模式"
+      en: "Dark mode"
+  # ── RL Training ──
+  rl:
+    page_title:
+      zh-CN: "强化学习训练实例管理"
+      en: "RL Training Instance Management (Data Table)"
+    new_task:
+      zh-CN: "新建 RL 训练任务"
+      en: "New RL Training Task"
+    refresh_list:
+      zh-CN: "刷新列表"
+      en: "Refresh List"
+    col_task:
+      zh-CN: "任务 ID / 名称"
+      en: "Task ID / Name"
+    col_algorithm:
+      zh-CN: "算法与环境"
+      en: "Algorithm & Env"
+    col_status:
+      zh-CN: "运行状态"
+      en: "Status"
+    col_steps:
+      zh-CN: "训练步数"
+      en: "Training Steps"
+    col_return:
+      zh-CN: "平均回报"
+      en: "Avg Return"
+    col_checkpoints:
+      zh-CN: "模型数"
+      en: "Checkpoints"
+    col_actions:
+      zh-CN: "交互控制操作栏"
+      en: "Actions"
+    ws_connected:
+      zh-CN: "已连接"
+      en: "Connected"
+    ws_disconnected:
+      zh-CN: "未连接"
+      en: "Disconnected"
+    enter_detail:
+      zh-CN: "进入详情"
+      en: "Details"
+    stop:
+      zh-CN: "停止"
+      en: "Stop"
+    save_model:
+      zh-CN: "存模型"
+      en: "Save Model"
+    back_to_list:
+      zh-CN: "返回实例列表"
+      en: "Back to List"
+    task_detail_title:
+      zh-CN: "任务详情与监控: %{id}"
+      en: "Task Detail & Monitor: %{id}"
+    save_current_model:
+      zh-CN: "保存当前模型"
+      en: "Save Current Model"
+    stop_running:
+      zh-CN: "停止运行"
+      en: "Stop Running"
+    running_visual_banner:
+      zh-CN: "正在使用模型 [%{model}] 运行 3D 可视版 Bevy Env 推理演示..."
+      en: "Running 3D visual Bevy Env inference demo with model [%{model}]..."
+    close_visual:
+      zh-CN: "关闭可视化"
+      en: "Close Visualization"
+    section_policy:
+      zh-CN: "离散动作概率分布"
+      en: "Discrete Action Probabilities (Policy)"
+    section_reward:
+      zh-CN: "奖励拆解细则"
+      en: "Reward Breakdown"
+    checkpoints_count:
+      zh-CN: "已存模型 (%{n})"
+      en: "Saved Model Checkpoints (%{n})"
+    run_visual_env:
+      zh-CN: "运行可视 Env"
+      en: "Run Visual Env"
+    metrics_title:
+      zh-CN: "历史训练统计表"
+      en: "History Training Stats (Metrics Data Table)"
+    m_step:
+      zh-CN: "步数"
+      en: "Step"
+    m_episode_return:
+      zh-CN: "回报"
+      en: "Episode Return"
+    m_loss:
+      zh-CN: "损失"
+      en: "Loss"
+    m_kl:
+      zh-CN: "KL 散度"
+      en: "KL Divergence"
+    m_entropy:
+      zh-CN: "熵"
+      en: "Entropy"
+    m_value:
+      zh-CN: "价值估计"
+      en: "Value"
+    m_fps:
+      zh-CN: "吞吐量"
+      en: "FPS"
+    visual_pause:
+      zh-CN: "暂停"
+      en: "Pause"
+    visual_resume:
+      zh-CN: "继续"
+      en: "Resume"
+    visual_reset:
+      zh-CN: "重置"
+      en: "Reset"
+    visual_close:
+      zh-CN: "关闭可视化"
+      en: "Close Visualization"
+    visual_connected:
+      zh-CN: "可视化已连接"
+      en: "Visual Connected"
+    visual_disconnected:
+      zh-CN: "可视化未连接"
+      en: "Visual Disconnected"
+    visual_status_bar:
+      zh-CN: "步数: %{step} | 奖励: %{reward}"
+      en: "Step: %{step} | Reward: %{reward}"
+  # ── 侧边栏（原 Vue app.sidebar） ──
+  sidebar:
+    new_match:
+      zh-CN: "新建对局"
+      en: "New Match"
+    new_match_shortcut:
+      zh-CN: "⌘N"
+      en: "⌘N"
+    settings:
+      zh-CN: "设置"
+      en: "Settings"
+    hero_presets:
+      zh-CN: "我的选手"
+      en: "My Players"
+    agent_presets:
+      zh-CN: "Agent 预设"
+      en: "Agent Presets"
+    spawn_presets:
+      zh-CN: "出生点预设"
+      en: "Spawn Presets"
+    debug_sessions:
+      zh-CN: "调试会话"
+      en: "Debug Sessions"
+    current_debug:
+      zh-CN: "当前调试窗口"
+      en: "Current Debug Window"
+    starting:
+      zh-CN: "启动中"
+      en: "Starting"
+    scenario_templates:
+      zh-CN: "对局配置模板"
+      en: "Scenario Templates"
+    completed_matches:
+      zh-CN: "已完成对局"
+      en: "Completed Matches"
+    archived:
+      zh-CN: "已归档"
+      en: "Archived"
+    config:
+      zh-CN: "配置"
+      en: "Config"
+  # ── 页头 ──
+  header:
+    connected:
+      zh-CN: "已连接"
+      en: "Connected"
+    starting:
+      zh-CN: "启动中"
+      en: "Starting"
+  # ── 视图标题 ──
+  view_titles:
+    launcher:
+      zh-CN: "对局编排"
+      en: "Match Orchestration"
+    debug:
+      zh-CN: "实时调试控制台"
+      en: "Live Debug Console"
+    history:
+      zh-CN: "对局回放"
+      en: "Match Replay"
+    settings:
+      zh-CN: "设置"
+      en: "Settings"
+    agents:
+      zh-CN: "Agent 预设管理"
+      en: "Agent Preset Management"
+    spawn_presets:
+      zh-CN: "出生点预设管理"
+      en: "Spawn Preset Management"
+    heroes:
+      zh-CN: "我的选手管理"
+      en: "My Player Management"
+  # ── 统计弹窗 ──
+  stats_modal:
+    title:
+      zh-CN: "AI Agent 模拟测试报告"
+      en: "AI Agent Simulation Report"
+    description:
+      zh-CN: "AI 代理已成功运行并自主决策满 2 分钟，累计运行数据统计如下："
+      en: "The AI agent has run autonomously for a full 2 minutes. Cumulative stats:"
+    minion_kills:
+      zh-CN: "总击杀小兵 (补刀)"
+      en: "Total Minion Kills (CS)"
+    gold:
+      zh-CN: "总累计金币"
+      en: "Total Gold"
+    confirm:
+      zh-CN: "确认并返回"
+      en: "Confirm & Return"
+  # ── 设置 ──
+  settings:
+    back_to_workspace:
+      zh-CN: "返回工作区"
+      en: "Back to Workspace"
+    nav:
+      general:
+        zh-CN: "常规设置"
+        en: "General"
+      model_settings:
+        zh-CN: "模型设置"
+        en: "Model Settings"
+    general:
+      title:
+        zh-CN: "常规设置"
+        en: "General Settings"
+      dark_mode_badge:
+        zh-CN: "深色模式"
+        en: "Dark Mode"
+      chinese_badge:
+        zh-CN: "简体中文"
+        en: "Simplified Chinese"
+      appearance:
+        title:
+          zh-CN: "外观与语言"
+          en: "Appearance & Language"
+        theme_label:
+          zh-CN: "界面主题"
+          en: "Theme"
+        theme_dark:
+          zh-CN: "深色"
+          en: "Dark"
+        theme_light:
+          zh-CN: "浅色"
+          en: "Light"
+        language_label:
+          zh-CN: "界面语言"
+          en: "Language"
+        language_zh:
+          zh-CN: "简体中文"
+          en: "简体中文"
+        language_en:
+          zh-CN: "English"
+          en: "English"
+    providers:
+      description:
+        zh-CN: "管理模型供应商，配置后可在选手编辑页选择使用。"
+        en: "Manage model providers. Once configured, they can be selected in the agent editor."
+      refresh:
+        zh-CN: "刷新"
+        en: "Refresh"
+      group_platform:
+        zh-CN: "平台模型"
+        en: "Platform"
+      group_preset:
+        zh-CN: "预设供应商"
+        en: "Preset Providers"
+      group_custom:
+        zh-CN: "自定义供应商"
+        en: "Custom Providers"
+      group_mine:
+        zh-CN: "我的供应商"
+        en: "My Providers"
+      platform_name:
+        zh-CN: "平台共享模型"
+        en: "Platform Shared Model"
+      platform_desc:
+        zh-CN: "走平台网关，由管理员在服务端 env 配置；按 Token 消耗以精粹结算。"
+        en: "Uses the platform gateway, configured by the admin via server env; billed by token consumption via essence."
+      add_provider:
+        zh-CN: "添加供应商"
+        en: "Add Provider"
+      add_title:
+        zh-CN: "添加模型供应商"
+        en: "Add Model Provider"
+      add_desc:
+        zh-CN: "选择预设可自动填入厂商参数，或选择自定义完全手填。"
+        en: "Pick a preset to auto-fill vendor params, or choose custom to fill everything by hand."
+      preset_type_label:
+        zh-CN: "供应商类型"
+        en: "Provider Type"
+      preset_custom:
+        zh-CN: "自定义供应商"
+        en: "Custom Provider"
+      edit_title:
+        zh-CN: "编辑供应商"
+        en: "Edit Provider"
+      name_label:
+        zh-CN: "名称"
+        en: "Name"
+      name_placeholder:
+        zh-CN: "如：智谱 GLM"
+        en: "e.g. Zhipu GLM"
+      base_url_label:
+        zh-CN: "Base URL"
+        en: "Base URL"
+      base_url_placeholder:
+        zh-CN: "https://api.example.com/v1"
+        en: "https://api.example.com/v1"
+      api_key_label:
+        zh-CN: "API Key"
+        en: "API Key"
+      api_key_placeholder:
+        zh-CN: "输入 API Key"
+        en: "Enter API Key"
+      api_key_kept:
+        zh-CN: "已设置，留空保持不变"
+        en: "Already set, leave empty to keep"
+      api_format_label:
+        zh-CN: "API 格式"
+        en: "API Format"
+      models_label:
+        zh-CN: "模型列表"
+        en: "Model List"
+      add_model:
+        zh-CN: "添加模型"
+        en: "Add Model"
+      model_placeholder:
+        zh-CN: "如 glm-5.1"
+        en: "e.g. glm-5.1"
+      save:
+        zh-CN: "保存"
+        en: "Save"
+      delete:
+        zh-CN: "删除"
+        en: "Delete"
+      enable:
+        zh-CN: "启用"
+        en: "Enable"
+      enabled:
+        zh-CN: "已启用"
+        en: "Enabled"
+      not_enabled:
+        zh-CN: "未启用"
+        en: "Not enabled"
+      delete_confirm:
+        zh-CN: "确认删除该供应商？"
+        en: "Delete this provider?"
+      refresh_done:
+        zh-CN: "已刷新模型列表"
+        en: "Refreshed model list"
+      refresh_failed:
+        zh-CN: "刷新失败：%{error}"
+        en: "Refresh failed: %{error}"
+      empty:
+        zh-CN: "暂无供应商，点击左侧「添加供应商」开始配置。"
+        en: "No providers yet. Click \"Add Provider\" on the left to start."
+      format_anthropic:
+        zh-CN: "Anthropic Messages (/v1/messages)"
+        en: "Anthropic Messages (/v1/messages)"
+      format_openai_chat:
+        zh-CN: "OpenAI Chat Completions"
+        en: "OpenAI Chat Completions"
+      format_openai_responses:
+        zh-CN: "OpenAI Responses"
+        en: "OpenAI Responses"
+      format_gemini:
+        zh-CN: "Gemini Native"
+        en: "Gemini Native"
+  # ── Agent 预设 ──
+  agents:
+    title:
+      zh-CN: "Agent 预设管理"
+      en: "Agent Preset Management"
+    count_unit:
+      zh-CN: "个"
+      en: " presets"
+    new_preset:
+      zh-CN: "新建预设"
+      en: "New Preset"
+    list_title:
+      zh-CN: "预设列表"
+      en: "Presets List"
+    empty_list:
+      zh-CN: "暂无预设"
+      en: "No presets"
+    success_save:
+      zh-CN: "保存成功"
+      en: "Save successful"
+    error_fill_name:
+      zh-CN: "请填写预设名称"
+      en: "Please fill in the preset name"
+    error_save:
+      zh-CN: "保存失败"
+      en: "Save failed"
+    error_delete:
+      zh-CN: "删除失败"
+      en: "Delete failed"
+    preset_name:
+      zh-CN: "预设名称"
+      en: "Preset Name"
+    preset_name_placeholder:
+      zh-CN: "如：激进压制 / 稳健发育 / 游走支援"
+      en: "e.g., Aggressive / Safe / Roaming"
+    agent_type:
+      zh-CN: "Agent 类型"
+      en: "Agent Type"
+    info:
+      zh-CN: "Agent 预设是<strong>英雄无关</strong>的「策略大脑」，可被任意英雄预设复用。英雄绑定在「英雄预设」管理页完成。"
+      en: "Agent presets are <strong>hero-independent</strong> \"strategic brains\" that can be reused by any hero preset. Hero binding is completed on the \"Hero Presets\" management page."
+    type_warning:
+      zh-CN: "<strong>%{type}</strong> 类型尚未接入运行时。该预设可保存，但在对局中会回退为 LLM 决策。"
+      en: "<strong>%{type}</strong> type is not yet integrated into the runtime. This preset can be saved, but will fall back to LLM decision in match."
+    prompt_label:
+      zh-CN: "系统提示词"
+      en: "System Prompt"
+    prompt_placeholder:
+      zh-CN: "描述该 Agent 的行为策略、对线风格、连招意图…"
+      en: "Describe the agent's behavior strategy, laning style, combo intentions..."
+    model_label:
+      zh-CN: "模型（留空用全局默认）"
+      en: "Model (leave empty for global default)"
+    model_placeholder:
+      zh-CN: "如 claude-sonnet-4-5"
+      en: "e.g. claude-sonnet-4-5"
+    save_btn:
+      zh-CN: "保存预设"
+      en: "Save Preset"
+    delete_btn:
+      zh-CN: "删除"
+      en: "Delete"
+    delete_confirm_title:
+      zh-CN: "删除预设「%{name}」？"
+      en: "Delete preset \"%{name}\"?"
+    delete_confirm_desc:
+      zh-CN: "该操作不可撤销。引用此预设的场景槽位需手动重新选择。"
+      en: "This action cannot be undone. Slots referencing this preset will need to be reselected manually."
+    cancel_btn:
+      zh-CN: "取消"
+      en: "Cancel"
+    confirm_delete_btn:
+      zh-CN: "删除"
+      en: "Delete"
+    types:
+      llm:
+        zh-CN: "LLM（语言模型）"
+        en: "LLM (Language Model)"
+      rl:
+        zh-CN: "RL（强化学习）"
+        en: "RL (Reinforcement Learning)"
+      script:
+        zh-CN: "Script（脚本）"
+        en: "Script"
+  # ── 英雄/选手 ──
+  heroes:
+    title:
+      zh-CN: "我的选手"
+      en: "My Players"
+    count_unit:
+      zh-CN: "个"
+      en: " presets"
+    new_preset:
+      zh-CN: "新建选手"
+      en: "New Player"
+    list_title:
+      zh-CN: "预设列表"
+      en: "Presets List"
+    empty_list:
+      zh-CN: "还没有选手，先建一个吧"
+      en: "No players yet — create one to get started."
+    error_fill_name:
+      zh-CN: "请填写选手名称"
+      en: "Please fill in the player name"
+    success_save:
+      zh-CN: "已保存"
+      en: "Saved"
+    error_save:
+      zh-CN: "保存失败"
+      en: "Save failed"
+    error_delete:
+      zh-CN: "删除失败"
+      en: "Delete failed"
+    preset_name:
+      zh-CN: "选手名称"
+      en: "Player Name"
+    preset_name_placeholder:
+      zh-CN: "如：锐雯 · 激进压制"
+      en: "e.g., Riven - Aggressive"
+    hero_label:
+      zh-CN: "英雄"
+      en: "Hero"
+    agent_type:
+      zh-CN: "决策驱动类型"
+      en: "Decision Type"
+    prompt_label:
+      zh-CN: "系统提示词"
+      en: "System Prompt"
+    prompt_placeholder:
+      zh-CN: "描述该选手的行为策略、对线风格、连招意图…"
+      en: "Describe the agent's behavior strategy, laning style, combo intentions..."
+    model_label:
+      zh-CN: "模型（留空用全局默认）"
+      en: "Model (leave empty for global default)"
+    model_placeholder:
+      zh-CN: "如 claude-sonnet-4-5"
+      en: "e.g. claude-sonnet-4-5"
+    provider_label:
+      zh-CN: "模型供应商"
+      en: "Model Provider"
+    provider_platform:
+      zh-CN: "平台模型"
+      en: "Platform Model"
+    model_select_label:
+      zh-CN: "模型名"
+      en: "Model Name"
+    model_manual:
+      zh-CN: "手填"
+      en: "Manual"
+    platform_models_empty:
+      zh-CN: "管理员暂未配置可选平台模型，请联系管理员或改选自带供应商。"
+      en: "No platform models configured by the admin yet. Contact the admin or pick a self-hosted provider."
+    config_json_label:
+      zh-CN: "配置 JSON"
+      en: "Config JSON"
+    config_json_placeholder:
+      zh-CN: "如 {\"speed_multiplier\": 1.0}"
+      en: "e.g. {\"speed_multiplier\": 1.0}"
+    script_label:
+      zh-CN: "脚本"
+      en: "Script (JavaScript)"
+    rl_model_path_label:
+      zh-CN: "模型权重路径 (.pth)"
+      en: "Model Weights Path (.pth)"
+    rl_model_path_placeholder:
+      zh-CN: "如 checkpoints/ppo_riven.pth"
+      en: "e.g. checkpoints/ppo_riven.pth"
+    rl_endpoint_label:
+      zh-CN: "推理端点 URL（可选）"
+      en: "Inference Endpoint URL (BYO, optional)"
+    rl_endpoint_placeholder:
+      zh-CN: "如 ws://127.0.0.1:8765"
+      en: "e.g. ws://127.0.0.1:8765"
+    rl_reward_shaper_label:
+      zh-CN: "Reward Shaper 权重"
+      en: "Reward Shaper Weights"
+    invalid_json:
+      zh-CN: "请输入合法的 JSON 格式"
+      en: "Please enter a valid JSON format"
+    thinking_depth_label:
+      zh-CN: "思考深度"
+      en: "Thinking Depth"
+    thinking_depth_desc:
+      zh-CN: "更高的思考深度让 LLM 在决策前展开更长的推理链，更稳但更慢、消耗更多 token。"
+      en: "Higher depth lets the LLM reason longer before acting — steadier but slower and more token-hungry."
+    import_btn:
+      zh-CN: "导入"
+      en: "Import"
+    export_btn:
+      zh-CN: "导出"
+      en: "Export"
+    sync_btn:
+      zh-CN: "同步"
+      en: "Sync"
+    sync_all_btn:
+      zh-CN: "全部同步云端"
+      en: "Sync All to Cloud"
+    syncing:
+      zh-CN: "同步中…"
+      en: "Syncing…"
+    sync_success:
+      zh-CN: "已同步至云端"
+      en: "Synced to cloud"
+    sync_all_success:
+      zh-CN: "已同步 %{count} 个选手至云端"
+      en: "Synced %{count} player(s) to cloud"
+    sync_resolved:
+      zh-CN: "已解决本地与云端的差异"
+      en: "Resolved differences between local and cloud"
+    sync_failed:
+      zh-CN: "同步失败（请确认已登录）"
+      en: "Failed to sync (please ensure you are logged in)"
+    import_success:
+      zh-CN: "已导入 %{count} 个选手"
+      en: "Imported %{count} player(s)"
+    import_failed:
+      zh-CN: "导入失败：请确认文件为合法的选手 JSON"
+      en: "Import failed: please ensure the file is valid player JSON"
+    unpublished:
+      zh-CN: "未发布改动"
+      en: "Unpublished"
+    unpublished_hint:
+      zh-CN: "当前配置晚于最新快照，需重新发布才会在 Rank 生效。"
+      en: "Current config is newer than the latest snapshot; republish for it to take effect in Rank."
+    div_badge:
+      conflict:
+        zh-CN: "冲突"
+        en: "Conflict"
+      local_only:
+        zh-CN: "未同步"
+        en: "Unsynced"
+      cloud_only:
+        zh-CN: "仅云端"
+        en: "Cloud only"
+    sync_dialog_title:
+      zh-CN: "解决本地与云端的差异"
+      en: "Resolve local vs cloud differences"
+    sync_dialog_desc:
+      zh-CN: "左右对比云端与本地数据，逐项选择保留哪一边。保留本地=推送覆盖云端；保留云端=拉取覆盖本地。"
+      en: "Compare cloud and local side by side and choose which side to keep for each. Keep local = push to cloud; keep cloud = pull to local."
+    sync_dialog_cloud:
+      zh-CN: "云端"
+      en: "Cloud"
+    sync_dialog_local:
+      zh-CN: "本地"
+      en: "Local"
+    sync_dialog_keep_cloud:
+      zh-CN: "保留云端"
+      en: "Keep cloud"
+    sync_dialog_keep_local:
+      zh-CN: "保留本地"
+      en: "Keep local"
+    sync_dialog_apply:
+      zh-CN: "应用选择"
+      en: "Apply choices"
+    sync_dialog_cancel:
+      zh-CN: "取消"
+      en: "Cancel"
+    sync_dialog_applying:
+      zh-CN: "应用中…"
+      en: "Applying…"
+    sync_dialog_no_cloud:
+      zh-CN: "（云端无）"
+      en: "(none on cloud)"
+    sync_dialog_no_local:
+      zh-CN: "（本地无）"
+      en: "(none locally)"
+    sync_dialog_empty:
+      zh-CN: "没有需要解决的差异"
+      en: "No differences to resolve"
+    save_btn:
+      zh-CN: "保存配置"
+      en: "Save Config"
+    delete_btn:
+      zh-CN: "删除"
+      en: "Delete"
+    delete_confirm_title:
+      zh-CN: "删除选手「%{name}」？"
+      en: "Delete player \"%{name}\"?"
+    delete_confirm_desc:
+      zh-CN: "该操作不可撤销。引用此选手的场景槽位需手动重新选择。"
+      en: "This action cannot be undone. Slots referencing this player will need to be reselected manually."
+    cancel_btn:
+      zh-CN: "取消"
+      en: "Cancel"
+    confirm_delete_btn:
+      zh-CN: "删除"
+      en: "Delete"
+    editing:
+      zh-CN: "编辑选手"
+      en: "Editing Player"
+    creating:
+      zh-CN: "新建选手"
+      en: "New Player"
+    untitled:
+      zh-CN: "未命名选手"
+      en: "Untitled Player"
+    tab_config:
+      zh-CN: "配置"
+      en: "Config"
+    tab_publish:
+      zh-CN: "发布与快照"
+      en: "Publish & Snapshots"
+    no_publish:
+      zh-CN: "未发布"
+      en: "Unpublished"
+    visibility_title:
+      zh-CN: "可见性"
+      en: "Visibility"
+    visibility_desc:
+      zh-CN: "公开后他人可在社区 Fork；提示词与模型配置等敏感字段是否暴露由可见性决定。"
+      en: "Public players can be forked by others. Whether prompts and model settings are exposed depends on this visibility."
+    visibility:
+      private:
+        zh-CN: "私有"
+        en: "Private"
+      friends:
+        zh-CN: "好友可见"
+        en: "Friends"
+      public:
+        zh-CN: "公开"
+        en: "Public"
+    visibility_updated:
+      zh-CN: "可见性已更新"
+      en: "Visibility updated"
+    visibility_failed:
+      zh-CN: "更新可见性失败"
+      en: "Failed to update visibility"
+    upstream_sync_title:
+      zh-CN: "上游同步"
+      en: "Upstream Sync"
+    upstream_sync_desc:
+      zh-CN: "该选手 Fork 自上游公开选手。可拉取上游最新策略，覆盖当前编辑态并标记为待发布。"
+      en: "This player was forked from a public upstream. Pull the latest upstream strategy to overwrite the current draft and mark it unpublished."
+    fork_from_label:
+      zh-CN: "Fork 自 "
+      en: "Forked from "
+    fork_author:
+      zh-CN: "经理"
+      en: "manager"
+    pull_upstream_btn:
+      zh-CN: "拉取上游更新"
+      en: "Pull Upstream"
+    diff_title:
+      zh-CN: "拉取上游更新 — 差异预览"
+      en: "Pull Upstream — Diff Preview"
+    diff_prompt_tab:
+      zh-CN: "Prompt"
+      en: "Prompt"
+    diff_config_tab:
+      zh-CN: "配置 JSON"
+      en: "Config JSON"
+    diff_current:
+      zh-CN: "当前"
+      en: "Current"
+    diff_upstream:
+      zh-CN: "上游"
+      en: "Upstream"
+    diff_apply:
+      zh-CN: "应用并覆盖（标记待发布）"
+      en: "Apply & Overwrite (mark unpublished)"
+    diff_cancel:
+      zh-CN: "取消"
+      en: "Cancel"
+    pulling:
+      zh-CN: "拉取中…"
+      en: "Pulling…"
+    pull_success:
+      zh-CN: "已拉取上游策略，请重新发布快照使其在 Rank 生效"
+      en: "Upstream strategy pulled; republish a snapshot for it to take effect in Rank"
+    pull_failed:
+      zh-CN: "拉取上游失败"
+      en: "Failed to pull upstream"
+    publish_title:
+      zh-CN: "发布参赛快照"
+      en: "Publish Competitive Snapshot"
+    publish_desc:
+      zh-CN: "Rank 队列始终取用该选手最新发布的快照。改完配置后需要再发布一次才会进入下一局；进行中的对局不受影响。"
+      en: "The rank queue always uses this player's latest published snapshot. Republish after editing — in-progress matches are unaffected."
+    publish_btn:
+      zh-CN: "发布快照"
+      en: "Publish Snapshot"
+    publishing:
+      zh-CN: "发布中…"
+      en: "Publishing…"
+    publish_success:
+      zh-CN: "已发布 v%{version}"
+      en: "Published v%{version}"
+    publish_failed:
+      zh-CN: "发布失败"
+      en: "Publish failed"
+    publish_needs_sync:
+      zh-CN: "该选手尚未在云端注册，无法发布快照。请先在云端完成同步。"
+      en: "This player isn't registered in the cloud yet, so no snapshot can be published. Sync to cloud first."
+    history_title:
+      zh-CN: "历史快照"
+      en: "Snapshot History"
+    no_snapshots:
+      zh-CN: "尚无历史快照"
+      en: "No snapshots yet"
+    current_latest:
+      zh-CN: "当前最新"
+      en: "Latest"
+    ago_suffix:
+      zh-CN: "前"
+      en: "ago"
+  # ── 脚本编辑器 ──
+  script_editor:
+    template_placeholder:
+      zh-CN: "模板库"
+      en: "Templates"
+    templates:
+      kite:
+        zh-CN: "走 A（风筝）"
+        en: "Kite (Attack-move)"
+      last_hit:
+        zh-CN: "智能补刀"
+        en: "Smart Last-hit"
+      combo:
+        zh-CN: "技能连招"
+        en: "Skill Combo"
+    confirm_overwrite:
+      zh-CN: "当前脚本将被模板覆盖，是否继续？"
+      en: "The current script will be overwritten by the template. Continue?"
+    compile_ok:
+      zh-CN: "编译通过"
+      en: "Compiled"
+    compile_error:
+      zh-CN: "%{count} 处错误"
+      en: "%{count} error(s)"
+    last_reload:
+      zh-CN: "上次热重载"
+      en: "Last reload"
+    never:
+      zh-CN: "从未"
+      en: "never"
+    reload_btn:
+      zh-CN: "应用热重载"
+      en: "Hot Reload"
+    debug_title:
+      zh-CN: "调试与日志"
+      en: "Debug & Logs"
+    step:
+      zh-CN: "单步"
+      en: "Step"
+    breakpoint:
+      zh-CN: "断点"
+      en: "Breakpoint"
+    watch:
+      zh-CN: "变量观测"
+      en: "Watch"
+    clear_logs:
+      zh-CN: "清空"
+      en: "Clear"
+    no_logs:
+      zh-CN: "暂无日志输出"
+      en: "No log output yet"
+    need_runtime:
+      zh-CN: "需在对局运行时接入后启用"
+      en: "Enabled once attached to a running match"
+    log_ready:
+      zh-CN: "脚本编辑器就绪"
+      en: "Script editor ready"
+    log_template_loaded:
+      zh-CN: "已载入模板：%{name}"
+      en: "Template loaded: %{name}"
+    log_compile_error:
+      zh-CN: "检测到 %{count} 处编译错误"
+      en: "%{count} compile error(s) detected"
+    log_reloaded:
+      zh-CN: "已请求热重载当前脚本"
+      en: "Requested hot reload of current script"
+    log_reload_blocked:
+      zh-CN: "存在编译错误，已阻止热重载"
+      en: "Hot reload blocked due to compile errors"
+  # ── 出生点预设 ──
+  spawn_presets:
+    title:
+      zh-CN: "出生点预设管理"
+      en: "Spawn Preset Management"
+    count_unit:
+      zh-CN: "个"
+      en: " presets"
+    new_preset:
+      zh-CN: "新建预设"
+      en: "New Preset"
+    list_title:
+      zh-CN: "预设列表"
+      en: "Presets List"
+    empty_list:
+      zh-CN: "暂无预设"
+      en: "No presets"
+    error_fill_name:
+      zh-CN: "请填写预设名称"
+      en: "Please fill in the preset name"
+    success_save:
+      zh-CN: "保存成功"
+      en: "Save successful"
+    error_save:
+      zh-CN: "保存失败"
+      en: "Save failed"
+    error_delete:
+      zh-CN: "删除失败"
+      en: "Delete failed"
+    preset_name:
+      zh-CN: "预设名称"
+      en: "Preset Name"
+    preset_name_placeholder:
+      zh-CN: "如：上路一塔前方"
+      en: "e.g., Forward Top Tier 1 Tower"
+    team_label:
+      zh-CN: "默认阵营"
+      en: "Default Team"
+    team_order:
+      zh-CN: "Order / 秩序"
+      en: "Order"
+    team_chaos:
+      zh-CN: "Chaos / 混沌"
+      en: "Chaos"
+    team_blue_label:
+      zh-CN: "蓝"
+      en: "Blue"
+    team_red_label:
+      zh-CN: "红"
+      en: "Red"
+    coords_label:
+      zh-CN: "坐标"
+      en: "Coordinates"
+    map_pick_hint:
+      zh-CN: "点击地图设置坐标（15000 × 15000）"
+      en: "Click map to set coordinates (15000 × 15000)"
+    save_btn:
+      zh-CN: "保存预设"
+      en: "Save Preset"
+    delete_btn:
+      zh-CN: "删除"
+      en: "Delete"
+    delete_confirm_title:
+      zh-CN: "删除预设「%{name}」？"
+      en: "Delete preset \"%{name}\"?"
+    delete_confirm_desc:
+      zh-CN: "该操作不可撤销。引用此预设的场景槽位需手动重新选择。"
+      en: "This action cannot be undone. Slots referencing this preset will need to be reselected manually."
+    cancel_btn:
+      zh-CN: "取消"
+      en: "Cancel"
+    confirm_delete_btn:
+      zh-CN: "删除"
+      en: "Delete"
+  # ── 启动器/对局编排 ──
+  launcher:
+    connecting:
+      zh-CN: "正在连接 Bevy 游戏进程..."
+      en: "Connecting to Bevy game process..."
+    cancel_launch:
+      zh-CN: "取消并终止进程"
+      en: "Cancel & Terminate Process"
+    mode_label:
+      zh-CN: "模式"
+      en: "Mode"
+    mode_agent:
+      zh-CN: "AI 决策"
+      en: "AI Decision"
+    mode_sandbox:
+      zh-CN: "沙盒"
+      en: "Sandbox"
+    scenario_label:
+      zh-CN: "场景"
+      en: "Scenario"
+    scenario_placeholder:
+      zh-CN: "scenario name"
+      en: "scenario name"
+    save_btn:
+      zh-CN: "保存"
+      en: "Save"
+    launch_btn:
+      zh-CN: "启动对局"
+      en: "Start Match"
+    save_success:
+      zh-CN: "配置 \"%{name}\" 保存成功！"
+      en: "Configuration \"%{name}\" saved successfully!"
+    save_failed:
+      zh-CN: "保存配置失败"
+      en: "Failed to save configuration"
+    load_failed:
+      zh-CN: "无法加载指定的配置"
+      en: "Failed to load the specified configuration"
+    new_scenario_default_zh:
+      zh-CN: "新建场景"
+      en: "新建场景"
+    new_scenario_default_en:
+      zh-CN: "new_scenario"
+      en: "new_scenario"
+    error_scene_name_required:
+      zh-CN: "请输入场景命名！"
+      en: "Please enter a scenario name!"
+    error_hero_preset_required:
+      zh-CN: "每个槽位需选择一个选手预设"
+      en: "Each slot must have a player preset selected"
+    error_launch_hero_preset_required:
+      zh-CN: "请至少为一个槽位选择选手预设！"
+      en: "Please select a player preset for at least one slot!"
+    error_launch_failed:
+      zh-CN: "无法拉起自定义 AI 对战"
+      en: "Failed to launch custom AI match"
+    copy_suffix:
+      zh-CN: "副本"
+      en: "Copy"
+    dialog_title:
+      zh-CN: "将临时配置存为新选手预设"
+      en: "Save temporary configuration as a new player preset"
+    dialog_desc:
+      zh-CN: "当前槽位已与原预设解绑。保存后槽位会重新绑定到这个新预设，原预设不会被修改。"
+      en: "Current slot has been unbound from the original preset. After saving, the slot will be bound to this new preset. The original preset will not be modified."
+    dialog_name_label:
+      zh-CN: "新预设名称"
+      en: "New Preset Name"
+    dialog_name_placeholder:
+      zh-CN: "如：锐雯 · 激进压制 · 副本"
+      en: "e.g., Riven - Aggressive - Copy"
+    no_brain:
+      zh-CN: "（无大脑）"
+      en: "(No Brain)"
+    default_spawn:
+      zh-CN: "（默认出生点）"
+      en: "(Default Spawn)"
+    dialog_save_btn:
+      zh-CN: "保存为新预设"
+      en: "Save as New Preset"
+    dialog_cancel_btn:
+      zh-CN: "取消"
+      en: "Cancel"
+  # ── 调试控制台 ──
+  debug:
+    connected:
+      zh-CN: "已连接"
+      en: "Connected"
+    disconnected:
+      zh-CN: "未连接"
+      en: "Disconnected"
+    current_hero:
+      zh-CN: "当前调试英雄"
+      en: "Debugging Hero"
+    stop_match:
+      zh-CN: "停止对局"
+      en: "Stop Match"
+    switch_label:
+      zh-CN: "开关设置"
+      en: "Toggles"
+    god_mode:
+      zh-CN: "上帝模式"
+      en: "God Mode"
+    cooldown:
+      zh-CN: "无冷却时间"
+      en: "No Cooldown"
+    paused:
+      zh-CN: "暂停游戏"
+      en: "Pause Game"
+    resume:
+      zh-CN: "恢复运行"
+      en: "Resume"
+    champion_control:
+      zh-CN: "角色控制"
+      en: "Champion Control"
+    switch_champion:
+      zh-CN: "切换当前英雄"
+      en: "Switch Current Hero"
+    quick_actions:
+      zh-CN: "快捷操作"
+      en: "Quick Actions"
+    reset_coords:
+      zh-CN: "重置位置坐标"
+      en: "Reset Coordinates"
+    console_logs_tab:
+      zh-CN: "控制台日志"
+      en: "Console Logs"
+    ai_mind_tab:
+      zh-CN: "AI 决策思维"
+      en: "AI Decision Mind"
+    running_logs_badge:
+      zh-CN: "系统运行日志"
+      en: "System Logs"
+    ai_mind_badge:
+      zh-CN: "Agent 实时决策对话"
+      en: "Agent Live Dialogue"
+    active_agents:
+      zh-CN: "活动代理"
+      en: "Active Agents"
+    no_active_agents:
+      zh-CN: "暂无活动代理决策数据"
+      en: "No active agent decision data"
+    rounds_count:
+      zh-CN: "%{count} 轮"
+      en: "%{count} Rounds"
+    default_agent_name:
+      zh-CN: "AI Agent"
+      en: "AI Agent"
+  # ── 对局历史 ──
+  history:
+    title:
+      zh-CN: "对局历史档案库"
+      en: "Match History Archives"
+    current_selection:
+      zh-CN: "当前选择："
+      en: "Current Selection: "
+    none:
+      zh-CN: "无"
+      en: "None"
+    delete_btn:
+      zh-CN: "删除此对局"
+      en: "Delete Match"
+    refresh_btn:
+      zh-CN: "刷新列表"
+      en: "Refresh List"
+    delete_confirm:
+      zh-CN: "确定要删除这局游戏历史记录吗？此操作无法撤销。"
+      en: "Are you sure you want to delete this match history? This action cannot be undone."
+    no_selection_hint:
+      zh-CN: "请从左侧「最近对局」的已完成列表中选择一局游戏历史记录进行查看"
+      en: "Please select a match history from the list on the left to view"
+    loading_detail:
+      zh-CN: "正在载入该局游戏历史档案详情..."
+      en: "Loading match history details..."
+    active_agents:
+      zh-CN: "对局活动代理"
+      en: "Match Active Agents"
+    team_order:
+      zh-CN: "秩序 Order"
+      en: "Order"
+    team_chaos:
+      zh-CN: "混沌 Chaos"
+      en: "Chaos"
+    rounds_count:
+      zh-CN: "%{count} 轮对话"
+      en: "%{count} Rounds Dialogue"
+    global_prompt:
+      zh-CN: "系统级全局提示词"
+      en: "Global System Prompt"
+    no_global_prompt:
+      zh-CN: "无系统级全局提示词设定。"
+      en: "No global system prompt set."
+    hero_prompt:
+      zh-CN: "英雄级个性化提示词"
+      en: "Hero Personal Prompt"
+    no_hero_prompt:
+      zh-CN: "无系统提示词设定。"
+      en: "No system prompt set."
+  # ── Mock 对话测试 ──
+  mock:
+    chat:
+      title:
+        zh-CN: "对话渲染测试平台"
+        en: "Dialogue Rendering Test Platform"
+      subtitle:
+        zh-CN: "Chat Rendering Mock Bench & Interactive Debugger"
+        en: "Chat Rendering Mock Bench & Interactive Debugger"
+      data_source:
+        zh-CN: "数据源"
+        en: "Data Source"
+      back_btn:
+        zh-CN: "返回调试页"
+        en: "Back to Debug Page"
+      current_agent:
+        zh-CN: "当前渲染代理"
+        en: "Current Mock Agent"
+      decision_cycle:
+        zh-CN: "决策周期"
+        en: "Decision Cycles"
+      turns_count:
+        zh-CN: "%{count} 轮"
+        en: "%{count} Rounds"
+      messages_count:
+        zh-CN: "%{count} 条"
+        en: "%{count} Messages"
+      reset_btn:
+        zh-CN: "🔄 重置 Mock 初始数据"
+        en: "🔄 Reset Mock Initial Data"
+      injector_title:
+        zh-CN: "渲染模拟控制器"
+        en: "Mock Injector"
+      complex_sim:
+        zh-CN: "复杂行为模拟"
+        en: "Complex Behavior Simulation"
+      sim_decision_btn:
+        zh-CN: "🧠 1. 模拟 AI 复杂决策"
+        en: "🧠 1. Simulate AI Complex Decision (Thought+Tool)"
+      sim_result_btn:
+        zh-CN: "⚙️ 2. 模拟返回工具执行结果"
+        en: "⚙️ 2. Simulate Tool Execution Result"
+      manual_add:
+        zh-CN: "手动追加普通消息"
+        en: "Manually Append Messages"
+      input_user_placeholder:
+        zh-CN: "输入环境观测/用户消息..."
+        en: "Enter environment observation / user message..."
+      insert_user_btn:
+        zh-CN: "➕ 插入用户/环境指令"
+        en: "➕ Insert User/Env Instruction"
+      input_ai_placeholder:
+        zh-CN: "输入 AI 决策文本发言..."
+        en: "Enter AI decision dialogue..."
+      insert_ai_btn:
+        zh-CN: "➕ 插入 AI 普通发言"
+        en: "➕ Insert AI Regular Speech"
+      observer_panel:
+        zh-CN: "组件渲染实时观察面板"
+        en: "Real-time Component Rendering Observer Panel"
+      loading_placeholder:
+        zh-CN: "正在等待重新加载 Mock 对话历史流..."
+        en: "Waiting to reload Mock dialogue history stream..."
+  # ── 英雄名 ──
+  champions:
+    Riven:
+      zh-CN: "锐雯"
+      en: "Riven"
+    Fiora:
+      zh-CN: "菲奥娜"
+      en: "Fiora"
+  # ── 通用组件 ──
+  common:
+    slot_card:
+      slot_label:
+        zh-CN: "槽位"
+        en: "Slot"
+      dirty_badge:
+        zh-CN: "已覆盖"
+        en: "Overridden"
+      inherit_badge:
+        zh-CN: "继承"
+        en: "Inherited"
+      delete_slot:
+        zh-CN: "删除槽位"
+        en: "Delete Slot"
+      hero_label:
+        zh-CN: "英雄"
+        en: "Hero"
+      edit_preset:
+        zh-CN: "编辑该选手预设"
+        en: "Edit Player Preset"
+      select_hero_placeholder:
+        zh-CN: "选择我的选手…"
+        en: "Select My Player..."
+      new_hero_label:
+        zh-CN: "新建选手预设"
+        en: "New Player Preset"
+      brain_label:
+        zh-CN: "大脑"
+        en: "Brain"
+      select_agent_placeholder:
+        zh-CN: "Agent 预设…"
+        en: "Agent Preset..."
+      new_agent_label:
+        zh-CN: "新建 Agent 预设"
+        en: "New Agent Preset"
+      spawn_label:
+        zh-CN: "出生点"
+        en: "Spawn Point"
+      select_spawn_placeholder:
+        zh-CN: "出生点预设…"
+        en: "Spawn Preset..."
+      new_spawn_label:
+        zh-CN: "新建出生点预设"
+        en: "New Spawn Preset"
+      save_as_btn:
+        zh-CN: "存为新预设"
+        en: "Save as New Preset"
+    team_slots:
+      add_slot_btn:
+        zh-CN: "槽位"
+        en: "Slot"
+    preset_select:
+      placeholder:
+        zh-CN: "选择预设…"
+        en: "Select Preset..."
+      search_placeholder:
+        zh-CN: "搜索预设…"
+        en: "Search presets..."
+      new_label:
+        zh-CN: "新建预设"
+        en: "New Preset"
+      no_match:
+        zh-CN: "未找到匹配的预设"
+        en: "No matching presets found"
+  # ── 账号与鉴权 ──
+  auth:
+    title:
+      zh-CN: "账号与鉴权"
+      en: "Account & Auth"
+    login:
+      zh-CN: "登录"
+      en: "Login"
+    register:
+      zh-CN: "注册"
+      en: "Register"
+    reset_password:
+      zh-CN: "重置密码"
+      en: "Reset Password"
+    phone:
+      zh-CN: "手机号"
+      en: "Phone Number"
+    phone_placeholder:
+      zh-CN: "请输入 11 位手机号"
+      en: "Enter 11-digit phone number"
+    password:
+      zh-CN: "密码"
+      en: "Password"
+    password_placeholder:
+      zh-CN: "请输入密码 (至少 6 位)"
+      en: "Enter password (at least 6 chars)"
+    code:
+      zh-CN: "验证码"
+      en: "Verification Code"
+    code_placeholder:
+      zh-CN: "输入验证码 (固定为 111111)"
+      en: "Enter code (fixed: 111111)"
+    send_code:
+      zh-CN: "获取验证码"
+      en: "Send Code"
+    login_success:
+      zh-CN: "登录成功"
+      en: "Login successful"
+    register_success:
+      zh-CN: "注册成功"
+      en: "Registration successful"
+    reset_success:
+      zh-CN: "密码重置成功"
+      en: "Password reset successful"
+    logout:
+      zh-CN: "退出登录"
+      en: "Log out"
+    no_account:
+      zh-CN: "还没有账号？点击注册"
+      en: "No account? Register here"
+    has_account:
+      zh-CN: "已有账号？点击登录"
+      en: "Already have an account? Login"
+    forgot_password:
+      zh-CN: "忘记密码？"
+      en: "Forgot password?"
+    confirm_reset:
+      zh-CN: "确认重置"
+      en: "Confirm Reset"
+    confirm_register:
+      zh-CN: "确认注册"
+      en: "Confirm Register"
+    confirm_login:
+      zh-CN: "确认登录"
+      en: "Confirm Login"
+    logout_confirm:
+      zh-CN: "确定要退出登录吗？"
+      en: "Are you sure you want to log out?"
+    unauthenticated:
+      zh-CN: "未登录"
+      en: "Not logged in"
+    role_esports_manager:
+      zh-CN: "电竞经理"
+      en: "Esports Manager"
+  # ── 粒子播放器 ──
+  particles:
+    title:
+      zh-CN: "粒子播放与调参编辑器"
+      en: "Particle Player & Parameter Editor"
+    subtitle:
+      zh-CN: "左侧选择英雄与粒子系统，右侧在线实时调整发射器数据并自动同步播放。"
+      en: "Select hero & particle system on the left, adjust emitter parameters online and auto-sync playback on the right."
+    connect_server:
+      zh-CN: "连接 Server"
+      en: "Connect Server"
+    connecting:
+      zh-CN: "连接中…"
+      en: "Connecting…"
+    refresh_list:
+      zh-CN: "刷新列表"
+      en: "Refresh List"
+    disconnect:
+      zh-CN: "断开"
+      en: "Disconnect"
+    connected:
+      zh-CN: "已连接"
+      en: "Connected"
+    connect_placeholder:
+      zh-CN: "请先启动 lol_particle 渲染服务器，然后点击右上角「连接 Server」"
+      en: "Please start lol_particle render server first, then click 'Connect Server' at the top right."
+    search_placeholder:
+      zh-CN: "搜索英雄或粒子名称 / Hash..."
+      en: "Search hero or particle name / Hash..."
+    clear_search:
+      zh-CN: "清空搜索"
+      en: "Clear Search"
+    loading_all:
+      zh-CN: "全量预加载中..."
+      en: "Preloading all..."
+    total_heroes:
+      zh-CN: "共 %{count} 个英雄"
+      en: "%{count} Heroes total"
+    matched_particles:
+      zh-CN: "匹配 %{count} 个粒子"
+      en: "%{count} Particles matched"
+    no_match:
+      zh-CN: "未找到匹配英雄或粒子"
+      en: "No matching hero or particle found"
+    no_particles_in_system:
+      zh-CN: "该粒子系统未包含复杂的发射器定义数据"
+      en: "This particle system contains no complex emitter data"
+    select_prompt:
+      zh-CN: "请从左侧双层树中展开英雄并选择粒子系统"
+      en: "Please expand a hero from the left tree and select a particle system"
+    auto_play_on_change:
+      zh-CN: "修改时自动播放"
+      en: "Auto-play on change"
+    reset_system:
+      zh-CN: "重置系统"
+      en: "Reset System"
+    reset_emitter:
+      zh-CN: "重置此发射器"
+      en: "Reset Emitter"
+    play_single_emitter:
+      zh-CN: "仅播放此粒子"
+      en: "Play Only This Particle"
+    play:
+      zh-CN: "播放"
+      en: "Play"
+    playing:
+      zh-CN: "正在播放"
+      en: "Playing"
+    stop:
+      zh-CN: "停止"
+      en: "Stop"
+    emitter_editor_title:
+      zh-CN: "发射器属性编辑"
+      en: "Emitter Properties Editor"
+    basic_controls:
+      zh-CN: "基本控制参数"
+      en: "Basic Control Parameters"
+    render_flags:
+      zh-CN: "渲染标志与定向控制"
+      en: "Render Flags & Orientation"
+    samplers:
+      zh-CN: "运动与色彩变换采样器"
+      en: "Motion & Color Samplers"
+    textures_and_materials:
+      zh-CN: "贴图与材质配置"
+      en: "Textures & Materials"
+    emitter_name:
+      zh-CN: "发射器名称"
+      en: "Emitter Name"
+    emitter_lifetime:
+      zh-CN: "发射器寿命"
+      en: "Emitter Lifetime"
+    lifetime_placeholder:
+      zh-CN: "持续秒数 (留空为无限)"
+      en: "Seconds (empty for infinite)"
+    num_frames:
+      zh-CN: "图幅帧数"
+      en: "Number of Frames"
+    blend_mode:
+      zh-CN: "混合模式"
+      en: "Blend Mode"
+    alpha_ref:
+      zh-CN: "透明裁剪"
+      en: "Alpha Reference"
+    rate:
+      zh-CN: "发射速率"
+      en: "Emission Rate"
+    particle_lifetime:
+      zh-CN: "单个粒子寿命"
+      en: "Particle Lifetime"
+    bind_weight:
+      zh-CN: "绑定权重"
+      en: "Bind Weight"
+    single_particle:
+      zh-CN: "单粒子"
+      en: "Single Particle"
+    uniform_scale:
+      zh-CN: "等比缩放"
+      en: "Uniform Scale"
+    random_start_frame:
+      zh-CN: "随机起始帧"
+      en: "Random Start Frame"
+    local_orientation:
+      zh-CN: "局部朝向"
+      en: "Local Orientation"
+    direction_oriented:
+      zh-CN: "方向定向"
+      en: "Direction Oriented"
+    soft_particle:
+      zh-CN: "柔和粒子"
+      en: "Soft Particle"
+    emitter_position:
+      zh-CN: "发射器位置"
+      en: "Emitter Position"
+    birth_velocity:
+      zh-CN: "出生速度"
+      en: "Birth Velocity"
+    birth_acceleration:
+      zh-CN: "出生加速度"
+      en: "Birth Acceleration"
+    birth_rotation0:
+      zh-CN: "出生旋转"
+      en: "Birth Rotation 0"
+    birth_scale0:
+      zh-CN: "出生缩放"
+      en: "Birth Scale 0"
+    scale0:
+      zh-CN: "持续缩放"
+      en: "Scale 0"
+    birth_color:
+      zh-CN: "出生颜色 RGBA"
+      en: "Birth Color RGBA"
+    color:
+      zh-CN: "持续颜色 RGBA"
+      en: "Color RGBA"
+    birth_uv_offset:
+      zh-CN: "出生 UV 偏移"
+      en: "Birth UV Offset"
+    birth_uv_scroll_rate:
+      zh-CN: "出生 UV 滚动速率"
+      en: "Birth UV Scroll Rate"
+    texture:
+      zh-CN: "主贴图"
+      en: "Main Texture"
+    particle_color_texture:
+      zh-CN: "颜色贴图"
+      en: "Color Texture"
+    palette_definition:
+      zh-CN: "调色板贴图"
+      en: "Palette Texture"
+    reflection_definition:
+      zh-CN: "反射贴图"
+      en: "Reflection Texture"
+    tex_div:
+      zh-CN: "UV 分割网格"
+      en: "Tex Div Grid"
+    curve_editor:
+      zh-CN: "采样曲线编辑器"
+      en: "Sampler Curve Editor"
+    convert_to_curve:
+      zh-CN: "转换为曲线"
+      en: "Convert to Curve"
+    convert_to_constant:
+      zh-CN: "转换为常量"
+      en: "Convert to Constant"
+    keyframe_points:
+      zh-CN: "控制节点"
+      en: "Keyframe Nodes"
+    add_keyframe:
+      zh-CN: "添加控制节点"
+      en: "Add Keyframe Node"
+    preset_flat:
+      zh-CN: "平坦"
+      en: "Flat"
+    preset_linear_up:
+      zh-CN: "线性上升"
+      en: "Linear Up"
+    preset_linear_down:
+      zh-CN: "线性下降"
+      en: "Linear Down"
+    preset_ease:
+      zh-CN: "缓入缓出"
+      en: "Ease In-Out"
+    preset_pulse:
+      zh-CN: "脉冲"
+      en: "Pulse"
+    time_ratio:
+      zh-CN: "时间比 t"
+      en: "Time Ratio t"
+    drag_tip:
+      zh-CN: "拖拽节点调整数值 / 双击空白处新增节点"
+      en: "Drag nodes to adjust / Double-click to add node"
+    advanced_definitions:
+      zh-CN: "高级通道与子对象定义"
+      en: "Advanced Sub-object Definitions"
+    alpha_erosion_title:
+      zh-CN: "Alpha 侵蚀消融定义 (Alpha Erosion)"
+      en: "Alpha Erosion Definition"
+    enable_alpha_erosion:
+      zh-CN: "启用 Alpha 侵蚀消融"
+      en: "Enable Alpha Erosion"
+    disable_alpha_erosion:
+      zh-CN: "停用/清除侵蚀定义"
+      en: "Disable / Clear Erosion Definition"
+    erosion_map_name:
+      zh-CN: "侵蚀贴图路径"
+      en: "Erosion Texture Path"
+    erosion_drive_curve:
+      zh-CN: "侵蚀驱动"
+      en: "Erosion Drive"
+    erosion_feather_in:
+      zh-CN: "羽化渐入 (Feather In)"
+      en: "Feather In"
+    erosion_feather_out:
+      zh-CN: "羽化渐出 (Feather Out)"
+      en: "Feather Out"
+    erosion_slice_width:
+      zh-CN: "切片宽度 (Slice Width)"
+      en: "Slice Width"
+    erosion_map_address_mode:
+      zh-CN: "寻址模式"
+      en: "Address Mode"
+    use_linger_erosion_drive_curve:
+      zh-CN: "启用残余 (Linger) 侵蚀驱动"
+      en: "Enable Linger Erosion Drive"
+    linger_erosion_drive_curve:
+      zh-CN: "残余侵蚀驱动"
+      en: "Linger Erosion Drive"
+    address_mode_wrap:
+      zh-CN: "Wrap (重复)"
+      en: "Wrap"
+    address_mode_clamp:
+      zh-CN: "Clamp (边缘截断)"
+      en: "Clamp"
+    address_mode_mirror:
+      zh-CN: "Mirror (镜像)"
+      en: "Mirror"
+  # ── Rank 竞技 ──
+  rank:
+    desc:
+      zh-CN: "Agent 7×24 全自动排队上分，离线时仍持续匹配。"
+      en: "Agents queue automatically 24/7, even while you are offline."
+    mode_label:
+      zh-CN: "模式"
+      en: "Mode"
+    agent_label:
+      zh-CN: "Agent"
+      en: "Agent"
+    snapshot_label:
+      zh-CN: "参赛快照"
+      en: "Snapshot"
+    no_snapshot:
+      zh-CN: "尚未发布快照"
+      en: "No snapshot published"
+    go_publish:
+      zh-CN: "去「我的选手」发布快照 →"
+      en: "Publish a snapshot in My Players →"
+    season_label:
+      zh-CN: "赛季"
+      en: "Season"
+    enroll_title:
+      zh-CN: "报名参赛"
+      en: "Enroll"
+    enroll_desc:
+      zh-CN: "队列始终使用 Agent 最新发布的快照参赛；修改 Agent 后需重新发布快照。"
+      en: "The queue always uses the latest published snapshot. Republish after editing the agent."
+    enqueue_btn:
+      zh-CN: "加入匹配池"
+      en: "Join Queue"
+    enqueueing:
+      zh-CN: "入队中…"
+      en: "Enqueuing..."
+    error_select:
+      zh-CN: "请选择 Agent 与参赛快照"
+      en: "Please select an Agent and a snapshot"
+    queue_title:
+      zh-CN: "我的排队状态"
+      en: "My Queue Status"
+    queue_empty:
+      zh-CN: "当前未在任何队列中。"
+      en: "Not currently in any queue."
+    queue_rating:
+      zh-CN: "ELO"
+      en: "ELO"
+  # ── 排行榜 ──
+  leaderboard:
+    desc:
+      zh-CN: "Agent × 模式维度的 ELO 排名"
+      en: "ELO rankings by Agent × Mode"
+    tab_total:
+      zh-CN: "总排行"
+      en: "Total"
+    tab_daily:
+      zh-CN: "今日增量"
+      en: "Daily Delta"
+    empty:
+      zh-CN: "暂无上榜 Agent"
+      en: "No ranked agents yet"
+    col_agent:
+      zh-CN: "Agent"
+      en: "Agent"
+    col_elo:
+      zh-CN: "ELO"
+      en: "ELO"
+    col_daily_delta:
+      zh-CN: "今日 Delta"
+      en: "Daily Delta"
+    col_record:
+      zh-CN: "胜 / 负"
+      en: "W / L"
+    col_winrate:
+      zh-CN: "胜率"
+      en: "Win Rate"
+  # ── 社区 ──
+  community:
+    desc:
+      zh-CN: "浏览其他电竞经理公开的 Agent，Fork 到本地继续训练或参赛。"
+      en: "Browse public agents from other managers. Fork to your account to train or compete."
+    sort_recent:
+      zh-CN: "最新"
+      en: "Recent"
+    sort_popular:
+      zh-CN: "热门"
+      en: "Popular"
+    sort_elo:
+      zh-CN: "ELO 高"
+      en: "Top ELO"
+    search_placeholder:
+      zh-CN: "搜索 Agent / 英雄"
+      en: "Search Agent / Hero"
+    empty:
+      zh-CN: "暂无公开 Agent"
+      en: "No public agents yet"
+    card_created:
+      zh-CN: "创建于"
+      en: "Created"
+    card_fork_btn:
+      zh-CN: "Fork 到我的 Agent"
+      en: "Fork to My Agents"
+    fork_title:
+      zh-CN: "Fork Agent"
+      en: "Fork Agent"
+    fork_desc:
+      zh-CN: "将创建一个属于你的副本，可继续编辑配置或上游同步。"
+      en: "Create a copy in your account. You can continue editing or sync with upstream."
+    fork_name_label:
+      zh-CN: "名称"
+      en: "Name"
+    fork_cancel:
+      zh-CN: "取消"
+      en: "Cancel"
+    fork_confirm:
+      zh-CN: "确认 Fork"
+      en: "Confirm Fork"
+    forking:
+      zh-CN: "处理中…"
+      en: "Processing..."
+    fork_suffix:
+      zh-CN: "副本"
+      en: "Copy"

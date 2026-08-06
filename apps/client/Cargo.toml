@@ -1,0 +1,33 @@
+[package]
+name = "client"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+gpui = { git = "https://github.com/zed-industries/zed", package = "gpui" }
+gpui_platform = { git = "https://github.com/zed-industries/zed", package = "gpui_platform" }
+gpui-component = { git = "https://github.com/longbridge/gpui-component", package = "gpui-component" }
+gpui-component-assets = { git = "https://github.com/longbridge/gpui-component", package = "gpui-component-assets" }
+lol_rl_protocol.workspace = true
+lol_web_protocol.workspace = true
+lol_client.workspace = true
+lol_agent_runtime.workspace = true
+lol_game_process_manager.workspace = true
+bincode.workspace = true
+serde = { workspace = true, features = ["derive"] }
+serde_json.workspace = true
+tokio = { workspace = true, features = ["full"] }
+tokio-tungstenite = { workspace = true }
+futures-util = { workspace = true }
+sqlx = { version = "0.8.3", default-features = false, features = [
+    "runtime-tokio-native-tls",
+    "sqlite",
+] }
+uuid = { version = "1", features = ["v4"] }
+reqwest = "0.12"
+async-trait = "0.1"
+tracing.workspace = true
+anyhow = "1"
+rust-i18n = "4.2"
+ron = { workspace = true }
+lol_share = { workspace = true }

@@ -170,10 +170,6 @@ fn on_command_particle_spawn(
     q_global_transform: Query<&GlobalTransform>,
 ) {
     let entity = trigger.event_target();
-    info!(
-        "{entity} 系统粒子创建命令，vfx_handle={:08x}",
-        trigger.vfx_handle.0
-    );
 
     let Ok(global_transform) = q_global_transform
         .get(entity)
@@ -197,10 +193,6 @@ fn on_command_particle_spawn(
         );
         return;
     };
-    info!(
-        "{entity} VFX 系统定义已加载，粒子名称={:?}，路径={:?}",
-        vfx_system_def.particle_name, vfx_system_def.particle_path
-    );
 
     // 自动播放粒子系统关联的创建音效（soundOnCreateDefault）
     if let Some(sound_name) = &vfx_system_def.sound_on_create_default {
@@ -211,16 +203,6 @@ fn on_command_particle_spawn(
             });
         }
     }
-
-    let complex_count = vfx_system_def
-        .complex_emitter_definition_data
-        .as_ref()
-        .map_or(0, |v| v.len());
-    let simple_count = vfx_system_def
-        .simple_emitter_definition_data
-        .as_ref()
-        .map_or(0, |v| v.len());
-    info!("{entity} 发射器数量：complex={complex_count} simple={simple_count}");
 
     let vfx_emitter_definition_datas = vfx_system_def
         .complex_emitter_definition_data
@@ -234,14 +216,6 @@ fn on_command_particle_spawn(
         );
 
     for (i, vfx_emitter_definition_data) in vfx_emitter_definition_datas.enumerate() {
-        let emitter_name = vfx_emitter_definition_data
-            .emitter_name
-            .as_deref()
-            .unwrap_or("(无名称)");
-        info!(
-            "{entity} 创建发射器[{i}] name={emitter_name:?} lifetime={:?} is_single_particle={:?}",
-            vfx_emitter_definition_data.lifetime, vfx_emitter_definition_data.is_single_particle,
-        );
         commands.entity(entity).with_related::<EmitterOf>((
             ParticleId {
                 vfx_handle: trigger.vfx_handle,
@@ -259,10 +233,6 @@ fn on_command_particle_spawn(
             global_transform,
         ));
     }
-    info!(
-        "{entity} 粒子创建完成，共创建 {} 个发射器",
-        complex_count + simple_count
-    );
 }
 
 fn on_command_particle_despawn(

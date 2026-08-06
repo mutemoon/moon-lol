@@ -174,7 +174,6 @@ fn on_play_particle(
             rotation: None,
         });
     playing.current = Some(hash);
-    info!("播放粒子 name={particle_name:?} hash={hash:08x}");
     respond(
         &event,
         Ok(json!({ "hash": hash, "particle_name": particle_name })),

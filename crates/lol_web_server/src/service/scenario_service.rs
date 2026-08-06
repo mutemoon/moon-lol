@@ -156,12 +156,15 @@ mod tests {
     }
 
     fn sample_scenario(owner: i32) -> Scenario {
+        let now = Utc::now();
         Scenario {
             id: Uuid::new_v4(),
             owner_id: owner,
             name: "5v5 激进".into(),
             agents: serde_json::json!([{"champion": "Riven"}]),
-            created_at: Utc::now(),
+            win_condition: None,
+            created_at: now,
+            updated_at: now,
         }
     }
 

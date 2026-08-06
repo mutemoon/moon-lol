@@ -1,7 +1,6 @@
 use bevy::color::palettes::tailwind::RED_500;
 use bevy::prelude::*;
 use lol_base::debug_area::DebugArea;
-use lol_base::debug_missile::DebugMissile;
 use lol_base::debug_sphere::DebugSphere;
 use lol_base::grid::ConfigNavigationGrid;
 use lol_base::movement::{MissileBehavior, MovementType};

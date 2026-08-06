@@ -151,6 +151,8 @@ mod tests {
             visibility: Visibility::Private,
             forked_from: None,
             upstream_agent_id: None,
+            created_at: Utc::now(),
+            updated_at: Utc::now(),
         }
     }
 
@@ -299,6 +301,8 @@ mod tests {
             visibility: Visibility::Private,
             forked_from: None,
             upstream_agent_id: None,
+            created_at: Utc::now(),
+            updated_at: Utc::now(),
         };
         let spawn = SpawnPreset {
             id: Uuid::new_v4(),
@@ -331,6 +335,8 @@ mod tests {
             visibility: Visibility::Private,
             forked_from: None,
             upstream_agent_id: None,
+            created_at: Utc::now(),
+            updated_at: Utc::now(),
         };
         let freeze = build_config_freeze(&agent, None, None);
         assert_eq!(freeze["spawn"], serde_json::Value::Null);

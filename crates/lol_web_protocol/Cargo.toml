@@ -1,0 +1,16 @@
+[package]
+name = "lol_web_protocol"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+serde = { workspace = true, features = ["derive"] }
+serde_json.workspace = true
+uuid = { version = "1", features = ["v4", "serde"] }
+
+# Optional: axum integration (enabled by lol_web_server to provide IntoResponse)
+axum = { version = "0.7.9", optional = true }
+
+[features]
+default = []
+axum = ["dep:axum"]

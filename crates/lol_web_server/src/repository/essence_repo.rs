@@ -43,10 +43,11 @@ fn parse_tx(r: &sqlx::postgres::PgRow) -> RepoResult<EssenceTransaction> {
         reason: r.try_get("reason")?,
         reference: r.try_get("reference")?,
         balance_after: r.try_get("balance_after")?,
+        created_at: r.try_get::<DateTime<Utc>, _>("created_at")?,
     })
 }
 
-const TX_COLS: &str = "id, user_id, delta, reason, reference, balance_after";
+const TX_COLS: &str = "id, user_id, delta, reason, reference, balance_after, created_at";
 
 #[async_trait]
 impl EssenceRepo for PgEssenceRepo {

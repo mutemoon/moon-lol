@@ -1,6 +1,7 @@
 //! Room 子系统的持久层（rooms + room_members + room_agent_slots）。
 
 use async_trait::async_trait;
+use chrono::{DateTime, Utc};
 use sqlx::{PgPool, Row};
 use uuid::Uuid;
 
@@ -71,6 +72,8 @@ fn parse_room(r: &sqlx::postgres::PgRow) -> RepoResult<Room> {
             prompt_visible: r.try_get("prompt_visible")?,
         },
         status,
+        created_at: r.try_get::<DateTime<Utc>, _>("created_at")?,
+        member_count: r.try_get("member_count")?,
     })
 }
 
@@ -79,7 +82,8 @@ impl RoomRepo for PgRoomRepo {
     async fn find_by_id(&self, id: Uuid) -> RepoResult<Option<Room>> {
         let row = sqlx::query(
             "SELECT id, owner_id, name, invite_code, max_members, max_agents_per_member, \
-             team_policy, lobby_visible, prompt_visible, status \
+             team_policy, lobby_visible, prompt_visible, status, created_at, \
+             (SELECT COUNT(*)::int4 FROM room_members WHERE room_id = rooms.id) AS member_count \
              FROM rooms WHERE id = $1",
         )
         .bind(id)
@@ -94,7 +98,8 @@ impl RoomRepo for PgRoomRepo {
     async fn find_by_invite_code(&self, code: &str) -> RepoResult<Option<Room>> {
         let row = sqlx::query(
             "SELECT id, owner_id, name, invite_code, max_members, max_agents_per_member, \
-             team_policy, lobby_visible, prompt_visible, status \
+             team_policy, lobby_visible, prompt_visible, status, created_at, \
+             (SELECT COUNT(*)::int4 FROM room_members WHERE room_id = rooms.id) AS member_count \
              FROM rooms WHERE invite_code = $1",
         )
         .bind(code)
@@ -109,7 +114,9 @@ impl RoomRepo for PgRoomRepo {
     async fn list_by_member(&self, user_id: i32) -> RepoResult<Vec<Room>> {
         let rows = sqlx::query(
             "SELECT r.id, r.owner_id, r.name, r.invite_code, r.max_members, \
-             r.max_agents_per_member, r.team_policy, r.lobby_visible, r.prompt_visible, r.status \
+             r.max_agents_per_member, r.team_policy, r.lobby_visible, r.prompt_visible, r.status, \
+             r.created_at, \
+             (SELECT COUNT(*)::int4 FROM room_members WHERE room_id = r.id) AS member_count \
              FROM rooms r JOIN room_members m ON r.id = m.room_id \
              WHERE m.user_id = $1 ORDER BY r.created_at DESC",
         )
@@ -122,7 +129,8 @@ impl RoomRepo for PgRoomRepo {
     async fn list_lobby(&self) -> RepoResult<Vec<Room>> {
         let rows = sqlx::query(
             "SELECT id, owner_id, name, invite_code, max_members, max_agents_per_member, \
-             team_policy, lobby_visible, prompt_visible, status \
+             team_policy, lobby_visible, prompt_visible, status, created_at, \
+             (SELECT COUNT(*)::int4 FROM room_members WHERE room_id = rooms.id) AS member_count \
              FROM rooms WHERE lobby_visible = TRUE AND status = 'lobby' \
              ORDER BY created_at DESC LIMIT 50",
         )
@@ -139,7 +147,8 @@ impl RoomRepo for PgRoomRepo {
              max_agents_per_member, team_policy, lobby_visible, prompt_visible, status) \
              VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 'lobby') \
              RETURNING id, owner_id, name, invite_code, max_members, max_agents_per_member, \
-             team_policy, lobby_visible, prompt_visible, status",
+             team_policy, lobby_visible, prompt_visible, status, created_at, \
+             0::int AS member_count",
         )
         .bind(id)
         .bind(owner_id)

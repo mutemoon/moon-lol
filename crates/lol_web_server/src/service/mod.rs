@@ -7,6 +7,7 @@ pub mod agent_service;
 pub mod agent_snapshot_service;
 pub mod community_service;
 pub mod essence_service;
+pub mod history_service;
 pub mod local_game_service;
 pub mod log_service;
 pub mod match_service;
@@ -28,6 +29,7 @@ pub use community_service::{CommunityService, CommunityServiceImpl};
 pub use essence_service::{
     CheckInResult, EssenceService, EssenceServiceImpl, SubscriptionService, SubscriptionServiceImpl,
 };
+pub use history_service::{HistoryService, HistoryServiceImpl};
 pub use local_game_service::{
     CommandProcessLauncher, LocalGameService, LocalGameServiceImpl, LocalStartInput,
 };

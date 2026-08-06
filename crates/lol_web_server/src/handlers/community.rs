@@ -2,10 +2,11 @@
 
 use axum::Json;
 use axum::extract::{Path, Query, State};
+use lol_web_protocol::agent::Agent;
 use serde::Deserialize;
 use uuid::Uuid;
 
-use super::response::ApiResponse;
+use super::response::{ApiResponse, api_error};
 use super::{AppState, AuthUser};
 
 #[derive(Deserialize)]
@@ -18,7 +19,7 @@ pub async fn browse_community(
     _auth: AuthUser,
     State(s): State<AppState>,
     Query(q): Query<BrowseQuery>,
-) -> ApiResponse<Vec<crate::domain::agent::Agent>> {
+) -> ApiResponse<Vec<Agent>> {
     let sort = q
         .sort
         .as_deref()
@@ -29,8 +30,8 @@ pub async fn browse_community(
         .browse_public(sort, q.limit.unwrap_or(50))
         .await
     {
-        Ok(list) => ApiResponse::ok(list),
-        Err(e) => ApiResponse::from_error(e),
+        Ok(list) => ApiResponse::ok(list.into_iter().map(Into::into).collect()),
+        Err(e) => api_error(e),
     }
 }
 
@@ -44,14 +45,14 @@ pub async fn fork_agent(
     State(s): State<AppState>,
     Path(id): Path<Uuid>,
     Json(req): Json<ForkRequest>,
-) -> ApiResponse<crate::domain::agent::Agent> {
+) -> ApiResponse<Agent> {
     match s
         .community_service
         .fork(auth.user_id, id, req.new_name)
         .await
     {
-        Ok(a) => ApiResponse::ok(a),
-        Err(e) => ApiResponse::from_error(e),
+        Ok(a) => ApiResponse::ok(a.into()),
+        Err(e) => api_error(e),
     }
 }
 
@@ -59,9 +60,9 @@ pub async fn pull_upstream_agent(
     auth: AuthUser,
     State(s): State<AppState>,
     Path(id): Path<Uuid>,
-) -> ApiResponse<crate::domain::agent::Agent> {
+) -> ApiResponse<Agent> {
     match s.community_service.pull_upstream(auth.user_id, id).await {
-        Ok(a) => ApiResponse::ok(a),
-        Err(e) => ApiResponse::from_error(e),
+        Ok(a) => ApiResponse::ok(a.into()),
+        Err(e) => api_error(e),
     }
 }

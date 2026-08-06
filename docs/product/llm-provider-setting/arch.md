@@ -43,14 +43,14 @@ CREATE TABLE IF NOT EXISTS model_providers (
 
 model_provider 子系统按 domain→repository→cache→service→handler 分层：
 
-| 层 | 文件 | 说明 |
-|---|---|---|
-| domain | [model_provider.rs](/crates/lol_web_server/src/domain/model_provider.rs) | `ModelProvider` / `ModelProviderInput` / `ModelProviderDto`（脱敏，`has_api_key`）+ 校验 |
-| repository | [model_provider_repo.rs](/crates/lol_web_server/src/repository/model_provider_repo.rs) | `ModelProviderRepo` trait + `PgModelProviderRepo`；`find_for_runtime` 校验归属；`update` 空串保留旧 key |
-| cache | [model_provider_cache.rs](/crates/lol_web_server/src/cache/model_provider_cache.rs) | `MokaModelProviderCache`（key=user_id，存含明文列表供运行时）+ `NoopModelProviderCache` |
-| service | [model_provider_service.rs](/crates/lol_web_server/src/service/model_provider_service.rs) | `list` 脱敏 / `create` / `update` / `delete` / `resolve_for_runtime`（缓存优先） |
-| handler | [model_provider.rs](/crates/lol_web_server/src/handlers/model_provider.rs) | `list` / `create` / `update` / `delete`，均 `AuthUser` + `State<AppState>` |
-| 组合根 | [main.rs](/crates/lol_web_server/src/main.rs) | 注入 repo→cache→service→`AppState.model_provider_service` |
+| 层         | 文件                                                                                      | 说明                                                                                                    |
+| ---------- | ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| domain     | [model_provider.rs](/crates/lol_web_server/src/domain/model_provider.rs)                  | `ModelProvider` / `ModelProviderInput` / `ModelProviderDto`（脱敏，`has_api_key`）+ 校验                |
+| repository | [model_provider_repo.rs](/crates/lol_web_server/src/repository/model_provider_repo.rs)    | `ModelProviderRepo` trait + `PgModelProviderRepo`；`find_for_runtime` 校验归属；`update` 空串保留旧 key |
+| cache      | [model_provider_cache.rs](/crates/lol_web_server/src/cache/model_provider_cache.rs)       | `MokaModelProviderCache`（key=user_id，存含明文列表供运行时）+ `NoopModelProviderCache`                 |
+| service    | [model_provider_service.rs](/crates/lol_web_server/src/service/model_provider_service.rs) | `list` 脱敏 / `create` / `update` / `delete` / `resolve_for_runtime`（缓存优先）                        |
+| handler    | [model_provider.rs](/crates/lol_web_server/src/handlers/model_provider.rs)                | `list` / `create` / `update` / `delete`，均 `AuthUser` + `State<AppState>`                              |
+| 组合根     | [main.rs](/crates/lol_web_server/src/main.rs)                                             | 注入 repo→cache→service→`AppState.model_provider_service`                                               |
 
 路由注册在 [handlers/mod.rs](/crates/lol_web_server/src/handlers/mod.rs)：`/api/model-providers`（get+post）、`/api/model-providers/:id`（put+delete）。
 
@@ -85,14 +85,14 @@ model_provider 子系统按 domain→repository→cache→service→handler 分�
 
 ## 五、前端实现
 
-| 模块 | 文件 | 说明 |
-|---|---|---|
-| 云端服务接口 | [cloud.ts](/apps/client/src/services/cloud.ts) | `listModelProviders` / `create/update/deleteModelProvider` / `listPlatformModels` |
-| 云端实现 | [cloudImpl.ts](/apps/client/src/services/cloudImpl.ts) | 对接 `/api/model-providers` 与 `/api/platform-models` |
-| 预设目录 | [providerPresets.ts](/apps/client/src/config/providerPresets.ts) | 整理自 cc-switch 的厂商预设；`PLATFORM_PROVIDER_ID` 哨兵 |
-| 状态 | [providersStore.ts](/apps/client/src/stores/providersStore.ts) | `useProviders`：统一走云端模型供应商 CRUD 接口 |
-| 设置页 | [settings.vue](/apps/client/src/pages/settings.vue) | 左导航仅列已配置供应商 + 右表单；新增时「供应商类型」下拉选预设预填厂商参数或自定义手填，CRUD、刷新探测。不再有全局默认凭证卡片 |
-| 选手编辑页 | [heroes.vue](/apps/client/src/pages/heroes.vue) | LLM 模型字段改为供应商 + 模型名级联下拉：平台模型候选来自 `/api/platform-models`（只选不填），自带供应商候选来自其 `models`（保留手填兜底）；写 `model` + `config_json.provider_id` |
+| 模块         | 文件                                                             | 说明                                                                                                                                                                                |
+| ------------ | ---------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 云端服务接口 | [cloud.ts](/apps/client/src/services/cloud.ts)                   | `listModelProviders` / `create/update/deleteModelProvider` / `listPlatformModels`                                                                                                   |
+| 云端实现     | [cloudImpl.ts](/apps/client/src/services/cloudImpl.ts)           | 对接 `/api/model-providers` 与 `/api/platform-models`                                                                                                                               |
+| 预设目录     | [providerPresets.ts](/apps/client/src/config/providerPresets.ts) | 整理自 cc-switch 的厂商预设；`PLATFORM_PROVIDER_ID` 哨兵                                                                                                                            |
+| 状态         | [providersStore.ts](/apps/client/src/stores/providersStore.ts)   | `useProviders`：统一走云端模型供应商 CRUD 接口                                                                                                                                      |
+| 设置页       | [settings.vue](/apps/client/src/pages/settings.vue)              | 左导航仅列已配置供应商 + 右表单；新增时「供应商类型」下拉选预设预填厂商参数或自定义手填，CRUD、刷新探测。不再有全局默认凭证卡片                                                     |
+| 选手编辑页   | [heroes.vue](/apps/client/src/pages/heroes.vue)                  | LLM 模型字段改为供应商 + 模型名级联下拉：平台模型候选来自 `/api/platform-models`（只选不填），自带供应商候选来自其 `models`（保留手填兜底）；写 `model` + `config_json.provider_id` |
 
 ### 存储策略
 
@@ -113,7 +113,7 @@ model_provider 子系统按 domain→repository→cache→service→handler 分�
 
 ## 七、验证
 
-- `cargo check --all-targets`：0 错误（全工作区）。
+- `cargo check --workspace --all-targets`：0 错误（全工作区）。
 - `cargo test -p lol_web_server`：lib + handler + local_game + model_provider 测试通过（已移除 ai_config / config_repo 测试）。
 - 前端 `vue-tsc -b && vite build`：类型检查与构建通过。
 - 手测要点：设置页增删供应商与刷新模型列表（无全局默认凭证卡片）；heroes.vue 选平台模型时下拉为管理员 `PLATFORM_MODELS` 清单、选自带供应商时为其 models 列表并回显；桌面本地对局按 provider 解析凭证（看 `debug!` 日志），选平台模型时走 env 网关；发布快照 `config_freeze` 非空且含 `provider_id`。

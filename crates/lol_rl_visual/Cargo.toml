@@ -1,0 +1,27 @@
+[package]
+name = "lol_rl_visual"
+version = "0.1.0"
+edition = "2024"
+
+[[bin]]
+name = "lol_rl_visual"
+path = "src/main.rs"
+
+[dependencies]
+lol_rl.workspace = true
+lol_env.workspace = true
+lol_rl_protocol.workspace = true
+candle-core = "0.8.2"
+candle-nn = "0.8.2"
+tokio = { workspace = true, features = ["full"] }
+tokio-tungstenite = { workspace = true }
+futures-util = { workspace = true }
+bincode.workspace = true
+serde.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+anyhow = "1"
+
+[features]
+default = []
+cuda = ["lol_rl/cuda", "candle-core/cuda", "candle-nn/cuda"]

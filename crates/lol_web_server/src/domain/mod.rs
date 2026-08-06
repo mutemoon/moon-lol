@@ -8,6 +8,7 @@ pub mod agent_snapshot;
 pub mod auth;
 pub mod community;
 pub mod essence;
+pub mod history;
 pub mod local_game;
 pub mod match_;
 pub mod model_provider;

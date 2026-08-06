@@ -22,6 +22,7 @@ pub mod agent_snapshot;
 pub mod auth;
 pub mod community;
 pub mod essence;
+pub mod history;
 pub mod local_game;
 pub mod match_;
 pub mod model_provider;
@@ -41,11 +42,14 @@ pub use auth::{
 };
 pub use community::{BrowseQuery, ForkRequest};
 pub use essence::{CheckInDto, TransactionsQuery};
+pub use lol_web_protocol::envelope::{ApiError, ApiResponse};
+pub use lol_web_protocol::essence::SubscribeRequest;
+pub use lol_web_protocol::rank::RankEnqueueRequest;
+pub use lol_web_protocol::room::{
+    AddSlotRequest, CreateRoomRequest, JoinByCodeRequest, StartRoomResponse,
+};
 pub use match_::{GetEventsQuery, ListMatchesQuery};
-pub use rank::{LeaderboardQuery, RankEnqueueRequest};
-pub use response::{ApiError, ApiResponse};
-pub use room::{AddSlotRequest, CreateRoomRequest, JoinByCodeRequest, StartRoomResponse};
-pub use subscription::SubscribeRequest;
+pub use rank::LeaderboardQuery;
 
 // ── AppState ──
 
@@ -65,6 +69,7 @@ pub struct AppState {
     pub local_game_service: Arc<dyn LocalGameService>,
     pub admin_service: Arc<dyn AdminService>,
     pub log_service: Arc<dyn LogService>,
+    pub history_service: Arc<dyn HistoryService>,
     pub model_provider_service: Arc<dyn ModelProviderService>,
 }
 
@@ -89,7 +94,7 @@ where
             .headers
             .get(AUTHORIZATION)
             .and_then(|v| v.to_str().ok())
-            .ok_or_else(|| ApiResponse::<()>::from_error(ServiceError::Unauthorized))?;
+            .ok_or_else(|| response::api_error(ServiceError::Unauthorized))?;
 
         let token = if let Some(stripped) = auth_header.strip_prefix("Bearer ") {
             stripped
@@ -105,7 +110,7 @@ where
             &DecodingKey::from_secret(secret.as_bytes()),
             &Validation::default(),
         )
-        .map_err(|_| ApiResponse::<()>::from_error(ServiceError::Unauthorized))?;
+        .map_err(|_| response::api_error(ServiceError::Unauthorized))?;
 
         Ok(AuthUser {
             user_id: token_data.claims.user_id,
@@ -258,6 +263,15 @@ pub fn create_router(state: AppState) -> Router {
             get(subscription::get_subscription).post(subscription::subscribe),
         )
         .route("/api/billing/plans", get(subscription::list_plans))
+        // Game Histories
+        .route(
+            "/api/histories",
+            get(history::list_histories).post(history::upload_history),
+        )
+        .route(
+            "/api/histories/:id",
+            get(history::get_history).delete(history::delete_history),
+        )
         // Admin
         .route("/api/admin/metrics", get(admin::admin_metrics))
         .route("/api/admin/matches/running", get(admin::admin_running))

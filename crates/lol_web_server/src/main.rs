@@ -58,6 +58,7 @@ async fn main() {
 
     let essence_repo = Arc::new(PgEssenceRepo { pool: pool.clone() });
     let subscription_repo = Arc::new(PgSubscriptionRepo { pool: pool.clone() });
+    let history_repo = Arc::new(PgHistoryRepo { pool: pool.clone() });
     let elo_repo = Arc::new(PgEloRepo { pool: pool.clone() });
     let rank_queue_repo = Arc::new(PgRankQueueRepo { pool: pool.clone() });
     let season_repo = Arc::new(PgSeasonRepo { pool: pool.clone() });
@@ -109,6 +110,7 @@ async fn main() {
     ));
 
     let essence_service = Arc::new(EssenceServiceImpl::new(essence_repo.clone()));
+    let history_service = Arc::new(HistoryServiceImpl::new(history_repo.clone()));
 
     // AdminServiceImpl
     let admin_service = Arc::new(AdminServiceImpl::new(
@@ -142,6 +144,7 @@ async fn main() {
         local_game_service,
         admin_service,
         log_service,
+        history_service,
         model_provider_service,
     };
 

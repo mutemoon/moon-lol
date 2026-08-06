@@ -1,5 +1,6 @@
 //! Match 子系统的领域层（对局实例，统一三形态）。
 
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
 use super::spawn_preset::Team;
@@ -141,6 +142,8 @@ pub struct Match {
     pub bevy_port: Option<i32>,
     pub winner_team: Option<Winner>,
     pub abort_reason: Option<String>,
+    pub created_at: DateTime<Utc>,
+    pub finished_at: Option<DateTime<Utc>>,
 }
 
 /// 对局参与者。
@@ -158,11 +161,14 @@ pub struct MatchParticipant {
 /// 对局事件（操作流）。
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct MatchEvent {
+    pub id: i64,
+    pub match_id: uuid::Uuid,
     pub seq: i32,
     pub event_type: String,
     pub agent_id: Option<uuid::Uuid>,
     pub payload: serde_json::Value,
     pub game_time_ms: i64,
+    pub occurred_at: DateTime<Utc>,
 }
 
 /// 状态机：判定状态转换是否合法。

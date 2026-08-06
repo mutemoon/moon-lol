@@ -285,6 +285,7 @@ impl RankMatchCreator for MatchServiceImpl {
 
 #[cfg(test)]
 mod tests {
+    use chrono::Utc;
     use mockall::mock;
     use mockall::predicate::*;
 
@@ -365,6 +366,8 @@ mod tests {
             bevy_port: None,
             winner_team: None,
             abort_reason: None,
+            created_at: Utc::now(),
+            finished_at: None,
         }
     }
 

@@ -182,7 +182,6 @@ pub fn update_particle(
                     life
                 };
 
-            info!("{erosion_drive}");
             for item in uv_frame_values {
                 item[3] = erosion_drive;
             }

@@ -29,7 +29,7 @@
 检查必须包括所有目标
 
 ```sh
-cargo check --all-targets
+cargo check --workspace --all-targets
 ```
 
 # 项目结构

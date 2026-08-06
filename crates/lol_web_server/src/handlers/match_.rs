@@ -5,10 +5,11 @@ use axum::extract::{Path, Query, State};
 use axum::http::HeaderMap;
 use axum::http::header::AUTHORIZATION;
 use jsonwebtoken::{DecodingKey, Validation, decode};
+use lol_web_protocol::match_::{Match, MatchEvent};
 use serde::Deserialize;
 use uuid::Uuid;
 
-use super::response::ApiResponse;
+use super::response::{ApiResponse, api_error};
 use super::{AppState, AuthUser, JwtClaims};
 use crate::service::match_supervisor::{SpectatorMessage, get_broadcasters};
 
@@ -21,18 +22,18 @@ pub async fn list_matches(
     auth: AuthUser,
     State(s): State<AppState>,
     Query(q): Query<ListMatchesQuery>,
-) -> ApiResponse<Vec<crate::domain::match_::Match>> {
+) -> ApiResponse<Vec<Match>> {
     if let Some(status_str) = q.status {
         if let Some(status) = crate::domain::match_::MatchStatus::from_str(&status_str) {
             return match s.match_service.list_by_status(status).await {
-                Ok(list) => ApiResponse::ok(list),
-                Err(e) => ApiResponse::from_error(e),
+                Ok(list) => ApiResponse::ok(list.into_iter().map(Into::into).collect()),
+                Err(e) => api_error(e),
             };
         }
     }
     match s.match_service.list_mine(auth.user_id).await {
-        Ok(list) => ApiResponse::ok(list),
-        Err(e) => ApiResponse::from_error(e),
+        Ok(list) => ApiResponse::ok(list.into_iter().map(Into::into).collect()),
+        Err(e) => api_error(e),
     }
 }
 
@@ -40,10 +41,10 @@ pub async fn get_match(
     auth: AuthUser,
     State(s): State<AppState>,
     Path(id): Path<Uuid>,
-) -> ApiResponse<crate::domain::match_::Match> {
+) -> ApiResponse<Match> {
     match s.match_service.get(auth.user_id, id).await {
-        Ok(m) => ApiResponse::ok(m),
-        Err(e) => ApiResponse::from_error(e),
+        Ok(m) => ApiResponse::ok(m.into()),
+        Err(e) => api_error(e),
     }
 }
 
@@ -58,7 +59,7 @@ pub async fn get_match_events(
     State(s): State<AppState>,
     Path(id): Path<Uuid>,
     Query(q): Query<GetEventsQuery>,
-) -> ApiResponse<Vec<crate::domain::match_::MatchEvent>> {
+) -> ApiResponse<Vec<MatchEvent>> {
     match s
         .match_service
         .get_events(
@@ -69,8 +70,8 @@ pub async fn get_match_events(
         )
         .await
     {
-        Ok(events) => ApiResponse::ok(events),
-        Err(e) => ApiResponse::from_error(e),
+        Ok(events) => ApiResponse::ok(events.into_iter().map(Into::into).collect()),
+        Err(e) => api_error(e),
     }
 }
 
@@ -81,7 +82,7 @@ pub async fn stop_match(
 ) -> ApiResponse<()> {
     match s.local_game_service.stop(auth.user_id, id).await {
         Ok(_) => ApiResponse::ok(()),
-        Err(e) => ApiResponse::from_error(e),
+        Err(e) => api_error(e),
     }
 }
 

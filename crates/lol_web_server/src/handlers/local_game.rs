@@ -4,9 +4,9 @@
 
 use axum::Json;
 use axum::extract::State;
+use lol_web_protocol::room::StartRoomResponse;
 
-use super::response::ApiResponse;
-use super::room::StartRoomResponse;
+use super::response::{ApiResponse, api_error};
 use super::{AppState, AuthUser};
 use crate::service::LocalStartInput;
 
@@ -20,7 +20,7 @@ pub async fn local_start(
             match_id,
             ws_port: port,
         }),
-        Err(e) => ApiResponse::from_error(e),
+        Err(e) => api_error(e),
     }
 }
 
