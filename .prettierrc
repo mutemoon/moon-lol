@@ -1,8 +1,0 @@
-{
-  "plugins": ["prettier-plugin-tailwindcss", "prettier-plugin-package", "prettier-plugin-zh"],
-  "htmlWhitespaceSensitivity": "ignore",
-  "tabWidth": 2,
-  "printWidth": 120,
-  "useTabs": false,
-  "semi": true
-}
