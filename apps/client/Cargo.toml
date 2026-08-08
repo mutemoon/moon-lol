@@ -31,3 +31,9 @@ anyhow = "1"
 rust-i18n = "4.2"
 ron = { workspace = true }
 lol_share = { workspace = true }
+league_property = { workspace = true }
+league_loader = { workspace = true }
+league_utils = { workspace = true }
+rayon = { workspace = true }
+
+

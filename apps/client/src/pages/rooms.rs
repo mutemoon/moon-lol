@@ -209,7 +209,9 @@ fn render_state_input(
         .child(
             h_flex()
                 .items_center()
-                .when(empty, |d| d.text_color(muted).child(placeholder.to_string()))
+                .when(empty, |d| {
+                    d.text_color(muted).child(placeholder.to_string())
+                })
                 .when(!empty, |d| {
                     d.child(before)
                         .child(div().w(px(1.)).h(rems(1.)).bg(accent))
@@ -232,20 +234,29 @@ pub fn render_rooms(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> A
         spawn_refresh_rooms(cx);
     }
 
-    let (lobby_count, my_count, loading, active_tab, join_error, joining, show_create, creating, create_error) =
-        with_state(|s| {
-            (
-                s.lobby_rooms.len(),
-                s.my_rooms.len(),
-                s.loading,
-                s.active_tab,
-                s.join_error.clone(),
-                s.joining,
-                s.show_create,
-                s.creating,
-                s.create_error.clone(),
-            )
-        });
+    let (
+        lobby_count,
+        my_count,
+        loading,
+        active_tab,
+        join_error,
+        joining,
+        show_create,
+        creating,
+        create_error,
+    ) = with_state(|s| {
+        (
+            s.lobby_rooms.len(),
+            s.my_rooms.len(),
+            s.loading,
+            s.active_tab,
+            s.join_error.clone(),
+            s.joining,
+            s.show_create,
+            s.creating,
+            s.create_error.clone(),
+        )
+    });
     let lobby_rooms = with_state(|s| s.lobby_rooms.clone());
     let my_rooms = with_state(|s| s.my_rooms.clone());
 
@@ -312,16 +323,14 @@ pub fn render_rooms(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> A
                     .child(
                         h_flex()
                             .gap_2()
-                            .child(
-                                div().flex_1().child(render_state_input(
-                                    cx,
-                                    "rooms-join-code",
-                                    "ABCD1234",
-                                    || with_state(|s| s.join_code.clone()),
-                                    |v| update_state(|s| s.join_code = v),
-                                    Some(Box::new(|cx| try_join_by_code(cx))),
-                                )),
-                            )
+                            .child(div().flex_1().child(render_state_input(
+                                cx,
+                                "rooms-join-code",
+                                "ABCD1234",
+                                || with_state(|s| s.join_code.clone()),
+                                |v| update_state(|s| s.join_code = v),
+                                Some(Box::new(|cx| try_join_by_code(cx))),
+                            )))
                             .child(
                                 Button::new("rooms-join-btn")
                                     .secondary()
@@ -417,7 +426,9 @@ pub fn render_rooms(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> A
                 }),
         )
         // ── 创建房间对话框 ──
-        .when(show_create, |d| d.child(create_room_dialog(cx, create_error, creating)))
+        .when(show_create, |d| {
+            d.child(create_room_dialog(cx, create_error, creating))
+        })
         .into_any_element()
 }
 
@@ -553,7 +564,11 @@ fn room_card(cx: &mut Context<AppSidebar>, room: &Room, _logged_in: bool) -> Any
         .into_any_element()
 }
 
-fn create_room_dialog(cx: &mut Context<AppSidebar>, create_error: String, creating: bool) -> AnyElement {
+fn create_room_dialog(
+    cx: &mut Context<AppSidebar>,
+    create_error: String,
+    creating: bool,
+) -> AnyElement {
     let (draft_team_policy, draft_lobby_visible) =
         with_state(|s| (s.draft_team_policy.clone(), s.draft_lobby_visible));
     let team_policy_free = draft_team_policy != "single_team";
@@ -637,12 +652,14 @@ fn create_room_dialog(cx: &mut Context<AppSidebar>, create_error: String, creati
                                             "create-max-members",
                                             "10",
                                             || with_state(|s| s.draft_max_members.clone()),
-                                            |v| update_state(|s| {
-                                                s.draft_max_members = v
-                                                    .chars()
-                                                    .filter(|c| c.is_ascii_digit())
-                                                    .collect();
-                                            }),
+                                            |v| {
+                                                update_state(|s| {
+                                                    s.draft_max_members = v
+                                                        .chars()
+                                                        .filter(|c| c.is_ascii_digit())
+                                                        .collect();
+                                                })
+                                            },
                                             None,
                                         )),
                                 )
@@ -656,12 +673,14 @@ fn create_room_dialog(cx: &mut Context<AppSidebar>, create_error: String, creati
                                             "create-max-agents",
                                             "3",
                                             || with_state(|s| s.draft_max_agents.clone()),
-                                            |v| update_state(|s| {
-                                                s.draft_max_agents = v
-                                                    .chars()
-                                                    .filter(|c| c.is_ascii_digit())
-                                                    .collect();
-                                            }),
+                                            |v| {
+                                                update_state(|s| {
+                                                    s.draft_max_agents = v
+                                                        .chars()
+                                                        .filter(|c| c.is_ascii_digit())
+                                                        .collect();
+                                                })
+                                            },
                                             None,
                                         )),
                                 ),
@@ -860,9 +879,8 @@ fn spawn_join_or_enter_room(cx: &mut Context<AppSidebar>, room_id: &str) {
             let mut cx = cx.clone();
             let room_id = room_id.clone();
             async move {
-                let is_member = with_state(|s| {
-                    s.my_rooms.iter().any(|r| r.id.to_string() == room_id)
-                });
+                let is_member =
+                    with_state(|s| s.my_rooms.iter().any(|r| r.id.to_string() == room_id));
                 if !is_member {
                     let _ = cloud_client().join_room(&room_id).await;
                 }
@@ -884,9 +902,7 @@ fn spawn_create_room(cx: &mut Context<AppSidebar>, room_name: &str, constraints:
             let mut cx = cx.clone();
             let room_name = room_name.clone();
             async move {
-                let result = cloud_client()
-                    .create_room(&room_name, &constraints)
-                    .await;
+                let result = cloud_client().create_room(&room_name, &constraints).await;
                 update_state(|s| s.creating = false);
                 match result {
                     Ok(_) => {

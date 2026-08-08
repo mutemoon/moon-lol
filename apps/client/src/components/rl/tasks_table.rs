@@ -1,0 +1,722 @@
+use gpui::prelude::FluentBuilder as _;
+use gpui::*;
+use gpui_component::button::{Button, ButtonVariants};
+use gpui_component::scroll::ScrollableElement;
+use gpui_component::table::{Column, DataTable, TableDelegate, TableState};
+use gpui_component::{
+    h_flex, v_flex, ActiveTheme, Disableable, IconName, Sizable as _, StyledExt, WindowExt as _,
+};
+use lol_rl_protocol::{InFrame, TaskConfigPayload, TaskOverviewItem};
+use rust_i18n::t;
+
+use crate::components::sidebar::AppSidebar;
+use crate::types::ActiveView;
+
+/// 任务概览表 delegate：驱动 `DataTable` 的列宽/单元格渲染，并反向通信到 `AppSidebar`。
+pub struct TaskTableDelegate {
+    tasks: Vec<TaskOverviewItem>,
+    columns: Vec<Column>,
+    sidebar: gpui::WeakEntity<AppSidebar>,
+}
+
+impl TaskTableDelegate {
+    pub fn new(sidebar: gpui::WeakEntity<AppSidebar>) -> Self {
+        Self {
+            tasks: Vec::new(),
+            columns: vec![
+                Column::new("task", t!("app.rl.col_task"))
+                    .width(px(220.))
+                    .min_width(px(140.)),
+                Column::new("agent", t!("app.rl.col_algorithm")).width(px(140.)),
+                Column::new("status", t!("app.rl.col_status"))
+                    .width(px(90.))
+                    .text_center(),
+                Column::new("steps", t!("app.rl.col_steps"))
+                    .width(px(80.))
+                    .text_right(),
+                Column::new("return", t!("app.rl.col_return"))
+                    .width(px(90.))
+                    .text_right(),
+                Column::new("ckpt", t!("app.rl.col_checkpoints"))
+                    .width(px(70.))
+                    .text_right(),
+                Column::new("actions", t!("app.rl.col_actions"))
+                    .width(px(150.))
+                    .selectable(false),
+            ],
+            sidebar,
+        }
+    }
+
+    /// 更新数据。不触发 `TableState::refresh()`，以保留用户手动调整过的列宽。
+    pub fn set_tasks(&mut self, tasks: Vec<TaskOverviewItem>) {
+        self.tasks = tasks;
+    }
+}
+
+impl TableDelegate for TaskTableDelegate {
+    fn columns_count(&self, _: &App) -> usize {
+        self.columns.len()
+    }
+
+    fn rows_count(&self, _: &App) -> usize {
+        self.tasks.len()
+    }
+
+    fn column(&self, col_ix: usize, _cx: &App) -> Column {
+        self.columns.get(col_ix).cloned().unwrap_or_default()
+    }
+
+    fn render_th(
+        &mut self,
+        col_ix: usize,
+        _window: &mut Window,
+        cx: &mut Context<TableState<Self>>,
+    ) -> impl IntoElement {
+        let col = self.column(col_ix, cx);
+        div()
+            .size_full()
+            .h_flex()
+            .items_center()
+            .when(col.align == TextAlign::Right, |this| this.justify_end())
+            .when(col.align == TextAlign::Center, |this| this.justify_center())
+            .child(col.name.clone())
+    }
+
+    fn render_td(
+        &mut self,
+        row_ix: usize,
+        col_ix: usize,
+        _window: &mut Window,
+        cx: &mut Context<TableState<Self>>,
+    ) -> impl IntoElement {
+        let Some(task) = self.tasks.get(row_ix) else {
+            return div().into_any_element();
+        };
+        let cell_content: AnyElement = match col_ix {
+            0 => v_flex()
+                .gap_0p5()
+                .child(div().font_bold().child(task.name.clone()))
+                .child(
+                    div()
+                        .text_xs()
+                        .text_color(cx.theme().muted_foreground)
+                        .child(task.id.clone()),
+                )
+                .into_any_element(),
+            1 => v_flex()
+                .gap_0p5()
+                .child(div().child(task.agent_type.clone()))
+                .child(
+                    div()
+                        .text_xs()
+                        .text_color(cx.theme().muted_foreground)
+                        .child(task.env_name.clone()),
+                )
+                .into_any_element(),
+            2 => {
+                let is_running = task.status == "running";
+                div()
+                    .px_2()
+                    .py_1()
+                    .rounded_md()
+                    .text_xs()
+                    .font_bold()
+                    .bg(if is_running {
+                        cx.theme().accent
+                    } else {
+                        cx.theme().secondary
+                    })
+                    .child(task.status.to_uppercase())
+                    .into_any_element()
+            }
+            3 => div()
+                .w_full()
+                .text_right()
+                .child(task.current_step.to_string())
+                .into_any_element(),
+            4 => div()
+                .w_full()
+                .text_right()
+                .child(format!("{:.2}", task.ep_return))
+                .into_any_element(),
+            5 => div()
+                .w_full()
+                .text_right()
+                .child(task.checkpoints_count.to_string())
+                .into_any_element(),
+            6 => render_actions(
+                task.id.clone(),
+                task.status == "running",
+                self.sidebar.clone(),
+                cx,
+            ),
+            _ => div().into_any_element(),
+        };
+
+        div()
+            .size_full()
+            .h_flex()
+            .items_center()
+            .child(cell_content)
+            .into_any_element()
+    }
+}
+
+fn render_actions(
+    task_id: String,
+    is_running: bool,
+    weak: gpui::WeakEntity<AppSidebar>,
+    cx: &mut Context<TableState<TaskTableDelegate>>,
+) -> AnyElement {
+    h_flex()
+        .gap_1()
+        .justify_end()
+        .child(
+            Button::new(format!("view-{task_id}"))
+                .compact()
+                .ghost()
+                .icon(IconName::Eye)
+                .on_click({
+                    let weak = weak.clone();
+                    let tid = task_id.clone();
+                    cx.listener(move |_, _, _, cx| {
+                        let _ = weak.update(cx, |s, s_cx| {
+                            s.selected_task_id = Some(tid.clone());
+                            s.navigate_to(ActiveView::RlTaskDetail);
+                            s_cx.notify();
+                        });
+                    })
+                }),
+        )
+        .child(
+            Button::new(format!("stop-{task_id}"))
+                .compact()
+                .ghost()
+                .icon(IconName::CircleX)
+                .disabled(!is_running)
+                .on_click({
+                    let weak = weak.clone();
+                    let tid = task_id.clone();
+                    cx.listener(move |_, _, _, cx| {
+                        let _ = weak.update(cx, |s, s_cx| {
+                            if let Some(tx) = &s.tx {
+                                let _ = tx.send(InFrame::Control {
+                                    task_id: tid.clone(),
+                                    command: "stop".into(),
+                                    config_json: None,
+                                });
+                            }
+                            s_cx.notify();
+                        });
+                    })
+                }),
+        )
+        .child(
+            Button::new(format!("save-{task_id}"))
+                .compact()
+                .ghost()
+                .icon(IconName::HardDrive)
+                .on_click({
+                    let weak = weak.clone();
+                    let tid = task_id.clone();
+                    cx.listener(move |_, _, _, cx| {
+                        let _ = weak.update(cx, |s, s_cx| {
+                            if let Some(tx) = &s.tx {
+                                let _ = tx.send(InFrame::SaveCheckpoint {
+                                    task_id: tid.clone(),
+                                });
+                            }
+                            s_cx.notify();
+                        });
+                    })
+                }),
+        )
+        .child(
+            Button::new(format!("delete-{task_id}"))
+                .compact()
+                .ghost()
+                .icon(IconName::Delete)
+                .on_click({
+                    let weak = weak.clone();
+                    let tid = task_id.clone();
+                    cx.listener(move |_, _, window, cx| {
+                        // on_ok 拿不到 AppSidebar，提前取出发帧通道
+                        let tx = weak.update(cx, |s, _| s.tx.clone()).unwrap_or(None);
+                        let tid_dialog = tid.clone();
+                        window.open_alert_dialog(cx, move |alert, _, _| {
+                            let tx_dialog = tx.clone();
+                            let tid_ok = tid_dialog.clone();
+                            alert
+                                .confirm()
+                                .title(t!("app.rl.delete_task_title"))
+                                .description(t!("app.rl.delete_task_desc"))
+                                .on_ok(move |_, _, _| {
+                                    if let Some(tx) = &tx_dialog {
+                                        let _ = tx.send(InFrame::DeleteTask {
+                                            task_id: tid_ok.clone(),
+                                        });
+                                    }
+                                    true
+                                })
+                        });
+                    })
+                }),
+        )
+        .into_any_element()
+}
+
+// 渲染多强化学习任务/学习实例概览表格
+pub fn render_tasks_table(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> AnyElement {
+    let main_content = v_flex()
+        .size_full()
+        .flex_1()
+        .gap_4()
+        .overflow_hidden()
+        .child(
+            h_flex()
+                .items_center()
+                .justify_between()
+                .child(
+                    h_flex()
+                        .gap_2()
+                        .items_center()
+                        .child(IconName::LayoutDashboard)
+                        .child(div().font_bold().text_lg().child(t!("app.rl.page_title"))),
+                )
+                .child(
+                    h_flex()
+                        .gap_2()
+                        .items_center()
+                        .child(ws_status_badge(sidebar.ws_connected, cx))
+                        .child(
+                            Button::new("new-task-btn")
+                                .primary()
+                                .icon(IconName::Plus)
+                                .label(t!("app.rl.new_task"))
+                                .on_click(cx.listener(|this, _, _, cx| {
+                                    let task_count = this.task_list.len() + 1;
+                                    let mut form = TaskConfigPayload::default();
+                                    form.name = format!("RL 对战训练任务 #{}", task_count);
+                                    this.create_task_form = form;
+                                    this.create_task_modal_open = true;
+                                    cx.notify();
+                                })),
+                        )
+                        .child(
+                            Button::new("refresh-btn")
+                                .outline()
+                                .icon(IconName::Loader)
+                                .label(t!("app.rl.refresh_list"))
+                                .on_click(cx.listener(|this, _, _, cx| {
+                                    this.send_in_frame(InFrame::GetTaskList);
+                                    cx.notify();
+                                })),
+                        ),
+                ),
+        )
+        .child(match &sidebar.table_state {
+            Some(table_state) => div()
+                .id("tasks-table-scroll")
+                .flex_1()
+                .w_full()
+                .child(
+                    DataTable::new(table_state)
+                        .bordered(true)
+                        .stripe(false)
+                        .with_size(px(52.)),
+                )
+                .into_any_element(),
+            None => div().flex_1().into_any_element(),
+        });
+
+    if sidebar.create_task_modal_open {
+        div()
+            .relative()
+            .size_full()
+            .child(main_content)
+            .child(render_create_task_modal(sidebar, cx))
+            .into_any_element()
+    } else {
+        main_content.into_any_element()
+    }
+}
+
+// 渲染新建 RL 任务参数配置弹窗 (Create Task Modal)
+fn render_create_task_modal(sidebar: &AppSidebar, cx: &mut Context<AppSidebar>) -> AnyElement {
+    let cfg = &sidebar.create_task_form;
+
+    div()
+        .absolute()
+        .inset_0()
+        .bg(hsla(0.0, 0.0, 0.0, 0.65))
+        .flex()
+        .items_center()
+        .justify_center()
+        .child(
+            v_flex()
+                .w(px(640.))
+                .max_h(px(680.))
+                .bg(cx.theme().background)
+                .border_1()
+                .border_color(cx.theme().border)
+                .rounded_xl()
+                .shadow_lg()
+                .p_6()
+                .gap_4()
+                .child(
+                    // 弹窗 Header
+                    h_flex()
+                        .justify_between()
+                        .items_center()
+                        .child(
+                            h_flex()
+                                .gap_2()
+                                .items_center()
+                                .child(IconName::Plus)
+                                .child(div().font_bold().text_lg().child("新建 RL 对战训练任务")),
+                        )
+                        .child(
+                            Button::new("close-modal-btn")
+                                .ghost()
+                                .icon(IconName::Close)
+                                .on_click(cx.listener(|this, _, _, cx| {
+                                    this.create_task_modal_open = false;
+                                    cx.notify();
+                                })),
+                        ),
+                )
+                .child(
+                    // 滚动表达区域
+                    v_flex()
+                        .id("modal-form-scroll")
+                        .flex_1()
+                        .gap_4()
+                        .overflow_y_scrollbar()
+                        .p_1()
+                        // 1. 任务名称
+                        .child(
+                            v_flex()
+                                .gap_1()
+                                .child(
+                                    div()
+                                        .text_xs()
+                                        .font_bold()
+                                        .text_color(cx.theme().muted_foreground)
+                                        .child("任务名称"),
+                                )
+                                .child(
+                                    div()
+                                        .p_2()
+                                        .bg(cx.theme().secondary)
+                                        .rounded_md()
+                                        .text_sm()
+                                        .font_semibold()
+                                        .child(cfg.name.clone()),
+                                ),
+                        )
+                        // 2. 算法与环境标识
+                        .child(
+                            h_flex()
+                                .gap_4()
+                                .child(
+                                    v_flex()
+                                        .flex_1()
+                                        .gap_1()
+                                        .child(
+                                            div()
+                                                .text_xs()
+                                                .font_bold()
+                                                .text_color(cx.theme().muted_foreground)
+                                                .child("算法模型 (Agent)"),
+                                        )
+                                        .child(
+                                            div()
+                                                .p_2()
+                                                .bg(cx.theme().secondary)
+                                                .rounded_md()
+                                                .text_sm()
+                                                .child(cfg.agent_type.clone()),
+                                        ),
+                                )
+                                .child(
+                                    v_flex()
+                                        .flex_1()
+                                        .gap_1()
+                                        .child(
+                                            div()
+                                                .text_xs()
+                                                .font_bold()
+                                                .text_color(cx.theme().muted_foreground)
+                                                .child("训练环境 (Env)"),
+                                        )
+                                        .child(
+                                            div()
+                                                .p_2()
+                                                .bg(cx.theme().secondary)
+                                                .rounded_md()
+                                                .text_sm()
+                                                .child(cfg.env_name.clone()),
+                                        ),
+                                ),
+                        )
+                        // 3. 学习率 Learning Rate (lr)
+                        .child(render_num_setting(
+                            "学习率 (Learning Rate / lr)",
+                            format!("{:.5}", cfg.lr),
+                            vec![
+                                ("1e-4", 0.0001),
+                                ("3e-4", 0.0003),
+                                ("5e-4", 0.0005),
+                                ("1e-3", 0.0010),
+                            ],
+                            cfg.lr,
+                            cx,
+                            |this, val| this.create_task_form.lr = val,
+                        ))
+                        // 4. 折扣因子 Gamma
+                        .child(render_num_setting(
+                            "折扣因子 (Gamma / γ)",
+                            format!("{:.3}", cfg.gamma),
+                            vec![
+                                ("0.90", 0.90),
+                                ("0.95", 0.95),
+                                ("0.98", 0.98),
+                                ("0.99", 0.99),
+                                ("0.999", 0.999),
+                            ],
+                            cfg.gamma,
+                            cx,
+                            |this, val| this.create_task_form.gamma = val,
+                        ))
+                        // 5. GAE Lambda
+                        .child(render_num_setting(
+                            "GAE 因子 (Lambda / λ)",
+                            format!("{:.2}", cfg.gae_lambda),
+                            vec![
+                                ("0.80", 0.80),
+                                ("0.90", 0.90),
+                                ("0.95", 0.95),
+                                ("0.98", 0.98),
+                            ],
+                            cfg.gae_lambda,
+                            cx,
+                            |this, val| this.create_task_form.gae_lambda = val,
+                        ))
+                        // 6. PPO Clip Epsilon
+                        .child(render_num_setting(
+                            "PPO Clip 范围 (Clip Epsilon / ε)",
+                            format!("{:.2}", cfg.clip_eps),
+                            vec![
+                                ("0.10", 0.10),
+                                ("0.15", 0.15),
+                                ("0.20", 0.20),
+                                ("0.25", 0.25),
+                                ("0.30", 0.30),
+                            ],
+                            cfg.clip_eps,
+                            cx,
+                            |this, val| this.create_task_form.clip_eps = val,
+                        ))
+                        // 7. PPO Epochs & 隐藏层维度
+                        .child(
+                            h_flex()
+                                .gap_4()
+                                .child(div().flex_1().child(render_int_setting(
+                                    "每轮训练 Epochs",
+                                    cfg.ppo_epochs,
+                                    vec![1, 2, 4, 8],
+                                    cx,
+                                    |this, val| this.create_task_form.ppo_epochs = val,
+                                )))
+                                .child(div().flex_1().child(render_int_setting(
+                                    "隐藏层神经元 (Hidden Dim)",
+                                    cfg.hidden_dim,
+                                    vec![32, 64, 128, 256],
+                                    cx,
+                                    |this, val| this.create_task_form.hidden_dim = val,
+                                ))),
+                        )
+                        // 8. 并行对局数与总训练轮次
+                        .child(
+                            h_flex()
+                                .gap_4()
+                                .child(div().flex_1().child(render_int_setting(
+                                    "并行对局数 (Parallel Envs)",
+                                    cfg.parallel_envs,
+                                    vec![1, 2, 4, 8, 16],
+                                    cx,
+                                    |this, val| this.create_task_form.parallel_envs = val,
+                                )))
+                                .child(div().flex_1().child(render_int_setting(
+                                    "总训练迭代轮次 (Total Iterations)",
+                                    cfg.total_iterations,
+                                    vec![20, 50, 80, 150, 300],
+                                    cx,
+                                    |this, val| this.create_task_form.total_iterations = val,
+                                ))),
+                        ),
+                )
+                .child(
+                    // 底部 Action
+                    h_flex()
+                        .justify_between()
+                        .items_center()
+                        .child(
+                            Button::new("reset-default-btn")
+                                .outline()
+                                .label("恢复默认配置")
+                                .on_click(cx.listener(|this, _, _, cx| {
+                                    let name = this.create_task_form.name.clone();
+                                    let mut def = TaskConfigPayload::default();
+                                    def.name = name;
+                                    this.create_task_form = def;
+                                    cx.notify();
+                                })),
+                        )
+                        .child(
+                            h_flex()
+                                .gap_2()
+                                .child(
+                                    Button::new("cancel-create-btn")
+                                        .ghost()
+                                        .label("取消")
+                                        .on_click(cx.listener(|this, _, _, cx| {
+                                            this.create_task_modal_open = false;
+                                            cx.notify();
+                                        })),
+                                )
+                                .child(
+                                    Button::new("confirm-create-btn")
+                                        .primary()
+                                        .icon(IconName::Plus)
+                                        .label("确认创建任务")
+                                        .on_click(cx.listener(|this, _, _, cx| {
+                                            let mut config = this.create_task_form.clone();
+                                            config.max_steps = config.parallel_envs
+                                                * config.rollout_steps_per_env
+                                                * config.total_iterations;
+                                            this.send_in_frame(InFrame::CreateTask { config });
+                                            this.create_task_modal_open = false;
+                                            cx.notify();
+                                        })),
+                                ),
+                        ),
+                ),
+        )
+        .into_any_element()
+}
+
+// 帮助组件：渲染浮点参数面板及预设 Pill 按钮
+fn render_num_setting<F>(
+    label: &str,
+    display_val: String,
+    presets: Vec<(&'static str, f32)>,
+    current_val: f32,
+    cx: &mut Context<AppSidebar>,
+    setter: F,
+) -> AnyElement
+where
+    F: Fn(&mut AppSidebar, f32) + Send + Sync + 'static + Copy,
+{
+    v_flex()
+        .gap_1()
+        .child(
+            h_flex()
+                .justify_between()
+                .child(
+                    div()
+                        .text_xs()
+                        .font_bold()
+                        .text_color(cx.theme().muted_foreground)
+                        .child(label.to_string()),
+                )
+                .child(div().text_xs().font_bold().child(display_val)),
+        )
+        .child(
+            h_flex()
+                .gap_1()
+                .children(presets.into_iter().map(|(name, val)| {
+                    let is_selected = (val - current_val).abs() < 1e-6;
+                    let btn = if is_selected {
+                        Button::new(format!("preset-{label}-{name}"))
+                            .primary()
+                            .compact()
+                            .label(name)
+                    } else {
+                        Button::new(format!("preset-{label}-{name}"))
+                            .outline()
+                            .compact()
+                            .label(name)
+                    };
+                    btn.on_click(cx.listener(move |this, _, _, cx| {
+                        setter(this, val);
+                        cx.notify();
+                    }))
+                })),
+        )
+        .into_any_element()
+}
+
+// 帮助组件：渲染整数参数面板及预设 Pill 按钮
+fn render_int_setting<F>(
+    label: &str,
+    current_val: usize,
+    presets: Vec<usize>,
+    cx: &mut Context<AppSidebar>,
+    setter: F,
+) -> AnyElement
+where
+    F: Fn(&mut AppSidebar, usize) + Send + Sync + 'static + Copy,
+{
+    v_flex()
+        .gap_1()
+        .child(
+            h_flex()
+                .justify_between()
+                .child(
+                    div()
+                        .text_xs()
+                        .font_bold()
+                        .text_color(cx.theme().muted_foreground)
+                        .child(label.to_string()),
+                )
+                .child(div().text_xs().font_bold().child(current_val.to_string())),
+        )
+        .child(h_flex().gap_1().children(presets.into_iter().map(|val| {
+            let is_selected = val == current_val;
+            let val_str = val.to_string();
+            let btn = if is_selected {
+                Button::new(format!("preset-int-{label}-{val}"))
+                    .primary()
+                    .compact()
+                    .label(val_str)
+            } else {
+                Button::new(format!("preset-int-{label}-{val}"))
+                    .outline()
+                    .compact()
+                    .label(val_str)
+            };
+            btn.on_click(cx.listener(move |this, _, _, cx| {
+                setter(this, val);
+                cx.notify();
+            }))
+        })))
+        .into_any_element()
+}
+
+// WebSocket 连接状态：小圆点 + 简洁文案，位于标题行右侧
+fn ws_status_badge(connected: bool, cx: &mut Context<AppSidebar>) -> AnyElement {
+    let (color, label) = if connected {
+        (cx.theme().accent, t!("app.rl.ws_connected"))
+    } else {
+        (cx.theme().muted_foreground, t!("app.rl.ws_disconnected"))
+    };
+    h_flex()
+        .gap_1()
+        .items_center()
+        .text_xs()
+        .child(div().w_2().h_2().rounded_full().bg(color))
+        .child(label)
+        .into_any_element()
+}

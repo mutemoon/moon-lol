@@ -176,7 +176,9 @@ fn render_input(
         .child(
             h_flex()
                 .items_center()
-                .when(empty, |d| d.text_color(muted).child(placeholder.to_string()))
+                .when(empty, |d| {
+                    d.text_color(muted).child(placeholder.to_string())
+                })
                 .when(!empty, |d| {
                     d.child(display(&before))
                         .child(div().w(px(1.)).h(rems(1.)).bg(accent))
@@ -384,7 +386,10 @@ fn render_dialog(_sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> Any
         field("手机号", phone_input),
     ];
     if show_password {
-        children.push(field(if is_reset { "新密码" } else { "密码" }, password_input));
+        children.push(field(
+            if is_reset { "新密码" } else { "密码" },
+            password_input,
+        ));
     }
     if show_code {
         children.push(field("验证码", code_input));
@@ -460,15 +465,16 @@ fn submit(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) {
         cx.notify();
         return;
     }
-    if matches!(mode, AuthMode::PasswordLogin | AuthMode::Register)
-        && password.chars().count() < 6
+    if matches!(mode, AuthMode::PasswordLogin | AuthMode::Register) && password.chars().count() < 6
     {
         set_error("密码长度至少为 6 位");
         cx.notify();
         return;
     }
-    if matches!(mode, AuthMode::CodeLogin | AuthMode::Register | AuthMode::ResetPassword)
-        && code.is_empty()
+    if matches!(
+        mode,
+        AuthMode::CodeLogin | AuthMode::Register | AuthMode::ResetPassword
+    ) && code.is_empty()
     {
         set_error("请输入验证码");
         cx.notify();
@@ -480,51 +486,53 @@ fn submit(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) {
     cx.notify();
 
     let cloud = sidebar.cloud.clone();
-    cx.spawn(move |this: gpui::WeakEntity<AppSidebar>, cx: &mut gpui::AsyncApp| {
-        let mut cx = cx.clone();
-        let cloud = cloud.clone();
-        async move {
-            match run_auth(&cloud, mode, &phone, &password, &code).await {
-                AuthResult::ResetDone => {
-                    this.update(&mut cx, |_this, cx| {
-                        SUBMITTING.with(|s| s.set(false));
-                        INFO_MSG.with(|i| *i.borrow_mut() = "已重置，请登录".to_string());
-                        AUTH_MODE.with(|m| m.set(AuthMode::PasswordLogin));
-                        PASSWORD.with(|p| p.borrow_mut().clear());
-                        cx.notify();
-                    })
-                    .ok();
-                }
-                AuthResult::Failed(e) => {
-                    this.update(&mut cx, |_this, cx| {
-                        SUBMITTING.with(|s| s.set(false));
-                        set_error(&format!("{}", e));
-                        cx.notify();
-                    })
-                    .ok();
-                }
-                AuthResult::Done => {
-                    let me = cloud.get_current_user().await;
-                    this.update(&mut cx, |this, cx| {
-                        SUBMITTING.with(|s| s.set(false));
-                        match me {
-                            Ok(u) => {
-                                this.auth_token = cloud.get_token();
-                                this.current_user = Some(crate::types::UserInfo {
-                                    id: u.id as i64,
-                                    phone: u.phone,
-                                });
-                                this.show_auth_dialog = false;
-                                clear_form();
+    cx.spawn(
+        move |this: gpui::WeakEntity<AppSidebar>, cx: &mut gpui::AsyncApp| {
+            let mut cx = cx.clone();
+            let cloud = cloud.clone();
+            async move {
+                match run_auth(&cloud, mode, &phone, &password, &code).await {
+                    AuthResult::ResetDone => {
+                        this.update(&mut cx, |_this, cx| {
+                            SUBMITTING.with(|s| s.set(false));
+                            INFO_MSG.with(|i| *i.borrow_mut() = "已重置，请登录".to_string());
+                            AUTH_MODE.with(|m| m.set(AuthMode::PasswordLogin));
+                            PASSWORD.with(|p| p.borrow_mut().clear());
+                            cx.notify();
+                        })
+                        .ok();
+                    }
+                    AuthResult::Failed(e) => {
+                        this.update(&mut cx, |_this, cx| {
+                            SUBMITTING.with(|s| s.set(false));
+                            set_error(&format!("{}", e));
+                            cx.notify();
+                        })
+                        .ok();
+                    }
+                    AuthResult::Done => {
+                        let me = cloud.get_current_user().await;
+                        this.update(&mut cx, |this, cx| {
+                            SUBMITTING.with(|s| s.set(false));
+                            match me {
+                                Ok(u) => {
+                                    this.auth_token = cloud.get_token();
+                                    this.current_user = Some(crate::types::UserInfo {
+                                        id: u.id as i64,
+                                        phone: u.phone,
+                                    });
+                                    this.show_auth_dialog = false;
+                                    clear_form();
+                                }
+                                Err(e) => set_error(&format!("获取用户信息失败：{}", e)),
                             }
-                            Err(e) => set_error(&format!("获取用户信息失败：{}", e)),
-                        }
-                        cx.notify();
-                    })
-                    .ok();
+                            cx.notify();
+                        })
+                        .ok();
+                    }
                 }
             }
-        }
-    })
+        },
+    )
     .detach();
 }

@@ -294,7 +294,7 @@ fn build_row(row: GameRow, stopping: &Option<String>, cx: &mut Context<AppSideba
                         .small()
                         .on_click(cx.listener(move |this, _, _, cx| {
                             this.current_game_id = Some(gid_debug.clone());
-                            this.active_view = ActiveView::Debug;
+                            this.navigate_to(ActiveView::Debug);
                             cx.notify();
                         })),
                 )
@@ -302,7 +302,11 @@ fn build_row(row: GameRow, stopping: &Option<String>, cx: &mut Context<AppSideba
                     Button::new(stop_id)
                         .outline()
                         .icon(IconName::CircleX)
-                        .label(if is_stopping { "停止中…" } else { "停止" })
+                        .label(if is_stopping {
+                            "停止中…"
+                        } else {
+                            "停止"
+                        })
                         .disabled(is_stopping)
                         .on_click(cx.listener(move |_this, _, _, cx| {
                             update_state(|s| s.stopping = Some(gid_stop.clone()));
@@ -369,7 +373,11 @@ pub fn render_games(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> A
                     id: g.id.clone(),
                     port: g.port,
                     status: g.status.clone(),
-                    champion: if champion.is_empty() { "—".into() } else { champion },
+                    champion: if champion.is_empty() {
+                        "—".into()
+                    } else {
+                        champion
+                    },
                     mode: if mode.is_empty() { "—".into() } else { mode },
                 }
             })
@@ -433,32 +441,28 @@ pub fn render_games(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> A
                 .border_color(cx.theme().border)
                 .overflow_hidden()
                 .child(
-                    v_flex()
-                        .size_full()
-                        .child(header_row(cx))
-                        .child(
-                            div()
-                                .flex_1()
-                                .overflow_y_scrollbar()
-                                .when(rows_empty, |d| {
-                                    d.flex().items_center().justify_center().child(
-                                        div()
-                                            .text_xs()
-                                            .text_color(cx.theme().muted_foreground)
-                                            .child(if loading {
-                                                "加载中…".to_string()
-                                            } else {
-                                                "暂无运行中对局".to_string()
-                                            }),
-                                    )
-                                })
-                                .when(!rows_empty, |d| {
-                                    d.children(
-                                        rows.into_iter()
-                                            .map(|row| build_row(row, &stopping, cx)),
-                                    )
-                                }),
-                        ),
+                    v_flex().size_full().child(header_row(cx)).child(
+                        div()
+                            .flex_1()
+                            .overflow_y_scrollbar()
+                            .when(rows_empty, |d| {
+                                d.flex().items_center().justify_center().child(
+                                    div()
+                                        .text_xs()
+                                        .text_color(cx.theme().muted_foreground)
+                                        .child(if loading {
+                                            "加载中…".to_string()
+                                        } else {
+                                            "暂无运行中对局".to_string()
+                                        }),
+                                )
+                            })
+                            .when(!rows_empty, |d| {
+                                d.children(
+                                    rows.into_iter().map(|row| build_row(row, &stopping, cx)),
+                                )
+                            }),
+                    ),
                 ),
         )
         .into_any_element()

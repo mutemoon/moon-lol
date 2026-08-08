@@ -29,11 +29,11 @@ fn main() -> anyhow::Result<()> {
 
     let actions = vec![
         FioraVsRivenAction::MoveEast50,
-        FioraVsRivenAction::CastQ,
         FioraVsRivenAction::AttackRiven,
-        FioraVsRivenAction::CastE,
-        FioraVsRivenAction::CastW,
-        FioraVsRivenAction::CastR,
+        FioraVsRivenAction::MoveWest50,
+        FioraVsRivenAction::AttackRiven,
+        FioraVsRivenAction::MoveNorth50,
+        FioraVsRivenAction::MoveSouth50,
     ];
 
     println!("\nExecuting Action Sequence:");
@@ -57,7 +57,7 @@ fn main() -> anyhow::Result<()> {
     let par_envs = ParallelFioraVsRivenEnvs::new(num_parallel_envs, 200);
     par_envs.reset_all();
 
-    let par_actions = vec![FioraVsRivenAction::CastQ; num_parallel_envs];
+    let par_actions = vec![FioraVsRivenAction::AttackRiven; num_parallel_envs];
 
     for _ in 0..total_steps {
         par_envs.step_all(&par_actions);

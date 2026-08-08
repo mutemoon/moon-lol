@@ -23,6 +23,16 @@ pub enum ActiveView {
     Observe,
     RoomDetail,
     Hero,
+    RlTaskDetail,
+    VisualEnv,
+    WadBrowser,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum TaskDetailTab {
+    Metrics,
+    Models,
+    VisualEnv,
 }
 
 #[derive(Debug, Clone)]

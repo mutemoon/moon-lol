@@ -212,9 +212,21 @@ app:
     run_visual_env:
       zh-CN: "运行可视 Env"
       en: "Run Visual Env"
+    delete_task:
+      zh-CN: "删除"
+      en: "Delete"
+    delete_task_title:
+      zh-CN: "删除任务？"
+      en: "Delete task?"
+    delete_task_desc:
+      zh-CN: "将永久删除该任务及其全部模型权重文件，此操作不可撤销。"
+      en: "This will permanently delete the task and all its model weight files. This action cannot be undone."
     metrics_title:
       zh-CN: "历史训练统计表"
       en: "History Training Stats (Metrics Data Table)"
+    metrics_empty:
+      zh-CN: "暂无训练数据，训练开始后实时更新..."
+      en: "No training data yet, updates in real-time once training starts..."
     m_step:
       zh-CN: "步数"
       en: "Step"
@@ -257,6 +269,12 @@ app:
     visual_status_bar:
       zh-CN: "步数: %{step} | 奖励: %{reward}"
       en: "Step: %{step} | Reward: %{reward}"
+    visual_starting:
+      zh-CN: "正在启动 3D 可视化环境..."
+      en: "Starting 3D visual environment..."
+    visual_error:
+      zh-CN: "可视化失败: %{err}"
+      en: "Visual environment error: %{err}"
   # ── 侧边栏（原 Vue app.sidebar） ──
   sidebar:
     new_match:

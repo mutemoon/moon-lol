@@ -1,6 +1,5 @@
 pub mod db;
 pub mod device;
-pub mod fiora_research;
 pub mod model_store;
 pub mod obs;
 pub mod policy;

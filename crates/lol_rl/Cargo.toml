@@ -2,6 +2,7 @@
 name = "lol_rl"
 version = "0.1.0"
 edition = "2024"
+default-run = "lol_rl"
 
 [dependencies]
 candle-core = "0.8.2"
@@ -18,7 +19,13 @@ lol_rl_protocol.workspace = true
 bincode.workspace = true
 tracing-subscriber.workspace = true
 futures-util = { workspace = true }
-sqlx = { version = "0.8.3", default-features = false, features = ["runtime-tokio-native-tls", "postgres", "uuid", "chrono", "json"] }
+sqlx = { version = "0.8.3", default-features = false, features = [
+    "runtime-tokio-native-tls",
+    "postgres",
+    "uuid",
+    "chrono",
+    "json",
+] }
 async-trait = "0.1"
 uuid = { version = "1", features = ["v4", "serde"] }
 chrono = "0.4"
@@ -27,3 +34,7 @@ thiserror.workspace = true
 [features]
 default = []
 cuda = ["candle-core/cuda", "candle-nn/cuda"]
+
+[[bin]]
+name = "lol_rl_visual"
+path = "src/bin/lol_rl_visual.rs"

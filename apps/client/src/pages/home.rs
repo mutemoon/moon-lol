@@ -143,7 +143,7 @@ pub fn render_home(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> An
                     t!("app.nav.menu_launcher"),
                     t!("app.sidebar.new_match"),
                     |this, _window, cx| {
-                        this.active_view = crate::types::ActiveView::Launcher;
+                        this.navigate_to(crate::types::ActiveView::Launcher);
                         cx.notify();
                     },
                 ))
@@ -162,7 +162,7 @@ pub fn render_home(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> An
                     t!("app.nav.menu_rooms"),
                     t!("app.nav.title_rooms"),
                     |this, _window, cx| {
-                        this.active_view = crate::types::ActiveView::Rooms;
+                        this.navigate_to(crate::types::ActiveView::Rooms);
                         cx.notify();
                     },
                 ))

@@ -134,7 +134,10 @@ fn render_log_row(cx: &Context<AppSidebar>, row: &ConsoleLogRow) -> AnyElement {
     let muted = cx.theme().muted_foreground;
     let foreground = cx.theme().foreground;
     let border = cx.theme().border;
-    let timestamp = row.timestamp.clone().unwrap_or_else(|| "--:--:--".to_string());
+    let timestamp = row
+        .timestamp
+        .clone()
+        .unwrap_or_else(|| "--:--:--".to_string());
 
     let mut meta_children: Vec<AnyElement> = Vec::new();
     if !row.category.is_empty() {
@@ -204,10 +207,8 @@ pub fn render_game_console_logs(
         .iter()
         .filter(|row| filter.matches(row.level.as_str()))
         .collect();
-    let row_children: Vec<AnyElement> = filtered
-        .iter()
-        .map(|row| render_log_row(cx, row))
-        .collect();
+    let row_children: Vec<AnyElement> =
+        filtered.iter().map(|row| render_log_row(cx, row)).collect();
     let muted = cx.theme().muted_foreground;
     let accent = cx.theme().accent;
     let border = cx.theme().border;
@@ -235,7 +236,13 @@ pub fn render_game_console_logs(
                     h_flex()
                         .gap_2()
                         .items_center()
-                        .child(filter_btn("gcl-filter-all", "全部", LevelFilter::All, filter, cx))
+                        .child(filter_btn(
+                            "gcl-filter-all",
+                            "全部",
+                            LevelFilter::All,
+                            filter,
+                            cx,
+                        ))
                         .child(filter_btn(
                             "gcl-filter-info",
                             "INFO",
@@ -284,12 +291,7 @@ pub fn render_game_console_logs(
             )
         })
         .when(!filtered.is_empty(), |d| {
-            d.child(
-                div()
-                    .flex_1()
-                    .overflow_y_scrollbar()
-                    .children(row_children),
-            )
+            d.child(div().flex_1().overflow_y_scrollbar().children(row_children))
         })
         .into_any_element()
 }

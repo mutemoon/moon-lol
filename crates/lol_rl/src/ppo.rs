@@ -131,6 +131,10 @@ impl PPOAgent {
         &self.device
     }
 
+    pub fn set_entropy_coef(&mut self, c2: f32) {
+        self.config.c2 = c2;
+    }
+
     pub fn save(&self, path: &Path) -> Result<()> {
         if !path.exists() {
             if let Some(parent) = path.parent() {
@@ -155,6 +159,21 @@ impl PPOAgent {
         if meta.len() == 0 {
             return Err(candle_core::Error::Msg("checkpoint 文件为空".to_string()));
         }
+        let hidden_dim = if let Ok(tensors) = candle_core::safetensors::load(path, &device) {
+            if let Some(fc2_bias) = tensors.get("fc2.bias").or_else(|| tensors.get("fc1.bias")) {
+                let dims = fc2_bias.shape().dims();
+                if !dims.is_empty() {
+                    dims[0]
+                } else {
+                    hidden_dim
+                }
+            } else {
+                hidden_dim
+            }
+        } else {
+            hidden_dim
+        };
+
         let mut varmap = VarMap::new();
         let vb = VarBuilder::from_varmap(&varmap, DType::F32, &device);
         let actor_critic = ActorCritic::new(state_dim, hidden_dim, action_dim, vb)?;
@@ -375,6 +394,46 @@ mod tests {
         assert!(result.is_err());
 
         let _ = std::fs::remove_file(&empty_path);
+    }
+
+    #[test]
+    fn load_custom_hidden_dim_auto_detect() -> Result<()> {
+        let state_dim = 17;
+        let hidden_dim = 256;
+        let action_dim = 5;
+        let config = PPOConfig::default();
+        let device = Device::Cpu;
+
+        let agent = PPOAgent::new(
+            state_dim,
+            hidden_dim,
+            action_dim,
+            config.clone(),
+            device.clone(),
+        )?;
+
+        let tmp_dir = std::env::temp_dir().join("moon_lol_test_256");
+        std::fs::create_dir_all(&tmp_dir).ok();
+        let save_path = tmp_dir.join("test_ckpt_256.safetensors");
+        let _ = std::fs::remove_file(&save_path);
+        agent.save(&save_path)?;
+
+        // Load with dummy hidden_dim=64, it should auto-detect 256 from safetensors file
+        let loaded = PPOAgent::load(
+            state_dim,
+            64,
+            action_dim,
+            config,
+            device.clone(),
+            &save_path,
+        )?;
+        let state = Tensor::zeros((1, state_dim), DType::F32, &device)?;
+        let (probs, val) = loaded.actor_critic.forward(&state)?;
+        assert_eq!(probs.dim(1)?, action_dim);
+        assert_eq!(val.dim(1)?, 1);
+
+        let _ = std::fs::remove_file(&save_path);
+        Ok(())
     }
 
     #[test]

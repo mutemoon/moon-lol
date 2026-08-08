@@ -16,7 +16,7 @@ use gpui_component::button::{Button, ButtonVariants};
 use gpui_component::scroll::ScrollableElement;
 use gpui_component::{h_flex, v_flex, ActiveTheme, IconName, Sizable, StyledExt};
 
-use crate::components::agent_chat_history::{AgentChatMessage, render_agent_chat_history};
+use crate::components::agent_chat_history::{render_agent_chat_history, AgentChatMessage};
 use crate::components::sidebar::AppSidebar;
 
 /// mock.json 中 payload.agent_id / champion
@@ -457,7 +457,9 @@ fn render_edit_input(
         .child(
             h_flex()
                 .items_center()
-                .when(empty, |d| d.text_color(muted).child(placeholder.to_string()))
+                .when(empty, |d| {
+                    d.text_color(muted).child(placeholder.to_string())
+                })
                 .when(!empty, |d| {
                     d.child(before)
                         .child(div().w(px(1.)).h(rems(1.)).bg(accent))
@@ -785,7 +787,13 @@ fn render_chat_panel_header(cx: &mut Context<AppSidebar>, count: usize) -> AnyEl
             h_flex()
                 .gap_2()
                 .items_center()
-                .child(div().w(px(8.)).h(px(8.)).rounded_full().bg(cx.theme().success))
+                .child(
+                    div()
+                        .w(px(8.))
+                        .h(px(8.))
+                        .rounded_full()
+                        .bg(cx.theme().success),
+                )
                 .child(div().text_xs().font_bold().child("AI 决策流实时渲染")),
         )
         .child(
@@ -901,12 +909,7 @@ fn render_agent_card(cx: &mut Context<AppSidebar>, turns: u32, count: usize) -> 
                                         .text_color(cx.theme().muted_foreground)
                                         .child("消息条数"),
                                 )
-                                .child(
-                                    div()
-                                        .text_sm()
-                                        .font_bold()
-                                        .child(count.to_string()),
-                                ),
+                                .child(div().text_sm().font_bold().child(count.to_string())),
                         ),
                 ),
         )
@@ -1037,15 +1040,9 @@ pub fn render_mock(_sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> A
         .gap_4()
         .overflow_hidden()
         .child(render_page_header(cx, &view))
-        .child(
-            div()
-                .flex_1()
-                .w_full()
-                .overflow_hidden()
-                .child(match view {
-                    MockView::List => render_list_view(cx),
-                    MockView::Chat => render_chat_view(cx),
-                }),
-        )
+        .child(div().flex_1().w_full().overflow_hidden().child(match view {
+            MockView::List => render_list_view(cx),
+            MockView::Chat => render_chat_view(cx),
+        }))
         .into_any_element()
 }

@@ -1,37 +1,108 @@
 use gpui::prelude::FluentBuilder;
 use gpui::*;
 use gpui_component::button::{Button, ButtonVariants};
-use gpui_component::menu::{DropdownMenu, PopupMenuItem};
 use gpui_component::sidebar::{
     Sidebar, SidebarFooter, SidebarGroup, SidebarHeader, SidebarMenu, SidebarMenuItem,
     SidebarToggleButton,
 };
-use gpui_component::{h_flex, ActiveTheme, Collapsible, IconName, StyledExt, Theme, ThemeMode};
+use gpui_component::{h_flex, ActiveTheme, Collapsible, Disableable, IconName, StyledExt};
 use rust_i18n::t;
 
 use crate::components::sidebar::AppSidebar;
 use crate::types::ActiveView;
 
-pub fn render_topbar(sidebar: &AppSidebar, cx: &mut Context<AppSidebar>) -> AnyElement {
+struct TopbarDragState {
+    should_move: bool,
+}
+
+impl Render for TopbarDragState {
+    fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+        div()
+    }
+}
+
+pub fn render_topbar(
+    sidebar: &AppSidebar,
+    window: &mut Window,
+    cx: &mut Context<AppSidebar>,
+) -> AnyElement {
     let active = sidebar.active_view;
-    let weak = cx.entity().downgrade();
-    let current_zh = sidebar.locale == "zh-CN";
+    let is_windows = cfg!(target_os = "windows");
+
+    let state = window.use_state(cx, |_, _| TopbarDragState { should_move: false });
 
     h_flex()
         .w_full()
         .items_center()
         .justify_between()
+        .on_mouse_down_out(window.listener_for(&state, |state, _, _, _| {
+            state.should_move = false;
+        }))
+        .on_mouse_down(
+            MouseButton::Left,
+            window.listener_for(&state, |state, _, _, _| {
+                state.should_move = true;
+            }),
+        )
+        .on_mouse_up(
+            MouseButton::Left,
+            window.listener_for(&state, |state, _, _, _| {
+                state.should_move = false;
+            }),
+        )
+        .on_mouse_move(window.listener_for(&state, |state, _, window, _| {
+            if state.should_move {
+                state.should_move = false;
+                window.start_window_move();
+            }
+        }))
         .child(
             h_flex()
-                .gap_2()
+                .flex_1()
                 .items_center()
+                .gap_2()
+                .py_4()
+                .when(is_windows, |this| {
+                    this.window_control_area(WindowControlArea::Drag)
+                })
                 .child(
-                    SidebarToggleButton::new()
-                        .collapsed(sidebar.sidebar_collapsed)
-                        .on_click(cx.listener(|this, _, _, cx| {
-                            this.sidebar_collapsed = !this.sidebar_collapsed;
-                            cx.notify();
-                        })),
+                    h_flex()
+                        .gap_2()
+                        .items_center()
+                        .on_mouse_down(MouseButton::Left, |_, window, cx| {
+                            window.prevent_default();
+                            cx.stop_propagation();
+                        })
+                        .child(
+                            SidebarToggleButton::new()
+                                .collapsed(sidebar.sidebar_collapsed)
+                                .on_click(cx.listener(|this, _, _, cx| {
+                                    this.sidebar_collapsed = !this.sidebar_collapsed;
+                                    cx.notify();
+                                })),
+                        )
+                        .child(
+                            Button::new("nav-back")
+                                .icon(IconName::ChevronLeft)
+                                .ghost()
+                                .disabled(!sidebar.can_go_back())
+                                .on_click(cx.listener(|this, _, _, cx| {
+                                    if this.go_back() {
+                                        cx.notify();
+                                    }
+                                })),
+                        )
+                        .child(
+                            Button::new("nav-forward")
+                                .icon(IconName::ChevronRight)
+                                .ghost()
+                                .disabled(!sidebar.can_go_forward())
+                                .on_click(cx.listener(|this, _, _, cx| {
+                                    if this.go_forward() {
+                                        cx.notify();
+                                    }
+                                })),
+                        ),
                 )
                 .child(div().text_xl().font_bold().child(match active {
                     ActiveView::Home => t!("app.nav.title_home"),
@@ -55,94 +126,65 @@ pub fn render_topbar(sidebar: &AppSidebar, cx: &mut Context<AppSidebar>) -> AnyE
                     ActiveView::Observe => t!("app.nav.title_observe"),
                     ActiveView::RoomDetail => t!("app.nav.title_room_detail"),
                     ActiveView::Hero => t!("app.nav.title_hero"),
+                    ActiveView::RlTaskDetail => {
+                        if let Some(tid) = &sidebar.selected_task_id {
+                            if let Some(detail) = sidebar.task_details.get(tid) {
+                                format!("任务详情 - {}", detail.name).into()
+                            } else {
+                                "任务详情".into()
+                            }
+                        } else {
+                            "任务详情".into()
+                        }
+                    }
+                    ActiveView::VisualEnv => "可视环境监控".into(),
+                    ActiveView::WadBrowser => "WAD 文件浏览器".into(),
                 })),
         )
         .child(
             h_flex()
-                .gap_2()
+                .gap_1()
                 .items_center()
-                .child(if let Some(user) = &sidebar.current_user {
-                    h_flex()
-                        .gap_2()
-                        .items_center()
-                        .child(
-                            div()
-                                .text_sm()
-                                .text_color(cx.theme().muted_foreground)
-                                .child(user.phone.clone()),
-                        )
-                        .child(
-                            Button::new("top-logout")
-                                .outline()
-                                .label("退出")
-                                .on_click(cx.listener(|this, _, _, cx| {
-                                    this.cloud.logout();
-                                    this.current_user = None;
-                                    this.auth_token = None;
-                                    cx.notify();
-                                })),
-                        )
-                        .into_any_element()
-                } else {
-                    Button::new("top-login")
-                        .primary()
-                        .icon(IconName::CircleUser)
-                        .label("登录")
-                        .on_click(cx.listener(|this, _, _, cx| {
-                            this.show_auth_dialog = true;
-                            cx.notify();
-                        }))
-                        .into_any_element()
-                })
                 .child(
-                    Button::new("lang-switcher")
-                        .label(if current_zh {
-                            "简体中文"
-                        } else {
-                            "English"
+                    div()
+                        .when(is_windows, |this| {
+                            this.window_control_area(WindowControlArea::Min)
                         })
-                        .icon(IconName::Globe)
-                        .outline()
-                        .dropdown_menu(move |menu, _window, _cx| {
-                            let zh_weak = weak.clone();
-                            let en_weak = weak.clone();
-                            menu.item(PopupMenuItem::new("简体中文").checked(current_zh).on_click(
-                                move |_, _, cx| {
-                                    let _ = zh_weak
-                                        .update(cx, |this, cx| this.change_locale("zh-CN", cx));
-                                },
-                            ))
-                            .item(
-                                PopupMenuItem::new("English").checked(!current_zh).on_click(
-                                    move |_, _, cx| {
-                                        let _ = en_weak
-                                            .update(cx, |this, cx| this.change_locale("en", cx));
-                                    },
-                                ),
-                            )
-                        }),
+                        .child(
+                            Button::new("win-minimize")
+                                .ghost()
+                                .icon(IconName::WindowMinimize)
+                                .on_click(cx.listener(|_, _, _window, _cx| {
+                                    // window.minimize_window();
+                                })),
+                        ),
                 )
                 .child(
-                    Button::new("top-theme-toggle")
-                        .icon(if cx.theme().is_dark() {
-                            IconName::Sun
-                        } else {
-                            IconName::Moon
+                    div()
+                        .when(is_windows, |this| {
+                            this.window_control_area(WindowControlArea::Max)
                         })
-                        .label(if cx.theme().is_dark() {
-                            t!("app.nav.theme_light")
-                        } else {
-                            t!("app.nav.theme_dark")
-                        })
-                        .outline()
-                        .on_click(cx.listener(|_, _, window, cx| {
-                            let new_mode = if cx.theme().is_dark() {
-                                ThemeMode::Light
+                        .child(Button::new("win-maximize").ghost().icon(
+                            if window.is_maximized() {
+                                IconName::WindowRestore
                             } else {
-                                ThemeMode::Dark
-                            };
-                            Theme::change(new_mode, Some(window), cx);
-                        })),
+                                IconName::WindowMaximize
+                            },
+                        )),
+                )
+                .child(
+                    div()
+                        .when(is_windows, |this| {
+                            this.window_control_area(WindowControlArea::Close)
+                        })
+                        .child(
+                            Button::new("win-close")
+                                .ghost()
+                                .icon(IconName::WindowClose)
+                                .on_click(cx.listener(|_, _, window, _cx| {
+                                    window.remove_window();
+                                })),
+                        ),
                 ),
         )
         .into_any_element()
@@ -155,25 +197,15 @@ pub fn render_sidebar_menu(sidebar: &AppSidebar, cx: &mut Context<AppSidebar>) -
     Sidebar::new("app-sidebar")
         .collapsed(collapsed)
         .header(
-            SidebarHeader::new()
-                .collapsed(collapsed)
-                .child(
-                    h_flex()
-                        .gap_2()
-                        .items_center()
-                        .child(IconName::Bot)
-                        .when(!collapsed, |this| {
-                            this.child(div().font_bold().child(t!("app.nav.brand")))
-                        }),
-                )
-                .when(!collapsed, |this| {
-                    this.child(SidebarToggleButton::new().collapsed(collapsed).on_click(
-                        cx.listener(|this, _, _, cx| {
-                            this.sidebar_collapsed = !this.sidebar_collapsed;
-                            cx.notify();
-                        }),
-                    ))
-                }),
+            SidebarHeader::new().collapsed(collapsed).child(
+                h_flex()
+                    .gap_2()
+                    .items_center()
+                    .child(IconName::Bot)
+                    .when(!collapsed, |this| {
+                        this.child(div().font_bold().child(t!("app.nav.brand")))
+                    }),
+            ),
         )
         // ── 核心组：首页、新建对局、英雄预设 ──
         .child(
@@ -184,7 +216,7 @@ pub fn render_sidebar_menu(sidebar: &AppSidebar, cx: &mut Context<AppSidebar>) -
                             .icon(IconName::LayoutDashboard)
                             .active(active == ActiveView::Home)
                             .on_click(cx.listener(|this, _, _, cx| {
-                                this.active_view = ActiveView::Home;
+                                this.navigate_to(ActiveView::Home);
                                 cx.notify();
                             })),
                     )
@@ -193,7 +225,7 @@ pub fn render_sidebar_menu(sidebar: &AppSidebar, cx: &mut Context<AppSidebar>) -
                             .icon(IconName::Plus)
                             .active(active == ActiveView::Launcher)
                             .on_click(cx.listener(|this, _, _, cx| {
-                                this.active_view = ActiveView::Launcher;
+                                this.navigate_to(ActiveView::Launcher);
                                 cx.notify();
                             })),
                     )
@@ -202,7 +234,7 @@ pub fn render_sidebar_menu(sidebar: &AppSidebar, cx: &mut Context<AppSidebar>) -
                             .icon(IconName::Frame)
                             .active(active == ActiveView::Heroes)
                             .on_click(cx.listener(|this, _, _, cx| {
-                                this.active_view = ActiveView::Heroes;
+                                this.navigate_to(ActiveView::Heroes);
                                 cx.notify();
                             })),
                     ),
@@ -217,7 +249,7 @@ pub fn render_sidebar_menu(sidebar: &AppSidebar, cx: &mut Context<AppSidebar>) -
                             .icon(IconName::Inbox)
                             .active(active == ActiveView::Rooms)
                             .on_click(cx.listener(|this, _, _, cx| {
-                                this.active_view = ActiveView::Rooms;
+                                this.navigate_to(ActiveView::Rooms);
                                 cx.notify();
                             })),
                     )
@@ -226,7 +258,7 @@ pub fn render_sidebar_menu(sidebar: &AppSidebar, cx: &mut Context<AppSidebar>) -
                             .icon(IconName::Play)
                             .active(active == ActiveView::Games)
                             .on_click(cx.listener(|this, _, _, cx| {
-                                this.active_view = ActiveView::Games;
+                                this.navigate_to(ActiveView::Games);
                                 cx.notify();
                             })),
                     )
@@ -235,7 +267,7 @@ pub fn render_sidebar_menu(sidebar: &AppSidebar, cx: &mut Context<AppSidebar>) -
                             .icon(IconName::ChartPie)
                             .active(active == ActiveView::Rank)
                             .on_click(cx.listener(|this, _, _, cx| {
-                                this.active_view = ActiveView::Rank;
+                                this.navigate_to(ActiveView::Rank);
                                 cx.notify();
                             })),
                     )
@@ -244,7 +276,7 @@ pub fn render_sidebar_menu(sidebar: &AppSidebar, cx: &mut Context<AppSidebar>) -
                             .icon(IconName::SortDescending)
                             .active(active == ActiveView::Leaderboard)
                             .on_click(cx.listener(|this, _, _, cx| {
-                                this.active_view = ActiveView::Leaderboard;
+                                this.navigate_to(ActiveView::Leaderboard);
                                 cx.notify();
                             })),
                     )
@@ -253,7 +285,7 @@ pub fn render_sidebar_menu(sidebar: &AppSidebar, cx: &mut Context<AppSidebar>) -
                             .icon(IconName::User)
                             .active(active == ActiveView::Community)
                             .on_click(cx.listener(|this, _, _, cx| {
-                                this.active_view = ActiveView::Community;
+                                this.navigate_to(ActiveView::Community);
                                 cx.notify();
                             })),
                     ),
@@ -268,7 +300,7 @@ pub fn render_sidebar_menu(sidebar: &AppSidebar, cx: &mut Context<AppSidebar>) -
                             .icon(IconName::Settings2)
                             .active(active == ActiveView::RlTraining)
                             .on_click(cx.listener(|this, _, _, cx| {
-                                this.active_view = ActiveView::RlTraining;
+                                this.navigate_to(ActiveView::RlTraining);
                                 cx.notify();
                             })),
                     )
@@ -277,7 +309,7 @@ pub fn render_sidebar_menu(sidebar: &AppSidebar, cx: &mut Context<AppSidebar>) -
                             .icon(IconName::Palette)
                             .active(active == ActiveView::Particles)
                             .on_click(cx.listener(|this, _, _, cx| {
-                                this.active_view = ActiveView::Particles;
+                                this.navigate_to(ActiveView::Particles);
                                 cx.notify();
                             })),
                     )
@@ -286,7 +318,16 @@ pub fn render_sidebar_menu(sidebar: &AppSidebar, cx: &mut Context<AppSidebar>) -
                             .icon(IconName::File)
                             .active(active == ActiveView::LogsArchive)
                             .on_click(cx.listener(|this, _, _, cx| {
-                                this.active_view = ActiveView::LogsArchive;
+                                this.navigate_to(ActiveView::LogsArchive);
+                                cx.notify();
+                            })),
+                    )
+                    .child(
+                        SidebarMenuItem::new("WAD 浏览器")
+                            .icon(IconName::File)
+                            .active(active == ActiveView::WadBrowser)
+                            .on_click(cx.listener(|this, _, _, cx| {
+                                this.navigate_to(ActiveView::WadBrowser);
                                 cx.notify();
                             })),
                     ),
@@ -301,7 +342,7 @@ pub fn render_sidebar_menu(sidebar: &AppSidebar, cx: &mut Context<AppSidebar>) -
                             .icon(IconName::Star)
                             .active(active == ActiveView::Billing)
                             .on_click(cx.listener(|this, _, _, cx| {
-                                this.active_view = ActiveView::Billing;
+                                this.navigate_to(ActiveView::Billing);
                                 cx.notify();
                             })),
                     )
@@ -310,7 +351,7 @@ pub fn render_sidebar_menu(sidebar: &AppSidebar, cx: &mut Context<AppSidebar>) -
                             .icon(IconName::Inspector)
                             .active(active == ActiveView::Admin)
                             .on_click(cx.listener(|this, _, _, cx| {
-                                this.active_view = ActiveView::Admin;
+                                this.navigate_to(ActiveView::Admin);
                                 cx.notify();
                             })),
                     )
@@ -319,22 +360,73 @@ pub fn render_sidebar_menu(sidebar: &AppSidebar, cx: &mut Context<AppSidebar>) -
                             .icon(IconName::Settings)
                             .active(active == ActiveView::Settings)
                             .on_click(cx.listener(|this, _, _, cx| {
-                                this.active_view = ActiveView::Settings;
+                                this.navigate_to(ActiveView::Settings);
                                 cx.notify();
                             })),
                     ),
             ),
         )
         .footer(
-            SidebarFooter::new().child(
-                h_flex().w_full().items_center().justify_between().child(
-                    h_flex()
-                        .gap_2()
-                        .items_center()
-                        .child(IconName::Settings)
-                        .when(!collapsed, |this| this.child(t!("app.nav.footer_settings"))),
-                ),
-            ),
+            SidebarFooter::new().child(if let Some(user) = &sidebar.current_user {
+                h_flex()
+                    .w_full()
+                    .items_center()
+                    .justify_between()
+                    .child(
+                        h_flex()
+                            .gap_2()
+                            .items_center()
+                            .child(IconName::CircleUser)
+                            .when(!collapsed, |this| {
+                                this.child(
+                                    div()
+                                        .text_sm()
+                                        .text_color(cx.theme().foreground)
+                                        .child(user.phone.clone()),
+                                )
+                            }),
+                    )
+                    .child(
+                        Button::new("sidebar-logout")
+                            .ghost()
+                            .label(if collapsed { "退" } else { "退出" })
+                            .on_click(cx.listener(|this, _, _, cx| {
+                                this.cloud.logout();
+                                this.current_user = None;
+                                this.auth_token = None;
+                                cx.notify();
+                            })),
+                    )
+            } else {
+                h_flex()
+                    .w_full()
+                    .items_center()
+                    .justify_between()
+                    .child(
+                        h_flex()
+                            .gap_2()
+                            .items_center()
+                            .child(IconName::CircleUser)
+                            .when(!collapsed, |this| {
+                                this.child(
+                                    div()
+                                        .text_sm()
+                                        .text_color(cx.theme().muted_foreground)
+                                        .child("未登录"),
+                                )
+                            }),
+                    )
+                    .child(
+                        Button::new("sidebar-login")
+                            .primary()
+                            .label(if collapsed { "" } else { "登录" })
+                            .icon(IconName::CircleUser)
+                            .on_click(cx.listener(|this, _, _, cx| {
+                                this.show_auth_dialog = true;
+                                cx.notify();
+                            })),
+                    )
+            }),
         )
         .into_any_element()
 }

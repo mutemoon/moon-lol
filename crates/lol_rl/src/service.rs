@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::path::Path;
 use std::sync::Arc;
 use std::time::Instant;
 
@@ -16,8 +17,16 @@ use tracing::{error, info};
 use uuid::Uuid;
 
 use crate::db::{self, CheckpointRow, PgRlRepo, RlRepo, TaskRow};
-use crate::model_store::new_checkpoint_path;
+use crate::model_store::{checkpoint_dir, new_checkpoint_path};
 use crate::ppo::{PPOAgent, PPOConfig, RolloutBuffer};
+
+/// 训练循环内保存当前权重的请求。
+#[derive(Debug, Clone)]
+pub struct SaveRequest {
+    pub ckpt_id: String,
+    pub path: String,
+    pub ep_return: f32,
+}
 
 #[derive(Debug, Clone)]
 pub struct TaskState {
@@ -30,20 +39,17 @@ pub struct TaskState {
     pub ep_return: f32,
     pub config: TaskConfigPayload,
     pub checkpoints: Vec<CheckpointItem>,
+    pub metrics_history: Vec<lol_rl_protocol::MetricsRow>,
+    pub logs: Vec<String>,
     pub created_at: String,
+    /// 训练循环存活时的保存请求通道；训练结束后置 None。
+    pub save_tx: Option<mpsc::UnboundedSender<SaveRequest>>,
 }
 
 impl TaskState {
     fn from_row(r: &TaskRow) -> Self {
-        let config: TaskConfigPayload = serde_json::from_value(r.config_json.clone())
-            .unwrap_or_else(|_| TaskConfigPayload {
-                name: r.name.clone(),
-                agent_type: r.agent_type.clone(),
-                env_name: r.env_name.clone(),
-                lr: 5e-4,
-                parallel_envs: 4,
-                max_steps: 10000,
-            });
+        let config: TaskConfigPayload =
+            serde_json::from_value(r.config_json.clone()).unwrap_or_default();
         Self {
             id: r.id.to_string(),
             name: r.name.clone(),
@@ -54,7 +60,10 @@ impl TaskState {
             ep_return: r.ep_return,
             config,
             checkpoints: Vec::new(),
+            metrics_history: Vec::new(),
+            logs: Vec::new(),
             created_at: r.created_at.to_rfc3339(),
+            save_tx: None,
         }
     }
 }
@@ -84,12 +93,19 @@ impl RLService {
             let cps = repo.list_checkpoints(&state.id).await?;
             for cp in &cps {
                 state.checkpoints.push(CheckpointItem {
-                    id: cp.id.to_string(),
+                    // 统一用展示 id "ckpt-{step}"，与运行中保存的一致
+                    id: format!("ckpt-{}", cp.step),
                     step: cp.step as usize,
                     path: cp.path.clone(),
                     ep_return: cp.ep_return,
                     created_at: cp.created_at.to_rfc3339(),
                 });
+            }
+            if let Ok(metrics) = repo.list_metrics(&state.id).await {
+                state.metrics_history = metrics;
+            }
+            if let Ok(logs) = repo.list_logs(&state.id).await {
+                state.logs = logs;
             }
             initial_tasks.insert(state.id.clone(), state);
         }
@@ -118,6 +134,9 @@ impl RLService {
         match frame {
             InFrame::GetTaskList => {
                 self.broadcast_task_list().await;
+            }
+            InFrame::GetTaskDetail { task_id } => {
+                self.handle_get_task_detail(&task_id).await;
             }
             InFrame::CreateTask { config } => {
                 let task_id = Uuid::new_v4();
@@ -150,7 +169,10 @@ impl RLService {
                     ep_return: 0.0,
                     config,
                     checkpoints: Vec::new(),
+                    metrics_history: Vec::new(),
+                    logs: Vec::new(),
                     created_at: now.to_rfc3339(),
+                    save_tx: None,
                 };
                 {
                     let mut tasks = self.tasks.lock().await;
@@ -234,59 +256,95 @@ impl RLService {
             InFrame::ApplyCheckpoint { task_id, id } => {
                 self.handle_apply_checkpoint(&task_id, &id).await;
             }
+            InFrame::DeleteTask { task_id } => {
+                self.handle_delete_task(&task_id).await;
+            }
         }
     }
 
-    async fn handle_save_checkpoint(&self, task_id: &str) {
-        let tasks_guard = self.tasks.lock().await;
-        let Some(t) = tasks_guard.get(task_id) else {
-            return;
+    async fn handle_get_task_detail(&self, task_id: &str) {
+        let (checkpoints, metrics_history, logs) = {
+            let tasks = self.tasks.lock().await;
+            if let Some(t) = tasks.get(task_id) {
+                (
+                    t.checkpoints.clone(),
+                    t.metrics_history.clone(),
+                    t.logs.clone(),
+                )
+            } else {
+                let cps = self
+                    .repo
+                    .list_checkpoints(task_id)
+                    .await
+                    .unwrap_or_default()
+                    .into_iter()
+                    .map(|cp| CheckpointItem {
+                        id: format!("ckpt-{}", cp.step),
+                        step: cp.step as usize,
+                        path: cp.path,
+                        ep_return: cp.ep_return,
+                        created_at: cp.created_at.to_rfc3339(),
+                    })
+                    .collect();
+                let m = self.repo.list_metrics(task_id).await.unwrap_or_default();
+                let l = self.repo.list_logs(task_id).await.unwrap_or_default();
+                (cps, m, l)
+            }
         };
-        let step = t.current_step;
-        let ep_return = t.ep_return;
-        drop(tasks_guard);
-
-        let ckpt_id = format!("ckpt-{}", step);
-        let ckpt_path = new_checkpoint_path(task_id, &ckpt_id);
-        let path_str = ckpt_path.to_string_lossy().to_string();
-
-        let cp_id = Uuid::new_v4();
-        let now = Utc::now();
-        let cp_row = CheckpointRow {
-            id: cp_id,
-            task_id: Uuid::parse_str(task_id).unwrap_or_default(),
-            step: step as i64,
-            path: path_str.clone(),
-            ep_return,
-            created_at: now,
-        };
-        if let Err(e) = self.repo.insert_checkpoint(&cp_row).await {
-            error!("写入 checkpoint DB 失败: {e}");
-            return;
-        }
-
-        let ckpt_item = CheckpointItem {
-            id: ckpt_id,
-            step,
-            path: path_str,
-            ep_return,
-            created_at: now.to_rfc3339(),
-        };
-
-        let mut tasks = self.tasks.lock().await;
-        if let Some(task) = tasks.get_mut(task_id) {
-            task.checkpoints.push(ckpt_item.clone());
-        }
-        drop(tasks);
-
-        let _ = self.event_tx.send(OutFrame::CheckpointMsg {
+        let _ = self.event_tx.send(OutFrame::TaskDetail {
             task_id: task_id.to_string(),
-            checkpoint: ckpt_item.clone(),
+            checkpoints,
+            metrics_history,
+            logs,
         });
-        let _ = self.event_tx.send(OutFrame::Log {
-            task_id: task_id.to_string(),
-            level: "info".into(),
-            message: format!("已为任务 {} 保存 Checkpoint 到 {}", task_id, ckpt_item.path),
+    }
+
+    async fn handle_delete_task(&self, task_id: &str) {
+        // 先从内存移除：训练循环在下一轮迭代感知并退出，persist_checkpoint 也会跳过已删除任务
+        {
+            let mut tasks = self.tasks.lock().await;
+            tasks.remove(task_id);
+        }
+        // 删除磁盘上的模型权重目录
+        let dir = checkpoint_dir(task_id);
+        if dir.exists() {
+            if let Err(e) = std::fs::remove_dir_all(&dir) {
+                error!("删除任务 {} 模型目录失败 {}: {e}", task_id, dir.display());
+            }
+        }
+        // 删除 DB 记录（rl_checkpoints 经外键 ON DELETE CASCADE 一并删除）
+        if let Err(e) = self.repo.delete_task(task_id).await {
+            error!("删除任务 {} DB 记录失败: {e}", task_id);
+        }
+        info!("已删除 RL 训练任务 {}", task_id);
+        self.broadcast_task_list().await;
+    }
+
+    async fn handle_save_checkpoint(&self, task_id: &str) {
+        let (save_tx, step, ep_return) = {
+            let tasks = self.tasks.lock().await;
+            match tasks.get(task_id) {
+                Some(t) => (t.save_tx.clone(), t.current_step, t.ep_return),
+                None => return,
+            }
+        };
+        let ckpt_id = format!("ckpt-{}", step);
+        let Some(tx) = save_tx else {
+            // 训练已结束：最终模型已在收敛时自动保存，无需重复写入
+            let _ = self.event_tx.send(OutFrame::Log {
+                task_id: task_id.to_string(),
+                level: "info".into(),
+                message: format!("任务已结束，最终模型已自动保存为 {ckpt_id}"),
+            });
+            return;
+        };
+        let path = new_checkpoint_path(task_id, &ckpt_id)
+            .to_string_lossy()
+            .to_string();
+        let _ = tx.send(SaveRequest {
+            ckpt_id,
+            path,
+            ep_return,
         });
     }
 
@@ -294,7 +352,8 @@ impl RLService {
         match self.repo.get_checkpoint(task_id, ckpt_id).await {
             Ok(Some(cp)) => {
                 let item = CheckpointItem {
-                    id: cp.id.to_string(),
+                    // 与保存流程一致，返回展示 id "ckpt-{step}"，供前端匹配 running_visual_model
+                    id: ckpt_id.to_string(),
                     step: cp.step as usize,
                     path: cp.path.clone(),
                     ep_return: cp.ep_return,
@@ -346,32 +405,127 @@ impl RLService {
     }
 }
 
+/// 写 safetensors 权重文件 + 登记 checkpoint 到 DB + 广播。仅在训练循环内（agent 存活时）调用。
+fn persist_checkpoint(
+    task_id: &str,
+    req: SaveRequest,
+    agent: &PPOAgent,
+    tasks: &Arc<Mutex<HashMap<String, TaskState>>>,
+    repo: &Arc<dyn RlRepo>,
+    event_tx: &broadcast::Sender<OutFrame>,
+) {
+    // 任务已被删除 → 不再写任何 checkpoint（防止训练循环末尾自动保存重建模型文件）
+    if !tasks.blocking_lock().contains_key(task_id) {
+        return;
+    }
+    // 同一展示 id 已保存过则跳过，避免运行中手动保存与结束自动保存重复
+    let already = {
+        let t = tasks.blocking_lock();
+        t.get(task_id)
+            .map(|x| x.checkpoints.iter().any(|c| c.id == req.ckpt_id))
+            .unwrap_or(false)
+    };
+    if already {
+        return;
+    }
+
+    if let Err(e) = agent.save(Path::new(&req.path)) {
+        error!("保存模型文件失败 {}: {e}", req.path);
+        return;
+    }
+
+    let step = req
+        .ckpt_id
+        .strip_prefix("ckpt-")
+        .and_then(|s| s.parse::<usize>().ok())
+        .unwrap_or(0);
+    let now = Utc::now();
+    let cp_row = CheckpointRow {
+        id: Uuid::new_v4(),
+        task_id: Uuid::parse_str(task_id).unwrap_or_default(),
+        step: step as i64,
+        path: req.path.clone(),
+        ep_return: req.ep_return,
+        created_at: now,
+    };
+    // DB 插入：同步上下文 → 临时 tokio runtime
+    let insert_ok = match tokio::runtime::Builder::new_current_thread()
+        .enable_all()
+        .build()
+    {
+        Ok(rt) => match rt.block_on(repo.insert_checkpoint(&cp_row)) {
+            Ok(()) => true,
+            Err(e) => {
+                error!("写入 checkpoint DB 失败: {e}");
+                false
+            }
+        },
+        Err(e) => {
+            error!("创建临时 tokio runtime 失败: {e}");
+            false
+        }
+    };
+    if !insert_ok {
+        return;
+    }
+
+    let ckpt_item = CheckpointItem {
+        id: req.ckpt_id,
+        step,
+        path: req.path,
+        ep_return: req.ep_return,
+        created_at: now.to_rfc3339(),
+    };
+    {
+        let mut t = tasks.blocking_lock();
+        if let Some(task) = t.get_mut(task_id) {
+            task.checkpoints.push(ckpt_item.clone());
+        }
+    }
+    let _ = event_tx.send(OutFrame::CheckpointMsg {
+        task_id: task_id.to_string(),
+        checkpoint: ckpt_item.clone(),
+    });
+    let _ = event_tx.send(OutFrame::Log {
+        task_id: task_id.to_string(),
+        level: "info".into(),
+        message: format!("已为任务 {task_id} 保存 Checkpoint 到 {}", ckpt_item.path),
+    });
+}
+
 fn run_training_loop_for_task(
     event_tx: broadcast::Sender<OutFrame>,
     tasks: Arc<Mutex<HashMap<String, TaskState>>>,
     repo: Arc<dyn RlRepo>,
     task_id: String,
 ) {
-    let env_max_steps = 100;
+    let task_config = {
+        let t = tasks.blocking_lock();
+        t.get(&task_id)
+            .map(|s| s.config.clone())
+            .unwrap_or_default()
+    };
+
+    let env_max_steps = 0; // 0 表示无最大步数上限，环境持续运行直到分出胜负游戏结束（阵亡 terminated）
     let state_dim = FioraVsRivenObs::dim();
-    let action_dim = 9;
-    let num_parallel_envs = 4;
-    let rollout_steps_per_env = 80;
-    let total_iterations = 80;
+    let action_dim = 5;
+    let num_parallel_envs = task_config.parallel_envs.max(1);
+    let total_iterations = task_config.total_iterations.max(1);
+    let hidden_dim = task_config.hidden_dim.max(16);
 
     let config = PPOConfig {
-        lr: 5e-4,
-        gamma: 0.99,
-        gae_lambda: 0.95,
-        clip_eps: 0.2,
+        lr: task_config.lr as f64,
+        gamma: task_config.gamma,
+        gae_lambda: task_config.gae_lambda,
+        clip_eps: task_config.clip_eps,
         c1: 0.5,
         c2: 0.05,
-        ppo_epochs: 4,
+        ppo_epochs: task_config.ppo_epochs.max(1),
     };
 
     let device = crate::device::select_device().unwrap_or(candle_core::Device::Cpu);
 
-    let mut agent = match PPOAgent::new(state_dim, 64, action_dim, config, device.clone()) {
+    let mut agent = match PPOAgent::new(state_dim, hidden_dim, action_dim, config, device.clone()) {
         Ok(a) => a,
         Err(e) => {
             error!("创建 PPOAgent 失败: {e}");
@@ -382,6 +536,18 @@ fn run_training_loop_for_task(
     let par_envs = ParallelFioraVsRivenEnvs::new(num_parallel_envs, env_max_steps);
     let mut buffer = RolloutBuffer::new();
     let mut current_obss = par_envs.reset_all();
+    let mut env_returns = vec![0.0f32; num_parallel_envs];
+    let mut recent_ep_returns: std::collections::VecDeque<f32> =
+        std::collections::VecDeque::with_capacity(50);
+
+    // 注册保存通道，供「保存模型」请求驱动实时落盘
+    let (save_tx, mut save_rx) = mpsc::unbounded_channel::<SaveRequest>();
+    {
+        let mut t = tasks.blocking_lock();
+        if let Some(task) = t.get_mut(&task_id) {
+            task.save_tx = Some(save_tx);
+        }
+    }
 
     for iter in 1..=total_iterations {
         {
@@ -395,20 +561,44 @@ fn run_training_loop_for_task(
             }
         }
 
+        // 处理「保存模型」请求：把当前权重写盘
+        while let Ok(req) = save_rx.try_recv() {
+            persist_checkpoint(&task_id, req, &agent, &tasks, &repo, &event_tx);
+        }
+
+        // 动态衰减熵系数（Entropy Annealing）：从 0.05 线性衰减至 0.001，使训练末期策略逼近确定性/贪婪策略
+        let progress = if total_iterations > 1 {
+            (iter - 1) as f32 / (total_iterations - 1) as f32
+        } else {
+            1.0
+        };
+        let current_c2 = (0.05 * (1.0 - progress) + 0.001 * progress).max(0.001);
+        agent.set_entropy_coef(current_c2);
+
         let iter_start = Instant::now();
 
         buffer.clear();
-        let mut iter_reward_sum = 0.0;
-        let mut iter_episodes = 0;
         let mut iter_reward_breakdown: HashMap<String, f32> = HashMap::new();
+        let mut completed_envs = vec![false; num_parallel_envs];
+        let mut iter_steps_count = 0usize;
 
-        for _step in 0..rollout_steps_per_env {
+        // 采集完整对局：持续采样直到所有并行环境本局全部结束（terminated 或 truncated）
+        while !completed_envs.iter().all(|&c| c) {
             let mut actions = Vec::with_capacity(num_parallel_envs);
             let mut action_indices = Vec::with_capacity(num_parallel_envs);
             let mut log_probs = Vec::with_capacity(num_parallel_envs);
             let mut values = Vec::with_capacity(num_parallel_envs);
 
-            for obs in &current_obss {
+            for i in 0..num_parallel_envs {
+                if completed_envs[i] {
+                    actions.push(FioraVsRivenAction::MoveEast50);
+                    action_indices.push(0);
+                    log_probs.push(0.0);
+                    values.push(0.0);
+                    continue;
+                }
+
+                let obs = &current_obss[i];
                 let state_vec = obs.to_vector();
                 let state_tensor =
                     match Tensor::from_vec(state_vec.clone(), (1, state_dim), &device) {
@@ -433,8 +623,13 @@ fn run_training_loop_for_task(
 
             let step_results = par_envs.step_all(&actions);
             for i in 0..num_parallel_envs {
+                if completed_envs[i] {
+                    continue;
+                }
+
                 let res = &step_results[i];
-                iter_reward_sum += res.reward;
+                env_returns[i] += res.reward;
+                iter_steps_count += 1;
 
                 for item in &res.reward_breakdown {
                     *iter_reward_breakdown
@@ -452,34 +647,32 @@ fn run_training_loop_for_task(
                 );
 
                 if res.terminated || res.truncated {
-                    current_obss[i] = par_envs.reset_all()[i].clone();
-                    iter_episodes += 1;
+                    let ep_ret = env_returns[i];
+                    env_returns[i] = 0.0;
+                    if recent_ep_returns.len() >= 50 {
+                        recent_ep_returns.pop_front();
+                    }
+                    recent_ep_returns.push_back(ep_ret);
+                    current_obss[i] = par_envs.reset_one(i);
+                    completed_envs[i] = true;
                 } else {
                     current_obss[i] = res.obs.clone();
                 }
             }
         }
 
-        let last_obs = &current_obss[0];
-        let last_state_tensor =
-            match Tensor::from_vec(last_obs.to_vector(), (1, state_dim), &device) {
-                Ok(t) => t,
-                Err(_) => break,
-            };
-        let last_val_scalar = match agent.actor_critic.forward(&last_state_tensor) {
-            Ok((_, last_val)) => last_val
-                .squeeze(0)
-                .unwrap()
-                .squeeze(0)
-                .unwrap()
-                .to_scalar()
-                .unwrap_or(0.0),
-            Err(_) => 0.0,
-        };
+        // 完整对局结束，终态 Bootstrap value 为 0.0
+        let last_val_scalar = 0.0f32;
 
         if let Ok(stats) = agent.update(&buffer, last_val_scalar) {
-            let total_steps = iter * rollout_steps_per_env * num_parallel_envs;
-            let ep_return = iter_reward_sum / iter_episodes.max(1) as f32;
+            let total_steps = iter * iter_steps_count;
+            let ep_return = if !recent_ep_returns.is_empty() {
+                let sum: f32 = recent_ep_returns.iter().sum();
+                sum / recent_ep_returns.len() as f32
+            } else {
+                let sum: f32 = env_returns.iter().sum();
+                sum / num_parallel_envs.max(1) as f32
+            };
 
             {
                 let mut t = tasks.blocking_lock();
@@ -500,31 +693,38 @@ fn run_training_loop_for_task(
                 }
             }
 
+            let sample_obs = &current_obss[0];
+            let sample_state_tensor =
+                match Tensor::from_vec(sample_obs.to_vector(), (1, state_dim), &device) {
+                    Ok(t) => t,
+                    Err(_) => break,
+                };
+
             let obs_payload = ObsFeaturePayload {
-                fiora_hp_pct: if last_obs.fiora_max_hp > 0.0 {
-                    last_obs.fiora_hp / last_obs.fiora_max_hp
+                fiora_hp_pct: if sample_obs.fiora_max_hp > 0.0 {
+                    sample_obs.fiora_hp / sample_obs.fiora_max_hp
                 } else {
                     1.0
                 },
-                riven_hp_pct: if last_obs.riven_max_hp > 0.0 {
-                    last_obs.riven_hp / last_obs.riven_max_hp
+                riven_hp_pct: if sample_obs.riven_max_hp > 0.0 {
+                    sample_obs.riven_hp / sample_obs.riven_max_hp
                 } else {
                     1.0
                 },
-                distance: last_obs.distance,
-                q_ready: last_obs.q_ready,
-                w_ready: last_obs.w_ready,
-                e_ready: last_obs.e_ready,
-                r_ready: last_obs.r_ready,
-                has_vital: last_obs.has_vital,
-                vital_is_active: last_obs.vital_is_active,
-                vital_direction: if last_obs.vital_dir_x > 0.5 {
+                distance: sample_obs.distance,
+                q_ready: sample_obs.q_ready,
+                w_ready: sample_obs.w_ready,
+                e_ready: sample_obs.e_ready,
+                r_ready: sample_obs.r_ready,
+                has_vital: sample_obs.has_vital,
+                vital_is_active: sample_obs.vital_is_active,
+                vital_direction: if sample_obs.vital_dir_x > 0.5 {
                     "+X (东侧)"
-                } else if last_obs.vital_dir_neg_x > 0.5 {
+                } else if sample_obs.vital_dir_neg_x > 0.5 {
                     "-X (西侧)"
-                } else if last_obs.vital_dir_z > 0.5 {
+                } else if sample_obs.vital_dir_z > 0.5 {
                     "+Z (北侧)"
-                } else if last_obs.vital_dir_neg_z > 0.5 {
+                } else if sample_obs.vital_dir_neg_z > 0.5 {
                     "-Z (南侧)"
                 } else {
                     "None"
@@ -532,29 +732,24 @@ fn run_training_loop_for_task(
                 .into(),
             };
 
-            let elapsed = iter_start.elapsed().as_secs_f64();
-            let steps_done = rollout_steps_per_env * num_parallel_envs;
-            let fps = if elapsed > 0.0 {
-                (steps_done as f64 / elapsed) as usize
-            } else {
-                0
-            };
+            let fps = (iter_steps_count.max(1) as f64
+                / iter_start.elapsed().as_secs_f64().max(1e-5)) as usize;
 
-            let obs_vec = last_obs.to_vector();
             let real_policy = agent
                 .actor_critic
-                .policy_probs(&last_state_tensor, &obs_vec)
-                .map(|probs| {
-                    let actions: [&str; 9] = [
+                .forward(&sample_state_tensor)
+                .ok()
+                .map(|(logits, _)| {
+                    let probs = candle_nn::ops::softmax(&logits.squeeze(0).unwrap(), 0)
+                        .unwrap()
+                        .to_vec1::<f32>()
+                        .unwrap_or_default();
+                    let actions = [
                         "MoveEast50 (东侧 50u 站位)",
                         "MoveWest50 (西侧 50u 站位)",
                         "MoveNorth50 (北侧 50u 站位)",
                         "MoveSouth50 (南侧 50u 站位)",
                         "AttackRiven (普通攻击 瑞雯)",
-                        "CastQ (Q: 破空斩)",
-                        "CastW (W: 劳伦特心眼刀)",
-                        "CastE (E: 夺命连刺)",
-                        "CastR (R: 无双挑战)",
                     ];
                     probs
                         .iter()
@@ -568,14 +763,37 @@ fn run_training_loop_for_task(
                 })
                 .unwrap_or_default();
 
-            let count = iter_episodes.max(1) as f32;
             let real_reward_breakdown: Vec<RewardItem> = iter_reward_breakdown
                 .iter()
                 .map(|(k, v)| RewardItem {
                     name: k.clone(),
-                    value: v / count,
+                    value: v / (iter_steps_count as f32).max(1.0),
                 })
                 .collect();
+
+            let metric_row = lol_rl_protocol::MetricsRow {
+                step: total_steps,
+                ep_return,
+                loss: stats.policy_loss + stats.value_loss,
+                kl: stats.kl,
+                entropy: stats.entropy_loss,
+                value: last_val_scalar,
+                fps,
+            };
+
+            {
+                let mut t = tasks.blocking_lock();
+                if let Some(task) = t.get_mut(&task_id) {
+                    task.metrics_history.push(metric_row.clone());
+                }
+            }
+
+            let rt = tokio::runtime::Builder::new_current_thread()
+                .enable_all()
+                .build();
+            if let Ok(rt) = rt {
+                let _ = rt.block_on(repo.insert_metric(&task_id, &metric_row));
+            }
 
             let out_metrics = OutFrame::Metrics {
                 task_id: task_id.clone(),
@@ -593,11 +811,43 @@ fn run_training_loop_for_task(
 
             let _ = event_tx.send(out_metrics);
 
+            // 每 10 次迭代自动保存一个 Checkpoint
+            if iter % 10 == 0 {
+                let ckpt_id = format!("ckpt-{}", total_steps);
+                let path = new_checkpoint_path(&task_id, &ckpt_id)
+                    .to_string_lossy()
+                    .to_string();
+                persist_checkpoint(
+                    &task_id,
+                    SaveRequest {
+                        ckpt_id,
+                        path,
+                        ep_return,
+                    },
+                    &agent,
+                    &tasks,
+                    &repo,
+                    &event_tx,
+                );
+            }
+
             if iter % 5 == 0 || iter == 1 {
                 let log_msg = format!(
                     "[{}] Iter {:2}/{} | Avg Reward: {:6.2} | P-Loss: {:7.4} | V-Loss: {:7.4}",
                     task_id, iter, total_iterations, ep_return, stats.policy_loss, stats.value_loss
                 );
+                {
+                    let mut t = tasks.blocking_lock();
+                    if let Some(task) = t.get_mut(&task_id) {
+                        task.logs.push(format!("[info] {}", log_msg));
+                    }
+                }
+                let rt = tokio::runtime::Builder::new_current_thread()
+                    .enable_all()
+                    .build();
+                if let Ok(rt) = rt {
+                    let _ = rt.block_on(repo.insert_log(&task_id, "info", &log_msg));
+                }
                 let _ = event_tx.send(OutFrame::Log {
                     task_id: task_id.clone(),
                     level: "info".into(),
@@ -607,10 +857,37 @@ fn run_training_loop_for_task(
         }
     }
 
+    // 训练收敛：自动保存最终模型
+    {
+        let (final_step, ep_return) = {
+            let t = tasks.blocking_lock();
+            t.get(&task_id)
+                .map(|x| (x.current_step, x.ep_return))
+                .unwrap_or((0, 0.0))
+        };
+        let ckpt_id = format!("ckpt-{}", final_step);
+        let path = new_checkpoint_path(&task_id, &ckpt_id)
+            .to_string_lossy()
+            .to_string();
+        persist_checkpoint(
+            &task_id,
+            SaveRequest {
+                ckpt_id,
+                path,
+                ep_return,
+            },
+            &agent,
+            &tasks,
+            &repo,
+            &event_tx,
+        );
+    }
+
     {
         let mut t = tasks.blocking_lock();
         if let Some(task) = t.get_mut(&task_id) {
             task.status = "finished".to_string();
+            task.save_tx = None;
         }
     }
     let rt = tokio::runtime::Builder::new_current_thread()

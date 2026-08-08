@@ -7,7 +7,7 @@ use gpui_component::menu::{DropdownMenu, PopupMenuItem};
 use gpui_component::scroll::ScrollableElement;
 use gpui_component::{h_flex, v_flex, ActiveTheme, Disableable, IconName, Sizable, StyledExt};
 use lol_web_protocol::agent::Agent;
-use lol_web_protocol::scenario::{CreateScenarioDto, UpdateScenarioDto, Scenario};
+use lol_web_protocol::scenario::{CreateScenarioDto, Scenario, UpdateScenarioDto};
 use lol_web_protocol::spawn_preset::SpawnPreset as ProtoSpawnPreset;
 use lol_web_protocol::{FrontAgentConfig, GameConfig};
 
@@ -159,10 +159,7 @@ fn build_all_agents(s: &LauncherPageState) -> Vec<FrontAgentConfig> {
 /// 反向匹配：从场景 agents 中识别选手预设名（对齐 useSlotConfig.matchHeroPreset）。
 fn match_preset(agents: &[Agent], champion: &str, prompt: &str, agent_type: &str) -> String {
     for a in agents {
-        if a.champion == champion
-            && a.prompt == prompt
-            && a.agent_type.as_str() == agent_type
-        {
+        if a.champion == champion && a.prompt == prompt && a.agent_type.as_str() == agent_type {
             return a.name.clone();
         }
     }
@@ -183,7 +180,12 @@ fn spawn_initial_load(cx: &mut Context<AppSidebar>) {
             async move {
                 let (agents, spawns) = tokio::join!(
                     async { cloud_client().list_agents().await.unwrap_or_default() },
-                    async { cloud_client().list_spawn_presets().await.unwrap_or_default() },
+                    async {
+                        cloud_client()
+                            .list_spawn_presets()
+                            .await
+                            .unwrap_or_default()
+                    },
                 );
                 let scenarios = cloud_client().list_scenarios().await.unwrap_or_default();
                 update_state(|s| {
@@ -194,27 +196,26 @@ fn spawn_initial_load(cx: &mut Context<AppSidebar>) {
                     s.error = None;
                 });
                 if let Some(entity) = weak.upgrade() {
-                    entity
-                        .update(&mut cx, |sidebar, cx| {
-                            sidebar.hero_presets = agents
-                                .iter()
-                                .map(|a| HeroPreset {
-                                    name: a.name.clone(),
-                                    hero: a.champion.clone(),
-                                    agent_type: a.agent_type.as_str().to_string(),
-                                })
-                                .collect();
-                            sidebar.spawn_presets = spawns
-                                .iter()
-                                .map(|sp| SpawnPreset {
-                                    name: sp.name.clone(),
-                                    x: sp.x,
-                                    z: sp.z,
-                                    team: sp.team.as_str().to_string(),
-                                })
-                                .collect();
-                            cx.notify();
-                        });
+                    entity.update(&mut cx, |sidebar, cx| {
+                        sidebar.hero_presets = agents
+                            .iter()
+                            .map(|a| HeroPreset {
+                                name: a.name.clone(),
+                                hero: a.champion.clone(),
+                                agent_type: a.agent_type.as_str().to_string(),
+                            })
+                            .collect();
+                        sidebar.spawn_presets = spawns
+                            .iter()
+                            .map(|sp| SpawnPreset {
+                                name: sp.name.clone(),
+                                x: sp.x,
+                                z: sp.z,
+                                team: sp.team.as_str().to_string(),
+                            })
+                            .collect();
+                        cx.notify();
+                    });
                 }
             }
         },
@@ -240,9 +241,7 @@ fn spawn_save_scenario(cx: &mut Context<AppSidebar>) {
                         .map(|sc| sc.id.to_string());
                     (name, agents_json, existing_id)
                 });
-                let empty = agents_json
-                    .as_array()
-                    .map_or(true, |a| a.is_empty());
+                let empty = agents_json.as_array().map_or(true, |a| a.is_empty());
                 let finish = |cx: &mut AsyncApp| {
                     if let Some(entity) = weak.upgrade() {
                         entity.update(cx, |_, cx| cx.notify());
@@ -290,8 +289,7 @@ fn spawn_save_scenario(cx: &mut Context<AppSidebar>) {
                 };
                 match result {
                     Ok(()) => {
-                        let scenarios =
-                            cloud_client().list_scenarios().await.unwrap_or_default();
+                        let scenarios = cloud_client().list_scenarios().await.unwrap_or_default();
                         update_state(|s| {
                             s.scenarios = scenarios;
                             s.saving = false;
@@ -317,90 +315,86 @@ fn spawn_load_scenario(cx: &mut App, weak: WeakEntity<AppSidebar>, id: String) {
         let mut cx = cx.clone();
         async move {
             match cloud_client().get_scenario(&id).await {
-            Ok(sc) => {
-                let agents_json = sc.agents.clone();
-                let scene_name = sc.name.clone();
-                update_state(|s| {
-                    s.loading_scenario = false;
-                    s.error = None;
-                    s.message = None;
-                    let arr = agents_json.as_array().cloned().unwrap_or_default();
-                    let mut blue = Vec::new();
-                    let mut red = Vec::new();
-                    for a in arr {
-                        let team = a
-                            .get("team")
-                            .and_then(|v| v.as_str())
-                            .unwrap_or("")
-                            .to_string();
-                        let champion = a
-                            .get("champion")
-                            .and_then(|v| v.as_str())
-                            .unwrap_or("")
-                            .to_string();
-                        let prompt = a
-                            .get("prompt")
-                            .and_then(|v| v.as_str())
-                            .unwrap_or("")
-                            .to_string();
-                        let agent_type = a
-                            .get("agent_type")
-                            .and_then(|v| v.as_str())
-                            .unwrap_or("llm")
-                            .to_string();
-                        let hero_name =
-                            match_preset(&s.agents, &champion, &prompt, &agent_type);
-                        let (x, z) = a
-                            .get("spawn_point")
-                            .and_then(|v| v.as_array())
-                            .map(|arr| {
-                                let x = arr
-                                    .get(0)
-                                    .and_then(|v| v.as_f64())
-                                    .unwrap_or(0.0) as f32;
-                                let z = arr
-                                    .get(1)
-                                    .and_then(|v| v.as_f64())
-                                    .unwrap_or(0.0) as f32;
-                                (x, z)
-                            })
-                            .unwrap_or((0.0, 0.0));
-                        let spawn_name = s
-                            .spawns
-                            .iter()
-                            .find(|sp| (sp.x - x).abs() < 1.0 && (sp.z - z).abs() < 1.0)
-                            .map(|sp| sp.name.clone())
-                            .unwrap_or_default();
-                        let slot = LauncherSlot {
-                            hero_name,
-                            spawn_name,
-                        };
-                        if team == "Order" {
-                            blue.push(slot);
-                        } else {
-                            red.push(slot);
+                Ok(sc) => {
+                    let agents_json = sc.agents.clone();
+                    let scene_name = sc.name.clone();
+                    update_state(|s| {
+                        s.loading_scenario = false;
+                        s.error = None;
+                        s.message = None;
+                        let arr = agents_json.as_array().cloned().unwrap_or_default();
+                        let mut blue = Vec::new();
+                        let mut red = Vec::new();
+                        for a in arr {
+                            let team = a
+                                .get("team")
+                                .and_then(|v| v.as_str())
+                                .unwrap_or("")
+                                .to_string();
+                            let champion = a
+                                .get("champion")
+                                .and_then(|v| v.as_str())
+                                .unwrap_or("")
+                                .to_string();
+                            let prompt = a
+                                .get("prompt")
+                                .and_then(|v| v.as_str())
+                                .unwrap_or("")
+                                .to_string();
+                            let agent_type = a
+                                .get("agent_type")
+                                .and_then(|v| v.as_str())
+                                .unwrap_or("llm")
+                                .to_string();
+                            let hero_name =
+                                match_preset(&s.agents, &champion, &prompt, &agent_type);
+                            let (x, z) = a
+                                .get("spawn_point")
+                                .and_then(|v| v.as_array())
+                                .map(|arr| {
+                                    let x =
+                                        arr.get(0).and_then(|v| v.as_f64()).unwrap_or(0.0) as f32;
+                                    let z =
+                                        arr.get(1).and_then(|v| v.as_f64()).unwrap_or(0.0) as f32;
+                                    (x, z)
+                                })
+                                .unwrap_or((0.0, 0.0));
+                            let spawn_name = s
+                                .spawns
+                                .iter()
+                                .find(|sp| (sp.x - x).abs() < 1.0 && (sp.z - z).abs() < 1.0)
+                                .map(|sp| sp.name.clone())
+                                .unwrap_or_default();
+                            let slot = LauncherSlot {
+                                hero_name,
+                                spawn_name,
+                            };
+                            if team == "Order" {
+                                blue.push(slot);
+                            } else {
+                                red.push(slot);
+                            }
                         }
-                    }
-                    if blue.is_empty() {
-                        blue.push(LauncherSlot::default());
-                    }
-                    if red.is_empty() {
-                        red.push(LauncherSlot::default());
-                    }
-                    s.blue_slots = blue;
-                    s.red_slots = red;
-                    s.scene_name = scene_name.clone();
-                    s.message = Some(format!("已载入场景「{}」", scene_name));
-                });
+                        if blue.is_empty() {
+                            blue.push(LauncherSlot::default());
+                        }
+                        if red.is_empty() {
+                            red.push(LauncherSlot::default());
+                        }
+                        s.blue_slots = blue;
+                        s.red_slots = red;
+                        s.scene_name = scene_name.clone();
+                        s.message = Some(format!("已载入场景「{}」", scene_name));
+                    });
+                }
+                Err(e) => update_state(|s| {
+                    s.loading_scenario = false;
+                    s.error = Some(format!("载入失败: {}", e));
+                }),
             }
-            Err(e) => update_state(|s| {
-                s.loading_scenario = false;
-                s.error = Some(format!("载入失败: {}", e));
-            }),
-        }
-        if let Some(entity) = weak.upgrade() {
-            entity.update(&mut cx, |_, cx| cx.notify());
-        }
+            if let Some(entity) = weak.upgrade() {
+                entity.update(&mut cx, |_, cx| cx.notify());
+            }
         }
     })
     .detach();
@@ -468,20 +462,18 @@ fn slot_card(
                 let slot_team = team;
                 let slot_idx = index;
                 let weak = hero_menu_weak.clone();
-                m = m.item(
-                    PopupMenuItem::new(name.clone())
-                        .checked(checked)
-                        .on_click(move |_, _, cx| {
-                            update_state(|s| {
-                                if slot_team == "Order" {
-                                    s.blue_slots[slot_idx].hero_name = name.clone();
-                                } else {
-                                    s.red_slots[slot_idx].hero_name = name.clone();
-                                }
-                            });
-                            weak.update(cx, |_, cx| cx.notify()).ok();
-                        }),
-                );
+                m = m.item(PopupMenuItem::new(name.clone()).checked(checked).on_click(
+                    move |_, _, cx| {
+                        update_state(|s| {
+                            if slot_team == "Order" {
+                                s.blue_slots[slot_idx].hero_name = name.clone();
+                            } else {
+                                s.red_slots[slot_idx].hero_name = name.clone();
+                            }
+                        });
+                        weak.update(cx, |_, cx| cx.notify()).ok();
+                    },
+                ));
             }
             m
         });
@@ -490,26 +482,25 @@ fn slot_card(
     let spawns_owned = spawns.to_vec();
     let spawn_selected = slot.spawn_name.clone();
     let spawn_menu_weak = weak.clone();
-    let spawn_dropdown = Button::new(format!("{team}-{index}-spawn"))
-        .outline()
-        .xsmall()
-        .label(spawn_label)
-        .dropdown_menu(move |menu, _window, _cx| {
-            let mut m = menu;
-            if spawns_owned.is_empty() {
-                m = m.item(PopupMenuItem::new("暂无出生点").disabled(true));
-            }
-            for sp in &spawns_owned {
-                let sp_name = sp.name.clone();
-                let label = format!("{} ({:.0}, {:.0})", sp.name, sp.x, sp.z);
-                let checked = sp_name == spawn_selected;
-                let slot_team = team;
-                let slot_idx = index;
-                let weak = spawn_menu_weak.clone();
-                m = m.item(
-                    PopupMenuItem::new(label)
-                        .checked(checked)
-                        .on_click(move |_, _, cx| {
+    let spawn_dropdown =
+        Button::new(format!("{team}-{index}-spawn"))
+            .outline()
+            .xsmall()
+            .label(spawn_label)
+            .dropdown_menu(move |menu, _window, _cx| {
+                let mut m = menu;
+                if spawns_owned.is_empty() {
+                    m = m.item(PopupMenuItem::new("暂无出生点").disabled(true));
+                }
+                for sp in &spawns_owned {
+                    let sp_name = sp.name.clone();
+                    let label = format!("{} ({:.0}, {:.0})", sp.name, sp.x, sp.z);
+                    let checked = sp_name == spawn_selected;
+                    let slot_team = team;
+                    let slot_idx = index;
+                    let weak = spawn_menu_weak.clone();
+                    m = m.item(PopupMenuItem::new(label).checked(checked).on_click(
+                        move |_, _, cx| {
                             update_state(|s| {
                                 if slot_team == "Order" {
                                     s.blue_slots[slot_idx].spawn_name = sp_name.clone();
@@ -518,11 +509,11 @@ fn slot_card(
                                 }
                             });
                             weak.update(cx, |_, cx| cx.notify()).ok();
-                        }),
-                );
-            }
-            m
-        });
+                        },
+                    ));
+                }
+                m
+            });
 
     v_flex()
         .gap_1p5()
@@ -538,12 +529,7 @@ fn slot_card(
                     h_flex()
                         .gap_1()
                         .items_center()
-                        .child(
-                            div()
-                                .text_xs()
-                                .font_bold()
-                                .child(format!("#{}", index + 1)),
-                        )
+                        .child(div().text_xs().font_bold().child(format!("#{}", index + 1)))
                         .child(
                             div()
                                 .text_xs()
@@ -643,15 +629,12 @@ fn team_column(
                 ),
         )
         .child(
-            v_flex()
-                .gap_2()
-                .p_2()
-                .children(
-                    slots
-                        .iter()
-                        .enumerate()
-                        .map(|(i, slot)| slot_card(cx, team, i, slot, agents, spawns)),
-                ),
+            v_flex().gap_2().p_2().children(
+                slots
+                    .iter()
+                    .enumerate()
+                    .map(|(i, slot)| slot_card(cx, team, i, slot, agents, spawns)),
+            ),
         )
         .into_any_element()
 }
@@ -689,12 +672,10 @@ pub fn render_launcher(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -
                 let sc_id = sc.id.to_string();
                 let sc_name = sc.name.clone();
                 let weak = weak.clone();
-                m = m.item(
-                    PopupMenuItem::new(sc_name).on_click(move |_, _, cx| {
-                        update_state(|s| s.loading_scenario = true);
-                        spawn_load_scenario(cx, weak.clone(), sc_id.clone());
-                    }),
-                );
+                m = m.item(PopupMenuItem::new(sc_name).on_click(move |_, _, cx| {
+                    update_state(|s| s.loading_scenario = true);
+                    spawn_load_scenario(cx, weak.clone(), sc_id.clone());
+                }));
             }
             m
         });
@@ -924,8 +905,7 @@ pub fn render_launcher(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -
                         this.launch_error = None;
                         cx.notify();
                         cx.spawn(
-                            move |weak: gpui::WeakEntity<AppSidebar>,
-                                  cx: &mut gpui::AsyncApp| {
+                            move |weak: gpui::WeakEntity<AppSidebar>, cx: &mut gpui::AsyncApp| {
                                 let mut cx = cx.clone();
                                 let mode = mode.clone();
                                 let champ = champ.clone();
@@ -940,32 +920,29 @@ pub fn render_launcher(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -
                                     match process_service().start(config).await {
                                         Ok(game) => {
                                             if let Some(entity) = weak.upgrade() {
-                                                entity
-                                                    .update(&mut cx, |sidebar, cx| {
-                                                        sidebar.is_starting_game = false;
-                                                        sidebar.current_game_id =
-                                                            Some(game.id.clone());
-                                                        sidebar
-                                                            .running_games
-                                                            .push(crate::types::RunningGameInfo {
-                                                                id: game.id,
-                                                                mode: mode.clone(),
-                                                                champion: champ.clone(),
-                                                                port: game.port as u16,
-                                                            });
-                                                        cx.notify();
-                                                    });
+                                                entity.update(&mut cx, |sidebar, cx| {
+                                                    sidebar.is_starting_game = false;
+                                                    sidebar.current_game_id = Some(game.id.clone());
+                                                    sidebar.running_games.push(
+                                                        crate::types::RunningGameInfo {
+                                                            id: game.id,
+                                                            mode: mode.clone(),
+                                                            champion: champ.clone(),
+                                                            port: game.port as u16,
+                                                        },
+                                                    );
+                                                    cx.notify();
+                                                });
                                             }
                                         }
                                         Err(e) => {
                                             if let Some(entity) = weak.upgrade() {
-                                                entity
-                                                    .update(&mut cx, |sidebar, cx| {
-                                                        sidebar.is_starting_game = false;
-                                                        sidebar.launch_error =
-                                                            Some(format!("启动失败: {}", e));
-                                                        cx.notify();
-                                                    });
+                                                entity.update(&mut cx, |sidebar, cx| {
+                                                    sidebar.is_starting_game = false;
+                                                    sidebar.launch_error =
+                                                        Some(format!("启动失败: {}", e));
+                                                    cx.notify();
+                                                });
                                             }
                                         }
                                     }

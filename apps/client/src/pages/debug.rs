@@ -8,12 +8,11 @@ use gpui_component::scroll::ScrollableElement;
 use gpui_component::{h_flex, v_flex, ActiveTheme, Disableable, IconName, Sizable, StyledExt};
 use uuid::Uuid;
 
-use crate::components::agent_chat_history::{AgentChatMessage, render_agent_chat_history};
-use crate::components::game_console_logs::{ConsoleLogRow, render_game_console_logs};
+use crate::components::agent_chat_history::{render_agent_chat_history, AgentChatMessage};
+use crate::components::game_console_logs::{render_game_console_logs, ConsoleLogRow};
 use crate::components::sidebar::AppSidebar;
-use crate::services::match_ws;
-use crate::services::provider;
 use crate::services::types::LogQueryParams;
+use crate::services::{match_ws, provider};
 use crate::types::ActiveView;
 
 // ── 页面本地状态 ──
@@ -287,8 +286,7 @@ fn spawn_init(game_id: String, gen: u64, cx: &mut Context<AppSidebar>) {
                     category: None,
                     search_text: None,
                 };
-                if let Ok(res) = crate::services::log_service::query_logs(&game_id, &params).await
-                {
+                if let Ok(res) = crate::services::log_service::query_logs(&game_id, &params).await {
                     let rows: Vec<ConsoleLogRow> = res
                         .rows
                         .into_iter()
@@ -318,8 +316,7 @@ fn spawn_init(game_id: String, gen: u64, cx: &mut Context<AppSidebar>) {
                 while let Some(val) = rx.recv().await {
                     // 该对局不再是调试焦点（已导航离开或重新进入新对局）则退出
                     let owned = with_state(|s| {
-                        s.current_game.as_deref() == Some(game_id.as_str())
-                            && s.generation == gen
+                        s.current_game.as_deref() == Some(game_id.as_str()) && s.generation == gen
                     });
                     if !owned {
                         break;
@@ -367,9 +364,7 @@ fn run_match_cmd(game_id: String, cmd: MatchCmd, cx: &mut Context<AppSidebar>) {
                         match_ws::toggle_cooldown(&state, &game_id, *enabled).await
                     }
                     MatchCmd::Pause => match_ws::pause_match(&state, &game_id).await.map(|_| ()),
-                    MatchCmd::Resume => {
-                        match_ws::resume_match(&state, &game_id).await.map(|_| ())
-                    }
+                    MatchCmd::Resume => match_ws::resume_match(&state, &game_id).await.map(|_| ()),
                     MatchCmd::ResetPosition => match_ws::reset_position(&state, &game_id).await,
                     MatchCmd::SwitchChampion(name) => {
                         match_ws::switch_champion(&state, &game_id, name).await
@@ -402,7 +397,7 @@ fn back_to_games_button(id: &'static str, cx: &mut Context<AppSidebar>) -> Butto
         .icon(IconName::ArrowLeft)
         .label("返回对局列表")
         .on_click(cx.listener(|this, _, _, cx| {
-            this.active_view = ActiveView::Games;
+            this.navigate_to(ActiveView::Games);
             cx.notify();
         }))
 }
@@ -456,21 +451,31 @@ fn render_content(
     game_id: &str,
     cx: &mut Context<AppSidebar>,
 ) -> AnyElement {
-    let (error, logs, messages, active_tab, god_mode, cooldown_disabled, paused, switch_target, stopping, stream_alive) =
-        with_state(|s| {
-            (
-                s.error.clone(),
-                s.logs.clone(),
-                s.messages.clone(),
-                s.active_tab,
-                s.god_mode,
-                s.cooldown_disabled,
-                s.paused,
-                s.switch_target.clone(),
-                s.stopping,
-                s.stream_alive,
-            )
-        });
+    let (
+        error,
+        logs,
+        messages,
+        active_tab,
+        god_mode,
+        cooldown_disabled,
+        paused,
+        switch_target,
+        stopping,
+        stream_alive,
+    ) = with_state(|s| {
+        (
+            s.error.clone(),
+            s.logs.clone(),
+            s.messages.clone(),
+            s.active_tab,
+            s.god_mode,
+            s.cooldown_disabled,
+            s.paused,
+            s.switch_target.clone(),
+            s.stopping,
+            s.stream_alive,
+        )
+    });
 
     // ── 对局控制按钮 ──
     let god_mode_btn = Button::new("debug-god-mode")
@@ -505,7 +510,11 @@ fn render_content(
 
     let pause_btn = Button::new("debug-pause")
         .outline()
-        .icon(if paused { IconName::Play } else { IconName::Pause })
+        .icon(if paused {
+            IconName::Play
+        } else {
+            IconName::Pause
+        })
         .label(if paused {
             "恢复对局".to_string()
         } else {
@@ -515,7 +524,11 @@ fn render_content(
             let was_paused = paused;
             update_state(|s| s.paused = !paused);
             let gid = this.current_game_id.clone().unwrap_or_default();
-            let cmd = if was_paused { MatchCmd::Resume } else { MatchCmd::Pause };
+            let cmd = if was_paused {
+                MatchCmd::Resume
+            } else {
+                MatchCmd::Pause
+            };
             run_match_cmd(gid, cmd, cx);
         }));
 
@@ -545,14 +558,12 @@ fn render_content(
                 let name = name.clone();
                 let checked = name == switch_target;
                 let weak = weak.clone();
-                m = m.item(
-                    PopupMenuItem::new(name.clone())
-                        .checked(checked)
-                        .on_click(move |_, _, cx| {
-                            update_state(|s| s.switch_target = name.clone());
-                            weak.update(cx, |_, cx| cx.notify()).ok();
-                        }),
-                );
+                m = m.item(PopupMenuItem::new(name.clone()).checked(checked).on_click(
+                    move |_, _, cx| {
+                        update_state(|s| s.switch_target = name.clone());
+                        weak.update(cx, |_, cx| cx.notify()).ok();
+                    },
+                ));
             }
             m
         });
@@ -593,7 +604,7 @@ fn render_content(
                         });
                         weak.update(&mut cx, |this, cx| {
                             this.current_game_id = None;
-                            this.active_view = ActiveView::Games;
+                            this.navigate_to(ActiveView::Games);
                             cx.notify();
                         })
                         .ok();
@@ -608,7 +619,7 @@ fn render_content(
         .icon(IconName::ArrowLeft)
         .label("返回")
         .on_click(cx.listener(|this, _, _, cx| {
-            this.active_view = ActiveView::Games;
+            this.navigate_to(ActiveView::Games);
             cx.notify();
         }));
 
@@ -663,23 +674,16 @@ fn render_content(
                             h_flex()
                                 .gap_1p5()
                                 .items_center()
-                                .child(
-                                    div()
-                                        .w_2()
-                                        .h_2()
-                                        .rounded_full()
-                                        .bg(if stream_alive { success } else { warning }),
-                                )
-                                .child(
-                                    div()
-                                        .text_xs()
-                                        .font_semibold()
-                                        .child(if stream_alive {
-                                            "已连接".to_string()
-                                        } else {
-                                            "连接中…".to_string()
-                                        }),
-                                ),
+                                .child(div().w_2().h_2().rounded_full().bg(if stream_alive {
+                                    success
+                                } else {
+                                    warning
+                                }))
+                                .child(div().text_xs().font_semibold().child(if stream_alive {
+                                    "已连接".to_string()
+                                } else {
+                                    "连接中…".to_string()
+                                })),
                         )
                         .child(
                             div()

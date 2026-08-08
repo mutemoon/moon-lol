@@ -74,10 +74,9 @@ fn ago_iso(iso: &str) -> String {
 /// 并行拉取 Admin 指标 + 运行中对局并写入 state。
 /// 云请求在 cloud.rs 内部已桥接 tokio，在 gpui AsyncApp 里 await 安全。
 async fn refresh_admin_data(client: &CloudClient) {
-    let (m, r) = tokio::join!(
-        async { client.get_admin_metrics().await },
-        async { client.list_running_matches().await },
-    );
+    let (m, r) = tokio::join!(async { client.get_admin_metrics().await }, async {
+        client.list_running_matches().await
+    },);
     update_state(|s| {
         s.metrics = m.ok();
         s.running = r.unwrap_or_default();

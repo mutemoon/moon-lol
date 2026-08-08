@@ -1,6 +1,9 @@
+use std::time::Duration;
+
 use futures_util::{SinkExt, StreamExt};
 use lol_rl_protocol::{VisualInFrame, VisualOutFrame};
 use tokio::sync::mpsc;
+use tokio::time::sleep;
 use tokio_tungstenite::connect_async;
 use tokio_tungstenite::tungstenite::Message;
 
@@ -31,14 +34,19 @@ pub fn spawn_visual_ws(
         rt.block_on(async move {
             let ws_url = format!("ws://127.0.0.1:{port}");
 
-            let Ok((ws_stream, _)) = connect_async(&ws_url).await else {
-                let _ = event_tx.send(VisualWsEvent::Disconnected);
-                return;
+            // 子进程（cargo run + Bevy 初始化 + 资产加载）需要时间启动，失败后重试
+            let (mut write, mut read) = loop {
+                match connect_async(&ws_url).await {
+                    Ok((ws, _)) => {
+                        let _ = event_tx.send(VisualWsEvent::Connected);
+                        break ws.split();
+                    }
+                    Err(_) => {
+                        let _ = event_tx.send(VisualWsEvent::Disconnected);
+                        sleep(Duration::from_millis(500)).await;
+                    }
+                }
             };
-
-            let _ = event_tx.send(VisualWsEvent::Connected);
-
-            let (mut write, mut read) = ws_stream.split();
 
             let read_handle = {
                 let event_tx = event_tx.clone();

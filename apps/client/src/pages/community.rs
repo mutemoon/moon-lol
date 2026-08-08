@@ -151,7 +151,9 @@ fn render_edit_input(
         .child(
             h_flex()
                 .items_center()
-                .when(empty, |d| d.text_color(muted).child(placeholder.to_string()))
+                .when(empty, |d| {
+                    d.text_color(muted).child(placeholder.to_string())
+                })
                 .when(!empty, |d| {
                     d.child(before)
                         .child(div().w(px(1.)).h(rems(1.)).bg(accent))
@@ -222,18 +224,14 @@ fn render_search(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> AnyE
     h_flex()
         .gap_1()
         .items_center()
-        .child(
-            div()
-                .w_64()
-                .child(render_edit_input(
-                    sidebar,
-                    cx,
-                    "comm-search",
-                    "搜索 Agent / 英雄",
-                    |this| this.community_search.clone(),
-                    |this, v| this.community_search = v,
-                )),
-        )
+        .child(div().w_64().child(render_edit_input(
+            sidebar,
+            cx,
+            "comm-search",
+            "搜索 Agent / 英雄",
+            |this| this.community_search.clone(),
+            |this, v| this.community_search = v,
+        )))
         .child(if current.is_empty() {
             div().into_any_element()
         } else {
@@ -447,18 +445,14 @@ fn render_fork_dialog(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) ->
                 .gap_2()
                 .items_center()
                 .child(div().text_xs().child("名称"))
-                .child(
-                    div()
-                        .flex_1()
-                        .child(render_edit_input(
-                            sidebar,
-                            cx,
-                            "comm-fork-name",
-                            "新 Agent 名称",
-                            |this| this.community_fork_name.clone(),
-                            |this, v| this.community_fork_name = v,
-                        )),
-                ),
+                .child(div().flex_1().child(render_edit_input(
+                    sidebar,
+                    cx,
+                    "comm-fork-name",
+                    "新 Agent 名称",
+                    |this| this.community_fork_name.clone(),
+                    |this, v| this.community_fork_name = v,
+                ))),
         )
         .when(!fork_error.is_empty(), |d| {
             d.child(
@@ -486,7 +480,11 @@ fn render_fork_dialog(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) ->
                 .child(
                     Button::new("comm-fork-confirm")
                         .primary()
-                        .label(if forking { "处理中…" } else { "确认 Fork" })
+                        .label(if forking {
+                            "处理中…"
+                        } else {
+                            "确认 Fork"
+                        })
                         .disabled(forking)
                         .on_click(cx.listener(|this, _, _, cx| {
                             confirm_fork(this, cx);

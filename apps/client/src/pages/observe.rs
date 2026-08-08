@@ -141,7 +141,9 @@ fn event_label(ev: &MatchEvent) -> String {
         }
         Some("agent_join") => format!(
             "{}（{}）加入对局",
-            p.get("name").and_then(|v| v.as_str()).unwrap_or("未知 Agent"),
+            p.get("name")
+                .and_then(|v| v.as_str())
+                .unwrap_or("未知 Agent"),
             team("team")
         ),
         Some("agent_stalled") => format!(
@@ -158,9 +160,7 @@ fn event_label(ev: &MatchEvent) -> String {
         ),
         Some("match_finished") => format!(
             "对局结束，胜方 {}",
-            p.get("winner")
-                .and_then(|v| v.as_str())
-                .unwrap_or("未知")
+            p.get("winner").and_then(|v| v.as_str()).unwrap_or("未知")
         ),
         _ => p
             .get("event_type")
@@ -178,9 +178,7 @@ struct RosterAgent {
 
 /// 从事件时间线回填双方阵容与失联 Agent。
 /// 真实引擎事件没有 agent_join，阵容可能为空（与 client observe 页行为一致）。
-fn build_rosters(
-    events: &[MatchEvent],
-) -> (Vec<RosterAgent>, Vec<RosterAgent>, Vec<String>) {
+fn build_rosters(events: &[MatchEvent]) -> (Vec<RosterAgent>, Vec<RosterAgent>, Vec<String>) {
     let mut order = Vec::new();
     let mut chaos = Vec::new();
     let mut stalled: Vec<String> = Vec::new();
@@ -282,7 +280,10 @@ async fn fetch_delta(id: Uuid, weak: &gpui::WeakEntity<AppSidebar>, cx: &mut gpu
 
     // 增量拉取事件（每次 200 条）
     let from_seq = with_state(|s| s.last_seq);
-    match client.get_match_events(&id_str, from_seq, EVENTS_LIMIT).await {
+    match client
+        .get_match_events(&id_str, from_seq, EVENTS_LIMIT)
+        .await
+    {
         Ok(delta) => {
             if let Some(last) = delta.last() {
                 let next_seq = last.seq as u32 + 1;
@@ -388,7 +389,7 @@ pub fn render_observe(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) ->
                     .primary()
                     .label("返回游戏页")
                     .on_click(cx.listener(move |this, _, _, cx| {
-                        this.active_view = ActiveView::Games;
+                        this.navigate_to(ActiveView::Games);
                         cx.notify();
                     })),
             )
@@ -509,7 +510,9 @@ pub fn render_observe(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) ->
             .font_bold()
             .bg(color.opacity(0.15))
             .text_color(color)
-            .when(running, |d| d.child(div().w_2().h_2().rounded_full().bg(color)))
+            .when(running, |d| {
+                d.child(div().w_2().h_2().rounded_full().bg(color))
+            })
             .child(label.to_string())
             .into_any_element()
     });
@@ -521,7 +524,11 @@ pub fn render_observe(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) ->
             .child(
                 Button::new("observe-confirm-stop-btn")
                     .danger()
-                    .label(if stopping { "结束中…" } else { "确认结束" })
+                    .label(if stopping {
+                        "结束中…"
+                    } else {
+                        "确认结束"
+                    })
                     .loading(stopping)
                     .disabled(stopping)
                     .on_click(cx.listener(move |_this, _, _, cx| {
@@ -532,8 +539,7 @@ pub fn render_observe(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) ->
                         let client = provider::cloud_client().clone();
                         let id_str = id_str.clone();
                         cx.spawn(
-                            move |weak: gpui::WeakEntity<AppSidebar>,
-                                  cx: &mut gpui::AsyncApp| {
+                            move |weak: gpui::WeakEntity<AppSidebar>, cx: &mut gpui::AsyncApp| {
                                 let weak = weak.clone();
                                 let mut cx = cx.clone();
                                 let client = client.clone();
@@ -549,7 +555,7 @@ pub fn render_observe(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) ->
                                             if let Some(entity) = weak.upgrade() {
                                                 let _ = entity.update(&mut cx, |this, cx| {
                                                     this.current_match_id = None;
-                                                    this.active_view = ActiveView::Games;
+                                                    this.navigate_to(ActiveView::Games);
                                                     cx.notify();
                                                 });
                                             }
@@ -611,7 +617,7 @@ pub fn render_observe(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) ->
                         .tooltip("返回")
                         .on_click(cx.listener(move |this, _, _, cx| {
                             this.current_match_id = None;
-                            this.active_view = ActiveView::Games;
+                            this.navigate_to(ActiveView::Games);
                             update_state(|s| s.match_id = None);
                             cx.notify();
                         })),
@@ -632,8 +638,16 @@ pub fn render_observe(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) ->
                 .child(
                     Button::new("observe-pause-btn")
                         .outline()
-                        .icon(if paused { IconName::Play } else { IconName::Pause })
-                        .label(if paused { "继续刷新" } else { "暂停刷新" })
+                        .icon(if paused {
+                            IconName::Play
+                        } else {
+                            IconName::Pause
+                        })
+                        .label(if paused {
+                            "继续刷新"
+                        } else {
+                            "暂停刷新"
+                        })
                         .small()
                         .on_click(cx.listener(move |_this, _, _, cx| {
                             update_state(|s| s.paused = !s.paused);
@@ -647,7 +661,12 @@ pub fn render_observe(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) ->
     let info_card = v_flex()
         .gap_2()
         .child(div().text_sm().font_bold().child("对局信息"))
-        .child(info_row("对局 ID", format!("#{}", short), muted, foreground))
+        .child(info_row(
+            "对局 ID",
+            format!("#{}", short),
+            muted,
+            foreground,
+        ))
         .child(info_row("模式", mode, muted, foreground))
         .child(info_row("创建时间", created_at, muted, foreground))
         .when_some(match_info.as_ref(), |d, m| {
@@ -698,10 +717,7 @@ pub fn render_observe(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) ->
                                 .min_w_0()
                                 .child(div().truncate().font_bold().child(a.name.clone()))
                                 .child(
-                                    div()
-                                        .truncate()
-                                        .text_color(muted)
-                                        .child(a.champion.clone()),
+                                    div().truncate().text_color(muted).child(a.champion.clone()),
                                 ),
                         )
                         .child(div().w_2().h_2().flex_shrink_0().rounded_full().bg(dot))
@@ -766,19 +782,13 @@ pub fn render_observe(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) ->
                         .overflow_y_scrollbar()
                         .py_1()
                         .when(lines_empty, |d| {
-                            d.flex()
-                                .items_center()
-                                .justify_center()
-                                .child(
-                                    div()
-                                        .text_xs()
-                                        .text_color(muted)
-                                        .child(if loading {
-                                            "加载中…".to_string()
-                                        } else {
-                                            "等待事件…".to_string()
-                                        }),
-                                )
+                            d.flex().items_center().justify_center().child(
+                                div().text_xs().text_color(muted).child(if loading {
+                                    "加载中…".to_string()
+                                } else {
+                                    "等待事件…".to_string()
+                                }),
+                            )
                         })
                         .when(!lines_empty, |d| {
                             d.children(lines.into_iter().map(|(seq, label, tone)| {
@@ -788,12 +798,7 @@ pub fn render_observe(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) ->
                                     .px_3()
                                     .py_1()
                                     .text_xs()
-                                    .child(
-                                        div()
-                                            .flex_shrink_0()
-                                            .text_color(muted)
-                                            .child(seq),
-                                    )
+                                    .child(div().flex_shrink_0().text_color(muted).child(seq))
                                     .child(div().text_color(tone).child(label))
                                     .into_any_element()
                             }))

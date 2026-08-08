@@ -15,19 +15,16 @@ pub fn pick_free_port() -> Option<u16> {
 pub async fn spawn_visual_env(checkpoint_path: &str) -> anyhow::Result<(Child, u16)> {
     let port = pick_free_port().ok_or_else(|| anyhow::anyhow!("没有可用端口"))?;
 
+    println!(">>> 从客户端启动 lol_rl_visual (Port: {port}, Checkpoint: {checkpoint_path})...");
+
     let mut cmd = Command::new("cargo");
-    cmd.args(["run", "-p", "lol_rl_visual", "--"])
+    cmd.args(["run", "-p", "lol_rl", "--bin", "lol_rl_visual", "--"])
         .arg("--port")
         .arg(port.to_string())
         .arg("--checkpoint")
-        .arg(checkpoint_path);
-
-    #[cfg(target_os = "windows")]
-    {
-        use std::os::windows::process::CommandExt;
-        const CREATE_NO_WINDOW: u32 = 0x08000000;
-        cmd.creation_flags(CREATE_NO_WINDOW);
-    }
+        .arg(checkpoint_path)
+        .stdout(std::process::Stdio::inherit())
+        .stderr(std::process::Stdio::inherit());
 
     let child = cmd.kill_on_drop(true).spawn()?;
 

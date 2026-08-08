@@ -93,6 +93,10 @@ impl ParallelFioraVsRivenEnvs {
         self.workers.iter().map(|w| w.reset()).collect()
     }
 
+    pub fn reset_one(&self, idx: usize) -> FioraVsRivenObs {
+        self.workers[idx].reset()
+    }
+
     pub fn step_all(&self, actions: &[FioraVsRivenAction]) -> Vec<StepResult> {
         assert_eq!(actions.len(), self.workers.len());
         self.workers

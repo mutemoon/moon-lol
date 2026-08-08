@@ -435,7 +435,9 @@ fn render_edit_input(
         .child(
             h_flex()
                 .items_center()
-                .when(empty, |d| d.text_color(muted).child(placeholder.to_string()))
+                .when(empty, |d| {
+                    d.text_color(muted).child(placeholder.to_string())
+                })
                 .when(!empty, |d| {
                     d.child(before)
                         .child(div().w(px(1.)).h(rems(1.)).bg(accent))
@@ -457,7 +459,14 @@ fn render_edit_field(
     v_flex()
         .gap_1()
         .child(div().text_xs().font_bold().child(label.into()))
-        .child(render_edit_input(sidebar, cx, id, placeholder, get_value, set_value))
+        .child(render_edit_input(
+            sidebar,
+            cx,
+            id,
+            placeholder,
+            get_value,
+            set_value,
+        ))
         .into_any_element()
 }
 
@@ -538,14 +547,22 @@ fn render_general(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> Any
 
     let theme_dark = {
         let btn = Button::new("theme-dark").label("深色");
-        let btn = if is_dark { btn.primary() } else { btn.outline() };
+        let btn = if is_dark {
+            btn.primary()
+        } else {
+            btn.outline()
+        };
         btn.on_click(cx.listener(|_, _, window, cx| {
             Theme::change(ThemeMode::Dark, Some(window), cx);
         }))
     };
     let theme_light = {
         let btn = Button::new("theme-light").label("浅色");
-        let btn = if is_dark { btn.outline() } else { btn.primary() };
+        let btn = if is_dark {
+            btn.outline()
+        } else {
+            btn.primary()
+        };
         btn.on_click(cx.listener(|_, _, window, cx| {
             Theme::change(ThemeMode::Light, Some(window), cx);
         }))
@@ -576,9 +593,11 @@ fn render_general(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> Any
 
     v_flex()
         .gap_6()
-        .child(v_flex().gap_2().child(
-            div().text_xl().font_bold().child("常规设置"),
-        ))
+        .child(
+            v_flex()
+                .gap_2()
+                .child(div().text_xl().font_bold().child("常规设置")),
+        )
         .child(
             v_flex()
                 .rounded_lg()
@@ -1019,16 +1038,14 @@ fn render_api_format_field(
             for &(val, label) in API_FORMATS {
                 let weak = weak.clone();
                 let val = val.to_string();
-                menu = menu.item(
-                    PopupMenuItem::new(label)
-                        .checked(current == val)
-                        .on_click(move |_, _, cx| {
-                            let _ = weak.update(cx, |this, cx| {
-                                this.settings.form_api_format = val.clone();
-                                cx.notify();
-                            });
-                        }),
-                );
+                menu = menu.item(PopupMenuItem::new(label).checked(current == val).on_click(
+                    move |_, _, cx| {
+                        let _ = weak.update(cx, |this, cx| {
+                            this.settings.form_api_format = val.clone();
+                            cx.notify();
+                        });
+                    },
+                ));
             }
             menu
         })
@@ -1211,7 +1228,11 @@ fn render_test_result_dialog(sidebar: &mut AppSidebar, cx: &mut Context<AppSideb
                     div()
                         .font_bold()
                         .text_sm()
-                        .text_color(if success { cx.theme().accent } else { cx.theme().danger })
+                        .text_color(if success {
+                            cx.theme().accent
+                        } else {
+                            cx.theme().danger
+                        })
                         .child(if success {
                             "连接测试成功"
                         } else {
@@ -1241,18 +1262,15 @@ fn render_test_result_dialog(sidebar: &mut AppSidebar, cx: &mut Context<AppSideb
                         .child(message),
                 )
                 .child(
-                    h_flex()
-                        .gap_2()
-                        .justify_end()
-                        .child(
-                            Button::new("test-result-close")
-                                .primary()
-                                .label("确定")
-                                .on_click(cx.listener(|this, _, _, cx| {
-                                    this.settings.show_test_result = false;
-                                    cx.notify();
-                                })),
-                        ),
+                    h_flex().gap_2().justify_end().child(
+                        Button::new("test-result-close")
+                            .primary()
+                            .label("确定")
+                            .on_click(cx.listener(|this, _, _, cx| {
+                                this.settings.show_test_result = false;
+                                cx.notify();
+                            })),
+                    ),
                 ),
         )
         .into_any_element()

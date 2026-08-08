@@ -4,6 +4,7 @@ pub mod log_service;
 pub mod match_ws;
 pub mod particle_service;
 pub mod process_service;
+pub mod prop_ron;
 pub mod provider;
 pub mod runtime;
 pub mod types;

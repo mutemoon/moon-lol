@@ -19,3 +19,4 @@ rand.workspace = true
 rayon.workspace = true
 tracing.workspace = true
 anyhow = "1"
+winit = "0.30"

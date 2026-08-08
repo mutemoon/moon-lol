@@ -3764,12 +3764,16 @@ dependencies = [
  "gpui-component",
  "gpui-component-assets",
  "gpui_platform",
+ "league_loader",
+ "league_property",
+ "league_utils",
  "lol_agent_runtime",
  "lol_client",
  "lol_game_process_manager",
  "lol_rl_protocol",
  "lol_share",
  "lol_web_protocol",
+ "rayon",
  "reqwest 0.12.28",
  "ron 0.8.1",
  "rust-i18n",
@@ -9748,6 +9752,7 @@ dependencies = [
  "serde",
  "serde_json",
  "tracing",
+ "winit",
 ]
 
 [[package]]
@@ -9843,25 +9848,6 @@ version = "0.1.0"
 dependencies = [
  "bincode",
  "serde",
-]
-
-[[package]]
-name = "lol_rl_visual"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "bincode",
- "candle-core",
- "candle-nn",
- "futures-util",
- "lol_env",
- "lol_rl",
- "lol_rl_protocol",
- "serde",
- "tokio",
- "tokio-tungstenite 0.24.0",
- "tracing",
- "tracing-subscriber",
 ]
 
 [[package]]

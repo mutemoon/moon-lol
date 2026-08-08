@@ -27,7 +27,15 @@ const PLATFORM_PROVIDER_ID: &str = "__platform__";
 
 /// RL Reward Shaper 固定权重键（对应 heroes.vue 的 RL_REWARD_KEYS）。
 const RL_REWARD_KEYS: [&str; 9] = [
-    "last_hit", "kill", "death", "assist", "gold", "level", "health", "time", "proximity",
+    "last_hit",
+    "kill",
+    "death",
+    "assist",
+    "gold",
+    "level",
+    "health",
+    "time",
+    "proximity",
 ];
 
 // ── 页面状态类型（存储在 AppSidebar） ──
@@ -153,7 +161,12 @@ fn set_edit_cursor(id: &str, cursor: usize) {
 
 /// 处理单个按键，返回（新文本，新光标）。无变化返回 None。
 /// `multiline` 为 true 时 Enter 换行，否则忽略。
-fn apply_key(value: &str, cursor: usize, event: &KeyDownEvent, multiline: bool) -> Option<(String, usize)> {
+fn apply_key(
+    value: &str,
+    cursor: usize,
+    event: &KeyDownEvent,
+    multiline: bool,
+) -> Option<(String, usize)> {
     let ks = &event.keystroke;
     let mods = &ks.modifiers;
     let mut chars: Vec<char> = value.chars().collect();
@@ -258,7 +271,9 @@ fn render_edit_input(
         .child(
             h_flex()
                 .items_center()
-                .when(empty, |d| d.text_color(muted).child(placeholder.to_string()))
+                .when(empty, |d| {
+                    d.text_color(muted).child(placeholder.to_string())
+                })
                 .when(!empty, |d| {
                     d.child(before)
                         .child(div().w(px(1.)).h(rems(1.)).bg(accent))
@@ -349,18 +364,30 @@ fn draft_config(state: &HeroesState) -> serde_json::Value {
     match state.draft_agent_type {
         AgentType::Llm => {
             let mut obj = serde_json::Map::new();
-            obj.insert("thinking_depth".into(), serde_json::json!(state.draft_thinking_depth));
+            obj.insert(
+                "thinking_depth".into(),
+                serde_json::json!(state.draft_thinking_depth),
+            );
             if !state.draft_provider_id.is_empty()
                 && state.draft_provider_id != PLATFORM_PROVIDER_ID
             {
-                obj.insert("provider_id".into(), serde_json::json!(state.draft_provider_id));
+                obj.insert(
+                    "provider_id".into(),
+                    serde_json::json!(state.draft_provider_id),
+                );
             }
             serde_json::Value::Object(obj)
         }
         AgentType::Rl => {
             let mut obj = serde_json::Map::new();
-            obj.insert("model_path".into(), serde_json::json!(state.draft_rl_model_path));
-            obj.insert("inference_endpoint".into(), serde_json::json!(state.draft_rl_endpoint));
+            obj.insert(
+                "model_path".into(),
+                serde_json::json!(state.draft_rl_model_path),
+            );
+            obj.insert(
+                "inference_endpoint".into(),
+                serde_json::json!(state.draft_rl_endpoint),
+            );
             let mut rs = serde_json::Map::new();
             for (k, v) in &state.draft_rl_rewards {
                 rs.insert(k.clone(), serde_json::json!(v));
@@ -394,7 +421,9 @@ fn export_json(state: &HeroesState) -> String {
 fn apply_import_json(state: &mut HeroesState, s: &str) -> Result<(), String> {
     let v: serde_json::Value = serde_json::from_str(s).map_err(|e| e.to_string())?;
     let obj = v.as_array().and_then(|a| a.first()).unwrap_or(&v);
-    let obj = obj.as_object().ok_or_else(|| "期望 JSON 对象".to_string())?;
+    let obj = obj
+        .as_object()
+        .ok_or_else(|| "期望 JSON 对象".to_string())?;
 
     if let Some(n) = obj.get("name").and_then(|v| v.as_str()) {
         state.draft_name = n.to_string();
@@ -710,7 +739,11 @@ fn render_edit(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> AnyEle
                             div()
                                 .text_sm()
                                 .text_color(cx.theme().muted_foreground)
-                                .child(if editing { "编辑选手" } else { "新建选手" }),
+                                .child(if editing {
+                                    "编辑选手"
+                                } else {
+                                    "新建选手"
+                                }),
                         )
                         .child(div().text_lg().font_bold().child(if draft_name.is_empty() {
                             "未命名选手".to_string()
@@ -893,7 +926,11 @@ fn render_config_tab(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> 
         .child(
             h_flex()
                 .gap_4()
-                .child(div().flex_1().child(edit_field("英雄", render_champion_select(sidebar, cx))))
+                .child(
+                    div()
+                        .flex_1()
+                        .child(edit_field("英雄", render_champion_select(sidebar, cx))),
+                )
                 .child(div().flex_1().child(edit_field(
                     "决策驱动类型",
                     h_flex().gap_2().children(type_buttons).into_any_element(),
@@ -948,7 +985,9 @@ fn render_think_depth(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) ->
             div()
                 .text_xs()
                 .text_color(cx.theme().muted_foreground)
-                .child("更高的思考深度让 LLM 在决策前展开更长的推理链，更稳但更慢、消耗更多 token。"),
+                .child(
+                    "更高的思考深度让 LLM 在决策前展开更长的推理链，更稳但更慢、消耗更多 token。",
+                ),
         )
         .child(h_flex().gap_2().children(pips))
         .into_any_element()
@@ -1111,19 +1150,17 @@ fn render_model_select(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -
                     let opt = opt.clone();
                     let weak = weak.clone();
                     let checked = current == opt;
-                    m = m.item(
-                        PopupMenuItem::new(opt.clone())
-                            .checked(checked)
-                            .on_click(move |_, _, cx| {
-                                if let Some(app) = weak.upgrade() {
-                                    let _ = app.update(cx, |this, cx| {
-                                        this.heroes.draft_model = opt.clone();
-                                        this.heroes.draft_manual_model = false;
-                                        cx.notify();
-                                    });
-                                }
-                            }),
-                    );
+                    m = m.item(PopupMenuItem::new(opt.clone()).checked(checked).on_click(
+                        move |_, _, cx| {
+                            if let Some(app) = weak.upgrade() {
+                                let _ = app.update(cx, |this, cx| {
+                                    this.heroes.draft_model = opt.clone();
+                                    this.heroes.draft_manual_model = false;
+                                    cx.notify();
+                                });
+                            }
+                        },
+                    ));
                 }
                 m
             })
@@ -1214,7 +1251,12 @@ fn render_json_section(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -
             h_flex()
                 .justify_between()
                 .items_center()
-                .child(div().text_sm().font_bold().child("配置 JSON（导入 / 导出）"))
+                .child(
+                    div()
+                        .text_sm()
+                        .font_bold()
+                        .child("配置 JSON（导入 / 导出）"),
+                )
                 .child(
                     h_flex()
                         .gap_2()
@@ -1249,7 +1291,9 @@ fn render_json_section(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -
             div()
                 .text_xs()
                 .text_color(cx.theme().muted_foreground)
-                .child("「导出」序列化当前表单并复制到剪贴板；粘贴 JSON 到上方后点「应用」填充表单。"),
+                .child(
+                    "「导出」序列化当前表单并复制到剪贴板；粘贴 JSON 到上方后点「应用」填充表单。",
+                ),
         )
         .into_any_element()
 }
@@ -1323,7 +1367,11 @@ fn render_upstream_sync(
                 .border_color(cx.theme().border)
                 .px_4()
                 .py_3()
-                .child(div().text_sm().child(format!("Fork 自「{}」· 经理 #{}", up_name, owner_id)))
+                .child(
+                    div()
+                        .text_sm()
+                        .child(format!("Fork 自「{}」· 经理 #{}", up_name, owner_id)),
+                )
                 .child(if show_diff {
                     Button::new("pull-btn")
                         .outline()
@@ -1601,7 +1649,12 @@ fn render_delete_modal(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -
                 .bg(cx.theme().background)
                 .p_6()
                 .gap_4()
-                .child(div().text_lg().font_bold().child(format!("删除选手「{}」？", name)))
+                .child(
+                    div()
+                        .text_lg()
+                        .font_bold()
+                        .child(format!("删除选手「{}」？", name)),
+                )
                 .child(
                     div()
                         .text_sm()
@@ -1666,7 +1719,9 @@ fn ensure_providers_loaded(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar
 /// 加载当前编辑 agent 的上游 Agent（用于 diff 对照）。
 fn spawn_load_upstream(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) {
     let editing_id = match &sidebar.heroes.mode {
-        HeroesMode::Edit { editing_id: Some(id) } => *id,
+        HeroesMode::Edit {
+            editing_id: Some(id),
+        } => *id,
         _ => return,
     };
     let upstream_id = sidebar

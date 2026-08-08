@@ -32,7 +32,6 @@ lol_game_process_manager = { path = "crates/lol_game_process_manager" }
 lol_rl = { path = "crates/lol_rl" }
 lol_rl_protocol = { path = "crates/lol_rl_protocol" }
 lol_env = { path = "crates/lol_env" }
-lol_rl_visual = { path = "crates/lol_rl_visual" }
 lol_web_protocol = { path = "crates/lol_web_protocol" }
 rmcp = { version = "1.8", features = ["client", "macros", "server"] }
 gltf = "1.4.1"

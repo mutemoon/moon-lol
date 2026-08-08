@@ -65,7 +65,7 @@ fn hero_banner(cx: &mut Context<AppSidebar>) -> AnyElement {
                     .icon(IconName::Play)
                     .label("开始逗蛐蛐 →")
                     .on_click(cx.listener(|this, _, _, cx| {
-                        this.active_view = ActiveView::Launcher;
+                        this.navigate_to(ActiveView::Launcher);
                         cx.notify();
                     })),
             ),
@@ -79,24 +79,26 @@ fn tech_strip(cx: &mut Context<AppSidebar>) -> AnyElement {
     let muted = cx.theme().muted_foreground;
     let border = cx.theme().border;
 
-    let chips: Vec<AnyElement> = ["RUST", "BEVY", "ECS", "WEBGL", "WGPU", "VUE", "TAILWIND", "GPUI"]
-        .iter()
-        .map(|name| {
-            h_flex()
-                .gap_4()
-                .items_center()
-                .whitespace_nowrap()
-                .child(
-                    div()
-                        .text_lg()
-                        .font_bold()
-                        .text_color(accent)
-                        .child(name.to_string()),
-                )
-                .child(div().text_sm().text_color(muted).child("///"))
-                .into_any_element()
-        })
-        .collect();
+    let chips: Vec<AnyElement> = [
+        "RUST", "BEVY", "ECS", "WEBGL", "WGPU", "VUE", "TAILWIND", "GPUI",
+    ]
+    .iter()
+    .map(|name| {
+        h_flex()
+            .gap_4()
+            .items_center()
+            .whitespace_nowrap()
+            .child(
+                div()
+                    .text_lg()
+                    .font_bold()
+                    .text_color(accent)
+                    .child(name.to_string()),
+            )
+            .child(div().text_sm().text_color(muted).child("///"))
+            .into_any_element()
+    })
+    .collect();
 
     div()
         .w_full()
@@ -185,17 +187,15 @@ fn stack_card(
                 .child(div().text_lg().font_bold().child(title.to_string())),
         )
         .child(div().text_sm().text_color(muted).child(desc.to_string()))
-        .child(
-            v_flex().gap_1p5().children(items.iter().map(|item| {
-                h_flex()
-                    .gap_1p5()
-                    .items_center()
-                    .text_xs()
-                    .text_color(muted)
-                    .child(div().w_2().h_2().rounded_full().bg(accent))
-                    .child(item.to_string())
-            })),
-        )
+        .child(v_flex().gap_1p5().children(items.iter().map(|item| {
+            h_flex()
+                .gap_1p5()
+                .items_center()
+                .text_xs()
+                .text_color(muted)
+                .child(div().w_2().h_2().rounded_full().bg(accent))
+                .child(item.to_string())
+        })))
         .into_any_element()
 }
 
@@ -270,7 +270,7 @@ fn log_card(
         .gap_3()
         .hover(|s| s.bg(accent.opacity(0.05)).border_color(accent.opacity(0.5)))
         .on_any_mouse_down(cx.listener(move |this, _, _, cx| {
-            this.active_view = ActiveView::Blog;
+            this.navigate_to(ActiveView::Blog);
             cx.notify();
         }))
         .child(

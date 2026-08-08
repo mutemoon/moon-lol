@@ -7,7 +7,7 @@ use gpui_component::scroll::ScrollableElement;
 use gpui_component::{h_flex, v_flex, ActiveTheme, Disableable, IconName, Sizable, StyledExt};
 use lol_web_protocol::history::{GameHistorySummary, SavedAgentHistory};
 
-use crate::components::agent_chat_history::{AgentChatMessage, render_agent_chat_history};
+use crate::components::agent_chat_history::{render_agent_chat_history, AgentChatMessage};
 use crate::components::sidebar::AppSidebar;
 use crate::services::provider::cloud_client;
 
@@ -282,19 +282,27 @@ pub fn render_history(_sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -
         spawn_refresh_list(cx);
     }
 
-    let (loading, histories, selected_id, detail_loading, detail, selected_agent_id, deleting, error) =
-        with_state(|s| {
-            (
-                s.loading,
-                s.histories.clone(),
-                s.selected_id.clone(),
-                s.detail_loading,
-                s.detail.clone(),
-                s.selected_agent_id.clone(),
-                s.deleting,
-                s.error.clone(),
-            )
-        });
+    let (
+        loading,
+        histories,
+        selected_id,
+        detail_loading,
+        detail,
+        selected_agent_id,
+        deleting,
+        error,
+    ) = with_state(|s| {
+        (
+            s.loading,
+            s.histories.clone(),
+            s.selected_id.clone(),
+            s.detail_loading,
+            s.detail.clone(),
+            s.selected_agent_id.clone(),
+            s.deleting,
+            s.error.clone(),
+        )
+    });
 
     let has_selection = selected_id.is_some();
     let count = histories.len();
@@ -667,19 +675,17 @@ fn render_detail_panel(
             v_flex()
                 .flex_shrink_0()
                 .gap_3()
-                .child(prompt_block(cx, "全局 Prompt", &selected_agent.system_prompt))
+                .child(prompt_block(
+                    cx,
+                    "全局 Prompt",
+                    &selected_agent.system_prompt,
+                ))
                 .child(prompt_block(cx, "英雄 Prompt", &selected_agent.prompt)),
         )
         // ── 分隔线 ──
         .child(div().w_full().h_px().bg(cx.theme().border))
         // ── 对话回放 ──
-        .child(
-            div()
-                .flex_1()
-                .min_h_0()
-                .overflow_hidden()
-                .child(chat),
-        )
+        .child(div().flex_1().min_h_0().overflow_hidden().child(chat))
         .into_any_element()
 }
 

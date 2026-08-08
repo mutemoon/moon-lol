@@ -33,8 +33,35 @@ pub struct TaskConfigPayload {
     pub agent_type: String,
     pub env_name: String,
     pub lr: f32,
+    pub gamma: f32,
+    pub gae_lambda: f32,
+    pub clip_eps: f32,
+    pub ppo_epochs: usize,
+    pub hidden_dim: usize,
     pub parallel_envs: usize,
+    pub rollout_steps_per_env: usize,
+    pub total_iterations: usize,
     pub max_steps: usize,
+}
+
+impl Default for TaskConfigPayload {
+    fn default() -> Self {
+        Self {
+            name: "RL 对战训练任务".to_string(),
+            agent_type: "PPO (Candle)".to_string(),
+            env_name: "FioraVsRivenEnv-v0".to_string(),
+            lr: 5e-4,
+            gamma: 0.99,
+            gae_lambda: 0.95,
+            clip_eps: 0.2,
+            ppo_epochs: 4,
+            hidden_dim: 64,
+            parallel_envs: 4,
+            rollout_steps_per_env: 80,
+            total_iterations: 80,
+            max_steps: 25600,
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -85,6 +112,12 @@ pub enum OutFrame {
         task_id: String,
         checkpoint: CheckpointItem,
     },
+    TaskDetail {
+        task_id: String,
+        checkpoints: Vec<CheckpointItem>,
+        metrics_history: Vec<MetricsRow>,
+        logs: Vec<String>,
+    },
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -112,6 +145,9 @@ pub struct CheckpointItem {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum InFrame {
     GetTaskList,
+    GetTaskDetail {
+        task_id: String,
+    },
     CreateTask {
         config: TaskConfigPayload,
     },
@@ -127,6 +163,9 @@ pub enum InFrame {
         task_id: String,
         id: String,
     },
+    DeleteTask {
+        task_id: String,
+    },
 }
 
 // ── Visual subprocess protocol ──
@@ -137,6 +176,7 @@ pub struct VisualObsFrame {
     pub obs: ObsFeaturePayload,
     pub reward: f32,
     pub reward_breakdown: Vec<RewardItem>,
+    pub policy: Vec<PolicyItem>,
     pub terminated: bool,
     pub truncated: bool,
     pub fiora_alive: bool,
@@ -165,4 +205,5 @@ pub enum VisualInFrame {
     Pause,
     Resume,
     StepOnce,
+    StepWithAction { action_id: usize },
 }

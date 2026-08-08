@@ -238,9 +238,7 @@ fn apply_key(value: &str, cursor: usize, event: &KeyDownEvent) -> Option<(String
 // ── 工作副本访问 ──
 
 /// 取「主发射器列表」：complex 非空用 complex，否则用 simple。
-fn primary_list_ref(
-    wd: &ConfigVfxSystemDefinition,
-) -> Option<&Vec<ConfigVfxEmitterDefinition>> {
+fn primary_list_ref(wd: &ConfigVfxSystemDefinition) -> Option<&Vec<ConfigVfxEmitterDefinition>> {
     if let Some(l) = wd.complex_emitter_definition_data.as_ref() {
         if !l.is_empty() {
             return Some(l);
@@ -311,7 +309,11 @@ fn set_num_field(idx: usize, field: NumField, v: f32) {
 fn set_name_idx(idx: usize, name: String) {
     mutate_emitter(idx, |em| {
         let trimmed = name.trim().to_string();
-        em.emitter_name = if trimmed.is_empty() { None } else { Some(trimmed) };
+        em.emitter_name = if trimmed.is_empty() {
+            None
+        } else {
+            Some(trimmed)
+        };
     });
 }
 
@@ -370,7 +372,11 @@ enum TexField {
 }
 
 const TEX_ITEMS: &[(TexField, &str, &str)] = &[
-    (TexField::Texture, "主贴图 texture", "ASSETS/Textures/particles/fire.dds"),
+    (
+        TexField::Texture,
+        "主贴图 texture",
+        "ASSETS/Textures/particles/fire.dds",
+    ),
     (
         TexField::ParticleColorTexture,
         "粒子颜色贴图 particle_color_texture",
@@ -1061,7 +1067,11 @@ fn comp_labels(dims: usize) -> &'static [&'static str] {
     }
 }
 
-fn render_section(cx: &mut Context<AppSidebar>, title: &str, children: Vec<AnyElement>) -> AnyElement {
+fn render_section(
+    cx: &mut Context<AppSidebar>,
+    title: &str,
+    children: Vec<AnyElement>,
+) -> AnyElement {
     v_flex()
         .gap_2()
         .child(
@@ -1109,29 +1119,25 @@ fn render_sampler_row(
                     is_curve,
                 )),
         )
-        .child(
-            h_flex()
-                .gap_1()
-                .children((0..dims).map(|c| {
-                    let id = format!("{:08x}-{}-sm-{:?}-{}", hash, idx, kind, c);
-                    v_flex()
-                        .gap_0p5()
-                        .flex_1()
-                        .child(
-                            div()
-                                .text_xs()
-                                .text_color(muted)
-                                .child(labels.get(c).copied().unwrap_or("?").to_string()),
-                        )
-                        .child(render_number_input(
-                            cx,
-                            id,
-                            vals.get(c).copied().unwrap_or(0.0),
-                            move |v| set_sampler_component(idx, kind, c, v),
-                        ))
-                        .into_any_element()
-                })),
-        )
+        .child(h_flex().gap_1().children((0..dims).map(|c| {
+            let id = format!("{:08x}-{}-sm-{:?}-{}", hash, idx, kind, c);
+            v_flex()
+                .gap_0p5()
+                .flex_1()
+                .child(
+                    div()
+                        .text_xs()
+                        .text_color(muted)
+                        .child(labels.get(c).copied().unwrap_or("?").to_string()),
+                )
+                .child(render_number_input(
+                    cx,
+                    id,
+                    vals.get(c).copied().unwrap_or(0.0),
+                    move |v| set_sampler_component(idx, kind, c, v),
+                ))
+                .into_any_element()
+        })))
         .into_any_element()
 }
 
@@ -1205,12 +1211,7 @@ fn render_emitter_editor(
             v_flex()
                 .gap_1()
                 .flex_1()
-                .child(
-                    div()
-                        .text_xs()
-                        .text_color(muted)
-                        .child(label.to_string()),
-                )
+                .child(div().text_xs().text_color(muted).child(label.to_string()))
                 .child(render_text_input(
                     cx,
                     format!("{:08x}-{}-tex-{:?}", hash, idx, f),
@@ -1233,20 +1234,11 @@ fn render_emitter_editor(
                     .text_color(muted)
                     .child("贴图分割 tex_div (U/V)".to_string()),
             )
-            .child(
-                h_flex()
-                    .gap_1()
-                    .children((0..2).map(|c| {
-                        let id = format!("{:08x}-{}-texdiv-{}", hash, idx, c);
-                        render_number_input(
-                            cx,
-                            id,
-                            tv[c],
-                            move |v| set_tex_div_comp(idx, c, v),
-                        )
-                        .into_any_element()
-                    })),
-            )
+            .child(h_flex().gap_1().children((0..2).map(|c| {
+                let id = format!("{:08x}-{}-texdiv-{}", hash, idx, c);
+                render_number_input(cx, id, tv[c], move |v| set_tex_div_comp(idx, c, v))
+                    .into_any_element()
+            })))
             .into_any_element(),
     );
 
@@ -1277,7 +1269,13 @@ fn render_emitter_editor(
             h_flex()
                 .items_center()
                 .justify_between()
-                .child(h_flex().gap_2().items_center().child(IconName::Settings).child(div().font_bold().text_sm().child(title)))
+                .child(
+                    h_flex()
+                        .gap_2()
+                        .items_center()
+                        .child(IconName::Settings)
+                        .child(div().font_bold().text_sm().child(title)),
+                )
                 .child(
                     h_flex()
                         .gap_2()
@@ -1319,7 +1317,11 @@ fn render_emitter_editor(
         // 渲染标志
         .child(render_section(cx, "渲染标志", flag_children))
         // 采样器
-        .child(render_section(cx, "采样器（数值输入 + 常量/曲线预设）", sampler_children))
+        .child(render_section(
+            cx,
+            "采样器（数值输入 + 常量/曲线预设）",
+            sampler_children,
+        ))
         // 贴图资源
         .child(render_section(cx, "贴图资源", texture_children))
         .into_any_element()
@@ -1397,23 +1399,14 @@ fn render_system_detail(
         )
         .when(emitter_count == 0, |d| {
             d.child(
-                div()
-                    .flex_1()
-                    .flex()
-                    .items_center()
-                    .justify_center()
-                    .child(
-                        v_flex()
-                            .gap_2()
-                            .items_center()
-                            .child(IconName::File)
-                            .child(
-                                div()
-                                    .text_xs()
-                                    .text_color(cx.theme().muted_foreground)
-                                    .child("该粒子系统未包含发射器定义数据"),
-                            ),
+                div().flex_1().flex().items_center().justify_center().child(
+                    v_flex().gap_2().items_center().child(IconName::File).child(
+                        div()
+                            .text_xs()
+                            .text_color(cx.theme().muted_foreground)
+                            .child("该粒子系统未包含发射器定义数据"),
                     ),
+                ),
             )
         })
         .when(emitter_count > 0, |d| {
@@ -1434,8 +1427,7 @@ fn render_system_detail(
                                     .emitter_name
                                     .clone()
                                     .unwrap_or_else(|| format!("发射器 #{}", idx + 1));
-                                let btn = Button::new(format!("emitter-tab-{}", idx))
-                                    .label(label);
+                                let btn = Button::new(format!("emitter-tab-{}", idx)).label(label);
                                 let btn = if is_active { btn } else { btn.ghost() };
                                 btn.on_click(cx.listener(move |_, _, _, cx| {
                                     update_state(|s| {
@@ -1640,14 +1632,9 @@ pub fn render_particles(_sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>)
                                                 h_flex()
                                                     .items_center()
                                                     .gap_1()
-                                                    .child(
-                                                        div()
-                                                            .flex_1()
-                                                            .child(render_search_input(
-                                                                cx,
-                                                                search.clone(),
-                                                            )),
-                                                    )
+                                                    .child(div().flex_1().child(
+                                                        render_search_input(cx, search.clone()),
+                                                    ))
                                                     .when(!search.is_empty(), |d2| {
                                                         d2.child(
                                                             Button::new("particle-search-clear")
@@ -1720,12 +1707,7 @@ fn render_page_header(cx: &mut Context<AppSidebar>, ws_url: &str, connected: boo
                         .gap_2()
                         .items_center()
                         .child(IconName::Palette)
-                        .child(
-                            div()
-                                .font_bold()
-                                .text_lg()
-                                .child("粒子系统编辑器"),
-                        ),
+                        .child(div().font_bold().text_lg().child("粒子系统编辑器")),
                 )
                 .child(
                     div()
@@ -2051,10 +2033,8 @@ fn render_hero_tree_node(
                                                         s.error = Some(e);
                                                     });
                                                     if let Some(e) = weak.upgrade() {
-                                                        let _ = e.update(
-                                                            &mut cx,
-                                                            |_, cx| cx.notify(),
-                                                        );
+                                                        let _ =
+                                                            e.update(&mut cx, |_, cx| cx.notify());
                                                     }
                                                 }
                                             }

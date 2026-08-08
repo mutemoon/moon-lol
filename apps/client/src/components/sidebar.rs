@@ -3,7 +3,8 @@ use std::collections::HashMap;
 use std::sync::Arc;
 
 use gpui::*;
-use gpui_component::{h_flex, v_flex, ActiveTheme, TitleBar};
+use gpui_component::table::TableState;
+use gpui_component::{h_flex, v_flex, ActiveTheme, Root};
 use lol_rl_protocol::{InFrame, TaskOverviewItem, VisualInFrame, VisualObsFrame};
 use lol_web_protocol::agent::Agent;
 use lol_web_protocol::agent_snapshot::AgentSnapshot;
@@ -13,20 +14,22 @@ use uuid::Uuid;
 
 use crate::components::auth_dialog::render_auth_dialog;
 use crate::components::navigation::{render_sidebar_menu, render_topbar};
+use crate::components::tasks_table::TaskTableDelegate;
+use crate::components::{render_running_visual, render_task_detail, render_tasks_table};
 use crate::pages::heroes::HeroesState;
 use crate::pages::settings::SettingsState;
 use crate::pages::{
     render_admin, render_billing, render_blog, render_community, render_debug, render_games,
     render_hero, render_heroes, render_history, render_home, render_launcher, render_leaderboard,
     render_logs_archive, render_mock, render_observe, render_particles, render_rank,
-    render_room_detail, render_rooms, render_settings, render_task_detail, render_tasks_table,
+    render_room_detail, render_rooms, render_settings, render_wad_browser,
 };
 use crate::services::cloud::CloudClient;
 use crate::services::provider;
 use crate::services::ws::spawn_ws_service;
 use crate::types::{
     ActiveView, HeroPreset, LocalTaskDetail, ModelProviderInfo, RunningGameInfo, SpawnPreset,
-    UserInfo,
+    TaskDetailTab, UserInfo,
 };
 
 // 401 回调标记：回调是无参 Fn()，拿不到 &mut App 句柄直接更新实体，
@@ -53,12 +56,22 @@ pub struct AppSidebar {
     pub selected_task_id: Option<String>,
     pub task_details: HashMap<String, LocalTaskDetail>,
     pub running_visual_model: Option<String>,
+    pub task_detail_tab: TaskDetailTab,
 
     // ── Visual subprocess session（RL 并行团队维护，不可删除） ──
     pub visual_session: Option<VisualSession>,
     pub visual_ws_connected: bool,
+    pub visual_paused: bool,
     pub latest_visual_frame: Option<VisualObsFrame>,
     pub visual_in_tx: Option<mpsc::UnboundedSender<VisualInFrame>>,
+    pub visual_error: Option<String>,
+    /// 当前可视化子进程所属的任务 id（用于删除任务时联动关闭）
+    pub visual_task_id: Option<String>,
+    /// 任务概览 DataTable 状态（惰性创建）
+    pub table_state: Option<Entity<TableState<TaskTableDelegate>>>,
+    /// 新建 RL 训练任务 Modal 弹窗状态与表单
+    pub create_task_modal_open: bool,
+    pub create_task_form: lol_rl_protocol::TaskConfigPayload,
 
     // ── 全局状态：Auth（M3/M4 对接 cloud REST 客户端后填充） ──
     pub auth_token: Option<String>,
@@ -110,6 +123,9 @@ pub struct AppSidebar {
     pub community_fork_name: String,
     pub community_forking: bool,
 
+    pub history: Vec<ActiveView>,
+    pub history_index: usize,
+
     // ── Heroes / Settings 页面 ──
     pub cloud: CloudClient,
     pub heroes: HeroesState,
@@ -137,11 +153,18 @@ impl AppSidebar {
             selected_task_id: None,
             task_details: initial_details,
             running_visual_model: None,
+            task_detail_tab: TaskDetailTab::Metrics,
             // Visual subprocess
             visual_session: None,
             visual_ws_connected: false,
+            visual_paused: false,
             latest_visual_frame: None,
             visual_in_tx: None,
+            visual_error: None,
+            visual_task_id: None,
+            table_state: None,
+            create_task_modal_open: false,
+            create_task_form: lol_rl_protocol::TaskConfigPayload::default(),
             // Auth
             auth_token: None,
             current_user: None,
@@ -186,6 +209,8 @@ impl AppSidebar {
             community_fork_target: None,
             community_fork_name: String::new(),
             community_forking: false,
+            history: vec![ActiveView::RlTraining],
+            history_index: 0,
             // Heroes / Settings
             // 与 provider::cloud_client() 共享同一 token 存储，登录态全应用一致
             cloud: provider::cloud_client().clone(),
@@ -198,6 +223,46 @@ impl AppSidebar {
         this
     }
 
+    pub fn navigate_to(&mut self, view: ActiveView) {
+        if self.active_view == view {
+            return;
+        }
+        if self.history_index + 1 < self.history.len() {
+            self.history.truncate(self.history_index + 1);
+        }
+        self.history.push(view);
+        self.history_index = self.history.len() - 1;
+        self.active_view = view;
+    }
+
+    pub fn can_go_back(&self) -> bool {
+        self.history_index > 0
+    }
+
+    pub fn can_go_forward(&self) -> bool {
+        self.history_index + 1 < self.history.len()
+    }
+
+    pub fn go_back(&mut self) -> bool {
+        if self.can_go_back() {
+            self.history_index -= 1;
+            self.active_view = self.history[self.history_index];
+            true
+        } else {
+            false
+        }
+    }
+
+    pub fn go_forward(&mut self) -> bool {
+        if self.can_go_forward() {
+            self.history_index += 1;
+            self.active_view = self.history[self.history_index];
+            true
+        } else {
+            false
+        }
+    }
+
     pub fn change_locale(&mut self, locale: &str, cx: &mut Context<Self>) {
         self.locale = locale.to_string();
         gpui_component::set_locale(locale);
@@ -208,6 +273,17 @@ impl AppSidebar {
     pub fn send_in_frame(&self, frame: InFrame) {
         if let Some(tx) = &self.tx {
             let _ = tx.send(frame);
+        }
+    }
+
+    pub fn send_visual_cmd(&mut self, cmd: VisualInFrame) {
+        if matches!(cmd, VisualInFrame::Pause) {
+            self.visual_paused = true;
+        } else if matches!(cmd, VisualInFrame::Resume) {
+            self.visual_paused = false;
+        }
+        if let Some(tx) = &self.visual_in_tx {
+            let _ = tx.send(cmd);
         }
     }
 }
@@ -259,7 +335,7 @@ fn setup_auth(this: &mut AppSidebar, cx: &mut Context<AppSidebar>) {
 }
 
 impl Render for AppSidebar {
-    fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+    fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         // 401 回调置位后由渲染帧消费：弹出登录框并清空已失效的用户态
         if UNAUTHORIZED_PENDING.with(|f| f.replace(false)) {
             self.show_auth_dialog = true;
@@ -267,16 +343,26 @@ impl Render for AppSidebar {
             self.auth_token = None;
         }
 
+        // 惰性创建任务概览 DataTable 状态（需要 window）
+        if self.table_state.is_none() {
+            let weak = cx.entity().downgrade();
+            let mut delegate = TaskTableDelegate::new(weak);
+            delegate.set_tasks(self.task_list.clone());
+            self.table_state = Some(cx.new(|cx| TableState::new(delegate, window, cx)));
+        }
+
         let active = self.active_view;
 
         let main_view_content = match active {
-            ActiveView::RlTraining => {
+            ActiveView::RlTraining => render_tasks_table(self, cx),
+            ActiveView::RlTaskDetail => {
                 if let Some(task_id) = self.selected_task_id.clone() {
                     render_task_detail(self, task_id, cx)
                 } else {
                     render_tasks_table(self, cx)
                 }
             }
+            ActiveView::VisualEnv => render_running_visual(self, cx),
             ActiveView::Home => render_home(self, cx),
             ActiveView::Launcher => render_launcher(self, cx),
             ActiveView::Heroes => {
@@ -327,6 +413,8 @@ impl Render for AppSidebar {
             ActiveView::Observe => render_observe(self, cx),
             ActiveView::RoomDetail => render_room_detail(self, cx),
             ActiveView::Hero => render_hero(self, cx),
+            ActiveView::WadBrowser => render_wad_browser(self, window, cx),
+
             ActiveView::Settings => {
                 if self.settings.providers.is_empty() && !self.settings.loading {
                     self.settings.loading = true;
@@ -357,11 +445,11 @@ impl Render for AppSidebar {
             .size_full()
             .flex_1()
             .p_4()
+            .pt_0()
             .flex()
             .flex_col()
-            .gap_4()
             .overflow_hidden()
-            .child(render_topbar(self, cx))
+            .child(render_topbar(self, window, cx))
             .child(
                 div()
                     .flex_1()
@@ -382,8 +470,10 @@ impl Render for AppSidebar {
         let mut root = v_flex()
             .size_full()
             .relative()
-            .child(TitleBar::new())
-            .child(div().flex_1().overflow_hidden().child(body));
+            .child(div().flex_1().overflow_hidden().child(body))
+            .children(Root::render_dialog_layer(window, cx))
+            .children(Root::render_sheet_layer(window, cx))
+            .children(Root::render_notification_layer(window, cx));
 
         // 登录弹窗覆盖层（绝对定位，盖在整个窗口之上）
         if let Some(dlg) = render_auth_dialog(self, cx) {

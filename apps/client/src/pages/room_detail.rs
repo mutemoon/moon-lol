@@ -248,10 +248,7 @@ fn spawn_remove_slot(cx: &mut Context<AppSidebar>, room_id: Uuid, slot_id: Uuid)
             let id_str = id_str.clone();
             let slot_id_str = slot_id_str.clone();
             async move {
-                if let Err(e) = cloud_client()
-                    .remove_room_slot(&id_str, &slot_id_str)
-                    .await
-                {
+                if let Err(e) = cloud_client().remove_room_slot(&id_str, &slot_id_str).await {
                     update_state(|s| s.error = Some(e.to_string()));
                 }
                 fetch_room_data(room_id, &weak, &mut cx).await;
@@ -280,7 +277,7 @@ fn spawn_start_match(cx: &mut Context<AppSidebar>, room_id: Uuid) {
                             let _ = entity.update(&mut cx, |this, cx| {
                                 this.current_room_id = None;
                                 this.current_match_id = Some(res.match_id);
-                                this.active_view = ActiveView::Observe;
+                                this.navigate_to(ActiveView::Observe);
                                 cx.notify();
                             });
                         }
@@ -314,7 +311,7 @@ fn spawn_leave_room(cx: &mut Context<AppSidebar>, room_id: Uuid) {
                         if let Some(entity) = weak.upgrade() {
                             let _ = entity.update(&mut cx, |this, cx| {
                                 this.current_room_id = None;
-                                this.active_view = ActiveView::Rooms;
+                                this.navigate_to(ActiveView::Rooms);
                                 cx.notify();
                             });
                         }
@@ -345,7 +342,7 @@ fn spawn_dissolve_room(cx: &mut Context<AppSidebar>, room_id: Uuid) {
                         if let Some(entity) = weak.upgrade() {
                             let _ = entity.update(&mut cx, |this, cx| {
                                 this.current_room_id = None;
-                                this.active_view = ActiveView::Rooms;
+                                this.navigate_to(ActiveView::Rooms);
                                 cx.notify();
                             });
                         }
@@ -498,8 +495,14 @@ fn render_team_column(
 // ── 添加槽位对话框 ──
 
 fn render_add_dialog(cx: &mut Context<AppSidebar>, room_id: Uuid, agents: &[Agent]) -> AnyElement {
-    let (show_team, add_agent_id, add_error, adding) =
-        with_state(|s| (s.show_add_team, s.add_agent_id.clone(), s.add_error.clone(), s.adding));
+    let (show_team, add_agent_id, add_error, adding) = with_state(|s| {
+        (
+            s.show_add_team,
+            s.add_agent_id.clone(),
+            s.add_error.clone(),
+            s.adding,
+        )
+    });
     let Some(team) = show_team else {
         return div().into_any_element();
     };
@@ -515,32 +518,31 @@ fn render_add_dialog(cx: &mut Context<AppSidebar>, room_id: Uuid, agents: &[Agen
     let weak = cx.entity().downgrade();
     let agents_owned = agents.to_vec();
 
-    let agent_dropdown = Button::new("room-add-agent-dropdown")
-        .outline()
-        .w_full()
-        .icon(IconName::ChevronDown)
-        .label(agent_label)
-        .dropdown_menu(move |menu, _window, _cx| {
-            let mut m = menu;
-            if agents_owned.is_empty() {
-                m = m.item(PopupMenuItem::new("暂无 Agent").disabled(true));
-            }
-            for a in &agents_owned {
-                let aid = a.id.to_string();
-                let label = format!("{} · {}", a.name, a.champion);
-                let checked = Some(aid.clone()) == add_agent_id;
-                let weak = weak.clone();
-                m = m.item(
-                    PopupMenuItem::new(label)
-                        .checked(checked)
-                        .on_click(move |_, _, cx| {
+    let agent_dropdown =
+        Button::new("room-add-agent-dropdown")
+            .outline()
+            .w_full()
+            .icon(IconName::ChevronDown)
+            .label(agent_label)
+            .dropdown_menu(move |menu, _window, _cx| {
+                let mut m = menu;
+                if agents_owned.is_empty() {
+                    m = m.item(PopupMenuItem::new("暂无 Agent").disabled(true));
+                }
+                for a in &agents_owned {
+                    let aid = a.id.to_string();
+                    let label = format!("{} · {}", a.name, a.champion);
+                    let checked = Some(aid.clone()) == add_agent_id;
+                    let weak = weak.clone();
+                    m = m.item(PopupMenuItem::new(label).checked(checked).on_click(
+                        move |_, _, cx| {
                             update_state(|s| s.add_agent_id = Some(aid.clone()));
                             let _ = weak.update(cx, |_, cx| cx.notify());
-                        }),
-                );
-            }
-            m
-        });
+                        },
+                    ));
+                }
+                m
+            });
 
     div()
         .absolute()
@@ -653,7 +655,7 @@ pub fn render_room_detail(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>
                     .label("返回房间列表")
                     .on_click(cx.listener(|this, _, _, cx| {
                         this.current_room_id = None;
-                        this.active_view = ActiveView::Rooms;
+                        this.navigate_to(ActiveView::Rooms);
                         cx.notify();
                     })),
             )
@@ -717,7 +719,7 @@ pub fn render_room_detail(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>
                     .label("返回房间列表")
                     .on_click(cx.listener(|this, _, _, cx| {
                         this.current_room_id = None;
-                        this.active_view = ActiveView::Rooms;
+                        this.navigate_to(ActiveView::Rooms);
                         cx.notify();
                     })),
             )
@@ -759,7 +761,7 @@ pub fn render_room_detail(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>
                         .tooltip("返回房间列表")
                         .on_click(cx.listener(|this, _, _, cx| {
                             this.current_room_id = None;
-                            this.active_view = ActiveView::Rooms;
+                            this.navigate_to(ActiveView::Rooms);
                             cx.notify();
                         })),
                 )
@@ -799,8 +801,16 @@ pub fn render_room_detail(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>
         ))
         .child(format!("每人最多 {} 个 Agent", c.max_agents_per_member))
         .child(team_policy_label.to_string())
-        .child(if c.lobby_visible { "大厅公开" } else { "邀请码加入" })
-        .child(if c.prompt_visible { "Prompt 公开" } else { "Prompt 隐藏" })
+        .child(if c.lobby_visible {
+            "大厅公开"
+        } else {
+            "邀请码加入"
+        })
+        .child(if c.prompt_visible {
+            "Prompt 公开"
+        } else {
+            "Prompt 隐藏"
+        })
         .child(
             h_flex()
                 .gap_1()
@@ -879,7 +889,11 @@ pub fn render_room_detail(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>
                 } else {
                     IconName::Play
                 })
-                .label(if starting { "启动中…" } else { "开始对局" })
+                .label(if starting {
+                    "启动中…"
+                } else {
+                    "开始对局"
+                })
                 .disabled(slots.is_empty() || starting)
                 .on_click(cx.listener(move |_, _, _, cx| {
                     spawn_start_match(cx, id);
@@ -906,7 +920,13 @@ pub fn render_room_detail(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>
         .child(header)
         .child(chips)
         .child(divider())
-        .child(div().flex_1().min_h_0().overflow_y_scrollbar().child(columns))
+        .child(
+            div()
+                .flex_1()
+                .min_h_0()
+                .overflow_y_scrollbar()
+                .child(columns),
+        )
         .child(divider())
         .child(footer)
         .child(render_add_dialog(cx, id, &agents))

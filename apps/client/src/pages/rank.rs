@@ -160,7 +160,7 @@ fn render_snapshot_selector(sidebar: &mut AppSidebar, cx: &mut Context<AppSideba
                             .ghost()
                             .label(t!("app.rank.go_publish"))
                             .on_click(cx.listener(|this, _, _, cx| {
-                                this.active_view = ActiveView::Heroes;
+                                this.navigate_to(ActiveView::Heroes);
                                 cx.notify();
                             })),
                     )
@@ -386,7 +386,7 @@ pub fn render_rank(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> An
                                 .icon(IconName::Star)
                                 .label("查看排行榜")
                                 .on_click(cx.listener(|this, _, _, cx| {
-                                    this.active_view = ActiveView::Leaderboard;
+                                    this.navigate_to(ActiveView::Leaderboard);
                                     cx.notify();
                                 })),
                         ),

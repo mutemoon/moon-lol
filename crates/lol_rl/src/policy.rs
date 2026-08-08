@@ -155,38 +155,20 @@ impl ActorCritic {
 }
 
 /// Apply action masking to logits based on observation state.
-/// Masks movement actions when too close, and skills on cooldown.
 pub fn masked_logits(logits: &Tensor, obs_vec: &[f32]) -> Result<Tensor> {
     let mut logits_vec: Vec<f32> = logits.squeeze(0)?.to_vec1()?;
+    let action_dim = logits.dim(1)?;
 
     let distance = if obs_vec.len() > 6 {
-        obs_vec[6] * 1000.0
+        obs_vec[6] * 100.0
     } else {
         250.0
     };
-    let q_ready = obs_vec.get(7).copied().unwrap_or(1.0) > 0.5;
-    let w_ready = obs_vec.get(8).copied().unwrap_or(1.0) > 0.5;
-    let e_ready = obs_vec.get(9).copied().unwrap_or(1.0) > 0.5;
-    let r_ready = obs_vec.get(10).copied().unwrap_or(1.0) > 0.5;
 
-    if distance <= 60.0 {
-        logits_vec[0] = f32::NEG_INFINITY;
-        logits_vec[1] = f32::NEG_INFINITY;
-        logits_vec[2] = f32::NEG_INFINITY;
-        logits_vec[3] = f32::NEG_INFINITY;
-    }
-    if !q_ready {
-        logits_vec[5] = f32::NEG_INFINITY;
-    }
-    if !w_ready {
-        logits_vec[6] = f32::NEG_INFINITY;
-    }
-    if !e_ready {
-        logits_vec[7] = f32::NEG_INFINITY;
-    }
-    if !r_ready {
-        logits_vec[8] = f32::NEG_INFINITY;
+    // 如果距离太远（> 220u），无法进行普通攻击，则屏蔽 Attack 动作
+    if distance > 220.0 && action_dim > 4 {
+        logits_vec[4] = f32::NEG_INFINITY;
     }
 
-    Tensor::from_vec(logits_vec, (1, logits.dim(1)?), logits.device())
+    Tensor::from_vec(logits_vec, (1, action_dim), logits.device())
 }

@@ -21,3 +21,27 @@ CREATE TABLE IF NOT EXISTS rl_checkpoints (
 );
 
 CREATE INDEX IF NOT EXISTS idx_rl_checkpoints_task_id ON rl_checkpoints(task_id);
+
+CREATE TABLE IF NOT EXISTS rl_metrics (
+    id          BIGSERIAL PRIMARY KEY,
+    task_id     UUID NOT NULL REFERENCES rl_tasks(id) ON DELETE CASCADE,
+    step        BIGINT NOT NULL,
+    ep_return   REAL NOT NULL,
+    loss        REAL NOT NULL,
+    kl          REAL NOT NULL,
+    entropy     REAL NOT NULL,
+    value       REAL NOT NULL,
+    fps         INTEGER NOT NULL,
+    created_at  TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_rl_metrics_task_id ON rl_metrics(task_id, step);
+
+CREATE TABLE IF NOT EXISTS rl_logs (
+    id          BIGSERIAL PRIMARY KEY,
+    task_id     UUID NOT NULL REFERENCES rl_tasks(id) ON DELETE CASCADE,
+    level       TEXT NOT NULL,
+    message     TEXT NOT NULL,
+    created_at  TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_rl_logs_task_id ON rl_logs(task_id);
+

@@ -91,6 +91,15 @@ pub trait RlRepo: Send + Sync {
     async fn insert_checkpoint(&self, cp: &CheckpointRow) -> RepoResult<()>;
     async fn list_checkpoints(&self, task_id: &str) -> RepoResult<Vec<CheckpointRow>>;
     async fn get_checkpoint(&self, task_id: &str, id: &str) -> RepoResult<Option<CheckpointRow>>;
+    async fn delete_task(&self, id: &str) -> RepoResult<()>;
+    async fn insert_metric(
+        &self,
+        task_id: &str,
+        row: &lol_rl_protocol::MetricsRow,
+    ) -> RepoResult<()>;
+    async fn list_metrics(&self, task_id: &str) -> RepoResult<Vec<lol_rl_protocol::MetricsRow>>;
+    async fn insert_log(&self, task_id: &str, level: &str, message: &str) -> RepoResult<()>;
+    async fn list_logs(&self, task_id: &str) -> RepoResult<Vec<String>>;
 }
 
 pub struct PgRlRepo {
@@ -204,16 +213,128 @@ impl RlRepo for PgRlRepo {
 
     async fn get_checkpoint(&self, task_id: &str, id: &str) -> RepoResult<Option<CheckpointRow>> {
         let task_uuid = Uuid::parse_str(task_id).map_err(|_| RepoError::NotFound)?;
-        let cp_uuid = Uuid::parse_str(id).map_err(|_| RepoError::NotFound)?;
-        let row = sqlx::query("SELECT * FROM rl_checkpoints WHERE task_id = $1 AND id = $2")
-            .bind(task_uuid)
-            .bind(cp_uuid)
-            .fetch_optional(&self.pool)
-            .await?;
+        // id 可能是 DB 的 UUID，也可能是展示用的 "ckpt-{step}"
+        if let Ok(cp_uuid) = Uuid::parse_str(id) {
+            let row = sqlx::query("SELECT * FROM rl_checkpoints WHERE task_id = $1 AND id = $2")
+                .bind(task_uuid)
+                .bind(cp_uuid)
+                .fetch_optional(&self.pool)
+                .await?;
+            return match row {
+                Some(ref r) => Ok(Some(parse_checkpoint_row(r)?)),
+                None => Ok(None),
+            };
+        }
+        let Some(step) = id.strip_prefix("ckpt-").and_then(|s| s.parse::<i64>().ok()) else {
+            return Ok(None);
+        };
+        let row = sqlx::query(
+            "SELECT * FROM rl_checkpoints WHERE task_id = $1 AND step = $2 ORDER BY created_at DESC LIMIT 1",
+        )
+        .bind(task_uuid)
+        .bind(step)
+        .fetch_optional(&self.pool)
+        .await?;
         match row {
             Some(ref r) => Ok(Some(parse_checkpoint_row(r)?)),
             None => Ok(None),
         }
+    }
+
+    async fn delete_task(&self, id: &str) -> RepoResult<()> {
+        let uuid = Uuid::parse_str(id).map_err(|_| RepoError::NotFound)?;
+        let result = sqlx::query("DELETE FROM rl_tasks WHERE id = $1")
+            .bind(uuid)
+            .execute(&self.pool)
+            .await?;
+        if result.rows_affected() == 0 {
+            return Err(RepoError::NotFound);
+        }
+        Ok(())
+    }
+
+    async fn insert_metric(
+        &self,
+        task_id: &str,
+        row: &lol_rl_protocol::MetricsRow,
+    ) -> RepoResult<()> {
+        let task_uuid = Uuid::parse_str(task_id).map_err(|_| RepoError::NotFound)?;
+        sqlx::query(
+            "INSERT INTO rl_metrics (task_id, step, ep_return, loss, kl, entropy, value, fps) \
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8)",
+        )
+        .bind(task_uuid)
+        .bind(row.step as i64)
+        .bind(row.ep_return)
+        .bind(row.loss)
+        .bind(row.kl)
+        .bind(row.entropy)
+        .bind(row.value)
+        .bind(row.fps as i32)
+        .execute(&self.pool)
+        .await
+        .map_err(map_db_error)?;
+        Ok(())
+    }
+
+    async fn list_metrics(&self, task_id: &str) -> RepoResult<Vec<lol_rl_protocol::MetricsRow>> {
+        let task_uuid = Uuid::parse_str(task_id).map_err(|_| RepoError::NotFound)?;
+        let rows = sqlx::query(
+            "SELECT step, ep_return, loss, kl, entropy, value, fps FROM rl_metrics WHERE task_id = $1 ORDER BY step ASC",
+        )
+        .bind(task_uuid)
+        .fetch_all(&self.pool)
+        .await?;
+
+        let mut metrics = Vec::new();
+        for r in rows {
+            let step: i64 = r.try_get("step")?;
+            let ep_return: f32 = r.try_get("ep_return")?;
+            let loss: f32 = r.try_get("loss")?;
+            let kl: f32 = r.try_get("kl")?;
+            let entropy: f32 = r.try_get("entropy")?;
+            let value: f32 = r.try_get("value")?;
+            let fps: i32 = r.try_get("fps")?;
+            metrics.push(lol_rl_protocol::MetricsRow {
+                step: step as usize,
+                ep_return,
+                loss,
+                kl,
+                entropy,
+                value,
+                fps: fps as usize,
+            });
+        }
+        Ok(metrics)
+    }
+
+    async fn insert_log(&self, task_id: &str, level: &str, message: &str) -> RepoResult<()> {
+        let task_uuid = Uuid::parse_str(task_id).map_err(|_| RepoError::NotFound)?;
+        sqlx::query("INSERT INTO rl_logs (task_id, level, message) VALUES ($1, $2, $3)")
+            .bind(task_uuid)
+            .bind(level)
+            .bind(message)
+            .execute(&self.pool)
+            .await
+            .map_err(map_db_error)?;
+        Ok(())
+    }
+
+    async fn list_logs(&self, task_id: &str) -> RepoResult<Vec<String>> {
+        let task_uuid = Uuid::parse_str(task_id).map_err(|_| RepoError::NotFound)?;
+        let rows =
+            sqlx::query("SELECT level, message FROM rl_logs WHERE task_id = $1 ORDER BY id ASC")
+                .bind(task_uuid)
+                .fetch_all(&self.pool)
+                .await?;
+
+        let mut logs = Vec::new();
+        for r in rows {
+            let level: String = r.try_get("level")?;
+            let message: String = r.try_get("message")?;
+            logs.push(format!("[{}] {}", level, message));
+        }
+        Ok(logs)
     }
 }
 
