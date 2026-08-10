@@ -1791,6 +1791,9 @@
         ("Death", "Run1In"): Time(
             time: 0.1,
         ),
+        ("Death", "Run2Base"): Time(
+            time: 0.0,
+        ),
         ("Death", "RunBase"): TransitionClip(
             clip_name: "Unk0x606fc7dc",
         ),
@@ -1849,9 +1852,6 @@
             time: 0.05,
         ),
         ("Death", "Unk0xc8a9aef5"): Time(
-            time: 0.0,
-        ),
-        ("Death", "Unk0xcf93f48"): Time(
             time: 0.0,
         ),
         ("Death", "Unk0xf30051d8"): Time(
@@ -2876,6 +2876,24 @@
         ),
         ("Run1In", "Unk0xff10bd3b"): Time(
             time: 0.0,
+        ),
+        ("Run2Base", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Run2Base", "Run1In"): Time(
+            time: 0.1,
+        ),
+        ("Run2Base", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Run2Base", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("Run2Base", "Taunt"): Time(
+            time: 0.0,
+        ),
+        ("Run2Base", "Unk0x606fc7dc"): Time(
+            time: 0.1,
         ),
         ("RunBase", "Death"): Time(
             time: 0.0,
@@ -5566,24 +5584,6 @@
             time: 0.1,
         ),
         ("Unk0xc8a9aef5", "Unk0x606fc7dc"): Time(
-            time: 0.1,
-        ),
-        ("Unk0xcf93f48", "Death"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xcf93f48", "Run1In"): Time(
-            time: 0.1,
-        ),
-        ("Unk0xcf93f48", "Spell1"): Time(
-            time: 0.1,
-        ),
-        ("Unk0xcf93f48", "Spell4"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xcf93f48", "Taunt"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xcf93f48", "Unk0x606fc7dc"): Time(
             time: 0.1,
         ),
         ("Unk0xdd5da053", "Spell4"): Time(

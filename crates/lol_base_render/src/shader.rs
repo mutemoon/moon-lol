@@ -3,9 +3,29 @@ use std::sync::Arc;
 
 use bevy::prelude::*;
 use bevy::reflect::Reflect;
-use league_utils::LeagueShader;
+use serde::{Deserialize, Serialize};
 
 use crate::shader_layout::ShaderLayoutDescriptor;
+
+// ---------------------------------------------------------------------------
+// LeagueShader：shader 家族标识（离线提取归一化后的变体类型）
+// ---------------------------------------------------------------------------
+
+#[derive(Debug, Copy, Clone, Hash, Eq, PartialEq, Serialize, Deserialize, Reflect, Default)]
+pub enum LeagueShader {
+    QuadPsSlice,
+    QuadVs,
+    #[default]
+    QuadPs,
+    UnlitDecalPs,
+    UnlitDecalVs,
+    DistortionPs,
+    DistortionVs,
+    MeshPs,
+    MeshVs,
+    SkinnedMeshParticlePs,
+    SkinnedMeshParticleVs,
+}
 
 // ---------------------------------------------------------------------------
 // ShaderMapEntry：单个 (LeagueShader, hash) 对应的 shader + layout

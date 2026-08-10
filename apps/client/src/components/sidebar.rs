@@ -19,10 +19,10 @@ use crate::components::{render_running_visual, render_task_detail, render_tasks_
 use crate::pages::heroes::HeroesState;
 use crate::pages::settings::SettingsState;
 use crate::pages::{
-    render_admin, render_billing, render_blog, render_community, render_debug, render_games,
-    render_hero, render_heroes, render_history, render_home, render_launcher, render_leaderboard,
-    render_logs_archive, render_mock, render_observe, render_particles, render_rank,
-    render_room_detail, render_rooms, render_settings, render_wad_browser,
+    render_admin, render_billing, render_blog, render_community, render_debug, render_extractor,
+    render_games, render_hero, render_heroes, render_history, render_home, render_launcher,
+    render_leaderboard, render_logs_archive, render_mock, render_observe, render_particles,
+    render_rank, render_room_detail, render_rooms, render_settings, render_wad_browser,
 };
 use crate::services::cloud::CloudClient;
 use crate::services::provider;
@@ -414,6 +414,7 @@ impl Render for AppSidebar {
             ActiveView::RoomDetail => render_room_detail(self, cx),
             ActiveView::Hero => render_hero(self, cx),
             ActiveView::WadBrowser => render_wad_browser(self, window, cx),
+            ActiveView::Extractor => render_extractor(self, window, cx),
 
             ActiveView::Settings => {
                 if self.settings.providers.is_empty() && !self.settings.loading {

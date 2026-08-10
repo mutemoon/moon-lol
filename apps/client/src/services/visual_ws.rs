@@ -48,22 +48,35 @@ pub fn spawn_visual_ws(
                 }
             };
 
-            let read_handle = {
+            let mut read_handle = {
                 let event_tx = event_tx.clone();
                 tokio::spawn(async move {
-                    while let Some(Ok(msg)) = read.next().await {
-                        if let Message::Binary(data) = msg {
-                            if let Ok(frame) = bincode::deserialize::<VisualOutFrame>(&data) {
-                                if event_tx.send(VisualWsEvent::Frame(frame)).is_err() {
-                                    break;
+                    while let Some(msg_res) = read.next().await {
+                        match msg_res {
+                            Ok(Message::Binary(data)) => {
+                                match bincode::deserialize::<VisualOutFrame>(&data) {
+                                    Ok(frame) => {
+                                        if event_tx.send(VisualWsEvent::Frame(frame)).is_err() {
+                                            break;
+                                        }
+                                    }
+                                    Err(e) => {
+                                        tracing::warn!("解析视觉帧失败: {e}");
+                                    }
                                 }
                             }
+                            Ok(Message::Close(_)) => break,
+                            Err(e) => {
+                                tracing::warn!("视觉 WS 读取错误: {e}");
+                                break;
+                            }
+                            _ => {}
                         }
                     }
                 })
             };
 
-            let write_handle = tokio::spawn(async move {
+            let mut write_handle = tokio::spawn(async move {
                 while let Some(cmd) = cmd_rx.recv().await {
                     if let Ok(data) = bincode::serialize(&cmd) {
                         if write.send(Message::Binary(data.into())).await.is_err() {
@@ -73,9 +86,13 @@ pub fn spawn_visual_ws(
                 }
             });
 
+            // 只要读取端仍在接收（服务端未断开），就持续保持连接
             tokio::select! {
-                _ = read_handle => {},
-                _ = write_handle => {},
+                _ = &mut read_handle => {},
+                _ = &mut write_handle => {
+                    // 若命令发送通道关闭，等待读取端自然结束
+                    let _ = read_handle.await;
+                },
             }
 
             let _ = event_tx.send(VisualWsEvent::Disconnected);

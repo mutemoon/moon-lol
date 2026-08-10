@@ -1,5 +1,7 @@
+pub mod assets_path;
 pub mod cloud;
 pub mod event_bus;
+pub mod extractor_service;
 pub mod log_service;
 pub mod match_ws;
 pub mod particle_service;

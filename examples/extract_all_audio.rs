@@ -4,7 +4,8 @@
 use std::fs;
 
 use league_core::extract::SkinCharacterDataProperties;
-use league_loader::game::{Data, LeagueLoader};
+use league_loader::game::LeagueLoader;
+use league_to_lol::data::Data;
 use league_to_lol::extract::audio::export_audio_for_skin;
 use league_to_lol::extract::extract_phase_1_create_loader;
 use league_to_lol::extract::utils::write_to_file;

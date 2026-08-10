@@ -11,7 +11,7 @@
 use std::collections::{BTreeMap, HashMap};
 use std::path::{Path, PathBuf};
 
-use league_utils::LeagueShader;
+use lol_base_render::shader::LeagueShader;
 use lol_base_render::shader_layout::{BindingTypeDesc, ShaderLayoutDescriptor};
 use serde::Deserialize;
 

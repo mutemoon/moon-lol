@@ -1,10 +1,10 @@
 use std::io::Read;
 
-use league_file::texture::LeagueTexture;
 use league_property::prop::PropFile;
 use league_utils::hash_wad;
 
 use crate::Error;
+use crate::texture::LeagueTexture;
 
 pub trait LeagueWadLoaderTrait {
     fn get_wad_entry_reader_by_hash(&self, hash: u64) -> Result<Box<dyn Read + '_>, Error>;

@@ -6,7 +6,7 @@ use candle_core::Tensor;
 use futures_util::{SinkExt, StreamExt};
 use lol_env::fiora_vs_riven::{FioraVsRivenAction, FioraVsRivenObs};
 use lol_env::visual_runner::{PolicyOutputItem, VisualRunnerCmd, VisualStepOutput, run_visual_env};
-use lol_env::{EnvConfig, FioraVsRivenEnv, RenderMode};
+use lol_env::{EnvConfig, FioraVsRivenEnv, RenderMode, RewardModel};
 use lol_rl::device::select_device;
 use lol_rl::ppo::{PPOAgent, PPOConfig};
 use lol_rl_protocol::{
@@ -148,25 +148,47 @@ async fn ws_server(
 
     tracing::info!("视觉 WS 服务启动在 ws://127.0.0.1:{}", port);
 
-    // Accept first connection; receiver is single-consumer
-    if let Ok((stream, _)) = listener.accept().await {
-        let ckpt = ckpt_path.clone();
-        if let Err(e) = handle_ws_client(stream, step_rx, ckpt, cmd_tx).await {
-            tracing::warn!("WS 客户端断开: {}", e);
+    // 广播通道与最新帧缓存，确保新接入的客户端能立即获得当前最新遥测数据
+    let (broadcast_tx, _) = tokio::sync::broadcast::channel::<VisualObsFrame>(512);
+    let latest_frame = Arc::new(std::sync::Mutex::new(None::<VisualObsFrame>));
+
+    let latest_frame_clone = latest_frame.clone();
+    let broadcast_tx_clone = broadcast_tx.clone();
+    std::thread::spawn(move || {
+        for output in step_rx {
+            let frame = step_output_to_frame_data(&output);
+            if let Ok(mut lock) = latest_frame_clone.lock() {
+                *lock = Some(frame.clone());
+            }
+            let _ = broadcast_tx_clone.send(frame);
         }
+    });
+
+    while let Ok((stream, _)) = listener.accept().await {
+        let ckpt = ckpt_path.clone();
+        let cmd = cmd_tx.clone();
+        let frame_rx = broadcast_tx.subscribe();
+        let latest_frame_sub = latest_frame.clone();
+
+        tokio::spawn(async move {
+            if let Err(e) = handle_ws_client(stream, frame_rx, latest_frame_sub, ckpt, cmd).await {
+                tracing::warn!("WS 客户端连接关闭: {}", e);
+            }
+        });
     }
 }
 
 async fn handle_ws_client(
     stream: TcpStream,
-    step_rx: mpsc::Receiver<VisualStepOutput>,
+    mut frame_rx: tokio::sync::broadcast::Receiver<VisualObsFrame>,
+    latest_frame: Arc<std::sync::Mutex<Option<VisualObsFrame>>>,
     ckpt_path: PathBuf,
     cmd_tx: mpsc::Sender<VisualRunnerCmd>,
 ) -> anyhow::Result<()> {
     let ws_stream = tokio_tungstenite::accept_async(stream).await?;
     let (mut ws_writer, mut ws_reader) = ws_stream.split();
 
-    // Send Ready frame
+    // 1. 发送 Ready 帧
     let ready = VisualOutFrame::Ready {
         checkpoint_path: ckpt_path.to_string_lossy().to_string(),
         env_max_steps: 100,
@@ -174,20 +196,26 @@ async fn handle_ws_client(
     let bytes = bincode::serialize(&ready)?;
     ws_writer.send(Message::Binary(bytes.into())).await?;
 
-    // Bridge std receiver to tokio channel
-    let (telemetry_tx, mut telemetry_rx) = tokio::sync::mpsc::channel::<VisualStepOutput>(256);
-    std::thread::spawn(move || {
-        for output in step_rx {
-            if telemetry_tx.blocking_send(output).is_err() {
-                break;
-            }
+    // 2. 如果存在最新的遥测帧，立即向新接入客户端推送，避免等待下一步才更新
+    let initial_frame = {
+        if let Ok(lock) = latest_frame.lock() {
+            lock.clone()
+        } else {
+            None
         }
-    });
+    };
+    if let Some(frame) = initial_frame {
+        let frame_msg = VisualOutFrame::Frame(frame);
+        if let Ok(data) = bincode::serialize(&frame_msg) {
+            let _ = ws_writer.send(Message::Binary(data.into())).await;
+        }
+    }
 
+    // 3. 遥测广播写入任务
     let write_handle = tokio::spawn(async move {
-        while let Some(output) = telemetry_rx.recv().await {
-            let frame = step_output_to_frame(&output);
-            if let Ok(data) = bincode::serialize(&frame) {
+        while let Ok(frame) = frame_rx.recv().await {
+            let frame_msg = VisualOutFrame::Frame(frame);
+            if let Ok(data) = bincode::serialize(&frame_msg) {
                 if ws_writer.send(Message::Binary(data.into())).await.is_err() {
                     break;
                 }
@@ -195,7 +223,7 @@ async fn handle_ws_client(
         }
     });
 
-    // Read commands from client
+    // 4. 从客户端读取控制命令
     while let Some(Ok(msg)) = ws_reader.next().await {
         if let Message::Binary(data) = msg {
             if let Ok(in_frame) = bincode::deserialize::<VisualInFrame>(&data) {
@@ -217,9 +245,8 @@ async fn handle_ws_client(
     Ok(())
 }
 
-/// Convert a `VisualStepOutput` (from lol_env) to a `VisualOutFrame` (WS protocol).
-/// This conversion lives here (in the binary) because the WS protocol is NOT the Env's concern.
-fn step_output_to_frame(output: &VisualStepOutput) -> VisualOutFrame {
+/// Convert a `VisualStepOutput` (from lol_env) to a `VisualObsFrame`.
+fn step_output_to_frame_data(output: &VisualStepOutput) -> VisualObsFrame {
     let r = &output.step_result;
     let obs = &r.obs;
 
@@ -254,7 +281,10 @@ fn step_output_to_frame(output: &VisualStepOutput) -> VisualOutFrame {
         })
         .collect();
 
-    VisualOutFrame::Frame(VisualObsFrame {
+    let reward_model = lol_env::reward::FioraVsRivenRewardModel;
+    let formula = reward_model.formula_spec();
+
+    VisualObsFrame {
         step: r.step,
         obs: ObsFeaturePayload {
             fiora_hp_pct: if obs.fiora_max_hp > 0.0 {
@@ -283,7 +313,9 @@ fn step_output_to_frame(output: &VisualStepOutput) -> VisualOutFrame {
         truncated: r.truncated,
         fiora_alive: obs.fiora_hp > 0.0,
         riven_alive: obs.riven_hp > 0.0,
-    })
+        reward_formula: Some(formula),
+        reward_variables: Some(r.reward_variables.clone()),
+    }
 }
 
 fn parse_arg(name: &str) -> Option<String> {

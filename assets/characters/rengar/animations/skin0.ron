@@ -88,6 +88,9 @@
         "Spell1": Clip(
             node_index: 20,
         ),
+        "Spell1IdleTra": Clip(
+            node_index: 15,
+        ),
         "Spell1Run2Tra": Clip(
             node_index: 16,
         ),
@@ -128,9 +131,6 @@
         ),
         "Taunt": Clip(
             node_index: 27,
-        ),
-        "Unk0x713ed5b5": Clip(
-            node_index: 15,
         ),
         "Unk0xfb24234": Clip(
             node_index: 1,
@@ -312,10 +312,10 @@
             time: 0.0,
         ),
         ("Spell1", "Idle1Base"): TransitionClip(
-            clip_name: "Unk0x713ed5b5",
+            clip_name: "Spell1IdleTra",
         ),
         ("Spell1", "Idle2Base"): TransitionClip(
-            clip_name: "Unk0x713ed5b5",
+            clip_name: "Spell1IdleTra",
         ),
         ("Spell1", "Run"): TransitionClip(
             clip_name: "Spell1RunTra",
@@ -329,10 +329,43 @@
         ("Spell1", "Spell1"): Time(
             time: 0.025,
         ),
+        ("Spell1", "Spell1IdleTra"): Time(
+            time: 0.0,
+        ),
         ("Spell1", "Spell1RunTra"): Time(
             time: 0.0,
         ),
-        ("Spell1", "Unk0x713ed5b5"): Time(
+        ("Spell1IdleTra", "Attack1"): Time(
+            time: 0.1,
+        ),
+        ("Spell1IdleTra", "Attack2"): Time(
+            time: 0.1,
+        ),
+        ("Spell1IdleTra", "Attack3"): Time(
+            time: 0.1,
+        ),
+        ("Spell1IdleTra", "Attack4"): Time(
+            time: 0.1,
+        ),
+        ("Spell1IdleTra", "Idle1Base"): Time(
+            time: 0.0,
+        ),
+        ("Spell1IdleTra", "Idle2Base"): Time(
+            time: 0.0,
+        ),
+        ("Spell1IdleTra", "Run"): TransitionClip(
+            clip_name: "Spell1RunTra",
+        ),
+        ("Spell1IdleTra", "Run1Fast"): TransitionClip(
+            clip_name: "Spell1Run2Tra",
+        ),
+        ("Spell1IdleTra", "Run2"): TransitionClip(
+            clip_name: "Spell1Run2Tra",
+        ),
+        ("Spell1IdleTra", "Spell1"): Time(
+            time: 0.03,
+        ),
+        ("Spell1IdleTra", "Spell1IdleTra"): Time(
             time: 0.0,
         ),
         ("Spell1Run2Tra", "Spell1"): Time(
@@ -444,39 +477,6 @@
             time: 0.025,
         ),
         ("Taunt", "Taunt"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x713ed5b5", "Attack1"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x713ed5b5", "Attack2"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x713ed5b5", "Attack3"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x713ed5b5", "Attack4"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x713ed5b5", "Idle1Base"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x713ed5b5", "Idle2Base"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x713ed5b5", "Run"): TransitionClip(
-            clip_name: "Spell1RunTra",
-        ),
-        ("Unk0x713ed5b5", "Run1Fast"): TransitionClip(
-            clip_name: "Spell1Run2Tra",
-        ),
-        ("Unk0x713ed5b5", "Run2"): TransitionClip(
-            clip_name: "Spell1Run2Tra",
-        ),
-        ("Unk0x713ed5b5", "Spell1"): Time(
-            time: 0.03,
-        ),
-        ("Unk0x713ed5b5", "Unk0x713ed5b5"): Time(
             time: 0.0,
         ),
         ("Unk0xfb24234", "Spell1"): Time(

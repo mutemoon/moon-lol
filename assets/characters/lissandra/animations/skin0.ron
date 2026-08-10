@@ -118,6 +118,9 @@
                 "Unk0xf217c1bd",
             ],
         ),
+        "Run2Base": Clip(
+            node_index: 2,
+        ),
         "Run2In": Clip(
             node_index: 35,
         ),
@@ -242,7 +245,7 @@
         "Unk0x5092b6bb": Selector(
             probably_nodes: [
                 (
-                    key: "Unk0xcf93f48",
+                    key: "Run2Base",
                     value: 0.7,
                 ),
                 (
@@ -283,9 +286,6 @@
         ),
         "Unk0x943b36a3": Clip(
             node_index: 21,
-        ),
-        "Unk0xcf93f48": Clip(
-            node_index: 2,
         ),
         "Unk0xf217c1bd": Selector(
             probably_nodes: [
@@ -505,6 +505,9 @@
         ("DanceLoopIce", "RecallWindup"): Time(
             time: 0.0,
         ),
+        ("DanceLoopIce", "Run2Base"): Time(
+            time: 0.0,
+        ),
         ("DanceLoopIce", "Run2In"): Time(
             time: 0.0,
         ),
@@ -563,9 +566,6 @@
             time: 0.0,
         ),
         ("DanceLoopIce", "Unk0x8dfb9419"): Time(
-            time: 0.0,
-        ),
-        ("DanceLoopIce", "Unk0xcf93f48"): Time(
             time: 0.0,
         ),
         ("Death", "Death"): Time(
@@ -725,6 +725,21 @@
             time: 0.0,
         ),
         ("Run", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Run2Base", "DanceLoopIce"): Time(
+            time: 0.0,
+        ),
+        ("Run2Base", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Run2Base", "DeathIce"): Time(
+            time: 0.0,
+        ),
+        ("Run2Base", "Spell2Base"): Time(
+            time: 0.1,
+        ),
+        ("Run2Base", "Unk0x3309a042"): Time(
             time: 0.0,
         ),
         ("Run2In", "DanceLoopIce"): Time(
@@ -904,6 +919,9 @@
         ("Spell1", "RecallWindup"): Time(
             time: 0.1,
         ),
+        ("Spell1", "Run2Base"): Time(
+            time: 0.1,
+        ),
         ("Spell1", "Run2In"): Time(
             time: 0.1,
         ),
@@ -944,9 +962,6 @@
             time: 0.1,
         ),
         ("Spell1", "Unk0x8dfb9419"): Time(
-            time: 0.1,
-        ),
-        ("Spell1", "Unk0xcf93f48"): Time(
             time: 0.1,
         ),
         ("Spell2", "Death"): Time(
@@ -1156,6 +1171,9 @@
         ("Unk0x3309a042", "RecallWindup"): Time(
             time: 0.0,
         ),
+        ("Unk0x3309a042", "Run2Base"): Time(
+            time: 0.0,
+        ),
         ("Unk0x3309a042", "Run2In"): Time(
             time: 0.0,
         ),
@@ -1216,9 +1234,6 @@
         ("Unk0x3309a042", "Unk0x8dfb9419"): Time(
             time: 0.0,
         ),
-        ("Unk0x3309a042", "Unk0xcf93f48"): Time(
-            time: 0.0,
-        ),
         ("Unk0x35d1db39", "DanceLoopIce"): Time(
             time: 0.0,
         ),
@@ -1271,21 +1286,6 @@
             time: 0.0,
         ),
         ("Unk0x943b36a3", "Death"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xcf93f48", "DanceLoopIce"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xcf93f48", "Death"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xcf93f48", "DeathIce"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xcf93f48", "Spell2Base"): Time(
-            time: 0.1,
-        ),
-        ("Unk0xcf93f48", "Unk0x3309a042"): Time(
             time: 0.0,
         ),
         ("Unk0xf217c1bd", "Death"): Time(

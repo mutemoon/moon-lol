@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use bevy::math::Vec2;
+use glam::Vec2;
 
 use crate::types::{BinDeserializerResult, BinStructHeader, BinType, Error};
 

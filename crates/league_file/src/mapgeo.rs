@@ -1,12 +1,13 @@
 use bevy::math::{Mat4, Vec2, Vec3};
 use bevy::prelude::*;
 use league_core::mapgeo::{EnvironmentVisibility, LayerTransitionBehavior};
-use league_utils::BoundingBox;
 use nom::bytes::complete::{tag, take};
 use nom::multi::count;
 use nom::number::complete::{le_f32, le_u8, le_u16, le_u32};
 use nom::{IResult, Parser};
 use serde::{Deserialize, Serialize};
+
+use crate::bounding_box::BoundingBox;
 
 #[derive(Debug, Clone, Serialize, Deserialize, Asset, TypePath)]
 pub struct LeagueMapGeo {

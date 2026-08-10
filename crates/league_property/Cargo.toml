@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-bevy.workspace = true
+glam = "0.33"
 nom.workspace = true
 heck.workspace = true
 league_utils.workspace = true

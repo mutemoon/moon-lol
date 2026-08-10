@@ -29,7 +29,8 @@ use league_core::extract::{X3dSharedData, X3dSharedSamplerDef};
 use league_file::shader::LeagueShaderToc;
 use league_loader::prop_bin::LeagueWadLoaderTrait;
 use league_loader::wad::LeagueWadLoader;
-use league_utils::{LeagueShader, hash_wad};
+use league_utils::hash_wad;
+use lol_base_render::shader::LeagueShader;
 use lol_base_render::shader_layout::{BindingDescriptor, BindingTypeDesc, ShaderLayoutDescriptor};
 use lol_render::shader::{ShaderMap, SharedRenderData, SharedSamplerDef, SharedTextureDef};
 use rayon::prelude::*;
@@ -419,7 +420,7 @@ fn main() -> anyhow::Result<()> {
 
     app.register_type::<ShaderMap>();
     app.register_type::<lol_render::shader::ShaderMapEntry>();
-    app.register_type::<league_utils::LeagueShader>();
+    app.register_type::<lol_base_render::shader::LeagueShader>();
     app.register_type::<lol_base_render::shader_layout::ShaderMemberLayout>();
     app.register_type::<lol_base_render::shader_layout::BindingTypeDesc>();
     app.register_type::<lol_base_render::shader_layout::BindingDescriptor>();

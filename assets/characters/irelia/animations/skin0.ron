@@ -1325,6 +1325,9 @@
         ("Attack1ToRun", "Run1"): Time(
             time: 0.0,
         ),
+        ("Attack1ToRun", "Run2Base"): Time(
+            time: 0.1,
+        ),
         ("Attack1ToRun", "Spell1"): Time(
             time: 0.05,
         ),
@@ -1471,9 +1474,6 @@
         ),
         ("Attack1ToRun", "Unk0xcb26ee24"): Time(
             time: 0.05,
-        ),
-        ("Attack1ToRun", "Unk0xcf93f48"): Time(
-            time: 0.1,
         ),
         ("Attack1ToRun", "Unk0xd08d447b"): Time(
             time: 0.0,
@@ -8065,6 +8065,39 @@
         ),
         ("Run1", "Unk0xf880d428"): Time(
             time: 0.1,
+        ),
+        ("Run2Base", "Attack1"): Time(
+            time: 0.01,
+        ),
+        ("Run2Base", "Attack2"): Time(
+            time: 0.01,
+        ),
+        ("Run2Base", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Run2Base", "Run2Base"): Time(
+            time: 0.0,
+        ),
+        ("Run2Base", "Spell1"): Time(
+            time: 0.05,
+        ),
+        ("Run2Base", "Spell1Idle"): Time(
+            time: 0.05,
+        ),
+        ("Run2Base", "Spell1ToRun"): Time(
+            time: 0.05,
+        ),
+        ("Run2Base", "Unk0x35d1db39"): Time(
+            time: 0.0,
+        ),
+        ("Run2Base", "Unk0x3a2fa8e1"): Time(
+            time: 0.05,
+        ),
+        ("Run2Base", "Unk0x59bf648f"): TransitionClip(
+            clip_name: "IdleInSubtle",
+        ),
+        ("Run2Base", "Unk0x95920515"): Time(
+            time: 0.0,
         ),
         ("RunB", "Death"): Time(
             time: 0.0,
@@ -16025,6 +16058,9 @@
         ("Unk0x3145cd5a", "Attack3ToIdle"): Time(
             time: 0.05,
         ),
+        ("Unk0x3145cd5a", "Run2Base"): Time(
+            time: 0.0,
+        ),
         ("Unk0x3145cd5a", "Unk0x1dae1fdf"): Time(
             time: 0.1,
         ),
@@ -16078,9 +16114,6 @@
         ),
         ("Unk0x3145cd5a", "Unk0xcb26ee24"): Time(
             time: 0.05,
-        ),
-        ("Unk0x3145cd5a", "Unk0xcf93f48"): Time(
-            time: 0.0,
         ),
         ("Unk0x3145cd5a", "Unk0xd5e93c4"): Time(
             time: 0.05,
@@ -16343,6 +16376,9 @@
         ("Unk0x35d1db39", "Attack2"): Time(
             time: 0.01,
         ),
+        ("Unk0x35d1db39", "Run2Base"): Time(
+            time: 0.0,
+        ),
         ("Unk0x35d1db39", "Spell1"): Time(
             time: 0.05,
         ),
@@ -16360,9 +16396,6 @@
         ),
         ("Unk0x35d1db39", "Unk0x59bf648f"): TransitionClip(
             clip_name: "IdleInSubtle",
-        ),
-        ("Unk0x35d1db39", "Unk0xcf93f48"): Time(
-            time: 0.0,
         ),
         ("Unk0x3603d18e", "Death"): Time(
             time: 0.0,
@@ -17513,6 +17546,9 @@
         ("Unk0x40ad3b31", "Recall"): Time(
             time: 0.0,
         ),
+        ("Unk0x40ad3b31", "Run2Base"): Time(
+            time: 0.0,
+        ),
         ("Unk0x40ad3b31", "Spell1"): Time(
             time: 0.05,
         ),
@@ -17550,9 +17586,6 @@
             time: 0.0,
         ),
         ("Unk0x40ad3b31", "Unk0xb07edf3d"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x40ad3b31", "Unk0xcf93f48"): Time(
             time: 0.0,
         ),
         ("Unk0x40ad3b31", "Unk0xd4b24c82"): Time(
@@ -21968,6 +22001,9 @@
         ("Unk0x819954b6", "Attack3ToIdle"): Time(
             time: 0.05,
         ),
+        ("Unk0x819954b6", "Run2Base"): Time(
+            time: 0.0,
+        ),
         ("Unk0x819954b6", "Unk0x1dae1fdf"): Time(
             time: 0.1,
         ),
@@ -22024,9 +22060,6 @@
         ),
         ("Unk0x819954b6", "Unk0xcb26ee24"): Time(
             time: 0.05,
-        ),
-        ("Unk0x819954b6", "Unk0xcf93f48"): Time(
-            time: 0.0,
         ),
         ("Unk0x819954b6", "Unk0xd5e93c4"): Time(
             time: 0.05,
@@ -24206,6 +24239,9 @@
         ("Unk0x95920515", "Recall"): Time(
             time: 0.0,
         ),
+        ("Unk0x95920515", "Run2Base"): Time(
+            time: 0.0,
+        ),
         ("Unk0x95920515", "Spell1"): Time(
             time: 0.0,
         ),
@@ -24270,9 +24306,6 @@
             time: 0.0,
         ),
         ("Unk0x95920515", "Unk0xb07edf3d"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x95920515", "Unk0xcf93f48"): Time(
             time: 0.0,
         ),
         ("Unk0x95920515", "Unk0xd4b24c82"): Time(
@@ -27155,6 +27188,9 @@
         ("Unk0xcb26ee24", "Attack3ToIdle"): Time(
             time: 0.05,
         ),
+        ("Unk0xcb26ee24", "Run2Base"): Time(
+            time: 0.0,
+        ),
         ("Unk0xcb26ee24", "Unk0x1dae1fdf"): Time(
             time: 0.1,
         ),
@@ -27208,9 +27244,6 @@
         ),
         ("Unk0xcb26ee24", "Unk0xcb26ee24"): Time(
             time: 0.05,
-        ),
-        ("Unk0xcb26ee24", "Unk0xcf93f48"): Time(
-            time: 0.0,
         ),
         ("Unk0xcb26ee24", "Unk0xd5e93c4"): Time(
             time: 0.05,
@@ -27310,39 +27343,6 @@
         ),
         ("Unk0xce311987", "Unk0xf880d428"): Time(
             time: 0.1,
-        ),
-        ("Unk0xcf93f48", "Attack1"): Time(
-            time: 0.01,
-        ),
-        ("Unk0xcf93f48", "Attack2"): Time(
-            time: 0.01,
-        ),
-        ("Unk0xcf93f48", "Death"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xcf93f48", "Spell1"): Time(
-            time: 0.05,
-        ),
-        ("Unk0xcf93f48", "Spell1Idle"): Time(
-            time: 0.05,
-        ),
-        ("Unk0xcf93f48", "Spell1ToRun"): Time(
-            time: 0.05,
-        ),
-        ("Unk0xcf93f48", "Unk0x35d1db39"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xcf93f48", "Unk0x3a2fa8e1"): Time(
-            time: 0.05,
-        ),
-        ("Unk0xcf93f48", "Unk0x59bf648f"): TransitionClip(
-            clip_name: "IdleInSubtle",
-        ),
-        ("Unk0xcf93f48", "Unk0x95920515"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xcf93f48", "Unk0xcf93f48"): Time(
-            time: 0.0,
         ),
         ("Unk0xd08d447b", "Attack1"): Time(
             time: 0.1,

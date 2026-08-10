@@ -15,7 +15,7 @@ use league_core::extract::{
     UiElementTextData, UiLevelUp, UiPositionRect, UiPropertyLoadable, UiSceneData,
     UnitFloatingInfoBarData, Unk0x1e2d1428, Unk0xc3f95838,
 };
-use league_loader::game::{Data, LeagueLoader};
+use league_loader::game::LeagueLoader;
 use league_loader::prop_bin::LeagueWadLoaderTrait;
 use league_utils::hash_bin;
 use lol_base_render::ui::{
@@ -41,6 +41,7 @@ use lol_base_render::ui::{
     LOLUnk0xf43ad1ce,
 };
 
+use crate::data::Data;
 use crate::extract::utils::write_to_file;
 
 /// UI 元素提取结果

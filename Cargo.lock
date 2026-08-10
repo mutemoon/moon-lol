@@ -3766,7 +3766,6 @@ dependencies = [
  "gpui_platform",
  "league_loader",
  "league_property",
- "league_utils",
  "lol_agent_runtime",
  "lol_client",
  "lol_game_process_manager",
@@ -9250,14 +9249,10 @@ dependencies = [
 name = "league_loader"
 version = "0.1.0"
 dependencies = [
- "bevy",
- "league_core",
- "league_file",
+ "bitflags 2.13.0",
  "league_property",
  "league_utils",
- "lol_base",
  "nom 8.0.0",
- "serde",
  "thiserror 2.0.18",
  "zstd",
 ]
@@ -9266,7 +9261,7 @@ dependencies = [
 name = "league_property"
 version = "0.1.0"
 dependencies = [
- "bevy",
+ "glam",
  "heck 0.5.0",
  "league_utils",
  "nom 8.0.0",
@@ -9307,10 +9302,7 @@ dependencies = [
 name = "league_utils"
 version = "0.1.0"
 dependencies = [
- "bevy",
  "heck 0.5.0",
- "nom 8.0.0",
- "serde",
  "twox-hash",
 ]
 
@@ -9747,12 +9739,27 @@ dependencies = [
  "lol_core",
  "lol_particle",
  "lol_render",
+ "lol_rl_protocol",
  "rand 0.9.4",
  "rayon",
  "serde",
  "serde_json",
  "tracing",
  "winit",
+]
+
+[[package]]
+name = "lol_extractor"
+version = "0.1.0"
+dependencies = [
+ "clap",
+ "league_core",
+ "league_loader",
+ "league_to_lol",
+ "lol_base",
+ "ron 0.8.1",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]

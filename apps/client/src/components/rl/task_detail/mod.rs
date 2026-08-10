@@ -48,6 +48,8 @@ pub fn render_task_detail(
             latest_policy: vec![],
             latest_reward_breakdown: vec![],
             latest_obs: None,
+            reward_formula: None,
+            latest_reward_variables: None,
             logs: vec![],
         });
 

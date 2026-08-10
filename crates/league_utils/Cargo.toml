@@ -4,8 +4,5 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-bevy.workspace = true
 twox-hash = "2.1.1"
 heck.workspace = true
-nom.workspace = true
-serde.workspace = true

@@ -41,7 +41,7 @@ pub fn extract_texture(loader: &LeagueLoader, texture_name: &str) -> String {
     }
 
     // 解析 .tex 文件
-    let Ok((_, texture)) = league_file::texture::LeagueTexture::parse(&buf) else {
+    let Ok((_, texture)) = league_loader::texture::LeagueTexture::parse(&buf) else {
         println!("[WARN] 无法解析纹理: {}", texture_name);
         return target_path;
     };
@@ -83,7 +83,7 @@ pub fn extract_particle_texture(loader: &LeagueLoader, texture_name: &str) -> St
         return target_path;
     }
 
-    let Ok((_, texture)) = league_file::texture::LeagueTexture::parse(&buf) else {
+    let Ok((_, texture)) = league_loader::texture::LeagueTexture::parse(&buf) else {
         println!("[WARN] 无法解析粒子纹理: {}", texture_name);
         return target_path;
     };

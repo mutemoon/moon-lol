@@ -1,9 +1,10 @@
 use bevy::prelude::*;
 use bevy::render::render_resource::{Extent3d, TextureDimension, TextureFormat};
+use lol_base_render::shader::LeagueShader;
 
 pub trait MaterialPath {
-    const FRAG_SHADER: league_utils::LeagueShader;
-    const VERT_SHADER: league_utils::LeagueShader;
+    const FRAG_SHADER: LeagueShader;
+    const VERT_SHADER: LeagueShader;
 }
 
 pub fn create_black_pixel_texture() -> Image {

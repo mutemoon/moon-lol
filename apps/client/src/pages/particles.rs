@@ -1,5 +1,6 @@
 use std::cell::RefCell;
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
+use std::path::PathBuf;
 
 use gpui::prelude::*;
 use gpui::*;
@@ -7,37 +8,62 @@ use gpui_component::button::{Button, ButtonVariants};
 use gpui_component::checkbox::Checkbox;
 use gpui_component::menu::{DropdownMenu, PopupMenuItem};
 use gpui_component::scroll::ScrollableElement;
-use gpui_component::{h_flex, v_flex, ActiveTheme, Disableable, IconName, StyledExt};
+use gpui_component::{h_flex, v_flex, ActiveTheme, IconName, Sizable, StyledExt};
 use lol_share::{
-    ConfigVfxEmitterDefinition, ConfigVfxSystemDefinition, Sampler, StochasticSampler, VfxTexture,
+    ConfigVfx, ConfigVfxEmitterDefinition, ConfigVfxSystemDefinition, Sampler, StochasticSampler,
+    VfxTexture,
 };
+use rayon::prelude::*;
 
 use crate::components::sidebar::AppSidebar;
 use crate::services::particle_service::{
     self, ParticleSystemDef, ParticleWsEvent, ParticleWsHandle,
 };
 
+// ── 树节点数据结构 ──
+
+#[derive(Debug, Clone)]
+pub struct ParticleTreeNode {
+    pub name: String,
+    pub is_dir: bool,
+    pub is_expanded: bool,
+    pub children: Vec<ParticleTreeNode>,
+    pub hero_name: String,
+    pub hash: Option<u32>,
+}
+
+#[derive(Debug, Clone)]
+pub struct FlatParticleNode {
+    pub name: String,
+    pub is_dir: bool,
+    pub depth: usize,
+    pub is_expanded: bool,
+    pub children_count: usize,
+    pub hero_name: String,
+    pub hash: Option<u32>,
+}
+
 // ── 页面本地状态 ──
 
-struct ParticlesPageState {
-    ws_url: String,
-    connected: bool,
-    error: Option<String>,
-    heroes: Vec<String>,
-    hero_systems: HashMap<String, Vec<ParticleSystemDef>>,
-    expanded_heroes: HashSet<String>,
-    loading_hero: Option<String>,
-    selected_hero: Option<String>,
-    selected_system: Option<ParticleSystemDef>,
-    active_tab: usize,
-    auto_play: bool,
-    ws_handle: Option<ParticleWsHandle>,
+pub struct ParticlesPageState {
+    pub ws_url: String,
+    pub connected: bool,
+    pub error: Option<String>,
+    pub tree_roots: Vec<ParticleTreeNode>,
+    pub hero_systems: HashMap<String, Vec<ParticleSystemDef>>,
+    pub is_initialized: bool,
+    pub is_scanning: bool,
+    pub selected_hero: Option<String>,
+    pub selected_system: Option<ParticleSystemDef>,
+    pub active_tab: usize,
+    pub auto_play: bool,
+    pub ws_handle: Option<ParticleWsHandle>,
     /// 左侧搜索框（英雄 / 粒子名 / hash）
-    search_query: String,
+    pub search_query: String,
     /// 当前可编辑的工作副本（来自 selected_system 的深拷贝）
-    working_def: Option<ConfigVfxSystemDefinition>,
+    pub working_def: Option<ConfigVfxSystemDefinition>,
     /// 选中时的原始定义，用于「重置单个 / 重置系统」
-    initial_def_backup: Option<ConfigVfxSystemDefinition>,
+    pub initial_def_backup: Option<ConfigVfxSystemDefinition>,
 }
 
 impl Default for ParticlesPageState {
@@ -46,10 +72,10 @@ impl Default for ParticlesPageState {
             ws_url: String::from("ws://127.0.0.1:9002"),
             connected: false,
             error: None,
-            heroes: Vec::new(),
+            tree_roots: Vec::new(),
             hero_systems: HashMap::new(),
-            expanded_heroes: HashSet::new(),
-            loading_hero: None,
+            is_initialized: false,
+            is_scanning: false,
             selected_hero: None,
             selected_system: None,
             active_tab: 0,
@@ -87,42 +113,196 @@ fn format_number(v: f32) -> String {
     }
 }
 
-/// 过滤后的英雄树节点（搜索词命中英雄或系统时保留）。
-fn filtered_tree(state: &ParticlesPageState) -> Vec<(String, Vec<ParticleSystemDef>)> {
-    let q = state.search_query.trim().to_lowercase();
-    state
-        .heroes
-        .iter()
-        .map(|h| {
-            let systems = state.hero_systems.get(h).cloned().unwrap_or_default();
-            (h.clone(), systems)
+/// Rayon 多线程并行扫描英雄与粒子系统定义
+pub fn scan_particles_rayon() -> (
+    Vec<ParticleTreeNode>,
+    HashMap<String, Vec<ParticleSystemDef>>,
+) {
+    let Ok(base) = particle_service::characters_dir() else {
+        return (Vec::new(), HashMap::new());
+    };
+    let Ok(read_dir) = std::fs::read_dir(&base) else {
+        return (Vec::new(), HashMap::new());
+    };
+    let hero_paths: Vec<PathBuf> = read_dir
+        .flatten()
+        .filter(|e| e.file_type().map(|t| t.is_dir()).unwrap_or(false))
+        .map(|e| e.path())
+        .collect();
+
+    let results: Vec<(ParticleTreeNode, (String, Vec<ParticleSystemDef>))> = hero_paths
+        .into_par_iter()
+        .filter_map(|path| {
+            let hero_name = path.file_name()?.to_string_lossy().to_string();
+            let vfx_path = path.join("skins").join("skin0_vfx.ron");
+            if !vfx_path.is_file() {
+                return None;
+            }
+            let content = std::fs::read_to_string(&vfx_path).ok()?;
+            let config: ConfigVfx = ron::from_str(&content).ok()?;
+            let mut systems = Vec::with_capacity(config.systems.len());
+            for (&hash, def) in &config.systems {
+                if let Ok(def_ron) = ron::ser::to_string(def) {
+                    systems.push(ParticleSystemDef {
+                        name: def.particle_name.clone(),
+                        hash,
+                        def_ron,
+                        def: def.clone(),
+                    });
+                }
+            }
+            systems.sort_by(|a, b| a.name.to_lowercase().cmp(&b.name.to_lowercase()));
+
+            let children: Vec<ParticleTreeNode> = systems
+                .iter()
+                .map(|sys| ParticleTreeNode {
+                    name: sys.name.clone(),
+                    is_dir: false,
+                    is_expanded: false,
+                    children: Vec::new(),
+                    hero_name: hero_name.clone(),
+                    hash: Some(sys.hash),
+                })
+                .collect();
+
+            let tree_node = ParticleTreeNode {
+                name: hero_name.clone(),
+                is_dir: true,
+                is_expanded: false,
+                children,
+                hero_name: hero_name.clone(),
+                hash: None,
+            };
+
+            Some((tree_node, (hero_name, systems)))
         })
-        .filter(|(h, systems)| {
-            if q.is_empty() {
+        .collect();
+
+    let mut tree_nodes = Vec::with_capacity(results.len());
+    let mut systems_map = HashMap::with_capacity(results.len());
+    for (node, (hero, systems)) in results {
+        tree_nodes.push(node);
+        systems_map.insert(hero, systems);
+    }
+    tree_nodes.sort_by(|a, b| a.name.to_lowercase().cmp(&b.name.to_lowercase()));
+
+    (tree_nodes, systems_map)
+}
+
+/// 切换树节点的折叠/展开状态
+fn toggle_node_expansion(nodes: &mut [ParticleTreeNode], target_hero: &str) -> bool {
+    for node in nodes.iter_mut() {
+        if node.is_dir && node.name == target_hero {
+            node.is_expanded = !node.is_expanded;
+            return true;
+        }
+    }
+    false
+}
+
+fn has_matching_child(node: &ParticleTreeNode, query_lower: &str) -> bool {
+    for child in &node.children {
+        if child.name.to_lowercase().contains(query_lower) {
+            return true;
+        }
+        if let Some(hash) = child.hash {
+            if format!("0x{:08x}", hash).contains(query_lower) {
                 return true;
             }
-            if h.to_lowercase().contains(&q) {
-                return true;
+        }
+        if child.is_dir && has_matching_child(child, query_lower) {
+            return true;
+        }
+    }
+    false
+}
+
+/// 平铺处于展开显示状态的树节点（折叠的节点绝对不占用 DOM 资源）
+fn collect_flat_visible_nodes(
+    nodes: &[ParticleTreeNode],
+    depth: usize,
+    query_lower: &str,
+    acc: &mut Vec<FlatParticleNode>,
+) {
+    let is_empty_query = query_lower.is_empty();
+    for node in nodes {
+        let name_matches = is_empty_query || node.name.to_lowercase().contains(query_lower);
+        let hash_matches = !is_empty_query
+            && node
+                .hash
+                .map_or(false, |h| format!("0x{:08x}", h).contains(query_lower));
+
+        if node.is_dir {
+            let child_matches = !is_empty_query && has_matching_child(node, query_lower);
+            let should_show = name_matches || child_matches;
+
+            if should_show {
+                acc.push(FlatParticleNode {
+                    name: node.name.clone(),
+                    is_dir: true,
+                    depth,
+                    is_expanded: node.is_expanded || child_matches,
+                    children_count: node.children.len(),
+                    hero_name: node.hero_name.clone(),
+                    hash: None,
+                });
+
+                if node.is_expanded || child_matches {
+                    collect_flat_visible_nodes(&node.children, depth + 1, query_lower, acc);
+                }
             }
-            systems.iter().any(|s| {
-                s.name.to_lowercase().contains(&q) || hash_hex(s.hash).to_lowercase().contains(&q)
-            })
-        })
-        .map(|(h, systems)| {
-            if q.is_empty() || h.to_lowercase().contains(&q) {
-                (h, systems)
-            } else {
-                let systems = systems
-                    .into_iter()
-                    .filter(|s| {
-                        s.name.to_lowercase().contains(&q)
-                            || hash_hex(s.hash).to_lowercase().contains(&q)
-                    })
-                    .collect();
-                (h, systems)
-            }
-        })
-        .collect()
+        } else if name_matches || hash_matches {
+            acc.push(FlatParticleNode {
+                name: node.name.clone(),
+                is_dir: false,
+                depth,
+                is_expanded: false,
+                children_count: 0,
+                hero_name: node.hero_name.clone(),
+                hash: node.hash,
+            });
+        }
+    }
+}
+
+fn start_async_rescan(cx: &mut Context<AppSidebar>) {
+    update_state(|s| {
+        s.is_scanning = true;
+    });
+    cx.notify();
+
+    let weak_entity = cx.entity().downgrade();
+    cx.spawn(|_this, cx: &mut AsyncApp| {
+        let mut cx = cx.clone();
+        async move {
+            let res = crate::services::runtime::tokio_runtime()
+                .spawn_blocking(scan_particles_rayon)
+                .await;
+            let (mut roots, systems_map) = res.unwrap_or_default();
+
+            let _ = weak_entity.update(&mut cx, |_, cx| {
+                update_state(|state| {
+                    let old_expanded: std::collections::HashSet<String> = state
+                        .tree_roots
+                        .iter()
+                        .filter(|n| n.is_dir && n.is_expanded)
+                        .map(|n| n.name.clone())
+                        .collect();
+
+                    for node in &mut roots {
+                        if node.is_dir && old_expanded.contains(&node.name) {
+                            node.is_expanded = true;
+                        }
+                    }
+                    state.tree_roots = roots;
+                    state.hero_systems = systems_map;
+                    state.is_scanning = false;
+                });
+                cx.notify();
+            });
+        }
+    })
+    .detach();
 }
 
 // ── 手写输入框：焦点 / 光标 / 文本缓冲（跨渲染保持） ──
@@ -1460,21 +1640,76 @@ fn render_system_detail(
 
 // ── 公开入口 ──
 
-/// 粒子系统编辑器：连接 server → 英雄树 → 选中系统 → 发射器参数编辑 → 自动重播。
+/// 粒子系统编辑器：Rayon 树状文件侧边栏 → 选中系统 → 发射器参数编辑 → 自动重播。
 pub fn render_particles(_sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> AnyElement {
-    let connected = with_state(|s| s.connected);
-    let error = with_state(|s| s.error.clone());
-    let ws_url = with_state(|s| s.ws_url.clone());
-    let heroes_count = with_state(|s| s.heroes.len());
-    let search = with_state(|s| s.search_query.clone());
-    let auto_play = with_state(|s| s.auto_play);
+    let should_start_scan = STATE.with(|cell| {
+        let mut state = cell.borrow_mut();
+        if !state.is_initialized && !state.is_scanning {
+            state.is_initialized = true;
+            state.is_scanning = true;
+            true
+        } else {
+            false
+        }
+    });
 
-    let tree = with_state(|s| filtered_tree(s));
-    let total_matched: usize = tree.iter().map(|(_, sys)| sys.len()).sum();
+    // 首次进入时，在后台 Rayon 多线程异步构建英雄粒子树
+    if should_start_scan {
+        let weak_entity = cx.entity().downgrade();
+        cx.spawn(|_this, cx: &mut AsyncApp| {
+            let mut cx = cx.clone();
+            async move {
+                let res = crate::services::runtime::tokio_runtime()
+                    .spawn_blocking(scan_particles_rayon)
+                    .await;
+                let (roots, systems_map) = res.unwrap_or_default();
 
-    let selected_system = with_state(|s| s.selected_system.clone());
-    let (hero, name, hash, wd) = with_state(|s| {
+                let _ = weak_entity.update(&mut cx, |_, cx| {
+                    update_state(|state| {
+                        state.tree_roots = roots;
+                        state.hero_systems = systems_map;
+                        state.is_scanning = false;
+                    });
+                    cx.notify();
+                });
+            }
+        })
+        .detach();
+    }
+
+    let (
+        flat_visible_nodes,
+        total_heroes,
+        total_particles,
+        connected,
+        error,
+        ws_url,
+        query,
+        auto_play,
+        is_scanning,
+        selected_system,
+        hero,
+        name,
+        hash,
+        wd,
+    ) = with_state(|s| {
+        let mut flat = Vec::new();
+        let query_lower = s.search_query.trim().to_lowercase();
+        collect_flat_visible_nodes(&s.tree_roots, 0, &query_lower, &mut flat);
+        let total_heroes = s.tree_roots.len();
+        let total_particles: usize = s.tree_roots.iter().map(|n| n.children.len()).sum();
+
         (
+            flat,
+            total_heroes,
+            total_particles,
+            s.connected,
+            s.error.clone(),
+            s.ws_url.clone(),
+            s.search_query.clone(),
+            s.auto_play,
+            s.is_scanning,
+            s.selected_system.clone(),
             s.selected_hero.clone(),
             s.selected_system.as_ref().map(|x| x.name.clone()),
             s.selected_system.as_ref().map(|x| x.hash),
@@ -1482,32 +1717,14 @@ pub fn render_particles(_sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>)
         )
     });
 
-    // 构建英雄树节点（搜索时自动展开命中英雄）
-    let expanded = with_state(|s| {
-        if s.search_query.trim().is_empty() {
-            s.expanded_heroes.clone()
-        } else {
-            filtered_tree(s)
-                .into_iter()
-                .filter(|(_, sys)| !sys.is_empty())
-                .map(|(h, _)| h)
-                .collect()
-        }
-    });
-    let loading_hero = with_state(|s| s.loading_hero.clone());
-    let hero_nodes: Vec<AnyElement> = tree
-        .iter()
-        .map(|(hero, systems)| {
-            render_hero_tree_node(
-                cx,
-                hero,
-                systems,
-                expanded.contains(hero),
-                loading_hero.as_deref() == Some(hero),
-                &selected_system,
-            )
-        })
-        .collect();
+    let theme = cx.theme();
+    let sidebar_bg = theme.sidebar;
+    let border_color = theme.border;
+    let bg_color = theme.background;
+    let accent_color = theme.accent;
+    let accent_fg = theme.accent_foreground;
+    let muted_fg = theme.muted_foreground;
+    let danger_color = theme.danger;
 
     // 右侧详情面板
     let right_panel = match (hero, name, hash, wd) {
@@ -1525,47 +1742,251 @@ pub fn render_particles(_sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>)
                     .child(
                         div()
                             .text_sm()
-                            .text_color(cx.theme().muted_foreground)
-                            .child("请从左侧展开英雄并选择粒子系统"),
+                            .text_color(muted_fg)
+                            .child("请在左侧展开英雄并选择粒子系统"),
                     ),
             )
             .into_any_element(),
     };
 
-    div()
-        .size_full()
-        .flex_1()
-        .overflow_hidden()
+    let search_input_elem = render_search_input(cx, query.clone());
+    let page_header_elem = render_page_header(cx, &ws_url, connected, auto_play);
+
+    h_flex()
+        .w_full()
+        .h_full()
+        .gap_3()
         .child(
-            div()
-                .size_full()
-                .flex()
-                .flex_col()
-                .gap_4()
-                .overflow_hidden()
-                .p_6()
-                // 页头
+            // ── 左侧英雄粒子树侧边栏（完全对齐 wad_browser 结构与视觉风格） ──
+            v_flex()
+                .w_80()
+                .h_full()
+                .p_3()
+                .gap_2()
+                .bg(sidebar_bg)
+                .border_r_1()
+                .border_color(border_color)
+                .child(
+                    h_flex()
+                        .w_full()
+                        .justify_between()
+                        .items_center()
+                        .child(
+                            h_flex()
+                                .gap_2()
+                                .items_center()
+                                .child(div().font_bold().text_base().child("英雄粒子树"))
+                                .when(is_scanning, |this| {
+                                    this.child(div().text_xs().opacity(0.6).child("(扫描中...)"))
+                                }),
+                        )
+                        .child(
+                            Button::new("refresh-particles-tree")
+                                .icon(IconName::Redo)
+                                .ghost()
+                                .small()
+                                .on_click(cx.listener(|_, _, _window, cx| {
+                                    start_async_rescan(cx);
+                                })),
+                        ),
+                )
+                // 搜索过滤框
                 .child(
                     v_flex()
-                        .gap_2()
-                        .border_b_1()
-                        .border_color(cx.theme().border)
-                        .pb_3()
-                        .child(render_page_header(cx, &ws_url, connected))
-                        .child(h_flex().items_center().gap_2().child({
-                            let is_checked = auto_play;
-                            let label = format!(
-                                "改动后自动播放: {}",
-                                if is_checked { "ON" } else { "OFF" }
-                            );
-                            let btn = Button::new("particle-auto-play-toggle").label(label);
-                            let btn = if is_checked { btn } else { btn.ghost() };
-                            btn.on_click(cx.listener(|_this, _, _, cx| {
-                                update_state(|s| s.auto_play = !s.auto_play);
-                                cx.notify();
-                            }))
-                        })),
+                        .gap_1()
+                        .child(
+                            h_flex()
+                                .w_full()
+                                .px_2()
+                                .py_1()
+                                .bg(bg_color)
+                                .border_1()
+                                .border_color(border_color)
+                                .rounded_md()
+                                .items_center()
+                                .gap_2()
+                                .child(IconName::Search)
+                                .child(div().flex_1().child(search_input_elem))
+                                .when(!query.is_empty(), |this| {
+                                    this.child(
+                                        Button::new("particle-search-clear")
+                                            .ghost()
+                                            .small()
+                                            .icon(IconName::Close)
+                                            .on_click(cx.listener(|_, _, _, cx| {
+                                                update_state(|s| {
+                                                    s.search_query.clear();
+                                                });
+                                                set_edit_cursor("particle-search", 0);
+                                                clear_input_buffer("particle-search");
+                                                cx.notify();
+                                            })),
+                                    )
+                                }),
+                        )
+                        .child(div().px_1().text_xs().text_color(muted_fg).child(
+                            if query.is_empty() {
+                                format!("共 {} 个英雄 · {} 个粒子", total_heroes, total_particles)
+                            } else {
+                                let matched_count =
+                                    flat_visible_nodes.iter().filter(|n| !n.is_dir).count();
+                                format!("匹配 {} 个粒子", matched_count)
+                            },
+                        )),
                 )
+                // 树状列表区域（严格只挂载当前展开显示的节点 DOM）
+                .child(
+                    v_flex()
+                        .flex_1()
+                        .w_full()
+                        .overflow_y_scrollbar()
+                        .gap_0p5()
+                        .when(is_scanning, |this| {
+                            this.child(
+                                div()
+                                    .w_full()
+                                    .py_4()
+                                    .flex()
+                                    .justify_center()
+                                    .text_sm()
+                                    .opacity(0.6)
+                                    .child("Rayon 多线程扫描英雄粒子中..."),
+                            )
+                        })
+                        .when(!is_scanning && flat_visible_nodes.is_empty(), |this| {
+                            this.child(
+                                div()
+                                    .w_full()
+                                    .py_4()
+                                    .flex()
+                                    .justify_center()
+                                    .text_sm()
+                                    .opacity(0.6)
+                                    .child("无匹配粒子节点"),
+                            )
+                        })
+                        .children(flat_visible_nodes.into_iter().map(|node| {
+                            let is_dir = node.is_dir;
+                            let is_selected = !is_dir
+                                && selected_system
+                                    .as_ref()
+                                    .map(|s| Some(s.hash) == node.hash)
+                                    .unwrap_or(false);
+                            let padding_left_px = (node.depth * 14 + 6) as f32;
+                            let hero_name = node.hero_name.clone();
+                            let node_hash = node.hash;
+
+                            div()
+                                .w_full()
+                                .py_1()
+                                .rounded_md()
+                                .cursor_pointer()
+                                .pl(px(padding_left_px))
+                                .when(is_selected, |this| {
+                                    this.bg(accent_color).text_color(accent_fg)
+                                })
+                                .when(!is_selected, |this| {
+                                    this.hover(|style| style.bg(accent_color.opacity(0.1)))
+                                })
+                                .on_mouse_down(
+                                    MouseButton::Left,
+                                    cx.listener(move |_, _, _window, cx| {
+                                        if is_dir {
+                                            let h = hero_name.clone();
+                                            update_state(|s| {
+                                                toggle_node_expansion(&mut s.tree_roots, &h);
+                                            });
+                                            cx.notify();
+                                        } else if let Some(target_hash) = node_hash {
+                                            let h = hero_name.clone();
+                                            let mut found_system = None;
+                                            update_state(|s| {
+                                                if let Some(systems) = s.hero_systems.get(&h) {
+                                                    if let Some(sys) = systems
+                                                        .iter()
+                                                        .find(|s| s.hash == target_hash)
+                                                    {
+                                                        s.selected_hero = Some(h.clone());
+                                                        s.selected_system = Some(sys.clone());
+                                                        s.active_tab = 0;
+                                                        s.working_def = Some(sys.def.clone());
+                                                        s.initial_def_backup =
+                                                            Some(sys.def.clone());
+                                                        found_system = Some(sys.clone());
+                                                    }
+                                                }
+                                            });
+                                            clear_all_input_buffers();
+                                            cx.notify();
+
+                                            if let Some(sys) = found_system {
+                                                let auto = with_state(|s| s.auto_play);
+                                                if auto {
+                                                    let ron = sys.def_ron;
+                                                    spawn_play_ron(cx, ron);
+                                                }
+                                            }
+                                        }
+                                    }),
+                                )
+                                .child(
+                                    h_flex()
+                                        .gap_1p5()
+                                        .items_center()
+                                        .child(if node.is_dir {
+                                            if node.is_expanded {
+                                                IconName::FolderOpen
+                                            } else {
+                                                IconName::Folder
+                                            }
+                                        } else {
+                                            IconName::Play
+                                        })
+                                        .child(
+                                            div()
+                                                .font_medium()
+                                                .text_sm()
+                                                .truncate()
+                                                .child(node.name.clone()),
+                                        )
+                                        .when(node.is_dir, |this| {
+                                            this.child(
+                                                div()
+                                                    .text_xs()
+                                                    .opacity(0.5)
+                                                    .child(format!("({})", node.children_count)),
+                                            )
+                                        })
+                                        .when_some(node.hash, |this, h| {
+                                            this.child(
+                                                div()
+                                                    .ml_auto()
+                                                    .mr_2()
+                                                    .px_1()
+                                                    .py_0p5()
+                                                    .rounded_sm()
+                                                    .bg(if is_selected {
+                                                        accent_fg.opacity(0.2)
+                                                    } else {
+                                                        accent_color.opacity(0.15)
+                                                    })
+                                                    .text_xs()
+                                                    .child(hash_hex(h)),
+                                            )
+                                        }),
+                                )
+                        })),
+                ),
+        )
+        .child(
+            // ── 右侧工作区 ──
+            v_flex()
+                .flex_1()
+                .h_full()
+                .p_3()
+                .gap_2()
+                // 页头状态栏
+                .child(page_header_elem)
                 // 错误提示
                 .when_some(error.as_ref(), |d, err| {
                     d.child(
@@ -1573,161 +1994,102 @@ pub fn render_particles(_sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>)
                             .px_3()
                             .py_2()
                             .rounded_md()
-                            .bg(cx.theme().danger.opacity(0.1))
-                            .text_color(cx.theme().danger)
+                            .bg(danger_color.opacity(0.1))
+                            .text_color(danger_color)
                             .text_xs()
                             .child(err.clone()),
                     )
                 })
-                // 未连接占位
-                .when(!connected, |d| {
-                    d.child(
-                        div()
-                            .flex_1()
-                            .rounded_lg()
-                            .border_1()
-                            .border_color(cx.theme().border.opacity(0.5))
-                            .flex()
-                            .items_center()
-                            .justify_center()
-                            .child(
-                                v_flex()
-                                    .gap_3()
-                                    .items_center()
-                                    .child(IconName::CircleX)
-                                    .child(
-                                        div()
-                                            .text_sm()
-                                            .text_color(cx.theme().muted_foreground)
-                                            .child("未连接粒子渲染服务器，点击右上角连接"),
-                                    ),
-                            ),
-                    )
-                })
-                // 主框架：左侧树 x 右侧详情
-                .when(connected, |d| {
-                    d.child(
-                        h_flex()
-                            .flex_1()
-                            .gap_4()
-                            .overflow_hidden()
-                            // 左侧：英雄树 + 搜索框
-                            .child(
-                                div()
-                                    .w(rems(18.))
-                                    .flex()
-                                    .flex_col()
-                                    .rounded_lg()
-                                    .border_1()
-                                    .border_color(cx.theme().border)
-                                    .overflow_hidden()
-                                    .child(
-                                        v_flex()
-                                            .border_b_1()
-                                            .border_color(cx.theme().border)
-                                            .bg(cx.theme().background)
-                                            .p_2()
-                                            .gap_2()
-                                            .child(
-                                                h_flex()
-                                                    .items_center()
-                                                    .gap_1()
-                                                    .child(div().flex_1().child(
-                                                        render_search_input(cx, search.clone()),
-                                                    ))
-                                                    .when(!search.is_empty(), |d2| {
-                                                        d2.child(
-                                                            Button::new("particle-search-clear")
-                                                                .ghost()
-                                                                .icon(IconName::Close)
-                                                                .on_click(cx.listener(
-                                                                    |_, _, _, cx| {
-                                                                        update_state(|s| {
-                                                                            s.search_query.clear();
-                                                                        });
-                                                                        set_edit_cursor(
-                                                                            "particle-search",
-                                                                            0,
-                                                                        );
-                                                                        cx.notify();
-                                                                    },
-                                                                )),
-                                                        )
-                                                    }),
-                                            )
-                                            .child(
-                                                div()
-                                                    .text_xs()
-                                                    .text_color(cx.theme().muted_foreground)
-                                                    .child(if search.is_empty() {
-                                                        format!("共 {} 个英雄", heroes_count)
-                                                    } else {
-                                                        format!("匹配 {} 个粒子", total_matched)
-                                                    }),
-                                            ),
-                                    )
-                                    .child(
-                                        div()
-                                            .flex_1()
-                                            .overflow_y_scrollbar()
-                                            .p_1p5()
-                                            .children(hero_nodes),
-                                    ),
-                            )
-                            // 右侧：系统详情 / 编辑器
-                            .child(
-                                div()
-                                    .flex_1()
-                                    .flex()
-                                    .flex_col()
-                                    .rounded_lg()
-                                    .border_1()
-                                    .border_color(cx.theme().border)
-                                    .overflow_hidden()
-                                    .child(right_panel),
-                            ),
-                    )
-                })
-                .into_any_element(),
+                // 主工作区面板
+                .child(
+                    v_flex()
+                        .flex_1()
+                        .w_full()
+                        .bg(bg_color)
+                        .border_1()
+                        .border_color(border_color)
+                        .rounded_md()
+                        .overflow_hidden()
+                        .child(right_panel),
+                ),
         )
         .into_any_element()
 }
 
 // ── 页头：标题 + WS 连接控制 ──
 
-fn render_page_header(cx: &mut Context<AppSidebar>, ws_url: &str, connected: bool) -> AnyElement {
+fn render_page_header(
+    cx: &mut Context<AppSidebar>,
+    ws_url: &str,
+    connected: bool,
+    auto_play: bool,
+) -> AnyElement {
+    let theme = cx.theme();
+    let (hero, system_name, hash) = with_state(|s| {
+        (
+            s.selected_hero.clone(),
+            s.selected_system.as_ref().map(|x| x.name.clone()),
+            s.selected_system.as_ref().map(|x| x.hash),
+        )
+    });
+
     h_flex()
-        .items_center()
+        .w_full()
         .justify_between()
+        .items_center()
+        .px_3()
+        .py_2()
+        .bg(theme.background)
+        .border_1()
+        .border_color(theme.border)
+        .rounded_md()
         .child(
-            v_flex()
-                .gap_0p5()
-                .child(
-                    h_flex()
-                        .gap_2()
-                        .items_center()
-                        .child(IconName::Palette)
-                        .child(div().font_bold().text_lg().child("粒子系统编辑器")),
-                )
+            h_flex()
+                .gap_2()
+                .items_center()
+                .child(IconName::Palette)
                 .child(
                     div()
-                        .text_xs()
-                        .text_color(cx.theme().muted_foreground)
-                        .child("浏览与编辑英雄粒子系统，改动后实时回放到渲染 server"),
-                ),
+                        .font_bold()
+                        .text_base()
+                        .child(match (&hero, &system_name) {
+                            (Some(h), Some(n)) => format!("{} / {}", h, n),
+                            _ => "粒子系统编辑器".to_string(),
+                        }),
+                )
+                .when_some(hash, |this, h| {
+                    this.child(
+                        div()
+                            .px_2()
+                            .py_0p5()
+                            .bg(theme.accent.opacity(0.2))
+                            .rounded_sm()
+                            .text_xs()
+                            .child(hash_hex(h)),
+                    )
+                }),
         )
         .child(
             h_flex()
                 .gap_2()
                 .items_center()
+                .child({
+                    let label = format!("自动播放: {}", if auto_play { "ON" } else { "OFF" });
+                    let btn = Button::new("particle-auto-play-toggle").label(label);
+                    let btn = if auto_play { btn } else { btn.ghost() };
+                    btn.on_click(cx.listener(|_this, _, _, cx| {
+                        update_state(|s| s.auto_play = !s.auto_play);
+                        cx.notify();
+                    }))
+                })
                 .child(
                     div()
                         .px_2()
                         .py_1()
                         .rounded_md()
-                        .bg(cx.theme().background)
+                        .bg(theme.background)
                         .text_xs()
-                        .text_color(cx.theme().muted_foreground)
+                        .text_color(theme.muted_foreground)
                         .child(format!("Server: {}", ws_url)),
                 )
                 .when(!connected, |d| {
@@ -1752,7 +2114,7 @@ fn render_page_header(cx: &mut Context<AppSidebar>, ws_url: &str, connected: boo
                                 let weak = cx.entity().downgrade();
                                 cx.spawn(
                                     move |_: gpui::WeakEntity<AppSidebar>,
-                                         cx: &mut gpui::AsyncApp| {
+                                          cx: &mut gpui::AsyncApp| {
                                         let mut cx2 = cx.clone();
                                         async move {
                                             while let Some(event) = ev_rx.recv().await {
@@ -1770,73 +2132,11 @@ fn render_page_header(cx: &mut Context<AppSidebar>, ws_url: &str, connected: boo
                                     },
                                 )
                                 .detach();
-
-                                cx.spawn(
-                                    |weak2: gpui::WeakEntity<AppSidebar>,
-                                     cx: &mut gpui::AsyncApp| {
-                                        let mut cx3 = cx.clone();
-                                        async move {
-                                            let heroes: Result<Vec<String>, String> =
-                                                crate::services::runtime::run_on_tokio(|| async {
-                                                    tokio::task::spawn_blocking(
-                                                        particle_service::list_particle_heroes,
-                                                    )
-                                                    .await
-                                                    .map_err(|e| e.to_string())
-                                                    .and_then(|r| r.map_err(|e| e))
-                                                })
-                                                .await;
-                                            update_state(|s| match heroes {
-                                                Ok(list) => s.heroes = list,
-                                                Err(e) => s.error = Some(e),
-                                            });
-                                            if let Some(e) = weak2.upgrade() {
-                                                let _ = e.update(&mut cx3, |_, cx| cx.notify());
-                                            }
-                                        }
-                                    },
-                                )
-                                .detach();
                             }))
                     })
                 })
                 .when(connected, |d| {
                     d.child(
-                        Button::new("particle-refresh-btn")
-                            .outline()
-                            .icon(IconName::Redo)
-                            .label("刷新列表")
-                            .on_click(cx.listener(|_this, _, _, cx| {
-                                let _weak = cx.entity().downgrade();
-                                cx.spawn(
-                                    |weak: gpui::WeakEntity<AppSidebar>,
-                                     cx: &mut gpui::AsyncApp| {
-                                        let mut cx = cx.clone();
-                                        async move {
-                                            let heroes: Result<Vec<String>, String> =
-                                                crate::services::runtime::run_on_tokio(|| async {
-                                                    tokio::task::spawn_blocking(
-                                                        particle_service::list_particle_heroes,
-                                                    )
-                                                    .await
-                                                    .map_err(|e| e.to_string())
-                                                    .and_then(|r| r.map_err(|e| e))
-                                                })
-                                                .await;
-                                            update_state(|s| match heroes {
-                                                Ok(list) => s.heroes = list,
-                                                Err(e) => s.error = Some(e),
-                                            });
-                                            if let Some(e) = weak.upgrade() {
-                                                let _ = e.update(&mut cx, |_, cx| cx.notify());
-                                            }
-                                        }
-                                    },
-                                )
-                                .detach();
-                            })),
-                    )
-                    .child(
                         Button::new("particle-disconnect-btn")
                             .icon(IconName::CircleX)
                             .label("断开")
@@ -1847,15 +2147,7 @@ fn render_page_header(cx: &mut Context<AppSidebar>, ws_url: &str, connected: boo
                                     }
                                     s.ws_handle = None;
                                     s.connected = false;
-                                    s.heroes.clear();
-                                    s.hero_systems.clear();
-                                    s.expanded_heroes.clear();
-                                    s.selected_hero = None;
-                                    s.selected_system = None;
-                                    s.working_def = None;
-                                    s.initial_def_backup = None;
                                 });
-                                clear_all_input_buffers();
                                 cx.notify();
                             })),
                     )
@@ -1866,8 +2158,8 @@ fn render_page_header(cx: &mut Context<AppSidebar>, ws_url: &str, connected: boo
                             .px_2()
                             .py_0p5()
                             .rounded_md()
-                            .bg(cx.theme().accent.opacity(0.15))
-                            .text_color(cx.theme().accent)
+                            .bg(theme.accent.opacity(0.15))
+                            .text_color(theme.accent)
                             .text_xs()
                             .font_bold()
                             .child("已连接"),
@@ -1896,157 +2188,4 @@ fn process_ws_event(event: ParticleWsEvent) -> bool {
             true
         }
     }
-}
-
-// ── 英雄树节点 ──
-
-fn render_hero_tree_node(
-    cx: &mut Context<AppSidebar>,
-    hero: &str,
-    systems: &[ParticleSystemDef],
-    is_expanded: bool,
-    is_loading: bool,
-    selected_system: &Option<ParticleSystemDef>,
-) -> AnyElement {
-    let hero_name = hero.to_string();
-
-    v_flex()
-        .child({
-            let label = format!(
-                "{} {} ({})",
-                if is_expanded { "v" } else { ">" },
-                hero,
-                systems.len()
-            );
-            let btn = Button::new(format!("particle-hero-{}", hero)).label(label);
-            let btn = if is_loading {
-                btn.disabled(true)
-            } else {
-                btn.ghost()
-            };
-            let hn = hero_name.clone();
-            btn.on_click(cx.listener(move |_this, _, _, cx| {
-                let hero_clone = hn.clone();
-                let was_expanded = with_state(|s| s.expanded_heroes.contains(&hero_clone));
-                if was_expanded {
-                    update_state(|s| {
-                        s.expanded_heroes.remove(&hero_clone);
-                    });
-                    cx.notify();
-                    return;
-                }
-                update_state(|s| {
-                    s.expanded_heroes.insert(hero_clone.clone());
-                    s.loading_hero = Some(hero_clone.clone());
-                });
-                cx.notify();
-
-                let hero_clone2 = hero_clone.clone();
-                let _weak = cx.entity().downgrade();
-                cx.spawn(
-                    |weak: gpui::WeakEntity<AppSidebar>, cx: &mut gpui::AsyncApp| {
-                        let mut cx = cx.clone();
-                        let hn = hero_clone2.clone();
-                        async move {
-                            let systems: Result<Vec<ParticleSystemDef>, String> =
-                                crate::services::runtime::run_on_tokio(move || async move {
-                                    tokio::task::spawn_blocking(move || {
-                                        particle_service::load_hero_particles(&hn)
-                                    })
-                                    .await
-                                    .map_err(|e| e.to_string())
-                                    .and_then(|r| r.map_err(|e| e))
-                                })
-                                .await;
-                            update_state(|s| {
-                                s.loading_hero = None;
-                                match systems {
-                                    Ok(list) => {
-                                        s.hero_systems.insert(hero_clone2, list);
-                                    }
-                                    Err(e) => {
-                                        s.error = Some(e);
-                                    }
-                                }
-                            });
-                            if let Some(e) = weak.upgrade() {
-                                let _ = e.update(&mut cx, |_, cx| cx.notify());
-                            }
-                        }
-                    },
-                )
-                .detach();
-            }))
-            .into_any_element()
-        })
-        .when(is_expanded, |d| {
-            d.child(
-                div()
-                    .ml_4()
-                    .pl_2()
-                    .border_l_1()
-                    .border_color(cx.theme().border.opacity(0.5))
-                    .children(systems.iter().map(|sys| {
-                        let hash = sys.hash;
-                        let is_active =
-                            selected_system.as_ref().map_or(false, |ss| ss.hash == hash);
-                        let hero_name2 = hero_name.clone();
-                        let sys_name = sys.name.clone();
-                        let def_ron = sys.def_ron.clone();
-                        let def_clone = sys.def.clone();
-                        let hash_clone = sys.hash;
-
-                        let label = format!("{}  {}", sys_name, hash_hex(hash));
-                        let btn = Button::new(format!("particle-system-{}", hash)).label(label);
-                        let btn = if is_active { btn } else { btn.ghost() };
-                        btn.on_click(cx.listener(move |_this, _, _, cx| {
-                            let hero = hero_name2.clone();
-                            let system = ParticleSystemDef {
-                                hash: hash_clone,
-                                name: sys_name.clone(),
-                                def_ron: def_ron.clone(),
-                                def: def_clone.clone(),
-                            };
-                            update_state(|s| {
-                                s.selected_hero = Some(hero);
-                                s.selected_system = Some(system.clone());
-                                s.active_tab = 0;
-                                s.working_def = Some(system.def.clone());
-                                s.initial_def_backup = Some(system.def.clone());
-                            });
-                            clear_all_input_buffers();
-                            cx.notify();
-
-                            let auto = with_state(|s| s.auto_play);
-                            if auto {
-                                let ron = def_ron.clone();
-                                let _weak = cx.entity().downgrade();
-                                cx.spawn(
-                                    |weak: gpui::WeakEntity<AppSidebar>,
-                                     cx: &mut gpui::AsyncApp| {
-                                        let mut cx = cx.clone();
-                                        async move {
-                                            let handle = with_state(|s| s.ws_handle.clone());
-                                            if let Some(h) = handle {
-                                                if let Err(e) = h.play_particle(&ron).await {
-                                                    update_state(|s| {
-                                                        s.error = Some(e);
-                                                    });
-                                                    if let Some(e) = weak.upgrade() {
-                                                        let _ =
-                                                            e.update(&mut cx, |_, cx| cx.notify());
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    },
-                                )
-                                .detach();
-                            }
-                        }))
-                        .into_any_element()
-                    })),
-            )
-        })
-        .into_any_element()
 }

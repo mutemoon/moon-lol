@@ -11,7 +11,7 @@ use std::collections::HashMap;
 use std::sync::Arc;
 
 use async_trait::async_trait;
-use lol_client::launch::{binary_name, build_command, BevySpawnRequest};
+use lol_client::launch::{build_command, install_root, resolve_executable, BevySpawnRequest};
 use lol_game_process_manager::{GameProcessManager, ManagerError, ProcessLauncher, StartGameInput};
 use lol_web_protocol::{FrontAgentConfig, GameConfig, RunningGame};
 use tokio::sync::{mpsc, Mutex};
@@ -42,7 +42,7 @@ fn bevy_game_config(config: &GameConfig) -> lol_client::launch::BevyGameConfig {
 }
 
 /// 写入 Bevy 动态场景 RON 文件到 `~/.moon-lol/games/{scene_name}.ron`。
-fn write_scene_ron(scene_name: &str, agents: &[FrontAgentConfig]) -> Result<(), String> {
+pub fn write_scene_ron(scene_name: &str, agents: &[FrontAgentConfig]) -> Result<(), String> {
     let dir = config_dir()?.join("games");
     std::fs::create_dir_all(&dir).map_err(|e| format!("创建 games 目录失败: {e}"))?;
 
@@ -137,24 +137,9 @@ fn rust_log() -> String {
     std::env::var("RUST_LOG").unwrap_or_else(|_| lol_client::launch::default_rust_log().to_string())
 }
 
-/// dev 模式检测：`CARGO` 环境变量存在表示通过 cargo 运行。
-fn is_dev() -> bool {
-    std::env::var("CARGO").is_ok()
-}
-
-/// 据环境决定程序与前缀：dev 用 `cargo run --`，release 尝试 target 下二进制。
+/// 据环境决定程序与前缀：dev `cargo run -p moon_lol`，release 解析兄弟二进制。
 fn program_and_prefix() -> (String, Vec<String>) {
-    if is_dev() {
-        return ("cargo".to_string(), vec!["run".into(), "--".into()]);
-    }
-    if let Some(ws_root) = lol_client::launch::workspace_root() {
-        let release_bin = ws_root.join("target").join("release").join(binary_name());
-        if release_bin.exists() {
-            return (release_bin.display().to_string(), vec![]);
-        }
-    }
-    // 最终回退：尝试 PATH 中的二进制名
-    (binary_name().to_string(), vec![])
+    resolve_executable("moon_lol", "moon_lol")
 }
 
 // ── GPUI 端进程启动器 ──
@@ -294,7 +279,7 @@ impl ProcessService {
                 prefix_args: vec![],
                 port: 0, // 由 manager 覆写
                 game_config: bevy_game_config(&config),
-                cwd: lol_client::launch::workspace_root(),
+                cwd: install_root(),
                 rust_log: Some(rust_log()),
                 log_db: Some(log_db),
             };

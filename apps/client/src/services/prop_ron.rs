@@ -174,18 +174,51 @@ pub fn convert_prop_bytes_to_ron(bytes: &[u8]) -> Result<String, String> {
     ron::ser::to_string_pretty(&doc, pretty_config).map_err(|e| format!("RON 序列化失败: {}", e))
 }
 
+pub fn get_global_game_hashes() -> &'static HashMap<u64, String> {
+    static GAME_HASHES: OnceLock<HashMap<u64, String>> = OnceLock::new();
+    GAME_HASHES.get_or_init(|| {
+        let game_hash_paths: Vec<String> = (0..9)
+            .map(|i| {
+                format!(
+                    "assets/CommunityDragon-Data/hashes/lol/hashes.game.txt.{}",
+                    i
+                )
+            })
+            .collect();
+        let maps: Vec<HashMap<u64, String>> = game_hash_paths
+            .into_iter()
+            .map(|path| {
+                let mut map = HashMap::new();
+                if let Ok(content) = std::fs::read_to_string(&path) {
+                    for line in content.lines() {
+                        if let Some((hash, name)) = line.split_once(' ') {
+                            if let Ok(hash) = u64::from_str_radix(hash, 16) {
+                                map.insert(hash, name.to_string());
+                            }
+                        }
+                    }
+                }
+                map
+            })
+            .collect();
+        let mut total = HashMap::new();
+        for map in maps {
+            total.extend(map);
+        }
+        total
+    })
+}
+
 pub async fn convert_prop_file_async(path: std::path::PathBuf) -> Result<(String, usize), String> {
-    let (tx, rx) = tokio::sync::oneshot::channel();
-    std::thread::spawn(move || {
-        let res = (|| {
+    crate::services::runtime::tokio_runtime()
+        .spawn_blocking(move || {
             let bytes = std::fs::read(&path).map_err(|e| format!("读取文件失败: {}", e))?;
             let len = bytes.len();
             let ron_str = convert_prop_bytes_to_ron(&bytes)?;
             Ok((ron_str, len))
-        })();
-        let _ = tx.send(res);
-    });
-    rx.await.map_err(|_| "后台解析线程中断".to_string())?
+        })
+        .await
+        .map_err(|_| "后台解析线程中断".to_string())?
 }
 
 fn parse_fields(data: &[u8], hashes: &HashMap<u32, String>) -> Result<Vec<PropRonField>, String> {

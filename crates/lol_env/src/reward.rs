@@ -1,0 +1,108 @@
+use std::collections::HashMap;
+
+use lol_rl_protocol::{RewardExpr, RewardFormulaSpec, RewardItem, RewardTermSpec};
+
+/// 统一的环境单步奖励模型 Trait
+pub trait RewardModel: Send + Sync {
+    type Context;
+
+    /// 获取环境定义的结构化奖励公式（单一事实来源）
+    fn formula_spec(&self) -> RewardFormulaSpec;
+
+    /// 从当前环境步骤上下文中提取特征变量
+    fn extract_variables(&self, ctx: &Self::Context) -> HashMap<String, f32>;
+
+    /// 严格基于结构化表达式 AST 计算奖励与 Breakdown，返回 (总奖励, 细拆项, 环境变量字典)
+    fn evaluate(&self, ctx: &Self::Context) -> (f32, Vec<RewardItem>, HashMap<String, f32>) {
+        let vars = self.extract_variables(ctx);
+        let (total, items) = self.formula_spec().compute(&vars);
+        (total, items, vars)
+    }
+}
+
+/// Fiora 对战环境单步奖励计算上下文
+#[derive(Debug, Clone, Default)]
+pub struct FioraRewardContext {
+    pub prev_aligned: bool,
+    pub curr_aligned: bool,
+    pub is_vital_break: bool,
+    pub is_attack: bool,
+    pub prev_riven_hp: f32,
+    pub curr_riven_hp: f32,
+}
+
+/// Fiora vs Riven 环境的奖励模型实现
+pub struct FioraVsRivenRewardModel;
+
+impl RewardModel for FioraVsRivenRewardModel {
+    type Context = FioraRewardContext;
+
+    fn formula_spec(&self) -> RewardFormulaSpec {
+        RewardFormulaSpec {
+            name: "无双剑姬打破绽标准公式".to_string(),
+            terms: vec![
+                RewardTermSpec::new(
+                    "time_penalty",
+                    "时间惩罚 (Time Penalty)",
+                    RewardExpr::Constant(-0.2),
+                ),
+                RewardTermSpec::new(
+                    "alignment_shaping",
+                    "站位引导 (Alignment Shaping)",
+                    RewardExpr::IfElse {
+                        cond: Box::new(RewardExpr::Variable("is_newly_aligned".into())),
+                        then_branch: Box::new(RewardExpr::Constant(2.0)),
+                        else_branch: Box::new(RewardExpr::IfElse {
+                            cond: Box::new(RewardExpr::Variable("is_misaligned_move".into())),
+                            then_branch: Box::new(RewardExpr::Constant(-1.0)),
+                            else_branch: Box::new(RewardExpr::Constant(0.0)),
+                        }),
+                    },
+                ),
+                RewardTermSpec::new(
+                    "missed_vital_penalty",
+                    "未打破绽失误扣分 (Missed Vital Penalty)",
+                    RewardExpr::Mul(
+                        Box::new(RewardExpr::Constant(-10.0)),
+                        Box::new(RewardExpr::Variable("is_attack_missed".into())),
+                    ),
+                ),
+                RewardTermSpec::new(
+                    "vital_break",
+                    "打破绽成功 (Vital Break)",
+                    RewardExpr::Mul(
+                        Box::new(RewardExpr::Constant(80.0)),
+                        Box::new(RewardExpr::Variable("is_vital_break".into())),
+                    ),
+                ),
+            ],
+        }
+    }
+
+    fn extract_variables(&self, ctx: &FioraRewardContext) -> HashMap<String, f32> {
+        let mut vars = HashMap::new();
+        let is_newly_aligned = if !ctx.prev_aligned && ctx.curr_aligned {
+            1.0
+        } else {
+            0.0
+        };
+        let is_misaligned_move = if ctx.prev_aligned && !ctx.curr_aligned {
+            1.0
+        } else {
+            0.0
+        };
+        let is_attack_missed = if ctx.is_attack && !ctx.is_vital_break {
+            1.0
+        } else {
+            0.0
+        };
+        let is_vital_break = if ctx.is_vital_break { 1.0 } else { 0.0 };
+
+        vars.insert("is_vital_break".into(), is_vital_break);
+        vars.insert("is_newly_aligned".into(), is_newly_aligned);
+        vars.insert("is_misaligned_move".into(), is_misaligned_move);
+        vars.insert("is_attack_missed".into(), is_attack_missed);
+        vars.insert("step_tick".into(), 1.0);
+        vars
+    }
+}

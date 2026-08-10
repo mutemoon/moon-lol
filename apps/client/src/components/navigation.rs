@@ -139,6 +139,7 @@ pub fn render_topbar(
                     }
                     ActiveView::VisualEnv => "可视环境监控".into(),
                     ActiveView::WadBrowser => "WAD 文件浏览器".into(),
+                    ActiveView::Extractor => "资源提取中心".into(),
                 })),
         )
         .child(
@@ -328,6 +329,15 @@ pub fn render_sidebar_menu(sidebar: &AppSidebar, cx: &mut Context<AppSidebar>) -
                             .active(active == ActiveView::WadBrowser)
                             .on_click(cx.listener(|this, _, _, cx| {
                                 this.navigate_to(ActiveView::WadBrowser);
+                                cx.notify();
+                            })),
+                    )
+                    .child(
+                        SidebarMenuItem::new("资源提取中心")
+                            .icon(IconName::Folder)
+                            .active(active == ActiveView::Extractor)
+                            .on_click(cx.listener(|this, _, _, cx| {
+                                this.navigate_to(ActiveView::Extractor);
                                 cx.notify();
                             })),
                     ),

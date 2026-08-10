@@ -9,7 +9,7 @@ use bevy::prelude::*;
 use bevy::transform::systems::{
     mark_dirty_trees, propagate_parent_transforms, sync_simple_transforms,
 };
-use league_utils::{LeagueShader, hash_wad};
+use league_utils::hash_wad;
 use lol_base::hash_key::{HashKey, LoadHashKeyTrait};
 use lol_base::render_cmd::CommandSkinSoundPlay;
 /// 因为粒子命令事件与 shader 布局描述已下沉到 lol_base_render，
@@ -19,7 +19,7 @@ use lol_base_render::particle::{
     ConfigResourceResolver, ConfigVfx, ConfigVfxEmitterDefinition, ConfigVfxHandle,
     ConfigVfxSystemDefinition,
 };
-use lol_base_render::shader::{DebugShaderHandles, ShaderMap, startup_load_shaders};
+use lol_base_render::shader::{DebugShaderHandles, LeagueShader, ShaderMap, startup_load_shaders};
 pub use lol_base_render::shader_layout;
 use lol_core::lifetime::{Lifetime, LifetimeMode, PluginLifetime};
 

@@ -154,13 +154,16 @@
         "Run1In": Clip(
             node_index: 23,
         ),
+        "Run2Base": Clip(
+            node_index: 5,
+        ),
         "Run2In": Clip(
             node_index: 61,
         ),
         "RunFast": Sequence(
             hashes: [
                 "Run2In",
-                "Unk0xcf93f48",
+                "Run2Base",
             ],
         ),
         "RunHaste": Clip(
@@ -440,9 +443,6 @@
                     value: 180.0,
                 ),
             ],
-        ),
-        "Unk0xcf93f48": Clip(
-            node_index: 5,
         ),
         "Unk0xd30fd1d2": Sequence(
             hashes: [
@@ -829,6 +829,9 @@
         ("Death", "Run1In"): Time(
             time: 0.0,
         ),
+        ("Death", "Run2Base"): Time(
+            time: 0.0,
+        ),
         ("Death", "Run2In"): Time(
             time: 0.0,
         ),
@@ -923,9 +926,6 @@
             time: 0.0,
         ),
         ("Death", "Unk0xc8a9aef5"): Time(
-            time: 0.0,
-        ),
-        ("Death", "Unk0xcf93f48"): Time(
             time: 0.0,
         ),
         ("Death", "Unk0xfb263b5b"): Time(
@@ -1029,6 +1029,9 @@
         ),
         ("Run1In", "Spell2Base"): Time(
             time: 0.1,
+        ),
+        ("Run2Base", "Death"): Time(
+            time: 0.0,
         ),
         ("Run2In", "Death"): Time(
             time: 0.0,
@@ -1208,9 +1211,6 @@
             time: 0.1,
         ),
         ("Unk0xc8a9aef5", "Death"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xcf93f48", "Death"): Time(
             time: 0.0,
         ),
         ("Unk0xd30fd1d2", "Death"): Time(

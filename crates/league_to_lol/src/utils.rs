@@ -3,7 +3,7 @@ use std::io::Read;
 
 use image::codecs::png::{CompressionType, FilterType};
 use image::{ExtendedColorType, ImageEncoder};
-use league_file::texture::{LeagueTexture, LeagueTextureFormat};
+use league_loader::texture::{LeagueTexture, LeagueTextureFormat};
 use serde::de::DeserializeOwned;
 use texpresso::Format;
 use thiserror::Error;

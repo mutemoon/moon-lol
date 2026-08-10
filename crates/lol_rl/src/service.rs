@@ -5,6 +5,7 @@ use std::time::Instant;
 
 use candle_core::Tensor;
 use chrono::Utc;
+use lol_env::RewardModel;
 use lol_env::fiora_vs_riven::{FioraVsRivenAction, FioraVsRivenObs};
 use lol_env::parallel::ParallelFioraVsRivenEnvs;
 pub use lol_rl_protocol::{
@@ -506,7 +507,7 @@ fn run_training_loop_for_task(
             .unwrap_or_default()
     };
 
-    let env_max_steps = 0; // 0 表示无最大步数上限，环境持续运行直到分出胜负游戏结束（阵亡 terminated）
+    let env_max_steps = 40; // 单局限制 40 步截断，促使 AI 快速打破绽击杀，避免无限移动刷分
     let state_dim = FioraVsRivenObs::dim();
     let action_dim = 5;
     let num_parallel_envs = task_config.parallel_envs.max(1);
@@ -579,6 +580,7 @@ fn run_training_loop_for_task(
 
         buffer.clear();
         let mut iter_reward_breakdown: HashMap<String, f32> = HashMap::new();
+        let mut last_reward_variables: HashMap<String, f32> = HashMap::new();
         let mut completed_envs = vec![false; num_parallel_envs];
         let mut iter_steps_count = 0usize;
 
@@ -630,6 +632,7 @@ fn run_training_loop_for_task(
                 let res = &step_results[i];
                 env_returns[i] += res.reward;
                 iter_steps_count += 1;
+                last_reward_variables = res.reward_variables.clone();
 
                 for item in &res.reward_breakdown {
                     *iter_reward_breakdown
@@ -795,6 +798,9 @@ fn run_training_loop_for_task(
                 let _ = rt.block_on(repo.insert_metric(&task_id, &metric_row));
             }
 
+            let reward_model = lol_env::reward::FioraVsRivenRewardModel;
+            let reward_formula = reward_model.formula_spec();
+
             let out_metrics = OutFrame::Metrics {
                 task_id: task_id.clone(),
                 step: total_steps,
@@ -807,6 +813,8 @@ fn run_training_loop_for_task(
                 policy: real_policy,
                 reward_breakdown: real_reward_breakdown,
                 obs_feature: Some(obs_payload),
+                reward_formula: Some(reward_formula),
+                reward_variables: Some(last_reward_variables),
             };
 
             let _ = event_tx.send(out_metrics);

@@ -4,7 +4,7 @@ use league_core::extract::{
     EnumGameCalculation, GameCalculation, SpellDataResource, SpellDataValue, SpellEffectAmount,
     SpellObject,
 };
-use league_loader::game::{Data, PropGroup};
+use league_loader::game::PropGroup;
 use league_utils::hash_to_field_name;
 use lol_base::movement::{
     HeightSolver, MissileBehavior, MissileSpecification, MovementType, MovementTypeFixedSpeed,
@@ -17,6 +17,7 @@ use lol_base::spell_calc::{
     CalculationSpell, CalculationType,
 };
 
+use crate::data::Data;
 use crate::extract::utils::{extract_texture, write_to_file};
 
 /// 从 CharacterRecord 所在 bin 文件提取所有 SpellObject，转换为 DataSpell 并导出

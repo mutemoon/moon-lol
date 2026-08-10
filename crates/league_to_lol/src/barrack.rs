@@ -4,7 +4,7 @@ use bevy::ecs::archetype;
 use bevy::prelude::*;
 use bevy::world_serialization::WorldSerializationPlugin;
 use league_core::extract;
-use league_loader::game::{Data, PropGroup};
+use league_loader::game::PropGroup;
 use lol_base::barrack::{
     ConfigBarracks, ConfigBarracksMinion, ConfigMinionUpgrade, ConstantWaveBehavior,
     EnumWaveBehavior, InhibitorWaveBehavior, RotatingWaveBehavior, TimedVariableWaveBehavior,
@@ -14,6 +14,7 @@ use lol_base::map::MapPaths;
 use lol_core::entities::minion::Minion;
 use lol_core::team::Team;
 
+use crate::data::Data;
 use crate::extract::champion::ChampionRecordData;
 use crate::extract::map::spawn_character_record;
 use crate::extract::utils::write_to_file;

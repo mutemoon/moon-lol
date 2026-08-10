@@ -43,16 +43,67 @@ pub fn default_rust_log() -> &'static str {
     "info,lol_core=debug,lol_server=debug,lol_champions=debug,lol_render=debug,moon_lol=debug"
 }
 
-/// 打包二进制名（按目标平台）。
-pub fn binary_name() -> &'static str {
-    #[cfg(target_os = "windows")]
-    {
-        "lol.exe"
+/// 运行环境探测：dev（`cargo run`/`cargo test` 会设置 `CARGO`）与否。
+pub fn is_dev() -> bool {
+    std::env::var("CARGO").is_ok()
+}
+
+/// 安装根目录：dev = workspace 根；release = 当前可执行文件所在目录。
+///
+/// 子进程默认 cwd，以及 release 打包后与 client 同目录的兄弟二进制查找都以此为准。
+pub fn install_root() -> Option<PathBuf> {
+    if is_dev() {
+        workspace_root()
+    } else {
+        std::env::current_exe().ok()?.parent().map(PathBuf::from)
     }
-    #[cfg(not(target_os = "windows"))]
-    {
-        "lol"
+}
+
+/// 平台可执行文件名（Windows 追加 `.exe`）。
+fn executable_name(bin: &str) -> String {
+    if cfg!(target_os = "windows") {
+        format!("{bin}.exe")
+    } else {
+        bin.to_string()
     }
+}
+
+/// 解析一个工作区子进程为「程序 + 前缀参数」，dev/release 通用。
+///
+/// - dev：`cargo run -p <pkg> --bin <bin> --`
+/// - release：优先当前可执行文件同级目录（打包布局，client 与各 worker 同目录），
+///   其次 workspace `target/release/`，最后 PATH。
+pub fn resolve_executable(pkg: &str, bin: &str) -> (String, Vec<String>) {
+    if is_dev() {
+        return (
+            "cargo".to_string(),
+            vec![
+                "run".into(),
+                "-p".into(),
+                pkg.into(),
+                "--bin".into(),
+                bin.into(),
+                "--".into(),
+            ],
+        );
+    }
+    let exe_name = executable_name(bin);
+    if let Some(dir) = std::env::current_exe()
+        .ok()
+        .and_then(|p| p.parent().map(PathBuf::from))
+    {
+        let cand = dir.join(&exe_name);
+        if cand.exists() {
+            return (cand.display().to_string(), vec![]);
+        }
+    }
+    if let Some(ws) = workspace_root() {
+        let cand = ws.join("target").join("release").join(&exe_name);
+        if cand.exists() {
+            return (cand.display().to_string(), vec![]);
+        }
+    }
+    (bin.to_string(), vec![])
 }
 
 /// workspace 根目录（开发阶段从 `CARGO_MANIFEST_DIR` 向上遍历寻找含有 rust-toolchain.toml 或 pnpm-workspace.yaml 的目录作为根）。

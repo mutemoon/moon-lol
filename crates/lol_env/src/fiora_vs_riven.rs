@@ -109,6 +109,9 @@ impl FioraVsRivenObs {
             self.vital_dir_neg_x,
             self.vital_dir_z,
             self.vital_dir_neg_z,
+            // 破绽状态 (2维：是否存在、是否已激活)
+            if self.has_vital { 1.0 } else { 0.0 },
+            if self.vital_is_active { 1.0 } else { 0.0 },
             // 剑姬相对于瑞雯的相对位置与距离 (3维，归一化/100.0)
             rel_x / 100.0,
             rel_z / 100.0,
@@ -117,9 +120,13 @@ impl FioraVsRivenObs {
     }
 
     pub fn dim() -> usize {
-        7
+        9
     }
 }
+
+use std::collections::HashMap;
+
+use crate::reward::{FioraRewardContext, FioraVsRivenRewardModel, RewardModel};
 
 #[derive(Debug, Clone)]
 pub struct StepResult {
@@ -129,6 +136,7 @@ pub struct StepResult {
     pub truncated: bool,
     pub step: usize,
     pub reward_breakdown: Vec<RewardBreakdownItem>,
+    pub reward_variables: HashMap<String, f32>,
 }
 
 #[derive(Debug, Clone)]
@@ -736,7 +744,7 @@ pub fn is_position_aligned_with_vital(fpos: Vec3, rpos: Vec3, obs: &FioraVsRiven
     }
 }
 
-/// Compute step reward and its breakdown items.
+/// Compute step reward and its breakdown items using the structured RewardModel.
 /// Extracted as a standalone function to be shared across Env modes and visual runners.
 pub fn compute_step_reward(
     prev_riven_hp: f32,
@@ -748,71 +756,38 @@ pub fn compute_step_reward(
     riven_pos: Vec3,
     action: FioraVsRivenAction,
     prev_obs: &FioraVsRivenObs,
-) -> (f32, Vec<RewardBreakdownItem>) {
-    let _damage_dealt = (prev_riven_hp - curr_riven_hp).max(0.0);
-
-    // 1. 时间惩罚 (Step/Time penalty)
-    let time_penalty = -0.5;
-
-    // 2. 判断攻击时（prev_fpos）或移动后（curr_fpos）是否与破绽方位对齐
-    let is_attack_pos_aligned =
+) -> (f32, Vec<RewardBreakdownItem>, HashMap<String, f32>) {
+    let prev_aligned =
         prev_obs.has_vital && is_position_aligned_with_vital(prev_fpos, riven_pos, prev_obs);
-    let is_move_pos_aligned =
+    let curr_aligned =
         prev_obs.has_vital && is_position_aligned_with_vital(curr_fpos, riven_pos, prev_obs);
 
-    // 3. 严格打破绽判定：必须满足破绽已激活、攻击动作、且站位处于正确破绽象限
     let is_vital_break = prev_obs.has_vital
         && prev_obs.vital_is_active
         && action == FioraVsRivenAction::AttackRiven
-        && is_attack_pos_aligned;
+        && prev_aligned;
 
-    let mut attack_miss_penalty = 0.0;
-
-    let (vital_break_reward, shaping_reward) = match action {
-        FioraVsRivenAction::AttackRiven => {
-            if is_vital_break {
-                (100.0, 0.0)
-            } else {
-                // 攻击时没有打到破绽：给予强烈的失误扣分惩罚，且不给任何伤害奖励
-                attack_miss_penalty = -10.0;
-                (0.0, 0.0)
-            }
-        }
-        FioraVsRivenAction::MoveEast50
-        | FioraVsRivenAction::MoveWest50
-        | FioraVsRivenAction::MoveNorth50
-        | FioraVsRivenAction::MoveSouth50 => {
-            // 移动动作：如果移动后的新位置对齐了当前破绽方位，给予站位对齐正反馈；否则给予微小惩罚
-            if is_move_pos_aligned {
-                (0.0, 2.0)
-            } else {
-                (0.0, -0.5)
-            }
-        }
+    let ctx = FioraRewardContext {
+        prev_aligned,
+        curr_aligned,
+        is_vital_break,
+        is_attack: action == FioraVsRivenAction::AttackRiven,
+        prev_riven_hp,
+        curr_riven_hp,
     };
 
-    let breakdown = vec![
-        RewardBreakdownItem {
-            name: "时间惩罚 (Time Penalty)".to_string(),
-            value: time_penalty,
-        },
-        RewardBreakdownItem {
-            name: "站位引导 (Alignment Shaping)".to_string(),
-            value: shaping_reward,
-        },
-        RewardBreakdownItem {
-            name: "未打破绽失误扣分 (Missed Vital Penalty)".to_string(),
-            value: attack_miss_penalty,
-        },
-        RewardBreakdownItem {
-            name: "打破绽成功 (Vital Break)".to_string(),
-            value: vital_break_reward,
-        },
-    ];
+    let model = FioraVsRivenRewardModel;
+    let (reward, items, vars) = model.evaluate(&ctx);
 
-    let reward = time_penalty + shaping_reward + attack_miss_penalty + vital_break_reward;
+    let breakdown = items
+        .into_iter()
+        .map(|it| RewardBreakdownItem {
+            name: it.name,
+            value: it.value,
+        })
+        .collect();
 
-    (reward, breakdown)
+    (reward, breakdown, vars)
 }
 
 /// Helper functions for controlling Virtual time during visual stepping.
@@ -857,8 +832,8 @@ pub fn step_world(
     let curr_riven_hp = obs.riven_hp;
     let curr_fiora_hp = obs.fiora_hp;
 
-    // 5. Compute step reward and breakdown
-    let (reward, reward_breakdown) = compute_step_reward(
+    // 5. Compute step reward and breakdown using structured AST formula
+    let (reward, reward_breakdown, reward_variables) = compute_step_reward(
         prev_riven_hp,
         prev_fiora_hp,
         curr_riven_hp,
@@ -880,5 +855,6 @@ pub fn step_world(
         truncated,
         step: step_count,
         reward_breakdown,
+        reward_variables,
     }
 }

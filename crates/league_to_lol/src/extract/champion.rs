@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use bevy::ecs::archetype;
 use bevy::prelude::*;
 use league_core::extract::{AbilityResourceSlotInfo, CharacterRecord, SpellObject};
-use league_loader::game::{Data, LeagueLoader, PropGroup};
+use league_loader::game::{LeagueLoader, PropGroup};
 use league_utils::hash_bin;
 use lol_base::spell::Spell;
 use lol_core::attack::{Attack, WindupConfig};
@@ -24,6 +24,7 @@ use lol_core::skill::{
 use super::skin::extract_skin_for_champion;
 use super::spell::extract_spells_for_champion;
 use super::utils::write_to_file;
+use crate::data::Data;
 
 /// Champion 记录数据
 #[derive(Clone)]

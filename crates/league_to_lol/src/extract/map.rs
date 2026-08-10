@@ -9,7 +9,7 @@ use league_core::extract::{
 };
 use league_file::grid::AiMeshNGrid;
 use league_file::mapgeo::LeagueMapGeo;
-use league_loader::game::{Data, LeagueLoader};
+use league_loader::game::LeagueLoader;
 use league_loader::prop_bin::LeagueWadLoaderTrait;
 use league_property::extract::get_hashes;
 use lol_base::character::{ConfigCharacterRecord, ConfigSkin};
@@ -26,6 +26,7 @@ use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use ron::ser::{PrettyConfig, to_string_pretty};
 
 use crate::barrack::barracks_config_to_barracks;
+use crate::data::Data;
 use crate::extract::champion::{
     ChampionRecordData, extract_character_from_record, skin_path_to_skin_bin_path,
 };

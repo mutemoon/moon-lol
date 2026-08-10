@@ -17,9 +17,9 @@ use league_core::mapgeo::EnvironmentVisibility;
 use league_file::mapgeo::{
     ElementName, LeagueMapGeo, LeagueMapGeoMesh, Submesh, TextureOverride, VertexDeclaration,
 };
-use league_file::texture::{LeagueTexture, LeagueTextureFormat};
 use league_loader::game::LeagueLoader;
 use league_loader::prop_bin::LeagueWadLoaderTrait;
+use league_loader::texture::{LeagueTexture, LeagueTextureFormat};
 use league_utils::hash_bin;
 use rayon::prelude::*;
 use texpresso::Format;

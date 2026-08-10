@@ -479,6 +479,9 @@ fn render_telemetry_policy_card(f: &VisualObsFrame, cx: &Context<AppSidebar>) ->
 }
 
 fn render_telemetry_reward_card(f: &VisualObsFrame, cx: &Context<AppSidebar>) -> AnyElement {
+    let empty_vars = std::collections::HashMap::new();
+    let vars = f.reward_variables.as_ref().unwrap_or(&empty_vars);
+
     div()
         .flex_1()
         .p_3()
@@ -490,18 +493,67 @@ fn render_telemetry_reward_card(f: &VisualObsFrame, cx: &Context<AppSidebar>) ->
             v_flex()
                 .gap_2()
                 .child(
-                    div()
-                        .font_bold()
-                        .text_sm()
-                        .child("实时奖励拆解 (Reward Breakdown)"),
+                    h_flex()
+                        .justify_between()
+                        .items_center()
+                        .child(
+                            div()
+                                .font_bold()
+                                .text_sm()
+                                .child("结构化单步奖励推导 (Reward Formula)"),
+                        )
+                        .child(
+                            div()
+                                .font_bold()
+                                .text_xs()
+                                .text_color(if f.reward >= 0.0 {
+                                    cx.theme().accent
+                                } else {
+                                    cx.theme().muted_foreground
+                                })
+                                .child(format!("单步总奖励: {:+.2}", f.reward)),
+                        ),
                 )
-                .child(if f.reward_breakdown.is_empty() {
-                    div()
-                        .text_xs()
-                        .text_color(cx.theme().muted_foreground)
-                        .child("无细拆项")
+                .child(if let Some(formula) = &f.reward_formula {
+                    v_flex()
+                        .gap_1p5()
+                        .children(formula.terms.iter().map(|term| {
+                            let term_val = term.eval(vars);
+                            let formula_str = term.expr.to_display_string();
+
+                            v_flex()
+                                .p_1p5()
+                                .rounded_md()
+                                .bg(cx.theme().secondary)
+                                .gap_0p5()
+                                .child(
+                                    h_flex()
+                                        .justify_between()
+                                        .items_center()
+                                        .child(
+                                            div().font_bold().text_xs().child(term.label.clone()),
+                                        )
+                                        .child(
+                                            div()
+                                                .font_bold()
+                                                .text_xs()
+                                                .text_color(if term_val >= 0.0 {
+                                                    cx.theme().accent
+                                                } else {
+                                                    cx.theme().muted_foreground
+                                                })
+                                                .child(format!("{:+}", term_val)),
+                                        ),
+                                )
+                                .child(
+                                    div()
+                                        .text_xs()
+                                        .text_color(cx.theme().muted_foreground)
+                                        .child(format!("公式: {}", formula_str)),
+                                )
+                        }))
                         .into_any_element()
-                } else {
+                } else if !f.reward_breakdown.is_empty() {
                     v_flex()
                         .gap_1()
                         .children(f.reward_breakdown.iter().map(|r| {
@@ -524,6 +576,12 @@ fn render_telemetry_reward_card(f: &VisualObsFrame, cx: &Context<AppSidebar>) ->
                                         .child(format!("{:+}", r.value)),
                                 )
                         }))
+                        .into_any_element()
+                } else {
+                    div()
+                        .text_xs()
+                        .text_color(cx.theme().muted_foreground)
+                        .child("无细拆项")
                         .into_any_element()
                 }),
         )

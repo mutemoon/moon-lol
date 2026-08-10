@@ -13,7 +13,6 @@ use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
 use futures_util::{SinkExt, StreamExt};
-use lol_client::launch::workspace_root;
 use lol_share::{ConfigVfx, ConfigVfxSystemDefinition};
 use serde::{Deserialize, Serialize};
 use tokio::sync::{mpsc, oneshot};
@@ -267,9 +266,8 @@ async fn request_via(
 
 // ── 资产读取（同步） ──
 
-fn characters_dir() -> Result<PathBuf, String> {
-    let root = workspace_root().ok_or_else(|| "找不到 workspace 根目录".to_string())?;
-    Ok(root.join("assets").join("characters"))
+pub fn characters_dir() -> Result<PathBuf, String> {
+    Ok(super::assets_path::resolve_assets_dir().join("characters"))
 }
 
 /// 列出所有带 skin0_vfx.ron 的英雄（名称升序）。

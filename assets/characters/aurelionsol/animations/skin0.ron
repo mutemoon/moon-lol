@@ -134,6 +134,18 @@
         "Run2B": Clip(
             node_index: 34,
         ),
+        "Run2Base": Sequence(
+            hashes: [
+                "Run2B",
+                "Run2C",
+                "Run2D",
+                "Run2E",
+                "Run2F",
+                "Run2G",
+                "Run2H",
+                "Run2A",
+            ],
+        ),
         "Run2C": Clip(
             node_index: 35,
         ),
@@ -333,7 +345,7 @@
         "Unk0x3b9295ac": Sequence(
             hashes: [
                 "RunBase",
-                "Unk0xcf93f48",
+                "Run2Base",
             ],
         ),
         "Unk0x472e3d3": Clip(
@@ -425,18 +437,6 @@
         ),
         "Unk0xc6bc7b6c": Clip(
             node_index: 63,
-        ),
-        "Unk0xcf93f48": Sequence(
-            hashes: [
-                "Run2B",
-                "Run2C",
-                "Run2D",
-                "Run2E",
-                "Run2F",
-                "Run2G",
-                "Run2H",
-                "Run2A",
-            ],
         ),
         "Unk0xcff81f88": Clip(
             node_index: 64,

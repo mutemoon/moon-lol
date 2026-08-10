@@ -1,45 +1,8 @@
 use std::collections::HashMap;
 use std::hash::Hasher;
-use std::marker::PhantomData;
 
-use bevy::asset::uuid::Uuid;
-use bevy::prelude::*;
 use heck::{ToPascalCase, ToSnakeCase};
-use nom::IResult;
-use nom::number::complete::le_f32;
-use serde::{Deserialize, Serialize};
 use twox_hash::XxHash64;
-
-pub fn parse_vec3(v: [f32; 3]) -> Vec3 {
-    Vec3::new(v[0], v[1], v[2])
-}
-
-pub fn parse_vec3_array(v: Vec<[f32; 3]>) -> Vec<Vec3> {
-    v.into_iter().map(parse_vec3).collect()
-}
-
-pub fn parse_quat(v: [f32; 4]) -> Quat {
-    Quat::from_xyzw(v[0], v[1], v[2], v[3])
-}
-
-pub fn parse_quat_array(v: Vec<[f32; 4]>) -> Vec<Quat> {
-    v.into_iter().map(parse_quat).collect()
-}
-
-pub fn nom_parse_vec3(input: &[u8]) -> IResult<&[u8], Vec3> {
-    let (i, x) = le_f32(input)?;
-    let (i, y) = le_f32(i)?;
-    let (i, z) = le_f32(i)?;
-    Ok((i, Vec3::new(x, y, z)))
-}
-
-pub fn nom_parse_quat(input: &[u8]) -> IResult<&[u8], Quat> {
-    let (i, x) = le_f32(input)?;
-    let (i, y) = le_f32(i)?;
-    let (i, z) = le_f32(i)?;
-    let (i, w) = le_f32(i)?;
-    Ok((i, Quat::from_xyzw(x, y, z, w)))
-}
 
 pub fn hash_wad(s: &str) -> u64 {
     let mut h = XxHash64::with_seed(0);
@@ -94,20 +57,6 @@ pub fn hash_shader_spec(defs: &Vec<String>) -> u64 {
     hash_shader(&define_string)
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, Reflect)]
-pub struct BoundingBox {
-    pub min: Vec3,
-    pub max: Vec3,
-}
-
-impl BoundingBox {
-    pub fn parse(input: &[u8]) -> IResult<&[u8], Self> {
-        let (i, min) = nom_parse_vec3(input)?;
-        let (i, max) = nom_parse_vec3(i)?;
-        Ok((i, BoundingBox { min, max }))
-    }
-}
-
 pub fn hash_to_type_name(hash: &u32, hash_to_string: &HashMap<u32, String>) -> String {
     hash_to_string
         .get(hash)
@@ -144,34 +93,6 @@ pub fn type_name_to_hash(type_name: &str) -> u32 {
     } else {
         hash_bin(&type_name)
     }
-}
-
-#[derive(Debug, Copy, Clone, Hash, Eq, PartialEq, Serialize, Deserialize, Reflect, Default)]
-pub enum LeagueShader {
-    QuadPsSlice,
-    QuadVs,
-    #[default]
-    QuadPs,
-    UnlitDecalPs,
-    UnlitDecalVs,
-    DistortionPs,
-    DistortionVs,
-    MeshPs,
-    MeshVs,
-    SkinnedMeshParticlePs,
-    SkinnedMeshParticleVs,
-}
-
-pub fn get_shader_uuid_by_hash(shader_type: LeagueShader, hash: u64) -> Uuid {
-    Uuid::from_u128(hash_shader(&format!("{:?}#{hash}", shader_type)) as u128)
-}
-
-pub fn get_shader_handle_by_hash(shader_type: LeagueShader, hash: u64) -> Handle<Shader> {
-    Handle::Uuid(get_shader_uuid_by_hash(shader_type, hash), PhantomData)
-}
-
-pub fn get_shader_handle(shader_type: LeagueShader, defs: &Vec<String>) -> Handle<Shader> {
-    get_shader_handle_by_hash(shader_type, hash_shader_spec(defs))
 }
 
 pub fn get_extension_by_bytes(bytes: &[u8]) -> &str {

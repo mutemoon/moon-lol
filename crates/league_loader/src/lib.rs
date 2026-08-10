@@ -1,6 +1,7 @@
 pub mod game;
 pub mod prop_bin;
 pub mod reader;
+pub mod texture;
 pub mod wad;
 pub mod wad_parse;
 

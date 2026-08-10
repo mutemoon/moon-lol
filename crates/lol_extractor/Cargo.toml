@@ -1,0 +1,14 @@
+[package]
+name = "lol_extractor"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+clap.workspace = true
+serde = { workspace = true, features = ["derive"] }
+serde_json.workspace = true
+league_core.workspace = true
+league_loader.workspace = true
+league_to_lol.workspace = true
+lol_base.workspace = true
+ron.workspace = true

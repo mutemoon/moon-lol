@@ -1,6 +1,137 @@
+use std::collections::HashMap;
+
 use serde::{Deserialize, Serialize};
 
 pub const DEFAULT_RL_SERVER_ADDR: &str = "127.0.0.1:8765";
+
+/// 结构化奖励表达式 AST
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
+pub enum RewardExpr {
+    Constant(f32),
+    Variable(String),
+    Add(Box<RewardExpr>, Box<RewardExpr>),
+    Sub(Box<RewardExpr>, Box<RewardExpr>),
+    Mul(Box<RewardExpr>, Box<RewardExpr>),
+    IfElse {
+        cond: Box<RewardExpr>,
+        then_branch: Box<RewardExpr>,
+        else_branch: Box<RewardExpr>,
+    },
+    Gt(Box<RewardExpr>, Box<RewardExpr>),
+    Max(Box<RewardExpr>, Box<RewardExpr>),
+    Min(Box<RewardExpr>, Box<RewardExpr>),
+}
+
+impl RewardExpr {
+    /// 在给定的环境变量上下文中对表达式求值
+    pub fn eval(&self, vars: &HashMap<String, f32>) -> f32 {
+        match self {
+            Self::Constant(c) => *c,
+            Self::Variable(name) => vars.get(name).copied().unwrap_or(0.0),
+            Self::Add(a, b) => a.eval(vars) + b.eval(vars),
+            Self::Sub(a, b) => a.eval(vars) - b.eval(vars),
+            Self::Mul(a, b) => a.eval(vars) * b.eval(vars),
+            Self::IfElse {
+                cond,
+                then_branch,
+                else_branch,
+            } => {
+                if cond.eval(vars) > 0.0 {
+                    then_branch.eval(vars)
+                } else {
+                    else_branch.eval(vars)
+                }
+            }
+            Self::Gt(a, b) => {
+                if a.eval(vars) > b.eval(vars) {
+                    1.0
+                } else {
+                    0.0
+                }
+            }
+            Self::Max(a, b) => a.eval(vars).max(b.eval(vars)),
+            Self::Min(a, b) => a.eval(vars).min(b.eval(vars)),
+        }
+    }
+
+    /// 转换为数学展示字符串，如 "80.0 × is_vital_break"
+    pub fn to_display_string(&self) -> String {
+        match self {
+            Self::Constant(c) => {
+                if c.fract() == 0.0 {
+                    format!("{:.0}", c)
+                } else {
+                    format!("{:.2}", c)
+                }
+            }
+            Self::Variable(v) => v.clone(),
+            Self::Add(a, b) => format!("({} + {})", a.to_display_string(), b.to_display_string()),
+            Self::Sub(a, b) => format!("({} - {})", a.to_display_string(), b.to_display_string()),
+            Self::Mul(a, b) => format!("{} × {}", a.to_display_string(), b.to_display_string()),
+            Self::IfElse {
+                cond,
+                then_branch,
+                else_branch,
+            } => {
+                format!(
+                    "if {} then {} else {}",
+                    cond.to_display_string(),
+                    then_branch.to_display_string(),
+                    else_branch.to_display_string()
+                )
+            }
+            Self::Gt(a, b) => format!("({} > {})", a.to_display_string(), b.to_display_string()),
+            Self::Max(a, b) => format!("max({}, {})", a.to_display_string(), b.to_display_string()),
+            Self::Min(a, b) => format!("min({}, {})", a.to_display_string(), b.to_display_string()),
+        }
+    }
+}
+
+/// 单项奖励定义
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
+pub struct RewardTermSpec {
+    pub id: String,
+    pub label: String,
+    pub expr: RewardExpr,
+}
+
+impl RewardTermSpec {
+    pub fn new(id: impl Into<String>, label: impl Into<String>, expr: RewardExpr) -> Self {
+        Self {
+            id: id.into(),
+            label: label.into(),
+            expr,
+        }
+    }
+
+    pub fn eval(&self, vars: &HashMap<String, f32>) -> f32 {
+        self.expr.eval(vars)
+    }
+}
+
+/// 统一的环境奖励公式规范
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Default)]
+pub struct RewardFormulaSpec {
+    pub name: String,
+    pub terms: Vec<RewardTermSpec>,
+}
+
+impl RewardFormulaSpec {
+    /// 依据结构化表达式计算总奖励与分解项
+    pub fn compute(&self, vars: &HashMap<String, f32>) -> (f32, Vec<RewardItem>) {
+        let mut total = 0.0;
+        let mut items = Vec::with_capacity(self.terms.len());
+        for term in &self.terms {
+            let val = term.eval(vars);
+            total += val;
+            items.push(RewardItem {
+                name: term.label.clone(),
+                value: val,
+            });
+        }
+        (total, items)
+    }
+}
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct MetricsRow {
@@ -98,6 +229,8 @@ pub enum OutFrame {
         policy: Vec<PolicyItem>,
         reward_breakdown: Vec<RewardItem>,
         obs_feature: Option<ObsFeaturePayload>,
+        reward_formula: Option<RewardFormulaSpec>,
+        reward_variables: Option<HashMap<String, f32>>,
     },
     Log {
         task_id: String,
@@ -181,6 +314,8 @@ pub struct VisualObsFrame {
     pub truncated: bool,
     pub fiora_alive: bool,
     pub riven_alive: bool,
+    pub reward_formula: Option<RewardFormulaSpec>,
+    pub reward_variables: Option<HashMap<String, f32>>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]

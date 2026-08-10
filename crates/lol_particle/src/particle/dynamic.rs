@@ -31,9 +31,8 @@ use bevy::render::render_resource::{
 use bevy::render::renderer::RenderDevice;
 use bevy::render::texture::{FallbackImage, GpuImage};
 use bevy::render::{Extract, ExtractSchedule, Render, RenderApp, RenderSystems};
-use league_utils::LeagueShader;
 use lol_base_render::particle::ConfigVfxEmitterDefinition;
-use lol_base_render::shader::{ShaderMap, SharedRenderData, SharedSamplerDef};
+use lol_base_render::shader::{LeagueShader, ShaderMap, SharedRenderData, SharedSamplerDef};
 use lol_base_render::shader_layout::{BindingTypeDesc, ShaderLayoutDescriptor};
 
 use crate::{

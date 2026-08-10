@@ -515,7 +515,22 @@ fn slot_card(
                 m
             });
 
-    v_flex()
+    let delete_btn = Button::new(format!("{team}-{index}-del"))
+        .ghost()
+        .xsmall()
+        .icon(IconName::Delete)
+        .on_click(cx.listener(move |_, _, _, cx| {
+            update_state(|s| {
+                if team == "Order" {
+                    s.blue_slots.remove(index);
+                } else {
+                    s.red_slots.remove(index);
+                }
+            });
+            cx.notify();
+        }));
+
+    let mut card = v_flex()
         .gap_1p5()
         .p_2()
         .rounded_md()
@@ -537,34 +552,21 @@ fn slot_card(
                                 .child("槽位"),
                         ),
                 )
-                .child(
-                    Button::new(format!("{team}-{index}-del"))
-                        .ghost()
-                        .xsmall()
-                        .icon(IconName::Delete)
-                        .on_click(cx.listener(move |_, _, _, cx| {
-                            update_state(|s| {
-                                if team == "Order" {
-                                    s.blue_slots.remove(index);
-                                } else {
-                                    s.red_slots.remove(index);
-                                }
-                            });
-                            cx.notify();
-                        })),
-                ),
+                .child(delete_btn),
         )
         .child(hero_dropdown)
-        .child(spawn_dropdown)
-        .when(!subtitle.is_empty(), |d| {
-            d.child(
-                div()
-                    .text_xs()
-                    .text_color(cx.theme().muted_foreground)
-                    .child(subtitle),
-            )
-        })
-        .into_any_element()
+        .child(spawn_dropdown);
+
+    if !subtitle.is_empty() {
+        card = card.child(
+            div()
+                .text_xs()
+                .text_color(cx.theme().muted_foreground)
+                .child(subtitle),
+        );
+    }
+
+    card.into_any_element()
 }
 
 /// 阵营列容器：标题/圆点/计数 + 槽位列表 + 新增槽位。
@@ -577,87 +579,151 @@ fn team_column(
     agents: &[Agent],
     spawns: &[ProtoSpawnPreset],
 ) -> AnyElement {
+    let header = h_flex()
+        .items_center()
+        .justify_between()
+        .px_3()
+        .py_2()
+        .border_b_1()
+        .border_color(cx.theme().border)
+        .child(
+            h_flex()
+                .gap_2()
+                .items_center()
+                .child(div().w_2().h_2().rounded_full().bg(color))
+                .child(div().text_xs().font_bold().child(label.to_string()))
+                .child(
+                    div()
+                        .px_1p5()
+                        .py_0p5()
+                        .rounded_md()
+                        .bg(cx.theme().accent.opacity(0.15))
+                        .text_xs()
+                        .font_bold()
+                        .text_color(cx.theme().accent)
+                        .child(format!("{}", slots.len())),
+                ),
+        )
+        .child(
+            Button::new(format!("add-{team}-slot"))
+                .outline()
+                .xsmall()
+                .icon(IconName::Plus)
+                .label("添加槽位")
+                .on_click(cx.listener(move |_, _, _, cx| {
+                    update_state(|s| {
+                        let slot = LauncherSlot::default();
+                        if team == "Order" {
+                            s.blue_slots.push(slot);
+                        } else {
+                            s.red_slots.push(slot);
+                        }
+                    });
+                    cx.notify();
+                })),
+        );
+
+    let slots_list = v_flex().gap_2().p_2().children(
+        slots
+            .iter()
+            .enumerate()
+            .map(|(i, slot)| slot_card(cx, team, i, slot, agents, spawns)),
+    );
+
     v_flex()
         .flex_1()
         .rounded_lg()
         .border_1()
         .border_color(cx.theme().border)
         .overflow_hidden()
+        .child(header)
+        .child(slots_list)
+        .into_any_element()
+}
+
+// ── 模块化子组件 ──
+
+fn render_header() -> AnyElement {
+    h_flex()
+        .items_center()
+        .justify_between()
         .child(
             h_flex()
+                .gap_2()
                 .items_center()
-                .justify_between()
-                .px_3()
-                .py_2()
-                .border_b_1()
-                .border_color(cx.theme().border)
-                .child(
-                    h_flex()
-                        .gap_2()
-                        .items_center()
-                        .child(div().w_2().h_2().rounded_full().bg(color))
-                        .child(div().text_xs().font_bold().child(label.to_string()))
-                        .child(
-                            div()
-                                .px_1p5()
-                                .py_0p5()
-                                .rounded_md()
-                                .bg(cx.theme().accent.opacity(0.15))
-                                .text_xs()
-                                .font_bold()
-                                .text_color(cx.theme().accent)
-                                .child(format!("{}", slots.len())),
-                        ),
-                )
-                .child(
-                    Button::new(format!("add-{team}-slot"))
-                        .outline()
-                        .xsmall()
-                        .icon(IconName::Plus)
-                        .label("添加槽位")
-                        .on_click(cx.listener(move |_, _, _, cx| {
-                            update_state(|s| {
-                                let slot = LauncherSlot::default();
-                                if team == "Order" {
-                                    s.blue_slots.push(slot);
-                                } else {
-                                    s.red_slots.push(slot);
-                                }
-                            });
-                            cx.notify();
-                        })),
-                ),
-        )
-        .child(
-            v_flex().gap_2().p_2().children(
-                slots
-                    .iter()
-                    .enumerate()
-                    .map(|(i, slot)| slot_card(cx, team, i, slot, agents, spawns)),
-            ),
+                .child(IconName::Play)
+                .child(div().font_bold().text_lg().child("启动器")),
         )
         .into_any_element()
 }
 
-// ── 页面入口 ──
+fn render_mode_and_champion(
+    mode: &str,
+    champ: &str,
+    champions: &[String],
+    cx: &mut Context<AppSidebar>,
+) -> AnyElement {
+    let mode_section = v_flex()
+        .gap_2()
+        .child(div().font_bold().text_sm().child("模式"))
+        .child(
+            h_flex()
+                .gap_2()
+                .child(
+                    Button::new("mode-agent")
+                        .when(mode == "agent", |b| b.primary())
+                        .when(mode != "agent", |b| b.outline())
+                        .label("Agent 模式")
+                        .on_click(cx.listener(|this, _, _, cx| {
+                            this.game_mode = "agent".into();
+                            cx.notify();
+                        })),
+                )
+                .child(
+                    Button::new("mode-sandbox")
+                        .when(mode == "sandbox", |b| b.primary())
+                        .when(mode != "sandbox", |b| b.outline())
+                        .label("沙盒模式")
+                        .on_click(cx.listener(|this, _, _, cx| {
+                            this.game_mode = "sandbox".into();
+                            cx.notify();
+                        })),
+                ),
+        );
 
-/// 启动器页面：模式 + 场景 + 双阵营槽位编排 + 启动。
-pub fn render_launcher(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> AnyElement {
-    let champ = sidebar.champion.clone();
-    let mode = sidebar.game_mode.clone();
-    let launch_error = sidebar.launch_error.clone();
-    let starting = sidebar.is_starting_game;
-    let champions = sidebar.champions_list.clone();
-    let view = snapshot();
+    let champ_section = v_flex()
+        .gap_2()
+        .child(div().font_bold().text_sm().child("英雄"))
+        .child(
+            h_flex()
+                .gap_2()
+                .flex_wrap()
+                .children(champions.iter().map(|c| {
+                    let selected = c == champ;
+                    let champ_clone = c.clone();
+                    Button::new(format!("champ-{}", c))
+                        .when(selected, |b| b.primary())
+                        .when(!selected, |b| b.outline())
+                        .label(champion_display(c))
+                        .on_click(cx.listener(move |this, _, _, cx| {
+                            this.champion = champ_clone.clone();
+                            cx.notify();
+                        }))
+                })),
+        );
 
-    if !view.loaded {
-        spawn_initial_load(cx);
-    }
+    h_flex()
+        .gap_6()
+        .items_start()
+        .child(mode_section)
+        .child(champ_section)
+        .into_any_element()
+}
 
-    // 载入场景下拉
+fn render_load_dropdown(view: &LauncherView, cx: &mut Context<AppSidebar>) -> AnyElement {
     let weak = cx.entity().downgrade();
     let scenarios = view.scenarios.clone();
-    let load_dropdown = Button::new("launcher-load-scenario")
+    Button::new("launcher-load-scenario")
         .outline()
         .xsmall()
         .icon(IconName::Folder)
@@ -678,280 +744,258 @@ pub fn render_launcher(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -
                 }));
             }
             m
-        });
+        })
+        .into_any_element()
+}
 
+fn render_scene_section(
+    view: &LauncherView,
+    load_dropdown: AnyElement,
+    cx: &mut Context<AppSidebar>,
+) -> AnyElement {
     v_flex()
-        .size_full()
-        .flex_1()
-        .gap_6()
-        .overflow_y_scrollbar()
-        // ── 标题行 ──
-        .child(
-            h_flex().items_center().justify_between().child(
-                h_flex()
-                    .gap_2()
-                    .items_center()
-                    .child(IconName::Play)
-                    .child(div().font_bold().text_lg().child("启动器")),
-            ),
-        )
-        // ── 模式与英雄选择 ──
+        .gap_2()
+        .child(div().font_bold().text_sm().child("场景"))
         .child(
             h_flex()
-                .gap_6()
-                .items_start()
+                .gap_2()
+                .items_center()
                 .child(
-                    v_flex()
-                        .gap_2()
-                        .child(div().font_bold().text_sm().child("模式"))
-                        .child(
-                            h_flex()
-                                .gap_2()
-                                .child(
-                                    Button::new("mode-agent")
-                                        .when(mode == "agent", |b| b.primary())
-                                        .when(mode != "agent", |b| b.outline())
-                                        .label("Agent 模式")
-                                        .on_click(cx.listener(|this, _, _, cx| {
-                                            this.game_mode = "agent".into();
-                                            cx.notify();
-                                        })),
-                                )
-                                .child(
-                                    Button::new("mode-sandbox")
-                                        .when(mode == "sandbox", |b| b.primary())
-                                        .when(mode != "sandbox", |b| b.outline())
-                                        .label("沙盒模式")
-                                        .on_click(cx.listener(|this, _, _, cx| {
-                                            this.game_mode = "sandbox".into();
-                                            cx.notify();
-                                        })),
-                                ),
-                        ),
+                    div()
+                        .flex_1()
+                        .px_3()
+                        .py_2()
+                        .rounded_md()
+                        .border_1()
+                        .border_color(cx.theme().border)
+                        .text_sm()
+                        .child(view.scene_name.clone()),
+                )
+                .child(load_dropdown)
+                .child(
+                    Button::new("launcher-save-scenario")
+                        .outline()
+                        .xsmall()
+                        .icon(IconName::Check)
+                        .label("保存")
+                        .disabled(view.saving)
+                        .on_click(cx.listener(|_, _, _, cx| {
+                            spawn_save_scenario(cx);
+                        })),
                 )
                 .child(
-                    v_flex()
-                        .gap_2()
-                        .child(div().font_bold().text_sm().child("英雄"))
-                        .child(
-                            h_flex()
-                                .gap_2()
-                                .flex_wrap()
-                                .children(champions.iter().map(|c| {
-                                    let selected = *c == champ;
-                                    let champ_clone = c.clone();
-                                    Button::new(format!("champ-{}", c))
-                                        .when(selected, |b| b.primary())
-                                        .when(!selected, |b| b.outline())
-                                        .label(champion_display(c))
-                                        .on_click(cx.listener(move |this, _, _, cx| {
-                                            this.champion = champ_clone.clone();
-                                            cx.notify();
-                                        }))
-                                })),
-                        ),
-                ),
-        )
-        // ── 场景栏：名称 + 载入 / 保存 / 新建 ──
-        .child(
-            v_flex()
-                .gap_2()
-                .child(div().font_bold().text_sm().child("场景"))
-                .child(
-                    h_flex()
-                        .gap_2()
-                        .items_center()
-                        .child(
-                            div()
-                                .flex_1()
-                                .px_3()
-                                .py_2()
-                                .rounded_md()
-                                .border_1()
-                                .border_color(cx.theme().border)
-                                .text_sm()
-                                .child(view.scene_name.clone()),
-                        )
-                        .child(load_dropdown)
-                        .child(
-                            Button::new("launcher-save-scenario")
-                                .outline()
-                                .xsmall()
-                                .icon(IconName::Check)
-                                .label("保存")
-                                .disabled(view.saving)
-                                .on_click(cx.listener(|_, _, _, cx| {
-                                    spawn_save_scenario(cx);
-                                })),
-                        )
-                        .child(
-                            Button::new("launcher-new-scenario")
-                                .outline()
-                                .xsmall()
-                                .icon(IconName::Plus)
-                                .label("新建")
-                                .on_click(cx.listener(|_, _, _, cx| {
-                                    update_state(|s| {
-                                        s.scene_name = format!("custom_agents_{}", unix_ts());
-                                        s.blue_slots = vec![LauncherSlot::default()];
-                                        s.red_slots = vec![LauncherSlot::default()];
-                                        s.error = None;
-                                        s.message = None;
-                                    });
-                                    cx.notify();
-                                })),
-                        ),
-                ),
-        )
-        // ── 页面提示（载入/保存结果）──
-        .when_some(view.message.clone(), |d, msg| {
-            d.child(
-                div()
-                    .px_3()
-                    .py_2()
-                    .rounded_md()
-                    .border_1()
-                    .border_color(cx.theme().accent)
-                    .bg(cx.theme().accent.opacity(0.1))
-                    .text_xs()
-                    .text_color(cx.theme().accent)
-                    .child(msg),
-            )
-        })
-        .when_some(view.error.clone(), |d, err| {
-            d.child(
-                div()
-                    .px_3()
-                    .py_2()
-                    .rounded_md()
-                    .border_1()
-                    .border_color(cx.theme().danger)
-                    .bg(cx.theme().danger.opacity(0.1))
-                    .text_xs()
-                    .text_color(cx.theme().danger)
-                    .child(err),
-            )
-        })
-        .when_some(launch_error, |d, err| {
-            d.child(
-                div()
-                    .px_3()
-                    .py_2()
-                    .rounded_md()
-                    .border_1()
-                    .border_color(cx.theme().danger)
-                    .bg(cx.theme().danger.opacity(0.1))
-                    .text_xs()
-                    .text_color(cx.theme().danger)
-                    .child(err),
-            )
-        })
-        // ── 双阵营槽位 ──
-        .child(
-            h_flex()
-                .gap_4()
-                .items_start()
-                .child(team_column(
-                    cx,
-                    "Order",
-                    "蓝色方 (Order)",
-                    gpui::hsla(0.6, 0.7, 0.5, 1.0),
-                    &view.blue_slots,
-                    &view.agents,
-                    &view.spawns,
-                ))
-                .child(team_column(
-                    cx,
-                    "Chaos",
-                    "红色方 (Chaos)",
-                    gpui::hsla(0.0, 0.7, 0.5, 1.0),
-                    &view.red_slots,
-                    &view.agents,
-                    &view.spawns,
-                )),
-        )
-        // ── 启动按钮 ──
-        .child(
-            h_flex().gap_2().child(
-                Button::new("launch-game-btn")
-                    .primary()
-                    .icon(if starting {
-                        IconName::Loader
-                    } else {
-                        IconName::Play
-                    })
-                    .label(if starting {
-                        "启动中…".to_string()
-                    } else {
-                        "启动对局".to_string()
-                    })
-                    .disabled(starting)
-                    .on_click(cx.listener(move |this, _, _, cx| {
-                        let mode = this.game_mode.clone();
-                        let champ = this.champion.clone();
-                        let (scene_name, agents) =
-                            with_state(|s| (s.scene_name.trim().to_string(), build_all_agents(s)));
-                        if agents.is_empty() {
-                            this.launch_error = Some("请至少选择一个英雄预设".into());
+                    Button::new("launcher-new-scenario")
+                        .outline()
+                        .xsmall()
+                        .icon(IconName::Plus)
+                        .label("新建")
+                        .on_click(cx.listener(|_, _, _, cx| {
+                            update_state(|s| {
+                                s.scene_name = format!("custom_agents_{}", unix_ts());
+                                s.blue_slots = vec![LauncherSlot::default()];
+                                s.red_slots = vec![LauncherSlot::default()];
+                                s.error = None;
+                                s.message = None;
+                            });
                             cx.notify();
-                            return;
-                        }
-                        let scene_name = if scene_name.is_empty() {
-                            format!("custom_agents_{}", unix_ts())
-                        } else {
-                            scene_name
-                        };
-                        this.is_starting_game = true;
-                        this.launch_error = None;
-                        cx.notify();
-                        cx.spawn(
-                            move |weak: gpui::WeakEntity<AppSidebar>, cx: &mut gpui::AsyncApp| {
-                                let mut cx = cx.clone();
-                                let mode = mode.clone();
-                                let champ = champ.clone();
-                                async move {
-                                    let config = GameConfig {
-                                        mode: mode.clone(),
-                                        champion: champ.clone(),
-                                        scene_name: Some(scene_name.clone()),
-                                        agents: Some(agents.clone()),
-                                        providers: None,
-                                    };
-                                    match process_service().start(config).await {
-                                        Ok(game) => {
-                                            if let Some(entity) = weak.upgrade() {
-                                                entity.update(&mut cx, |sidebar, cx| {
-                                                    sidebar.is_starting_game = false;
-                                                    sidebar.current_game_id = Some(game.id.clone());
-                                                    sidebar.running_games.push(
-                                                        crate::types::RunningGameInfo {
-                                                            id: game.id,
-                                                            mode: mode.clone(),
-                                                            champion: champ.clone(),
-                                                            port: game.port as u16,
-                                                        },
-                                                    );
-                                                    cx.notify();
-                                                });
-                                            }
-                                        }
-                                        Err(e) => {
-                                            if let Some(entity) = weak.upgrade() {
-                                                entity.update(&mut cx, |sidebar, cx| {
-                                                    sidebar.is_starting_game = false;
-                                                    sidebar.launch_error =
-                                                        Some(format!("启动失败: {}", e));
-                                                    cx.notify();
-                                                });
-                                            }
-                                        }
-                                    }
-                                }
-                            },
-                        )
-                        .detach();
-                    })),
-            ),
+                        })),
+                ),
         )
         .into_any_element()
+}
+
+fn render_message_banners(
+    view: &LauncherView,
+    launch_error: Option<String>,
+    cx: &mut Context<AppSidebar>,
+) -> Vec<AnyElement> {
+    let mut banners = Vec::new();
+
+    if let Some(msg) = view.message.clone() {
+        banners.push(
+            div()
+                .px_3()
+                .py_2()
+                .rounded_md()
+                .border_1()
+                .border_color(cx.theme().accent)
+                .bg(cx.theme().accent.opacity(0.1))
+                .text_xs()
+                .text_color(cx.theme().accent)
+                .child(msg)
+                .into_any_element(),
+        );
+    }
+
+    if let Some(err) = view.error.clone() {
+        banners.push(
+            div()
+                .px_3()
+                .py_2()
+                .rounded_md()
+                .border_1()
+                .border_color(cx.theme().danger)
+                .bg(cx.theme().danger.opacity(0.1))
+                .text_xs()
+                .text_color(cx.theme().danger)
+                .child(err)
+                .into_any_element(),
+        );
+    }
+
+    if let Some(err) = launch_error {
+        banners.push(
+            div()
+                .px_3()
+                .py_2()
+                .rounded_md()
+                .border_1()
+                .border_color(cx.theme().danger)
+                .bg(cx.theme().danger.opacity(0.1))
+                .text_xs()
+                .text_color(cx.theme().danger)
+                .child(err)
+                .into_any_element(),
+        );
+    }
+
+    banners
+}
+
+fn render_teams_section(view: &LauncherView, cx: &mut Context<AppSidebar>) -> AnyElement {
+    h_flex()
+        .gap_4()
+        .items_start()
+        .child(team_column(
+            cx,
+            "Order",
+            "蓝色方 (Order)",
+            gpui::hsla(0.6, 0.7, 0.5, 1.0),
+            &view.blue_slots,
+            &view.agents,
+            &view.spawns,
+        ))
+        .child(team_column(
+            cx,
+            "Chaos",
+            "红色方 (Chaos)",
+            gpui::hsla(0.0, 0.7, 0.5, 1.0),
+            &view.red_slots,
+            &view.agents,
+            &view.spawns,
+        ))
+        .into_any_element()
+}
+
+fn render_action_buttons(starting: bool, cx: &mut Context<AppSidebar>) -> AnyElement {
+    let launch_game_btn = Button::new("launch-game-btn")
+        .primary()
+        .icon(if starting {
+            IconName::Loader
+        } else {
+            IconName::Play
+        })
+        .label(if starting {
+            "启动中…".to_string()
+        } else {
+            "启动对局".to_string()
+        })
+        .disabled(starting)
+        .on_click(cx.listener(move |this, _, _, cx| {
+            let mode = this.game_mode.clone();
+            let champ = this.champion.clone();
+            let (scene_name, agents) =
+                with_state(|s| (s.scene_name.trim().to_string(), build_all_agents(s)));
+            if agents.is_empty() {
+                this.launch_error = Some("请至少选择一个英雄预设".into());
+                cx.notify();
+                return;
+            }
+            let scene_name = if scene_name.is_empty() {
+                format!("custom_agents_{}", unix_ts())
+            } else {
+                scene_name
+            };
+            this.is_starting_game = true;
+            this.launch_error = None;
+            cx.notify();
+            cx.spawn(
+                move |weak: gpui::WeakEntity<AppSidebar>, cx: &mut gpui::AsyncApp| {
+                    let mut cx = cx.clone();
+                    let mode = mode.clone();
+                    let champ = champ.clone();
+                    async move {
+                        let config = GameConfig {
+                            mode: mode.clone(),
+                            champion: champ.clone(),
+                            scene_name: Some(scene_name.clone()),
+                            agents: Some(agents.clone()),
+                            providers: None,
+                        };
+                        match process_service().start(config).await {
+                            Ok(game) => {
+                                if let Some(entity) = weak.upgrade() {
+                                    entity.update(&mut cx, |sidebar, cx| {
+                                        sidebar.is_starting_game = false;
+                                        sidebar.current_game_id = Some(game.id.clone());
+                                        sidebar.running_games.push(crate::types::RunningGameInfo {
+                                            id: game.id,
+                                            mode: mode.clone(),
+                                            champion: champ.clone(),
+                                            port: game.port as u16,
+                                        });
+                                        cx.notify();
+                                    });
+                                }
+                            }
+                            Err(e) => {
+                                if let Some(entity) = weak.upgrade() {
+                                    entity.update(&mut cx, |sidebar, cx| {
+                                        sidebar.is_starting_game = false;
+                                        sidebar.launch_error = Some(format!("启动失败: {}", e));
+                                        cx.notify();
+                                    });
+                                }
+                            }
+                        }
+                    }
+                },
+            )
+            .detach();
+        }));
+
+    launch_game_btn.into_any_element()
+}
+
+// ── 页面入口 ──
+
+/// 启动器页面：模式 + 场景 + 双阵营槽位编排 + 启动。
+pub fn render_launcher(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> AnyElement {
+    let champ = sidebar.champion.clone();
+    let mode = sidebar.game_mode.clone();
+    let launch_error = sidebar.launch_error.clone();
+    let starting = sidebar.is_starting_game;
+    let champions = sidebar.champions_list.clone();
+    let view = snapshot();
+
+    if !view.loaded {
+        spawn_initial_load(cx);
+    }
+
+    let load_dropdown = render_load_dropdown(&view, cx);
+
+    let mut container = v_flex().size_full().flex_1().gap_6().overflow_y_scrollbar();
+
+    container = container.child(render_header());
+    container = container.child(render_mode_and_champion(&mode, &champ, &champions, cx));
+    container = container.child(render_scene_section(&view, load_dropdown, cx));
+
+    for banner in render_message_banners(&view, launch_error, cx) {
+        container = container.child(banner);
+    }
+
+    container = container.child(render_teams_section(&view, cx));
+    container = container.child(render_action_buttons(starting, cx));
+
+    container.into_any_element()
 }

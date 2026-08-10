@@ -17,14 +17,18 @@ pub async fn spawn_visual_env(checkpoint_path: &str) -> anyhow::Result<(Child, u
 
     println!(">>> 从客户端启动 lol_rl_visual (Port: {port}, Checkpoint: {checkpoint_path})...");
 
-    let mut cmd = Command::new("cargo");
-    cmd.args(["run", "-p", "lol_rl", "--bin", "lol_rl_visual", "--"])
+    let (program, prefix_args) = lol_client::launch::resolve_executable("lol_rl", "lol_rl_visual");
+    let mut cmd = Command::new(&program);
+    cmd.args(&prefix_args)
         .arg("--port")
         .arg(port.to_string())
         .arg("--checkpoint")
         .arg(checkpoint_path)
         .stdout(std::process::Stdio::inherit())
         .stderr(std::process::Stdio::inherit());
+    if let Some(root) = lol_client::launch::install_root() {
+        cmd.current_dir(root);
+    }
 
     let child = cmd.kill_on_drop(true).spawn()?;
 

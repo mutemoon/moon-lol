@@ -92,6 +92,8 @@ pub fn spawn_ws_service(
                                 policy,
                                 reward_breakdown,
                                 obs_feature,
+                                reward_formula,
+                                reward_variables,
                             } => {
                                 if let Some(item) =
                                     sidebar.task_list.iter_mut().find(|t| t.id == task_id)
@@ -124,6 +126,8 @@ pub fn spawn_ws_service(
                                         latest_policy: Vec::new(),
                                         latest_reward_breakdown: Vec::new(),
                                         latest_obs: None,
+                                        reward_formula: None,
+                                        latest_reward_variables: None,
                                         logs: Vec::new(),
                                     });
                                 detail.current_step = step;
@@ -133,6 +137,12 @@ pub fn spawn_ws_service(
                                 detail.latest_reward_breakdown = reward_breakdown;
                                 if obs_feature.is_some() {
                                     detail.latest_obs = obs_feature;
+                                }
+                                if reward_formula.is_some() {
+                                    detail.reward_formula = reward_formula;
+                                }
+                                if reward_variables.is_some() {
+                                    detail.latest_reward_variables = reward_variables;
                                 }
                             }
                             OutFrame::Log {
@@ -209,6 +219,8 @@ pub fn spawn_ws_service(
                                         latest_policy: Vec::new(),
                                         latest_reward_breakdown: Vec::new(),
                                         latest_obs: None,
+                                        reward_formula: None,
+                                        latest_reward_variables: None,
                                         logs: Vec::new(),
                                     });
                                 detail.checkpoints = checkpoints;
@@ -365,24 +377,27 @@ async fn spawn_visual_session(
 
     // 转发视觉 WS 事件到 UI；WS 线程退出（sender drop）后循环自终结
     while let Some(ev) = vis_event_rx.recv().await {
-        let _ = weak.update(cx, |sidebar, _| match ev {
-            VisualWsEvent::Connected => sidebar.visual_ws_connected = true,
-            VisualWsEvent::Disconnected => sidebar.visual_ws_connected = false,
-            VisualWsEvent::Frame(VisualOutFrame::Frame(f)) => {
-                if f.terminated {
-                    sidebar.visual_paused = true;
+        let _ = weak.update(cx, |sidebar, cx| {
+            match ev {
+                VisualWsEvent::Connected => sidebar.visual_ws_connected = true,
+                VisualWsEvent::Disconnected => sidebar.visual_ws_connected = false,
+                VisualWsEvent::Frame(VisualOutFrame::Frame(f)) => {
+                    if f.terminated {
+                        sidebar.visual_paused = true;
+                    }
+                    sidebar.latest_visual_frame = Some(f);
                 }
-                sidebar.latest_visual_frame = Some(f);
+                VisualWsEvent::Frame(VisualOutFrame::Ready { .. }) => {}
+                VisualWsEvent::Frame(VisualOutFrame::Log { .. }) => {}
+                VisualWsEvent::Frame(VisualOutFrame::Exited { code }) => {
+                    sidebar.visual_ws_connected = false;
+                    sidebar.visual_session = None;
+                    sidebar.visual_in_tx = None;
+                    sidebar.visual_task_id = None;
+                    sidebar.visual_error = Some(format!("可视化子进程已退出 (code {:?})", code));
+                }
             }
-            VisualWsEvent::Frame(VisualOutFrame::Ready { .. }) => {}
-            VisualWsEvent::Frame(VisualOutFrame::Log { .. }) => {}
-            VisualWsEvent::Frame(VisualOutFrame::Exited { code }) => {
-                sidebar.visual_ws_connected = false;
-                sidebar.visual_session = None;
-                sidebar.visual_in_tx = None;
-                sidebar.visual_task_id = None;
-                sidebar.visual_error = Some(format!("可视化子进程已退出 (code {:?})", code));
-            }
+            cx.notify();
         });
     }
 }

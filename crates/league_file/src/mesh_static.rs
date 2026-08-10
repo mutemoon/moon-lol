@@ -1,10 +1,11 @@
 use bevy::math::Vec3;
 use bitflags::bitflags;
-use league_utils::BoundingBox;
 use nom::bytes::complete::{tag, take};
 use nom::multi::count;
 use nom::number::complete::{le_f32, le_i32, le_u8, le_u16, le_u32};
 use nom::{IResult, Parser};
+
+use crate::bounding_box::BoundingBox;
 
 bitflags! {
     #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]

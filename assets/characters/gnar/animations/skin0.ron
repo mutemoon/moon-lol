@@ -181,8 +181,11 @@
         ),
         "Run2": Parallel(
             hashes: [
-                "Unk0xcf93f48",
+                "Run2Base",
             ],
+        ),
+        "Run2Base": Clip(
+            node_index: 2,
         ),
         "Run3": Parallel(
             hashes: [
@@ -385,9 +388,6 @@
                 "Attack2Fast",
                 "Unk0x3e9550fc",
             ],
-        ),
-        "Unk0xcf93f48": Clip(
-            node_index: 2,
         ),
         "Unk0xd35b4a3c": Clip(
             node_index: 58,
@@ -749,6 +749,9 @@
         ("Recall", "Run1In"): Time(
             time: 0.0,
         ),
+        ("Recall", "Run2Base"): Time(
+            time: 0.0,
+        ),
         ("Recall", "RunBase"): Time(
             time: 0.0,
         ),
@@ -842,9 +845,6 @@
         ("Recall", "Unk0xc482693a"): Time(
             time: 0.0,
         ),
-        ("Recall", "Unk0xcf93f48"): Time(
-            time: 0.0,
-        ),
         ("Recall", "Unk0xd35b4a3c"): Time(
             time: 0.0,
         ),
@@ -876,6 +876,18 @@
             time: 0.0,
         ),
         ("Run1In", "Unk0x89779994"): Time(
+            time: 0.0,
+        ),
+        ("Run2Base", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Run2Base", "DanceLoopBase"): Time(
+            time: 0.0,
+        ),
+        ("Run2Base", "RevertScale"): Time(
+            time: 0.0,
+        ),
+        ("Run2Base", "Unk0x89779994"): Time(
             time: 0.0,
         ),
         ("RunBase", "DanceIn"): Time(
@@ -1170,18 +1182,6 @@
             time: 0.0,
         ),
         ("Unk0xc482693a", "Unk0x89779994"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xcf93f48", "DanceIn"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xcf93f48", "DanceLoopBase"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xcf93f48", "RevertScale"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xcf93f48", "Unk0x89779994"): Time(
             time: 0.0,
         ),
         ("Unk0xd35b4a3c", "RevertScale"): Time(

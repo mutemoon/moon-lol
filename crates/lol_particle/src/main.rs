@@ -7,6 +7,9 @@
 //!                              解析贴图为线性 handle，注册进 Assets 并在锚点实体上播放（自动停止上一个）
 //!   - stop_particle          → 停止当前播放的粒子系统
 
+use std::path::PathBuf;
+
+use bevy::asset::AssetPlugin;
 use bevy::image::ImageLoaderSettings;
 use bevy::prelude::*;
 use bevy::render::RenderPlugin;
@@ -31,14 +34,36 @@ struct Args {
     /// WebSocket 服务端口（与游戏 server 默认的 9001 区分）
     #[arg(long, default_value = "9002")]
     ws_port: u16,
+
+    /// 资产目录路径（未指定时默认使用 workspace 根目录下的 assets）
+    #[arg(long)]
+    assets_dir: Option<PathBuf>,
 }
 
 fn main() {
     let args = Args::parse();
 
+    let manifest_dir = std::env::var("CARGO_MANIFEST_DIR")
+        .unwrap_or_else(|_| env!("CARGO_MANIFEST_DIR").to_string());
+    let workspace_root = PathBuf::from(&manifest_dir)
+        .parent()
+        .map(|p| p.parent())
+        .flatten()
+        .map(|p| p.to_path_buf())
+        .unwrap_or_else(|| PathBuf::from(&manifest_dir));
+
+    let assets_path = args
+        .assets_dir
+        .or_else(|| std::env::var("MOON_ASSETS_DIR").ok().map(PathBuf::from))
+        .unwrap_or_else(|| workspace_root.join("assets"));
+
     App::new()
         .add_plugins(
             DefaultPlugins
+                .set(AssetPlugin {
+                    file_path: assets_path.to_string_lossy().to_string(),
+                    ..default()
+                })
                 .set(RenderPlugin {
                     // 因为更新后的 Bevy 仅在设备启用 PASSTHROUGH_SHADERS 时才将 SpirV 走 wgpu passthrough（原样使用），
                     // 否则回退 naga 解析而无法处理这些 DXC 编译的 League SPIR-V（报 Unable to find entry point 'main'），

@@ -9,7 +9,7 @@ use league_core::extract::{
 use league_file::animation::AnimationFile;
 use league_file::mesh_skinned::LeagueSkinnedMesh;
 use league_file::skeleton::LeagueSkeleton;
-use league_loader::game::{Data, LeagueLoader, PropGroup};
+use league_loader::game::{LeagueLoader, PropGroup};
 use league_loader::prop_bin::LeagueWadLoaderTrait;
 use lol_base::audio::{AudioBank, ConfigAudio};
 use lol_base::character::{HealthBar, Skin};
@@ -18,6 +18,7 @@ use lol_base_render::particle::{ConfigVfx, ConfigVfxHandle};
 use ron::ser::{PrettyConfig, to_string_pretty};
 
 use crate::animation::load_animation_file;
+use crate::data::Data;
 use crate::extract::animation::animation_graph_to_config;
 use crate::extract::audio::export_audio_for_skin;
 use crate::extract::utils::{
@@ -100,7 +101,7 @@ pub fn extract_skin_for_champion(
         .get_wad_entry_buffer_by_path(&texture_path)
         .ok()
         .and_then(|buf| {
-            let (_, texture) = league_file::texture::LeagueTexture::parse(&buf).ok()?;
+            let (_, texture) = league_loader::texture::LeagueTexture::parse(&buf).ok()?;
             decode_texture_to_png(&texture)
         });
 
@@ -135,7 +136,7 @@ pub fn extract_skin_for_champion(
                                 if let Some(texture_path) = &sampler.texture_path {
                                     println!("[DEBUG] Found Diffuse_Texture for submesh '{}': path={}", submesh_name, texture_path);
                                     if let Ok(buf) = loader.get_wad_entry_buffer_by_path(texture_path) {
-                                        if let Ok((_, texture)) = league_file::texture::LeagueTexture::parse(&buf) {
+                                        if let Ok((_, texture)) = league_loader::texture::LeagueTexture::parse(&buf) {
                                             if let Some(png_data) = decode_texture_to_png(&texture) {
                                                 override_map.insert(override_item.submesh.clone(), png_data);
                                             }
@@ -161,7 +162,7 @@ pub fn extract_skin_for_champion(
                 }
             } else if let Some(texture_path) = &override_item.texture {
                 if let Ok(buf) = loader.get_wad_entry_buffer_by_path(texture_path) {
-                    if let Ok((_, texture)) = league_file::texture::LeagueTexture::parse(&buf) {
+                    if let Ok((_, texture)) = league_loader::texture::LeagueTexture::parse(&buf) {
                         if let Some(png_data) = decode_texture_to_png(&texture) {
                             override_map.insert(override_item.submesh.clone(), png_data);
                         }

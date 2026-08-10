@@ -69,6 +69,7 @@ struct CustomVisualRunner {
     step_count: usize,
     current_ep_steps: usize,
     assets_loaded: bool,
+    load_wait_frames: usize,
     pending_manual_action: Option<usize>,
     pending_step_once: bool,
     window_created: bool,
@@ -118,6 +119,22 @@ impl ApplicationHandler for CustomVisualRunner {
                     self.paused = true;
                     self.pending_step_once = false;
                     pause_virtual_time(self.app.world_mut());
+
+                    let obs = get_obs_from_world(self.app.world(), self.fiora, self.riven);
+                    let (_, policy_items) = (self.policy_arc.lock().unwrap())(&obs);
+                    let pause_output = VisualStepOutput {
+                        step_result: StepResult {
+                            obs,
+                            reward: 0.0,
+                            terminated: false,
+                            truncated: false,
+                            step: self.step_count,
+                            reward_breakdown: Vec::new(),
+                            reward_variables: std::collections::HashMap::new(),
+                        },
+                        policy: policy_items,
+                    };
+                    let _ = self.step_tx.send(pause_output);
                 }
                 VisualRunnerCmd::Resume => {
                     self.paused = false;
@@ -133,6 +150,21 @@ impl ApplicationHandler for CustomVisualRunner {
                         self.initial_fiora_pos,
                         self.initial_riven_pos,
                     );
+                    let obs = get_obs_from_world(self.app.world(), self.fiora, self.riven);
+                    let (_, policy_items) = (self.policy_arc.lock().unwrap())(&obs);
+                    let initial_output = VisualStepOutput {
+                        step_result: StepResult {
+                            obs,
+                            reward: 0.0,
+                            terminated: false,
+                            truncated: false,
+                            step: 0,
+                            reward_breakdown: Vec::new(),
+                            reward_variables: std::collections::HashMap::new(),
+                        },
+                        policy: policy_items,
+                    };
+                    let _ = self.step_tx.send(initial_output);
                 }
                 VisualRunnerCmd::StepOnce => {
                     self.pending_step_once = true;
@@ -145,8 +177,9 @@ impl ApplicationHandler for CustomVisualRunner {
             }
         }
 
-        // 2. Asset loading wait
+        // 2. Asset loading wait (with fallback timeout)
         if !self.assets_loaded {
+            self.load_wait_frames += 1;
             let fiora_ready = {
                 let asset_server = self.app.world().resource::<AssetServer>();
                 asset_server
@@ -160,9 +193,26 @@ impl ApplicationHandler for CustomVisualRunner {
                     .is_some_and(|s| s.is_loaded())
             };
 
-            if fiora_ready && riven_ready {
+            if (fiora_ready && riven_ready) || self.load_wait_frames >= 60 {
                 self.assets_loaded = true;
                 setup_skill_levels_world(self.app.world_mut(), self.fiora, self.riven);
+
+                // 发送初始第一帧数据到前端
+                let obs = get_obs_from_world(self.app.world(), self.fiora, self.riven);
+                let (_, policy_items) = (self.policy_arc.lock().unwrap())(&obs);
+                let initial_output = VisualStepOutput {
+                    step_result: StepResult {
+                        obs,
+                        reward: 0.0,
+                        terminated: false,
+                        truncated: false,
+                        step: 0,
+                        reward_breakdown: Vec::new(),
+                        reward_variables: std::collections::HashMap::new(),
+                    },
+                    policy: policy_items,
+                };
+                let _ = self.step_tx.send(initial_output);
             }
 
             self.app.update();
@@ -204,10 +254,6 @@ impl ApplicationHandler for CustomVisualRunner {
                 self.max_steps,
             );
 
-            if self.paused {
-                pause_virtual_time(self.app.world_mut());
-            }
-
             let terminated = step_result.terminated;
             let truncated = step_result.truncated;
 
@@ -220,6 +266,7 @@ impl ApplicationHandler for CustomVisualRunner {
             if terminated || truncated {
                 self.paused = true;
                 self.current_ep_steps = 0;
+                pause_virtual_time(self.app.world_mut());
                 reset_episode_world(
                     self.app.world_mut(),
                     self.fiora,
@@ -227,7 +274,28 @@ impl ApplicationHandler for CustomVisualRunner {
                     self.initial_fiora_pos,
                     self.initial_riven_pos,
                 );
+
+                // 对局结束并重置后，发送重置后的新起点帧，使前端遥测卡片立即呈现新一局状态
+                let next_obs = get_obs_from_world(self.app.world(), self.fiora, self.riven);
+                let (_, next_policy_items) = (self.policy_arc.lock().unwrap())(&next_obs);
+                let reset_output = VisualStepOutput {
+                    step_result: StepResult {
+                        obs: next_obs,
+                        reward: 0.0,
+                        terminated: false,
+                        truncated: false,
+                        step: self.step_count,
+                        reward_breakdown: Vec::new(),
+                        reward_variables: std::collections::HashMap::new(),
+                    },
+                    policy: next_policy_items,
+                };
+                let _ = self.step_tx.send(reset_output);
+            } else if self.paused {
+                pause_virtual_time(self.app.world_mut());
             }
+
+            self.app.update();
         } else {
             // Paused: ensure Time<Virtual> is paused so FixedUpdate tick does 0 simulation
             // progress, but app.update() still renders the frame
@@ -284,6 +352,7 @@ pub fn run_visual_env<F>(
             step_count: 0,
             current_ep_steps: 0,
             assets_loaded: false,
+            load_wait_frames: 0,
             pending_manual_action: None,
             pending_step_once: false,
             window_created: false,

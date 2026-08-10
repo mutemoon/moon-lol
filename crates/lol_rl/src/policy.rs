@@ -53,9 +53,10 @@ impl ActorCritic {
         actions: &Tensor,
     ) -> Result<(Tensor, Tensor, Tensor)> {
         let (logits, values) = self.forward(state)?;
+        let masked_logits = batch_masked_logits(&logits, state)?;
 
-        let log_probs_all = candle_nn::ops::log_softmax(&logits, D::Minus1)?;
-        let probs_all = candle_nn::ops::softmax(&logits, D::Minus1)?;
+        let log_probs_all = candle_nn::ops::log_softmax(&masked_logits, D::Minus1)?;
+        let probs_all = candle_nn::ops::softmax(&masked_logits, D::Minus1)?;
 
         let actions_dim = actions.unsqueeze(1)?;
         let selected_log_probs = log_probs_all.gather(&actions_dim, 1)?.squeeze(1)?;
@@ -154,12 +155,14 @@ impl ActorCritic {
     }
 }
 
-/// Apply action masking to logits based on observation state.
+/// Apply action masking to logits based on observation state (single instance).
 pub fn masked_logits(logits: &Tensor, obs_vec: &[f32]) -> Result<Tensor> {
     let mut logits_vec: Vec<f32> = logits.squeeze(0)?.to_vec1()?;
     let action_dim = logits.dim(1)?;
 
-    let distance = if obs_vec.len() > 6 {
+    let distance = if obs_vec.len() > 8 {
+        obs_vec[8] * 100.0
+    } else if obs_vec.len() > 6 {
         obs_vec[6] * 100.0
     } else {
         250.0
@@ -167,8 +170,36 @@ pub fn masked_logits(logits: &Tensor, obs_vec: &[f32]) -> Result<Tensor> {
 
     // 如果距离太远（> 220u），无法进行普通攻击，则屏蔽 Attack 动作
     if distance > 220.0 && action_dim > 4 {
-        logits_vec[4] = f32::NEG_INFINITY;
+        logits_vec[4] = -1e9;
     }
 
     Tensor::from_vec(logits_vec, (1, action_dim), logits.device())
+}
+
+/// Apply action masking to batch logits based on batch state tensor.
+pub fn batch_masked_logits(logits: &Tensor, state: &Tensor) -> Result<Tensor> {
+    let (n, action_dim) = (logits.dim(0)?, logits.dim(1)?);
+    let state_dim = state.dim(1)?;
+    if action_dim <= 4 || state_dim <= 8 {
+        return Ok(logits.clone());
+    }
+
+    // 距离特征在第 8 列 (distance / 100.0)
+    let dist_col = state.narrow(1, 8, 1)?;
+    let dist_vec: Vec<f32> = dist_col.squeeze(1)?.to_vec1()?;
+    let mut logits_vec: Vec<f32> = logits.to_vec2::<f32>()?.into_iter().flatten().collect();
+
+    let mut modified = false;
+    for (i, &d) in dist_vec.iter().enumerate() {
+        if d > 2.2 {
+            logits_vec[i * action_dim + 4] = -1e9;
+            modified = true;
+        }
+    }
+
+    if modified {
+        Tensor::from_vec(logits_vec, (n, action_dim), logits.device())
+    } else {
+        Ok(logits.clone())
+    }
 }

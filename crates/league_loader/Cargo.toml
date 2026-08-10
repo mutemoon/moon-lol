@@ -4,13 +4,9 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-league_core.workspace = true
-league_file.workspace = true
 league_property.workspace = true
 league_utils.workspace = true
-lol_base.workspace = true
 thiserror.workspace = true
 zstd = "0.13.3"
 nom.workspace = true
-bevy.workspace = true
-serde.workspace = true
+bitflags.workspace = true
