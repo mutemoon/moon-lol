@@ -1,16 +1,14 @@
 use std::time::Duration;
 
-use futures_util::{SinkExt, StreamExt};
 use lol_rl_protocol::{InFrame, OutFrame, VisualOutFrame, DEFAULT_RL_SERVER_ADDR};
 use tokio::sync::mpsc;
 use tokio::time::sleep;
-use tokio_tungstenite::connect_async;
-use tokio_tungstenite::tungstenite::Message;
 
 use crate::components::sidebar::{AppSidebar, VisualSession};
-use crate::services::runtime::run_on_tokio;
+use crate::services::runtime::{run_on_tokio, tokio_runtime};
 use crate::services::visual_process::spawn_visual_env;
 use crate::services::visual_ws::{spawn_visual_ws, VisualWsEvent};
+use crate::services::ws_bridge::{run_frame_connection, SendOutcome};
 use crate::types::LocalTaskDetail;
 
 enum WsEvent {
@@ -244,84 +242,51 @@ pub fn spawn_ws_service(
     })
     .detach();
 
-    std::thread::spawn(move || {
-        let rt = match tokio::runtime::Builder::new_current_thread()
-            .enable_all()
-            .build()
-        {
-            Ok(rt) => rt,
-            Err(_) => return,
+    // 复用全局 tokio runtime 跑 WS 后台任务（不阻塞 gpui 主线程）
+    tokio_runtime().spawn(async move {
+        let ws_url = format!("ws://{}", DEFAULT_RL_SERVER_ADDR);
+
+        // 外部 InFrame 转发到写队列
+        let (cmd_tx, mut cmd_rx) = mpsc::unbounded_channel::<InFrame>();
+        let on_connected_cmd = cmd_tx.clone();
+        let bridge_task = async move {
+            while let Some(frame) = rx.recv().await {
+                if cmd_tx.send(frame).is_err() {
+                    break;
+                }
+            }
         };
 
-        rt.block_on(async move {
-            let ws_url = format!("ws://{}", DEFAULT_RL_SERVER_ADDR);
-
-            let (frame_tx, mut frame_rx) = mpsc::unbounded_channel::<InFrame>();
-
-            // 将收到的外部 InFrame 转发到内部 frame_tx
-            let bridge_task = async move {
-                while let Some(frame) = rx.recv().await {
-                    if frame_tx.send(frame).is_err() {
-                        break;
-                    }
-                }
-            };
-
-            let connection_loop = async move {
-                loop {
-                    if let Ok((ws_stream, _)) = connect_async(&ws_url).await {
-                        // 通知 UI 已连接
+        // 无限重连：连接失败/断开后 2 秒重试
+        let connection_loop = async move {
+            loop {
+                let _ = run_frame_connection(
+                    &ws_url,
+                    &mut cmd_rx,
+                    event_tx.clone(),
+                    || {
+                        // 通知 UI 已连接，并自动拉取任务列表
                         let _ = event_tx.send(WsEvent::Connected(true));
+                        let _ = on_connected_cmd.send(InFrame::GetTaskList);
+                    },
+                    |cmd: InFrame| match bincode::serialize(&cmd) {
+                        Ok(bytes) => SendOutcome::Send(bytes),
+                        Err(_) => SendOutcome::Skip,
+                    },
+                    |bytes: &[u8]| {
+                        bincode::deserialize::<OutFrame>(bytes)
+                            .ok()
+                            .map(WsEvent::Frame)
+                    },
+                )
+                .await;
+                // 通知 UI 断开连接
+                let _ = event_tx.send(WsEvent::Connected(false));
+                sleep(Duration::from_secs(2)).await;
+            }
+        };
 
-                        let (mut write, mut read) = ws_stream.split();
-
-                        // 连接建立后自动拉取任务列表
-                        let req_bytes =
-                            bincode::serialize(&InFrame::GetTaskList).unwrap_or_default();
-                        let _ = write.send(Message::Binary(req_bytes.into())).await;
-
-                        // 读任务
-                        let event_tx_read = event_tx.clone();
-                        let read_task = async move {
-                            while let Some(Ok(msg)) = read.next().await {
-                                if let Message::Binary(bytes) = msg {
-                                    if let Ok(out_frame) = bincode::deserialize::<OutFrame>(&bytes)
-                                    {
-                                        let _ = event_tx_read.send(WsEvent::Frame(out_frame));
-                                    }
-                                }
-                            }
-                        };
-
-                        // 写任务
-                        let write_task = async {
-                            while let Some(in_frame) = frame_rx.recv().await {
-                                if let Ok(msg_bytes) = bincode::serialize(&in_frame) {
-                                    if write.send(Message::Binary(msg_bytes.into())).await.is_err()
-                                    {
-                                        break;
-                                    }
-                                }
-                            }
-                        };
-
-                        futures_util::future::select(Box::pin(read_task), Box::pin(write_task))
-                            .await;
-
-                        // 通知 UI 断开连接
-                        let _ = event_tx.send(WsEvent::Connected(false));
-                    } else {
-                        // 通知 UI 断开连接
-                        let _ = event_tx.send(WsEvent::Connected(false));
-                    }
-
-                    // 2 秒后自动重试连接
-                    sleep(Duration::from_secs(2)).await;
-                }
-            };
-
-            futures_util::future::join(bridge_task, connection_loop).await;
-        });
+        futures_util::future::join(bridge_task, connection_loop).await;
     });
 }
 

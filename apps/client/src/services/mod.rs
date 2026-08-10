@@ -1,6 +1,5 @@
 pub mod assets_path;
 pub mod cloud;
-pub mod event_bus;
 pub mod extractor_service;
 pub mod log_service;
 pub mod match_ws;
@@ -13,3 +12,4 @@ pub mod types;
 pub mod visual_process;
 pub mod visual_ws;
 pub mod ws;
+pub mod ws_bridge;

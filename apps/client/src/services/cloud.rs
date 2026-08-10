@@ -4,7 +4,7 @@
 //! 内部请求体类型（无对应协议类型）在本文件局部定义。
 
 use std::path::PathBuf;
-use std::sync::{Arc, OnceLock, RwLock};
+use std::sync::{Arc, RwLock};
 use std::{env, fs};
 
 use lol_web_protocol::admin::AdminMetrics;
@@ -32,7 +32,6 @@ use reqwest::{Client as HttpClient, Method, StatusCode};
 use serde::de::DeserializeOwned;
 use serde::Serialize;
 use serde_json::Value;
-use tokio::runtime::Runtime;
 
 // ── Error ──
 
@@ -118,22 +117,19 @@ pub struct CloudClient {
 
 /// 全局 tokio runtime：reqwest 的 send/text 必须在 tokio runtime 上下文内执行，
 /// 而 client 的 UI 主线程与 gpui AsyncApp 的 executor 都不是 tokio。
-fn tokio_runtime() -> &'static Runtime {
-    static RT: OnceLock<Runtime> = OnceLock::new();
-    RT.get_or_init(|| Runtime::new().expect("创建 tokio runtime 失败"))
-}
+/// 统一复用 `runtime::tokio_runtime()`（`run_on_tokio` 内使用）。
 
 impl CloudClient {
     /// 创建客户端。
     ///
-    /// `base_url` 缺省时读取环境变量 `VITE_BASE_URL`，再缺省使用 `http://127.0.0.1:8080`。
+    /// `base_url` 缺省时读取环境变量 `VITE_BASE_URL`，再缺省使用 `http://127.0.0.1:8000`。
     pub fn new(base_url: Option<String>) -> Self {
         let base_url = base_url
             .or_else(|| env::var("VITE_BASE_URL").ok())
             .unwrap_or_else(|| "http://127.0.0.1:8000".into());
         let token = load_token();
         // reqwest Client 的内部连接任务由 tokio::spawn 驱动，必须在 tokio runtime 内创建。
-        let http = tokio_runtime().block_on(async { HttpClient::new() });
+        let http = super::runtime::tokio_runtime().block_on(async { HttpClient::new() });
         Self {
             base_url: base_url.trim_end_matches('/').to_string(),
             http,
@@ -152,12 +148,9 @@ impl CloudClient {
         F: FnOnce() -> Fut + Send + 'static,
         Fut: std::future::Future<Output = Result<T, CloudError>> + Send + 'static,
     {
-        let (tx, rx) = tokio::sync::oneshot::channel();
-        tokio_runtime().spawn(async move {
-            let _ = tx.send(f().await);
-        });
-        rx.await
-            .map_err(|e| CloudError::Http(format!("请求任务被取消: {e}")))?
+        super::runtime::run_on_tokio(move || async move { f().await.map_err(|e| e.to_string()) })
+            .await
+            .map_err(CloudError::Http)
     }
 
     /// 注册 401 回调。收到 401 时自动清 token 并调用该回调。

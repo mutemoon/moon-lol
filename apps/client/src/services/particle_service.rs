@@ -12,12 +12,11 @@ use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
-use futures_util::{SinkExt, StreamExt};
 use lol_share::{ConfigVfx, ConfigVfxSystemDefinition};
 use serde::{Deserialize, Serialize};
 use tokio::sync::{mpsc, oneshot};
-use tokio_tungstenite::connect_async;
-use tokio_tungstenite::tungstenite::Message;
+
+use super::ws_bridge::{run_frame_connection, SendOutcome};
 
 pub const DEFAULT_WS_URL: &str = "ws://127.0.0.1:9002";
 const REQUEST_TIMEOUT: Duration = Duration::from_secs(8);
@@ -112,124 +111,94 @@ struct WsResponse {
 
 /// 启动粒子 WS 连接。
 ///
-/// 后台启动独立线程管理 WS 连接生命周期。
+/// 后台任务管理 WS 连接生命周期。
 /// 返回客户端句柄（发送 play/stop 命令）和事件接收器（Connected / Disconnected）。
 pub fn connect_to_particle_server(
     url: &str,
 ) -> (ParticleWsHandle, mpsc::UnboundedReceiver<ParticleWsEvent>) {
-    let (cmd_tx, cmd_rx) = mpsc::unbounded_channel::<WsCmd>();
+    let (cmd_tx, mut cmd_rx) = mpsc::unbounded_channel::<WsCmd>();
     let (event_tx, event_rx) = mpsc::unbounded_channel::<ParticleWsEvent>();
     let url = url.to_string();
 
-    std::thread::spawn(move || {
-        let rt = match tokio::runtime::Builder::new_current_thread()
-            .enable_all()
-            .build()
-        {
-            Ok(rt) => rt,
-            Err(e) => {
-                let _ = event_tx.send(ParticleWsEvent::Disconnected {
-                    error: Some(format!("无法创建 tokio runtime: {e}")),
-                });
-                return;
-            }
-        };
-        rt.block_on(run_ws(&url, cmd_rx, event_tx));
-    });
+    // 复用全局 tokio runtime 跑粒子 WS 后台任务（不阻塞 gpui 主线程）
+    super::runtime::tokio_runtime().spawn(async move {
+        let next_id = AtomicU64::new(1);
+        let pending: Arc<Mutex<HashMap<u64, oneshot::Sender<WrappedResult>>>> =
+            Arc::new(Mutex::new(HashMap::new()));
 
-    (ParticleWsHandle { cmd_tx }, event_rx)
-}
-
-// ── WS 后台主循环 ──
-
-async fn run_ws(
-    url: &str,
-    mut cmd_rx: mpsc::UnboundedReceiver<WsCmd>,
-    event_tx: mpsc::UnboundedSender<ParticleWsEvent>,
-) {
-    let (mut ws_write, mut ws_read) = match connect_async(url).await {
-        Ok((ws, _)) => {
-            let _ = event_tx.send(ParticleWsEvent::Connected);
-            ws.split()
-        }
-        Err(e) => {
-            let _ = event_tx.send(ParticleWsEvent::Disconnected {
-                error: Some(format!("无法连接到粒子渲染 server: {e}")),
-            });
-            drain_commands(cmd_rx).await;
-            return;
-        }
-    };
-
-    let next_id = AtomicU64::new(1);
-    let pending: Arc<Mutex<HashMap<u64, oneshot::Sender<WrappedResult>>>> =
-        Arc::new(Mutex::new(HashMap::new()));
-
-    // 读任务：解析 server 响应，匹配 pending map
-    let pending_read = pending.clone();
-    let pending_cleanup = pending.clone();
-    let read_task = tokio::spawn(async move {
-        while let Some(Ok(msg)) = ws_read.next().await {
-            let text = match msg {
-                Message::Text(t) => t,
-                Message::Close(_) => break,
-                _ => continue,
-            };
-            let resp: WsResponse = match serde_json::from_str(&text) {
-                Ok(r) => r,
-                Err(_) => continue,
-            };
-            if resp.resp_type != "result" {
-                continue;
-            }
-            if let Some(reply) = pending_read.lock().unwrap().remove(&resp.id) {
-                if resp.ok {
-                    let _ = reply.send(Ok(resp.data.unwrap_or(serde_json::Value::Null)));
-                } else {
-                    let _ = reply.send(Err(resp.error.unwrap_or_else(|| "请求失败".to_string())));
-                }
-            }
-        }
-    });
-
-    // 写任务：从 cmd_rx 取命令，序列化为 JSON 发送
-    let write_task = tokio::spawn(async move {
-        while let Some(cmd) = cmd_rx.recv().await {
-            match cmd {
-                WsCmd::Disconnect => break,
+        // 请求 → JSON 文本帧；Disconnect → 终止连接
+        let encode = {
+            let pending = pending.clone();
+            move |cmd: WsCmd| match cmd {
                 WsCmd::Request { cmd, params, reply } => {
                     let id = next_id.fetch_add(1, Ordering::SeqCst);
                     pending.lock().unwrap().insert(id, reply);
-
                     let req = WsRequest { id, cmd, params };
-                    let payload = match serde_json::to_string(&req) {
-                        Ok(s) => s,
+                    match serde_json::to_string(&req) {
+                        Ok(s) => SendOutcome::SendText(s),
                         Err(e) => {
                             if let Some(reply) = pending.lock().unwrap().remove(&id) {
                                 let _ = reply.send(Err(format!("序列化失败: {e}")));
                             }
-                            continue;
+                            SendOutcome::Skip
                         }
-                    };
-                    if ws_write.send(Message::Text(payload.into())).await.is_err() {
-                        break;
                     }
                 }
+                WsCmd::Disconnect => SendOutcome::Close,
             }
+        };
+
+        // 响应 → 匹配 pending 表，同步回填 oneshot（RPC 语义，不产生 UI 事件）
+        let decode = {
+            let pending = pending.clone();
+            move |bytes: &[u8]| {
+                let resp: WsResponse = match serde_json::from_slice(bytes) {
+                    Ok(r) => r,
+                    Err(_) => return None,
+                };
+                if resp.resp_type != "result" {
+                    return None;
+                }
+                if let Some(reply) = pending.lock().unwrap().remove(&resp.id) {
+                    if resp.ok {
+                        let _ = reply.send(Ok(resp.data.unwrap_or(serde_json::Value::Null)));
+                    } else {
+                        let _ =
+                            reply.send(Err(resp.error.unwrap_or_else(|| "请求失败".to_string())));
+                    }
+                }
+                None
+            }
+        };
+
+        let connected = run_frame_connection(
+            &url,
+            &mut cmd_rx,
+            event_tx.clone(),
+            || {
+                let _ = event_tx.send(ParticleWsEvent::Connected);
+            },
+            encode,
+            decode,
+        )
+        .await;
+
+        if !connected {
+            // 连接失败：清空命令队列，对所有命令回复错误
+            drain_commands(cmd_rx).await;
+            let _ = event_tx.send(ParticleWsEvent::Disconnected {
+                error: Some("无法连接到粒子渲染 server".to_string()),
+            });
+        } else {
+            // 清理未完成的请求
+            for (_, reply) in pending.lock().unwrap().drain() {
+                let _ = reply.send(Err("连接已关闭".to_string()));
+            }
+            let _ = event_tx.send(ParticleWsEvent::Disconnected { error: None });
         }
     });
 
-    tokio::select! {
-        _ = read_task => {}
-        _ = write_task => {}
-    }
-
-    // 清理未完成的请求
-    for (_, reply) in pending_cleanup.lock().unwrap().drain() {
-        let _ = reply.send(Err("连接已关闭".to_string()));
-    }
-
-    let _ = event_tx.send(ParticleWsEvent::Disconnected { error: None });
+    (ParticleWsHandle { cmd_tx }, event_rx)
 }
 
 /// 连接失败或关闭后清空命令队列，对所有命令回复错误。

@@ -12,7 +12,7 @@
     "release:client": "cargo run --release -p client",
     "start": "cargo run",
     "start:all": "docker compose up -d && until docker exec moon-lol-postgres pg_isready -U postgres -d moon_lol 2>/dev/null; do sleep 1; done && pnpm start:server",
-    "start:client": "pnpm --filter @moon-lol/client run tauri:dev",
+    "start:client": "cargo run -p client",
     "start:particle": "cargo run -p lol_particle",
     "start:server": "cargo run -p lol_web_server",
     "start:rl": "cargo run -p lol_rl",

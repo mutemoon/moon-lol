@@ -27,16 +27,32 @@ fn get_session(state: &LocalGameState, id: &Uuid) -> MatchResult<WsSession> {
         .ok_or_else(|| "对局 WS 未连接".to_string())
 }
 
-// ── 控制操作 ──
-
-/// 暂停本地对局（幂等，返回是否实际触发了暂停状态切换）。
-pub async fn pause_match(state: &Arc<LocalGameState>, id_str: &str) -> MatchResult<bool> {
+/// 通用骨架：解析 id → 取 session → 在全局 tokio runtime 内对 GameClient 执行操作。
+/// 所有对局控制命令共用，消除重复样板。
+async fn with_session<Fut, T>(
+    state: &Arc<LocalGameState>,
+    id_str: &str,
+    f: impl FnOnce(GameClient) -> Fut + Send + 'static,
+) -> MatchResult<T>
+where
+    Fut: std::future::Future<Output = MatchResult<T>> + Send + 'static,
+    T: Send + 'static,
+{
     let state = state.clone();
     let id_str = id_str.to_string();
     super::runtime::run_on_tokio(move || async move {
         let id = Uuid::parse_str(&id_str).map_err(|e| format!("无效对局 id: {e}"))?;
         let session = get_session(&state, &id)?;
-        let client = GameClient::new(session);
+        f(GameClient::new(session)).await
+    })
+    .await
+}
+
+// ── 控制操作 ──
+
+/// 暂停本地对局（幂等，返回是否实际触发了暂停状态切换）。
+pub async fn pause_match(state: &Arc<LocalGameState>, id_str: &str) -> MatchResult<bool> {
+    with_session(state, id_str, |client| async move {
         client.pause().await.map_err(|e| format!("暂停失败: {e}"))
     })
     .await
@@ -44,12 +60,7 @@ pub async fn pause_match(state: &Arc<LocalGameState>, id_str: &str) -> MatchResu
 
 /// 恢复本地对局（幂等，返回是否实际触发了暂停状态切换）。
 pub async fn resume_match(state: &Arc<LocalGameState>, id_str: &str) -> MatchResult<bool> {
-    let state = state.clone();
-    let id_str = id_str.to_string();
-    super::runtime::run_on_tokio(move || async move {
-        let id = Uuid::parse_str(&id_str).map_err(|e| format!("无效对局 id: {e}"))?;
-        let session = get_session(&state, &id)?;
-        let client = GameClient::new(session);
+    with_session(state, id_str, |client| async move {
         client.unpause().await.map_err(|e| format!("恢复失败: {e}"))
     })
     .await
@@ -61,12 +72,7 @@ pub async fn set_god_mode(
     id_str: &str,
     enabled: bool,
 ) -> MatchResult<()> {
-    let state = state.clone();
-    let id_str = id_str.to_string();
-    super::runtime::run_on_tokio(move || async move {
-        let id = Uuid::parse_str(&id_str).map_err(|e| format!("无效对局 id: {e}"))?;
-        let session = get_session(&state, &id)?;
-        let client = GameClient::new(session);
+    with_session(state, id_str, move |client| async move {
         client.god_mode(enabled).await.map_err(|e| e.to_string())?;
         Ok(())
     })
@@ -79,12 +85,7 @@ pub async fn toggle_cooldown(
     id_str: &str,
     enabled: bool,
 ) -> MatchResult<()> {
-    let state = state.clone();
-    let id_str = id_str.to_string();
-    super::runtime::run_on_tokio(move || async move {
-        let id = Uuid::parse_str(&id_str).map_err(|e| format!("无效对局 id: {e}"))?;
-        let session = get_session(&state, &id)?;
-        let client = GameClient::new(session);
+    with_session(state, id_str, move |client| async move {
         client
             .toggle_cooldown(enabled)
             .await
@@ -96,12 +97,7 @@ pub async fn toggle_cooldown(
 
 /// 重置本地对局中的英雄位置。
 pub async fn reset_position(state: &Arc<LocalGameState>, id_str: &str) -> MatchResult<()> {
-    let state = state.clone();
-    let id_str = id_str.to_string();
-    super::runtime::run_on_tokio(move || async move {
-        let id = Uuid::parse_str(&id_str).map_err(|e| format!("无效对局 id: {e}"))?;
-        let session = get_session(&state, &id)?;
-        let client = GameClient::new(session);
+    with_session(state, id_str, |client| async move {
         client.reset_position().await.map_err(|e| e.to_string())?;
         Ok(())
     })
@@ -114,13 +110,8 @@ pub async fn switch_champion(
     id_str: &str,
     name: &str,
 ) -> MatchResult<()> {
-    let state = state.clone();
-    let id_str = id_str.to_string();
     let name = name.to_string();
-    super::runtime::run_on_tokio(move || async move {
-        let id = Uuid::parse_str(&id_str).map_err(|e| format!("无效对局 id: {e}"))?;
-        let session = get_session(&state, &id)?;
-        let client = GameClient::new(session);
+    with_session(state, id_str, move |client| async move {
         client
             .switch_champion(&name)
             .await
@@ -137,13 +128,8 @@ pub async fn set_script(
     entity_id: u64,
     source: &str,
 ) -> MatchResult<()> {
-    let state = state.clone();
-    let id_str = id_str.to_string();
     let source = source.to_string();
-    super::runtime::run_on_tokio(move || async move {
-        let id = Uuid::parse_str(&id_str).map_err(|e| format!("无效对局 id: {e}"))?;
-        let session = get_session(&state, &id)?;
-        let client = GameClient::new(session);
+    with_session(state, id_str, move |client| async move {
         client
             .set_script(entity_id, &source)
             .await

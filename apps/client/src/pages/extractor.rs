@@ -452,7 +452,7 @@ pub fn render_extractor(
 }
 
 fn start_extraction_process(cx: &mut Context<AppSidebar>) {
-    let (config, _game_path_input) = EXTRACTOR_STATE.with(|cell| {
+    let config = EXTRACTOR_STATE.with(|cell| {
         let mut state = cell.borrow_mut();
         state.is_extracting = true;
         state.status_message = None;
@@ -466,73 +466,65 @@ fn start_extraction_process(cx: &mut Context<AppSidebar>) {
             .map(|ed| ed.read(cx).value().to_string())
             .unwrap_or_else(|| state.game_path.clone());
 
-        (
-            ExtractionConfig {
-                game_path: path,
-                extract_base_and_ui: state.extract_base_and_ui,
-                extract_shaders: state.extract_shaders,
-                extract_audio: state.extract_audio,
-                skip_map_geo: state.skip_map_geo,
-            },
-            state.game_path_input.clone(),
-        )
+        ExtractionConfig {
+            game_path: path,
+            extract_base_and_ui: state.extract_base_and_ui,
+            extract_shaders: state.extract_shaders,
+            extract_audio: state.extract_audio,
+            skip_map_geo: state.skip_map_geo,
+        }
     });
     cx.notify();
 
     let (log_tx, mut log_rx) = mpsc::unbounded_channel::<(ExtractionStep, String)>();
     let (step_tx, mut step_rx) = mpsc::unbounded_channel::<(ExtractionStep, String)>();
-    let weak_entity_log = cx.entity().downgrade();
-    let weak_entity_step = cx.entity().downgrade();
-    let weak_entity_task = cx.entity().downgrade();
+    let weak = cx.entity().downgrade();
 
-    // 监听日志消息推送到对应的 Step UI 内部
     cx.spawn(|_this, cx: &mut AsyncApp| {
         let mut cx = cx.clone();
         async move {
-            while let Some((step, log_msg)) = log_rx.recv().await {
-                let step_idx = step as usize;
-                let _ = weak_entity_log.update(&mut cx, |_, cx| {
-                    EXTRACTOR_STATE.with(|cell| {
-                        let mut state = cell.borrow_mut();
-                        state.step_logs.entry(step_idx).or_default().push(log_msg);
-                    });
-                    cx.notify();
-                });
+            // 提取任务放全局 runtime 并行跑，本任务同时消费 log/step 进度消息
+            let mut task = crate::services::runtime::tokio_runtime()
+                .spawn(run_extraction_task(config, log_tx, step_tx));
+
+            let mut result: Option<Result<(), String>> = None;
+            while result.is_none() {
+                tokio::select! {
+                    log = log_rx.recv() => {
+                        if let Some((step, log_msg)) = log {
+                            let _ = weak.update(&mut cx, |_, cx| {
+                                EXTRACTOR_STATE.with(|cell| {
+                                    let mut state = cell.borrow_mut();
+                                    state.step_logs.entry(step as usize).or_default().push(log_msg);
+                                });
+                                cx.notify();
+                            });
+                        }
+                    }
+                    step = step_rx.recv() => {
+                        if let Some((step, desc)) = step {
+                            let _ = weak.update(&mut cx, |_, cx| {
+                                EXTRACTOR_STATE.with(|cell| {
+                                    let mut state = cell.borrow_mut();
+                                    state.current_step_index = step as usize;
+                                    state.current_step_status = desc;
+                                    state.expanded_steps.insert(step as usize, true);
+                                });
+                                cx.notify();
+                            });
+                        }
+                    }
+                    res = &mut task => {
+                        result = Some(res.unwrap_or_else(|_| Err("提取任务被取消".to_string())));
+                    }
+                }
             }
-        }
-    })
-    .detach();
 
-    // 监听步骤状态变化并更新进度
-    cx.spawn(|_this, cx: &mut AsyncApp| {
-        let mut cx = cx.clone();
-        async move {
-            while let Some((step, desc)) = step_rx.recv().await {
-                let step_idx = step as usize;
-                let _ = weak_entity_step.update(&mut cx, |_, cx| {
-                    EXTRACTOR_STATE.with(|cell| {
-                        let mut state = cell.borrow_mut();
-                        state.current_step_index = step_idx;
-                        state.current_step_status = desc;
-                        state.expanded_steps.insert(step_idx, true);
-                    });
-                    cx.notify();
-                });
-            }
-        }
-    })
-    .detach();
-
-    // 异步执行主任务
-    cx.spawn(|_this, cx: &mut AsyncApp| {
-        let mut cx = cx.clone();
-        async move {
-            let res = run_extraction_task(config, log_tx, step_tx).await;
-            let _ = weak_entity_task.update(&mut cx, |_, cx| {
+            let _ = weak.update(&mut cx, |_, cx| {
                 EXTRACTOR_STATE.with(|cell| {
                     let mut state = cell.borrow_mut();
                     state.is_extracting = false;
-                    if let Err(err) = res {
+                    if let Err(err) = result.take().unwrap_or(Ok(())) {
                         state.status_message = Some(err);
                     }
                 });
