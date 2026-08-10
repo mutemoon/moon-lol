@@ -15,7 +15,7 @@ use gpui_component::{h_flex, v_flex, ActiveTheme, IconName, Sizable, StyledExt};
 
 use self::detail::{render_page_header, render_system_detail};
 use self::input::{
-    clear_all_input_buffers, clear_input_buffer, render_search_input, set_edit_cursor,
+    clear_all_input_buffers, clear_input_buffer, render_search_input,
 };
 use self::play::spawn_play_ron;
 use self::state::{
@@ -26,7 +26,11 @@ use crate::components::sidebar::AppSidebar;
 use crate::services::particle_service::ParticleWsEvent;
 
 /// 粒子系统编辑器：Rayon 树状文件侧边栏 → 选中系统 → 发射器参数编辑 → 自动重播。
-pub fn render_particles(_sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> AnyElement {
+pub fn render_particles(
+    _sidebar: &mut AppSidebar,
+    window: &mut Window,
+    cx: &mut Context<AppSidebar>,
+) -> AnyElement {
     let should_start_scan = update_state_returns(|s| {
         if !s.is_initialized && !s.is_scanning {
             s.is_initialized = true;
@@ -112,7 +116,7 @@ pub fn render_particles(_sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>)
 
     // 右侧详情面板
     let right_panel = match (hero, name, hash, wd) {
-        (Some(h), Some(n), Some(hh), Some(w)) => render_system_detail(cx, &h, &n, hh, &w),
+        (Some(h), Some(n), Some(hh), Some(w)) => render_system_detail(window, cx, &h, &n, hh, &w),
         _ => div()
             .flex_1()
             .flex()
@@ -133,7 +137,7 @@ pub fn render_particles(_sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>)
             .into_any_element(),
     };
 
-    let search_input_elem = render_search_input(cx, query.clone());
+    let search_input_elem = render_search_input(window, cx);
     let page_header_elem = render_page_header(cx, &ws_url, connected, auto_play);
 
     h_flex()
@@ -201,7 +205,6 @@ pub fn render_particles(_sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>)
                                                 update_state(|s| {
                                                     s.search_query.clear();
                                                 });
-                                                set_edit_cursor("particle-search", 0);
                                                 clear_input_buffer("particle-search");
                                                 cx.notify();
                                             })),

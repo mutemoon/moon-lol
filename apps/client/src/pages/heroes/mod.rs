@@ -27,7 +27,40 @@ use crate::components::sidebar::AppSidebar;
 
 // ── 主渲染函数 ──
 
-pub fn render_heroes(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> AnyElement {
+pub fn render_heroes(
+    sidebar: &mut AppSidebar,
+    window: &mut Window,
+    cx: &mut Context<AppSidebar>,
+) -> AnyElement {
+    // 首次进入自动加载英雄与快照
+    if sidebar.heroes.agents.is_empty() && !sidebar.heroes.loading {
+        sidebar.heroes.loading = true;
+        let cloud = sidebar.cloud.clone();
+        cx.spawn(
+            |this: gpui::WeakEntity<AppSidebar>, cx: &mut gpui::AsyncApp| {
+                let this = this.clone();
+                let mut cx = cx.clone();
+                async move {
+                    let agents = cloud.list_agents().await.unwrap_or_default();
+                    use std::collections::HashMap;
+                    let mut snapshots = HashMap::new();
+                    for a in &agents {
+                        if let Ok(snaps) = cloud.list_snapshots(&a.id.to_string()).await {
+                            snapshots.insert(a.id, snaps);
+                        }
+                    }
+                    this.update(&mut cx, |this, ctx| {
+                        this.heroes.agents = agents;
+                        this.heroes.snapshots = snapshots;
+                        this.heroes.loading = false;
+                        ctx.notify();
+                    })
+                    .ok();
+                }
+            },
+        )
+        .detach();
+    }
     if sidebar.heroes.loading && sidebar.heroes.agents.is_empty() {
         return v_flex()
             .size_full()
@@ -40,7 +73,7 @@ pub fn render_heroes(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> 
     if matches!(sidebar.heroes.mode, HeroesMode::Browse) {
         render_browse(sidebar, cx)
     } else {
-        render_edit(sidebar, cx)
+        render_edit(sidebar, window, cx)
     }
 }
 

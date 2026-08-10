@@ -4,6 +4,7 @@ pub mod game_console_logs;
 pub mod navigation;
 pub mod rl;
 pub mod sidebar;
+pub mod text_input;
 
 pub use rl::*;
 pub use sidebar::*;

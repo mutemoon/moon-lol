@@ -1,7 +1,7 @@
 //! 对局 WS 会话服务。
 //!
 //! 基于 `lol_client::WsSession` / `GameClient` 封装本地对局的调试 / 控制操作：
-//! pause / resume / god_mode / toggle_cooldown / reset_position / switch_champion / set_script，
+//! pause / resume / god_mode / toggle_cooldown / reset_position / switch_champion，
 //! 以及事件订阅（用 tokio mpsc 替代 Tauri Channel）。
 
 use std::sync::Arc;
@@ -114,24 +114,6 @@ pub async fn switch_champion(
     with_session(state, id_str, move |client| async move {
         client
             .switch_champion(&name)
-            .await
-            .map_err(|e| e.to_string())?;
-        Ok(())
-    })
-    .await
-}
-
-/// 设置本地对局中某个角色的运行脚本代码。
-pub async fn set_script(
-    state: &Arc<LocalGameState>,
-    id_str: &str,
-    entity_id: u64,
-    source: &str,
-) -> MatchResult<()> {
-    let source = source.to_string();
-    with_session(state, id_str, move |client| async move {
-        client
-            .set_script(entity_id, &source)
             .await
             .map_err(|e| e.to_string())?;
         Ok(())

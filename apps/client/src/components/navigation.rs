@@ -238,6 +238,15 @@ pub fn render_sidebar_menu(sidebar: &AppSidebar, cx: &mut Context<AppSidebar>) -
                                 this.navigate_to(ActiveView::Heroes);
                                 cx.notify();
                             })),
+                    )
+                    .child(
+                        SidebarMenuItem::new(t!("app.nav.menu_hero"))
+                            .icon(IconName::Frame)
+                            .active(active == ActiveView::Hero)
+                            .on_click(cx.listener(|this, _, _, cx| {
+                                this.navigate_to(ActiveView::Hero);
+                                cx.notify();
+                            })),
                     ),
             ),
         )
@@ -289,6 +298,33 @@ pub fn render_sidebar_menu(sidebar: &AppSidebar, cx: &mut Context<AppSidebar>) -
                                 this.navigate_to(ActiveView::Community);
                                 cx.notify();
                             })),
+                    )
+                    .child(
+                        SidebarMenuItem::new(t!("app.nav.menu_observe"))
+                            .icon(IconName::Play)
+                            .active(active == ActiveView::Observe)
+                            .on_click(cx.listener(|this, _, _, cx| {
+                                this.navigate_to(ActiveView::Observe);
+                                cx.notify();
+                            })),
+                    )
+                    .child(
+                        SidebarMenuItem::new(t!("app.nav.menu_history"))
+                            .icon(IconName::File)
+                            .active(active == ActiveView::History)
+                            .on_click(cx.listener(|this, _, _, cx| {
+                                this.navigate_to(ActiveView::History);
+                                cx.notify();
+                            })),
+                    )
+                    .child(
+                        SidebarMenuItem::new(t!("app.nav.menu_room_detail"))
+                            .icon(IconName::Inbox)
+                            .active(active == ActiveView::RoomDetail)
+                            .on_click(cx.listener(|this, _, _, cx| {
+                                this.navigate_to(ActiveView::RoomDetail);
+                                cx.notify();
+                            })),
                     ),
             ),
         )
@@ -338,6 +374,33 @@ pub fn render_sidebar_menu(sidebar: &AppSidebar, cx: &mut Context<AppSidebar>) -
                             .active(active == ActiveView::Extractor)
                             .on_click(cx.listener(|this, _, _, cx| {
                                 this.navigate_to(ActiveView::Extractor);
+                                cx.notify();
+                            })),
+                    )
+                    .child(
+                        SidebarMenuItem::new(t!("app.nav.menu_visual_env"))
+                            .icon(IconName::Settings2)
+                            .active(active == ActiveView::VisualEnv)
+                            .on_click(cx.listener(|this, _, _, cx| {
+                                this.navigate_to(ActiveView::VisualEnv);
+                                cx.notify();
+                            })),
+                    )
+                    .child(
+                        SidebarMenuItem::new(t!("app.nav.menu_mock"))
+                            .icon(IconName::Settings2)
+                            .active(active == ActiveView::Mock)
+                            .on_click(cx.listener(|this, _, _, cx| {
+                                this.navigate_to(ActiveView::Mock);
+                                cx.notify();
+                            })),
+                    )
+                    .child(
+                        SidebarMenuItem::new(t!("app.nav.menu_blog"))
+                            .icon(IconName::File)
+                            .active(active == ActiveView::Blog)
+                            .on_click(cx.listener(|this, _, _, cx| {
+                                this.navigate_to(ActiveView::Blog);
                                 cx.notify();
                             })),
                     ),

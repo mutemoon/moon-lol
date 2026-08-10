@@ -17,6 +17,7 @@ use crate::components::sidebar::AppSidebar;
 use crate::services::particle_service;
 
 pub(super) fn render_system_detail(
+    window: &mut Window,
     cx: &mut Context<AppSidebar>,
     hero: &str,
     name: &str,
@@ -135,7 +136,7 @@ pub(super) fn render_system_detail(
                                     .flex_1()
                                     .overflow_y_scrollbar()
                                     .p_4()
-                                    .child(render_emitter_editor(cx, hash, active_tab, em))
+                                    .child(render_emitter_editor(window, cx, hash, active_tab, em))
                                     .into_any_element()
                             })
                             .unwrap_or_else(|| div().flex_1().into_any_element()),

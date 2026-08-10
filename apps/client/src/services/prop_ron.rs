@@ -209,18 +209,6 @@ pub fn get_global_game_hashes() -> &'static HashMap<u64, String> {
     })
 }
 
-pub async fn convert_prop_file_async(path: std::path::PathBuf) -> Result<(String, usize), String> {
-    crate::services::runtime::tokio_runtime()
-        .spawn_blocking(move || {
-            let bytes = std::fs::read(&path).map_err(|e| format!("读取文件失败: {}", e))?;
-            let len = bytes.len();
-            let ron_str = convert_prop_bytes_to_ron(&bytes)?;
-            Ok((ron_str, len))
-        })
-        .await
-        .map_err(|_| "后台解析线程中断".to_string())?
-}
-
 fn parse_fields(data: &[u8], hashes: &HashMap<u32, String>) -> Result<Vec<PropRonField>, String> {
     let mut parser = BinParser::from_bytes(data);
     let field_count = parser

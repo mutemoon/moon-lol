@@ -1,404 +1,19 @@
-use std::cell::RefCell;
+//! 启动器页渲染辅助：槽位卡片 / 阵营列 / 各区块 UI。
 
 use gpui::prelude::*;
 use gpui::*;
 use gpui_component::button::{Button, ButtonVariants};
 use gpui_component::menu::{DropdownMenu, PopupMenuItem};
-use gpui_component::scroll::ScrollableElement;
 use gpui_component::{h_flex, v_flex, ActiveTheme, Disableable, IconName, Sizable, StyledExt};
 use lol_web_protocol::agent::Agent;
-use lol_web_protocol::scenario::{CreateScenarioDto, Scenario, UpdateScenarioDto};
 use lol_web_protocol::spawn_preset::SpawnPreset as ProtoSpawnPreset;
-use lol_web_protocol::{FrontAgentConfig, GameConfig};
+use lol_web_protocol::GameConfig;
 
+use super::logic::{build_all_agents, spawn_load_scenario, spawn_save_scenario};
+use super::types::{update_state, with_state, LauncherSlot, LauncherView};
 use crate::components::sidebar::AppSidebar;
-use crate::services::provider::{cloud_client, process_service};
-use crate::types::{HeroPreset, SpawnPreset};
-
-// ── 页面本地状态 ──
-
-/// 单个阵营槽位：选手预设名 + 出生点预设名，二者相互独立。
-#[derive(Debug, Clone, Default)]
-struct LauncherSlot {
-    hero_name: String,
-    spawn_name: String,
-}
-
-struct LauncherPageState {
-    loaded: bool,
-    agents: Vec<Agent>,
-    spawns: Vec<ProtoSpawnPreset>,
-    scenarios: Vec<Scenario>,
-    blue_slots: Vec<LauncherSlot>,
-    red_slots: Vec<LauncherSlot>,
-    scene_name: String,
-    saving: bool,
-    loading_scenario: bool,
-    error: Option<String>,
-    message: Option<String>,
-}
-
-impl Default for LauncherPageState {
-    fn default() -> Self {
-        Self {
-            loaded: false,
-            agents: Vec::new(),
-            spawns: Vec::new(),
-            scenarios: Vec::new(),
-            blue_slots: vec![LauncherSlot::default()],
-            red_slots: vec![LauncherSlot::default()],
-            scene_name: "default_scenario".into(),
-            saving: false,
-            loading_scenario: false,
-            error: None,
-            message: None,
-        }
-    }
-}
-
-thread_local! {
-    static STATE: RefCell<LauncherPageState> = RefCell::new(LauncherPageState::default());
-}
-
-fn with_state<R>(f: impl FnOnce(&LauncherPageState) -> R) -> R {
-    STATE.with(|s| f(&s.borrow()))
-}
-
-fn update_state(f: impl FnOnce(&mut LauncherPageState)) {
-    STATE.with(|s| f(&mut s.borrow_mut()));
-}
-
-/// 渲染时快照，避免 borrow 逃逸。
-struct LauncherView {
-    loaded: bool,
-    scene_name: String,
-    scenarios: Vec<Scenario>,
-    blue_slots: Vec<LauncherSlot>,
-    red_slots: Vec<LauncherSlot>,
-    agents: Vec<Agent>,
-    spawns: Vec<ProtoSpawnPreset>,
-    saving: bool,
-    loading_scenario: bool,
-    error: Option<String>,
-    message: Option<String>,
-}
-
-fn snapshot() -> LauncherView {
-    with_state(|s| LauncherView {
-        loaded: s.loaded,
-        scene_name: s.scene_name.clone(),
-        scenarios: s.scenarios.clone(),
-        blue_slots: s.blue_slots.clone(),
-        red_slots: s.red_slots.clone(),
-        agents: s.agents.clone(),
-        spawns: s.spawns.clone(),
-        saving: s.saving,
-        loading_scenario: s.loading_scenario,
-        error: s.error.clone(),
-        message: s.message.clone(),
-    })
-}
-
-// ── 组装逻辑（对应前端 useSlotConfig.toBackend / expandSlot）──
-
-fn default_spawn(team: &str) -> Vec<f32> {
-    if team == "Order" {
-        vec![1981.0, 11441.0]
-    } else {
-        vec![3318.0, 12875.0]
-    }
-}
-
-/// 把单个阵营槽位展开为后端的 FrontAgentConfig。
-fn build_team_agents(
-    s: &LauncherPageState,
-    team: &str,
-    slots: &[LauncherSlot],
-) -> Vec<FrontAgentConfig> {
-    slots
-        .iter()
-        .filter_map(|slot| {
-            if slot.hero_name.is_empty() {
-                return None;
-            }
-            let hero = s.agents.iter().find(|a| a.name == slot.hero_name)?;
-            if hero.champion.is_empty() {
-                return None;
-            }
-            let spawn = s.spawns.iter().find(|sp| sp.name == slot.spawn_name);
-            let spawn_point = spawn
-                .map(|sp| vec![sp.x, sp.z])
-                .unwrap_or_else(|| default_spawn(team));
-            let config_json = hero.config_json.clone();
-            let provider_id = config_json
-                .as_ref()
-                .and_then(|v| v.get("provider_id"))
-                .and_then(|v| v.as_str())
-                .map(str::to_string);
-            Some(FrontAgentConfig {
-                id: None,
-                champion: hero.champion.clone(),
-                team: team.to_string(),
-                prompt: hero.prompt.clone(),
-                spawn_point,
-                agent_type: hero.agent_type.as_str().to_string(),
-                model: hero.model.clone(),
-                provider_id,
-                config_json,
-            })
-        })
-        .collect()
-}
-
-fn build_all_agents(s: &LauncherPageState) -> Vec<FrontAgentConfig> {
-    let mut agents = build_team_agents(s, "Order", &s.blue_slots);
-    agents.extend(build_team_agents(s, "Chaos", &s.red_slots));
-    agents
-}
-
-/// 反向匹配：从场景 agents 中识别选手预设名（对齐 useSlotConfig.matchHeroPreset）。
-fn match_preset(agents: &[Agent], champion: &str, prompt: &str, agent_type: &str) -> String {
-    for a in agents {
-        if a.champion == champion && a.prompt == prompt && a.agent_type.as_str() == agent_type {
-            return a.name.clone();
-        }
-    }
-    agents
-        .iter()
-        .find(|a| a.champion == champion)
-        .map(|a| a.name.clone())
-        .unwrap_or_default()
-}
-
-// ── 异步动作 ──
-
-/// 首次加载：拉取英雄预设 / 出生点预设 / 场景列表，并回填 sidebar 全局字段。
-fn spawn_initial_load(cx: &mut Context<AppSidebar>) {
-    cx.spawn(
-        move |weak: gpui::WeakEntity<AppSidebar>, cx: &mut gpui::AsyncApp| {
-            let mut cx = cx.clone();
-            async move {
-                let (agents, spawns) = tokio::join!(
-                    async { cloud_client().list_agents().await.unwrap_or_default() },
-                    async {
-                        cloud_client()
-                            .list_spawn_presets()
-                            .await
-                            .unwrap_or_default()
-                    },
-                );
-                let scenarios = cloud_client().list_scenarios().await.unwrap_or_default();
-                update_state(|s| {
-                    s.agents = agents.clone();
-                    s.spawns = spawns.clone();
-                    s.scenarios = scenarios.clone();
-                    s.loaded = true;
-                    s.error = None;
-                });
-                if let Some(entity) = weak.upgrade() {
-                    entity.update(&mut cx, |sidebar, cx| {
-                        sidebar.hero_presets = agents
-                            .iter()
-                            .map(|a| HeroPreset {
-                                name: a.name.clone(),
-                                hero: a.champion.clone(),
-                                agent_type: a.agent_type.as_str().to_string(),
-                            })
-                            .collect();
-                        sidebar.spawn_presets = spawns
-                            .iter()
-                            .map(|sp| SpawnPreset {
-                                name: sp.name.clone(),
-                                x: sp.x,
-                                z: sp.z,
-                                team: sp.team.as_str().to_string(),
-                            })
-                            .collect();
-                        cx.notify();
-                    });
-                }
-            }
-        },
-    )
-    .detach();
-}
-
-/// 保存当前阵容为场景：同名存在则更新，否则新建。
-fn spawn_save_scenario(cx: &mut Context<AppSidebar>) {
-    cx.spawn(
-        move |weak: gpui::WeakEntity<AppSidebar>, cx: &mut gpui::AsyncApp| {
-            let mut cx = cx.clone();
-            async move {
-                let (scene_name, agents_json, existing_id) = with_state(|s| {
-                    let name = s.scene_name.trim().to_string();
-                    let agents = build_all_agents(s);
-                    let agents_json =
-                        serde_json::to_value(&agents).unwrap_or(serde_json::Value::Null);
-                    let existing_id = s
-                        .scenarios
-                        .iter()
-                        .find(|sc| sc.name == name)
-                        .map(|sc| sc.id.to_string());
-                    (name, agents_json, existing_id)
-                });
-                let empty = agents_json.as_array().map_or(true, |a| a.is_empty());
-                let finish = |cx: &mut AsyncApp| {
-                    if let Some(entity) = weak.upgrade() {
-                        entity.update(cx, |_, cx| cx.notify());
-                    }
-                };
-                if scene_name.is_empty() {
-                    update_state(|s| {
-                        s.saving = false;
-                        s.error = Some("请输入场景名称".into());
-                    });
-                    finish(&mut cx);
-                    return;
-                }
-                if empty {
-                    update_state(|s| {
-                        s.saving = false;
-                        s.error = Some("请至少选择一个英雄预设".into());
-                    });
-                    finish(&mut cx);
-                    return;
-                }
-                update_state(|s| {
-                    s.saving = true;
-                    s.error = None;
-                    s.message = None;
-                });
-                let result = match existing_id {
-                    Some(id) => cloud_client()
-                        .update_scenario(
-                            &id,
-                            &UpdateScenarioDto {
-                                name: None,
-                                agents: Some(agents_json),
-                            },
-                        )
-                        .await
-                        .map(|_| ()),
-                    None => cloud_client()
-                        .create_scenario(&CreateScenarioDto {
-                            name: scene_name.clone(),
-                            agents: agents_json,
-                        })
-                        .await
-                        .map(|_| ()),
-                };
-                match result {
-                    Ok(()) => {
-                        let scenarios = cloud_client().list_scenarios().await.unwrap_or_default();
-                        update_state(|s| {
-                            s.scenarios = scenarios;
-                            s.saving = false;
-                            s.message = Some(format!("场景「{}」已保存", scene_name));
-                            s.error = None;
-                        });
-                    }
-                    Err(e) => update_state(|s| {
-                        s.saving = false;
-                        s.error = Some(format!("保存失败: {}", e));
-                    }),
-                }
-                finish(&mut cx);
-            }
-        },
-    )
-    .detach();
-}
-
-/// 按 id 载入场景并回填蓝/红槽位。
-fn spawn_load_scenario(cx: &mut App, weak: WeakEntity<AppSidebar>, id: String) {
-    cx.spawn(move |cx: &mut gpui::AsyncApp| {
-        let mut cx = cx.clone();
-        async move {
-            match cloud_client().get_scenario(&id).await {
-                Ok(sc) => {
-                    let agents_json = sc.agents.clone();
-                    let scene_name = sc.name.clone();
-                    update_state(|s| {
-                        s.loading_scenario = false;
-                        s.error = None;
-                        s.message = None;
-                        let arr = agents_json.as_array().cloned().unwrap_or_default();
-                        let mut blue = Vec::new();
-                        let mut red = Vec::new();
-                        for a in arr {
-                            let team = a
-                                .get("team")
-                                .and_then(|v| v.as_str())
-                                .unwrap_or("")
-                                .to_string();
-                            let champion = a
-                                .get("champion")
-                                .and_then(|v| v.as_str())
-                                .unwrap_or("")
-                                .to_string();
-                            let prompt = a
-                                .get("prompt")
-                                .and_then(|v| v.as_str())
-                                .unwrap_or("")
-                                .to_string();
-                            let agent_type = a
-                                .get("agent_type")
-                                .and_then(|v| v.as_str())
-                                .unwrap_or("llm")
-                                .to_string();
-                            let hero_name =
-                                match_preset(&s.agents, &champion, &prompt, &agent_type);
-                            let (x, z) = a
-                                .get("spawn_point")
-                                .and_then(|v| v.as_array())
-                                .map(|arr| {
-                                    let x =
-                                        arr.get(0).and_then(|v| v.as_f64()).unwrap_or(0.0) as f32;
-                                    let z =
-                                        arr.get(1).and_then(|v| v.as_f64()).unwrap_or(0.0) as f32;
-                                    (x, z)
-                                })
-                                .unwrap_or((0.0, 0.0));
-                            let spawn_name = s
-                                .spawns
-                                .iter()
-                                .find(|sp| (sp.x - x).abs() < 1.0 && (sp.z - z).abs() < 1.0)
-                                .map(|sp| sp.name.clone())
-                                .unwrap_or_default();
-                            let slot = LauncherSlot {
-                                hero_name,
-                                spawn_name,
-                            };
-                            if team == "Order" {
-                                blue.push(slot);
-                            } else {
-                                red.push(slot);
-                            }
-                        }
-                        if blue.is_empty() {
-                            blue.push(LauncherSlot::default());
-                        }
-                        if red.is_empty() {
-                            red.push(LauncherSlot::default());
-                        }
-                        s.blue_slots = blue;
-                        s.red_slots = red;
-                        s.scene_name = scene_name.clone();
-                        s.message = Some(format!("已载入场景「{}」", scene_name));
-                    });
-                }
-                Err(e) => update_state(|s| {
-                    s.loading_scenario = false;
-                    s.error = Some(format!("载入失败: {}", e));
-                }),
-            }
-            if let Some(entity) = weak.upgrade() {
-                entity.update(&mut cx, |_, cx| cx.notify());
-            }
-        }
-    })
-    .detach();
-}
+use crate::services::provider::process_service;
+use crate::types::RunningGameInfo;
 
 // ── 渲染辅助 ──
 
@@ -643,7 +258,7 @@ fn team_column(
 
 // ── 模块化子组件 ──
 
-fn render_header() -> AnyElement {
+pub(super) fn render_header() -> AnyElement {
     h_flex()
         .items_center()
         .justify_between()
@@ -657,7 +272,7 @@ fn render_header() -> AnyElement {
         .into_any_element()
 }
 
-fn render_mode_and_champion(
+pub(super) fn render_mode_and_champion(
     mode: &str,
     champ: &str,
     champions: &[String],
@@ -720,7 +335,7 @@ fn render_mode_and_champion(
         .into_any_element()
 }
 
-fn render_load_dropdown(view: &LauncherView, cx: &mut Context<AppSidebar>) -> AnyElement {
+pub(super) fn render_load_dropdown(view: &LauncherView, cx: &mut Context<AppSidebar>) -> AnyElement {
     let weak = cx.entity().downgrade();
     let scenarios = view.scenarios.clone();
     Button::new("launcher-load-scenario")
@@ -748,7 +363,7 @@ fn render_load_dropdown(view: &LauncherView, cx: &mut Context<AppSidebar>) -> An
         .into_any_element()
 }
 
-fn render_scene_section(
+pub(super) fn render_scene_section(
     view: &LauncherView,
     load_dropdown: AnyElement,
     cx: &mut Context<AppSidebar>,
@@ -804,7 +419,7 @@ fn render_scene_section(
         .into_any_element()
 }
 
-fn render_message_banners(
+pub(super) fn render_message_banners(
     view: &LauncherView,
     launch_error: Option<String>,
     cx: &mut Context<AppSidebar>,
@@ -862,7 +477,7 @@ fn render_message_banners(
     banners
 }
 
-fn render_teams_section(view: &LauncherView, cx: &mut Context<AppSidebar>) -> AnyElement {
+pub(super) fn render_teams_section(view: &LauncherView, cx: &mut Context<AppSidebar>) -> AnyElement {
     h_flex()
         .gap_4()
         .items_start()
@@ -887,7 +502,7 @@ fn render_teams_section(view: &LauncherView, cx: &mut Context<AppSidebar>) -> An
         .into_any_element()
 }
 
-fn render_action_buttons(starting: bool, cx: &mut Context<AppSidebar>) -> AnyElement {
+pub(super) fn render_action_buttons(starting: bool, cx: &mut Context<AppSidebar>) -> AnyElement {
     let launch_game_btn = Button::new("launch-game-btn")
         .primary()
         .icon(if starting {
@@ -938,7 +553,7 @@ fn render_action_buttons(starting: bool, cx: &mut Context<AppSidebar>) -> AnyEle
                                     entity.update(&mut cx, |sidebar, cx| {
                                         sidebar.is_starting_game = false;
                                         sidebar.current_game_id = Some(game.id.clone());
-                                        sidebar.running_games.push(crate::types::RunningGameInfo {
+                                        sidebar.running_games.push(RunningGameInfo {
                                             id: game.id,
                                             mode: mode.clone(),
                                             champion: champ.clone(),
@@ -965,37 +580,4 @@ fn render_action_buttons(starting: bool, cx: &mut Context<AppSidebar>) -> AnyEle
         }));
 
     launch_game_btn.into_any_element()
-}
-
-// ── 页面入口 ──
-
-/// 启动器页面：模式 + 场景 + 双阵营槽位编排 + 启动。
-pub fn render_launcher(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> AnyElement {
-    let champ = sidebar.champion.clone();
-    let mode = sidebar.game_mode.clone();
-    let launch_error = sidebar.launch_error.clone();
-    let starting = sidebar.is_starting_game;
-    let champions = sidebar.champions_list.clone();
-    let view = snapshot();
-
-    if !view.loaded {
-        spawn_initial_load(cx);
-    }
-
-    let load_dropdown = render_load_dropdown(&view, cx);
-
-    let mut container = v_flex().size_full().flex_1().gap_6().overflow_y_scrollbar();
-
-    container = container.child(render_header());
-    container = container.child(render_mode_and_champion(&mode, &champ, &champions, cx));
-    container = container.child(render_scene_section(&view, load_dropdown, cx));
-
-    for banner in render_message_banners(&view, launch_error, cx) {
-        container = container.child(banner);
-    }
-
-    container = container.child(render_teams_section(&view, cx));
-    container = container.child(render_action_buttons(starting, cx));
-
-    container.into_any_element()
 }

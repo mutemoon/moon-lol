@@ -2,12 +2,10 @@
 
 //! 登录 / 认证弹窗（对应 apps/client/src/components/auth/AuthDialog.vue）。
 //!
-//! 表单状态用 thread_local 保存（同 community.rs / heroes.rs 的 track_focus 手法），
-//! 避免给 AppSidebar 增加字段。输入框为手写焦点/光标实现，因为
-//! gpui_component 的 Input 需要 &mut Window，而 render 签名拿不到 window。
+//! 表单状态用 thread_local 保存，避免给 AppSidebar 增加字段。
+//! 输入框复用共享组件（gpui_component Input 封装）。
 
 use std::cell::{Cell, RefCell};
-use std::collections::HashMap;
 
 use gpui::prelude::*;
 use gpui::*;
@@ -35,96 +33,12 @@ thread_local! {
     static ERROR_MSG: RefCell<String> = RefCell::new(String::new());
     static INFO_MSG: RefCell<String> = RefCell::new(String::new());
     static SUBMITTING: Cell<bool> = Cell::new(false);
-    static EDITS: RefCell<HashMap<String, EditMeta>> = RefCell::new(HashMap::new());
 }
 
-#[derive(Clone)]
-struct EditMeta {
-    cursor: usize,
-    focus: FocusHandle,
-}
-
-fn edit_meta(id: &str, cx: &App) -> EditMeta {
-    EDITS.with(|m| {
-        let mut m = m.borrow_mut();
-        if let Some(meta) = m.get(id) {
-            return meta.clone();
-        }
-        let meta = EditMeta {
-            cursor: 0,
-            focus: cx.focus_handle(),
-        };
-        m.insert(id.to_string(), meta.clone());
-        meta
-    })
-}
-
-fn edit_cursor(id: &str) -> usize {
-    EDITS.with(|m| m.borrow().get(id).map_or(0, |e| e.cursor))
-}
-
-fn set_edit_cursor(id: &str, cursor: usize) {
-    EDITS.with(|m| {
-        if let Some(e) = m.borrow_mut().get_mut(id) {
-            e.cursor = cursor;
-        }
-    })
-}
-
-/// 处理单个按键，返回（新文本，新光标）。无变化返回 None。
-fn apply_key(value: &str, cursor: usize, event: &KeyDownEvent) -> Option<(String, usize)> {
-    let ks = &event.keystroke;
-    let mods = &ks.modifiers;
-    let mut chars: Vec<char> = value.chars().collect();
-    let cursor = cursor.min(chars.len());
-
-    // ctrl / cmd 组合键不作为字符输入
-    if mods.control || mods.platform {
-        return None;
-    }
-
-    if let Some(ch) = ks.key_char.as_deref() {
-        let insert_chars: Vec<char> = ch.chars().collect();
-        if !mods.alt && !insert_chars.is_empty() && !insert_chars.iter().any(|c| c.is_control()) {
-            for (i, c) in insert_chars.iter().enumerate() {
-                chars.insert(cursor + i, *c);
-            }
-            return Some((chars.into_iter().collect(), cursor + insert_chars.len()));
-        }
-    }
-
-    match ks.key.as_str() {
-        "backspace" => {
-            if cursor > 0 {
-                chars.remove(cursor - 1);
-                Some((chars.into_iter().collect(), cursor - 1))
-            } else {
-                None
-            }
-        }
-        "delete" => {
-            if cursor < chars.len() {
-                chars.remove(cursor);
-                Some((chars.into_iter().collect(), cursor))
-            } else {
-                None
-            }
-        }
-        "left" => Some((value.to_string(), cursor.saturating_sub(1))),
-        "right" => Some((value.to_string(), (cursor + 1).min(chars.len()))),
-        "home" => Some((value.to_string(), 0)),
-        "end" => Some((value.to_string(), chars.len())),
-        "space" => {
-            chars.insert(cursor, ' ');
-            Some((chars.into_iter().collect(), cursor + 1))
-        }
-        _ => None,
-    }
-}
-
-// ── 手写输入框（参照 community.rs） ──
+// ── 输入框（复用共享组件） ──
 
 fn render_input(
+    window: &mut Window,
     cx: &mut Context<AppSidebar>,
     id: &str,
     placeholder: &str,
@@ -132,60 +46,18 @@ fn render_input(
     get_value: impl Fn() -> String + 'static,
     set_value: impl Fn(String) + 'static,
 ) -> AnyElement {
-    let value = get_value();
-    let meta = edit_meta(id, cx);
-    let focus_handle = meta.focus.clone();
-    let empty = value.is_empty();
-    let chars: Vec<char> = value.chars().collect();
-    let cursor = meta.cursor.min(chars.len());
-    let before: String = chars[..cursor].iter().collect();
-    let after: String = chars[cursor..].iter().collect();
-    let accent = cx.theme().accent;
-    let muted = cx.theme().muted_foreground;
-    let id_owned = id.to_string();
-
-    let display = move |s: &str| -> String {
-        if mask {
-            "•".repeat(s.chars().count())
-        } else {
-            s.to_string()
-        }
-    };
-
-    let listener = cx.listener(move |_this, event: &KeyDownEvent, _window, cx| {
-        let live = get_value();
-        let cur = edit_cursor(&id_owned);
-        if let Some((nv, nc)) = apply_key(&live, cur, event) {
-            set_value(nv);
-            set_edit_cursor(&id_owned, nc);
-            cx.notify();
-        }
-    });
-
-    div()
-        .track_focus(&focus_handle)
-        .px_2()
-        .py_1()
-        .w_full()
-        .border_1()
-        .border_color(cx.theme().border)
-        .rounded_md()
-        .bg(cx.theme().background)
-        .text_sm()
-        .on_key_down(listener)
-        .child(
-            h_flex()
-                .items_center()
-                .when(empty, |d| {
-                    d.text_color(muted).child(placeholder.to_string())
-                })
-                .when(!empty, |d| {
-                    d.child(display(&before))
-                        .child(div().w(px(1.)).h(rems(1.)).bg(accent))
-                        .child(display(&after))
-                }),
-        )
-        .into_any_element()
+    crate::components::text_input::render_edit_input(
+        window,
+        cx,
+        id,
+        placeholder,
+        crate::components::text_input::EditOptions {
+            masked: mask,
+            ..Default::default()
+        },
+        move |_s| get_value(),
+        move |_s, v| set_value(v),
+    )
 }
 
 fn field(label: &str, input: AnyElement) -> AnyElement {
@@ -265,15 +137,20 @@ fn mode_tab(target: AuthMode, label: &str, cx: &mut Context<AppSidebar>) -> AnyE
 /// sidebar.show_auth_dialog 为 true 时返回居中弹窗，否则 None。
 pub fn render_auth_dialog(
     sidebar: &mut AppSidebar,
+    window: &mut Window,
     cx: &mut Context<AppSidebar>,
 ) -> Option<AnyElement> {
     if !sidebar.show_auth_dialog {
         return None;
     }
-    Some(render_dialog(sidebar, cx))
+    Some(render_dialog(sidebar, window, cx))
 }
 
-fn render_dialog(_sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> AnyElement {
+fn render_dialog(
+    _sidebar: &mut AppSidebar,
+    window: &mut Window,
+    cx: &mut Context<AppSidebar>,
+) -> AnyElement {
     let mode = AUTH_MODE.with(|m| m.get());
     let error = ERROR_MSG.with(|e| e.borrow().clone());
     let info = INFO_MSG.with(|i| i.borrow().clone());
@@ -297,6 +174,7 @@ fn render_dialog(_sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> Any
     );
 
     let phone_input = render_input(
+        window,
         cx,
         "auth-phone",
         "请输入 11 位手机号",
@@ -305,6 +183,7 @@ fn render_dialog(_sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> Any
         |v| PHONE.with(|p| *p.borrow_mut() = v),
     );
     let password_input = render_input(
+        window,
         cx,
         "auth-password",
         if is_reset {
@@ -317,6 +196,7 @@ fn render_dialog(_sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> Any
         |v| PASSWORD.with(|p| *p.borrow_mut() = v),
     );
     let code_input = render_input(
+        window,
         cx,
         "auth-code",
         "请输入验证码",

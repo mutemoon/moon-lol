@@ -36,10 +36,7 @@ pub fn render_task_detail(
         .get(&task_id)
         .cloned()
         .unwrap_or_else(|| LocalTaskDetail {
-            id: task_id.clone(),
             name: format!("任务 {}", task_id),
-            agent_type: "PPO".into(),
-            env_name: "FioraVsRivenEnv".into(),
             status: "running".into(),
             current_step: 0,
             ep_return: 0.0,

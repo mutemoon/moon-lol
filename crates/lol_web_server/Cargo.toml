@@ -13,7 +13,7 @@ path = "src/main.rs"
 
 [dependencies]
 # Inherited from workspace
-tokio = { workspace = true, features = ["full"] }
+tokio.workspace = true
 serde = { workspace = true, features = ["derive"] }
 serde_json.workspace = true
 futures-util.workspace = true

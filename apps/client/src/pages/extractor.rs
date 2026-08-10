@@ -7,7 +7,7 @@ use gpui_component::button::{Button, ButtonVariants};
 use gpui_component::checkbox::Checkbox;
 use gpui_component::input::{Input, InputState};
 use gpui_component::scroll::ScrollableElement;
-use gpui_component::{h_flex, v_flex, ActiveTheme, Disableable, IconName, StyledExt};
+use gpui_component::{h_flex, v_flex, ActiveTheme, Disableable, StyledExt};
 use tokio::sync::mpsc;
 
 use crate::components::sidebar::AppSidebar;
@@ -18,7 +18,6 @@ use crate::services::extractor_service::{run_extraction_task, ExtractionConfig, 
 pub struct StepInfo {
     pub title: String,
     pub description: String,
-    pub icon: IconName,
 }
 
 pub struct ExtractorPageState {
@@ -113,28 +112,23 @@ pub fn render_extractor(
         StepInfo {
             title: "1. Git 同步 Hash 数据".to_string(),
             description: "自动 clone / pull CommunityDragon-Data 社区哈希字典".to_string(),
-            icon: IconName::Folder,
         },
         StepInfo {
             title: "2. 基础资源与 UI 提取".to_string(),
             description: "提取全英雄 3D 模型、纹理贴图、地图数据与全套矢量 UI 资源".to_string(),
-            icon: IconName::File,
         },
         StepInfo {
             title: "3. 全英雄音效提取".to_string(),
             description: "解析 bnk/wpk 音频包并用 ww2ogg 转码生成 AudioBank RON 配置".to_string(),
-            icon: IconName::Palette,
         },
         StepInfo {
             title: "4. 着色器反编译 (ShaderCache)".to_string(),
             description: "提取 DXBC 字节码，用 HLSLDecompiler 转 HLSL 再由 DXC 编译 SPIR-V"
                 .to_string(),
-            icon: IconName::Settings,
         },
         StepInfo {
             title: "5. 全量完成 (Complete)".to_string(),
             description: "所有资源已同步更新至目标 assets 目录，可以投入游戏或场景使用".to_string(),
-            icon: IconName::Check,
         },
     ];
 

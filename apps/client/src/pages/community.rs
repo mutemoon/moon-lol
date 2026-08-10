@@ -1,5 +1,4 @@
 use std::cell::RefCell;
-use std::collections::HashMap;
 
 use gpui::prelude::*;
 use gpui::*;
@@ -9,158 +8,16 @@ use gpui_component::{h_flex, v_flex, ActiveTheme, Disableable, IconName, StyledE
 use lol_web_protocol::agent::Agent;
 
 use crate::components::sidebar::AppSidebar;
+use crate::components::text_input::{render_edit_input, EditOptions};
 use crate::services::provider;
 
 const SORTS: &[(&str, &str)] = &[("recent", "最近"), ("popular", "热门"), ("elo", "ELO")];
 
 // ── 页面本地状态 ──
 
-/// 可编辑输入框的焦点与光标（按 id 区分，跨渲染保持）
-#[derive(Clone)]
-struct EditMeta {
-    cursor: usize,
-    focus: FocusHandle,
-}
-
 thread_local! {
-    static EDITS: RefCell<HashMap<String, EditMeta>> = RefCell::new(HashMap::new());
     static LOADING: RefCell<bool> = RefCell::new(false);
     static FORK_ERROR: RefCell<Option<String>> = RefCell::new(None);
-}
-
-fn edit_meta(id: &str, cx: &App) -> EditMeta {
-    EDITS.with(|m| {
-        let mut m = m.borrow_mut();
-        if let Some(meta) = m.get(id) {
-            return meta.clone();
-        }
-        let meta = EditMeta {
-            cursor: 0,
-            focus: cx.focus_handle(),
-        };
-        m.insert(id.to_string(), meta.clone());
-        meta
-    })
-}
-
-fn edit_cursor(id: &str) -> usize {
-    EDITS.with(|m| m.borrow().get(id).map_or(0, |e| e.cursor))
-}
-
-fn set_edit_cursor(id: &str, cursor: usize) {
-    EDITS.with(|m| {
-        if let Some(e) = m.borrow_mut().get_mut(id) {
-            e.cursor = cursor;
-        }
-    })
-}
-
-/// 处理单个按键，返回（新文本，新光标）。无变化返回 None。
-fn apply_key(value: &str, cursor: usize, event: &KeyDownEvent) -> Option<(String, usize)> {
-    let ks = &event.keystroke;
-    let mods = &ks.modifiers;
-    let mut chars: Vec<char> = value.chars().collect();
-    let cursor = cursor.min(chars.len());
-
-    // ctrl / cmd 组合键不作为字符输入
-    if mods.control || mods.platform {
-        return None;
-    }
-
-    if let Some(ch) = ks.key_char.as_deref() {
-        let insert_chars: Vec<char> = ch.chars().collect();
-        if !mods.alt && !insert_chars.is_empty() && !insert_chars.iter().any(|c| c.is_control()) {
-            for (i, c) in insert_chars.iter().enumerate() {
-                chars.insert(cursor + i, *c);
-            }
-            return Some((chars.into_iter().collect(), cursor + insert_chars.len()));
-        }
-    }
-
-    match ks.key.as_str() {
-        "backspace" => {
-            if cursor > 0 {
-                chars.remove(cursor - 1);
-                Some((chars.into_iter().collect(), cursor - 1))
-            } else {
-                None
-            }
-        }
-        "delete" => {
-            if cursor < chars.len() {
-                chars.remove(cursor);
-                Some((chars.into_iter().collect(), cursor))
-            } else {
-                None
-            }
-        }
-        "left" => Some((value.to_string(), cursor.saturating_sub(1))),
-        "right" => Some((value.to_string(), (cursor + 1).min(chars.len()))),
-        "home" => Some((value.to_string(), 0)),
-        "end" => Some((value.to_string(), chars.len())),
-        "space" => {
-            chars.insert(cursor, ' ');
-            Some((chars.into_iter().collect(), cursor + 1))
-        }
-        _ => None,
-    }
-}
-
-/// 可聚焦、可键盘编辑的文本输入框。get_value 读 live 值，set_value 写回 sidebar 字段。
-fn render_edit_input(
-    sidebar: &AppSidebar,
-    cx: &mut Context<AppSidebar>,
-    id: &str,
-    placeholder: &str,
-    get_value: impl Fn(&AppSidebar) -> String + 'static,
-    set_value: impl Fn(&mut AppSidebar, String) + 'static,
-) -> AnyElement {
-    let value = get_value(sidebar);
-    let meta = edit_meta(id, cx);
-    let focus_handle = meta.focus.clone();
-    let empty = value.is_empty();
-    let chars: Vec<char> = value.chars().collect();
-    let cursor = meta.cursor.min(chars.len());
-    let before: String = chars[..cursor].iter().collect();
-    let after: String = chars[cursor..].iter().collect();
-    let accent = cx.theme().accent;
-    let muted = cx.theme().muted_foreground;
-    let id_owned = id.to_string();
-
-    let listener = cx.listener(move |this, event: &KeyDownEvent, _window, cx| {
-        let live = get_value(this);
-        let cur = edit_cursor(&id_owned);
-        if let Some((nv, nc)) = apply_key(&live, cur, event) {
-            set_value(this, nv);
-            set_edit_cursor(&id_owned, nc);
-            cx.notify();
-        }
-    });
-
-    div()
-        .track_focus(&focus_handle)
-        .px_2()
-        .py_1()
-        .w_full()
-        .border_1()
-        .border_color(cx.theme().border)
-        .rounded_md()
-        .bg(cx.theme().background)
-        .text_sm()
-        .on_key_down(listener)
-        .child(
-            h_flex()
-                .items_center()
-                .when(empty, |d| {
-                    d.text_color(muted).child(placeholder.to_string())
-                })
-                .when(!empty, |d| {
-                    d.child(before)
-                        .child(div().w(px(1.)).h(rems(1.)).bg(accent))
-                        .child(after)
-                }),
-        )
-        .into_any_element()
 }
 
 // ── 数据加载 ──
@@ -219,16 +76,21 @@ fn render_sort_tabs(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> A
         .into_any_element()
 }
 
-fn render_search(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> AnyElement {
+fn render_search(
+    sidebar: &mut AppSidebar,
+    window: &mut Window,
+    cx: &mut Context<AppSidebar>,
+) -> AnyElement {
     let current = sidebar.community_search.clone();
     h_flex()
         .gap_1()
         .items_center()
         .child(div().w_64().child(render_edit_input(
-            sidebar,
+            window,
             cx,
             "comm-search",
             "搜索 Agent / 英雄",
+            EditOptions::default(),
             |this| this.community_search.clone(),
             |this, v| this.community_search = v,
         )))
@@ -240,7 +102,6 @@ fn render_search(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> AnyE
                 .label("x")
                 .on_click(cx.listener(|this, _, _, cx| {
                     this.community_search.clear();
-                    set_edit_cursor("comm-search", 0);
                     cx.notify();
                 }))
                 .into_any_element()
@@ -420,7 +281,11 @@ fn confirm_fork(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) {
     .detach();
 }
 
-fn render_fork_dialog(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> AnyElement {
+fn render_fork_dialog(
+    sidebar: &mut AppSidebar,
+    window: &mut Window,
+    cx: &mut Context<AppSidebar>,
+) -> AnyElement {
     if sidebar.community_fork_target.is_none() {
         return div().into_any_element();
     }
@@ -446,10 +311,11 @@ fn render_fork_dialog(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) ->
                 .items_center()
                 .child(div().text_xs().child("名称"))
                 .child(div().flex_1().child(render_edit_input(
-                    sidebar,
+                    window,
                     cx,
                     "comm-fork-name",
                     "新 Agent 名称",
+                    EditOptions::default(),
                     |this| this.community_fork_name.clone(),
                     |this, v| this.community_fork_name = v,
                 ))),
@@ -496,7 +362,11 @@ fn render_fork_dialog(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) ->
 
 // ── 入口 ──
 
-pub fn render_community(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> AnyElement {
+pub fn render_community(
+    sidebar: &mut AppSidebar,
+    window: &mut Window,
+    cx: &mut Context<AppSidebar>,
+) -> AnyElement {
     // 首次渲染加载社区列表
     if !sidebar.community_loaded {
         sidebar.community_loaded = true;
@@ -533,11 +403,11 @@ pub fn render_community(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) 
                 .items_center()
                 .justify_between()
                 .child(render_sort_tabs(sidebar, cx))
-                .child(render_search(sidebar, cx)),
+                .child(render_search(sidebar, window, cx)),
         )
         .child(div().h_0p5().bg(cx.theme().border))
         .child(if sidebar.community_fork_target.is_some() {
-            render_fork_dialog(sidebar, cx)
+            render_fork_dialog(sidebar, window, cx)
         } else {
             div().into_any_element()
         })

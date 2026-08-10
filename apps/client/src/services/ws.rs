@@ -112,10 +112,7 @@ pub fn spawn_ws_service(
                                     .task_details
                                     .entry(task_id.clone())
                                     .or_insert_with(|| LocalTaskDetail {
-                                        id: task_id.clone(),
                                         name: task_id.clone(),
-                                        agent_type: "PPO".to_string(),
-                                        env_name: "FioraVsRiven".to_string(),
                                         status: "Running".to_string(),
                                         current_step: step,
                                         ep_return,
@@ -205,10 +202,7 @@ pub fn spawn_ws_service(
                                     .task_details
                                     .entry(task_id.clone())
                                     .or_insert_with(|| LocalTaskDetail {
-                                        id: task_id.clone(),
                                         name: task_id.clone(),
-                                        agent_type: "PPO".to_string(),
-                                        env_name: "FioraVsRiven".to_string(),
                                         status: "Running".to_string(),
                                         current_step: 0,
                                         ep_return: 0.0,

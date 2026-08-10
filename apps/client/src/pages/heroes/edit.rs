@@ -20,7 +20,11 @@ use super::{
 };
 use crate::components::sidebar::AppSidebar;
 
-pub(super) fn render_edit(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> AnyElement {
+pub(super) fn render_edit(
+    sidebar: &mut AppSidebar,
+    window: &mut Window,
+    cx: &mut Context<AppSidebar>,
+) -> AnyElement {
     let editing = matches!(
         sidebar.heroes.mode,
         HeroesMode::Edit {
@@ -52,7 +56,7 @@ pub(super) fn render_edit(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>
     );
 
     let tab_content = if selected_tab == HeroesTab::Config {
-        render_config_tab(sidebar, cx)
+        render_config_tab(sidebar, window, cx)
     } else {
         render_publish_tab(sidebar, cx)
     };
@@ -154,7 +158,11 @@ fn make_tab_btn(
         .into_any_element()
 }
 
-fn render_config_tab(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> AnyElement {
+fn render_config_tab(
+    sidebar: &mut AppSidebar,
+    window: &mut Window,
+    cx: &mut Context<AppSidebar>,
+) -> AnyElement {
     ensure_providers_loaded(sidebar, cx);
 
     let agent_type = sidebar.heroes.draft_agent_type;
@@ -185,6 +193,7 @@ fn render_config_tab(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> 
                 "系统提示词",
                 render_edit_input(
                     sidebar,
+                    window,
                     cx,
                     "heroes-prompt",
                     "描述该选手的行为策略、对线风格、连招意图…",
@@ -197,7 +206,7 @@ fn render_config_tab(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> 
                 h_flex()
                     .gap_4()
                     .child(div().flex_1().child(edit_field("模型供应商", render_provider_select(sidebar, cx))))
-                    .child(div().flex_1().child(edit_field("模型（留空用全局默认）", render_model_select(sidebar, cx)))),
+                    .child(div().flex_1().child(edit_field("模型（留空用全局默认）", render_model_select(sidebar, window, cx)))),
             )
             .child(render_think_depth(sidebar, cx))
             .into_any_element(),
@@ -207,6 +216,7 @@ fn render_config_tab(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> 
                 "模型权重路径 (.pth)",
                 render_edit_input(
                     sidebar,
+                    window,
                     cx,
                     "heroes-rl-path",
                     "如 checkpoints/ppo_riven.pth",
@@ -219,6 +229,7 @@ fn render_config_tab(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> 
                 "推理端点 URL（可选）",
                 render_edit_input(
                     sidebar,
+                    window,
                     cx,
                     "heroes-rl-endpoint",
                     "如 ws://127.0.0.1:8765",
@@ -227,7 +238,7 @@ fn render_config_tab(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> 
                     |s, v| s.heroes.draft_rl_endpoint = v,
                 ),
             ))
-            .child(reward_grid(sidebar, cx))
+            .child(reward_grid(sidebar, window, cx))
             .into_any_element(),
         AgentType::Script => v_flex()
             .gap_4()
@@ -235,6 +246,7 @@ fn render_config_tab(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> 
                 "脚本",
                 render_edit_input(
                     sidebar,
+                    window,
                     cx,
                     "heroes-script",
                     "// 在此编写宿主 API 脚本…",
@@ -258,6 +270,7 @@ fn render_config_tab(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> 
             "选手名称",
             render_edit_input(
                 sidebar,
+                window,
                 cx,
                 "heroes-name",
                 "如：锐雯 · 激进压制",
@@ -281,7 +294,7 @@ fn render_config_tab(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> 
         )
         .child(type_specific)
         .child(Separator::horizontal())
-        .child(render_json_section(sidebar, cx))
+        .child(render_json_section(sidebar, window, cx))
         .into_any_element()
 }
 
@@ -438,7 +451,11 @@ fn render_provider_select(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>
 }
 
 /// 模型选择：平台模型走管理员清单；BYO 供应商走其 models 列表；可切「手填」。
-fn render_model_select(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> AnyElement {
+fn render_model_select(
+    sidebar: &mut AppSidebar,
+    window: &mut Window,
+    cx: &mut Context<AppSidebar>,
+) -> AnyElement {
     let is_platform = sidebar.heroes.draft_provider_id.is_empty()
         || sidebar.heroes.draft_provider_id == PLATFORM_PROVIDER_ID;
     let manual = sidebar.heroes.draft_manual_model;
@@ -465,6 +482,7 @@ fn render_model_select(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -
     let selector: AnyElement = if show_manual {
         render_edit_input(
             sidebar,
+            window,
             cx,
             "heroes-model-manual",
             "手动输入模型名…",
@@ -544,7 +562,11 @@ fn render_model_select(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -
 }
 
 /// RL Reward Shaper 权重输入网格。
-fn reward_grid(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> AnyElement {
+fn reward_grid(
+    sidebar: &mut AppSidebar,
+    window: &mut Window,
+    cx: &mut Context<AppSidebar>,
+) -> AnyElement {
     v_flex()
         .gap_2()
         .child(div().text_sm().font_bold().child("Reward Shaper 权重"))
@@ -565,6 +587,7 @@ fn reward_grid(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> AnyEle
                         )
                         .child(render_edit_input(
                             sidebar,
+                            window,
                             cx,
                             &kid,
                             "0",
@@ -587,7 +610,11 @@ fn reward_grid(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> AnyEle
 }
 
 /// JSON 导入 / 导出区块。
-fn render_json_section(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> AnyElement {
+fn render_json_section(
+    sidebar: &mut AppSidebar,
+    window: &mut Window,
+    cx: &mut Context<AppSidebar>,
+) -> AnyElement {
     v_flex()
         .gap_2()
         .child(
@@ -623,6 +650,7 @@ fn render_json_section(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -
         )
         .child(render_edit_input(
             sidebar,
+            window,
             cx,
             "heroes-json",
             "{}",

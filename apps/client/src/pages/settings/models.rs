@@ -19,13 +19,14 @@ use crate::components::sidebar::AppSidebar;
 
 pub(super) fn render_model_settings(
     sidebar: &mut AppSidebar,
+    window: &mut Window,
     cx: &mut Context<AppSidebar>,
 ) -> AnyElement {
     let show_model_dialog = sidebar.settings.show_model_dialog;
     let show_test_result = sidebar.settings.show_test_result;
 
     let dialog = if show_model_dialog {
-        render_model_dialog(sidebar, cx).into_any_element()
+        render_model_dialog(sidebar, window, cx).into_any_element()
     } else if show_test_result {
         render_test_result_dialog(sidebar, cx).into_any_element()
     } else {
@@ -46,7 +47,7 @@ pub(super) fn render_model_settings(
                     div()
                         .flex_1()
                         .id("settings-form-scroll")
-                        .child(render_provider_form(sidebar, cx)),
+                        .child(render_provider_form(sidebar, window, cx)),
                 ),
         )
         .child(dialog)
@@ -214,7 +215,11 @@ fn make_provider_btn(
     btn.into_any_element()
 }
 
-fn render_provider_form(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> AnyElement {
+fn render_provider_form(
+    sidebar: &mut AppSidebar,
+    window: &mut Window,
+    cx: &mut Context<AppSidebar>,
+) -> AnyElement {
     if sidebar.settings.selected_key == PLATFORM_KEY {
         return v_flex()
             .p_6()
@@ -313,6 +318,7 @@ fn render_provider_form(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) 
             "名称",
             "如：智谱 GLM",
             sidebar,
+            window,
             cx,
             |t| t.settings.form_name.clone(),
             |t, v| t.settings.form_name = v,
@@ -322,6 +328,7 @@ fn render_provider_form(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) 
             "Base URL",
             "https://api.example.com/v1",
             sidebar,
+            window,
             cx,
             |t| t.settings.form_base_url.clone(),
             |t, v| t.settings.form_base_url = v,
@@ -331,6 +338,7 @@ fn render_provider_form(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) 
             "API Key",
             &api_key_placeholder_text,
             sidebar,
+            window,
             cx,
             |t| t.settings.form_api_key.clone(),
             |t, v| t.settings.form_api_key = v,
@@ -440,7 +448,11 @@ fn render_api_format_field(
 
 // ── 模型新增 / 编辑对话框 ──
 
-fn render_model_dialog(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> AnyElement {
+fn render_model_dialog(
+    sidebar: &mut AppSidebar,
+    window: &mut Window,
+    cx: &mut Context<AppSidebar>,
+) -> AnyElement {
     let editing = sidebar.settings.editing_model_idx.is_some();
 
     div()
@@ -499,6 +511,7 @@ fn render_model_dialog(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -
                             "模型 ID",
                             "如 gpt-4o, claude-3-5-sonnet",
                             sidebar,
+                            window,
                             cx,
                             |t| t.settings.model_form_name.clone(),
                             |t, v| t.settings.model_form_name = v,
@@ -508,6 +521,7 @@ fn render_model_dialog(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -
                             "最大上下文 Token 数",
                             "200000",
                             sidebar,
+                            window,
                             cx,
                             |t| t.settings.model_form_max_tokens.clone(),
                             |t, v| {

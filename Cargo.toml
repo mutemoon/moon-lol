@@ -74,7 +74,7 @@ getrandom_03 = { package = "getrandom", version = "0.3", features = [
 ] }
 wasm-bindgen = "0.2"
 clap = { version = "4", features = ["derive"] }
-tokio = { version = "1", features = ["full"] }
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "sync", "time", "io-util", "process", "net"] }
 tokio-tungstenite = "0.24"
 async-channel = "2"
 futures-util = "0.3"

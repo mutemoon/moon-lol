@@ -63,6 +63,27 @@ app:
     menu_settings:
       zh-CN: "设置"
       en: "Settings"
+    menu_observe:
+      zh-CN: "观战"
+      en: "Spectate"
+    menu_history:
+      zh-CN: "对局历史"
+      en: "Match History"
+    menu_visual_env:
+      zh-CN: "可视环境监控"
+      en: "Visual Env"
+    menu_mock:
+      zh-CN: "Mock 沙盒"
+      en: "Mock Sandbox"
+    menu_blog:
+      zh-CN: "开发日志"
+      en: "Dev Blog"
+    menu_room_detail:
+      zh-CN: "房间详情"
+      en: "Room Detail"
+    menu_hero:
+      zh-CN: "英雄"
+      en: "Hero"
     title_home:
       zh-CN: "仿真工作台"
       en: "Workbench"

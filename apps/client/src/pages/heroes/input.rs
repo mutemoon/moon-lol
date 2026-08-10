@@ -1,119 +1,16 @@
-//! 可编辑文本输入框（焦点/光标跨渲染保持，参照 community.rs 手法）。
-
-use std::cell::RefCell;
-use std::collections::HashMap;
+//! 可编辑文本输入框（焦点/光标跨渲染保持，复用共享组件）。
 
 use gpui::prelude::*;
 use gpui::*;
-use gpui_component::{h_flex, v_flex, ActiveTheme, StyledExt};
+use gpui_component::{v_flex, StyledExt};
 
 use crate::components::sidebar::AppSidebar;
-
-#[derive(Clone)]
-struct EditMeta {
-    cursor: usize,
-    focus: FocusHandle,
-}
-
-thread_local! {
-    static EDITS: RefCell<HashMap<String, EditMeta>> = RefCell::new(HashMap::new());
-}
-
-fn edit_meta(id: &str, cx: &App) -> EditMeta {
-    EDITS.with(|m| {
-        let mut m = m.borrow_mut();
-        if let Some(meta) = m.get(id) {
-            return meta.clone();
-        }
-        let meta = EditMeta {
-            cursor: 0,
-            focus: cx.focus_handle(),
-        };
-        m.insert(id.to_string(), meta.clone());
-        meta
-    })
-}
-
-fn edit_cursor(id: &str) -> usize {
-    EDITS.with(|m| m.borrow().get(id).map_or(0, |e| e.cursor))
-}
-
-fn set_edit_cursor(id: &str, cursor: usize) {
-    EDITS.with(|m| {
-        if let Some(e) = m.borrow_mut().get_mut(id) {
-            e.cursor = cursor;
-        }
-    })
-}
-
-/// 处理单个按键，返回（新文本，新光标）。无变化返回 None。
-/// `multiline` 为 true 时 Enter 换行，否则忽略。
-fn apply_key(
-    value: &str,
-    cursor: usize,
-    event: &KeyDownEvent,
-    multiline: bool,
-) -> Option<(String, usize)> {
-    let ks = &event.keystroke;
-    let mods = &ks.modifiers;
-    let mut chars: Vec<char> = value.chars().collect();
-    let cursor = cursor.min(chars.len());
-
-    // ctrl / cmd 组合键不作为字符输入
-    if mods.control || mods.platform {
-        return None;
-    }
-
-    if let Some(ch) = ks.key_char.as_deref() {
-        let insert_chars: Vec<char> = ch.chars().collect();
-        if !mods.alt && !insert_chars.is_empty() && !insert_chars.iter().any(|c| c.is_control()) {
-            for (i, c) in insert_chars.iter().enumerate() {
-                chars.insert(cursor + i, *c);
-            }
-            return Some((chars.into_iter().collect(), cursor + insert_chars.len()));
-        }
-    }
-
-    match ks.key.as_str() {
-        "backspace" => {
-            if cursor > 0 {
-                chars.remove(cursor - 1);
-                Some((chars.into_iter().collect(), cursor - 1))
-            } else {
-                None
-            }
-        }
-        "delete" => {
-            if cursor < chars.len() {
-                chars.remove(cursor);
-                Some((chars.into_iter().collect(), cursor))
-            } else {
-                None
-            }
-        }
-        "left" => Some((value.to_string(), cursor.saturating_sub(1))),
-        "right" => Some((value.to_string(), (cursor + 1).min(chars.len()))),
-        "home" => Some((value.to_string(), 0)),
-        "end" => Some((value.to_string(), chars.len())),
-        "space" => {
-            chars.insert(cursor, ' ');
-            Some((chars.into_iter().collect(), cursor + 1))
-        }
-        "enter" => {
-            if multiline {
-                chars.insert(cursor, '\n');
-                Some((chars.into_iter().collect(), cursor + 1))
-            } else {
-                None
-            }
-        }
-        _ => None,
-    }
-}
+use crate::components::text_input::{self, EditOptions};
 
 /// 可聚焦、可键盘编辑的文本输入框。get_value 读 live 值，set_value 写回 sidebar 字段。
 pub(super) fn render_edit_input(
-    sidebar: &AppSidebar,
+    _sidebar: &AppSidebar,
+    window: &mut Window,
     cx: &mut Context<AppSidebar>,
     id: &str,
     placeholder: &str,
@@ -121,53 +18,18 @@ pub(super) fn render_edit_input(
     get_value: impl Fn(&AppSidebar) -> String + 'static,
     set_value: impl Fn(&mut AppSidebar, String) + 'static,
 ) -> AnyElement {
-    let value = get_value(sidebar);
-    let meta = edit_meta(id, cx);
-    let focus_handle = meta.focus.clone();
-    let empty = value.is_empty();
-    let chars: Vec<char> = value.chars().collect();
-    let cursor = meta.cursor.min(chars.len());
-    let before: String = chars[..cursor].iter().collect();
-    let after: String = chars[cursor..].iter().collect();
-    let accent = cx.theme().accent;
-    let muted = cx.theme().muted_foreground;
-    let id_owned = id.to_string();
-
-    let listener = cx.listener(move |this, event: &KeyDownEvent, _window, cx| {
-        let live = get_value(this);
-        let cur = edit_cursor(&id_owned);
-        if let Some((nv, nc)) = apply_key(&live, cur, event, multiline) {
-            set_value(this, nv);
-            set_edit_cursor(&id_owned, nc);
-            cx.notify();
-        }
-    });
-
-    div()
-        .track_focus(&focus_handle)
-        .px_3()
-        .py_2()
-        .w_full()
-        .border_1()
-        .border_color(cx.theme().border)
-        .rounded_md()
-        .bg(cx.theme().background)
-        .text_sm()
-        .when(multiline, |d| d.h(px(150.)).items_start())
-        .on_key_down(listener)
-        .child(
-            h_flex()
-                .items_center()
-                .when(empty, |d| {
-                    d.text_color(muted).child(placeholder.to_string())
-                })
-                .when(!empty, |d| {
-                    d.child(before)
-                        .child(div().w(px(1.)).h(rems(1.)).bg(accent))
-                        .child(after)
-                }),
-        )
-        .into_any_element()
+    text_input::render_edit_input(
+        window,
+        cx,
+        id,
+        placeholder,
+        EditOptions {
+            multiline,
+            ..Default::default()
+        },
+        get_value,
+        set_value,
+    )
 }
 
 /// 带标签的编辑区包装。

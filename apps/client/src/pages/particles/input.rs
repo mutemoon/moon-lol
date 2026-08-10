@@ -1,4 +1,4 @@
-//! 手写输入框（焦点/光标/文本缓冲跨渲染保持）+ 各输入控件。
+//! 输入控件：搜索 / 数字 / 文本输入（复用共享输入框）+ 采样器下拉 / 标志开关。
 
 use std::cell::RefCell;
 use std::collections::HashMap;
@@ -8,51 +8,17 @@ use gpui::*;
 use gpui_component::button::Button;
 use gpui_component::checkbox::Checkbox;
 use gpui_component::menu::{DropdownMenu, PopupMenuItem};
-use gpui_component::{h_flex, ActiveTheme};
 
 use super::edit::{set_flag_idx, set_sampler_mode_idx, FlagField, SamplerKind};
 use super::play::replay_after_edit;
 use super::state::{format_number, update_state, with_state};
 use crate::components::sidebar::AppSidebar;
+use crate::components::text_input::{self, EditOptions};
 
-// ── 手写输入框：焦点 / 光标 / 文本缓冲（跨渲染保持） ──
-
-#[derive(Clone)]
-struct EditMeta {
-    cursor: usize,
-    focus: FocusHandle,
-}
+// ── 输入缓冲：未提交文本跨渲染保持（Enter 提交到 STATE） ──
 
 thread_local! {
-    static EDITS: RefCell<HashMap<String, EditMeta>> = RefCell::new(HashMap::new());
     static BUFS: RefCell<HashMap<String, String>> = RefCell::new(HashMap::new());
-}
-
-fn edit_meta(id: &str, cx: &App) -> EditMeta {
-    EDITS.with(|m| {
-        let mut m = m.borrow_mut();
-        if let Some(meta) = m.get(id) {
-            return meta.clone();
-        }
-        let meta = EditMeta {
-            cursor: 0,
-            focus: cx.focus_handle(),
-        };
-        m.insert(id.to_string(), meta.clone());
-        meta
-    })
-}
-
-pub(super) fn edit_cursor(id: &str) -> usize {
-    EDITS.with(|m| m.borrow().get(id).map_or(0, |e| e.cursor))
-}
-
-pub(super) fn set_edit_cursor(id: &str, cursor: usize) {
-    EDITS.with(|m| {
-        if let Some(e) = m.borrow_mut().get_mut(id) {
-            e.cursor = cursor;
-        }
-    })
 }
 
 pub(super) fn input_buffer(id: &str) -> Option<String> {
@@ -75,232 +41,92 @@ pub(super) fn clear_all_input_buffers() {
     BUFS.with(|b| b.borrow_mut().clear());
 }
 
-/// 处理单个按键，返回（新文本，新光标）。无变化返回 None。
-fn apply_key(value: &str, cursor: usize, event: &KeyDownEvent) -> Option<(String, usize)> {
-    let ks = &event.keystroke;
-    let mods = &ks.modifiers;
-    let mut chars: Vec<char> = value.chars().collect();
-    let cursor = cursor.min(chars.len());
-
-    if mods.control || mods.platform {
-        return None;
-    }
-
-    if let Some(ch) = ks.key_char.as_deref() {
-        let insert_chars: Vec<char> = ch.chars().collect();
-        if !mods.alt && !insert_chars.is_empty() && !insert_chars.iter().any(|c| c.is_control()) {
-            for (i, c) in insert_chars.iter().enumerate() {
-                chars.insert(cursor + i, *c);
-            }
-            return Some((chars.into_iter().collect(), cursor + insert_chars.len()));
-        }
-    }
-
-    match ks.key.as_str() {
-        "backspace" => {
-            if cursor > 0 {
-                chars.remove(cursor - 1);
-                Some((chars.into_iter().collect(), cursor - 1))
-            } else {
-                None
-            }
-        }
-        "delete" => {
-            if cursor < chars.len() {
-                chars.remove(cursor);
-                Some((chars.into_iter().collect(), cursor))
-            } else {
-                None
-            }
-        }
-        "left" => Some((value.to_string(), cursor.saturating_sub(1))),
-        "right" => Some((value.to_string(), (cursor + 1).min(chars.len()))),
-        "home" => Some((value.to_string(), 0)),
-        "end" => Some((value.to_string(), chars.len())),
-        "space" => {
-            chars.insert(cursor, ' ');
-            Some((chars.into_iter().collect(), cursor + 1))
-        }
-        _ => None,
-    }
-}
-
 // ── 输入控件 ──
 
-pub(super) fn render_search_input(cx: &mut Context<AppSidebar>, value: String) -> AnyElement {
-    let id = "particle-search".to_string();
-    let meta = edit_meta(&id, cx);
-    let focus_handle = meta.focus.clone();
-    let empty = value.is_empty();
-    let chars: Vec<char> = value.chars().collect();
-    let cursor = meta.cursor.min(chars.len());
-    let before: String = chars[..cursor].iter().collect();
-    let after: String = chars[cursor..].iter().collect();
-    let accent = cx.theme().accent;
-    let muted = cx.theme().muted_foreground;
-    let id2 = id.clone();
-
-    let listener = cx.listener(move |_this, event: &KeyDownEvent, _window, cx| {
-        let live = with_state(|s| s.search_query.clone());
-        let cur = edit_cursor(&id2);
-        if let Some((nv, nc)) = apply_key(&live, cur, event) {
-            update_state(|s| s.search_query = nv);
-            set_edit_cursor(&id2, nc);
-            cx.notify();
-        }
-    });
-
-    div()
-        .track_focus(&focus_handle)
-        .px_2()
-        .py_1()
-        .w_full()
-        .border_1()
-        .border_color(cx.theme().border)
-        .rounded_md()
-        .bg(cx.theme().background)
-        .text_sm()
-        .on_key_down(listener)
-        .child(
-            h_flex()
-                .items_center()
-                .when(empty, |d| d.text_color(muted).child("搜索英雄 / 粒子"))
-                .when(!empty, |d| {
-                    d.child(before)
-                        .child(div().w(px(1.)).h(rems(1.)).bg(accent))
-                        .child(after)
-                }),
-        )
-        .into_any_element()
+pub(super) fn render_search_input(
+    window: &mut Window,
+    cx: &mut Context<AppSidebar>,
+) -> AnyElement {
+    text_input::render_edit_input(
+        window,
+        cx,
+        "particle-search",
+        "搜索英雄 / 粒子",
+        EditOptions::default(),
+        |_s| with_state(|s| s.search_query.clone()),
+        |_s, v| update_state(|s| s.search_query = v),
+    )
 }
 
 /// 手写数字输入框：回车提交（Enter）→ commit(v)；非法输入回车则回退。
 pub(super) fn render_number_input(
+    window: &mut Window,
     cx: &mut Context<AppSidebar>,
     id: String,
     value: f32,
     commit: impl Fn(f32) + 'static,
 ) -> AnyElement {
-    let meta = edit_meta(&id, cx);
-    let focus_handle = meta.focus.clone();
-    let buf = input_buffer(&id);
-    let display = buf.unwrap_or_else(|| format_number(value));
-    let empty = display.is_empty();
-    let chars: Vec<char> = display.chars().collect();
-    let cursor = meta.cursor.min(chars.len());
-    let before: String = chars[..cursor].iter().collect();
-    let after: String = chars[cursor..].iter().collect();
-    let accent = cx.theme().accent;
-    let muted = cx.theme().muted_foreground;
-    let id2 = id.clone();
-
-    let listener = cx.listener(move |_this, event: &KeyDownEvent, _window, cx| {
-        let live = input_buffer(&id2).unwrap_or_else(|| format_number(value));
-        let cur = edit_cursor(&id2);
-        if let Some((nv, nc)) = apply_key(&live, cur, event) {
-            set_input_buffer(&id2, nv);
-            set_edit_cursor(&id2, nc);
-            cx.notify();
-        } else if event.keystroke.key == "enter" {
-            match live.trim().parse::<f32>() {
-                Ok(v) => {
-                    commit(v);
-                    clear_input_buffer(&id2);
-                    set_edit_cursor(&id2, 0);
-                    replay_after_edit(cx);
-                }
-                Err(_) => {
-                    clear_input_buffer(&id2);
-                    set_edit_cursor(&id2, 0);
-                    cx.notify();
-                }
+    let id_enter = id.clone();
+    let on_enter = Box::new(move |text: String, cx: &mut Context<AppSidebar>| {
+        match text.trim().parse::<f32>() {
+            Ok(v) => {
+                commit(v);
+                clear_input_buffer(&id_enter);
+                replay_after_edit(cx);
+            }
+            Err(_) => {
+                clear_input_buffer(&id_enter);
+                cx.notify();
             }
         }
     });
-
-    div()
-        .track_focus(&focus_handle)
-        .px_2()
-        .py_1()
-        .w_full()
-        .border_1()
-        .border_color(cx.theme().border)
-        .rounded_md()
-        .bg(cx.theme().background)
-        .text_sm()
-        .on_key_down(listener)
-        .child(
-            h_flex()
-                .items_center()
-                .when(empty, |d| d.text_color(muted).child("0"))
-                .when(!empty, |d| {
-                    d.child(before)
-                        .child(div().w(px(1.)).h(rems(1.)).bg(accent))
-                        .child(after)
-                }),
-        )
-        .into_any_element()
+    let id_get = id.clone();
+    let id_set = id.clone();
+    text_input::render_edit_input(
+        window,
+        cx,
+        &id,
+        "0",
+        EditOptions {
+            on_enter: Some(on_enter),
+            ..Default::default()
+        },
+        move |_s| input_buffer(&id_get).unwrap_or_else(|| format_number(value)),
+        move |_s, v| set_input_buffer(&id_set, v),
+    )
 }
 
 /// 手写文本输入框：回车提交（Enter）→ commit(text)。
 pub(super) fn render_text_input(
+    window: &mut Window,
     cx: &mut Context<AppSidebar>,
     id: String,
     value: String,
     placeholder: &str,
     commit: impl Fn(String) + 'static,
 ) -> AnyElement {
-    let meta = edit_meta(&id, cx);
-    let focus_handle = meta.focus.clone();
-    let buf = input_buffer(&id);
-    let display = buf.unwrap_or_else(|| value.clone());
-    let empty = display.is_empty();
-    let chars: Vec<char> = display.chars().collect();
-    let cursor = meta.cursor.min(chars.len());
-    let before: String = chars[..cursor].iter().collect();
-    let after: String = chars[cursor..].iter().collect();
-    let accent = cx.theme().accent;
-    let muted = cx.theme().muted_foreground;
-    let id2 = id.clone();
-    let placeholder_owned = placeholder.to_string();
-
-    let listener = cx.listener(move |_this, event: &KeyDownEvent, _window, cx| {
-        let live = input_buffer(&id2).unwrap_or_else(|| value.clone());
-        let cur = edit_cursor(&id2);
-        if let Some((nv, nc)) = apply_key(&live, cur, event) {
-            set_input_buffer(&id2, nv);
-            set_edit_cursor(&id2, nc);
-            cx.notify();
-        } else if event.keystroke.key == "enter" {
-            commit(live.clone());
-            clear_input_buffer(&id2);
-            set_edit_cursor(&id2, 0);
-            replay_after_edit(cx);
-        }
+    let id_enter = id.clone();
+    let on_enter = Box::new(move |text: String, cx: &mut Context<AppSidebar>| {
+        commit(text.clone());
+        clear_input_buffer(&id_enter);
+        replay_after_edit(cx);
     });
-
-    div()
-        .track_focus(&focus_handle)
-        .px_2()
-        .py_1()
-        .w_full()
-        .border_1()
-        .border_color(cx.theme().border)
-        .rounded_md()
-        .bg(cx.theme().background)
-        .text_sm()
-        .on_key_down(listener)
-        .child(
-            h_flex()
-                .items_center()
-                .when(empty, |d| d.text_color(muted).child(placeholder_owned))
-                .when(!empty, |d| {
-                    d.child(before)
-                        .child(div().w(px(1.)).h(rems(1.)).bg(accent))
-                        .child(after)
-                }),
-        )
-        .into_any_element()
+    let id_get = id.clone();
+    let value_get = value.clone();
+    let id_set = id.clone();
+    let placeholder_owned = placeholder.to_string();
+    text_input::render_edit_input(
+        window,
+        cx,
+        &id,
+        &placeholder_owned,
+        EditOptions {
+            on_enter: Some(on_enter),
+            ..Default::default()
+        },
+        move |_s| input_buffer(&id_get).unwrap_or_else(|| value_get.clone()),
+        move |_s, v| set_input_buffer(&id_set, v),
+    )
 }
 
 /// 常量/曲线预设下拉。

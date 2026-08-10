@@ -42,10 +42,7 @@ pub enum TaskDetailTab {
 
 #[derive(Debug, Clone)]
 pub struct LocalTaskDetail {
-    pub id: String,
     pub name: String,
-    pub agent_type: String,
-    pub env_name: String,
     pub status: String,
     pub current_step: usize,
     pub ep_return: f32,
@@ -73,28 +70,4 @@ pub struct RunningGameInfo {
     pub mode: String,
     pub champion: String,
     pub port: u16,
-}
-
-#[derive(Debug, Clone)]
-pub struct ModelProviderInfo {
-    pub id: Option<String>,
-    pub name: String,
-    pub category: String,
-    pub models: Vec<String>,
-    pub enabled: bool,
-}
-
-#[derive(Debug, Clone)]
-pub struct SpawnPreset {
-    pub name: String,
-    pub x: f32,
-    pub z: f32,
-    pub team: String,
-}
-
-#[derive(Debug, Clone)]
-pub struct HeroPreset {
-    pub name: String,
-    pub hero: String,
-    pub agent_type: String,
 }

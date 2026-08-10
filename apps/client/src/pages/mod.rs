@@ -15,7 +15,6 @@ pub mod logs_archive;
 pub mod mock;
 pub mod observe;
 pub mod particles;
-pub mod placeholder;
 pub mod rank;
 pub mod room_detail;
 pub mod rooms;

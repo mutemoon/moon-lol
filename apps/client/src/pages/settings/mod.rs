@@ -23,7 +23,32 @@ use self::types::SettingsTab;
 use crate::components::sidebar::AppSidebar;
 
 /// 主渲染函数：顶部 Tab（常规 / 模型设置）+ 内容区。
-pub fn render_settings(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> AnyElement {
+pub fn render_settings(
+    sidebar: &mut AppSidebar,
+    window: &mut Window,
+    cx: &mut Context<AppSidebar>,
+) -> AnyElement {
+    // 首次进入自动加载模型供应商
+    if sidebar.settings.providers.is_empty() && !sidebar.settings.loading {
+        sidebar.settings.loading = true;
+        let cloud = sidebar.cloud.clone();
+        cx.spawn(
+            |this: gpui::WeakEntity<AppSidebar>, cx: &mut gpui::AsyncApp| {
+                let this = this.clone();
+                let mut cx = cx.clone();
+                async move {
+                    let providers = cloud.list_model_providers().await.unwrap_or_default();
+                    this.update(&mut cx, |this, ctx| {
+                        this.settings.providers = providers;
+                        this.settings.loading = false;
+                        ctx.notify();
+                    })
+                    .ok();
+                }
+            },
+        )
+        .detach();
+    }
     let tab = sidebar.settings.active_tab;
 
     let tab_general = make_tab(
@@ -49,7 +74,7 @@ pub fn render_settings(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -
 
     let content = match tab {
         SettingsTab::General => render_general(sidebar, cx),
-        SettingsTab::ModelSettings => render_model_settings(sidebar, cx),
+        SettingsTab::ModelSettings => render_model_settings(sidebar, window, cx),
     };
 
     v_flex()

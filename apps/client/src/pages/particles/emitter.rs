@@ -47,6 +47,7 @@ fn render_section(
 }
 
 fn render_sampler_row(
+    window: &mut Window,
     cx: &mut Context<AppSidebar>,
     hash: u32,
     idx: usize,
@@ -89,6 +90,7 @@ fn render_sampler_row(
                         .child(labels.get(c).copied().unwrap_or("?").to_string()),
                 )
                 .child(render_number_input(
+                    window,
                     cx,
                     id,
                     vals.get(c).copied().unwrap_or(0.0),
@@ -100,6 +102,7 @@ fn render_sampler_row(
 }
 
 pub(super) fn render_emitter_editor(
+    window: &mut Window,
     cx: &mut Context<AppSidebar>,
     hash: u32,
     idx: usize,
@@ -116,6 +119,7 @@ pub(super) fn render_emitter_editor(
         (
             "名称 emitter_name".to_string(),
             render_text_input(
+                window,
                 cx,
                 format!("{:08x}-{}-name", hash, idx),
                 em.emitter_name.clone().unwrap_or_default(),
@@ -126,6 +130,7 @@ pub(super) fn render_emitter_editor(
         (
             "寿命 lifetime".to_string(),
             render_number_input(
+                window,
                 cx,
                 format!("{:08x}-{}-lifetime", hash, idx),
                 get_num_field(em, NumField::Lifetime),
@@ -135,6 +140,7 @@ pub(super) fn render_emitter_editor(
         (
             "帧数 num_frames".to_string(),
             render_number_input(
+                window,
                 cx,
                 format!("{:08x}-{}-num_frames", hash, idx),
                 get_num_field(em, NumField::NumFrames),
@@ -144,6 +150,7 @@ pub(super) fn render_emitter_editor(
         (
             "混合模式 blend_mode".to_string(),
             render_number_input(
+                window,
                 cx,
                 format!("{:08x}-{}-blend", hash, idx),
                 get_num_field(em, NumField::BlendMode),
@@ -153,6 +160,7 @@ pub(super) fn render_emitter_editor(
         (
             "Alpha参考 alpha_ref".to_string(),
             render_number_input(
+                window,
                 cx,
                 format!("{:08x}-{}-alpha", hash, idx),
                 get_num_field(em, NumField::AlphaRef),
@@ -171,6 +179,7 @@ pub(super) fn render_emitter_editor(
                 .flex_1()
                 .child(div().text_xs().text_color(muted).child(label.to_string()))
                 .child(render_text_input(
+                    window,
                     cx,
                     format!("{:08x}-{}-tex-{:?}", hash, idx, f),
                     get_texture(em, f),
@@ -194,7 +203,7 @@ pub(super) fn render_emitter_editor(
             )
             .child(h_flex().gap_1().children((0..2).map(|c| {
                 let id = format!("{:08x}-{}-texdiv-{}", hash, idx, c);
-                render_number_input(cx, id, tv[c], move |v| set_tex_div_comp(idx, c, v))
+                render_number_input(window, cx, id, tv[c], move |v| set_tex_div_comp(idx, c, v))
                     .into_any_element()
             })))
             .into_any_element(),
@@ -217,7 +226,7 @@ pub(super) fn render_emitter_editor(
         .into_any_element()];
     let sampler_children: Vec<AnyElement> = SamplerKind::all()
         .iter()
-        .map(|k| render_sampler_row(cx, hash, idx, *k, em))
+        .map(|k| render_sampler_row(window, cx, hash, idx, *k, em))
         .collect();
 
     v_flex()

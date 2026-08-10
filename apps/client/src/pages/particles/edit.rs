@@ -4,7 +4,7 @@ use lol_share::{
     ConfigVfxEmitterDefinition, ConfigVfxSystemDefinition, Sampler, StochasticSampler, VfxTexture,
 };
 
-use super::state::{update_state, with_state};
+use super::state::update_state;
 
 // ── 工作副本访问 ──
 
@@ -29,13 +29,6 @@ pub(super) fn primary_list_mut(
         }
     }
     wd.simple_emitter_definition_data.as_mut()
-}
-
-pub(super) fn read_emitter(idx: usize) -> Option<ConfigVfxEmitterDefinition> {
-    with_state(|s| {
-        let wd = s.working_def.as_ref()?;
-        primary_list_ref(wd)?.get(idx).cloned()
-    })
 }
 
 pub(super) fn mutate_emitter(idx: usize, f: impl FnOnce(&mut ConfigVfxEmitterDefinition)) {

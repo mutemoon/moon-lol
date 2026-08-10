@@ -25,9 +25,7 @@ use lol_web_protocol::room::{
     StartRoomResponse,
 };
 use lol_web_protocol::scenario::{CreateScenarioDto, Scenario, UpdateScenarioDto};
-use lol_web_protocol::spawn_preset::{
-    CreateSpawnPresetDto, SpawnPreset, Team, UpdateSpawnPresetDto, Visibility,
-};
+use lol_web_protocol::spawn_preset::{SpawnPreset, Team, Visibility};
 use reqwest::{Client as HttpClient, Method, StatusCode};
 use serde::de::DeserializeOwned;
 use serde::Serialize;
@@ -59,11 +57,6 @@ impl std::error::Error for CloudError {}
 #[derive(Serialize)]
 struct ForkAgentBody {
     new_name: Option<String>,
-}
-
-#[derive(Serialize)]
-struct UploadHistoryBody {
-    histories: Vec<SavedAgentHistory>,
 }
 
 #[derive(Serialize)]
@@ -519,27 +512,6 @@ impl CloudClient {
         self.get_json("/api/spawn-presets").await
     }
 
-    pub async fn create_spawn_preset(
-        &self,
-        data: &CreateSpawnPresetDto,
-    ) -> Result<SpawnPreset, CloudError> {
-        self.post_json("/api/spawn-presets", data).await
-    }
-
-    pub async fn update_spawn_preset(
-        &self,
-        id: &str,
-        data: &UpdateSpawnPresetDto,
-    ) -> Result<SpawnPreset, CloudError> {
-        let path = format!("/api/spawn-presets/{}", id);
-        self.put_json(&path, data).await
-    }
-
-    pub async fn delete_spawn_preset(&self, id: &str) -> Result<(), CloudError> {
-        let path = format!("/api/spawn-presets/{}", id);
-        self.delete_empty(&path).await
-    }
-
     // ── Scenarios ──
 
     pub async fn list_scenarios(&self) -> Result<Vec<Scenario>, CloudError> {
@@ -564,25 +536,6 @@ impl CloudClient {
         self.put_json(&path, data).await
     }
 
-    pub async fn delete_scenario(&self, id: &str) -> Result<(), CloudError> {
-        let path = format!("/api/scenarios/{}", id);
-        self.delete_empty(&path).await
-    }
-
-    pub async fn get_scenario_win_condition(&self, id: &str) -> Result<Option<Value>, CloudError> {
-        let path = format!("/api/scenarios/{}/win-condition", id);
-        self.get_json(&path).await
-    }
-
-    pub async fn set_scenario_win_condition(
-        &self,
-        id: &str,
-        condition: &Value,
-    ) -> Result<(), CloudError> {
-        let path = format!("/api/scenarios/{}/win-condition", id);
-        self.put_empty(&path, condition).await
-    }
-
     // ── Game Histories ──
 
     pub async fn list_game_histories(&self) -> Result<Vec<GameHistorySummary>, CloudError> {
@@ -595,14 +548,6 @@ impl CloudClient {
     ) -> Result<Vec<SavedAgentHistory>, CloudError> {
         let path = format!("/api/histories/{}", id);
         self.get_json(&path).await
-    }
-
-    pub async fn upload_game_history(
-        &self,
-        histories: Vec<SavedAgentHistory>,
-    ) -> Result<(), CloudError> {
-        let body = UploadHistoryBody { histories };
-        self.post_empty("/api/histories", &body).await
     }
 
     pub async fn delete_game_history(&self, id: &str) -> Result<(), CloudError> {
@@ -658,15 +603,6 @@ impl CloudClient {
     pub async fn dissolve_room(&self, id: &str) -> Result<(), CloudError> {
         let path = format!("/api/rooms/{}", id);
         self.delete_empty(&path).await
-    }
-
-    pub async fn update_room_constraints(
-        &self,
-        id: &str,
-        constraints: &RoomConstraints,
-    ) -> Result<(), CloudError> {
-        let path = format!("/api/rooms/{}", id);
-        self.patch_empty(&path, constraints).await
     }
 
     pub async fn list_room_slots(&self, room_id: &str) -> Result<Vec<RoomAgentSlot>, CloudError> {

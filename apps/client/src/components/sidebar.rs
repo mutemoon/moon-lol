@@ -27,10 +27,7 @@ use crate::pages::{
 use crate::services::cloud::CloudClient;
 use crate::services::provider;
 use crate::services::ws::spawn_ws_service;
-use crate::types::{
-    ActiveView, HeroPreset, LocalTaskDetail, ModelProviderInfo, RunningGameInfo, SpawnPreset,
-    TaskDetailTab, UserInfo,
-};
+use crate::types::{ActiveView, LocalTaskDetail, RunningGameInfo, TaskDetailTab, UserInfo};
 
 // 401 回调标记：回调是无参 Fn()，拿不到 &mut App 句柄直接更新实体，
 // 只能置位该标记，由 render 帧消费后弹出登录框。
@@ -38,6 +35,8 @@ thread_local! {
     static UNAUTHORIZED_PENDING: Cell<bool> = Cell::new(false);
 }
 
+/// RL 并行团队维护：字段暂未读取，保留供子进程生命周期管理 / 命令通道使用。
+#[allow(dead_code)]
 pub struct VisualSession {
     pub child: Option<tokio::process::Child>,
     pub port: u16,
@@ -89,12 +88,6 @@ pub struct AppSidebar {
     pub current_match_id: Option<Uuid>,
     pub current_room_id: Option<Uuid>,
     pub champions_list: Vec<String>,
-    pub spawn_presets: Vec<SpawnPreset>,
-    pub hero_presets: Vec<HeroPreset>,
-
-    // ── 全局状态：Provider ──
-    pub model_providers: Vec<ModelProviderInfo>,
-    pub providers_loading: bool,
 
     // ── Rank 页面 ──
     pub rank_agents: Vec<Agent>,
@@ -180,11 +173,6 @@ impl AppSidebar {
             current_match_id: None,
             current_room_id: None,
             champions_list: vec!["Riven".into(), "Fiora".into()],
-            spawn_presets: Vec::new(),
-            hero_presets: Vec::new(),
-            // Provider
-            model_providers: Vec::new(),
-            providers_loading: false,
             // Rank
             rank_agents: Vec::new(),
             rank_selected_agent_id: String::new(),
@@ -365,81 +353,27 @@ impl Render for AppSidebar {
             ActiveView::VisualEnv => render_running_visual(self, cx),
             ActiveView::Home => render_home(self, cx),
             ActiveView::Launcher => render_launcher(self, cx),
-            ActiveView::Heroes => {
-                if self.heroes.agents.is_empty() && !self.heroes.loading {
-                    self.heroes.loading = true;
-                    let cloud = self.cloud.clone();
-                    cx.spawn(
-                        |this: gpui::WeakEntity<AppSidebar>, cx: &mut gpui::AsyncApp| {
-                            let this = this.clone();
-                            let mut cx = cx.clone();
-                            async move {
-                                let agents = cloud.list_agents().await.unwrap_or_default();
-                                use std::collections::HashMap;
-                                let mut snapshots = HashMap::new();
-                                for a in &agents {
-                                    if let Ok(snaps) = cloud.list_snapshots(&a.id.to_string()).await
-                                    {
-                                        snapshots.insert(a.id, snaps);
-                                    }
-                                }
-                                this.update(&mut cx, |this, ctx| {
-                                    this.heroes.agents = agents;
-                                    this.heroes.snapshots = snapshots;
-                                    this.heroes.loading = false;
-                                    ctx.notify();
-                                })
-                                .ok();
-                            }
-                        },
-                    )
-                    .detach();
-                }
-                render_heroes(self, cx)
-            }
-            ActiveView::Rooms => render_rooms(self, cx),
+            ActiveView::Heroes => render_heroes(self, window, cx),
+            ActiveView::Rooms => render_rooms(self, window, cx),
             ActiveView::Rank => render_rank(self, cx),
             ActiveView::Leaderboard => render_leaderboard(self, cx),
-            ActiveView::Community => render_community(self, cx),
+            ActiveView::Community => render_community(self, window, cx),
             ActiveView::Billing => render_billing(self, cx),
-            ActiveView::Particles => render_particles(self, cx),
-            ActiveView::LogsArchive => render_logs_archive(self, cx),
+            ActiveView::Particles => render_particles(self, window, cx),
+            ActiveView::LogsArchive => render_logs_archive(self, window, cx),
             ActiveView::Admin => render_admin(self, cx),
             ActiveView::Games => render_games(self, cx),
             ActiveView::History => render_history(self, cx),
             ActiveView::Blog => render_blog(self, cx),
             ActiveView::Debug => render_debug(self, cx),
-            ActiveView::Mock => render_mock(self, cx),
+            ActiveView::Mock => render_mock(self, window, cx),
             ActiveView::Observe => render_observe(self, cx),
             ActiveView::RoomDetail => render_room_detail(self, cx),
             ActiveView::Hero => render_hero(self, cx),
             ActiveView::WadBrowser => render_wad_browser(self, window, cx),
             ActiveView::Extractor => render_extractor(self, window, cx),
 
-            ActiveView::Settings => {
-                if self.settings.providers.is_empty() && !self.settings.loading {
-                    self.settings.loading = true;
-                    let cloud = self.cloud.clone();
-                    cx.spawn(
-                        |this: gpui::WeakEntity<AppSidebar>, cx: &mut gpui::AsyncApp| {
-                            let this = this.clone();
-                            let mut cx = cx.clone();
-                            async move {
-                                let providers =
-                                    cloud.list_model_providers().await.unwrap_or_default();
-                                this.update(&mut cx, |this, ctx| {
-                                    this.settings.providers = providers;
-                                    this.settings.loading = false;
-                                    ctx.notify();
-                                })
-                                .ok();
-                            }
-                        },
-                    )
-                    .detach();
-                }
-                render_settings(self, cx)
-            }
+            ActiveView::Settings => render_settings(self, window, cx)
         };
 
         let content = div()
@@ -477,7 +411,7 @@ impl Render for AppSidebar {
             .children(Root::render_notification_layer(window, cx));
 
         // 登录弹窗覆盖层（绝对定位，盖在整个窗口之上）
-        if let Some(dlg) = render_auth_dialog(self, cx) {
+        if let Some(dlg) = render_auth_dialog(self, window, cx) {
             root = root.child(dlg);
         }
 

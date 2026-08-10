@@ -32,7 +32,6 @@ pub struct FlatNode {
     pub is_dir: bool,
     pub depth: usize,
     pub is_expanded: bool,
-    pub has_children: bool,
     pub hash: Option<u64>,
 }
 
@@ -579,7 +578,6 @@ fn collect_flat_visible_nodes(
                     is_dir: true,
                     depth,
                     is_expanded: node.is_expanded || child_matches,
-                    has_children: !node.children.is_empty(),
                     hash: None,
                 });
 
@@ -594,7 +592,6 @@ fn collect_flat_visible_nodes(
                 is_dir: false,
                 depth,
                 is_expanded: false,
-                has_children: false,
                 hash: node.hash,
             });
         }

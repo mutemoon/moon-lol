@@ -12,13 +12,12 @@ use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
-use lol_share::{ConfigVfx, ConfigVfxSystemDefinition};
+use lol_share::ConfigVfxSystemDefinition;
 use serde::{Deserialize, Serialize};
 use tokio::sync::{mpsc, oneshot};
 
 use super::ws_bridge::{run_frame_connection, SendOutcome};
 
-pub const DEFAULT_WS_URL: &str = "ws://127.0.0.1:9002";
 const REQUEST_TIMEOUT: Duration = Duration::from_secs(8);
 
 // ── 公开类型 ──
@@ -237,61 +236,6 @@ async fn request_via(
 
 pub fn characters_dir() -> Result<PathBuf, String> {
     Ok(super::assets_path::resolve_assets_dir().join("characters"))
-}
-
-/// 列出所有带 skin0_vfx.ron 的英雄（名称升序）。
-pub fn list_particle_heroes() -> Result<Vec<String>, String> {
-    let base = characters_dir()?;
-    let read_dir =
-        std::fs::read_dir(&base).map_err(|e| format!("读取 {} 失败: {e}", base.display()))?;
-
-    let mut out = Vec::new();
-    for entry in read_dir.flatten() {
-        if !entry.file_type().map(|t| t.is_dir()).unwrap_or(false) {
-            continue;
-        }
-        let name = entry.file_name().to_string_lossy().to_string();
-        if base
-            .join(&name)
-            .join("skins")
-            .join("skin0_vfx.ron")
-            .is_file()
-        {
-            out.push(name);
-        }
-    }
-    out.sort();
-    Ok(out)
-}
-
-/// 加载某英雄的 skin0_vfx.ron，解析为 ConfigVfx，返回每个 system 的 RON 字符串。
-pub fn load_hero_particles(hero: &str) -> Result<Vec<ParticleSystemDef>, String> {
-    let vfx_path = characters_dir()?
-        .join(hero)
-        .join("skins")
-        .join("skin0_vfx.ron");
-    if !vfx_path.is_file() {
-        return Err(format!("英雄 {hero} 不存在 skin0_vfx.ron"));
-    }
-
-    let content = std::fs::read_to_string(&vfx_path)
-        .map_err(|e| format!("读取 {} 失败: {e}", vfx_path.display()))?;
-    let config: ConfigVfx =
-        ron::from_str(&content).map_err(|e| format!("解析 {hero} 的 ConfigVfx 失败: {e}"))?;
-
-    let mut systems = Vec::with_capacity(config.systems.len());
-    for (&hash, def) in &config.systems {
-        let def_ron =
-            ron::ser::to_string(def).map_err(|e| format!("序列化 system {hash:08x} 失败: {e}"))?;
-        systems.push(ParticleSystemDef {
-            hash,
-            name: def.particle_name.clone(),
-            def_ron,
-            def: def.clone(),
-        });
-    }
-    systems.sort_by(|a, b| a.name.cmp(&b.name));
-    Ok(systems)
 }
 
 /// 将 ConfigVfxSystemDefinition 序列化为 RON 字符串。
