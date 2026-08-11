@@ -5,7 +5,6 @@
 //! 常量消息序列，渲染复用 `render_agent_chat_history`。
 //! 全部为本地状态，无任何服务依赖；文案内联中文。
 
-
 mod input;
 mod logic;
 mod types;

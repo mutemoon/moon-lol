@@ -35,11 +35,13 @@ thread_local! {
 
 /// 可聚焦、可键盘编辑的文本输入框（gpui_component `Input`）。
 ///
-/// get_value 读实时值（从 sidebar 或页面状态），set_value 在 Change 时写回；
+/// sidebar 来自调用方 render 持有的实体状态（render 期间实体被 gpui lease，
+/// 不能再 `cx.entity().read(cx)`）。get_value 读实时值，set_value 在 Change 时写回；
 /// 焦点、光标、未提交文本由 `InputState` 跨渲染保持。
 pub fn render_edit_input(
     window: &mut Window,
     cx: &mut Context<AppSidebar>,
+    sidebar: &AppSidebar,
     id: &str,
     placeholder: &str,
     opts: EditOptions,
@@ -49,11 +51,7 @@ pub fn render_edit_input(
     let state = STATES
         .with(|s| s.borrow().get(id).cloned())
         .unwrap_or_else(|| {
-            let init = {
-                let entity = cx.entity();
-                let sidebar = entity.read(cx);
-                get_value(sidebar)
-            };
+            let init = get_value(sidebar);
             let ed = cx.new(|cx| {
                 let mut st = InputState::new(window, cx).placeholder(placeholder);
                 if opts.multiline {
@@ -93,11 +91,7 @@ pub fn render_edit_input(
         });
 
     // 外部值 → InputState 同步（外部清空/加载时保持一致；输入中二者相等则跳过）
-    let external = {
-        let entity = cx.entity();
-        let sidebar = entity.read(cx);
-        get_value(sidebar)
-    };
+    let external = get_value(sidebar);
     if state.read(cx).value().to_string() != external {
         cx.update_entity(&state, |s, cx| s.set_value(external.clone(), window, cx));
     }

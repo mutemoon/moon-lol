@@ -9,6 +9,7 @@ use crate::components::text_input::{self, EditOptions};
 pub(super) fn render_state_input(
     window: &mut Window,
     cx: &mut Context<AppSidebar>,
+    sidebar: &AppSidebar,
     id: &str,
     placeholder: &str,
     get_value: impl Fn(&AppSidebar) -> String + 'static,
@@ -18,6 +19,7 @@ pub(super) fn render_state_input(
     text_input::render_edit_input(
         window,
         cx,
+        sidebar,
         id,
         placeholder,
         EditOptions {

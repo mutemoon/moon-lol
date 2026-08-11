@@ -43,10 +43,15 @@ pub(super) fn clear_all_input_buffers() {
 
 // ── 输入控件 ──
 
-pub(super) fn render_search_input(window: &mut Window, cx: &mut Context<AppSidebar>) -> AnyElement {
+pub(super) fn render_search_input(
+    window: &mut Window,
+    cx: &mut Context<AppSidebar>,
+    sidebar: &AppSidebar,
+) -> AnyElement {
     text_input::render_edit_input(
         window,
         cx,
+        sidebar,
         "particle-search",
         "搜索英雄 / 粒子",
         EditOptions::default(),
@@ -59,6 +64,7 @@ pub(super) fn render_search_input(window: &mut Window, cx: &mut Context<AppSideb
 pub(super) fn render_number_input(
     window: &mut Window,
     cx: &mut Context<AppSidebar>,
+    sidebar: &AppSidebar,
     id: String,
     value: f32,
     commit: impl Fn(&mut AppSidebar, f32) + 'static,
@@ -85,6 +91,7 @@ pub(super) fn render_number_input(
     text_input::render_edit_input(
         window,
         cx,
+        sidebar,
         &id,
         "0",
         EditOptions {
@@ -100,6 +107,7 @@ pub(super) fn render_number_input(
 pub(super) fn render_text_input(
     window: &mut Window,
     cx: &mut Context<AppSidebar>,
+    sidebar: &AppSidebar,
     id: String,
     value: String,
     placeholder: &str,
@@ -120,6 +128,7 @@ pub(super) fn render_text_input(
     text_input::render_edit_input(
         window,
         cx,
+        sidebar,
         &id,
         &placeholder_owned,
         EditOptions {

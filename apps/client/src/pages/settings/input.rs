@@ -11,7 +11,7 @@ pub(super) fn render_edit_field(
     id: &str,
     label: impl Into<SharedString>,
     placeholder: &str,
-    _sidebar: &AppSidebar,
+    sidebar: &AppSidebar,
     window: &mut Window,
     cx: &mut Context<AppSidebar>,
     get_value: impl Fn(&AppSidebar) -> String + 'static,
@@ -23,6 +23,7 @@ pub(super) fn render_edit_field(
         .child(text_input::render_edit_input(
             window,
             cx,
+            sidebar,
             id,
             placeholder,
             EditOptions::default(),

@@ -1,4 +1,3 @@
-
 //! 登录 / 认证弹窗（对应 apps/client/src/components/auth/AuthDialog.vue）。
 //!
 //! 表单状态存于 AppSidebar.auth（AuthDialogState），输入框复用共享组件
@@ -52,6 +51,7 @@ impl Default for AuthDialogState {
 fn render_input(
     window: &mut Window,
     cx: &mut Context<AppSidebar>,
+    sidebar: &AppSidebar,
     id: &str,
     placeholder: &str,
     mask: bool,
@@ -61,6 +61,7 @@ fn render_input(
     crate::components::text_input::render_edit_input(
         window,
         cx,
+        sidebar,
         id,
         placeholder,
         crate::components::text_input::EditOptions {
@@ -193,6 +194,7 @@ fn render_dialog(
     let phone_input = render_input(
         window,
         cx,
+        &*sidebar,
         "auth-phone",
         "请输入 11 位手机号",
         false,
@@ -202,6 +204,7 @@ fn render_dialog(
     let password_input = render_input(
         window,
         cx,
+        &*sidebar,
         "auth-password",
         if is_reset {
             "请输入新密码（至少 6 位）"
@@ -215,6 +218,7 @@ fn render_dialog(
     let code_input = render_input(
         window,
         cx,
+        &*sidebar,
         "auth-code",
         "请输入验证码",
         false,

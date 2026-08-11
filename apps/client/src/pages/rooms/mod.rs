@@ -121,6 +121,7 @@ pub fn render_rooms(
                             .child(div().flex_1().child(render_state_input(
                                 window,
                                 cx,
+                                &*sidebar,
                                 "rooms-join-code",
                                 "ABCD1234",
                                 |s: &AppSidebar| s.rooms.join_code.clone(),

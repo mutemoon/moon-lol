@@ -219,6 +219,7 @@ pub(super) fn create_room_dialog(
                                 .child(render_state_input(
                                     window,
                                     cx,
+                                    &*sidebar,
                                     "create-room-name",
                                     "周末野队挑战",
                                     |s: &AppSidebar| s.rooms.draft_name.clone(),
@@ -238,6 +239,7 @@ pub(super) fn create_room_dialog(
                                         .child(render_state_input(
                                             window,
                                             cx,
+                                            &*sidebar,
                                             "create-max-members",
                                             "10",
                                             |s: &AppSidebar| s.rooms.draft_max_members.clone(),
@@ -258,6 +260,7 @@ pub(super) fn create_room_dialog(
                                         .child(render_state_input(
                                             window,
                                             cx,
+                                            &*sidebar,
                                             "create-max-agents",
                                             "3",
                                             |s: &AppSidebar| s.rooms.draft_max_agents.clone(),

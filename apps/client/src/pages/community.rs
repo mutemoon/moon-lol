@@ -79,6 +79,7 @@ fn render_search(
         .child(div().w_64().child(render_edit_input(
             window,
             cx,
+            &*sidebar,
             "comm-search",
             "搜索 Agent / 英雄",
             EditOptions::default(),
@@ -304,6 +305,7 @@ fn render_fork_dialog(
                 .child(div().flex_1().child(render_edit_input(
                     window,
                     cx,
+                    &*sidebar,
                     "comm-fork-name",
                     "新 Agent 名称",
                     EditOptions::default(),

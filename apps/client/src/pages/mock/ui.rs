@@ -197,7 +197,7 @@ pub(super) fn render_chat_view(
                 .gap_4()
                 .overflow_y_scrollbar()
                 .child(render_agent_card(cx, turns, count))
-                .child(render_debugger(window, cx)),
+                .child(render_debugger(sidebar, window, cx)),
         )
         .child(
             div()
@@ -375,7 +375,11 @@ fn render_agent_card(cx: &mut Context<AppSidebar>, turns: u32, count: usize) -> 
 }
 
 /// 左侧「模拟调试器」：预设动作 + 手动注入。
-fn render_debugger(window: &mut Window, cx: &mut Context<AppSidebar>) -> AnyElement {
+fn render_debugger(
+    sidebar: &AppSidebar,
+    window: &mut Window,
+    cx: &mut Context<AppSidebar>,
+) -> AnyElement {
     let get_user = |s: &AppSidebar| s.mock.user_input.clone();
     let set_user = |s: &mut AppSidebar, v: String| s.mock.user_input = v;
     let get_ai = |s: &AppSidebar| s.mock.assistant_input.clone();
@@ -438,6 +442,7 @@ fn render_debugger(window: &mut Window, cx: &mut Context<AppSidebar>) -> AnyElem
                         .child(render_edit_input(
                             window,
                             cx,
+                            sidebar,
                             "mock-user-input",
                             "输入用户环境观测消息…",
                             get_user,
@@ -459,6 +464,7 @@ fn render_debugger(window: &mut Window, cx: &mut Context<AppSidebar>) -> AnyElem
                         .child(render_edit_input(
                             window,
                             cx,
+                            sidebar,
                             "mock-assistant-input",
                             "输入 AI 回复消息…",
                             get_ai,

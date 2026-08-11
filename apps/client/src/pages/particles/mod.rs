@@ -128,7 +128,7 @@ pub fn render_particles(
             .into_any_element(),
     };
 
-    let search_input_elem = render_search_input(window, cx);
+    let search_input_elem = render_search_input(window, cx, &*sidebar);
     let page_header_elem = render_page_header(sidebar, cx, &ws_url, connected, auto_play);
 
     h_flex()

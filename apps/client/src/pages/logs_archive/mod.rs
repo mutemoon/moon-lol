@@ -365,6 +365,7 @@ pub fn render_logs_archive(
                                                     div().w(rems(24.)).child(render_text_input(
                                                         window,
                                                         cx,
+                                                        &*sidebar,
                                                         "logs-local-path",
                                                         "输入 .sqlite 文件路径…",
                                                         |s: &AppSidebar| {
@@ -425,6 +426,7 @@ pub fn render_logs_archive(
                                     div().w(rems(24.)).child(render_text_input(
                                         window,
                                         cx,
+                                        &*sidebar,
                                         "logs-game-id",
                                         "输入对局 ID（或从上方列表点击「查询」）",
                                         |s: &AppSidebar| s.logs_archive.game_id.clone(),

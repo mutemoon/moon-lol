@@ -49,6 +49,7 @@ fn render_section(
 fn render_sampler_row(
     window: &mut Window,
     cx: &mut Context<AppSidebar>,
+    sidebar: &AppSidebar,
     hash: u32,
     idx: usize,
     kind: SamplerKind,
@@ -92,6 +93,7 @@ fn render_sampler_row(
                 .child(render_number_input(
                     window,
                     cx,
+                    sidebar,
                     id,
                     vals.get(c).copied().unwrap_or(0.0),
                     move |s: &mut AppSidebar, v| set_sampler_component(s, idx, kind, c, v),
@@ -104,6 +106,7 @@ fn render_sampler_row(
 pub(super) fn render_emitter_editor(
     window: &mut Window,
     cx: &mut Context<AppSidebar>,
+    sidebar: &AppSidebar,
     hash: u32,
     idx: usize,
     em: &ConfigVfxEmitterDefinition,
@@ -121,6 +124,7 @@ pub(super) fn render_emitter_editor(
             render_text_input(
                 window,
                 cx,
+                sidebar,
                 format!("{:08x}-{}-name", hash, idx),
                 em.emitter_name.clone().unwrap_or_default(),
                 "Fire_Particle",
@@ -132,6 +136,7 @@ pub(super) fn render_emitter_editor(
             render_number_input(
                 window,
                 cx,
+                sidebar,
                 format!("{:08x}-{}-lifetime", hash, idx),
                 get_num_field(em, NumField::Lifetime),
                 move |s: &mut AppSidebar, v| set_num_field(s, idx, NumField::Lifetime, v),
@@ -142,6 +147,7 @@ pub(super) fn render_emitter_editor(
             render_number_input(
                 window,
                 cx,
+                sidebar,
                 format!("{:08x}-{}-num_frames", hash, idx),
                 get_num_field(em, NumField::NumFrames),
                 move |s: &mut AppSidebar, v| set_num_field(s, idx, NumField::NumFrames, v),
@@ -152,6 +158,7 @@ pub(super) fn render_emitter_editor(
             render_number_input(
                 window,
                 cx,
+                sidebar,
                 format!("{:08x}-{}-blend", hash, idx),
                 get_num_field(em, NumField::BlendMode),
                 move |s: &mut AppSidebar, v| set_num_field(s, idx, NumField::BlendMode, v),
@@ -162,6 +169,7 @@ pub(super) fn render_emitter_editor(
             render_number_input(
                 window,
                 cx,
+                sidebar,
                 format!("{:08x}-{}-alpha", hash, idx),
                 get_num_field(em, NumField::AlphaRef),
                 move |s: &mut AppSidebar, v| set_num_field(s, idx, NumField::AlphaRef, v),
@@ -181,6 +189,7 @@ pub(super) fn render_emitter_editor(
                 .child(render_text_input(
                     window,
                     cx,
+                    sidebar,
                     format!("{:08x}-{}-tex-{:?}", hash, idx, f),
                     get_texture(em, f),
                     placeholder,
@@ -203,7 +212,7 @@ pub(super) fn render_emitter_editor(
             )
             .child(h_flex().gap_1().children((0..2).map(|c| {
                 let id = format!("{:08x}-{}-texdiv-{}", hash, idx, c);
-                render_number_input(window, cx, id, tv[c], move |s: &mut AppSidebar, v| {
+                render_number_input(window, cx, sidebar, id, tv[c], move |s: &mut AppSidebar, v| {
                     set_tex_div_comp(s, idx, c, v)
                 })
                 .into_any_element()
@@ -228,7 +237,7 @@ pub(super) fn render_emitter_editor(
         .into_any_element()];
     let sampler_children: Vec<AnyElement> = SamplerKind::all()
         .iter()
-        .map(|k| render_sampler_row(window, cx, hash, idx, *k, em))
+        .map(|k| render_sampler_row(window, cx, sidebar, hash, idx, *k, em))
         .collect();
 
     v_flex()

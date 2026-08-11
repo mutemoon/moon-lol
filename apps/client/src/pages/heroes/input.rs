@@ -9,7 +9,7 @@ use crate::components::text_input::{self, EditOptions};
 
 /// 可聚焦、可键盘编辑的文本输入框。get_value 读 live 值，set_value 写回 sidebar 字段。
 pub(super) fn render_edit_input(
-    _sidebar: &AppSidebar,
+    sidebar: &AppSidebar,
     window: &mut Window,
     cx: &mut Context<AppSidebar>,
     id: &str,
@@ -21,6 +21,7 @@ pub(super) fn render_edit_input(
     text_input::render_edit_input(
         window,
         cx,
+        sidebar,
         id,
         placeholder,
         EditOptions {

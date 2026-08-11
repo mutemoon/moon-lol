@@ -7,7 +7,6 @@
 //! 文案内联中文（未接入 i18n），本文件自包含、不依赖其它页面私有状态；
 //! 组件注册（mod.rs）与页面接入由主会话处理。
 
-
 use std::collections::{HashMap, HashSet};
 
 use gpui::prelude::*;
