@@ -94,7 +94,7 @@ fn render_sampler_row(
                     cx,
                     id,
                     vals.get(c).copied().unwrap_or(0.0),
-                    move |v| set_sampler_component(idx, kind, c, v),
+                    move |s: &mut AppSidebar, v| set_sampler_component(s, idx, kind, c, v),
                 ))
                 .into_any_element()
         })))
@@ -124,7 +124,7 @@ pub(super) fn render_emitter_editor(
                 format!("{:08x}-{}-name", hash, idx),
                 em.emitter_name.clone().unwrap_or_default(),
                 "Fire_Particle",
-                move |v| set_name_idx(idx, v),
+                move |s: &mut AppSidebar, v| set_name_idx(s, idx, v),
             ),
         ),
         (
@@ -134,7 +134,7 @@ pub(super) fn render_emitter_editor(
                 cx,
                 format!("{:08x}-{}-lifetime", hash, idx),
                 get_num_field(em, NumField::Lifetime),
-                move |v| set_num_field(idx, NumField::Lifetime, v),
+                move |s: &mut AppSidebar, v| set_num_field(s, idx, NumField::Lifetime, v),
             ),
         ),
         (
@@ -144,7 +144,7 @@ pub(super) fn render_emitter_editor(
                 cx,
                 format!("{:08x}-{}-num_frames", hash, idx),
                 get_num_field(em, NumField::NumFrames),
-                move |v| set_num_field(idx, NumField::NumFrames, v),
+                move |s: &mut AppSidebar, v| set_num_field(s, idx, NumField::NumFrames, v),
             ),
         ),
         (
@@ -154,7 +154,7 @@ pub(super) fn render_emitter_editor(
                 cx,
                 format!("{:08x}-{}-blend", hash, idx),
                 get_num_field(em, NumField::BlendMode),
-                move |v| set_num_field(idx, NumField::BlendMode, v),
+                move |s: &mut AppSidebar, v| set_num_field(s, idx, NumField::BlendMode, v),
             ),
         ),
         (
@@ -164,7 +164,7 @@ pub(super) fn render_emitter_editor(
                 cx,
                 format!("{:08x}-{}-alpha", hash, idx),
                 get_num_field(em, NumField::AlphaRef),
-                move |v| set_num_field(idx, NumField::AlphaRef, v),
+                move |s: &mut AppSidebar, v| set_num_field(s, idx, NumField::AlphaRef, v),
             ),
         ),
     ];
@@ -184,7 +184,7 @@ pub(super) fn render_emitter_editor(
                     format!("{:08x}-{}-tex-{:?}", hash, idx, f),
                     get_texture(em, f),
                     placeholder,
-                    move |v| set_texture_idx(idx, f, v),
+                    move |s: &mut AppSidebar, v| set_texture_idx(s, idx, f, v),
                 ))
                 .into_any_element()
         })
@@ -203,8 +203,10 @@ pub(super) fn render_emitter_editor(
             )
             .child(h_flex().gap_1().children((0..2).map(|c| {
                 let id = format!("{:08x}-{}-texdiv-{}", hash, idx, c);
-                render_number_input(window, cx, id, tv[c], move |v| set_tex_div_comp(idx, c, v))
-                    .into_any_element()
+                render_number_input(window, cx, id, tv[c], move |s: &mut AppSidebar, v| {
+                    set_tex_div_comp(s, idx, c, v)
+                })
+                .into_any_element()
             })))
             .into_any_element(),
     );
@@ -250,16 +252,16 @@ pub(super) fn render_emitter_editor(
                             Button::new(format!("play-single-{:08x}-{}", hash, idx))
                                 .icon(IconName::Play)
                                 .label("播放单个")
-                                .on_click(cx.listener(move |_, _, _, cx| {
-                                    play_single_emitter(cx, idx);
+                                .on_click(cx.listener(move |this, _, _, cx| {
+                                    play_single_emitter(this, cx, idx);
                                 })),
                         )
                         .child(
                             Button::new(format!("reset-single-{:08x}-{}", hash, idx))
                                 .ghost()
                                 .label("重置")
-                                .on_click(cx.listener(move |_, _, _, cx| {
-                                    reset_single_emitter(cx, idx);
+                                .on_click(cx.listener(move |this, _, _, cx| {
+                                    reset_single_emitter(this, cx, idx);
                                 })),
                         ),
                 ),

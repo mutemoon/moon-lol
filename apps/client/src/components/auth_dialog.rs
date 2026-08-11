@@ -1,11 +1,8 @@
-#![allow(dead_code)]
 
 //! 登录 / 认证弹窗（对应 apps/client/src/components/auth/AuthDialog.vue）。
 //!
-//! 表单状态用 thread_local 保存，避免给 AppSidebar 增加字段。
-//! 输入框复用共享组件（gpui_component Input 封装）。
-
-use std::cell::{Cell, RefCell};
+//! 表单状态存于 AppSidebar.auth（AuthDialogState），输入框复用共享组件
+//! （gpui_component Input 封装）。
 
 use gpui::prelude::*;
 use gpui::*;
@@ -18,21 +15,36 @@ use crate::services::cloud::{CloudClient, CloudError};
 // ── 模式与表单状态 ──
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-enum AuthMode {
+pub enum AuthMode {
     CodeLogin,
     PasswordLogin,
     Register,
     ResetPassword,
 }
 
-thread_local! {
-    static AUTH_MODE: Cell<AuthMode> = Cell::new(AuthMode::CodeLogin);
-    static PHONE: RefCell<String> = RefCell::new(String::new());
-    static PASSWORD: RefCell<String> = RefCell::new(String::new());
-    static CODE: RefCell<String> = RefCell::new(String::new());
-    static ERROR_MSG: RefCell<String> = RefCell::new(String::new());
-    static INFO_MSG: RefCell<String> = RefCell::new(String::new());
-    static SUBMITTING: Cell<bool> = Cell::new(false);
+/// 登录表单状态（存于 AppSidebar.auth）。
+pub struct AuthDialogState {
+    pub mode: AuthMode,
+    pub phone: String,
+    pub password: String,
+    pub code: String,
+    pub error: String,
+    pub info: String,
+    pub submitting: bool,
+}
+
+impl Default for AuthDialogState {
+    fn default() -> Self {
+        Self {
+            mode: AuthMode::CodeLogin,
+            phone: String::new(),
+            password: String::new(),
+            code: String::new(),
+            error: String::new(),
+            info: String::new(),
+            submitting: false,
+        }
+    }
 }
 
 // ── 输入框（复用共享组件） ──
@@ -43,8 +55,8 @@ fn render_input(
     id: &str,
     placeholder: &str,
     mask: bool,
-    get_value: impl Fn() -> String + 'static,
-    set_value: impl Fn(String) + 'static,
+    get_value: impl Fn(&AppSidebar) -> String + 'static,
+    set_value: impl Fn(&mut AppSidebar, String) + 'static,
 ) -> AnyElement {
     crate::components::text_input::render_edit_input(
         window,
@@ -55,8 +67,8 @@ fn render_input(
             masked: mask,
             ..Default::default()
         },
-        move |_s| get_value(),
-        move |_s, v| set_value(v),
+        get_value,
+        set_value,
     )
 }
 
@@ -98,35 +110,40 @@ fn info_banner(text: &str, cx: &Context<AppSidebar>) -> AnyElement {
 
 // ── 模式切换与表单操作 ──
 
-fn switch_mode(target: AuthMode) {
-    AUTH_MODE.with(|m| m.set(target));
-    ERROR_MSG.with(|e| e.borrow_mut().clear());
-    INFO_MSG.with(|i| i.borrow_mut().clear());
-    PASSWORD.with(|p| p.borrow_mut().clear());
-    CODE.with(|c| c.borrow_mut().clear());
-    SUBMITTING.with(|s| s.set(false));
+fn switch_mode(sidebar: &mut AppSidebar, target: AuthMode) {
+    sidebar.auth.mode = target;
+    sidebar.auth.error.clear();
+    sidebar.auth.info.clear();
+    sidebar.auth.password.clear();
+    sidebar.auth.code.clear();
+    sidebar.auth.submitting = false;
 }
 
-fn set_error(msg: &str) {
-    ERROR_MSG.with(|e| *e.borrow_mut() = msg.to_string());
-    INFO_MSG.with(|i| i.borrow_mut().clear());
+fn set_error(sidebar: &mut AppSidebar, msg: &str) {
+    sidebar.auth.error = msg.to_string();
+    sidebar.auth.info.clear();
 }
 
-fn clear_form() {
-    PHONE.with(|p| p.borrow_mut().clear());
-    PASSWORD.with(|p| p.borrow_mut().clear());
-    CODE.with(|c| c.borrow_mut().clear());
-    ERROR_MSG.with(|e| e.borrow_mut().clear());
-    INFO_MSG.with(|i| i.borrow_mut().clear());
-    SUBMITTING.with(|s| s.set(false));
+fn clear_form(sidebar: &mut AppSidebar) {
+    sidebar.auth.phone.clear();
+    sidebar.auth.password.clear();
+    sidebar.auth.code.clear();
+    sidebar.auth.error.clear();
+    sidebar.auth.info.clear();
+    sidebar.auth.submitting = false;
 }
 
-fn mode_tab(target: AuthMode, label: &str, cx: &mut Context<AppSidebar>) -> AnyElement {
-    let active = AUTH_MODE.with(|m| m.get()) == target;
+fn mode_tab(
+    target: AuthMode,
+    label: &str,
+    sidebar: &AppSidebar,
+    cx: &mut Context<AppSidebar>,
+) -> AnyElement {
+    let active = sidebar.auth.mode == target;
     let btn = Button::new(format!("auth-mode-{:?}", target)).label(label);
     let btn = if active { btn.primary() } else { btn.outline() };
-    btn.on_click(cx.listener(move |_, _, _, cx| {
-        switch_mode(target);
+    btn.on_click(cx.listener(move |this, _, _, cx| {
+        switch_mode(this, target);
         cx.notify();
     }))
     .into_any_element()
@@ -147,14 +164,14 @@ pub fn render_auth_dialog(
 }
 
 fn render_dialog(
-    _sidebar: &mut AppSidebar,
+    sidebar: &mut AppSidebar,
     window: &mut Window,
     cx: &mut Context<AppSidebar>,
 ) -> AnyElement {
-    let mode = AUTH_MODE.with(|m| m.get());
-    let error = ERROR_MSG.with(|e| e.borrow().clone());
-    let info = INFO_MSG.with(|i| i.borrow().clone());
-    let submitting = SUBMITTING.with(|s| s.get());
+    let mode = sidebar.auth.mode;
+    let error = sidebar.auth.error.clone();
+    let info = sidebar.auth.info.clone();
+    let submitting = sidebar.auth.submitting;
     let is_reset = mode == AuthMode::ResetPassword;
 
     let title = match mode {
@@ -179,8 +196,8 @@ fn render_dialog(
         "auth-phone",
         "请输入 11 位手机号",
         false,
-        || PHONE.with(|p| p.borrow().clone()),
-        |v| PHONE.with(|p| *p.borrow_mut() = v),
+        |s: &AppSidebar| s.auth.phone.clone(),
+        |s: &mut AppSidebar, v: String| s.auth.phone = v,
     );
     let password_input = render_input(
         window,
@@ -192,8 +209,8 @@ fn render_dialog(
             "请输入密码（至少 6 位）"
         },
         true,
-        || PASSWORD.with(|p| p.borrow().clone()),
-        |v| PASSWORD.with(|p| *p.borrow_mut() = v),
+        |s: &AppSidebar| s.auth.password.clone(),
+        |s: &mut AppSidebar, v: String| s.auth.password = v,
     );
     let code_input = render_input(
         window,
@@ -201,8 +218,8 @@ fn render_dialog(
         "auth-code",
         "请输入验证码",
         false,
-        || CODE.with(|c| c.borrow().clone()),
-        |v| CODE.with(|c| *c.borrow_mut() = v),
+        |s: &AppSidebar| s.auth.code.clone(),
+        |s: &mut AppSidebar, v: String| s.auth.code = v,
     );
 
     let tabs: Vec<AnyElement> = [
@@ -212,7 +229,7 @@ fn render_dialog(
         (AuthMode::ResetPassword, "重置密码"),
     ]
     .into_iter()
-    .map(|(m, label)| mode_tab(m, label, cx))
+    .map(|(m, label)| mode_tab(m, label, &*sidebar, cx))
     .collect();
 
     let header = h_flex()
@@ -237,7 +254,7 @@ fn render_dialog(
                 .icon(IconName::Close)
                 .on_click(cx.listener(|this, _, _, cx| {
                     this.show_auth_dialog = false;
-                    clear_form();
+                    clear_form(this);
                     cx.notify();
                 })),
         );
@@ -335,19 +352,19 @@ async fn run_auth(
 }
 
 fn submit(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) {
-    let mode = AUTH_MODE.with(|m| m.get());
-    let phone = PHONE.with(|p| p.borrow().trim().to_string());
-    let password = PASSWORD.with(|p| p.borrow().clone());
-    let code = CODE.with(|c| c.borrow().clone());
+    let mode = sidebar.auth.mode;
+    let phone = sidebar.auth.phone.trim().to_string();
+    let password = sidebar.auth.password.clone();
+    let code = sidebar.auth.code.clone();
 
     if phone.chars().count() != 11 {
-        set_error("请输入正确的 11 位手机号");
+        set_error(sidebar, "请输入正确的 11 位手机号");
         cx.notify();
         return;
     }
     if matches!(mode, AuthMode::PasswordLogin | AuthMode::Register) && password.chars().count() < 6
     {
-        set_error("密码长度至少为 6 位");
+        set_error(sidebar, "密码长度至少为 6 位");
         cx.notify();
         return;
     }
@@ -356,13 +373,13 @@ fn submit(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) {
         AuthMode::CodeLogin | AuthMode::Register | AuthMode::ResetPassword
     ) && code.is_empty()
     {
-        set_error("请输入验证码");
+        set_error(sidebar, "请输入验证码");
         cx.notify();
         return;
     }
 
-    set_error("");
-    SUBMITTING.with(|s| s.set(true));
+    set_error(sidebar, "");
+    sidebar.auth.submitting = true;
     cx.notify();
 
     let cloud = sidebar.cloud.clone();
@@ -373,19 +390,20 @@ fn submit(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) {
             async move {
                 match run_auth(&cloud, mode, &phone, &password, &code).await {
                     AuthResult::ResetDone => {
-                        this.update(&mut cx, |_this, cx| {
-                            SUBMITTING.with(|s| s.set(false));
-                            INFO_MSG.with(|i| *i.borrow_mut() = "已重置，请登录".to_string());
-                            AUTH_MODE.with(|m| m.set(AuthMode::PasswordLogin));
-                            PASSWORD.with(|p| p.borrow_mut().clear());
+                        this.update(&mut cx, |this, cx| {
+                            this.auth.submitting = false;
+                            this.auth.info = "已重置，请登录".to_string();
+                            this.auth.mode = AuthMode::PasswordLogin;
+                            this.auth.password.clear();
                             cx.notify();
                         })
                         .ok();
                     }
                     AuthResult::Failed(e) => {
-                        this.update(&mut cx, |_this, cx| {
-                            SUBMITTING.with(|s| s.set(false));
-                            set_error(&format!("{}", e));
+                        this.update(&mut cx, |this, cx| {
+                            this.auth.submitting = false;
+                            this.auth.error = format!("{}", e);
+                            this.auth.info.clear();
                             cx.notify();
                         })
                         .ok();
@@ -393,7 +411,7 @@ fn submit(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) {
                     AuthResult::Done => {
                         let me = cloud.get_current_user().await;
                         this.update(&mut cx, |this, cx| {
-                            SUBMITTING.with(|s| s.set(false));
+                            this.auth.submitting = false;
                             match me {
                                 Ok(u) => {
                                     this.auth_token = cloud.get_token();
@@ -402,9 +420,12 @@ fn submit(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) {
                                         phone: u.phone,
                                     });
                                     this.show_auth_dialog = false;
-                                    clear_form();
+                                    clear_form(this);
                                 }
-                                Err(e) => set_error(&format!("获取用户信息失败：{}", e)),
+                                Err(e) => {
+                                    this.auth.error = format!("获取用户信息失败：{}", e);
+                                    this.auth.info.clear();
+                                }
                             }
                             cx.notify();
                         })

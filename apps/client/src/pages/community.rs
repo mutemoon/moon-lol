@@ -1,5 +1,3 @@
-use std::cell::RefCell;
-
 use gpui::prelude::*;
 use gpui::*;
 use gpui_component::button::{Button, ButtonVariants};
@@ -12,13 +10,6 @@ use crate::components::text_input::{render_edit_input, EditOptions};
 use crate::services::provider;
 
 const SORTS: &[(&str, &str)] = &[("recent", "最近"), ("popular", "热门"), ("elo", "ELO")];
-
-// ── 页面本地状态 ──
-
-thread_local! {
-    static LOADING: RefCell<bool> = RefCell::new(false);
-    static FORK_ERROR: RefCell<Option<String>> = RefCell::new(None);
-}
 
 // ── 数据加载 ──
 
@@ -36,9 +27,9 @@ fn spawn_load_agents(cx: &mut Context<AppSidebar>, sort: &str) {
                     .browse_community_agents(&sort, 60)
                     .await
                     .unwrap_or_default();
-                LOADING.with(|l| *l.borrow_mut() = false);
                 if let Some(e) = weak.upgrade() {
                     let _ = e.update(&mut cx, |this, cx| {
+                        this.community_loading = false;
                         this.community_agents = agents;
                         this.community_loaded = true;
                         cx.notify();
@@ -66,7 +57,7 @@ fn render_sort_tabs(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> A
                 btn.outline()
                     .on_click(cx.listener(move |this, _, _, cx| {
                         this.community_sort = v.clone();
-                        LOADING.with(|l| *l.borrow_mut() = true);
+                        this.community_loading = true;
                         spawn_load_agents(cx, &v);
                         cx.notify();
                     }))
@@ -122,7 +113,7 @@ fn filtered_agents(agents: &[Agent], search: &str) -> Vec<Agent> {
 }
 
 fn render_cards(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> AnyElement {
-    let loading = LOADING.with(|l| *l.borrow());
+    let loading = sidebar.community_loading;
     let search = sidebar.community_search.clone();
     let agents = filtered_agents(&sidebar.community_agents, &search);
 
@@ -208,7 +199,7 @@ fn render_cards(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> AnyEl
                         .on_click(cx.listener(move |this, _, _, cx| {
                             this.community_fork_target = Some(target2.clone());
                             this.community_fork_name = format!("{} · 副本", target2.name);
-                            FORK_ERROR.with(|e| *e.borrow_mut() = None);
+                            this.community_fork_error = None;
                             cx.notify();
                         }))
                         .into_any_element()
@@ -226,12 +217,12 @@ fn confirm_fork(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) {
     };
     let name = sidebar.community_fork_name.trim().to_string();
     if name.is_empty() {
-        FORK_ERROR.with(|e| *e.borrow_mut() = Some("请输入新 Agent 名称".to_string()));
+        sidebar.community_fork_error = Some("请输入新 Agent 名称".to_string());
         cx.notify();
         return;
     }
     sidebar.community_forking = true;
-    FORK_ERROR.with(|e| *e.borrow_mut() = None);
+    sidebar.community_fork_error = None;
     let sort = sidebar.community_sort.clone();
     let client = provider::cloud_client().clone();
     let agent_id = target.id.to_string();
@@ -246,14 +237,16 @@ fn confirm_fork(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) {
             async move {
                 match client.fork_agent(&agent_id, Some(&name)).await {
                     Ok(_) => {
-                        LOADING.with(|l| *l.borrow_mut() = true);
+                        if let Some(e) = weak.upgrade() {
+                            let _ = e.update(&mut cx, |this, _| this.community_loading = true);
+                        }
                         let agents = client
                             .browse_community_agents(&sort, 60)
                             .await
                             .unwrap_or_default();
-                        LOADING.with(|l| *l.borrow_mut() = false);
                         if let Some(e) = weak.upgrade() {
                             let _ = e.update(&mut cx, |this, cx| {
+                                this.community_loading = false;
                                 this.community_forking = false;
                                 this.community_fork_target = None;
                                 this.community_fork_name.clear();
@@ -264,12 +257,10 @@ fn confirm_fork(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) {
                         }
                     }
                     Err(err) => {
-                        FORK_ERROR.with(|e| {
-                            *e.borrow_mut() = Some(format!("Fork 失败：{}", err));
-                        });
                         if let Some(e) = weak.upgrade() {
                             let _ = e.update(&mut cx, |this, cx| {
                                 this.community_forking = false;
+                                this.community_fork_error = Some(format!("Fork 失败：{}", err));
                                 cx.notify();
                             });
                         }
@@ -290,7 +281,7 @@ fn render_fork_dialog(
         return div().into_any_element();
     }
     let forking = sidebar.community_forking;
-    let fork_error = FORK_ERROR.with(|e| e.borrow().clone()).unwrap_or_default();
+    let fork_error = sidebar.community_fork_error.clone().unwrap_or_default();
 
     v_flex()
         .gap_4()
@@ -339,7 +330,7 @@ fn render_fork_dialog(
                         .on_click(cx.listener(|this, _, _, cx| {
                             this.community_fork_target = None;
                             this.community_fork_name.clear();
-                            FORK_ERROR.with(|e| *e.borrow_mut() = None);
+                            this.community_fork_error = None;
                             cx.notify();
                         })),
                 )
@@ -370,7 +361,7 @@ pub fn render_community(
     // 首次渲染加载社区列表
     if !sidebar.community_loaded {
         sidebar.community_loaded = true;
-        LOADING.with(|l| *l.borrow_mut() = true);
+        sidebar.community_loading = true;
         let sort = sidebar.community_sort.clone();
         spawn_load_agents(cx, &sort);
     }

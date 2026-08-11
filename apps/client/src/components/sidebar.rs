@@ -12,7 +12,9 @@ use lol_web_protocol::rank::{EloRating, RankQueueEntry, Season};
 use tokio::sync::mpsc;
 use uuid::Uuid;
 
-use crate::components::auth_dialog::render_auth_dialog;
+use crate::components::agent_chat_history::ChatHistoryFilters;
+use crate::components::auth_dialog::{render_auth_dialog, AuthDialogState};
+use crate::components::game_console_logs::GameConsoleLogsState;
 use crate::components::navigation::{render_sidebar_menu, render_topbar};
 use crate::components::tasks_table::TaskTableDelegate;
 use crate::components::{render_running_visual, render_task_detail, render_tasks_table};
@@ -23,6 +25,10 @@ use crate::pages::{
     render_games, render_hero, render_heroes, render_history, render_home, render_launcher,
     render_leaderboard, render_logs_archive, render_mock, render_observe, render_particles,
     render_rank, render_room_detail, render_rooms, render_settings, render_wad_browser,
+    AdminPageState, BillingPageState, BlogPageState, DebugPageState, ExtractorPageState,
+    GamesPageState, HistoryPageState, HomePageState, LauncherPageState, LogsArchiveState,
+    MockPageState, ObservePageState, ParticlesPageState, RoomDetailPageState, RoomsPageState,
+    WadBrowserState,
 };
 use crate::services::cloud::CloudClient;
 use crate::services::provider;
@@ -77,6 +83,10 @@ pub struct AppSidebar {
     pub current_user: Option<UserInfo>,
     pub auth_loading: bool,
     pub show_auth_dialog: bool,
+    pub auth: AuthDialogState,
+    // ── 共享组件本地状态 ──
+    pub game_console_logs: GameConsoleLogsState,
+    pub agent_chat_filters: ChatHistoryFilters,
 
     // ── 全局状态：Game / Match ──
     pub champion: String,
@@ -106,15 +116,18 @@ pub struct AppSidebar {
     pub leaderboard_mode: String,
     pub leaderboard_view: String,
     pub leaderboard_loaded: bool,
+    pub leaderboard_loading: bool,
 
     // ── Community 页面 ──
     pub community_agents: Vec<Agent>,
     pub community_sort: String,
     pub community_search: String,
     pub community_loaded: bool,
+    pub community_loading: bool,
     pub community_fork_target: Option<Agent>,
     pub community_fork_name: String,
     pub community_forking: bool,
+    pub community_fork_error: Option<String>,
 
     pub history: Vec<ActiveView>,
     pub history_index: usize,
@@ -123,6 +136,23 @@ pub struct AppSidebar {
     pub cloud: CloudClient,
     pub heroes: HeroesState,
     pub settings: SettingsState,
+    // ── 各页面本地状态（thread_local STATE → entity 字段迁移） ──
+    pub home: HomePageState,
+    pub history_page: HistoryPageState,
+    pub blog: BlogPageState,
+    pub admin: AdminPageState,
+    pub billing: BillingPageState,
+    pub games: GamesPageState,
+    pub launcher: LauncherPageState,
+    pub observe: ObservePageState,
+    pub logs_archive: LogsArchiveState,
+    pub debug: DebugPageState,
+    pub room_detail: RoomDetailPageState,
+    pub rooms: RoomsPageState,
+    pub particles: ParticlesPageState,
+    pub extractor: ExtractorPageState,
+    pub wad_browser: WadBrowserState,
+    pub mock: MockPageState,
 }
 
 impl AppSidebar {
@@ -163,6 +193,9 @@ impl AppSidebar {
             current_user: None,
             auth_loading: false,
             show_auth_dialog: false,
+            auth: AuthDialogState::default(),
+            game_console_logs: GameConsoleLogsState::default(),
+            agent_chat_filters: ChatHistoryFilters::default(),
             // Game
             champion: String::new(),
             game_mode: String::from("sandbox"),
@@ -189,14 +222,17 @@ impl AppSidebar {
             leaderboard_mode: String::from("top_solo"),
             leaderboard_view: String::from("total"),
             leaderboard_loaded: false,
+            leaderboard_loading: false,
             // Community
             community_agents: Vec::new(),
             community_sort: String::from("recent"),
             community_search: String::new(),
             community_loaded: false,
+            community_loading: false,
             community_fork_target: None,
             community_fork_name: String::new(),
             community_forking: false,
+            community_fork_error: None,
             history: vec![ActiveView::RlTraining],
             history_index: 0,
             // Heroes / Settings
@@ -204,6 +240,22 @@ impl AppSidebar {
             cloud: provider::cloud_client().clone(),
             heroes: HeroesState::default(),
             settings: SettingsState::default(),
+            home: HomePageState::default(),
+            history_page: HistoryPageState::default(),
+            blog: BlogPageState::default(),
+            admin: AdminPageState::default(),
+            billing: BillingPageState::default(),
+            games: GamesPageState::default(),
+            launcher: LauncherPageState::default(),
+            observe: ObservePageState::default(),
+            logs_archive: LogsArchiveState::default(),
+            debug: DebugPageState::default(),
+            room_detail: RoomDetailPageState::default(),
+            rooms: RoomsPageState::default(),
+            particles: ParticlesPageState::default(),
+            extractor: ExtractorPageState::default(),
+            wad_browser: WadBrowserState::default(),
+            mock: MockPageState::default(),
         };
 
         setup_auth(&mut this, cx);
@@ -373,7 +425,7 @@ impl Render for AppSidebar {
             ActiveView::WadBrowser => render_wad_browser(self, window, cx),
             ActiveView::Extractor => render_extractor(self, window, cx),
 
-            ActiveView::Settings => render_settings(self, window, cx)
+            ActiveView::Settings => render_settings(self, window, cx),
         };
 
         let content = div()

@@ -10,7 +10,6 @@ use lol_web_protocol::room::{Room, RoomStatus, TeamPolicy};
 
 use super::input::render_state_input;
 use super::logic::{spawn_join_or_enter_room, try_create_room};
-use super::types::{update_state, with_state};
 use crate::components::sidebar::AppSidebar;
 
 pub(super) fn tab_button(
@@ -44,7 +43,12 @@ pub(super) fn tab_button(
         .into_any_element()
 }
 
-pub(super) fn room_card(cx: &mut Context<AppSidebar>, room: &Room, _logged_in: bool) -> AnyElement {
+pub(super) fn room_card(
+    sidebar: &AppSidebar,
+    cx: &mut Context<AppSidebar>,
+    room: &Room,
+    _logged_in: bool,
+) -> AnyElement {
     let status_label = match room.status {
         RoomStatus::Lobby => "待开始",
         RoomStatus::Running => "对局中",
@@ -61,7 +65,7 @@ pub(super) fn room_card(cx: &mut Context<AppSidebar>, room: &Room, _logged_in: b
     };
 
     let room_id = room.id.to_string();
-    let is_my_room = with_state(|s| s.my_rooms.iter().any(|r| r.id == room.id));
+    let is_my_room = sidebar.rooms.my_rooms.iter().any(|r| r.id == room.id);
 
     div()
         .rounded_lg()
@@ -146,13 +150,14 @@ pub(super) fn room_card(cx: &mut Context<AppSidebar>, room: &Room, _logged_in: b
 }
 
 pub(super) fn create_room_dialog(
+    sidebar: &mut AppSidebar,
     window: &mut Window,
     cx: &mut Context<AppSidebar>,
     create_error: String,
     creating: bool,
 ) -> AnyElement {
-    let (draft_team_policy, draft_lobby_visible) =
-        with_state(|s| (s.draft_team_policy.clone(), s.draft_lobby_visible));
+    let draft_team_policy = sidebar.rooms.draft_team_policy.clone();
+    let draft_lobby_visible = sidebar.rooms.draft_lobby_visible;
     let team_policy_free = draft_team_policy != "single_team";
     let team_policy_label = if team_policy_free {
         "自由（红蓝皆可）"
@@ -172,8 +177,8 @@ pub(super) fn create_room_dialog(
         .flex()
         .items_center()
         .justify_center()
-        .on_any_mouse_down(cx.listener(|_, _, _, cx| {
-            update_state(|s| s.show_create = false);
+        .on_any_mouse_down(cx.listener(|this, _, _, cx| {
+            this.rooms.show_create = false;
             cx.notify();
         }))
         .child(
@@ -197,8 +202,8 @@ pub(super) fn create_room_dialog(
                             Button::new("close-create-room")
                                 .ghost()
                                 .icon(IconName::Close)
-                                .on_click(cx.listener(|_, _, _, cx| {
-                                    update_state(|s| s.show_create = false);
+                                .on_click(cx.listener(|this, _, _, cx| {
+                                    this.rooms.show_create = false;
                                     cx.notify();
                                 })),
                         ),
@@ -216,8 +221,8 @@ pub(super) fn create_room_dialog(
                                     cx,
                                     "create-room-name",
                                     "周末野队挑战",
-                                    || with_state(|s| s.draft_name.clone()),
-                                    |v| update_state(|s| s.draft_name = v),
+                                    |s: &AppSidebar| s.rooms.draft_name.clone(),
+                                    |s: &mut AppSidebar, v| s.rooms.draft_name = v,
                                     None,
                                 )),
                         )
@@ -235,14 +240,12 @@ pub(super) fn create_room_dialog(
                                             cx,
                                             "create-max-members",
                                             "10",
-                                            || with_state(|s| s.draft_max_members.clone()),
-                                            |v| {
-                                                update_state(|s| {
-                                                    s.draft_max_members = v
-                                                        .chars()
-                                                        .filter(|c| c.is_ascii_digit())
-                                                        .collect();
-                                                })
+                                            |s: &AppSidebar| s.rooms.draft_max_members.clone(),
+                                            |s: &mut AppSidebar, v| {
+                                                s.rooms.draft_max_members = v
+                                                    .chars()
+                                                    .filter(|c| c.is_ascii_digit())
+                                                    .collect();
                                             },
                                             None,
                                         )),
@@ -257,14 +260,12 @@ pub(super) fn create_room_dialog(
                                             cx,
                                             "create-max-agents",
                                             "3",
-                                            || with_state(|s| s.draft_max_agents.clone()),
-                                            |v| {
-                                                update_state(|s| {
-                                                    s.draft_max_agents = v
-                                                        .chars()
-                                                        .filter(|c| c.is_ascii_digit())
-                                                        .collect();
-                                                })
+                                            |s: &AppSidebar| s.rooms.draft_max_agents.clone(),
+                                            |s: &mut AppSidebar, v| {
+                                                s.rooms.draft_max_agents = v
+                                                    .chars()
+                                                    .filter(|c| c.is_ascii_digit())
+                                                    .collect();
                                             },
                                             None,
                                         )),
@@ -288,23 +289,22 @@ pub(super) fn create_room_dialog(
                                                 PopupMenuItem::new("自由（红蓝皆可）")
                                                     .checked(team_policy_free)
                                                     .on_click(move |_, _, cx| {
-                                                        update_state(|s| {
-                                                            s.draft_team_policy = "free".into();
+                                                        let _ = free_weak.update(cx, |s, cx| {
+                                                            s.rooms.draft_team_policy =
+                                                                "free".into();
+                                                            cx.notify();
                                                         });
-                                                        let _ = free_weak
-                                                            .update(cx, |_, cx| cx.notify());
                                                     }),
                                             )
                                             .item(
                                                 PopupMenuItem::new("单阵营（每人只能在一方）")
                                                     .checked(!team_policy_free)
                                                     .on_click(move |_, _, cx| {
-                                                        update_state(|s| {
-                                                            s.draft_team_policy =
+                                                        let _ = single_weak.update(cx, |s, cx| {
+                                                            s.rooms.draft_team_policy =
                                                                 "single_team".into();
+                                                            cx.notify();
                                                         });
-                                                        let _ = single_weak
-                                                            .update(cx, |_, cx| cx.notify());
                                                     }),
                                             )
                                         }),
@@ -316,8 +316,10 @@ pub(super) fn create_room_dialog(
                                 .checked(draft_lobby_visible)
                                 .label("公开到大厅")
                                 .on_click(move |new_checked, _, cx| {
-                                    update_state(|s| s.draft_lobby_visible = *new_checked);
-                                    let _ = checkbox_weak.update(cx, |_, cx| cx.notify());
+                                    let _ = checkbox_weak.update(cx, |s, cx| {
+                                        s.rooms.draft_lobby_visible = *new_checked;
+                                        cx.notify();
+                                    });
                                 }),
                         ),
                 )
@@ -337,8 +339,8 @@ pub(super) fn create_room_dialog(
                             Button::new("cancel-create-room")
                                 .ghost()
                                 .label("取消")
-                                .on_click(cx.listener(|_, _, _, cx| {
-                                    update_state(|s| s.show_create = false);
+                                .on_click(cx.listener(|this, _, _, cx| {
+                                    this.rooms.show_create = false;
                                     cx.notify();
                                 })),
                         )
@@ -347,8 +349,8 @@ pub(super) fn create_room_dialog(
                                 .primary()
                                 .label("创建")
                                 .disabled(creating)
-                                .on_click(cx.listener(|_, _, _, cx| {
-                                    try_create_room(cx);
+                                .on_click(cx.listener(|this, _, _, cx| {
+                                    try_create_room(this, cx);
                                 })),
                         ),
                 ),

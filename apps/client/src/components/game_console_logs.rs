@@ -1,5 +1,3 @@
-use std::cell::RefCell;
-
 use gpui::prelude::*;
 use gpui::*;
 use gpui_component::button::{Button, ButtonVariants};
@@ -27,8 +25,8 @@ pub struct ConsoleLogRow {
 
 // ── 本地过滤状态 ──
 
-/// 顶部过滤按钮的选择状态。多个页面复用一个组件时共享此过滤选择，
-/// 简化起见不做按页面隔离。
+/// 顶部过滤按钮的选择状态（存于 AppSidebar.game_console_logs）。多个页面复用一个
+/// 组件时共享此过滤选择，简化起见不做按页面隔离。
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 enum LevelFilter {
     All,
@@ -48,7 +46,8 @@ impl LevelFilter {
     }
 }
 
-struct GameConsoleLogsState {
+/// 控制台日志过滤状态（存于 AppSidebar.game_console_logs）。
+pub struct GameConsoleLogsState {
     filter: LevelFilter,
 }
 
@@ -58,18 +57,6 @@ impl Default for GameConsoleLogsState {
             filter: LevelFilter::All,
         }
     }
-}
-
-thread_local! {
-    static STATE: RefCell<GameConsoleLogsState> = RefCell::new(GameConsoleLogsState::default());
-}
-
-fn with_state<R>(f: impl FnOnce(&GameConsoleLogsState) -> R) -> R {
-    STATE.with(|s| f(&s.borrow()))
-}
-
-fn update_state(f: impl FnOnce(&mut GameConsoleLogsState)) {
-    STATE.with(|s| f(&mut s.borrow_mut()));
 }
 
 // ── 渲染辅助 ──
@@ -108,15 +95,13 @@ fn filter_btn(
     cx: &Context<AppSidebar>,
 ) -> AnyElement {
     let selected = current == target;
-    let click = cx.listener(move |_this, _event, _window, cx| {
+    let click = cx.listener(move |this, _event, _window, cx| {
         // 点击当前级别时回到「全部」，否则切换到该级别。
-        update_state(|s| {
-            s.filter = if s.filter == target {
-                LevelFilter::All
-            } else {
-                target
-            };
-        });
+        this.game_console_logs.filter = if this.game_console_logs.filter == target {
+            LevelFilter::All
+        } else {
+            target
+        };
         cx.notify();
     });
     let button = Button::new(id).small().label(label);
@@ -200,9 +185,10 @@ fn render_log_row(cx: &Context<AppSidebar>, row: &ConsoleLogRow) -> AnyElement {
 /// 简化实现：不做分组、分页、复制与分析面板。
 pub fn render_game_console_logs(
     rows: &[ConsoleLogRow],
+    sidebar: &AppSidebar,
     cx: &mut Context<AppSidebar>,
 ) -> AnyElement {
-    let filter = with_state(|s| s.filter);
+    let filter = sidebar.game_console_logs.filter;
     let filtered: Vec<&ConsoleLogRow> = rows
         .iter()
         .filter(|row| filter.matches(row.level.as_str()))

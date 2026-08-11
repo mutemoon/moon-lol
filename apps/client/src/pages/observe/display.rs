@@ -85,7 +85,9 @@ pub(super) fn event_label(ev: &MatchEvent) -> String {
 
 /// 从事件时间线回填双方阵容与失联 Agent。
 /// 真实引擎事件没有 agent_join，阵容可能为空（与 client observe 页行为一致）。
-pub(super) fn build_rosters(events: &[MatchEvent]) -> (Vec<RosterAgent>, Vec<RosterAgent>, Vec<String>) {
+pub(super) fn build_rosters(
+    events: &[MatchEvent],
+) -> (Vec<RosterAgent>, Vec<RosterAgent>, Vec<String>) {
     let mut order = Vec::new();
     let mut chaos = Vec::new();
     let mut stalled: Vec<String> = Vec::new();

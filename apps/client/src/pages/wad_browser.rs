@@ -1,4 +1,3 @@
-use std::cell::RefCell;
 use std::collections::HashSet;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
@@ -67,29 +66,24 @@ impl Default for WadBrowserState {
     }
 }
 
-thread_local! {
-    static WAD_BROWSER_STATE: RefCell<WadBrowserState> = RefCell::new(WadBrowserState::default());
-}
-
 pub fn render_wad_browser(
-    _sidebar: &AppSidebar,
+    sidebar: &mut AppSidebar,
     window: &mut Window,
     cx: &mut Context<AppSidebar>,
 ) -> AnyElement {
-    let should_start_scan = WAD_BROWSER_STATE.with(|cell| {
-        let mut state = cell.borrow_mut();
-        if !state.is_initialized && !state.is_scanning {
-            state.is_initialized = true;
-            state.is_scanning = true;
+    let should_start_scan = {
+        if !sidebar.wad_browser.is_initialized && !sidebar.wad_browser.is_scanning {
+            sidebar.wad_browser.is_initialized = true;
+            sidebar.wad_browser.is_scanning = true;
             true
         } else {
             false
         }
-    });
+    };
 
     // 首次进入时，在后台异步加载 WAD Header 与 Game Hashes 并构建虚拟文件树结构
     if should_start_scan {
-        start_async_wad_scan(cx);
+        start_async_wad_scan(sidebar, cx);
     }
 
     let (
@@ -103,8 +97,8 @@ pub fn render_wad_browser(
         is_scanning,
         is_parsing,
         pending_ron,
-    ) = WAD_BROWSER_STATE.with(|cell| {
-        let mut state = cell.borrow_mut();
+    ) = {
+        let state = &mut sidebar.wad_browser;
         let pending = state.pending_ron.take();
         let mut flat = Vec::new();
         let query_lower = state.search_query.trim().to_lowercase();
@@ -122,32 +116,30 @@ pub fn render_wad_browser(
             state.is_parsing,
             pending,
         )
-    });
+    };
 
     // 在 render 帧安全使用传进来的 window 句柄更新/新建 InputState
     if let Some((ron_str, size)) = pending_ron {
-        WAD_BROWSER_STATE.with(|cell| {
-            let mut state = cell.borrow_mut();
-            state.file_size_bytes = size;
-            if let Some(ed) = &state.editor_state {
-                ed.update(cx, |input_state, cx| {
-                    input_state.set_value(ron_str, window, cx);
-                });
-            } else {
-                let ed = cx.new(|cx| {
-                    InputState::new(window, cx)
-                        .code_editor("ron")
-                        .line_number(true)
-                        .searchable(true)
-                        .multi_line(true)
-                        .default_value(&ron_str)
-                });
-                state.editor_state = Some(ed);
-            }
-        });
+        let state = &mut sidebar.wad_browser;
+        state.file_size_bytes = size;
+        if let Some(ed) = &state.editor_state {
+            ed.update(cx, |input_state, cx| {
+                input_state.set_value(ron_str, window, cx);
+            });
+        } else {
+            let ed = cx.new(|cx| {
+                InputState::new(window, cx)
+                    .code_editor("ron")
+                    .line_number(true)
+                    .searchable(true)
+                    .multi_line(true)
+                    .default_value(&ron_str)
+            });
+            state.editor_state = Some(ed);
+        }
     }
 
-    let editor = WAD_BROWSER_STATE.with(|cell| cell.borrow().editor_state.clone());
+    let editor = sidebar.wad_browser.editor_state.clone();
 
     let theme = cx.theme();
 
@@ -186,8 +178,8 @@ pub fn render_wad_browser(
                                 .icon(IconName::Redo)
                                 .ghost()
                                 .small()
-                                .on_click(cx.listener(|_, _, _window, cx| {
-                                    start_async_wad_scan(cx);
+                                .on_click(cx.listener(|this, _, _window, cx| {
+                                    start_async_wad_scan(this, cx);
                                 })),
                         ),
                 )
@@ -281,16 +273,16 @@ pub fn render_wad_browser(
                                 })
                                 .on_mouse_down(
                                     MouseButton::Left,
-                                    cx.listener(move |_, _, _window, cx| {
+                                    cx.listener(move |this, _, _window, cx| {
                                         let p = path_clone.clone();
                                         if is_dir {
-                                            WAD_BROWSER_STATE.with(|cell| {
-                                                let mut state = cell.borrow_mut();
-                                                toggle_node_expansion(&mut state.tree_roots, &p);
-                                            });
+                                            toggle_node_expansion(
+                                                &mut this.wad_browser.tree_roots,
+                                                &p,
+                                            );
                                             cx.notify();
                                         } else if let Some(h) = hash {
-                                            start_async_file_parse_from_wad(&p, h, cx);
+                                            start_async_file_parse_from_wad(this, &p, h, cx);
                                         }
                                     }),
                                 )
@@ -610,11 +602,8 @@ fn has_matching_child(node: &TreeNode, query_lower: &str) -> bool {
     false
 }
 
-fn start_async_wad_scan(cx: &mut Context<AppSidebar>) {
-    WAD_BROWSER_STATE.with(|cell| {
-        let mut state = cell.borrow_mut();
-        state.is_scanning = true;
-    });
+fn start_async_wad_scan(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) {
+    sidebar.wad_browser.is_scanning = true;
     cx.notify();
 
     let weak_entity = cx.entity().downgrade();
@@ -635,13 +624,10 @@ fn start_async_wad_scan(cx: &mut Context<AppSidebar>) {
                 .await;
             let (loader, roots) = res.unwrap_or((None, Vec::new()));
 
-            let _ = weak_entity.update(&mut cx, |_, cx| {
-                WAD_BROWSER_STATE.with(|cell| {
-                    let mut state = cell.borrow_mut();
-                    state.loader = loader.map(Arc::new);
-                    state.tree_roots = roots;
-                    state.is_scanning = false;
-                });
+            let _ = weak_entity.update(&mut cx, |this, cx| {
+                this.wad_browser.loader = loader.map(Arc::new);
+                this.wad_browser.tree_roots = roots;
+                this.wad_browser.is_scanning = false;
                 cx.notify();
             });
         }
@@ -649,16 +635,18 @@ fn start_async_wad_scan(cx: &mut Context<AppSidebar>) {
     .detach();
 }
 
-fn start_async_file_parse_from_wad(file_path: &Path, hash: u64, cx: &mut Context<AppSidebar>) {
+fn start_async_file_parse_from_wad(
+    sidebar: &mut AppSidebar,
+    file_path: &Path,
+    hash: u64,
+    cx: &mut Context<AppSidebar>,
+) {
     let p = file_path.to_path_buf();
-    let loader_opt = WAD_BROWSER_STATE.with(|cell| cell.borrow().loader.clone());
+    let loader_opt = sidebar.wad_browser.loader.clone();
 
-    WAD_BROWSER_STATE.with(|cell| {
-        let mut state = cell.borrow_mut();
-        state.selected_file = Some(p.clone());
-        state.is_parsing = true;
-        state.status_message = None;
-    });
+    sidebar.wad_browser.selected_file = Some(p.clone());
+    sidebar.wad_browser.is_parsing = true;
+    sidebar.wad_browser.status_message = None;
     cx.notify();
 
     let weak_entity = cx.entity().downgrade();
@@ -682,20 +670,17 @@ fn start_async_file_parse_from_wad(file_path: &Path, hash: u64, cx: &mut Context
                 .await
                 .unwrap_or_else(|_| Err("后台读取线程中断".to_string()));
 
-            let _ = weak_entity.update(&mut cx, |_, cx| {
-                WAD_BROWSER_STATE.with(|cell| {
-                    let mut state = cell.borrow_mut();
-                    state.is_parsing = false;
-                    match res {
-                        Ok((ron_str, size_bytes)) => {
-                            state.pending_ron = Some((ron_str, size_bytes));
-                            state.status_message = None;
-                        }
-                        Err(err) => {
-                            state.status_message = Some(err);
-                        }
+            let _ = weak_entity.update(&mut cx, |this, cx| {
+                this.wad_browser.is_parsing = false;
+                match res {
+                    Ok((ron_str, size_bytes)) => {
+                        this.wad_browser.pending_ron = Some((ron_str, size_bytes));
+                        this.wad_browser.status_message = None;
                     }
-                });
+                    Err(err) => {
+                        this.wad_browser.status_message = Some(err);
+                    }
+                }
                 cx.notify();
             });
         }

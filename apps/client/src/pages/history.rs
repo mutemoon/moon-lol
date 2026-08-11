@@ -1,5 +1,3 @@
-use std::cell::RefCell;
-
 use gpui::prelude::*;
 use gpui::*;
 use gpui_component::button::{Button, ButtonVariants};
@@ -13,7 +11,7 @@ use crate::services::provider::cloud_client;
 
 // ── 页面本地状态 ──
 
-struct HistoryPageState {
+pub struct HistoryPageState {
     /// 列表首次加载是否已触发
     loaded: bool,
     /// 列表加载中
@@ -46,18 +44,6 @@ impl Default for HistoryPageState {
             error: None,
         }
     }
-}
-
-thread_local! {
-    static STATE: RefCell<HistoryPageState> = RefCell::new(HistoryPageState::default());
-}
-
-fn with_state<R>(f: impl FnOnce(&HistoryPageState) -> R) -> R {
-    STATE.with(|s| f(&s.borrow()))
-}
-
-fn update_state(f: impl FnOnce(&mut HistoryPageState)) {
-    STATE.with(|s| f(&mut s.borrow_mut()));
 }
 
 // ── 格式化辅助 ──
@@ -150,27 +136,36 @@ fn agent_messages(agent: &SavedAgentHistory) -> Vec<AgentChatMessage> {
 // ── 异步加载 ──
 
 /// 拉取对局列表并写回状态（同时清理已失效的选中项）。
-async fn fetch_list() {
+async fn fetch_list(weak: &gpui::WeakEntity<AppSidebar>, cx: &mut gpui::AsyncApp) {
     match cloud_client().list_game_histories().await {
-        Ok(list) => update_state(|s| {
-            s.histories = list;
-            s.loading = false;
-            if let Some(sid) = &s.selected_id {
-                let exists = s
-                    .histories
-                    .iter()
-                    .any(|h| h.id.as_deref() == Some(sid.as_str()));
-                if !exists {
-                    s.selected_id = None;
-                    s.detail.clear();
-                    s.selected_agent_id = None;
+        Ok(list) => {
+            weak.update(cx, |s, cx| {
+                s.history_page.histories = list;
+                s.history_page.loading = false;
+                if let Some(sid) = &s.history_page.selected_id {
+                    let exists = s
+                        .history_page
+                        .histories
+                        .iter()
+                        .any(|h| h.id.as_deref() == Some(sid.as_str()));
+                    if !exists {
+                        s.history_page.selected_id = None;
+                        s.history_page.detail.clear();
+                        s.history_page.selected_agent_id = None;
+                    }
                 }
-            }
-        }),
-        Err(e) => update_state(|s| {
-            s.loading = false;
-            s.error = Some(format!("加载对局列表失败: {}", e));
-        }),
+                cx.notify();
+            })
+            .ok();
+        }
+        Err(e) => {
+            weak.update(cx, |s, cx| {
+                s.history_page.loading = false;
+                s.history_page.error = Some(format!("加载对局列表失败: {}", e));
+                cx.notify();
+            })
+            .ok();
+        }
     }
 }
 
@@ -180,14 +175,13 @@ fn spawn_refresh_list(cx: &mut Context<AppSidebar>) {
             let weak = weak.clone();
             let mut cx = cx.clone();
             async move {
-                update_state(|s| {
-                    s.loading = true;
-                    s.error = None;
-                });
-                fetch_list().await;
-                if let Some(entity) = weak.upgrade() {
-                    let _ = entity.update(&mut cx, |_, cx| cx.notify());
-                }
+                weak.update(&mut cx, |s, cx| {
+                    s.history_page.loading = true;
+                    s.history_page.error = None;
+                    cx.notify();
+                })
+                .ok();
+                fetch_list(&weak, &mut cx).await;
             }
         },
     )
@@ -202,28 +196,35 @@ fn spawn_select_game(cx: &mut Context<AppSidebar>, id: &str) {
             let mut cx = cx.clone();
             let id = id.clone();
             async move {
-                update_state(|s| {
-                    s.selected_id = Some(id.clone());
-                    s.detail.clear();
-                    s.selected_agent_id = None;
-                    s.detail_loading = true;
-                    s.error = None;
-                });
+                weak.update(&mut cx, |s, cx| {
+                    s.history_page.selected_id = Some(id.clone());
+                    s.history_page.detail.clear();
+                    s.history_page.selected_agent_id = None;
+                    s.history_page.detail_loading = true;
+                    s.history_page.error = None;
+                    cx.notify();
+                })
+                .ok();
                 match cloud_client().get_game_history_detail(&id).await {
-                    Ok(detail) => update_state(|s| {
-                        s.detail = detail;
-                        s.detail_loading = false;
-                        if let Some(first) = s.detail.first() {
-                            s.selected_agent_id = Some(first.agent_id.clone());
-                        }
-                    }),
-                    Err(e) => update_state(|s| {
-                        s.detail_loading = false;
-                        s.error = Some(format!("加载对局详情失败: {}", e));
-                    }),
-                }
-                if let Some(entity) = weak.upgrade() {
-                    let _ = entity.update(&mut cx, |_, cx| cx.notify());
+                    Ok(detail) => {
+                        weak.update(&mut cx, |s, cx| {
+                            s.history_page.detail = detail;
+                            s.history_page.detail_loading = false;
+                            if let Some(first) = s.history_page.detail.first() {
+                                s.history_page.selected_agent_id = Some(first.agent_id.clone());
+                            }
+                            cx.notify();
+                        })
+                        .ok();
+                    }
+                    Err(e) => {
+                        weak.update(&mut cx, |s, cx| {
+                            s.history_page.detail_loading = false;
+                            s.history_page.error = Some(format!("加载对局详情失败: {}", e));
+                            cx.notify();
+                        })
+                        .ok();
+                    }
                 }
             }
         },
@@ -231,8 +232,8 @@ fn spawn_select_game(cx: &mut Context<AppSidebar>, id: &str) {
     .detach();
 }
 
-fn spawn_delete_game(cx: &mut Context<AppSidebar>) {
-    let Some(id) = with_state(|s| s.selected_id.clone()) else {
+fn spawn_delete_game(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) {
+    let Some(id) = sidebar.history_page.selected_id.clone() else {
         return;
     };
     cx.spawn(
@@ -241,30 +242,35 @@ fn spawn_delete_game(cx: &mut Context<AppSidebar>) {
             let mut cx = cx.clone();
             let id = id.clone();
             async move {
-                update_state(|s| s.deleting = true);
+                weak.update(&mut cx, |s, cx| {
+                    s.history_page.deleting = true;
+                    cx.notify();
+                })
+                .ok();
                 match cloud_client().delete_game_history(&id).await {
                     Ok(()) => {
-                        update_state(|s| {
-                            s.deleting = false;
-                            if s.selected_id.as_deref() == Some(id.as_str()) {
-                                s.selected_id = None;
-                                s.detail.clear();
-                                s.selected_agent_id = None;
+                        weak.update(&mut cx, |s, cx| {
+                            s.history_page.deleting = false;
+                            if s.history_page.selected_id.as_deref() == Some(id.as_str()) {
+                                s.history_page.selected_id = None;
+                                s.history_page.detail.clear();
+                                s.history_page.selected_agent_id = None;
                             }
-                        });
-                        update_state(|s| {
-                            s.loading = true;
-                            s.error = None;
-                        });
-                        fetch_list().await;
+                            s.history_page.loading = true;
+                            s.history_page.error = None;
+                            cx.notify();
+                        })
+                        .ok();
+                        fetch_list(&weak, &mut cx).await;
                     }
-                    Err(e) => update_state(|s| {
-                        s.deleting = false;
-                        s.error = Some(format!("删除失败: {}", e));
-                    }),
-                }
-                if let Some(entity) = weak.upgrade() {
-                    let _ = entity.update(&mut cx, |_, cx| cx.notify());
+                    Err(e) => {
+                        weak.update(&mut cx, |s, cx| {
+                            s.history_page.deleting = false;
+                            s.history_page.error = Some(format!("删除失败: {}", e));
+                            cx.notify();
+                        })
+                        .ok();
+                    }
                 }
             }
         },
@@ -275,10 +281,10 @@ fn spawn_delete_game(cx: &mut Context<AppSidebar>) {
 // ── 渲染 ──
 
 /// 对局历史详情 + Agent 对话回放（对应 client `pages/history.vue`）。
-pub fn render_history(_sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> AnyElement {
+pub fn render_history(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> AnyElement {
     // 首次渲染自动加载对局列表
-    if !with_state(|s| s.loaded) {
-        update_state(|s| s.loaded = true);
+    if !sidebar.history_page.loaded {
+        sidebar.history_page.loaded = true;
         spawn_refresh_list(cx);
     }
 
@@ -291,7 +297,8 @@ pub fn render_history(_sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -
         selected_agent_id,
         deleting,
         error,
-    ) = with_state(|s| {
+    ) = {
+        let s = &sidebar.history_page;
         (
             s.loading,
             s.histories.clone(),
@@ -302,7 +309,7 @@ pub fn render_history(_sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -
             s.deleting,
             s.error.clone(),
         )
-    });
+    };
 
     let has_selection = selected_id.is_some();
     let count = histories.len();
@@ -354,8 +361,8 @@ pub fn render_history(_sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -
                                     .icon(IconName::Delete)
                                     .label(if deleting { "删除中…" } else { "删除" })
                                     .disabled(deleting)
-                                    .on_click(cx.listener(|_, _, _, cx| {
-                                        spawn_delete_game(cx);
+                                    .on_click(cx.listener(|this, _, _, cx| {
+                                        spawn_delete_game(this, cx);
                                     })),
                             )
                         })
@@ -469,6 +476,7 @@ pub fn render_history(_sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -
                         .border_color(cx.theme().border)
                         .overflow_hidden()
                         .child(render_detail_panel(
+                            sidebar,
                             cx,
                             has_selection,
                             detail_loading,
@@ -556,6 +564,7 @@ fn history_list_item(
 
 /// 右侧详情面板：Agent 选择 + 全局/英雄 Prompt + 对话回放。
 fn render_detail_panel(
+    sidebar: &AppSidebar,
     cx: &mut Context<AppSidebar>,
     has_selection: bool,
     detail_loading: bool,
@@ -625,8 +634,8 @@ fn render_detail_panel(
                 .when(!is_active, |b| b.outline())
                 .label(format!("{} · {}", champion, team_label(&team)))
                 .xsmall()
-                .on_click(cx.listener(move |_, _, _, cx| {
-                    update_state(|s| s.selected_agent_id = Some(aid.clone()));
+                .on_click(cx.listener(move |this, _, _, cx| {
+                    this.history_page.selected_agent_id = Some(aid.clone());
                     cx.notify();
                 }))
                 .into_any_element()
@@ -635,7 +644,7 @@ fn render_detail_panel(
 
     // 对话回放（映射为 AgentChatMessage）
     let msgs = agent_messages(selected_agent);
-    let chat = render_agent_chat_history(&msgs, cx);
+    let chat = render_agent_chat_history(&msgs, sidebar, cx);
 
     v_flex()
         .size_full()

@@ -1,5 +1,3 @@
-use std::cell::RefCell;
-
 use gpui::prelude::*;
 use gpui::*;
 use gpui_component::button::Button;
@@ -13,7 +11,7 @@ use crate::services::provider;
 
 // ── 页面本地状态 ──
 
-struct BillingPageState {
+pub struct BillingPageState {
     balance: Option<i64>,
     transactions: Vec<EssenceTransaction>,
     plans: Vec<BillingPlan>,
@@ -37,18 +35,6 @@ impl Default for BillingPageState {
             error: None,
         }
     }
-}
-
-thread_local! {
-    static STATE: RefCell<BillingPageState> = RefCell::new(BillingPageState::default());
-}
-
-fn with_state<R>(f: impl FnOnce(&BillingPageState) -> R) -> R {
-    STATE.with(|s| f(&s.borrow()))
-}
-
-fn update_state(f: impl FnOnce(&mut BillingPageState)) {
-    STATE.with(|s| f(&mut s.borrow_mut()));
 }
 
 fn fmt_price(cents: i32) -> String {
@@ -81,20 +67,17 @@ fn fmt_date(iso: &str) -> String {
 // ── 公开入口 ──
 
 /// 精粹余额、签到、交易流水、订阅套餐、订阅操作。
-pub fn render_billing(_sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> AnyElement {
-    let (balance, transactions, plans, current_plan, check_in_result, subscribing, loading, error) =
-        with_state(|s| {
-            (
-                s.balance,
-                s.transactions.clone(),
-                s.plans.clone(),
-                s.current_plan.clone(),
-                s.check_in_result.clone(),
-                s.subscribing.clone(),
-                s.loading,
-                s.error.clone(),
-            )
-        });
+pub fn render_billing(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> AnyElement {
+    let (balance, transactions, plans, current_plan, check_in_result, subscribing, loading, error) = (
+        sidebar.billing.balance,
+        sidebar.billing.transactions.clone(),
+        sidebar.billing.plans.clone(),
+        sidebar.billing.current_plan.clone(),
+        sidebar.billing.check_in_result.clone(),
+        sidebar.billing.subscribing.clone(),
+        sidebar.billing.loading,
+        sidebar.billing.error.clone(),
+    );
 
     // 提前构建交易行元素列表，使用 owned 数据避免 borrow 逃逸
     let tx_children: Vec<AnyElement> = transactions
@@ -152,16 +135,16 @@ pub fn render_billing(_sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -
                         async { client.list_billing_plans().await },
                         async { client.get_current_subscription().await },
                     );
-                    update_state(|s| {
-                        s.balance = bal.ok();
-                        s.transactions = txs.unwrap_or_default();
-                        s.plans = plans.unwrap_or_default();
-                        s.current_plan = cur.ok();
-                        s.loading = false;
-                        s.error = None;
-                    });
                     if let Some(e) = weak.upgrade() {
-                        let _ = e.update(&mut cx, |_, cx| cx.notify());
+                        let _ = e.update(&mut cx, |this, cx| {
+                            this.billing.balance = bal.ok();
+                            this.billing.transactions = txs.unwrap_or_default();
+                            this.billing.plans = plans.unwrap_or_default();
+                            this.billing.current_plan = cur.ok();
+                            this.billing.loading = false;
+                            this.billing.error = None;
+                            cx.notify();
+                        });
                     }
                 }
             },
@@ -247,7 +230,6 @@ pub fn render_billing(_sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -
                                         .label("每日签到")
                                         .on_click(cx.listener(move |_this, _, _, cx| {
                                             let client = provider::cloud_client().clone();
-                                            let _weak = cx.entity().downgrade();
                                             cx.spawn(
                                                 move |weak: gpui::WeakEntity<AppSidebar>,
                                                  cx: &mut gpui::AsyncApp| {
@@ -257,21 +239,34 @@ pub fn render_billing(_sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -
                                                     async move {
                                                         match client.check_in_essence().await {
                                                             Ok(res) => {
-                                                                update_state(|s| {
-                                                                    s.check_in_result =
-                                                                        Some(res.clone());
-                                                                    s.balance = Some(res.balance);
-                                                                });
+                                                                if let Some(e) = weak.upgrade() {
+                                                                    let _ = e.update(
+                                                                        &mut cx,
+                                                                        |this, cx| {
+                                                                            this.billing
+                                                                                .check_in_result =
+                                                                                Some(res.clone());
+                                                                            this.billing.balance =
+                                                                                Some(res.balance);
+                                                                            cx.notify();
+                                                                        },
+                                                                    );
+                                                                }
                                                             }
                                                             Err(e) => {
-                                                                update_state(|s| {
-                                                                    s.error =
-                                                                        Some(e.to_string());
-                                                                });
+                                                                if let Some(e2) =
+                                                                    weak.upgrade()
+                                                                {
+                                                                    let _ = e2.update(
+                                                                        &mut cx,
+                                                                        |this, cx| {
+                                                                            this.billing.error =
+                                                                                Some(e.to_string());
+                                                                            cx.notify();
+                                                                        },
+                                                                    );
+                                                                }
                                                             }
-                                                        }
-                                                        if let Some(e) = weak.upgrade() {
-                                                            let _ = e.update(&mut cx, |_, cx| cx.notify());
                                                         }
                                                     }
                                                 },
@@ -399,17 +394,13 @@ pub fn render_billing(_sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -
                                                     })
                                                     .when(is_subscribing, |b| b.disabled(true))
                                                     .on_click(cx.listener(
-                                                        move |_this, _, _, cx| {
-                                                            update_state(|s| {
-                                                                s.subscribing =
-                                                                    Some(pid.clone());
-                                                                s.error = None;
-                                                            });
+                                                        move |this, _, _, cx| {
+                                                            this.billing.subscribing =
+                                                                Some(pid.clone());
+                                                            this.billing.error = None;
                                                             let client =
                                                                 provider::cloud_client().clone();
                                                             let pid2 = pid.clone();
-                                                            let _weak =
-                                                                cx.entity().downgrade();
                                                             cx.spawn(
                                                                 move |weak: gpui::WeakEntity<
                                                                     AppSidebar,
@@ -436,37 +427,38 @@ pub fn render_billing(_sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -
                                                                                     async { client.list_billing_plans().await },
                                                                                     async { client.get_current_subscription().await },
                                                                                 );
-                                                                                update_state(
-                                                                                    |s| {
-                                                                                        s.balance = bal.ok();
-                                                                                        s.transactions = txs.unwrap_or_default();
-                                                                                        s.plans = plans.unwrap_or_default();
-                                                                                        s.current_plan = cur.ok();
-                                                                                        s.subscribing = None;
-                                                                                        s.loading = false;
-                                                                                    },
-                                                                                );
+                                                                                if let Some(e) =
+                                                                                    weak.upgrade()
+                                                                                {
+                                                                                    let _ = e.update(
+                                                                                        &mut cx,
+                                                                                        |this, cx| {
+                                                                                            this.billing.balance = bal.ok();
+                                                                                            this.billing.transactions = txs.unwrap_or_default();
+                                                                                            this.billing.plans = plans.unwrap_or_default();
+                                                                                            this.billing.current_plan = cur.ok();
+                                                                                            this.billing.subscribing = None;
+                                                                                            this.billing.loading = false;
+                                                                                            cx.notify();
+                                                                                        },
+                                                                                    );
+                                                                                }
                                                                             }
                                                                             Err(e) => {
-                                                                                update_state(
-                                                                                    |s| {
-                                                                                        s.error =
-                                                                                            Some(
-                                                                                                e.to_string(),
-                                                                                            );
-                                                                                        s.subscribing = None;
-                                                                                    },
-                                                                                );
+                                                                                if let Some(e2) =
+                                                                                    weak.upgrade()
+                                                                                {
+                                                                                    let _ = e2.update(
+                                                                                        &mut cx,
+                                                                                        |this, cx| {
+                                                                                            this.billing.error =
+                                                                                                Some(e.to_string());
+                                                                                            this.billing.subscribing = None;
+                                                                                            cx.notify();
+                                                                                        },
+                                                                                    );
+                                                                                }
                                                                             }
-                                                                        }
-                                                                        if let Some(e) = weak.upgrade()
-                                                                        {
-                                                                            let _ = e.update(
-                                                                                &mut cx,
-                                                                                |_, cx| {
-                                                                                    cx.notify()
-                                                                                },
-                                                                            );
                                                                         }
                                                                     }
                                                                 },

@@ -11,7 +11,6 @@ use lol_web_protocol::spawn_preset::Team;
 use uuid::Uuid;
 
 use super::logic::{spawn_add_slot, spawn_remove_slot};
-use super::types::{update_state, with_state};
 use crate::components::sidebar::AppSidebar;
 
 // ── 展示辅助 ──
@@ -134,12 +133,10 @@ pub(super) fn render_team_column(
                         .xsmall()
                         .icon(IconName::Plus)
                         .label("添加槽位")
-                        .on_click(cx.listener(move |_, _, _, cx| {
-                            update_state(|s| {
-                                s.show_add_team = Some(team);
-                                s.add_agent_id = None;
-                                s.add_error.clear();
-                            });
+                        .on_click(cx.listener(move |this, _, _, cx| {
+                            this.room_detail.show_add_team = Some(team);
+                            this.room_detail.add_agent_id = None;
+                            this.room_detail.add_error.clear();
                             cx.notify();
                         })),
                 ),
@@ -166,15 +163,16 @@ pub(super) fn render_team_column(
 
 // ── 添加槽位对话框 ──
 
-pub(super) fn render_add_dialog(cx: &mut Context<AppSidebar>, room_id: Uuid, agents: &[Agent]) -> AnyElement {
-    let (show_team, add_agent_id, add_error, adding) = with_state(|s| {
-        (
-            s.show_add_team,
-            s.add_agent_id.clone(),
-            s.add_error.clone(),
-            s.adding,
-        )
-    });
+pub(super) fn render_add_dialog(
+    sidebar: &mut AppSidebar,
+    cx: &mut Context<AppSidebar>,
+    room_id: Uuid,
+    agents: &[Agent],
+) -> AnyElement {
+    let show_team = sidebar.room_detail.show_add_team;
+    let add_agent_id = sidebar.room_detail.add_agent_id.clone();
+    let add_error = sidebar.room_detail.add_error.clone();
+    let adding = sidebar.room_detail.adding;
     let Some(team) = show_team else {
         return div().into_any_element();
     };
@@ -208,8 +206,10 @@ pub(super) fn render_add_dialog(cx: &mut Context<AppSidebar>, room_id: Uuid, age
                     let weak = weak.clone();
                     m = m.item(PopupMenuItem::new(label).checked(checked).on_click(
                         move |_, _, cx| {
-                            update_state(|s| s.add_agent_id = Some(aid.clone()));
-                            let _ = weak.update(cx, |_, cx| cx.notify());
+                            let _ = weak.update(cx, |s, cx| {
+                                s.room_detail.add_agent_id = Some(aid.clone());
+                                cx.notify();
+                            });
                         },
                     ));
                 }
@@ -223,8 +223,8 @@ pub(super) fn render_add_dialog(cx: &mut Context<AppSidebar>, room_id: Uuid, age
         .flex()
         .items_center()
         .justify_center()
-        .on_any_mouse_down(cx.listener(|_, _, _, cx| {
-            update_state(|s| s.show_add_team = None);
+        .on_any_mouse_down(cx.listener(|this, _, _, cx| {
+            this.room_detail.show_add_team = None;
             cx.notify();
         }))
         .child(
@@ -248,8 +248,8 @@ pub(super) fn render_add_dialog(cx: &mut Context<AppSidebar>, room_id: Uuid, age
                             Button::new("close-add-slot")
                                 .ghost()
                                 .icon(IconName::Close)
-                                .on_click(cx.listener(|_, _, _, cx| {
-                                    update_state(|s| s.show_add_team = None);
+                                .on_click(cx.listener(|this, _, _, cx| {
+                                    this.room_detail.show_add_team = None;
                                     cx.notify();
                                 })),
                         ),
@@ -281,8 +281,8 @@ pub(super) fn render_add_dialog(cx: &mut Context<AppSidebar>, room_id: Uuid, age
                                 .ghost()
                                 .label("取消")
                                 .disabled(adding)
-                                .on_click(cx.listener(|_, _, _, cx| {
-                                    update_state(|s| s.show_add_team = None);
+                                .on_click(cx.listener(|this, _, _, cx| {
+                                    this.room_detail.show_add_team = None;
                                     cx.notify();
                                 })),
                         )
@@ -291,8 +291,8 @@ pub(super) fn render_add_dialog(cx: &mut Context<AppSidebar>, room_id: Uuid, age
                                 .primary()
                                 .label(if adding { "添加中…" } else { "添加" })
                                 .disabled(adding)
-                                .on_click(cx.listener(move |_, _, _, cx| {
-                                    spawn_add_slot(cx, room_id);
+                                .on_click(cx.listener(move |this, _, _, cx| {
+                                    spawn_add_slot(this, cx, room_id);
                                 })),
                         ),
                 ),

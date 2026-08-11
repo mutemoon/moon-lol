@@ -14,13 +14,13 @@ use gpui_component::scroll::ScrollableElement;
 use gpui_component::{h_flex, v_flex, ActiveTheme, Disableable, IconName, StyledExt};
 use lol_web_protocol::match_::Match;
 use rust_i18n::t;
+pub use types::LogsArchiveState;
 
 use self::input::render_text_input;
 use self::logic::{
     do_load_logs, do_query, download_match_db, fmt_date, load_local_sqlite, load_matches,
     status_label,
 };
-use self::types::{update_state, with_state, STATE};
 use crate::components::sidebar::AppSidebar;
 use crate::services::log_service;
 use crate::services::types::{LogCategory, LogEntity, LogRow};
@@ -30,73 +30,81 @@ use crate::services::types::{LogCategory, LogEntity, LogRow};
 /// 2) 加载本地 .sqlite 校验大小；
 /// 3) 按 game_id 查询日志（级别/实体/类别筛选、分页、清空）。
 pub fn render_logs_archive(
-    _sidebar: &mut AppSidebar,
+    sidebar: &mut AppSidebar,
     window: &mut Window,
     cx: &mut Context<AppSidebar>,
 ) -> AnyElement {
     // 首次渲染触发拉取对局列表
-    if !with_state(|s| s.matches_loaded) && !with_state(|s| s.matches_loading) {
-        load_matches(cx);
+    if !sidebar.logs_archive.matches_loaded && !sidebar.logs_archive.matches_loading {
+        load_matches(sidebar, cx);
     }
 
     // Read individual fields without cloning the whole state
-    let game_id = with_state(|s| s.game_id.clone());
+    let game_id = sidebar.logs_archive.game_id.clone();
     let game_id_empty = game_id.is_empty();
-    let levels = with_state(|s| s.levels.clone());
-    let entities = with_state(|s| s.entities.len());
+    let levels = sidebar.logs_archive.levels.clone();
+    let entities = sidebar.logs_archive.entities.len();
     let entities_empty = entities == 0;
-    let categories = with_state(|s| s.categories.len());
+    let categories = sidebar.logs_archive.categories.len();
     let categories_empty = categories == 0;
-    let loading = with_state(|s| s.loading);
-    let error = with_state(|s| s.error.clone());
-    let has_results = with_state(|s| s.results.is_some());
-    let total_count = with_state(|s| s.results.as_ref().map_or(0, |r| r.total_count));
-    let total_pages = with_state(|s| {
-        let total = s.results.as_ref().map_or(0, |r| r.total_count);
-        if s.limit > 0 {
-            ((total as f64) / (s.limit as f64)).ceil() as i64
+    let loading = sidebar.logs_archive.loading;
+    let error = sidebar.logs_archive.error.clone();
+    let has_results = sidebar.logs_archive.results.is_some();
+    let total_count = sidebar
+        .logs_archive
+        .results
+        .as_ref()
+        .map_or(0, |r| r.total_count);
+    let total_pages = {
+        let total = sidebar
+            .logs_archive
+            .results
+            .as_ref()
+            .map_or(0, |r| r.total_count);
+        if sidebar.logs_archive.limit > 0 {
+            ((total as f64) / (sidebar.logs_archive.limit as f64)).ceil() as i64
         } else {
             0
         }
-    });
-    let current_page = with_state(|s| {
-        if s.limit > 0 {
-            s.offset / s.limit + 1
+    };
+    let current_page = {
+        if sidebar.logs_archive.limit > 0 {
+            sidebar.logs_archive.offset / sidebar.logs_archive.limit + 1
         } else {
             1
         }
-    });
+    };
 
-    let matches = with_state(|s| s.matches.clone());
-    let matches_loading = with_state(|s| s.matches_loading);
-    let matches_error = with_state(|s| s.matches_error.clone());
-    let downloading = with_state(|s| s.downloading.clone());
-    let download_msg = with_state(|s| s.download_msg.clone());
-    let local_size = with_state(|s| s.local_size);
-    let local_msg = with_state(|s| s.local_msg.clone());
+    let matches = sidebar.logs_archive.matches.clone();
+    let matches_loading = sidebar.logs_archive.matches_loading;
+    let matches_error = sidebar.logs_archive.matches_error.clone();
+    let downloading = sidebar.logs_archive.downloading.clone();
+    let download_msg = sidebar.logs_archive.download_msg.clone();
+    let local_size = sidebar.logs_archive.local_size;
+    let local_msg = sidebar.logs_archive.local_msg.clone();
 
-    let entity_list: Vec<LogEntity> = STATE.with(|s| {
-        let s = s.borrow();
-        s.entities
-            .iter()
-            .map(|e| LogEntity {
-                entity_id: e.entity_id,
-                entity_name: e.entity_name.clone(),
-            })
-            .collect()
-    });
-    let category_list: Vec<LogCategory> = STATE.with(|s| {
-        let s = s.borrow();
-        s.categories
-            .iter()
-            .map(|c| LogCategory {
-                category: c.category.clone(),
-            })
-            .collect()
-    });
-    let rows_data: Vec<LogRow> = STATE.with(|s| {
-        let s = s.borrow();
-        s.results.as_ref().map_or(Vec::new(), |r| {
+    let entity_list: Vec<LogEntity> = sidebar
+        .logs_archive
+        .entities
+        .iter()
+        .map(|e| LogEntity {
+            entity_id: e.entity_id,
+            entity_name: e.entity_name.clone(),
+        })
+        .collect();
+    let category_list: Vec<LogCategory> = sidebar
+        .logs_archive
+        .categories
+        .iter()
+        .map(|c| LogCategory {
+            category: c.category.clone(),
+        })
+        .collect();
+    let rows_data: Vec<LogRow> = sidebar
+        .logs_archive
+        .results
+        .as_ref()
+        .map_or(Vec::new(), |r| {
             r.rows
                 .iter()
                 .map(|row| LogRow {
@@ -111,8 +119,7 @@ pub fn render_logs_archive(
                     message: row.message.clone(),
                 })
                 .collect()
-        })
-    });
+        });
 
     div()
         .size_full()
@@ -196,7 +203,9 @@ pub fn render_logs_archive(
                                         .icon(IconName::Redo2)
                                         .label("刷新")
                                         .when(matches_loading, |b| b.disabled(true))
-                                        .on_click(cx.listener(|_, _, _, cx| load_matches(cx))),
+                                        .on_click(cx.listener(|this, _, _, cx| {
+                                            load_matches(this, cx)
+                                        })),
                                 ),
                         )
                         .when_some(matches_error.as_ref(), |d, err| {
@@ -358,17 +367,13 @@ pub fn render_logs_archive(
                                                         cx,
                                                         "logs-local-path",
                                                         "输入 .sqlite 文件路径…",
-                                                        || {
-                                                            with_state(|s| {
-                                                                s.local_path.clone()
-                                                            })
+                                                        |s: &AppSidebar| {
+                                                            s.logs_archive.local_path.clone()
                                                         },
-                                                        |v| {
-                                                            update_state(|s| {
-                                                                s.local_path = v;
-                                                                s.local_size = None;
-                                                                s.local_msg = None;
-                                                            });
+                                                        |s: &mut AppSidebar, v: String| {
+                                                            s.logs_archive.local_path = v;
+                                                            s.logs_archive.local_size = None;
+                                                            s.logs_archive.local_msg = None;
                                                         },
                                                     )),
                                                 )
@@ -376,20 +381,18 @@ pub fn render_logs_archive(
                                                     Button::new("logs-local-load")
                                                         .icon(IconName::Play)
                                                         .label("加载")
-                                                        .on_click(cx.listener(|_, _, _, cx| {
-                                                            load_local_sqlite(cx);
+                                                        .on_click(cx.listener(|this, _, _, cx| {
+                                                            load_local_sqlite(this, cx);
                                                         })),
                                                 )
                                                 .child(
                                                     Button::new("logs-local-clear")
                                                         .ghost()
                                                         .label("清除")
-                                                        .on_click(cx.listener(|_, _, _, cx| {
-                                                            update_state(|s| {
-                                                                s.local_path.clear();
-                                                                s.local_size = None;
-                                                                s.local_msg = None;
-                                                            });
+                                                        .on_click(cx.listener(|this, _, _, cx| {
+                                                            this.logs_archive.local_path.clear();
+                                                            this.logs_archive.local_size = None;
+                                                            this.logs_archive.local_msg = None;
                                                             cx.notify();
                                                         })),
                                                 ),
@@ -424,8 +427,10 @@ pub fn render_logs_archive(
                                         cx,
                                         "logs-game-id",
                                         "输入对局 ID（或从上方列表点击「查询」）",
-                                        || with_state(|s| s.game_id.clone()),
-                                        |v| update_state(|s| s.game_id = v),
+                                        |s: &AppSidebar| s.logs_archive.game_id.clone(),
+                                        |s: &mut AppSidebar, v: String| {
+                                            s.logs_archive.game_id = v
+                                        },
                                     )),
                                 ),
                         )
@@ -435,18 +440,16 @@ pub fn render_logs_archive(
                                 .icon(IconName::Search)
                                 .label("加载日志")
                                 .when(gid.is_empty(), |b| b.disabled(true))
-                                .on_click(cx.listener(move |_this, _, _, cx| {
+                                .on_click(cx.listener(move |this, _, _, cx| {
                                     if gid.is_empty() {
                                         return;
                                     }
-                                    update_state(|s| {
-                                        s.loading = true;
-                                        s.error = None;
-                                        s.results = None;
-                                        s.entities.clear();
-                                        s.categories.clear();
-                                    });
-                                    do_load_logs(cx);
+                                    this.logs_archive.loading = true;
+                                    this.logs_archive.error = None;
+                                    this.logs_archive.results = None;
+                                    this.logs_archive.entities.clear();
+                                    this.logs_archive.categories.clear();
+                                    do_load_logs(this, cx);
                                 }))
                         }),
                 )
@@ -468,20 +471,18 @@ pub fn render_logs_archive(
                             let btn = Button::new(format!("logs-level-{}", lvl)).label(lvl.clone());
                             if selected {
                                 let lvl2 = lvl.clone();
-                                btn.on_click(cx.listener(move |_this, _, _, cx| {
-                                    update_state(|s| s.levels.retain(|l| l != &lvl2));
+                                btn.on_click(cx.listener(move |this, _, _, cx| {
+                                    this.logs_archive.levels.retain(|l| l != &lvl2);
                                     cx.notify();
                                 }))
                                 .into_any_element()
                             } else {
                                 let lvl2 = lvl.clone();
                                 btn.ghost()
-                                    .on_click(cx.listener(move |_this, _, _, cx| {
-                                        update_state(|s| {
-                                            if !s.levels.contains(&lvl2) {
-                                                s.levels.push(lvl2.clone());
-                                            }
-                                        });
+                                    .on_click(cx.listener(move |this, _, _, cx| {
+                                        if !this.logs_archive.levels.contains(&lvl2) {
+                                            this.logs_archive.levels.push(lvl2.clone());
+                                        }
                                         cx.notify();
                                     }))
                                     .into_any_element()
@@ -507,20 +508,20 @@ pub fn render_logs_archive(
                                     let label = e.entity_name.clone().unwrap_or_else(|| {
                                         format!("Entity {}", e.entity_id.unwrap_or(0))
                                     });
-                                    let is_selected = with_state(|s| s.entity_id == eid);
+                                    let is_selected = sidebar.logs_archive.entity_id == eid;
                                     let btn =
                                         Button::new(format!("logs-entity-{}", eid.unwrap_or(0)))
                                             .label(label);
                                     if is_selected {
-                                        btn.on_click(cx.listener(|_this, _, _, cx| {
-                                            update_state(|s| s.entity_id = None);
+                                        btn.on_click(cx.listener(|this, _, _, cx| {
+                                            this.logs_archive.entity_id = None;
                                             cx.notify();
                                         }))
                                         .into_any_element()
                                     } else {
                                         btn.ghost()
-                                            .on_click(cx.listener(move |_this, _, _, cx| {
-                                                update_state(|s| s.entity_id = eid);
+                                            .on_click(cx.listener(move |this, _, _, cx| {
+                                                this.logs_archive.entity_id = eid;
                                                 cx.notify();
                                             }))
                                             .into_any_element()
@@ -537,24 +538,24 @@ pub fn render_logs_archive(
                                 .children(
                                     category_list.iter().map(|c| {
                                         let cat = c.category.clone().unwrap_or_default();
-                                        let is_selected = with_state(|s| {
-                                            s.category.as_ref().map_or(false, |sc| sc == &cat)
-                                        });
+                                        let is_selected = sidebar
+                                            .logs_archive
+                                            .category
+                                            .as_ref()
+                                            .map_or(false, |sc| sc == &cat);
                                         let btn = Button::new(format!("logs-cat-{}", cat))
                                             .label(cat.clone());
                                         if is_selected {
-                                            btn.on_click(cx.listener(|_this, _, _, cx| {
-                                                update_state(|s| s.category = None);
+                                            btn.on_click(cx.listener(|this, _, _, cx| {
+                                                this.logs_archive.category = None;
                                                 cx.notify();
                                             }))
                                             .into_any_element()
                                         } else {
                                             let cat2 = cat.clone();
                                             btn.ghost()
-                                                .on_click(cx.listener(move |_this, _, _, cx| {
-                                                    update_state(|s| {
-                                                        s.category = Some(cat2.clone())
-                                                    });
+                                                .on_click(cx.listener(move |this, _, _, cx| {
+                                                    this.logs_archive.category = Some(cat2.clone());
                                                     cx.notify();
                                                 }))
                                                 .into_any_element()
@@ -578,13 +579,11 @@ pub fn render_logs_archive(
                                         .icon(IconName::Search)
                                         .label("应用筛选")
                                         .when(game_id_empty, |b| b.disabled(true))
-                                        .on_click(cx.listener(move |_this, _, _, cx| {
-                                            update_state(|s| {
-                                                s.offset = 0;
-                                                s.loading = true;
-                                                s.error = None;
-                                            });
-                                            do_query(cx);
+                                        .on_click(cx.listener(move |this, _, _, cx| {
+                                            this.logs_archive.offset = 0;
+                                            this.logs_archive.loading = true;
+                                            this.logs_archive.error = None;
+                                            do_query(this, cx);
                                         })),
                                 )
                                 .child(
@@ -593,36 +592,42 @@ pub fn render_logs_archive(
                                         .icon(IconName::Delete)
                                         .label("清空日志")
                                         .when(game_id_empty, |b| b.disabled(true))
-                                        .on_click(cx.listener(move |_this, _, _, cx| {
-                                            let gid2 = with_state(|s| s.game_id.clone());
+                                        .on_click(cx.listener(move |this, _, _, cx| {
+                                            let gid2 = this.logs_archive.game_id.clone();
                                             if gid2.is_empty() {
                                                 return;
                                             }
-                                            let _weak = cx.entity().downgrade();
                                             let gid3 = gid2.clone();
                                             cx.spawn(
-                                                move |_weak: gpui::WeakEntity<AppSidebar>,
+                                                move |weak: gpui::WeakEntity<AppSidebar>,
                                                  cx: &mut gpui::AsyncApp| {
-                                                    let weak2 = _weak.clone();
-                                                    let mut cx2 = cx.clone();
+                                                    let weak = weak.clone();
+                                                    let mut cx = cx.clone();
                                                     let gid4 = gid3.clone();
                                                     async move {
                                                         let result =
                                                             log_service::clear_logs(&gid4).await;
-                                                        update_state(|s| match result {
-                                                            Ok(()) => {
-                                                                s.results = None;
-                                                                s.entities.clear();
-                                                                s.categories.clear();
+                                                        weak.update(&mut cx, |this, cx| {
+                                                            match result {
+                                                                Ok(()) => {
+                                                                    this.logs_archive.results = None;
+                                                                    this
+                                                                        .logs_archive
+                                                                        .entities
+                                                                        .clear();
+                                                                    this
+                                                                        .logs_archive
+                                                                        .categories
+                                                                        .clear();
+                                                                }
+                                                                Err(e) => {
+                                                                    this.logs_archive.error =
+                                                                        Some(e)
+                                                                }
                                                             }
-                                                            Err(e) => s.error = Some(e),
-                                                        });
-                                                        if let Some(e) = weak2.upgrade() {
-                                                            let _ = e.update(
-                                                                &mut cx2,
-                                                                |_, cx| cx.notify(),
-                                                            );
-                                                        }
+                                                            cx.notify();
+                                                        })
+                                                        .ok();
                                                     }
                                                 },
                                             )
@@ -728,12 +733,12 @@ pub fn render_logs_archive(
                                     .ghost()
                                     .label("上一页")
                                     .when(current_page <= 1, |b| b.disabled(true))
-                                    .on_click(cx.listener(|_this, _, _, cx| {
-                                        update_state(|s| {
-                                            s.offset = (s.offset - s.limit).max(0);
-                                            s.loading = true;
-                                        });
-                                        do_query(cx);
+                                    .on_click(cx.listener(|this, _, _, cx| {
+                                        this.logs_archive.offset = (this.logs_archive.offset
+                                            - this.logs_archive.limit)
+                                            .max(0);
+                                        this.logs_archive.loading = true;
+                                        do_query(this, cx);
                                     })),
                             )
                             .child(
@@ -747,12 +752,10 @@ pub fn render_logs_archive(
                                     .ghost()
                                     .label("下一页")
                                     .when(current_page >= total_pages, |b| b.disabled(true))
-                                    .on_click(cx.listener(|_this, _, _, cx| {
-                                        update_state(|s| {
-                                            s.offset += s.limit;
-                                            s.loading = true;
-                                        });
-                                        do_query(cx);
+                                    .on_click(cx.listener(|this, _, _, cx| {
+                                        this.logs_archive.offset += this.logs_archive.limit;
+                                        this.logs_archive.loading = true;
+                                        do_query(this, cx);
                                     })),
                             ),
                     )
@@ -829,8 +832,8 @@ fn render_match_row(
                     Button::new(format!("logs-use-{}", mid))
                         .ghost()
                         .label("查询")
-                        .on_click(cx.listener(move |_, _, _, cx| {
-                            update_state(|s| s.game_id = mid2.clone());
+                        .on_click(cx.listener(move |this, _, _, cx| {
+                            this.logs_archive.game_id = mid2.clone();
                             cx.notify();
                         }))
                 })
@@ -845,8 +848,8 @@ fn render_match_row(
                             "下载 DB".to_string()
                         })
                         .when(is_downloading, |b| b.disabled(true))
-                        .on_click(cx.listener(move |_, _, _, cx| {
-                            download_match_db(cx, &mid2);
+                        .on_click(cx.listener(move |this, _, _, cx| {
+                            download_match_db(this, cx, &mid2);
                         }))
                 }),
         )

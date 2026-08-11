@@ -1,5 +1,3 @@
-use std::cell::Cell;
-
 use gpui::*;
 use gpui_component::button::{Button, ButtonVariants};
 use gpui_component::scroll::ScrollableElement;
@@ -10,19 +8,7 @@ use rust_i18n::t;
 use crate::components::sidebar::AppSidebar;
 use crate::services::provider;
 
-// ── 拉取状态（线程局部，防 render 期间重复触发请求） ──
-
-thread_local! {
-    static LOADING: Cell<bool> = Cell::new(false);
-}
-
-fn loading() -> bool {
-    LOADING.with(|l| l.get())
-}
-
-fn set_loading(v: bool) {
-    LOADING.with(|l| l.set(v));
-}
+// ── 子视图 ──
 
 fn render_view_tabs(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> AnyElement {
     let is_total = sidebar.leaderboard_view == "total";
@@ -71,7 +57,7 @@ fn render_mode_select(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) ->
                     .on_click(cx.listener(move |this, _, _, cx| {
                         this.leaderboard_mode = v.clone();
                         this.leaderboard_loaded = false;
-                        set_loading(false);
+                        this.leaderboard_loading = false;
                         cx.notify();
                     }))
                     .into_any_element()
@@ -202,10 +188,10 @@ fn render_table(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> AnyEl
 
 pub fn render_leaderboard(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> AnyElement {
     // 首次渲染或 mode 切换后拉取数据（与 client 一致：mode 传给 API，view 仅本地排序切换）
-    if !sidebar.leaderboard_loaded && !loading() {
+    if !sidebar.leaderboard_loaded && !sidebar.leaderboard_loading {
         let client = provider::cloud_client().clone();
         let mode = sidebar.leaderboard_mode.clone();
-        set_loading(true);
+        sidebar.leaderboard_loading = true;
         cx.spawn(
             move |weak: gpui::WeakEntity<AppSidebar>, cx: &mut gpui::AsyncApp| {
                 let weak = weak.clone();
@@ -213,8 +199,8 @@ pub fn render_leaderboard(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>
                 let client = client.clone();
                 async move {
                     let data = client.get_leaderboard(&mode, 100).await;
-                    set_loading(false);
                     weak.update(&mut cx, |this, cx| {
+                        this.leaderboard_loading = false;
                         // mode 已切换时丢弃过期响应，避免覆盖新 mode 数据
                         if this.leaderboard_mode == mode {
                             this.leaderboard_data = data.unwrap_or_default();

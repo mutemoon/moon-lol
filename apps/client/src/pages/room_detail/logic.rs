@@ -5,7 +5,6 @@ use std::time::Duration;
 use gpui::*;
 use uuid::Uuid;
 
-use super::types::{update_state, with_state};
 use crate::components::sidebar::AppSidebar;
 use crate::services::provider::cloud_client;
 use crate::services::runtime::run_on_tokio;
@@ -19,7 +18,10 @@ const POLL_INTERVAL_SECS: u64 = 5;
 /// 并行拉取房间信息 + 槽位 + agent 列表并写回状态。
 async fn fetch_room_data(id: Uuid, weak: &gpui::WeakEntity<AppSidebar>, cx: &mut gpui::AsyncApp) {
     // 中途已切换房间则丢弃本次结果
-    if with_state(|s| s.room_id) != Some(id) {
+    let still_this_room = weak.upgrade().map_or(false, |e| {
+        e.read_with(cx, |s, _| s.room_detail.room_id) == Some(id)
+    });
+    if !still_this_room {
         return;
     }
     let client = cloud_client().clone();
@@ -30,20 +32,20 @@ async fn fetch_room_data(id: Uuid, weak: &gpui::WeakEntity<AppSidebar>, cx: &mut
         async { client.list_room_slots(&id_b).await.unwrap_or_default() },
         async { client.list_agents().await.unwrap_or_default() },
     );
-    update_state(|s| {
-        s.loading = false;
-        match r {
-            Ok(room) => {
-                s.room = Some(room);
-                s.error = None;
-            }
-            Err(e) => s.error = Some(e.to_string()),
-        }
-        s.slots = slots;
-        s.agents = agents;
-    });
     if let Some(entity) = weak.upgrade() {
-        let _ = entity.update(cx, |_, cx| cx.notify());
+        let _ = entity.update(cx, |s, cx| {
+            s.room_detail.loading = false;
+            match r {
+                Ok(room) => {
+                    s.room_detail.room = Some(room);
+                    s.room_detail.error = None;
+                }
+                Err(e) => s.room_detail.error = Some(e.to_string()),
+            }
+            s.room_detail.slots = slots;
+            s.room_detail.agents = agents;
+            cx.notify();
+        });
     }
 }
 
@@ -77,7 +79,10 @@ pub(super) fn spawn_poll(cx: &mut Context<AppSidebar>, id: Uuid) {
                     {
                         break;
                     }
-                    if with_state(|s| s.room_id) != Some(id) {
+                    let still_this_room = weak.upgrade().map_or(false, |e| {
+                        e.read_with(&cx, |s, _| s.room_detail.room_id) == Some(id)
+                    });
+                    if !still_this_room {
                         break;
                     }
                     // 已离开详情页则停止轮询
@@ -98,20 +103,23 @@ pub(super) fn spawn_poll(cx: &mut Context<AppSidebar>, id: Uuid) {
 // ── 异步动作 ──
 
 /// 添加槽位：校验已选 agent 后调用 add_room_slot。
-pub(super) fn spawn_add_slot(cx: &mut Context<AppSidebar>, room_id: Uuid) {
-    let (agent_id, team) = with_state(|s| (s.add_agent_id.clone(), s.show_add_team));
+pub(super) fn spawn_add_slot(
+    sidebar: &mut AppSidebar,
+    cx: &mut Context<AppSidebar>,
+    room_id: Uuid,
+) {
+    let agent_id = sidebar.room_detail.add_agent_id.clone();
+    let team = sidebar.room_detail.show_add_team;
     let Some(agent_id) = agent_id else {
-        update_state(|s| s.add_error = "请选择 Agent".into());
+        sidebar.room_detail.add_error = "请选择 Agent".into();
         cx.notify();
         return;
     };
     let Some(team) = team else {
         return;
     };
-    update_state(|s| {
-        s.adding = true;
-        s.add_error.clear();
-    });
+    sidebar.room_detail.adding = true;
+    sidebar.room_detail.add_error.clear();
     let id_str = room_id.to_string();
     cx.spawn(
         move |weak: gpui::WeakEntity<AppSidebar>, cx: &mut gpui::AsyncApp| {
@@ -122,21 +130,26 @@ pub(super) fn spawn_add_slot(cx: &mut Context<AppSidebar>, room_id: Uuid) {
             async move {
                 match cloud_client().add_room_slot(&id_str, &agent_id, team).await {
                     Ok(_) => {
-                        update_state(|s| {
-                            s.adding = false;
-                            s.show_add_team = None;
-                            s.add_agent_id = None;
-                            s.add_error.clear();
-                        });
+                        if let Some(entity) = weak.upgrade() {
+                            let _ = entity.update(&mut cx, |s, cx| {
+                                s.room_detail.adding = false;
+                                s.room_detail.show_add_team = None;
+                                s.room_detail.add_agent_id = None;
+                                s.room_detail.add_error.clear();
+                                cx.notify();
+                            });
+                        }
                         fetch_room_data(room_id, &weak, &mut cx).await;
                     }
-                    Err(e) => update_state(|s| {
-                        s.adding = false;
-                        s.add_error = format!("添加失败: {}", e);
-                    }),
-                }
-                if let Some(entity) = weak.upgrade() {
-                    let _ = entity.update(&mut cx, |_, cx| cx.notify());
+                    Err(e) => {
+                        if let Some(entity) = weak.upgrade() {
+                            let _ = entity.update(&mut cx, |s, cx| {
+                                s.room_detail.adding = false;
+                                s.room_detail.add_error = format!("添加失败: {}", e);
+                                cx.notify();
+                            });
+                        }
+                    }
                 }
             }
         },
@@ -155,7 +168,12 @@ pub(super) fn spawn_remove_slot(cx: &mut Context<AppSidebar>, room_id: Uuid, slo
             let slot_id_str = slot_id_str.clone();
             async move {
                 if let Err(e) = cloud_client().remove_room_slot(&id_str, &slot_id_str).await {
-                    update_state(|s| s.error = Some(e.to_string()));
+                    if let Some(entity) = weak.upgrade() {
+                        let _ = entity.update(&mut cx, |s, cx| {
+                            s.room_detail.error = Some(e.to_string());
+                            cx.notify();
+                        });
+                    }
                 }
                 fetch_room_data(room_id, &weak, &mut cx).await;
             }
@@ -164,11 +182,13 @@ pub(super) fn spawn_remove_slot(cx: &mut Context<AppSidebar>, room_id: Uuid, slo
     .detach();
 }
 
-pub(super) fn spawn_start_match(cx: &mut Context<AppSidebar>, room_id: Uuid) {
-    update_state(|s| {
-        s.starting = true;
-        s.error = None;
-    });
+pub(super) fn spawn_start_match(
+    sidebar: &mut AppSidebar,
+    cx: &mut Context<AppSidebar>,
+    room_id: Uuid,
+) {
+    sidebar.room_detail.starting = true;
+    sidebar.room_detail.error = None;
     let id_str = room_id.to_string();
     cx.spawn(
         move |weak: gpui::WeakEntity<AppSidebar>, cx: &mut gpui::AsyncApp| {
@@ -178,9 +198,9 @@ pub(super) fn spawn_start_match(cx: &mut Context<AppSidebar>, room_id: Uuid) {
             async move {
                 match cloud_client().start_room_match(&id_str).await {
                     Ok(res) => {
-                        update_state(|s| s.starting = false);
                         if let Some(entity) = weak.upgrade() {
                             let _ = entity.update(&mut cx, |this, cx| {
+                                this.room_detail.starting = false;
                                 this.current_room_id = None;
                                 this.current_match_id = Some(res.match_id);
                                 this.navigate_to(ActiveView::Observe);
@@ -189,12 +209,12 @@ pub(super) fn spawn_start_match(cx: &mut Context<AppSidebar>, room_id: Uuid) {
                         }
                     }
                     Err(e) => {
-                        update_state(|s| {
-                            s.starting = false;
-                            s.error = Some(format!("启动失败: {}", e));
-                        });
                         if let Some(entity) = weak.upgrade() {
-                            let _ = entity.update(&mut cx, |_, cx| cx.notify());
+                            let _ = entity.update(&mut cx, |s, cx| {
+                                s.room_detail.starting = false;
+                                s.room_detail.error = Some(format!("启动失败: {}", e));
+                                cx.notify();
+                            });
                         }
                     }
                 }
@@ -223,9 +243,11 @@ pub(super) fn spawn_leave_room(cx: &mut Context<AppSidebar>, room_id: Uuid) {
                         }
                     }
                     Err(e) => {
-                        update_state(|s| s.error = Some(format!("离开失败: {}", e)));
                         if let Some(entity) = weak.upgrade() {
-                            let _ = entity.update(&mut cx, |_, cx| cx.notify());
+                            let _ = entity.update(&mut cx, |s, cx| {
+                                s.room_detail.error = Some(format!("离开失败: {}", e));
+                                cx.notify();
+                            });
                         }
                     }
                 }
@@ -254,9 +276,11 @@ pub(super) fn spawn_dissolve_room(cx: &mut Context<AppSidebar>, room_id: Uuid) {
                         }
                     }
                     Err(e) => {
-                        update_state(|s| s.error = Some(format!("解散失败: {}", e)));
                         if let Some(entity) = weak.upgrade() {
-                            let _ = entity.update(&mut cx, |_, cx| cx.notify());
+                            let _ = entity.update(&mut cx, |s, cx| {
+                                s.room_detail.error = Some(format!("解散失败: {}", e));
+                                cx.notify();
+                            });
                         }
                     }
                 }

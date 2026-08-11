@@ -1,11 +1,9 @@
-//! 房间页状态：RoomsPageState + thread_local 全局状态 + with_state/update_state 访问器。
-
-use std::cell::RefCell;
+//! 房间页状态：RoomsPageState（存储在 `AppSidebar.rooms`）。
 
 use lol_web_protocol::room::Room;
 
-#[derive(Debug, Clone, Default)]
-pub(super) struct RoomsPageState {
+#[derive(Debug, Clone)]
+pub struct RoomsPageState {
     /// 是否已触发首次自动加载
     pub(super) loaded: bool,
     pub(super) lobby_rooms: Vec<Room>,
@@ -27,6 +25,29 @@ pub(super) struct RoomsPageState {
     pub(super) draft_lobby_visible: bool,
 }
 
+impl Default for RoomsPageState {
+    fn default() -> Self {
+        Self {
+            loaded: false,
+            lobby_rooms: Vec::new(),
+            my_rooms: Vec::new(),
+            loading: false,
+            active_tab: RoomsTab::Lobby,
+            join_code: String::new(),
+            join_error: String::new(),
+            joining: false,
+            show_create: false,
+            creating: false,
+            create_error: String::new(),
+            draft_name: String::new(),
+            draft_max_members: "10".into(),
+            draft_max_agents: "3".into(),
+            draft_team_policy: "free".into(),
+            draft_lobby_visible: true,
+        }
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub(super) enum RoomsTab {
     Lobby,
@@ -37,22 +58,4 @@ impl Default for RoomsTab {
     fn default() -> Self {
         RoomsTab::Lobby
     }
-}
-
-thread_local! {
-    static STATE: RefCell<RoomsPageState> = RefCell::new(RoomsPageState {
-        draft_max_members: "10".into(),
-        draft_max_agents: "3".into(),
-        draft_team_policy: "free".into(),
-        draft_lobby_visible: true,
-        ..Default::default()
-    });
-}
-
-pub(super) fn with_state<R>(f: impl FnOnce(&RoomsPageState) -> R) -> R {
-    STATE.with(|s| f(&s.borrow()))
-}
-
-pub(super) fn update_state(f: impl FnOnce(&mut RoomsPageState)) {
-    STATE.with(|s| f(&mut s.borrow_mut()));
 }

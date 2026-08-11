@@ -1,15 +1,15 @@
-//! 房间详情页本地状态（thread_local）。
-
-use std::cell::RefCell;
+//! 房间详情页本地状态（存储在 `AppSidebar.room_detail`）。
 
 use lol_web_protocol::agent::Agent;
 use lol_web_protocol::room::{Room, RoomAgentSlot};
 use lol_web_protocol::spawn_preset::Team;
 use uuid::Uuid;
 
+use crate::components::sidebar::AppSidebar;
+
 // ── 页面本地状态 ──
 
-pub(super) struct RoomDetailPageState {
+pub struct RoomDetailPageState {
     /// 状态绑定的房间 id；与 sidebar.current_room_id 不一致时重置
     pub(super) room_id: Option<Uuid>,
     /// 是否已触发首次加载
@@ -52,26 +52,12 @@ impl Default for RoomDetailPageState {
     }
 }
 
-thread_local! {
-    pub(super) static STATE: RefCell<RoomDetailPageState> = RefCell::new(RoomDetailPageState::default());
-}
-
-pub(super) fn with_state<R>(f: impl FnOnce(&RoomDetailPageState) -> R) -> R {
-    STATE.with(|s| f(&s.borrow()))
-}
-
-pub(super) fn update_state(f: impl FnOnce(&mut RoomDetailPageState)) {
-    STATE.with(|s| f(&mut s.borrow_mut()));
-}
-
 /// 将状态绑定到当前房间；id 变化时清空旧数据。
-pub(super) fn reset_state_for(room_id: Option<Uuid>) {
-    update_state(|s| {
-        if s.room_id != room_id {
-            *s = RoomDetailPageState {
-                room_id,
-                ..RoomDetailPageState::default()
-            };
-        }
-    });
+pub(super) fn reset_state_for(sidebar: &mut AppSidebar, room_id: Option<Uuid>) {
+    if sidebar.room_detail.room_id != room_id {
+        sidebar.room_detail = RoomDetailPageState {
+            room_id,
+            ..RoomDetailPageState::default()
+        };
+    }
 }

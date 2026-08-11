@@ -12,10 +12,11 @@ use gpui_component::button::{Button, ButtonVariants};
 use gpui_component::scroll::ScrollableElement;
 use gpui_component::{h_flex, v_flex, ActiveTheme, Disableable, IconName, Sizable, StyledExt};
 use lol_web_protocol::match_::MatchStatus;
+pub use types::ObservePageState;
 
 use self::display::{build_rosters, event_label, fmt_date, info_row, short_id};
 use self::logic::{spawn_load, spawn_poll};
-use self::types::{reset_state_for, update_state, with_state, RosterAgent};
+use self::types::{reset_state_for, RosterAgent};
 use crate::components::sidebar::AppSidebar;
 use crate::services::provider;
 use crate::types::ActiveView;
@@ -23,7 +24,7 @@ use crate::types::ActiveView;
 /// 观战/回放页（对应 client `pages/observe/[id].vue`，用 sidebar.current_match_id）。
 pub fn render_observe(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> AnyElement {
     let match_id = sidebar.current_match_id;
-    reset_state_for(match_id);
+    reset_state_for(sidebar, match_id);
 
     // ── 空态：未选中对局 ──
     let Some(id) = match_id else {
@@ -54,32 +55,24 @@ pub fn render_observe(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) ->
     let short = short_id(&id_str);
 
     // 首次加载 + 轮询（防重复 spawn）
-    let (inited, polling) = with_state(|s| (s.inited, s.polling));
-    if !inited {
-        update_state(|s| {
-            s.inited = true;
-            s.loading = true;
-        });
+    if !sidebar.observe.inited {
+        sidebar.observe.inited = true;
+        sidebar.observe.loading = true;
         spawn_load(id, cx);
     }
-    if !polling {
-        update_state(|s| s.polling = true);
+    if !sidebar.observe.polling {
+        sidebar.observe.polling = true;
         spawn_poll(cx);
     }
 
-    let (match_info, loading, error, paused, confirming_stop, stopping, stop_error, events_count) =
-        with_state(|s| {
-            (
-                s.match_info.clone(),
-                s.loading,
-                s.error.clone(),
-                s.paused,
-                s.confirming_stop,
-                s.stopping,
-                s.stop_error.clone(),
-                s.events.len(),
-            )
-        });
+    let match_info = sidebar.observe.match_info.clone();
+    let loading = sidebar.observe.loading;
+    let error = sidebar.observe.error.clone();
+    let paused = sidebar.observe.paused;
+    let confirming_stop = sidebar.observe.confirming_stop;
+    let stopping = sidebar.observe.stopping;
+    let stop_error = sidebar.observe.stop_error.clone();
+    let events_count = sidebar.observe.events.len();
 
     let warning = cx.theme().warning;
     let foreground = cx.theme().foreground;
@@ -90,27 +83,27 @@ pub fn render_observe(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) ->
     let success = cx.theme().success;
 
     // 时间线行（倒序展示）
-    let lines: Vec<(String, String, Hsla)> = with_state(|s| {
-        s.events
-            .iter()
-            .rev()
-            .map(|ev| {
-                let et = ev
-                    .payload
-                    .get("event_type")
-                    .and_then(|v| v.as_str())
-                    .unwrap_or("");
-                let tone = match et {
-                    "agent_stalled" => warning,
-                    "champion_kill" | "turret_destroyed" | "match_finished" => foreground,
-                    _ => muted,
-                };
-                (format!("#{:04}", ev.seq), event_label(ev), tone)
-            })
-            .collect()
-    });
+    let lines: Vec<(String, String, Hsla)> = sidebar
+        .observe
+        .events
+        .iter()
+        .rev()
+        .map(|ev| {
+            let et = ev
+                .payload
+                .get("event_type")
+                .and_then(|v| v.as_str())
+                .unwrap_or("");
+            let tone = match et {
+                "agent_stalled" => warning,
+                "champion_kill" | "turret_destroyed" | "match_finished" => foreground,
+                _ => muted,
+            };
+            (format!("#{:04}", ev.seq), event_label(ev), tone)
+        })
+        .collect();
     let lines_empty = lines.is_empty();
-    let (order_agents, chaos_agents, stalled_agents) = with_state(|s| build_rosters(&s.events));
+    let (order_agents, chaos_agents, stalled_agents) = build_rosters(&sidebar.observe.events);
     let stalled_text = stalled_agents
         .iter()
         .map(|s| short_id(s))
@@ -186,11 +179,10 @@ pub fn render_observe(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) ->
                     })
                     .loading(stopping)
                     .disabled(stopping)
-                    .on_click(cx.listener(move |_this, _, _, cx| {
-                        update_state(|s| {
-                            s.stopping = true;
-                            s.stop_error = None;
-                        });
+                    .on_click(cx.listener(move |this, _, _, cx| {
+                        this.observe.stopping = true;
+                        this.observe.stop_error = None;
+                        cx.notify();
                         let client = provider::cloud_client().clone();
                         let id_str = id_str.clone();
                         cx.spawn(
@@ -202,27 +194,23 @@ pub fn render_observe(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) ->
                                 async move {
                                     match client.stop_match(&id_str).await {
                                         Ok(()) => {
-                                            update_state(|s| {
-                                                s.match_id = None;
-                                                s.stopping = false;
-                                                s.confirming_stop = false;
-                                            });
-                                            if let Some(entity) = weak.upgrade() {
-                                                let _ = entity.update(&mut cx, |this, cx| {
-                                                    this.current_match_id = None;
-                                                    this.navigate_to(ActiveView::Games);
-                                                    cx.notify();
-                                                });
-                                            }
+                                            weak.update(&mut cx, |this, cx| {
+                                                this.observe.match_id = None;
+                                                this.observe.stopping = false;
+                                                this.observe.confirming_stop = false;
+                                                this.current_match_id = None;
+                                                this.navigate_to(ActiveView::Games);
+                                                cx.notify();
+                                            })
+                                            .ok();
                                         }
                                         Err(e) => {
-                                            update_state(|s| {
-                                                s.stopping = false;
-                                                s.stop_error = Some(e.to_string());
-                                            });
-                                            if let Some(entity) = weak.upgrade() {
-                                                let _ = entity.update(&mut cx, |_, cx| cx.notify());
-                                            }
+                                            weak.update(&mut cx, |this, cx| {
+                                                this.observe.stopping = false;
+                                                this.observe.stop_error = Some(e.to_string());
+                                                cx.notify();
+                                            })
+                                            .ok();
                                         }
                                     }
                                 }
@@ -236,8 +224,8 @@ pub fn render_observe(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) ->
                     .ghost()
                     .label("取消")
                     .disabled(stopping)
-                    .on_click(cx.listener(move |_this, _, _, cx| {
-                        update_state(|s| s.confirming_stop = false);
+                    .on_click(cx.listener(move |this, _, _, cx| {
+                        this.observe.confirming_stop = false;
                         cx.notify();
                     })),
             )
@@ -249,8 +237,8 @@ pub fn render_observe(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) ->
             .icon(IconName::CircleX)
             .label("结束对局")
             .small()
-            .on_click(cx.listener(move |_this, _, _, cx| {
-                update_state(|s| s.confirming_stop = true);
+            .on_click(cx.listener(move |this, _, _, cx| {
+                this.observe.confirming_stop = true;
                 cx.notify();
             }))
             .into_any_element()
@@ -273,7 +261,7 @@ pub fn render_observe(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) ->
                         .on_click(cx.listener(move |this, _, _, cx| {
                             this.current_match_id = None;
                             this.navigate_to(ActiveView::Games);
-                            update_state(|s| s.match_id = None);
+                            this.observe.match_id = None;
                             cx.notify();
                         })),
                 )
@@ -304,8 +292,8 @@ pub fn render_observe(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) ->
                             "暂停刷新"
                         })
                         .small()
-                        .on_click(cx.listener(move |_this, _, _, cx| {
-                            update_state(|s| s.paused = !s.paused);
+                        .on_click(cx.listener(move |this, _, _, cx| {
+                            this.observe.paused = !this.observe.paused;
                             cx.notify();
                         })),
                 )

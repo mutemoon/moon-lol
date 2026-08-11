@@ -1,4 +1,3 @@
-use std::cell::RefCell;
 use std::time::Duration;
 
 use gpui::prelude::*;
@@ -16,7 +15,7 @@ use crate::services::provider;
 
 // ── 页面本地状态 ──
 
-struct AdminPageState {
+pub struct AdminPageState {
     metrics: Option<AdminMetrics>,
     running: Vec<Match>,
     abort_target: Option<Match>,
@@ -41,18 +40,6 @@ impl Default for AdminPageState {
     }
 }
 
-thread_local! {
-    static STATE: RefCell<AdminPageState> = RefCell::new(AdminPageState::default());
-}
-
-fn with_state<R>(f: impl FnOnce(&AdminPageState) -> R) -> R {
-    STATE.with(|s| f(&s.borrow()))
-}
-
-fn update_state(f: impl FnOnce(&mut AdminPageState)) {
-    STATE.with(|s| f(&mut s.borrow_mut()));
-}
-
 fn short_id(id: &str) -> String {
     if id.len() > 8 {
         id[..8].to_string()
@@ -73,21 +60,28 @@ fn ago_iso(iso: &str) -> String {
 
 /// 并行拉取 Admin 指标 + 运行中对局并写入 state。
 /// 云请求在 cloud.rs 内部已桥接 tokio，在 gpui AsyncApp 里 await 安全。
-async fn refresh_admin_data(client: &CloudClient) {
+async fn refresh_admin_data(
+    client: &CloudClient,
+    weak: &gpui::WeakEntity<AppSidebar>,
+    cx: &mut gpui::AsyncApp,
+) {
     let (m, r) = tokio::join!(async { client.get_admin_metrics().await }, async {
         client.list_running_matches().await
     },);
-    update_state(|s| {
-        s.metrics = m.ok();
-        s.running = r.unwrap_or_default();
-        s.loading = false;
-    });
+    if let Some(e) = weak.upgrade() {
+        let _ = e.update(cx, |this, cx| {
+            this.admin.metrics = m.ok();
+            this.admin.running = r.unwrap_or_default();
+            this.admin.loading = false;
+            cx.notify();
+        });
+    }
 }
 
 /// 启动 3 秒自动轮询。页面运行在 gpui AsyncApp（非 tokio runtime），
 /// 延时必须经 run_on_tokio 桥接到全局 tokio runtime，直接 sleep 会 panic。
-fn start_polling(cx: &mut Context<AppSidebar>) {
-    update_state(|s| s.polling = true);
+fn start_polling(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) {
+    sidebar.admin.polling = true;
     let client = provider::cloud_client().clone();
     cx.spawn(
         move |weak: gpui::WeakEntity<AppSidebar>, cx: &mut gpui::AsyncApp| {
@@ -96,11 +90,9 @@ fn start_polling(cx: &mut Context<AppSidebar>) {
             let client = client.clone();
             async move {
                 loop {
-                    refresh_admin_data(&client).await;
+                    refresh_admin_data(&client, &weak, &mut cx).await;
                     // sidebar 实体被销毁则停止轮询，避免后台空转请求
-                    if let Some(e) = weak.upgrade() {
-                        let _ = e.update(&mut cx, |_, cx| cx.notify());
-                    } else {
+                    if weak.upgrade().is_none() {
                         break;
                     }
                     let _ = crate::services::runtime::run_on_tokio(|| async {
@@ -118,22 +110,20 @@ fn start_polling(cx: &mut Context<AppSidebar>) {
 // ── 公开入口 ──
 
 /// Admin 指标、运行中对局、强制中止。首次渲染即加载，并每 3 秒自动轮询刷新。
-pub fn render_admin(_sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> AnyElement {
+pub fn render_admin(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> AnyElement {
     // 首次渲染即启动 3 秒轮询（polling 标志位防止重复 spawn）
-    if !with_state(|s| s.polling) {
-        start_polling(cx);
+    if !sidebar.admin.polling {
+        start_polling(sidebar, cx);
     }
 
-    let (metrics, running, abort_target, aborting, loading, error) = with_state(|s| {
-        (
-            s.metrics.clone(),
-            s.running.clone(),
-            s.abort_target.clone(),
-            s.aborting,
-            s.loading,
-            s.error.clone(),
-        )
-    });
+    let (metrics, running, abort_target, aborting, loading, error) = (
+        sidebar.admin.metrics.clone(),
+        sidebar.admin.running.clone(),
+        sidebar.admin.abort_target.clone(),
+        sidebar.admin.aborting,
+        sidebar.admin.loading,
+        sidebar.admin.error.clone(),
+    );
 
     // 刷新按钮
     let refresh_btn = {
@@ -150,10 +140,7 @@ pub fn render_admin(_sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> 
                         let mut cx = cx.clone();
                         let client = client.clone();
                         async move {
-                            refresh_admin_data(&client).await;
-                            if let Some(e) = weak.upgrade() {
-                                let _ = e.update(&mut cx, |_, cx| cx.notify());
-                            }
+                            refresh_admin_data(&client, &weak, &mut cx).await;
                         }
                     },
                 )
@@ -181,18 +168,9 @@ pub fn render_admin(_sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> 
                         .child(
                             v_flex()
                                 .gap_1()
-                                .child(
-                                    h_flex()
-                                        .gap_2()
-                                        .items_center()
-                                        .child(IconName::Cpu)
-                                        .child(
-                                            div()
-                                                .font_bold()
-                                                .text_lg()
-                                                .child(t!("app.nav.title_admin")),
-                                        ),
-                                )
+                                .child(h_flex().gap_2().items_center().child(IconName::Cpu).child(
+                                    div().font_bold().text_lg().child(t!("app.nav.title_admin")),
+                                ))
                                 .child(
                                     div()
                                         .text_xs()
@@ -388,34 +366,28 @@ pub fn render_admin(_sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> 
                                                             .flex_1()
                                                             .text_xs()
                                                             .text_color(cx.theme().muted_foreground)
-                                                            .child(if let Some(ref rid) = m.room_id
-                                                            {
-                                                                format!(
-                                                                    "房间 {}",
-                                                                    short_id(&rid.to_string())
-                                                                )
-                                                            } else {
-                                                                format!(
-                                                                    "用户 #{}",
-                                                                    m.owner_user_id
-                                                                        .map_or(
+                                                            .child(
+                                                                if let Some(ref rid) = m.room_id {
+                                                                    format!(
+                                                                        "房间 {}",
+                                                                        short_id(&rid.to_string())
+                                                                    )
+                                                                } else {
+                                                                    format!(
+                                                                        "用户 #{}",
+                                                                        m.owner_user_id.map_or(
                                                                             "—".to_string(),
                                                                             |id| id.to_string()
                                                                         )
-                                                                )
-                                                            }),
-                                                    )
-                                                    .child(
-                                                        div()
-                                                            .w(rems(4.))
-                                                            .text_xs()
-                                                            .child(
-                                                                m.ws_port.map_or(
-                                                                    "—".to_string(),
-                                                                    |p| p.to_string(),
-                                                                ),
+                                                                    )
+                                                                },
                                                             ),
                                                     )
+                                                    .child(div().w(rems(4.)).text_xs().child(
+                                                        m.ws_port.map_or("—".to_string(), |p| {
+                                                            p.to_string()
+                                                        }),
+                                                    ))
                                                     .child(
                                                         div()
                                                             .w(rems(10.))
@@ -423,27 +395,20 @@ pub fn render_admin(_sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> 
                                                             .text_color(cx.theme().muted_foreground)
                                                             .child(ago_iso(&m.created_at)),
                                                     )
-                                                    .child(
-                                                        div().w(rems(8.)).text_right().child({
-                                                            let m_clone = m.clone();
-                                                            Button::new(format!(
-                                                                "abort-{}",
-                                                                mid
-                                                            ))
+                                                    .child(div().w(rems(8.)).text_right().child({
+                                                        let m_clone = m.clone();
+                                                        Button::new(format!("abort-{}", mid))
                                                             .ghost()
                                                             .icon(IconName::CircleX)
                                                             .label("强制中止")
                                                             .on_click(cx.listener(
-                                                                move |_this, _, _, cx| {
-                                                                    update_state(|s| {
-                                                                        s.abort_target =
-                                                                            Some(m_clone.clone());
-                                                                    });
+                                                                move |this, _, _, cx| {
+                                                                    this.admin.abort_target =
+                                                                        Some(m_clone.clone());
                                                                     cx.notify();
                                                                 },
                                                             ))
-                                                        }),
-                                                    )
+                                                    }))
                                             })),
                                     ),
                             )
@@ -477,17 +442,14 @@ pub fn render_admin(_sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> 
                             .child(
                                 v_flex()
                                     .gap_1()
-                                    .child(
-                                        div()
-                                            .font_bold()
-                                            .text_sm()
-                                            .child("强制中止对局"),
-                                    )
+                                    .child(div().font_bold().text_sm().child("强制中止对局"))
                                     .child(
                                         div()
                                             .text_xs()
                                             .text_color(cx.theme().muted_foreground)
-                                            .child("该对局将被立即终止并释放算力。此操作不可恢复。"),
+                                            .child(
+                                                "该对局将被立即终止并释放算力。此操作不可恢复。",
+                                            ),
                                     ),
                             )
                             .child(
@@ -498,10 +460,8 @@ pub fn render_admin(_sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> 
                                         Button::new("cancel-abort-btn")
                                             .ghost()
                                             .label("取消")
-                                            .on_click(cx.listener(|_this, _, _, cx| {
-                                                update_state(|s| {
-                                                    s.abort_target = None;
-                                                });
+                                            .on_click(cx.listener(|this, _, _, cx| {
+                                                this.admin.abort_target = None;
                                                 cx.notify();
                                             })),
                                     )
@@ -511,10 +471,8 @@ pub fn render_admin(_sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> 
                                         Button::new("confirm-abort-btn")
                                             .label("确认中止")
                                             .when(aborting, |b| b.disabled(true))
-                                            .on_click(cx.listener(move |_this, _, _, cx| {
-                                                update_state(|s| {
-                                                    s.aborting = true;
-                                                });
+                                            .on_click(cx.listener(move |this, _, _, cx| {
+                                                this.admin.aborting = true;
                                                 let aid2 = aid.clone();
                                                 let client2 = client.clone();
                                                 cx.spawn(
@@ -528,20 +486,29 @@ pub fn render_admin(_sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> 
                                                             let _ = client3
                                                                 .force_abort_match(&aid3)
                                                                 .await;
-                                                            refresh_admin_data(&client3).await;
-                                                            update_state(|s| {
-                                                                s.aborting = false;
-                                                                s.abort_target = None;
-                                                            });
+                                                            refresh_admin_data(
+                                                                &client3,
+                                                                &weak,
+                                                                &mut cx,
+                                                            )
+                                                            .await;
                                                             if let Some(e) = weak.upgrade() {
-                                                                let _ = e.update(&mut cx, |_, cx| cx.notify());
+                                                                let _ = e.update(
+                                                                    &mut cx,
+                                                                    |this, cx| {
+                                                                        this.admin.aborting = false;
+                                                                        this.admin.abort_target =
+                                                                            None;
+                                                                        cx.notify();
+                                                                    },
+                                                                );
                                                             }
                                                         }
                                                     },
                                                 )
                                                 .detach();
                                             }))
-                                    })
+                                    }),
                             ),
                     ),
             )

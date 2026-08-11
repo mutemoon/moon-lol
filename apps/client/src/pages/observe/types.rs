@@ -1,11 +1,11 @@
-//! 观战/回放页状态类型与页面级 thread_local 状态。
-
-use std::cell::RefCell;
+//! 观战/回放页状态类型，状态由 AppSidebar.observe 持有。
 
 use lol_web_protocol::match_::{Match, MatchEvent};
 use uuid::Uuid;
 
-pub(super) struct ObservePageState {
+use crate::components::sidebar::AppSidebar;
+
+pub struct ObservePageState {
     /// 状态对应的对局 id；与 sidebar.current_match_id 不一致时重置
     pub(super) match_id: Option<Uuid>,
     /// 是否已触发首次加载
@@ -51,28 +51,14 @@ impl Default for ObservePageState {
     }
 }
 
-thread_local! {
-    pub(super) static STATE: RefCell<ObservePageState> = RefCell::new(ObservePageState::default());
-}
-
-pub(super) fn with_state<R>(f: impl FnOnce(&ObservePageState) -> R) -> R {
-    STATE.with(|s| f(&s.borrow()))
-}
-
-pub(super) fn update_state(f: impl FnOnce(&mut ObservePageState)) {
-    STATE.with(|s| f(&mut s.borrow_mut()));
-}
-
 /// 将状态绑定到当前对局；id 变化时清空旧数据（也用于离开页面时的重置）。
-pub(super) fn reset_state_for(match_id: Option<Uuid>) {
-    update_state(|s| {
-        if s.match_id != match_id {
-            *s = ObservePageState {
-                match_id,
-                ..ObservePageState::default()
-            };
-        }
-    });
+pub(super) fn reset_state_for(sidebar: &mut AppSidebar, match_id: Option<Uuid>) {
+    if sidebar.observe.match_id != match_id {
+        sidebar.observe = ObservePageState {
+            match_id,
+            ..ObservePageState::default()
+        };
+    }
 }
 
 /// 阵容 Agent 摘要（从事件时间线回填）。

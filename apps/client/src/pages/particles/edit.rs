@@ -4,7 +4,7 @@ use lol_share::{
     ConfigVfxEmitterDefinition, ConfigVfxSystemDefinition, Sampler, StochasticSampler, VfxTexture,
 };
 
-use super::state::update_state;
+use crate::components::sidebar::AppSidebar;
 
 // ── 工作副本访问 ──
 
@@ -31,17 +31,19 @@ pub(super) fn primary_list_mut(
     wd.simple_emitter_definition_data.as_mut()
 }
 
-pub(super) fn mutate_emitter(idx: usize, f: impl FnOnce(&mut ConfigVfxEmitterDefinition)) {
-    update_state(|s| {
-        let Some(wd) = &mut s.working_def else {
-            return;
-        };
-        if let Some(list) = primary_list_mut(wd) {
-            if let Some(em) = list.get_mut(idx) {
-                f(em);
-            }
+pub(super) fn mutate_emitter(
+    sidebar: &mut AppSidebar,
+    idx: usize,
+    f: impl FnOnce(&mut ConfigVfxEmitterDefinition),
+) {
+    let Some(wd) = &mut sidebar.particles.working_def else {
+        return;
+    };
+    if let Some(list) = primary_list_mut(wd) {
+        if let Some(em) = list.get_mut(idx) {
+            f(em);
         }
-    });
+    }
 }
 
 // ── 发射器字段编辑 ──
@@ -63,8 +65,8 @@ pub(super) fn get_num_field(em: &ConfigVfxEmitterDefinition, field: NumField) ->
     }
 }
 
-pub(super) fn set_num_field(idx: usize, field: NumField, v: f32) {
-    mutate_emitter(idx, |em| match field {
+pub(super) fn set_num_field(sidebar: &mut AppSidebar, idx: usize, field: NumField, v: f32) {
+    mutate_emitter(sidebar, idx, |em| match field {
         NumField::Lifetime => em.lifetime = Some(v),
         NumField::NumFrames => em.num_frames = Some(v.max(1.0) as u16),
         NumField::BlendMode => em.blend_mode = Some(v.clamp(0.0, 255.0) as u8),
@@ -72,8 +74,8 @@ pub(super) fn set_num_field(idx: usize, field: NumField, v: f32) {
     });
 }
 
-pub(super) fn set_name_idx(idx: usize, name: String) {
-    mutate_emitter(idx, |em| {
+pub(super) fn set_name_idx(sidebar: &mut AppSidebar, idx: usize, name: String) {
+    mutate_emitter(sidebar, idx, |em| {
         let trimmed = name.trim().to_string();
         em.emitter_name = if trimmed.is_empty() {
             None
@@ -125,8 +127,8 @@ fn set_flag(em: &mut ConfigVfxEmitterDefinition, flag: FlagField, on: bool) {
     }
 }
 
-pub(super) fn set_flag_idx(idx: usize, flag: FlagField, on: bool) {
-    mutate_emitter(idx, |em| set_flag(em, flag, on));
+pub(super) fn set_flag_idx(sidebar: &mut AppSidebar, idx: usize, flag: FlagField, on: bool) {
+    mutate_emitter(sidebar, idx, |em| set_flag(em, flag, on));
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
@@ -199,16 +201,16 @@ fn set_texture(em: &mut ConfigVfxEmitterDefinition, f: TexField, path: String) {
     }
 }
 
-pub(super) fn set_texture_idx(idx: usize, f: TexField, path: String) {
-    mutate_emitter(idx, |em| set_texture(em, f, path));
+pub(super) fn set_texture_idx(sidebar: &mut AppSidebar, idx: usize, f: TexField, path: String) {
+    mutate_emitter(sidebar, idx, |em| set_texture(em, f, path));
 }
 
 pub(super) fn tex_div_values(em: &ConfigVfxEmitterDefinition) -> [f32; 2] {
     em.tex_div.map(|v| v.to_array()).unwrap_or([1.0, 1.0])
 }
 
-pub(super) fn set_tex_div_comp(idx: usize, comp: usize, v: f32) {
-    mutate_emitter(idx, |em| {
+pub(super) fn set_tex_div_comp(sidebar: &mut AppSidebar, idx: usize, comp: usize, v: f32) {
+    mutate_emitter(sidebar, idx, |em| {
         let mut vals = tex_div_values(em);
         if comp < 2 {
             vals[comp] = v;
@@ -391,8 +393,14 @@ fn write_sampler_values(em: &mut ConfigVfxEmitterDefinition, kind: SamplerKind, 
     }
 }
 
-pub(super) fn set_sampler_component(idx: usize, kind: SamplerKind, comp: usize, v: f32) {
-    mutate_emitter(idx, |em| {
+pub(super) fn set_sampler_component(
+    sidebar: &mut AppSidebar,
+    idx: usize,
+    kind: SamplerKind,
+    comp: usize,
+    v: f32,
+) {
+    mutate_emitter(sidebar, idx, |em| {
         let (mut vals, _) = read_sampler(em, kind);
         if comp < vals.len() {
             vals[comp] = v;
@@ -439,6 +447,11 @@ fn set_sampler_mode(em: &mut ConfigVfxEmitterDefinition, kind: SamplerKind, curv
     }
 }
 
-pub(super) fn set_sampler_mode_idx(idx: usize, kind: SamplerKind, curve: bool) {
-    mutate_emitter(idx, |em| set_sampler_mode(em, kind, curve));
+pub(super) fn set_sampler_mode_idx(
+    sidebar: &mut AppSidebar,
+    idx: usize,
+    kind: SamplerKind,
+    curve: bool,
+) {
+    mutate_emitter(sidebar, idx, |em| set_sampler_mode(em, kind, curve));
 }

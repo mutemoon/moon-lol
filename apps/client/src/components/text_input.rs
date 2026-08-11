@@ -23,8 +23,8 @@ pub struct EditOptions {
     pub masked: bool,
     /// Enter 提交（多行时 Enter 不换行，改用提交）。
     pub submit_on_enter: bool,
-    /// Enter 提交回调，参数为输入框当前文本。
-    pub on_enter: Option<Box<dyn Fn(String, &mut Context<AppSidebar>) + 'static>>,
+    /// Enter 提交回调，参数为输入框当前文本 + 可写 sidebar（页面状态直访）。
+    pub on_enter: Option<Box<dyn Fn(String, &mut AppSidebar, &mut Context<AppSidebar>) + 'static>>,
 }
 
 thread_local! {
@@ -46,48 +46,51 @@ pub fn render_edit_input(
     get_value: impl Fn(&AppSidebar) -> String + 'static,
     set_value: impl Fn(&mut AppSidebar, String) + 'static,
 ) -> AnyElement {
-    let state = STATES.with(|s| s.borrow().get(id).cloned()).unwrap_or_else(|| {
-        let init = {
-            let entity = cx.entity();
-            let sidebar = entity.read(cx);
-            get_value(sidebar)
-        };
-        let ed = cx.new(|cx| {
-            let mut st = InputState::new(window, cx).placeholder(placeholder);
-            if opts.multiline {
-                st = st.multi_line(true);
-            }
-            if opts.masked {
-                st = st.masked(true);
-            }
-            if opts.submit_on_enter {
-                st = st.submit_on_enter(true);
-            }
-            st.default_value(init)
-        });
-        // 创建时订阅一次：Change 实时写回，PressEnter 触发提交
-        let sub_entity = ed.clone();
-        let on_enter = opts.on_enter;
-        let sub = cx.subscribe(&sub_entity, move |this, state_entity, event: &InputEvent, cx| {
-            match event {
-                InputEvent::Change => {
-                    let text = state_entity.read(cx).value().to_string();
-                    set_value(this, text);
-                    cx.notify();
+    let state = STATES
+        .with(|s| s.borrow().get(id).cloned())
+        .unwrap_or_else(|| {
+            let init = {
+                let entity = cx.entity();
+                let sidebar = entity.read(cx);
+                get_value(sidebar)
+            };
+            let ed = cx.new(|cx| {
+                let mut st = InputState::new(window, cx).placeholder(placeholder);
+                if opts.multiline {
+                    st = st.multi_line(true);
                 }
-                InputEvent::PressEnter { .. } => {
-                    if let Some(f) = on_enter.as_ref() {
+                if opts.masked {
+                    st = st.masked(true);
+                }
+                if opts.submit_on_enter {
+                    st = st.submit_on_enter(true);
+                }
+                st.default_value(init)
+            });
+            // 创建时订阅一次：Change 实时写回，PressEnter 触发提交
+            let sub_entity = ed.clone();
+            let on_enter = opts.on_enter;
+            let sub = cx.subscribe(
+                &sub_entity,
+                move |this, state_entity, event: &InputEvent, cx| match event {
+                    InputEvent::Change => {
                         let text = state_entity.read(cx).value().to_string();
-                        f(text, cx);
+                        set_value(this, text);
+                        cx.notify();
                     }
-                }
-                _ => {}
-            }
+                    InputEvent::PressEnter { .. } => {
+                        if let Some(f) = on_enter.as_ref() {
+                            let text = state_entity.read(cx).value().to_string();
+                            f(text, this, cx);
+                        }
+                    }
+                    _ => {}
+                },
+            );
+            STATES.with(|s| s.borrow_mut().insert(id.to_string(), ed.clone()));
+            SUBS.with(|s| s.borrow_mut().insert(id.to_string(), sub));
+            ed
         });
-        STATES.with(|s| s.borrow_mut().insert(id.to_string(), ed.clone()));
-        SUBS.with(|s| s.borrow_mut().insert(id.to_string(), sub));
-        ed
-    });
 
     // 外部值 → InputState 同步（外部清空/加载时保持一致；输入中二者相等则跳过）
     let external = {

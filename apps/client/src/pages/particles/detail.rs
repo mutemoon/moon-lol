@@ -12,11 +12,12 @@ use super::emitter::render_emitter_editor;
 use super::input::clear_all_input_buffers;
 use super::play::{play_working, reset_system, stop_playing};
 use super::process_ws_event;
-use super::state::{hash_hex, update_state, with_state};
+use super::state::hash_hex;
 use crate::components::sidebar::AppSidebar;
 use crate::services::particle_service;
 
 pub(super) fn render_system_detail(
+    sidebar: &mut AppSidebar,
     window: &mut Window,
     cx: &mut Context<AppSidebar>,
     hero: &str,
@@ -27,7 +28,7 @@ pub(super) fn render_system_detail(
     let emitters: Vec<ConfigVfxEmitterDefinition> =
         primary_list_ref(wd).map(|l| l.clone()).unwrap_or_default();
     let emitter_count = emitters.len();
-    let active_tab = with_state(|s| s.active_tab);
+    let active_tab = sidebar.particles.active_tab;
 
     v_flex()
         .size_full()
@@ -69,19 +70,19 @@ pub(super) fn render_system_detail(
                                 .ghost()
                                 .icon(IconName::Redo)
                                 .label("重置系统")
-                                .on_click(cx.listener(|_, _, _, cx| reset_system(cx))),
+                                .on_click(cx.listener(|this, _, _, cx| reset_system(this, cx))),
                         )
                         .child(
                             Button::new("particle-stop-btn")
                                 .icon(IconName::CircleX)
                                 .label("停止")
-                                .on_click(cx.listener(|_, _, _, cx| stop_playing(cx))),
+                                .on_click(cx.listener(|this, _, _, cx| stop_playing(this, cx))),
                         )
                         .child(
                             Button::new("particle-play-btn")
                                 .icon(IconName::Play)
                                 .label("播放")
-                                .on_click(cx.listener(|_, _, _, cx| play_working(cx))),
+                                .on_click(cx.listener(|this, _, _, cx| play_working(this, cx))),
                         ),
                 ),
         )
@@ -117,10 +118,8 @@ pub(super) fn render_system_detail(
                                     .unwrap_or_else(|| format!("发射器 #{}", idx + 1));
                                 let btn = Button::new(format!("emitter-tab-{}", idx)).label(label);
                                 let btn = if is_active { btn } else { btn.ghost() };
-                                btn.on_click(cx.listener(move |_, _, _, cx| {
-                                    update_state(|s| {
-                                        s.active_tab = idx;
-                                    });
+                                btn.on_click(cx.listener(move |this, _, _, cx| {
+                                    this.particles.active_tab = idx;
                                     clear_all_input_buffers();
                                     cx.notify();
                                 }))
@@ -149,19 +148,20 @@ pub(super) fn render_system_detail(
 // ── 页头：标题 + WS 连接控制 ──
 
 pub(super) fn render_page_header(
+    sidebar: &mut AppSidebar,
     cx: &mut Context<AppSidebar>,
     ws_url: &str,
     connected: bool,
     auto_play: bool,
 ) -> AnyElement {
     let theme = cx.theme();
-    let (hero, system_name, hash) = with_state(|s| {
-        (
-            s.selected_hero.clone(),
-            s.selected_system.as_ref().map(|x| x.name.clone()),
-            s.selected_system.as_ref().map(|x| x.hash),
-        )
-    });
+    let hero = sidebar.particles.selected_hero.clone();
+    let system_name = sidebar
+        .particles
+        .selected_system
+        .as_ref()
+        .map(|x| x.name.clone());
+    let hash = sidebar.particles.selected_system.as_ref().map(|x| x.hash);
 
     h_flex()
         .w_full()
@@ -207,8 +207,8 @@ pub(super) fn render_page_header(
                     let label = format!("自动播放: {}", if auto_play { "ON" } else { "OFF" });
                     let btn = Button::new("particle-auto-play-toggle").label(label);
                     let btn = if auto_play { btn } else { btn.ghost() };
-                    btn.on_click(cx.listener(|_this, _, _, cx| {
-                        update_state(|s| s.auto_play = !s.auto_play);
+                    btn.on_click(cx.listener(|this, _, _, cx| {
+                        this.particles.auto_play = !this.particles.auto_play;
                         cx.notify();
                     }))
                 })
@@ -227,19 +227,15 @@ pub(super) fn render_page_header(
                         let url = ws_url.to_string();
                         Button::new("particle-connect-btn")
                             .label("连接服务器")
-                            .on_click(cx.listener(move |_this, _, _, cx| {
+                            .on_click(cx.listener(move |this, _, _, cx| {
                                 let target_url = url.clone();
-                                update_state(|s| {
-                                    s.error = None;
-                                    s.ws_url = target_url.clone();
-                                });
+                                this.particles.error = None;
+                                this.particles.ws_url = target_url.clone();
                                 cx.notify();
 
                                 let (handle, mut ev_rx) =
                                     particle_service::connect_to_particle_server(&target_url);
-                                update_state(|s| {
-                                    s.ws_handle = Some(handle);
-                                });
+                                this.particles.ws_handle = Some(handle);
 
                                 let weak = cx.entity().downgrade();
                                 cx.spawn(
@@ -248,15 +244,7 @@ pub(super) fn render_page_header(
                                         let mut cx2 = cx.clone();
                                         async move {
                                             while let Some(event) = ev_rx.recv().await {
-                                                let notify = process_ws_event(event);
-                                                if notify {
-                                                    if let Some(e) = weak.upgrade() {
-                                                        let _ = e.update(
-                                                            &mut cx2,
-                                                            |_, cx| cx.notify(),
-                                                        );
-                                                    }
-                                                }
+                                                process_ws_event(&weak, &mut cx2, event);
                                             }
                                         }
                                     },
@@ -270,14 +258,12 @@ pub(super) fn render_page_header(
                         Button::new("particle-disconnect-btn")
                             .icon(IconName::CircleX)
                             .label("断开")
-                            .on_click(cx.listener(|_this, _, _, cx| {
-                                update_state(|s| {
-                                    if let Some(h) = &s.ws_handle {
-                                        h.disconnect();
-                                    }
-                                    s.ws_handle = None;
-                                    s.connected = false;
-                                });
+                            .on_click(cx.listener(|this, _, _, cx| {
+                                if let Some(h) = &this.particles.ws_handle {
+                                    h.disconnect();
+                                }
+                                this.particles.ws_handle = None;
+                                this.particles.connected = false;
                                 cx.notify();
                             })),
                     )

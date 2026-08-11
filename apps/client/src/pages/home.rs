@@ -1,5 +1,3 @@
-use std::cell::RefCell;
-
 use gpui::prelude::*;
 use gpui::*;
 use gpui_component::button::{Button, ButtonVariants};
@@ -14,7 +12,7 @@ use crate::services::provider;
 
 // ── 页面本地状态：对局历史与场景模板（运行中对局存于 sidebar.running_games） ──
 
-struct HomePageState {
+pub struct HomePageState {
     /// 首次渲染是否已触发加载
     inited: bool,
     histories: Vec<GameHistorySummary>,
@@ -31,18 +29,6 @@ impl Default for HomePageState {
     }
 }
 
-thread_local! {
-    static STATE: RefCell<HomePageState> = RefCell::new(HomePageState::default());
-}
-
-fn with_state<R>(f: impl FnOnce(&HomePageState) -> R) -> R {
-    STATE.with(|s| f(&s.borrow()))
-}
-
-fn update_state(f: impl FnOnce(&mut HomePageState)) {
-    STATE.with(|s| f(&mut s.borrow_mut()));
-}
-
 /// 拉取运行中对局、对局历史与场景模板，写回 sidebar 与页面本地状态。
 async fn refresh_home_data(sidebar_weak: &gpui::WeakEntity<AppSidebar>, cx: &mut gpui::AsyncApp) {
     let client = provider::cloud_client().clone();
@@ -51,16 +37,14 @@ async fn refresh_home_data(sidebar_weak: &gpui::WeakEntity<AppSidebar>, cx: &mut
         async { client.list_game_histories().await },
         async { client.list_scenarios().await },
     );
-    update_state(|s| {
-        if let Ok(h) = histories {
-            s.histories = h;
-        }
-        if let Ok(sc) = scenarios {
-            s.scenarios = sc;
-        }
-    });
     if let Some(entity) = sidebar_weak.upgrade() {
         let _ = entity.update(cx, |sidebar, cx| {
+            if let Ok(h) = histories {
+                sidebar.home.histories = h;
+            }
+            if let Ok(sc) = scenarios {
+                sidebar.home.scenarios = sc;
+            }
             if let Ok(games) = games {
                 sidebar.running_games = games
                     .into_iter()
@@ -79,7 +63,6 @@ async fn refresh_home_data(sidebar_weak: &gpui::WeakEntity<AppSidebar>, cx: &mut
 
 /// 异步刷新首页数据（首次渲染与手动刷新共用）。
 fn spawn_refresh(cx: &mut Context<AppSidebar>) {
-    let _entity = cx.entity().clone();
     cx.spawn(
         move |weak: gpui::WeakEntity<AppSidebar>, cx: &mut gpui::AsyncApp| {
             let weak = weak.clone();
@@ -95,13 +78,15 @@ fn spawn_refresh(cx: &mut Context<AppSidebar>) {
 /// 工作台首页：运行中对局、场景模板、对局历史概览。
 pub fn render_home(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> AnyElement {
     let running_count = sidebar.running_games.len();
-    let (inited, history_count, scenarios) =
-        with_state(|s| (s.inited, s.histories.len(), s.scenarios.clone()));
+    let (inited, history_count, scenarios) = {
+        let s = &sidebar.home;
+        (s.inited, s.histories.len(), s.scenarios.clone())
+    };
     let scenario_count = scenarios.len();
 
     // 首次渲染自动拉取运行对局、对局历史与场景模板
     if !inited {
-        update_state(|s| s.inited = true);
+        sidebar.home.inited = true;
         spawn_refresh(cx);
     }
 
@@ -284,8 +269,6 @@ pub fn render_home(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> An
                                                                 let gid = game_id.clone();
                                                                 cx.listener(move |_this, _, _, cx| {
                                                                     let eid = gid.clone();
-                                                                    let _entity =
-                                                                        cx.entity().clone();
                                                                     cx.spawn(
                                                                         move |weak: gpui::WeakEntity<
                                                                             AppSidebar,

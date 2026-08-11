@@ -12,34 +12,33 @@ use gpui::*;
 use gpui_component::button::{Button, ButtonVariants};
 use gpui_component::scroll::ScrollableElement;
 use gpui_component::{h_flex, v_flex, ActiveTheme, IconName, Sizable, StyledExt};
+pub use state::ParticlesPageState;
 
 use self::detail::{render_page_header, render_system_detail};
-use self::input::{
-    clear_all_input_buffers, clear_input_buffer, render_search_input,
-};
+use self::input::{clear_all_input_buffers, clear_input_buffer, render_search_input};
 use self::play::spawn_play_ron;
 use self::state::{
     collect_flat_visible_nodes, hash_hex, scan_particles_rayon, start_async_rescan,
-    toggle_node_expansion, update_state, update_state_returns, with_state,
+    toggle_node_expansion,
 };
 use crate::components::sidebar::AppSidebar;
 use crate::services::particle_service::ParticleWsEvent;
 
 /// 粒子系统编辑器：Rayon 树状文件侧边栏 → 选中系统 → 发射器参数编辑 → 自动重播。
 pub fn render_particles(
-    _sidebar: &mut AppSidebar,
+    sidebar: &mut AppSidebar,
     window: &mut Window,
     cx: &mut Context<AppSidebar>,
 ) -> AnyElement {
-    let should_start_scan = update_state_returns(|s| {
-        if !s.is_initialized && !s.is_scanning {
-            s.is_initialized = true;
-            s.is_scanning = true;
+    let should_start_scan = {
+        if !sidebar.particles.is_initialized && !sidebar.particles.is_scanning {
+            sidebar.particles.is_initialized = true;
+            sidebar.particles.is_scanning = true;
             true
         } else {
             false
         }
-    });
+    };
 
     // 首次进入时，在后台 Rayon 多线程异步构建英雄粒子树
     if should_start_scan {
@@ -52,12 +51,10 @@ pub fn render_particles(
                     .await;
                 let (roots, systems_map) = res.unwrap_or_default();
 
-                let _ = weak_entity.update(&mut cx, |_, cx| {
-                    update_state(|state| {
-                        state.tree_roots = roots;
-                        state.hero_systems = systems_map;
-                        state.is_scanning = false;
-                    });
+                let _ = weak_entity.update(&mut cx, |this, cx| {
+                    this.particles.tree_roots = roots;
+                    this.particles.hero_systems = systems_map;
+                    this.particles.is_scanning = false;
                     cx.notify();
                 });
             }
@@ -65,45 +62,37 @@ pub fn render_particles(
         .detach();
     }
 
-    let (
-        flat_visible_nodes,
-        total_heroes,
-        total_particles,
-        connected,
-        error,
-        ws_url,
-        query,
-        auto_play,
-        is_scanning,
-        selected_system,
-        hero,
-        name,
-        hash,
-        wd,
-    ) = with_state(|s| {
-        let mut flat = Vec::new();
-        let query_lower = s.search_query.trim().to_lowercase();
-        collect_flat_visible_nodes(&s.tree_roots, 0, &query_lower, &mut flat);
-        let total_heroes = s.tree_roots.len();
-        let total_particles: usize = s.tree_roots.iter().map(|n| n.children.len()).sum();
+    let query_lower = sidebar.particles.search_query.trim().to_lowercase();
+    let mut flat_visible_nodes = Vec::new();
+    collect_flat_visible_nodes(
+        &sidebar.particles.tree_roots,
+        0,
+        &query_lower,
+        &mut flat_visible_nodes,
+    );
+    let total_heroes = sidebar.particles.tree_roots.len();
+    let total_particles: usize = sidebar
+        .particles
+        .tree_roots
+        .iter()
+        .map(|n| n.children.len())
+        .sum();
 
-        (
-            flat,
-            total_heroes,
-            total_particles,
-            s.connected,
-            s.error.clone(),
-            s.ws_url.clone(),
-            s.search_query.clone(),
-            s.auto_play,
-            s.is_scanning,
-            s.selected_system.clone(),
-            s.selected_hero.clone(),
-            s.selected_system.as_ref().map(|x| x.name.clone()),
-            s.selected_system.as_ref().map(|x| x.hash),
-            s.working_def.clone(),
-        )
-    });
+    let connected = sidebar.particles.connected;
+    let error = sidebar.particles.error.clone();
+    let ws_url = sidebar.particles.ws_url.clone();
+    let query = sidebar.particles.search_query.clone();
+    let auto_play = sidebar.particles.auto_play;
+    let is_scanning = sidebar.particles.is_scanning;
+    let selected_system = sidebar.particles.selected_system.clone();
+    let hero = sidebar.particles.selected_hero.clone();
+    let name = sidebar
+        .particles
+        .selected_system
+        .as_ref()
+        .map(|x| x.name.clone());
+    let hash = sidebar.particles.selected_system.as_ref().map(|x| x.hash);
+    let wd = sidebar.particles.working_def.clone();
 
     let theme = cx.theme();
     let sidebar_bg = theme.sidebar;
@@ -116,7 +105,9 @@ pub fn render_particles(
 
     // 右侧详情面板
     let right_panel = match (hero, name, hash, wd) {
-        (Some(h), Some(n), Some(hh), Some(w)) => render_system_detail(window, cx, &h, &n, hh, &w),
+        (Some(h), Some(n), Some(hh), Some(w)) => {
+            render_system_detail(sidebar, window, cx, &h, &n, hh, &w)
+        }
         _ => div()
             .flex_1()
             .flex()
@@ -138,7 +129,7 @@ pub fn render_particles(
     };
 
     let search_input_elem = render_search_input(window, cx);
-    let page_header_elem = render_page_header(cx, &ws_url, connected, auto_play);
+    let page_header_elem = render_page_header(sidebar, cx, &ws_url, connected, auto_play);
 
     h_flex()
         .w_full()
@@ -173,8 +164,8 @@ pub fn render_particles(
                                 .icon(IconName::Redo)
                                 .ghost()
                                 .small()
-                                .on_click(cx.listener(|_, _, _window, cx| {
-                                    start_async_rescan(cx);
+                                .on_click(cx.listener(|this, _, _window, cx| {
+                                    start_async_rescan(this, cx);
                                 })),
                         ),
                 )
@@ -201,10 +192,8 @@ pub fn render_particles(
                                             .ghost()
                                             .small()
                                             .icon(IconName::Close)
-                                            .on_click(cx.listener(|_, _, _, cx| {
-                                                update_state(|s| {
-                                                    s.search_query.clear();
-                                                });
+                                            .on_click(cx.listener(|this, _, _, cx| {
+                                                this.particles.search_query.clear();
                                                 clear_input_buffer("particle-search");
                                                 cx.notify();
                                             })),
@@ -277,40 +266,42 @@ pub fn render_particles(
                                 })
                                 .on_mouse_down(
                                     MouseButton::Left,
-                                    cx.listener(move |_, _, _window, cx| {
+                                    cx.listener(move |this, _, _window, cx| {
                                         if is_dir {
                                             let h = hero_name.clone();
-                                            update_state(|s| {
-                                                toggle_node_expansion(&mut s.tree_roots, &h);
-                                            });
+                                            toggle_node_expansion(
+                                                &mut this.particles.tree_roots,
+                                                &h,
+                                            );
                                             cx.notify();
                                         } else if let Some(target_hash) = node_hash {
                                             let h = hero_name.clone();
                                             let mut found_system = None;
-                                            update_state(|s| {
-                                                if let Some(systems) = s.hero_systems.get(&h) {
-                                                    if let Some(sys) = systems
-                                                        .iter()
-                                                        .find(|s| s.hash == target_hash)
-                                                    {
-                                                        s.selected_hero = Some(h.clone());
-                                                        s.selected_system = Some(sys.clone());
-                                                        s.active_tab = 0;
-                                                        s.working_def = Some(sys.def.clone());
-                                                        s.initial_def_backup =
-                                                            Some(sys.def.clone());
-                                                        found_system = Some(sys.clone());
-                                                    }
+                                            if let Some(systems) =
+                                                this.particles.hero_systems.get(&h)
+                                            {
+                                                if let Some(sys) =
+                                                    systems.iter().find(|s| s.hash == target_hash)
+                                                {
+                                                    this.particles.selected_hero = Some(h.clone());
+                                                    this.particles.selected_system =
+                                                        Some(sys.clone());
+                                                    this.particles.active_tab = 0;
+                                                    this.particles.working_def =
+                                                        Some(sys.def.clone());
+                                                    this.particles.initial_def_backup =
+                                                        Some(sys.def.clone());
+                                                    found_system = Some(sys.clone());
                                                 }
-                                            });
+                                            }
                                             clear_all_input_buffers();
                                             cx.notify();
 
                                             if let Some(sys) = found_system {
-                                                let auto = with_state(|s| s.auto_play);
+                                                let auto = this.particles.auto_play;
                                                 if auto {
                                                     let ron = sys.def_ron;
-                                                    spawn_play_ron(cx, ron);
+                                                    spawn_play_ron(this, cx, ron);
                                                 }
                                             }
                                         }
@@ -405,19 +396,27 @@ pub fn render_particles(
 
 // ── WS 事件处理 ──
 
-pub(super) fn process_ws_event(event: ParticleWsEvent) -> bool {
+pub(super) fn process_ws_event(
+    weak: &gpui::WeakEntity<AppSidebar>,
+    cx: &mut gpui::AsyncApp,
+    event: ParticleWsEvent,
+) -> bool {
     match event {
         ParticleWsEvent::Connected => {
-            update_state(|s| s.connected = true);
+            let _ = weak.update(cx, |this, cx| {
+                this.particles.connected = true;
+                cx.notify();
+            });
             true
         }
         ParticleWsEvent::Disconnected { error } => {
-            update_state(|s| {
-                s.connected = false;
-                s.ws_handle = None;
+            let _ = weak.update(cx, |this, cx| {
+                this.particles.connected = false;
+                this.particles.ws_handle = None;
                 if let Some(e) = error {
-                    s.error = Some(e);
+                    this.particles.error = Some(e);
                 }
+                cx.notify();
             });
             true
         }

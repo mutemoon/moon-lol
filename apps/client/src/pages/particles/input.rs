@@ -11,7 +11,7 @@ use gpui_component::menu::{DropdownMenu, PopupMenuItem};
 
 use super::edit::{set_flag_idx, set_sampler_mode_idx, FlagField, SamplerKind};
 use super::play::replay_after_edit;
-use super::state::{format_number, update_state, with_state};
+use super::state::format_number;
 use crate::components::sidebar::AppSidebar;
 use crate::components::text_input::{self, EditOptions};
 
@@ -43,18 +43,15 @@ pub(super) fn clear_all_input_buffers() {
 
 // ── 输入控件 ──
 
-pub(super) fn render_search_input(
-    window: &mut Window,
-    cx: &mut Context<AppSidebar>,
-) -> AnyElement {
+pub(super) fn render_search_input(window: &mut Window, cx: &mut Context<AppSidebar>) -> AnyElement {
     text_input::render_edit_input(
         window,
         cx,
         "particle-search",
         "搜索英雄 / 粒子",
         EditOptions::default(),
-        |_s| with_state(|s| s.search_query.clone()),
-        |_s, v| update_state(|s| s.search_query = v),
+        |s: &AppSidebar| s.particles.search_query.clone(),
+        |s: &mut AppSidebar, v| s.particles.search_query = v,
     )
 }
 
@@ -64,22 +61,25 @@ pub(super) fn render_number_input(
     cx: &mut Context<AppSidebar>,
     id: String,
     value: f32,
-    commit: impl Fn(f32) + 'static,
+    commit: impl Fn(&mut AppSidebar, f32) + 'static,
 ) -> AnyElement {
     let id_enter = id.clone();
-    let on_enter = Box::new(move |text: String, cx: &mut Context<AppSidebar>| {
-        match text.trim().parse::<f32>() {
+    let on_enter = Box::new(
+        move |text: String, sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>| match text
+            .trim()
+            .parse::<f32>()
+        {
             Ok(v) => {
-                commit(v);
+                commit(sidebar, v);
                 clear_input_buffer(&id_enter);
-                replay_after_edit(cx);
+                replay_after_edit(sidebar, cx);
             }
             Err(_) => {
                 clear_input_buffer(&id_enter);
                 cx.notify();
             }
-        }
-    });
+        },
+    );
     let id_get = id.clone();
     let id_set = id.clone();
     text_input::render_edit_input(
@@ -103,14 +103,16 @@ pub(super) fn render_text_input(
     id: String,
     value: String,
     placeholder: &str,
-    commit: impl Fn(String) + 'static,
+    commit: impl Fn(&mut AppSidebar, String) + 'static,
 ) -> AnyElement {
     let id_enter = id.clone();
-    let on_enter = Box::new(move |text: String, cx: &mut Context<AppSidebar>| {
-        commit(text.clone());
-        clear_input_buffer(&id_enter);
-        replay_after_edit(cx);
-    });
+    let on_enter = Box::new(
+        move |text: String, sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>| {
+            commit(sidebar, text.clone());
+            clear_input_buffer(&id_enter);
+            replay_after_edit(sidebar, cx);
+        },
+    );
     let id_get = id.clone();
     let value_get = value.clone();
     let id_set = id.clone();
@@ -148,16 +150,20 @@ pub(super) fn render_sampler_mode_dropdown(
                 PopupMenuItem::new("常量")
                     .checked(!is_curve)
                     .on_click(move |_, _, cx| {
-                        set_sampler_mode_idx(idx, kind, false);
-                        let _ = w1.update(cx, |_, cx| replay_after_edit(cx));
+                        let _ = w1.update(cx, |sidebar, cx| {
+                            set_sampler_mode_idx(sidebar, idx, kind, false);
+                            replay_after_edit(sidebar, cx);
+                        });
                     }),
             )
             .item(
                 PopupMenuItem::new("曲线")
                     .checked(is_curve)
                     .on_click(move |_, _, cx| {
-                        set_sampler_mode_idx(idx, kind, true);
-                        let _ = w2.update(cx, |_, cx| replay_after_edit(cx));
+                        let _ = w2.update(cx, |sidebar, cx| {
+                            set_sampler_mode_idx(sidebar, idx, kind, true);
+                            replay_after_edit(sidebar, cx);
+                        });
                     }),
             )
         })
@@ -178,8 +184,10 @@ pub(super) fn render_flag_toggle(
         .checked(checked)
         .label(label)
         .on_click(move |new_checked, _, cx| {
-            set_flag_idx(idx, flag, *new_checked);
-            let _ = weak.update(cx, |_, cx| replay_after_edit(cx));
+            let _ = weak.update(cx, |sidebar, cx| {
+                set_flag_idx(sidebar, idx, flag, *new_checked);
+                replay_after_edit(sidebar, cx);
+            });
         })
         .into_any_element()
 }

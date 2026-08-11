@@ -6,7 +6,7 @@ use lol_web_protocol::agent::Agent;
 use lol_web_protocol::scenario::{CreateScenarioDto, UpdateScenarioDto};
 use lol_web_protocol::FrontAgentConfig;
 
-use super::types::{update_state, with_state, LauncherPageState, LauncherSlot};
+use super::types::{LauncherPageState, LauncherSlot};
 use crate::components::sidebar::AppSidebar;
 use crate::services::provider::cloud_client;
 
@@ -86,74 +86,77 @@ fn match_preset(agents: &[Agent], champion: &str, prompt: &str, agent_type: &str
 /// 首次加载：拉取英雄预设 / 出生点预设 / 场景列表。
 pub(super) fn spawn_initial_load(cx: &mut Context<AppSidebar>) {
     cx.spawn(
-        move |_weak, _cx: &mut gpui::AsyncApp| async move {
-            let (agents, spawns) = tokio::join!(
-                async { cloud_client().list_agents().await.unwrap_or_default() },
-                async {
-                    cloud_client()
-                        .list_spawn_presets()
-                        .await
-                        .unwrap_or_default()
-                },
-            );
-            let scenarios = cloud_client().list_scenarios().await.unwrap_or_default();
-            update_state(|s| {
-                s.agents = agents.clone();
-                s.spawns = spawns.clone();
-                s.scenarios = scenarios.clone();
-                s.loaded = true;
-                s.error = None;
-            });
+        move |weak: gpui::WeakEntity<AppSidebar>, cx: &mut gpui::AsyncApp| {
+            let mut cx = cx.clone();
+            async move {
+                let (agents, spawns) = tokio::join!(
+                    async { cloud_client().list_agents().await.unwrap_or_default() },
+                    async {
+                        cloud_client()
+                            .list_spawn_presets()
+                            .await
+                            .unwrap_or_default()
+                    },
+                );
+                let scenarios = cloud_client().list_scenarios().await.unwrap_or_default();
+                weak.update(&mut cx, |this, cx| {
+                    this.launcher.agents = agents;
+                    this.launcher.spawns = spawns;
+                    this.launcher.scenarios = scenarios;
+                    this.launcher.loaded = true;
+                    this.launcher.error = None;
+                    cx.notify();
+                })
+                .ok();
+            }
         },
     )
     .detach();
 }
 
 /// 保存当前阵容为场景：同名存在则更新，否则新建。
-pub(super) fn spawn_save_scenario(cx: &mut Context<AppSidebar>) {
+pub(super) fn spawn_save_scenario(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) {
+    let (scene_name, agents_json, existing_id) = {
+        let s = &sidebar.launcher;
+        let name = s.scene_name.trim().to_string();
+        let agents = build_all_agents(s);
+        let agents_json = serde_json::to_value(&agents).unwrap_or(serde_json::Value::Null);
+        let existing_id = s
+            .scenarios
+            .iter()
+            .find(|sc| sc.name == name)
+            .map(|sc| sc.id.to_string());
+        (name, agents_json, existing_id)
+    };
     cx.spawn(
         move |weak: gpui::WeakEntity<AppSidebar>, cx: &mut gpui::AsyncApp| {
             let mut cx = cx.clone();
             async move {
-                let (scene_name, agents_json, existing_id) = with_state(|s| {
-                    let name = s.scene_name.trim().to_string();
-                    let agents = build_all_agents(s);
-                    let agents_json =
-                        serde_json::to_value(&agents).unwrap_or(serde_json::Value::Null);
-                    let existing_id = s
-                        .scenarios
-                        .iter()
-                        .find(|sc| sc.name == name)
-                        .map(|sc| sc.id.to_string());
-                    (name, agents_json, existing_id)
-                });
                 let empty = agents_json.as_array().map_or(true, |a| a.is_empty());
-                let finish = |cx: &mut AsyncApp| {
-                    if let Some(entity) = weak.upgrade() {
-                        entity.update(cx, |_, cx| cx.notify());
-                    }
-                };
                 if scene_name.is_empty() {
-                    update_state(|s| {
-                        s.saving = false;
-                        s.error = Some("请输入场景名称".into());
-                    });
-                    finish(&mut cx);
+                    weak.update(&mut cx, |this, cx| {
+                        this.launcher.saving = false;
+                        this.launcher.error = Some("请输入场景名称".into());
+                        cx.notify();
+                    })
+                    .ok();
                     return;
                 }
                 if empty {
-                    update_state(|s| {
-                        s.saving = false;
-                        s.error = Some("请至少选择一个英雄预设".into());
-                    });
-                    finish(&mut cx);
+                    weak.update(&mut cx, |this, cx| {
+                        this.launcher.saving = false;
+                        this.launcher.error = Some("请至少选择一个英雄预设".into());
+                        cx.notify();
+                    })
+                    .ok();
                     return;
                 }
-                update_state(|s| {
-                    s.saving = true;
-                    s.error = None;
-                    s.message = None;
-                });
+                weak.update(&mut cx, |this, _| {
+                    this.launcher.saving = true;
+                    this.launcher.error = None;
+                    this.launcher.message = None;
+                })
+                .ok();
                 let result = match existing_id {
                     Some(id) => cloud_client()
                         .update_scenario(
@@ -176,19 +179,24 @@ pub(super) fn spawn_save_scenario(cx: &mut Context<AppSidebar>) {
                 match result {
                     Ok(()) => {
                         let scenarios = cloud_client().list_scenarios().await.unwrap_or_default();
-                        update_state(|s| {
-                            s.scenarios = scenarios;
-                            s.saving = false;
-                            s.message = Some(format!("场景「{}」已保存", scene_name));
-                            s.error = None;
-                        });
+                        weak.update(&mut cx, |this, cx| {
+                            this.launcher.scenarios = scenarios;
+                            this.launcher.saving = false;
+                            this.launcher.message = Some(format!("场景「{}」已保存", scene_name));
+                            this.launcher.error = None;
+                            cx.notify();
+                        })
+                        .ok();
                     }
-                    Err(e) => update_state(|s| {
-                        s.saving = false;
-                        s.error = Some(format!("保存失败: {}", e));
-                    }),
+                    Err(e) => {
+                        weak.update(&mut cx, |this, cx| {
+                            this.launcher.saving = false;
+                            this.launcher.error = Some(format!("保存失败: {}", e));
+                            cx.notify();
+                        })
+                        .ok();
+                    }
                 }
-                finish(&mut cx);
             }
         },
     )
@@ -204,7 +212,8 @@ pub(super) fn spawn_load_scenario(cx: &mut App, weak: WeakEntity<AppSidebar>, id
                 Ok(sc) => {
                     let agents_json = sc.agents.clone();
                     let scene_name = sc.name.clone();
-                    update_state(|s| {
+                    weak.update(&mut cx, |this, cx| {
+                        let s = &mut this.launcher;
                         s.loading_scenario = false;
                         s.error = None;
                         s.message = None;
@@ -271,15 +280,18 @@ pub(super) fn spawn_load_scenario(cx: &mut App, weak: WeakEntity<AppSidebar>, id
                         s.red_slots = red;
                         s.scene_name = scene_name.clone();
                         s.message = Some(format!("已载入场景「{}」", scene_name));
-                    });
+                        cx.notify();
+                    })
+                    .ok();
                 }
-                Err(e) => update_state(|s| {
-                    s.loading_scenario = false;
-                    s.error = Some(format!("载入失败: {}", e));
-                }),
-            }
-            if let Some(entity) = weak.upgrade() {
-                entity.update(&mut cx, |_, cx| cx.notify());
+                Err(e) => {
+                    weak.update(&mut cx, |this, cx| {
+                        this.launcher.loading_scenario = false;
+                        this.launcher.error = Some(format!("载入失败: {}", e));
+                        cx.notify();
+                    })
+                    .ok();
+                }
             }
         }
     })

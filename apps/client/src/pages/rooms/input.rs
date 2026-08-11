@@ -11,9 +11,9 @@ pub(super) fn render_state_input(
     cx: &mut Context<AppSidebar>,
     id: &str,
     placeholder: &str,
-    get_value: impl Fn() -> String + 'static,
-    set_value: impl Fn(String) + 'static,
-    on_enter: Option<Box<dyn Fn(&mut Context<AppSidebar>) + 'static>>,
+    get_value: impl Fn(&AppSidebar) -> String + 'static,
+    set_value: impl Fn(&mut AppSidebar, String) + 'static,
+    on_enter: Option<Box<dyn Fn(&mut AppSidebar, &mut Context<AppSidebar>) + 'static>>,
 ) -> AnyElement {
     text_input::render_edit_input(
         window,
@@ -22,12 +22,16 @@ pub(super) fn render_state_input(
         placeholder,
         EditOptions {
             on_enter: on_enter.map(|f| {
-                Box::new(move |_text: String, cx: &mut Context<AppSidebar>| f(cx))
-                    as Box<dyn Fn(String, &mut Context<AppSidebar>) + 'static>
+                Box::new(
+                    move |_text: String, sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>| {
+                        f(sidebar, cx)
+                    },
+                )
+                    as Box<dyn Fn(String, &mut AppSidebar, &mut Context<AppSidebar>) + 'static>
             }),
             ..Default::default()
         },
-        move |_s| get_value(),
-        move |_s, v| set_value(v),
+        get_value,
+        set_value,
     )
 }

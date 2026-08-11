@@ -4,7 +4,6 @@ use gpui::*;
 use lol_web_protocol::match_::MatchStatus;
 use uuid::Uuid;
 
-use super::types::{update_state, with_state};
 use crate::components::sidebar::AppSidebar;
 use crate::services::provider;
 use crate::services::runtime::run_on_tokio;
@@ -18,35 +17,56 @@ const MAX_EVENTS: usize = 1000;
 const POLL_INTERVAL_SECS: u64 = 1;
 
 /// 拉取对局信息 + 增量事件并写回状态。
-pub(super) async fn fetch_delta(id: Uuid, weak: &gpui::WeakEntity<AppSidebar>, cx: &mut gpui::AsyncApp) {
+pub(super) async fn fetch_delta(
+    id: Uuid,
+    weak: &gpui::WeakEntity<AppSidebar>,
+    cx: &mut gpui::AsyncApp,
+) {
     // 中途已切换对局则丢弃本次结果
-    if with_state(|s| s.match_id) != Some(id) {
+    let cur_match_id = match weak.upgrade() {
+        Some(e) => e.read_with(cx, |this, _| this.observe.match_id),
+        None => return,
+    };
+    if cur_match_id != Some(id) {
         return;
     }
     let client = provider::cloud_client().clone();
     let id_str = id.to_string();
 
     // 对局信息：未加载或仍处于运行中时刷新
-    let need_match = with_state(|s| {
-        s.match_info
-            .as_ref()
-            .map_or(true, |m| m.status == MatchStatus::Running)
-    });
+    let need_match = match weak.upgrade() {
+        Some(e) => e.read_with(cx, |this, _| {
+            this.observe
+                .match_info
+                .as_ref()
+                .map_or(true, |m| m.status == MatchStatus::Running)
+        }),
+        None => return,
+    };
     if need_match {
         match client.get_match(&id_str).await {
-            Ok(m) => update_state(|s| {
-                s.match_info = Some(m);
-                s.loading = false;
-            }),
-            Err(e) => update_state(|s| {
-                s.error = Some(e.to_string());
-                s.loading = false;
-            }),
+            Ok(m) => {
+                weak.update(cx, |this, _| {
+                    this.observe.match_info = Some(m);
+                    this.observe.loading = false;
+                })
+                .ok();
+            }
+            Err(e) => {
+                weak.update(cx, |this, _| {
+                    this.observe.error = Some(e.to_string());
+                    this.observe.loading = false;
+                })
+                .ok();
+            }
         }
     }
 
     // 增量拉取事件（每次 200 条）
-    let from_seq = with_state(|s| s.last_seq);
+    let from_seq = match weak.upgrade() {
+        Some(e) => e.read_with(cx, |this, _| this.observe.last_seq),
+        None => return,
+    };
     match client
         .get_match_events(&id_str, from_seq, EVENTS_LIMIT)
         .await
@@ -54,22 +74,29 @@ pub(super) async fn fetch_delta(id: Uuid, weak: &gpui::WeakEntity<AppSidebar>, c
         Ok(delta) => {
             if let Some(last) = delta.last() {
                 let next_seq = last.seq as u32 + 1;
-                update_state(|s| {
-                    s.events.extend(delta);
-                    if s.events.len() > MAX_EVENTS {
-                        s.events = s.events.split_off(s.events.len() - MAX_EVENTS);
+                weak.update(cx, |this, _| {
+                    this.observe.events.extend(delta);
+                    if this.observe.events.len() > MAX_EVENTS {
+                        this.observe.events = this
+                            .observe
+                            .events
+                            .split_off(this.observe.events.len() - MAX_EVENTS);
                     }
-                    s.last_seq = s.last_seq.max(next_seq);
-                    s.loading = false;
-                });
+                    this.observe.last_seq = this.observe.last_seq.max(next_seq);
+                    this.observe.loading = false;
+                })
+                .ok();
             } else {
-                update_state(|s| s.loading = false);
+                weak.update(cx, |this, _| this.observe.loading = false).ok();
             }
         }
-        Err(e) => update_state(|s| {
-            s.error = Some(e.to_string());
-            s.loading = false;
-        }),
+        Err(e) => {
+            weak.update(cx, |this, _| {
+                this.observe.error = Some(e.to_string());
+                this.observe.loading = false;
+            })
+            .ok();
+        }
     }
 
     if let Some(entity) = weak.upgrade() {
@@ -110,7 +137,12 @@ pub(super) fn spawn_poll(cx: &mut Context<AppSidebar>) {
                     {
                         break;
                     }
-                    let (id, paused) = with_state(|s| (s.match_id, s.paused));
+                    let (id, paused) = match weak.upgrade() {
+                        Some(e) => {
+                            e.read_with(&cx, |this, _| (this.observe.match_id, this.observe.paused))
+                        }
+                        None => break,
+                    };
                     let Some(id) = id else { break };
                     if paused {
                         continue;

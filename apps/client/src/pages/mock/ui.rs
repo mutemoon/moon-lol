@@ -6,12 +6,11 @@ use gpui_component::button::{Button, ButtonVariants};
 use gpui_component::scroll::ScrollableElement;
 use gpui_component::{h_flex, v_flex, ActiveTheme, IconName, Sizable, StyledExt};
 
-use crate::components::agent_chat_history::render_agent_chat_history;
-use crate::components::sidebar::AppSidebar;
-
 use super::input::render_edit_input;
 use super::logic::{add_tool_result, inject_ai, inject_user, reset_all, simulate_decision};
-use super::types::{current_round, update_state, with_state, AGENT_ID, CHAMPION, MockView};
+use super::types::{current_round, MockView, AGENT_ID, CHAMPION};
+use crate::components::agent_chat_history::render_agent_chat_history;
+use crate::components::sidebar::AppSidebar;
 
 // ── 子区块渲染 ──
 
@@ -83,8 +82,8 @@ fn render_view_toggle(cx: &mut Context<AppSidebar>, active: MockView) -> AnyElem
                 .xsmall()
                 .when(list_active, |b| b.primary())
                 .when(!list_active, |b| b.outline())
-                .on_click(cx.listener(|_, _, _, cx| {
-                    update_state(|s| s.view = MockView::List);
+                .on_click(cx.listener(|this, _, _, cx| {
+                    this.mock.view = MockView::List;
                     cx.notify();
                 })),
         )
@@ -94,8 +93,8 @@ fn render_view_toggle(cx: &mut Context<AppSidebar>, active: MockView) -> AnyElem
                 .xsmall()
                 .when(chat_active, |b| b.primary())
                 .when(!chat_active, |b| b.outline())
-                .on_click(cx.listener(|_, _, _, cx| {
-                    update_state(|s| s.view = MockView::Chat);
+                .on_click(cx.listener(|this, _, _, cx| {
+                    this.mock.view = MockView::Chat;
                     cx.notify();
                 })),
         )
@@ -164,8 +163,8 @@ pub(super) fn render_list_view(cx: &mut Context<AppSidebar>) -> AnyElement {
                                 .primary()
                                 .icon(IconName::ArrowRight)
                                 .label("进入测试床")
-                                .on_click(cx.listener(|_, _, _, cx| {
-                                    update_state(|s| s.view = MockView::Chat);
+                                .on_click(cx.listener(|this, _, _, cx| {
+                                    this.mock.view = MockView::Chat;
                                     cx.notify();
                                 })),
                         ),
@@ -176,15 +175,16 @@ pub(super) fn render_list_view(cx: &mut Context<AppSidebar>) -> AnyElement {
 
 /// 会话态整体（对应 chat.vue）：左侧控制面板 + 右侧消息流。
 pub(super) fn render_chat_view(
+    sidebar: &AppSidebar,
     window: &mut Window,
     cx: &mut Context<AppSidebar>,
 ) -> AnyElement {
-    let messages = with_state(|s| s.messages.clone());
+    let messages = sidebar.mock.messages.clone();
     let turns = current_round(&messages);
     let count = messages.len();
 
     // 先构建消息流元素（内部带独立滚动区与筛选栏）
-    let history_element = render_agent_chat_history(&messages, cx);
+    let history_element = render_agent_chat_history(&messages, sidebar, cx);
 
     h_flex()
         .size_full()
@@ -366,8 +366,8 @@ fn render_agent_card(cx: &mut Context<AppSidebar>, turns: u32, count: usize) -> 
                 .icon(IconName::Undo2)
                 .w_full()
                 .label("重置数据")
-                .on_click(cx.listener(|_, _, _, cx| {
-                    reset_all();
+                .on_click(cx.listener(|this, _, _, cx| {
+                    reset_all(this);
                     cx.notify();
                 })),
         )
@@ -375,14 +375,11 @@ fn render_agent_card(cx: &mut Context<AppSidebar>, turns: u32, count: usize) -> 
 }
 
 /// 左侧「模拟调试器」：预设动作 + 手动注入。
-fn render_debugger(
-    window: &mut Window,
-    cx: &mut Context<AppSidebar>,
-) -> AnyElement {
-    let get_user = || with_state(|s| s.user_input.clone());
-    let set_user = |v: String| update_state(|s| s.user_input = v);
-    let get_ai = || with_state(|s| s.assistant_input.clone());
-    let set_ai = |v: String| update_state(|s| s.assistant_input = v);
+fn render_debugger(window: &mut Window, cx: &mut Context<AppSidebar>) -> AnyElement {
+    let get_user = |s: &AppSidebar| s.mock.user_input.clone();
+    let set_user = |s: &mut AppSidebar, v: String| s.mock.user_input = v;
+    let get_ai = |s: &AppSidebar| s.mock.assistant_input.clone();
+    let set_ai = |s: &mut AppSidebar, v: String| s.mock.assistant_input = v;
 
     v_flex()
         .gap_3()
@@ -414,7 +411,7 @@ fn render_debugger(
                         .icon(IconName::CircleCheck)
                         .w_full()
                         .label("模拟决策")
-                        .on_click(cx.listener(|_, _, _, cx| simulate_decision(cx))),
+                        .on_click(cx.listener(|this, _, _, cx| simulate_decision(this, cx))),
                 )
                 .child(
                     Button::new("mock-simulate-result")
@@ -422,7 +419,7 @@ fn render_debugger(
                         .icon(IconName::SquareTerminal)
                         .w_full()
                         .label("模拟工具结果")
-                        .on_click(cx.listener(|_, _, _, cx| add_tool_result(cx))),
+                        .on_click(cx.listener(|this, _, _, cx| add_tool_result(this, cx))),
                 ),
         )
         .child(
@@ -453,7 +450,7 @@ fn render_debugger(
                                 .icon(IconName::User)
                                 .w_full()
                                 .label("注入用户消息")
-                                .on_click(cx.listener(|_, _, _, cx| inject_user(cx))),
+                                .on_click(cx.listener(|this, _, _, cx| inject_user(this, cx))),
                         ),
                 )
                 .child(
@@ -474,7 +471,7 @@ fn render_debugger(
                                 .icon(IconName::Bot)
                                 .w_full()
                                 .label("注入 AI 消息")
-                                .on_click(cx.listener(|_, _, _, cx| inject_ai(cx))),
+                                .on_click(cx.listener(|this, _, _, cx| inject_ai(this, cx))),
                         ),
                 ),
         )

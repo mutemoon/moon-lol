@@ -7,7 +7,6 @@ use gpui::*;
 use gpui_component::ActiveTheme;
 use lol_web_protocol::match_::MatchStatus;
 
-use super::types::{update_state, with_state};
 use crate::components::sidebar::AppSidebar;
 use crate::services::runtime::run_on_tokio;
 use crate::services::types::LogQueryParams;
@@ -64,33 +63,29 @@ fn _level_color(level: &str, cx: &mut Context<AppSidebar>) -> Hsla {
 // ── 异步动作 ──
 
 /// 拉取「我的对局」（24h）列表，按 created_at 倒序。
-pub(super) fn load_matches(cx: &mut Context<AppSidebar>) {
-    update_state(|s| {
-        s.matches_loading = true;
-        s.matches_error = None;
-    });
+pub(super) fn load_matches(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) {
+    sidebar.logs_archive.matches_loading = true;
+    sidebar.logs_archive.matches_error = None;
     let client = provider::cloud_client().clone();
-    let _weak = cx.entity().downgrade();
     cx.spawn(
-        move |_weak: gpui::WeakEntity<AppSidebar>, cx: &mut gpui::AsyncApp| {
-            let weak = _weak.clone();
-            let mut cx2 = cx.clone();
+        move |this: gpui::WeakEntity<AppSidebar>, cx: &mut gpui::AsyncApp| {
+            let this = this.clone();
+            let mut cx = cx.clone();
             async move {
                 let result = client.list_my_matches().await;
-                update_state(|s| {
-                    s.matches_loading = false;
-                    s.matches_loaded = true;
+                this.update(&mut cx, |this, cx| {
+                    this.logs_archive.matches_loading = false;
+                    this.logs_archive.matches_loaded = true;
                     match result {
                         Ok(mut list) => {
                             list.sort_by(|a, b| b.created_at.cmp(&a.created_at));
-                            s.matches = list;
+                            this.logs_archive.matches = list;
                         }
-                        Err(e) => s.matches_error = Some(e.to_string()),
+                        Err(e) => this.logs_archive.matches_error = Some(e.to_string()),
                     }
-                });
-                if let Some(e) = weak.upgrade() {
-                    let _ = e.update(&mut cx2, |_, cx| cx.notify());
-                }
+                    cx.notify();
+                })
+                .ok();
             }
         },
     )
@@ -99,22 +94,23 @@ pub(super) fn load_matches(cx: &mut Context<AppSidebar>) {
 
 /// 下载指定对局的 SQLite 日志 DB（GET /api/matches/{id}/log-db），
 /// 存到 %APPDATA%/moon-lol/matches/。cloud.rs 无此方法，这里用 reqwest 直连并桥接 tokio。
-pub(super) fn download_match_db(cx: &mut Context<AppSidebar>, match_id: &str) {
+pub(super) fn download_match_db(
+    sidebar: &mut AppSidebar,
+    cx: &mut Context<AppSidebar>,
+    match_id: &str,
+) {
     let match_id = match_id.to_string();
     let short: String = match_id.chars().take(8).collect();
-    update_state(|s| {
-        s.downloading = Some(match_id.clone());
-        s.download_msg = None;
-    });
+    sidebar.logs_archive.downloading = Some(match_id.clone());
+    sidebar.logs_archive.download_msg = None;
     let url = format!("{}/api/matches/{}/log-db", api_base_url(), match_id);
     let token = provider::cloud_client().get_token();
     let dir = matches_dir();
     let dest = dir.join(format!("match-{}.sqlite", short));
-    let _weak = cx.entity().downgrade();
     cx.spawn(
-        move |_weak: gpui::WeakEntity<AppSidebar>, cx: &mut gpui::AsyncApp| {
-            let weak = _weak.clone();
-            let mut cx2 = cx.clone();
+        move |this: gpui::WeakEntity<AppSidebar>, cx: &mut gpui::AsyncApp| {
+            let this = this.clone();
+            let mut cx = cx.clone();
             let url = url.clone();
             let dest = dest.clone();
             let dir = dir.clone();
@@ -136,16 +132,15 @@ pub(super) fn download_match_db(cx: &mut Context<AppSidebar>, match_id: &str) {
                     Ok(dest.display().to_string())
                 })
                 .await;
-                update_state(|s| {
-                    s.downloading = None;
-                    s.download_msg = Some(match result {
+                this.update(&mut cx, |this, cx| {
+                    this.logs_archive.downloading = None;
+                    this.logs_archive.download_msg = Some(match result {
                         Ok(path) => format!("已下载到 {}", path),
                         Err(e) => e,
                     });
-                });
-                if let Some(e) = weak.upgrade() {
-                    let _ = e.update(&mut cx2, |_, cx| cx.notify());
-                }
+                    cx.notify();
+                })
+                .ok();
             }
         },
     )
@@ -153,10 +148,10 @@ pub(super) fn download_match_db(cx: &mut Context<AppSidebar>, match_id: &str) {
 }
 
 /// 校验本地 .sqlite 路径并展示大小（不做真正回放，回放属后续 debug 页 wave）。
-pub(super) fn load_local_sqlite(cx: &mut Context<AppSidebar>) {
-    let path = with_state(|s| s.local_path.trim().to_string());
+pub(super) fn load_local_sqlite(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) {
+    let path = sidebar.logs_archive.local_path.trim().to_string();
     if path.is_empty() {
-        update_state(|s| s.local_msg = Some("请输入 .sqlite 文件路径".to_string()));
+        sidebar.logs_archive.local_msg = Some("请输入 .sqlite 文件路径".to_string());
         cx.notify();
         return;
     }
@@ -173,102 +168,96 @@ pub(super) fn load_local_sqlite(cx: &mut Context<AppSidebar>) {
     } else {
         (None, "不是 .sqlite 文件".to_string())
     };
-    update_state(|s| {
-        s.local_size = size;
-        s.local_msg = Some(msg);
-    });
+    sidebar.logs_archive.local_size = size;
+    sidebar.logs_archive.local_msg = Some(msg);
     cx.notify();
 }
 
 // ── 查询面板动作 ──
 
-pub(super) fn do_query(cx: &mut Context<AppSidebar>) {
-    let gid = with_state(|s| s.game_id.clone());
+pub(super) fn do_query(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) {
+    let gid = sidebar.logs_archive.game_id.clone();
     if gid.is_empty() {
         return;
     }
 
-    let params = with_state(|s| LogQueryParams {
-        offset: s.offset,
-        limit: s.limit,
-        levels: if s.levels.is_empty() {
+    let params = LogQueryParams {
+        offset: sidebar.logs_archive.offset,
+        limit: sidebar.logs_archive.limit,
+        levels: if sidebar.logs_archive.levels.is_empty() {
             None
         } else {
-            Some(s.levels.clone())
+            Some(sidebar.logs_archive.levels.clone())
         },
-        entity_id: s.entity_id,
-        category: s.category.clone(),
-        search_text: s.search_text.clone(),
-    });
-    let _weak = cx.entity().downgrade();
+        entity_id: sidebar.logs_archive.entity_id,
+        category: sidebar.logs_archive.category.clone(),
+        search_text: sidebar.logs_archive.search_text.clone(),
+    };
     cx.spawn(
-        move |_weak: gpui::WeakEntity<AppSidebar>, cx: &mut gpui::AsyncApp| {
-            let weak2 = _weak.clone();
-            let mut cx2 = cx.clone();
+        move |this: gpui::WeakEntity<AppSidebar>, cx: &mut gpui::AsyncApp| {
+            let this = this.clone();
+            let mut cx = cx.clone();
             let gid = gid.clone();
             let params = params.clone();
             async move {
                 let results = log_service::query_logs(&gid, &params).await;
-                update_state(|s| {
-                    s.loading = false;
+                this.update(&mut cx, |this, cx| {
+                    this.logs_archive.loading = false;
                     match results {
-                        Ok(r) => s.results = Some(r),
-                        Err(e) => s.error = Some(e),
+                        Ok(r) => this.logs_archive.results = Some(r),
+                        Err(e) => this.logs_archive.error = Some(e),
                     }
-                });
-                if let Some(e) = weak2.upgrade() {
-                    let _ = e.update(&mut cx2, |_, cx| cx.notify());
-                }
+                    cx.notify();
+                })
+                .ok();
             }
         },
     )
     .detach();
 }
 
-pub(super) fn do_load_logs(cx: &mut Context<AppSidebar>) {
-    let gid = with_state(|s| s.game_id.clone());
+pub(super) fn do_load_logs(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) {
+    let gid = sidebar.logs_archive.game_id.clone();
     if gid.is_empty() {
         return;
     }
-    let params = with_state(|s| LogQueryParams {
-        offset: s.offset,
-        limit: s.limit,
-        levels: if s.levels.is_empty() {
+    let params = LogQueryParams {
+        offset: sidebar.logs_archive.offset,
+        limit: sidebar.logs_archive.limit,
+        levels: if sidebar.logs_archive.levels.is_empty() {
             None
         } else {
-            Some(s.levels.clone())
+            Some(sidebar.logs_archive.levels.clone())
         },
-        entity_id: s.entity_id,
-        category: s.category.clone(),
-        search_text: s.search_text.clone(),
-    });
-    let _weak = cx.entity().downgrade();
+        entity_id: sidebar.logs_archive.entity_id,
+        category: sidebar.logs_archive.category.clone(),
+        search_text: sidebar.logs_archive.search_text.clone(),
+    };
     cx.spawn(
-        move |_weak: gpui::WeakEntity<AppSidebar>, cx: &mut gpui::AsyncApp| {
-            let weak2 = _weak.clone();
-            let mut cx2 = cx.clone();
+        move |this: gpui::WeakEntity<AppSidebar>, cx: &mut gpui::AsyncApp| {
+            let this = this.clone();
+            let mut cx = cx.clone();
             let gid = gid.clone();
             let params = params.clone();
             async move {
                 let results = log_service::query_logs(&gid, &params).await;
                 let entities = log_service::query_log_entities(&gid).await;
                 let categories = log_service::query_log_categories(&gid).await;
-                update_state(|s| {
-                    s.loading = false;
+                this.update(&mut cx, |this, cx| {
+                    this.logs_archive.loading = false;
                     match results {
-                        Ok(r) => s.results = Some(r),
-                        Err(e) => s.error = Some(e),
+                        Ok(r) => this.logs_archive.results = Some(r),
+                        Err(e) => this.logs_archive.error = Some(e),
                     }
                     if let Ok(e) = entities {
-                        s.entities = e;
+                        this.logs_archive.entities = e;
                     }
                     if let Ok(c) = categories {
-                        s.categories = c;
+                        this.logs_archive.categories = c;
                     }
-                });
-                if let Some(e) = weak2.upgrade() {
-                    let _ = e.update(&mut cx2, |_, cx| cx.notify());
-                }
+                    cx.notify();
+                })
+                .ok();
             }
         },
     )

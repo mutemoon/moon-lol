@@ -1,6 +1,5 @@
 //! 粒子系统编辑器：全局页面状态 + 树数据结构 + Rayon 扫描 + 树操作。
 
-use std::cell::RefCell;
 use std::collections::{HashMap, HashSet};
 use std::path::PathBuf;
 
@@ -78,23 +77,6 @@ impl Default for ParticlesPageState {
             initial_def_backup: None,
         }
     }
-}
-
-thread_local! {
-    pub(super) static STATE: RefCell<ParticlesPageState> = RefCell::new(ParticlesPageState::default());
-}
-
-pub(super) fn with_state<R>(f: impl FnOnce(&ParticlesPageState) -> R) -> R {
-    STATE.with(|s| f(&s.borrow()))
-}
-
-pub(super) fn update_state(f: impl FnOnce(&mut ParticlesPageState)) {
-    STATE.with(|s| f(&mut s.borrow_mut()));
-}
-
-/// 与 update_state 相同但返回闭包结果。
-pub(super) fn update_state_returns<R>(f: impl FnOnce(&mut ParticlesPageState) -> R) -> R {
-    STATE.with(|s| f(&mut s.borrow_mut()))
 }
 
 pub(super) fn hash_hex(hash: u32) -> String {
@@ -263,10 +245,8 @@ pub(super) fn collect_flat_visible_nodes(
 }
 
 /// 手动刷新：保留已展开目录的展开状态，重新 Rayon 扫描。
-pub(super) fn start_async_rescan(cx: &mut Context<AppSidebar>) {
-    update_state(|s| {
-        s.is_scanning = true;
-    });
+pub(super) fn start_async_rescan(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) {
+    sidebar.particles.is_scanning = true;
     cx.notify();
 
     let weak_entity = cx.entity().downgrade();
@@ -278,24 +258,23 @@ pub(super) fn start_async_rescan(cx: &mut Context<AppSidebar>) {
                 .await;
             let (mut roots, systems_map) = res.unwrap_or_default();
 
-            let _ = weak_entity.update(&mut cx, |_, cx| {
-                update_state(|state| {
-                    let old_expanded: HashSet<String> = state
-                        .tree_roots
-                        .iter()
-                        .filter(|n| n.is_dir && n.is_expanded)
-                        .map(|n| n.name.clone())
-                        .collect();
+            let _ = weak_entity.update(&mut cx, |this, cx| {
+                let old_expanded: HashSet<String> = this
+                    .particles
+                    .tree_roots
+                    .iter()
+                    .filter(|n| n.is_dir && n.is_expanded)
+                    .map(|n| n.name.clone())
+                    .collect();
 
-                    for node in &mut roots {
-                        if node.is_dir && old_expanded.contains(&node.name) {
-                            node.is_expanded = true;
-                        }
+                for node in &mut roots {
+                    if node.is_dir && old_expanded.contains(&node.name) {
+                        node.is_expanded = true;
                     }
-                    state.tree_roots = roots;
-                    state.hero_systems = systems_map;
-                    state.is_scanning = false;
-                });
+                }
+                this.particles.tree_roots = roots;
+                this.particles.hero_systems = systems_map;
+                this.particles.is_scanning = false;
                 cx.notify();
             });
         }

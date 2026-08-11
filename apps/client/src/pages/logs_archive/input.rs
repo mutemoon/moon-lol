@@ -6,14 +6,14 @@ use gpui::*;
 use crate::components::sidebar::AppSidebar;
 use crate::components::text_input::{self, EditOptions};
 
-/// 可聚焦、可键盘编辑的文本输入框，读写本页面 thread_local 状态。
+/// 可聚焦、可键盘编辑的文本输入框，读写 `sidebar.logs_archive`。
 pub(super) fn render_text_input(
     window: &mut Window,
     cx: &mut Context<AppSidebar>,
     id: &str,
     placeholder: &str,
-    get_value: impl Fn() -> String + 'static,
-    set_value: impl Fn(String) + 'static,
+    get_value: impl Fn(&AppSidebar) -> String + 'static,
+    set_value: impl Fn(&mut AppSidebar, String) + 'static,
 ) -> AnyElement {
     text_input::render_edit_input(
         window,
@@ -21,7 +21,7 @@ pub(super) fn render_text_input(
         id,
         placeholder,
         EditOptions::default(),
-        move |_s| get_value(),
-        move |_s, v| set_value(v),
+        get_value,
+        set_value,
     )
 }

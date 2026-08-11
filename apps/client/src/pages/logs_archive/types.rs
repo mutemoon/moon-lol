@@ -1,12 +1,10 @@
-//! 日志归档页状态：thread_local 单例 + 读写访问器。
-
-use std::cell::RefCell;
+//! 日志归档页状态。
 
 use lol_web_protocol::match_::Match;
 
 use crate::services::types::{LogCategory, LogEntity, QueryLogsResult};
 
-pub(super) struct LogsArchiveState {
+pub struct LogsArchiveState {
     // 查询面板
     pub(super) game_id: String,
     pub(super) levels: Vec<String>,
@@ -59,16 +57,4 @@ impl Default for LogsArchiveState {
             local_msg: None,
         }
     }
-}
-
-thread_local! {
-    pub(super) static STATE: RefCell<LogsArchiveState> = RefCell::new(LogsArchiveState::default());
-}
-
-pub(super) fn with_state<R>(f: impl FnOnce(&LogsArchiveState) -> R) -> R {
-    STATE.with(|s| f(&s.borrow()))
-}
-
-pub(super) fn update_state(f: impl FnOnce(&mut LogsArchiveState)) {
-    STATE.with(|s| f(&mut s.borrow_mut()));
 }

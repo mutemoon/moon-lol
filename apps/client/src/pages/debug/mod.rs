@@ -1,6 +1,6 @@
 //! 对局调试台 — 对应 client `pages/debug/[id].vue`，用 sidebar.current_game_id 定位对局。
 //!
-//! 页面状态与 thread_local 在 `types.rs`，事件解析 / 对局控制逻辑在 `logic.rs`，
+//! 页面状态在 `types.rs`，事件解析 / 对局控制逻辑在 `logic.rs`，
 //! 本文件只保留渲染函数与公开入口 `render_debug`。
 
 mod logic;
@@ -12,10 +12,11 @@ use gpui_component::button::{Button, ButtonVariants};
 use gpui_component::menu::{DropdownMenu, PopupMenuItem};
 use gpui_component::scroll::ScrollableElement;
 use gpui_component::{h_flex, v_flex, ActiveTheme, Disableable, IconName, Sizable, StyledExt};
+pub use types::DebugPageState;
 use uuid::Uuid;
 
 use self::logic::{run_match_cmd, spawn_init};
-use self::types::{update_state, with_state, DebugPageState, DebugTab, MatchCmd};
+use self::types::{DebugTab, MatchCmd};
 use crate::components::agent_chat_history::render_agent_chat_history;
 use crate::components::game_console_logs::render_game_console_logs;
 use crate::components::sidebar::AppSidebar;
@@ -95,20 +96,18 @@ fn render_content(
         switch_target,
         stopping,
         stream_alive,
-    ) = with_state(|s| {
-        (
-            s.error.clone(),
-            s.logs.clone(),
-            s.messages.clone(),
-            s.active_tab,
-            s.god_mode,
-            s.cooldown_disabled,
-            s.paused,
-            s.switch_target.clone(),
-            s.stopping,
-            s.stream_alive,
-        )
-    });
+    ) = (
+        sidebar.debug.error.clone(),
+        sidebar.debug.logs.clone(),
+        sidebar.debug.messages.clone(),
+        sidebar.debug.active_tab,
+        sidebar.debug.god_mode,
+        sidebar.debug.cooldown_disabled,
+        sidebar.debug.paused,
+        sidebar.debug.switch_target.clone(),
+        sidebar.debug.stopping,
+        sidebar.debug.stream_alive,
+    );
 
     // ── 对局控制按钮 ──
     let god_mode_btn = Button::new("debug-god-mode")
@@ -121,7 +120,7 @@ fn render_content(
         })
         .on_click(cx.listener(move |this, _, _, cx| {
             let enabled = !god_mode;
-            update_state(|s| s.god_mode = enabled);
+            this.debug.god_mode = enabled;
             let gid = this.current_game_id.clone().unwrap_or_default();
             run_match_cmd(gid, MatchCmd::GodMode(enabled), cx);
         }));
@@ -136,7 +135,7 @@ fn render_content(
         })
         .on_click(cx.listener(move |this, _, _, cx| {
             let enabled = !cooldown_disabled;
-            update_state(|s| s.cooldown_disabled = enabled);
+            this.debug.cooldown_disabled = enabled;
             let gid = this.current_game_id.clone().unwrap_or_default();
             run_match_cmd(gid, MatchCmd::Cooldown(enabled), cx);
         }));
@@ -155,7 +154,7 @@ fn render_content(
         })
         .on_click(cx.listener(move |this, _, _, cx| {
             let was_paused = paused;
-            update_state(|s| s.paused = !paused);
+            this.debug.paused = !paused;
             let gid = this.current_game_id.clone().unwrap_or_default();
             let cmd = if was_paused {
                 MatchCmd::Resume
@@ -193,8 +192,11 @@ fn render_content(
                 let weak = weak.clone();
                 m = m.item(PopupMenuItem::new(name.clone()).checked(checked).on_click(
                     move |_, _, cx| {
-                        update_state(|s| s.switch_target = name.clone());
-                        weak.update(cx, |_, cx| cx.notify()).ok();
+                        weak.update(cx, |this, cx| {
+                            this.debug.switch_target = name.clone();
+                            cx.notify();
+                        })
+                        .ok();
                     },
                 ));
             }
@@ -206,7 +208,7 @@ fn render_content(
         .icon(IconName::ChevronsUpDown)
         .label("切换英雄")
         .on_click(cx.listener(move |this, _, _, cx| {
-            let target = with_state(|s| s.switch_target.clone());
+            let target = this.debug.switch_target.clone();
             let gid = this.current_game_id.clone().unwrap_or_default();
             run_match_cmd(gid, MatchCmd::SwitchChampion(target), cx);
         }));
@@ -222,7 +224,7 @@ fn render_content(
         })
         .disabled(stopping)
         .on_click(cx.listener(move |this, _, _, cx| {
-            update_state(|s| s.stopping = true);
+            this.debug.stopping = true;
             let gid = this.current_game_id.clone().unwrap_or_default();
             cx.spawn(
                 move |weak: gpui::WeakEntity<AppSidebar>, cx: &mut gpui::AsyncApp| {
@@ -231,11 +233,9 @@ fn render_content(
                     let gid = gid.clone();
                     async move {
                         let _ = provider::process_service().stop(&gid).await;
-                        update_state(|s| {
-                            s.stopping = false;
-                            s.stream_alive = false;
-                        });
                         weak.update(&mut cx, |this, cx| {
+                            this.debug.stopping = false;
+                            this.debug.stream_alive = false;
                             this.current_game_id = None;
                             this.navigate_to(ActiveView::Games);
                             cx.notify();
@@ -263,8 +263,8 @@ fn render_content(
         .label("控制台日志")
         .when(active_tab == DebugTab::Logs, |b| b.primary())
         .when(active_tab != DebugTab::Logs, |b| b.ghost())
-        .on_click(cx.listener(|_, _, _, cx| {
-            update_state(|s| s.active_tab = DebugTab::Logs);
+        .on_click(cx.listener(|this, _, _, cx| {
+            this.debug.active_tab = DebugTab::Logs;
             cx.notify();
         }));
 
@@ -274,14 +274,14 @@ fn render_content(
         .label("AI 思维链")
         .when(active_tab == DebugTab::Agents, |b| b.primary())
         .when(active_tab != DebugTab::Agents, |b| b.ghost())
-        .on_click(cx.listener(|_, _, _, cx| {
-            update_state(|s| s.active_tab = DebugTab::Agents);
+        .on_click(cx.listener(|this, _, _, cx| {
+            this.debug.active_tab = DebugTab::Agents;
             cx.notify();
         }));
 
     let tab_content = match active_tab {
-        DebugTab::Logs => render_game_console_logs(&logs, cx),
-        DebugTab::Agents => render_agent_chat_history(&messages, cx),
+        DebugTab::Logs => render_game_console_logs(&logs, &*sidebar, cx),
+        DebugTab::Agents => render_agent_chat_history(&messages, &*sidebar, cx),
     };
 
     let muted = cx.theme().muted_foreground;
@@ -455,19 +455,20 @@ pub fn render_debug(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> A
     }
 
     // 首次进入该对局：重置页面状态并启动事件订阅 / 历史加载
-    let is_current = with_state(|s| s.current_game.as_deref() == Some(game_id.as_str()));
+    let is_current = sidebar.debug.current_game.as_deref() == Some(game_id.as_str());
     if !is_current {
-        let gen = with_state(|s| s.generation + 1);
-        update_state(|s| {
-            *s = DebugPageState::default();
-            s.current_game = Some(game_id.clone());
-            s.generation = gen;
-            s.switch_target = sidebar
-                .champions_list
-                .first()
-                .cloned()
-                .unwrap_or_else(|| "Riven".to_string());
-        });
+        let gen = sidebar.debug.generation + 1;
+        let first_champ = sidebar
+            .champions_list
+            .first()
+            .cloned()
+            .unwrap_or_else(|| "Riven".to_string());
+        sidebar.debug = DebugPageState {
+            current_game: Some(game_id.clone()),
+            generation: gen,
+            switch_target: first_champ,
+            ..Default::default()
+        };
         spawn_init(game_id.clone(), gen, cx);
     }
 

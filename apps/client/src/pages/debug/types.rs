@@ -1,6 +1,4 @@
-//! 对局调试台页面状态：选项卡 / 控制命令 / 本地乐观状态 + thread_local 存储。
-
-use std::cell::RefCell;
+//! 对局调试台页面状态：选项卡 / 控制命令 / 本地乐观状态。
 
 use crate::components::agent_chat_history::AgentChatMessage;
 use crate::components::game_console_logs::ConsoleLogRow;
@@ -25,7 +23,7 @@ pub(super) enum MatchCmd {
     SwitchChampion(String),
 }
 
-pub(super) struct DebugPageState {
+pub struct DebugPageState {
     /// 当前调试的对局 id（与 sidebar.current_game_id 联动）。
     pub(super) current_game: Option<String>,
     /// 事件循环代际：每次进入新对局自增，旧事件循环靠它识别自己已过期。
@@ -63,16 +61,4 @@ impl Default for DebugPageState {
             stopping: false,
         }
     }
-}
-
-thread_local! {
-    pub(super) static STATE: RefCell<DebugPageState> = RefCell::new(DebugPageState::default());
-}
-
-pub(super) fn with_state<R>(f: impl FnOnce(&DebugPageState) -> R) -> R {
-    STATE.with(|s| f(&s.borrow()))
-}
-
-pub(super) fn update_state(f: impl FnOnce(&mut DebugPageState)) {
-    STATE.with(|s| f(&mut s.borrow_mut()));
 }

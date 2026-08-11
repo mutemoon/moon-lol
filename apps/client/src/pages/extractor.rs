@@ -1,4 +1,3 @@
-use std::cell::RefCell;
 use std::collections::HashMap;
 
 use gpui::prelude::*;
@@ -56,26 +55,19 @@ impl Default for ExtractorPageState {
     }
 }
 
-thread_local! {
-    static EXTRACTOR_STATE: RefCell<ExtractorPageState> = RefCell::new(ExtractorPageState::default());
-}
-
 pub fn render_extractor(
-    _sidebar: &AppSidebar,
+    sidebar: &mut AppSidebar,
     window: &mut Window,
     cx: &mut Context<AppSidebar>,
 ) -> AnyElement {
     let assets_dir = resolve_assets_dir();
 
     // 帧初始化输入框句柄
-    EXTRACTOR_STATE.with(|cell| {
-        let mut state = cell.borrow_mut();
-        if state.game_path_input.is_none() {
-            let default_path = state.game_path.clone();
-            let ed = cx.new(|cx| InputState::new(window, cx).default_value(&default_path));
-            state.game_path_input = Some(ed);
-        }
-    });
+    if sidebar.extractor.game_path_input.is_none() {
+        let default_path = sidebar.extractor.game_path.clone();
+        let ed = cx.new(|cx| InputState::new(window, cx).default_value(&default_path));
+        sidebar.extractor.game_path_input = Some(ed);
+    }
 
     let (
         game_path_input,
@@ -89,22 +81,22 @@ pub fn render_extractor(
         step_logs,
         expanded_steps,
         status,
-    ) = EXTRACTOR_STATE.with(|cell| {
-        let state = cell.borrow();
+    ) = {
+        let s = &sidebar.extractor;
         (
-            state.game_path_input.clone(),
-            state.extract_base_and_ui,
-            state.extract_shaders,
-            state.extract_audio,
-            state.skip_map_geo,
-            state.is_extracting,
-            state.current_step_index,
-            state.current_step_status.clone(),
-            state.step_logs.clone(),
-            state.expanded_steps.clone(),
-            state.status_message.clone(),
+            s.game_path_input.clone(),
+            s.extract_base_and_ui,
+            s.extract_shaders,
+            s.extract_audio,
+            s.skip_map_geo,
+            s.is_extracting,
+            s.current_step_index,
+            s.current_step_status.clone(),
+            s.step_logs.clone(),
+            s.expanded_steps.clone(),
+            s.status_message.clone(),
         )
-    });
+    };
 
     let theme = cx.theme();
 
@@ -215,11 +207,9 @@ pub fn render_extractor(
                             Checkbox::new("chk_base")
                                 .label("基础模型/贴图/地图/UI 提取")
                                 .checked(extract_base)
-                                .on_click(cx.listener(|_, _, _window, cx| {
-                                    EXTRACTOR_STATE.with(|cell| {
-                                        let mut state = cell.borrow_mut();
-                                        state.extract_base_and_ui = !state.extract_base_and_ui;
-                                    });
+                                .on_click(cx.listener(|this, _, _window, cx| {
+                                    this.extractor.extract_base_and_ui =
+                                        !this.extractor.extract_base_and_ui;
                                     cx.notify();
                                 })),
                         )
@@ -227,11 +217,8 @@ pub fn render_extractor(
                             Checkbox::new("chk_shaders")
                                 .label("ShaderCache 着色器反编译与编译")
                                 .checked(extract_shaders)
-                                .on_click(cx.listener(|_, _, _window, cx| {
-                                    EXTRACTOR_STATE.with(|cell| {
-                                        let mut state = cell.borrow_mut();
-                                        state.extract_shaders = !state.extract_shaders;
-                                    });
+                                .on_click(cx.listener(|this, _, _window, cx| {
+                                    this.extractor.extract_shaders = !this.extractor.extract_shaders;
                                     cx.notify();
                                 })),
                         )
@@ -239,11 +226,8 @@ pub fn render_extractor(
                             Checkbox::new("chk_audio")
                                 .label("全英雄音效配置 (AudioBank / ww2ogg)")
                                 .checked(extract_audio)
-                                .on_click(cx.listener(|_, _, _window, cx| {
-                                    EXTRACTOR_STATE.with(|cell| {
-                                        let mut state = cell.borrow_mut();
-                                        state.extract_audio = !state.extract_audio;
-                                    });
+                                .on_click(cx.listener(|this, _, _window, cx| {
+                                    this.extractor.extract_audio = !this.extractor.extract_audio;
                                     cx.notify();
                                 })),
                         )
@@ -251,11 +235,8 @@ pub fn render_extractor(
                             Checkbox::new("chk_no_mapgeo")
                                 .label("跳过地图 Mesh 优化 (Fast Mode)")
                                 .checked(skip_map_geo)
-                                .on_click(cx.listener(|_, _, _window, cx| {
-                                    EXTRACTOR_STATE.with(|cell| {
-                                        let mut state = cell.borrow_mut();
-                                        state.skip_map_geo = !state.skip_map_geo;
-                                    });
+                                .on_click(cx.listener(|this, _, _window, cx| {
+                                    this.extractor.skip_map_geo = !this.extractor.skip_map_geo;
                                     cx.notify();
                                 })),
                         ),
@@ -270,8 +251,8 @@ pub fn render_extractor(
                                 .primary()
                                 .label(if is_extracting { "正在提取中..." } else { "开始全量提取" })
                                 .disabled(is_extracting)
-                                .on_click(cx.listener(|_, _, _window, cx| {
-                                    start_extraction_process(cx);
+                                .on_click(cx.listener(|this, _, _window, cx| {
+                                    start_extraction_process(this, cx);
                                 })),
                         )
                         .when_some(status, |this, msg| {
@@ -335,12 +316,14 @@ pub fn render_extractor(
                                 .cursor_pointer()
                                 .on_mouse_down(
                                     MouseButton::Left,
-                                    cx.listener(move |_, _, _window, cx| {
-                                        EXTRACTOR_STATE.with(|cell| {
-                                            let mut state = cell.borrow_mut();
-                                            let cur = state.expanded_steps.get(&idx).copied().unwrap_or(false);
-                                            state.expanded_steps.insert(idx, !cur);
-                                        });
+                                    cx.listener(move |this, _, _window, cx| {
+                                        let cur = this
+                                            .extractor
+                                            .expanded_steps
+                                            .get(&idx)
+                                            .copied()
+                                            .unwrap_or(false);
+                                        this.extractor.expanded_steps.insert(idx, !cur);
                                         cx.notify();
                                     }),
                                 )
@@ -445,9 +428,9 @@ pub fn render_extractor(
         .into_any_element()
 }
 
-fn start_extraction_process(cx: &mut Context<AppSidebar>) {
-    let config = EXTRACTOR_STATE.with(|cell| {
-        let mut state = cell.borrow_mut();
+fn start_extraction_process(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) {
+    let config = {
+        let state = &mut sidebar.extractor;
         state.is_extracting = true;
         state.status_message = None;
         state.step_logs.clear();
@@ -467,7 +450,7 @@ fn start_extraction_process(cx: &mut Context<AppSidebar>) {
             extract_audio: state.extract_audio,
             skip_map_geo: state.skip_map_geo,
         }
-    });
+    };
     cx.notify();
 
     let (log_tx, mut log_rx) = mpsc::unbounded_channel::<(ExtractionStep, String)>();
@@ -486,24 +469,22 @@ fn start_extraction_process(cx: &mut Context<AppSidebar>) {
                 tokio::select! {
                     log = log_rx.recv() => {
                         if let Some((step, log_msg)) = log {
-                            let _ = weak.update(&mut cx, |_, cx| {
-                                EXTRACTOR_STATE.with(|cell| {
-                                    let mut state = cell.borrow_mut();
-                                    state.step_logs.entry(step as usize).or_default().push(log_msg);
-                                });
+                            let _ = weak.update(&mut cx, |this, cx| {
+                                this.extractor
+                                    .step_logs
+                                    .entry(step as usize)
+                                    .or_default()
+                                    .push(log_msg);
                                 cx.notify();
                             });
                         }
                     }
                     step = step_rx.recv() => {
                         if let Some((step, desc)) = step {
-                            let _ = weak.update(&mut cx, |_, cx| {
-                                EXTRACTOR_STATE.with(|cell| {
-                                    let mut state = cell.borrow_mut();
-                                    state.current_step_index = step as usize;
-                                    state.current_step_status = desc;
-                                    state.expanded_steps.insert(step as usize, true);
-                                });
+                            let _ = weak.update(&mut cx, |this, cx| {
+                                this.extractor.current_step_index = step as usize;
+                                this.extractor.current_step_status = desc;
+                                this.extractor.expanded_steps.insert(step as usize, true);
                                 cx.notify();
                             });
                         }
@@ -514,14 +495,11 @@ fn start_extraction_process(cx: &mut Context<AppSidebar>) {
                 }
             }
 
-            let _ = weak.update(&mut cx, |_, cx| {
-                EXTRACTOR_STATE.with(|cell| {
-                    let mut state = cell.borrow_mut();
-                    state.is_extracting = false;
-                    if let Err(err) = result.take().unwrap_or(Ok(())) {
-                        state.status_message = Some(err);
-                    }
-                });
+            let _ = weak.update(&mut cx, |this, cx| {
+                this.extractor.is_extracting = false;
+                if let Err(err) = result.take().unwrap_or(Ok(())) {
+                    this.extractor.status_message = Some(err);
+                }
                 cx.notify();
             });
         }

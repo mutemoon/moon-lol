@@ -1,4 +1,3 @@
-use std::cell::RefCell;
 use std::collections::HashMap;
 
 use gpui::prelude::*;
@@ -15,7 +14,7 @@ use crate::types::{ActiveView, RunningGameInfo};
 
 // ── 页面本地状态 ──
 
-struct GamesPageState {
+pub struct GamesPageState {
     /// 是否已触发首次自动加载
     inited: bool,
     /// 是否已启动 5s 轮询（防重复 spawn）
@@ -41,18 +40,6 @@ impl Default for GamesPageState {
             stopping: None,
         }
     }
-}
-
-thread_local! {
-    static STATE: RefCell<GamesPageState> = RefCell::new(GamesPageState::default());
-}
-
-fn with_state<R>(f: impl FnOnce(&GamesPageState) -> R) -> R {
-    STATE.with(|s| f(&s.borrow()))
-}
-
-fn update_state(f: impl FnOnce(&mut GamesPageState)) {
-    STATE.with(|s| f(&mut s.borrow_mut()));
 }
 
 // ── 数据加载 ──
@@ -82,26 +69,22 @@ fn sync_sidebar_games(sidebar: &mut AppSidebar, games: Vec<RunningGame>) {
 async fn fetch_games(weak: &gpui::WeakEntity<AppSidebar>, cx: &mut gpui::AsyncApp) {
     match provider::process_service().list().await {
         Ok(games) => {
-            update_state(|s| {
-                s.games = games.clone();
-                s.loading = false;
-                s.error = None;
-            });
-            if let Some(entity) = weak.upgrade() {
-                let _ = entity.update(cx, |sidebar, cx| {
-                    sync_sidebar_games(sidebar, games);
-                    cx.notify();
-                });
-            }
+            weak.update(cx, |s, cx| {
+                s.games.games = games.clone();
+                s.games.loading = false;
+                s.games.error = None;
+                sync_sidebar_games(s, games);
+                cx.notify();
+            })
+            .ok();
         }
         Err(err) => {
-            update_state(|s| {
-                s.loading = false;
-                s.error = Some(err);
-            });
-            if let Some(entity) = weak.upgrade() {
-                let _ = entity.update(cx, |_, cx| cx.notify());
-            }
+            weak.update(cx, |s, cx| {
+                s.games.loading = false;
+                s.games.error = Some(err);
+                cx.notify();
+            })
+            .ok();
         }
     }
 }
@@ -308,10 +291,9 @@ fn build_row(row: GameRow, stopping: &Option<String>, cx: &mut Context<AppSideba
                             "停止"
                         })
                         .disabled(is_stopping)
-                        .on_click(cx.listener(move |_this, _, _, cx| {
-                            update_state(|s| s.stopping = Some(gid_stop.clone()));
+                        .on_click(cx.listener(move |this, _, _, cx| {
+                            this.games.stopping = Some(gid_stop.clone());
                             cx.notify();
-                            let _entity = cx.entity().clone();
                             let gid = gid_stop.clone();
                             cx.spawn(
                                 move |weak: gpui::WeakEntity<AppSidebar>,
@@ -322,10 +304,11 @@ fn build_row(row: GameRow, stopping: &Option<String>, cx: &mut Context<AppSideba
                                     async move {
                                         let _ = provider::process_service().stop(&gid).await;
                                         fetch_games(&weak, &mut cx).await;
-                                        update_state(|s| s.stopping = None);
-                                        if let Some(entity) = weak.upgrade() {
-                                            let _ = entity.update(&mut cx, |_, cx| cx.notify());
-                                        }
+                                        weak.update(&mut cx, |s, cx| {
+                                            s.games.stopping = None;
+                                            cx.notify();
+                                        })
+                                        .ok();
                                     }
                                 },
                             )
@@ -340,20 +323,20 @@ fn build_row(row: GameRow, stopping: &Option<String>, cx: &mut Context<AppSideba
 
 /// 运行中对局管理（对应 client `pages/games.vue`）。
 pub fn render_games(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> AnyElement {
-    let (inited, polling, loading, error) =
-        with_state(|s| (s.inited, s.polling, s.loading, s.error.clone()));
+    let (inited, polling, loading, error) = {
+        let s = &sidebar.games;
+        (s.inited, s.polling, s.loading, s.error.clone())
+    };
 
     // 首次渲染自动加载
     if !inited {
-        update_state(|s| {
-            s.inited = true;
-            s.loading = true;
-        });
+        sidebar.games.inited = true;
+        sidebar.games.loading = true;
         spawn_load(cx);
     }
     // 5s 自动轮询（防重复 spawn）
     if !polling {
-        update_state(|s| s.polling = true);
+        sidebar.games.polling = true;
         spawn_poll(cx);
     }
 
@@ -364,27 +347,27 @@ pub fn render_games(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> A
         .map(|g| (g.id.clone(), (g.champion.clone(), g.mode.clone())))
         .collect();
 
-    let rows: Vec<GameRow> = with_state(|s| {
-        s.games
-            .iter()
-            .map(|g| {
-                let (champion, mode) = known.get(&g.id).cloned().unwrap_or_default();
-                GameRow {
-                    id: g.id.clone(),
-                    port: g.port,
-                    status: g.status.clone(),
-                    champion: if champion.is_empty() {
-                        "—".into()
-                    } else {
-                        champion
-                    },
-                    mode: if mode.is_empty() { "—".into() } else { mode },
-                }
-            })
-            .collect()
-    });
+    let rows: Vec<GameRow> = sidebar
+        .games
+        .games
+        .iter()
+        .map(|g| {
+            let (champion, mode) = known.get(&g.id).cloned().unwrap_or_default();
+            GameRow {
+                id: g.id.clone(),
+                port: g.port,
+                status: g.status.clone(),
+                champion: if champion.is_empty() {
+                    "—".into()
+                } else {
+                    champion
+                },
+                mode: if mode.is_empty() { "—".into() } else { mode },
+            }
+        })
+        .collect();
     let rows_empty = rows.is_empty();
-    let stopping = with_state(|s| s.stopping.clone());
+    let stopping = sidebar.games.stopping.clone();
 
     v_flex()
         .size_full()
@@ -413,8 +396,8 @@ pub fn render_games(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> A
                         .icon(IconName::Redo)
                         .label("刷新")
                         .disabled(loading)
-                        .on_click(cx.listener(move |_this, _, _, cx| {
-                            update_state(|s| s.loading = true);
+                        .on_click(cx.listener(move |this, _, _, cx| {
+                            this.games.loading = true;
                             spawn_load(cx);
                         })),
                 ),

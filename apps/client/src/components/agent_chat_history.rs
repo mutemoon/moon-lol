@@ -7,9 +7,7 @@
 //! 文案内联中文（未接入 i18n），本文件自包含、不依赖其它页面私有状态；
 //! 组件注册（mod.rs）与页面接入由主会话处理。
 
-#![allow(dead_code)]
 
-use std::cell::RefCell;
 use std::collections::{HashMap, HashSet};
 
 use gpui::prelude::*;
@@ -78,16 +76,18 @@ fn kind_accent(kind: &str, cx: &Context<AppSidebar>) -> Hsla {
     }
 }
 
-// ── 筛选 / 折叠状态（thread_local，组件自包含） ──
+// ── 筛选 / 折叠状态（存于 AppSidebar.agent_chat_filters） ──
 
+/// 消息流筛选与折叠状态。多个页面复用一个组件时共享此状态，
+/// 简化起见不做按页面隔离。
 #[derive(Clone)]
-struct ChatHistoryFilters {
-    show_think: bool,
-    show_tool: bool,
-    show_decision: bool,
-    show_observation: bool,
-    show_message: bool,
-    collapsed_rounds: HashSet<u32>,
+pub struct ChatHistoryFilters {
+    pub show_think: bool,
+    pub show_tool: bool,
+    pub show_decision: bool,
+    pub show_observation: bool,
+    pub show_message: bool,
+    pub collapsed_rounds: HashSet<u32>,
 }
 
 impl Default for ChatHistoryFilters {
@@ -103,10 +103,6 @@ impl Default for ChatHistoryFilters {
     }
 }
 
-thread_local! {
-    static FILTER_STATE: RefCell<ChatHistoryFilters> = RefCell::new(ChatHistoryFilters::default());
-}
-
 fn is_kind_shown(kind: &str, filters: &ChatHistoryFilters) -> bool {
     match classify_kind(kind) {
         KindClass::Think => filters.show_think,
@@ -117,30 +113,25 @@ fn is_kind_shown(kind: &str, filters: &ChatHistoryFilters) -> bool {
     }
 }
 
-fn toggle_kind(kind: KindClass) {
-    FILTER_STATE.with(|s| {
-        let mut f = s.borrow_mut();
-        match kind {
-            KindClass::Think => f.show_think = !f.show_think,
-            KindClass::Tool => f.show_tool = !f.show_tool,
-            KindClass::Decision => f.show_decision = !f.show_decision,
-            KindClass::Observation => f.show_observation = !f.show_observation,
-            KindClass::Message => f.show_message = !f.show_message,
-        }
-    });
+fn toggle_kind(sidebar: &mut AppSidebar, kind: KindClass) {
+    let f = &mut sidebar.agent_chat_filters;
+    match kind {
+        KindClass::Think => f.show_think = !f.show_think,
+        KindClass::Tool => f.show_tool = !f.show_tool,
+        KindClass::Decision => f.show_decision = !f.show_decision,
+        KindClass::Observation => f.show_observation = !f.show_observation,
+        KindClass::Message => f.show_message = !f.show_message,
+    }
 }
 
-fn toggle_round_collapse(round: u32) {
-    FILTER_STATE.with(|s| {
-        let mut f = s.borrow_mut();
-        if !f.collapsed_rounds.remove(&round) {
-            f.collapsed_rounds.insert(round);
-        }
-    });
+fn toggle_round_collapse(sidebar: &mut AppSidebar, round: u32) {
+    if !sidebar.agent_chat_filters.collapsed_rounds.remove(&round) {
+        sidebar.agent_chat_filters.collapsed_rounds.insert(round);
+    }
 }
 
-fn reset_filters() {
-    FILTER_STATE.with(|s| *s.borrow_mut() = ChatHistoryFilters::default());
+fn reset_filters(sidebar: &mut AppSidebar) {
+    sidebar.agent_chat_filters = ChatHistoryFilters::default();
 }
 
 // ── 渲染 ──
@@ -148,9 +139,10 @@ fn reset_filters() {
 /// 渲染可滚动的 AI 决策历史流（思维 / 工具 / 决策 / 观测 / 消息）。
 pub fn render_agent_chat_history(
     messages: &[AgentChatMessage],
+    sidebar: &AppSidebar,
     cx: &mut Context<AppSidebar>,
 ) -> AnyElement {
-    let filters = FILTER_STATE.with(|s| s.borrow().clone());
+    let filters = sidebar.agent_chat_filters.clone();
 
     let total = messages.len();
     let visible: Vec<&AgentChatMessage> = messages
@@ -228,8 +220,8 @@ pub fn render_agent_chat_history(
             .label("重置")
             .xsmall()
             .ghost()
-            .on_click(cx.listener(|_, _, _, cx| {
-                reset_filters();
+            .on_click(cx.listener(|this, _, _, cx| {
+                reset_filters(this);
                 cx.notify();
             }))
             .into_any_element(),
@@ -289,8 +281,8 @@ pub fn render_agent_chat_history(
                             .label("重置过滤条件")
                             .xsmall()
                             .outline()
-                            .on_click(cx.listener(|_, _, _, cx| {
-                                reset_filters();
+                            .on_click(cx.listener(|this, _, _, cx| {
+                                reset_filters(this);
                                 cx.notify();
                             })),
                     ),
@@ -332,8 +324,8 @@ fn render_kind_filter_button(
         .xsmall()
         .when(active, |b| b.primary())
         .when(!active, |b| b.outline())
-        .on_click(cx.listener(move |_, _, _, cx| {
-            toggle_kind(kind);
+        .on_click(cx.listener(move |this, _, _, cx| {
+            toggle_kind(this, kind);
             cx.notify();
         }))
         .into_any_element()
@@ -374,8 +366,8 @@ fn render_round_header(
                 .label(if collapsed { "展开" } else { "折叠" })
                 .xsmall()
                 .ghost()
-                .on_click(cx.listener(move |_, _, _, cx| {
-                    toggle_round_collapse(round);
+                .on_click(cx.listener(move |this, _, _, cx| {
+                    toggle_round_collapse(this, round);
                     cx.notify();
                 })),
         )

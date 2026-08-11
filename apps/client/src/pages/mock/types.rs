@@ -1,7 +1,5 @@
 //! 离线 mock 页状态类型 + mock.json 数据移植。
 
-use std::cell::RefCell;
-
 use crate::components::agent_chat_history::AgentChatMessage;
 
 /// mock.json 中 payload.agent_id / champion
@@ -265,7 +263,7 @@ pub(super) enum MockView {
     Chat,
 }
 
-pub(super) struct MockPageState {
+pub struct MockPageState {
     pub(super) view: MockView,
     pub(super) messages: Vec<AgentChatMessage>,
     pub(super) user_input: String,
@@ -281,18 +279,6 @@ impl Default for MockPageState {
             assistant_input: String::new(),
         }
     }
-}
-
-thread_local! {
-    static STATE: RefCell<MockPageState> = RefCell::new(MockPageState::default());
-}
-
-pub(super) fn with_state<R>(f: impl FnOnce(&MockPageState) -> R) -> R {
-    STATE.with(|s| f(&s.borrow()))
-}
-
-pub(super) fn update_state(f: impl FnOnce(&mut MockPageState)) {
-    STATE.with(|s| f(&mut s.borrow_mut()));
 }
 
 /// 当前最大轮次（作为新追加消息的归属轮次）。

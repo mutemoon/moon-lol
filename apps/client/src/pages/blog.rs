@@ -1,5 +1,3 @@
-use std::cell::RefCell;
-
 use gpui::prelude::*;
 use gpui::*;
 use gpui_component::button::{Button, ButtonVariants};
@@ -169,7 +167,7 @@ Bevy 引擎每帧执行一次 Update Schedule：
 
 // ── 页面本地状态 ──
 
-struct BlogPageState {
+pub struct BlogPageState {
     /// 当前选中的文章下标，None 表示列表态
     selected: Option<usize>,
 }
@@ -178,18 +176,6 @@ impl Default for BlogPageState {
     fn default() -> Self {
         Self { selected: None }
     }
-}
-
-thread_local! {
-    static STATE: RefCell<BlogPageState> = RefCell::new(BlogPageState::default());
-}
-
-fn with_state<R>(f: impl FnOnce(&BlogPageState) -> R) -> R {
-    STATE.with(|s| f(&s.borrow()))
-}
-
-fn update_state(f: impl FnOnce(&mut BlogPageState)) {
-    STATE.with(|s| f(&mut s.borrow_mut()));
 }
 
 // ── markdown 渲染 ──
@@ -363,8 +349,8 @@ fn render_post_list(cx: &mut Context<AppSidebar>) -> AnyElement {
                 .border_color(accent.opacity(0.3))
                 .cursor_pointer()
                 .id(format!("blog-item-{}", idx))
-                .on_click(cx.listener(move |_this, _event, _window, cx| {
-                    update_state(|s| s.selected = Some(idx));
+                .on_click(cx.listener(move |this, _event, _window, cx| {
+                    this.blog.selected = Some(idx);
                     cx.notify();
                 }))
                 .items_start()
@@ -406,8 +392,8 @@ fn render_post_detail(post: &Post, cx: &mut Context<AppSidebar>) -> AnyElement {
                 .ghost()
                 .icon(IconName::ArrowLeft)
                 .label("返回列表")
-                .on_click(cx.listener(|_this, _event, _window, cx| {
-                    update_state(|s| s.selected = None);
+                .on_click(cx.listener(|this, _event, _window, cx| {
+                    this.blog.selected = None;
                     cx.notify();
                 })),
         )
@@ -444,8 +430,8 @@ fn render_post_detail(post: &Post, cx: &mut Context<AppSidebar>) -> AnyElement {
 // ── 公开入口 ──
 
 /// 开发日志博客：列表态展示文章标题 / 日期 / 摘要，点击进入详情态，返回按钮回到列表。
-pub fn render_blog(_sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> AnyElement {
-    let selected = with_state(|s| s.selected);
+pub fn render_blog(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> AnyElement {
+    let selected = sidebar.blog.selected;
 
     let divider = div().w_full().h_px().bg(cx.theme().border);
     let header = render_header(cx);

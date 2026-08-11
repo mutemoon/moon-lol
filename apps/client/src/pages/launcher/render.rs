@@ -10,7 +10,7 @@ use lol_web_protocol::spawn_preset::SpawnPreset as ProtoSpawnPreset;
 use lol_web_protocol::GameConfig;
 
 use super::logic::{build_all_agents, spawn_load_scenario, spawn_save_scenario};
-use super::types::{update_state, with_state, LauncherSlot, LauncherView};
+use super::types::LauncherSlot;
 use crate::components::sidebar::AppSidebar;
 use crate::services::provider::process_service;
 use crate::types::RunningGameInfo;
@@ -79,14 +79,15 @@ fn slot_card(
                 let weak = hero_menu_weak.clone();
                 m = m.item(PopupMenuItem::new(name.clone()).checked(checked).on_click(
                     move |_, _, cx| {
-                        update_state(|s| {
+                        weak.update(cx, |this, cx| {
                             if slot_team == "Order" {
-                                s.blue_slots[slot_idx].hero_name = name.clone();
+                                this.launcher.blue_slots[slot_idx].hero_name = name.clone();
                             } else {
-                                s.red_slots[slot_idx].hero_name = name.clone();
+                                this.launcher.red_slots[slot_idx].hero_name = name.clone();
                             }
-                        });
-                        weak.update(cx, |_, cx| cx.notify()).ok();
+                            cx.notify();
+                        })
+                        .ok();
                     },
                 ));
             }
@@ -116,14 +117,15 @@ fn slot_card(
                     let weak = spawn_menu_weak.clone();
                     m = m.item(PopupMenuItem::new(label).checked(checked).on_click(
                         move |_, _, cx| {
-                            update_state(|s| {
+                            weak.update(cx, |this, cx| {
                                 if slot_team == "Order" {
-                                    s.blue_slots[slot_idx].spawn_name = sp_name.clone();
+                                    this.launcher.blue_slots[slot_idx].spawn_name = sp_name.clone();
                                 } else {
-                                    s.red_slots[slot_idx].spawn_name = sp_name.clone();
+                                    this.launcher.red_slots[slot_idx].spawn_name = sp_name.clone();
                                 }
-                            });
-                            weak.update(cx, |_, cx| cx.notify()).ok();
+                                cx.notify();
+                            })
+                            .ok();
                         },
                     ));
                 }
@@ -134,14 +136,12 @@ fn slot_card(
         .ghost()
         .xsmall()
         .icon(IconName::Delete)
-        .on_click(cx.listener(move |_, _, _, cx| {
-            update_state(|s| {
-                if team == "Order" {
-                    s.blue_slots.remove(index);
-                } else {
-                    s.red_slots.remove(index);
-                }
-            });
+        .on_click(cx.listener(move |this, _, _, cx| {
+            if team == "Order" {
+                this.launcher.blue_slots.remove(index);
+            } else {
+                this.launcher.red_slots.remove(index);
+            }
             cx.notify();
         }));
 
@@ -225,15 +225,13 @@ fn team_column(
                 .xsmall()
                 .icon(IconName::Plus)
                 .label("添加槽位")
-                .on_click(cx.listener(move |_, _, _, cx| {
-                    update_state(|s| {
-                        let slot = LauncherSlot::default();
-                        if team == "Order" {
-                            s.blue_slots.push(slot);
-                        } else {
-                            s.red_slots.push(slot);
-                        }
-                    });
+                .on_click(cx.listener(move |this, _, _, cx| {
+                    let slot = LauncherSlot::default();
+                    if team == "Order" {
+                        this.launcher.blue_slots.push(slot);
+                    } else {
+                        this.launcher.red_slots.push(slot);
+                    }
                     cx.notify();
                 })),
         );
@@ -335,15 +333,18 @@ pub(super) fn render_mode_and_champion(
         .into_any_element()
 }
 
-pub(super) fn render_load_dropdown(view: &LauncherView, cx: &mut Context<AppSidebar>) -> AnyElement {
+pub(super) fn render_load_dropdown(
+    sidebar: &AppSidebar,
+    cx: &mut Context<AppSidebar>,
+) -> AnyElement {
     let weak = cx.entity().downgrade();
-    let scenarios = view.scenarios.clone();
+    let scenarios = sidebar.launcher.scenarios.clone();
     Button::new("launcher-load-scenario")
         .outline()
         .xsmall()
         .icon(IconName::Folder)
         .label("载入")
-        .disabled(view.loading_scenario)
+        .disabled(sidebar.launcher.loading_scenario)
         .dropdown_menu(move |menu, _window, _cx| {
             let mut m = menu;
             if scenarios.is_empty() {
@@ -354,7 +355,11 @@ pub(super) fn render_load_dropdown(view: &LauncherView, cx: &mut Context<AppSide
                 let sc_name = sc.name.clone();
                 let weak = weak.clone();
                 m = m.item(PopupMenuItem::new(sc_name).on_click(move |_, _, cx| {
-                    update_state(|s| s.loading_scenario = true);
+                    weak.update(cx, |this, cx| {
+                        this.launcher.loading_scenario = true;
+                        cx.notify();
+                    })
+                    .ok();
                     spawn_load_scenario(cx, weak.clone(), sc_id.clone());
                 }));
             }
@@ -364,7 +369,7 @@ pub(super) fn render_load_dropdown(view: &LauncherView, cx: &mut Context<AppSide
 }
 
 pub(super) fn render_scene_section(
-    view: &LauncherView,
+    sidebar: &AppSidebar,
     load_dropdown: AnyElement,
     cx: &mut Context<AppSidebar>,
 ) -> AnyElement {
@@ -384,7 +389,7 @@ pub(super) fn render_scene_section(
                         .border_1()
                         .border_color(cx.theme().border)
                         .text_sm()
-                        .child(view.scene_name.clone()),
+                        .child(sidebar.launcher.scene_name.clone()),
                 )
                 .child(load_dropdown)
                 .child(
@@ -393,9 +398,9 @@ pub(super) fn render_scene_section(
                         .xsmall()
                         .icon(IconName::Check)
                         .label("保存")
-                        .disabled(view.saving)
-                        .on_click(cx.listener(|_, _, _, cx| {
-                            spawn_save_scenario(cx);
+                        .disabled(sidebar.launcher.saving)
+                        .on_click(cx.listener(|this, _, _, cx| {
+                            spawn_save_scenario(this, cx);
                         })),
                 )
                 .child(
@@ -404,14 +409,12 @@ pub(super) fn render_scene_section(
                         .xsmall()
                         .icon(IconName::Plus)
                         .label("新建")
-                        .on_click(cx.listener(|_, _, _, cx| {
-                            update_state(|s| {
-                                s.scene_name = format!("custom_agents_{}", unix_ts());
-                                s.blue_slots = vec![LauncherSlot::default()];
-                                s.red_slots = vec![LauncherSlot::default()];
-                                s.error = None;
-                                s.message = None;
-                            });
+                        .on_click(cx.listener(|this, _, _, cx| {
+                            this.launcher.scene_name = format!("custom_agents_{}", unix_ts());
+                            this.launcher.blue_slots = vec![LauncherSlot::default()];
+                            this.launcher.red_slots = vec![LauncherSlot::default()];
+                            this.launcher.error = None;
+                            this.launcher.message = None;
                             cx.notify();
                         })),
                 ),
@@ -420,13 +423,13 @@ pub(super) fn render_scene_section(
 }
 
 pub(super) fn render_message_banners(
-    view: &LauncherView,
+    sidebar: &AppSidebar,
     launch_error: Option<String>,
     cx: &mut Context<AppSidebar>,
 ) -> Vec<AnyElement> {
     let mut banners = Vec::new();
 
-    if let Some(msg) = view.message.clone() {
+    if let Some(msg) = sidebar.launcher.message.clone() {
         banners.push(
             div()
                 .px_3()
@@ -442,7 +445,7 @@ pub(super) fn render_message_banners(
         );
     }
 
-    if let Some(err) = view.error.clone() {
+    if let Some(err) = sidebar.launcher.error.clone() {
         banners.push(
             div()
                 .px_3()
@@ -477,7 +480,10 @@ pub(super) fn render_message_banners(
     banners
 }
 
-pub(super) fn render_teams_section(view: &LauncherView, cx: &mut Context<AppSidebar>) -> AnyElement {
+pub(super) fn render_teams_section(
+    sidebar: &AppSidebar,
+    cx: &mut Context<AppSidebar>,
+) -> AnyElement {
     h_flex()
         .gap_4()
         .items_start()
@@ -486,23 +492,27 @@ pub(super) fn render_teams_section(view: &LauncherView, cx: &mut Context<AppSide
             "Order",
             "蓝色方 (Order)",
             gpui::hsla(0.6, 0.7, 0.5, 1.0),
-            &view.blue_slots,
-            &view.agents,
-            &view.spawns,
+            &sidebar.launcher.blue_slots,
+            &sidebar.launcher.agents,
+            &sidebar.launcher.spawns,
         ))
         .child(team_column(
             cx,
             "Chaos",
             "红色方 (Chaos)",
             gpui::hsla(0.0, 0.7, 0.5, 1.0),
-            &view.red_slots,
-            &view.agents,
-            &view.spawns,
+            &sidebar.launcher.red_slots,
+            &sidebar.launcher.agents,
+            &sidebar.launcher.spawns,
         ))
         .into_any_element()
 }
 
-pub(super) fn render_action_buttons(starting: bool, cx: &mut Context<AppSidebar>) -> AnyElement {
+pub(super) fn render_action_buttons(
+    sidebar: &AppSidebar,
+    cx: &mut Context<AppSidebar>,
+) -> AnyElement {
+    let starting = sidebar.is_starting_game;
     let launch_game_btn = Button::new("launch-game-btn")
         .primary()
         .icon(if starting {
@@ -519,8 +529,10 @@ pub(super) fn render_action_buttons(starting: bool, cx: &mut Context<AppSidebar>
         .on_click(cx.listener(move |this, _, _, cx| {
             let mode = this.game_mode.clone();
             let champ = this.champion.clone();
-            let (scene_name, agents) =
-                with_state(|s| (s.scene_name.trim().to_string(), build_all_agents(s)));
+            let (scene_name, agents) = (
+                this.launcher.scene_name.trim().to_string(),
+                build_all_agents(&this.launcher),
+            );
             if agents.is_empty() {
                 this.launch_error = Some("请至少选择一个英雄预设".into());
                 cx.notify();

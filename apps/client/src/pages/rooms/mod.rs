@@ -10,10 +10,11 @@ use gpui::*;
 use gpui_component::button::{Button, ButtonVariants};
 use gpui_component::scroll::ScrollableElement;
 use gpui_component::{h_flex, v_flex, ActiveTheme, Disableable, IconName, StyledExt};
+pub use types::RoomsPageState;
 
 use self::input::render_state_input;
 use self::logic::{spawn_refresh_rooms, try_join_by_code};
-use self::types::{update_state, with_state, RoomsTab};
+use self::types::RoomsTab;
 use self::ui::{create_room_dialog, room_card, tab_button};
 use crate::components::sidebar::AppSidebar;
 
@@ -26,11 +27,9 @@ pub fn render_rooms(
     let logged_in = sidebar.auth_token.is_some();
 
     // 首次渲染自动加载大厅 + 我的房间
-    if !with_state(|s| s.loaded) {
-        update_state(|s| {
-            s.loaded = true;
-            s.loading = true;
-        });
+    if !sidebar.rooms.loaded {
+        sidebar.rooms.loaded = true;
+        sidebar.rooms.loading = true;
         spawn_refresh_rooms(cx);
     }
 
@@ -44,21 +43,19 @@ pub fn render_rooms(
         show_create,
         creating,
         create_error,
-    ) = with_state(|s| {
-        (
-            s.lobby_rooms.len(),
-            s.my_rooms.len(),
-            s.loading,
-            s.active_tab,
-            s.join_error.clone(),
-            s.joining,
-            s.show_create,
-            s.creating,
-            s.create_error.clone(),
-        )
-    });
-    let lobby_rooms = with_state(|s| s.lobby_rooms.clone());
-    let my_rooms = with_state(|s| s.my_rooms.clone());
+    ) = (
+        sidebar.rooms.lobby_rooms.len(),
+        sidebar.rooms.my_rooms.len(),
+        sidebar.rooms.loading,
+        sidebar.rooms.active_tab,
+        sidebar.rooms.join_error.clone(),
+        sidebar.rooms.joining,
+        sidebar.rooms.show_create,
+        sidebar.rooms.creating,
+        sidebar.rooms.create_error.clone(),
+    );
+    let lobby_rooms = sidebar.rooms.lobby_rooms.clone();
+    let my_rooms = sidebar.rooms.my_rooms.clone();
 
     v_flex()
         .size_full()
@@ -98,11 +95,9 @@ pub fn render_rooms(
                                 .icon(IconName::Plus)
                                 .label("创建房间")
                                 .disabled(!logged_in)
-                                .on_click(cx.listener(|_, _, _, cx| {
-                                    update_state(|s| {
-                                        s.show_create = true;
-                                        s.create_error.clear();
-                                    });
+                                .on_click(cx.listener(|this, _, _, cx| {
+                                    this.rooms.show_create = true;
+                                    this.rooms.create_error.clear();
                                     cx.notify();
                                 })),
                         ),
@@ -128,17 +123,17 @@ pub fn render_rooms(
                                 cx,
                                 "rooms-join-code",
                                 "ABCD1234",
-                                || with_state(|s| s.join_code.clone()),
-                                |v| update_state(|s| s.join_code = v),
-                                Some(Box::new(|cx| try_join_by_code(cx))),
+                                |s: &AppSidebar| s.rooms.join_code.clone(),
+                                |s: &mut AppSidebar, v| s.rooms.join_code = v,
+                                Some(Box::new(|sidebar, cx| try_join_by_code(sidebar, cx))),
                             )))
                             .child(
                                 Button::new("rooms-join-btn")
                                     .secondary()
                                     .label("加入")
                                     .disabled(!logged_in || joining)
-                                    .on_click(cx.listener(|_, _, _, cx| {
-                                        try_join_by_code(cx);
+                                    .on_click(cx.listener(|this, _, _, cx| {
+                                        try_join_by_code(this, cx);
                                     })),
                             ),
                     )
@@ -161,8 +156,8 @@ pub fn render_rooms(
                     "大厅",
                     lobby_count,
                     active_tab == RoomsTab::Lobby,
-                    |_, _, _window, cx| {
-                        update_state(|s| s.active_tab = RoomsTab::Lobby);
+                    |this, _, _window, cx| {
+                        this.rooms.active_tab = RoomsTab::Lobby;
                         cx.notify();
                     },
                 ))
@@ -171,8 +166,8 @@ pub fn render_rooms(
                     "我的房间",
                     my_count,
                     active_tab == RoomsTab::Mine,
-                    |_, _, _window, cx| {
-                        update_state(|s| s.active_tab = RoomsTab::Mine);
+                    |this, _, _window, cx| {
+                        this.rooms.active_tab = RoomsTab::Mine;
                         cx.notify();
                     },
                 )),
@@ -219,16 +214,23 @@ pub fn render_rooms(
                         my_rooms
                     };
                     d.child(
-                        h_flex()
-                            .gap_3()
-                            .flex_wrap()
-                            .children(rooms.into_iter().map(|r| room_card(cx, &r, logged_in))),
+                        h_flex().gap_3().flex_wrap().children(
+                            rooms
+                                .into_iter()
+                                .map(|r| room_card(sidebar, cx, &r, logged_in)),
+                        ),
                     )
                 }),
         )
         // ── 创建房间对话框 ──
         .when(show_create, |d| {
-            d.child(create_room_dialog(window, cx, create_error, creating))
+            d.child(create_room_dialog(
+                sidebar,
+                window,
+                cx,
+                create_error,
+                creating,
+            ))
         })
         .into_any_element()
 }

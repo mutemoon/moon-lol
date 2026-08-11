@@ -6,16 +6,16 @@ use gpui::*;
 use crate::components::sidebar::AppSidebar;
 use crate::components::text_input::{self, EditOptions};
 
-/// 可聚焦、可键盘编辑的文本输入框。get_value / set_value 读写页面 STATE，
+/// 可聚焦、可键盘编辑的文本输入框。get_value / set_value 读写 sidebar.mock，
 /// Enter 触发 submit（注入消息）。
 pub(super) fn render_edit_input(
     window: &mut Window,
     cx: &mut Context<AppSidebar>,
     id: &'static str,
     placeholder: &'static str,
-    get_value: impl Fn() -> String + 'static,
-    set_value: impl Fn(String) + 'static,
-    submit: Option<Box<dyn Fn(&mut Context<AppSidebar>) + 'static>>,
+    get_value: impl Fn(&AppSidebar) -> String + 'static,
+    set_value: impl Fn(&mut AppSidebar, String) + 'static,
+    submit: Option<Box<dyn Fn(&mut AppSidebar, &mut Context<AppSidebar>) + 'static>>,
 ) -> AnyElement {
     text_input::render_edit_input(
         window,
@@ -24,12 +24,16 @@ pub(super) fn render_edit_input(
         placeholder,
         EditOptions {
             on_enter: submit.map(|f| {
-                Box::new(move |_text: String, cx: &mut Context<AppSidebar>| f(cx))
-                    as Box<dyn Fn(String, &mut Context<AppSidebar>) + 'static>
+                Box::new(
+                    move |_text: String, sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>| {
+                        f(sidebar, cx)
+                    },
+                )
+                    as Box<dyn Fn(String, &mut AppSidebar, &mut Context<AppSidebar>) + 'static>
             }),
             ..Default::default()
         },
-        move |_s| get_value(),
-        move |_s, v| set_value(v),
+        get_value,
+        set_value,
     )
 }

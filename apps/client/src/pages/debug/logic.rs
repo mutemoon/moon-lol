@@ -2,7 +2,7 @@
 
 use gpui::*;
 
-use super::types::{update_state, with_state, MatchCmd};
+use super::types::MatchCmd;
 use crate::components::agent_chat_history::AgentChatMessage;
 use crate::components::game_console_logs::ConsoleLogRow;
 use crate::components::sidebar::AppSidebar;
@@ -179,8 +179,8 @@ fn now_hms() -> String {
 pub(super) fn spawn_init(game_id: String, gen: u64, cx: &mut Context<AppSidebar>) {
     let state = provider::process_service().state.clone();
     cx.spawn(
-        move |weak: gpui::WeakEntity<AppSidebar>, cx: &mut gpui::AsyncApp| {
-            let weak = weak.clone();
+        move |this: gpui::WeakEntity<AppSidebar>, cx: &mut gpui::AsyncApp| {
+            let this = this.clone();
             let mut cx = cx.clone();
             let state = state.clone();
             async move {
@@ -188,13 +188,19 @@ pub(super) fn spawn_init(game_id: String, gen: u64, cx: &mut Context<AppSidebar>
                 match provider::process_service().get(&game_id).await {
                     Ok(Some(_)) => {}
                     Ok(None) => {
-                        update_state(|s| s.error = Some("对局未运行或不存在".to_string()));
-                        weak.update(&mut cx, |_, cx| cx.notify()).ok();
+                        this.update(&mut cx, |this, cx| {
+                            this.debug.error = Some("对局未运行或不存在".to_string());
+                            cx.notify();
+                        })
+                        .ok();
                         return;
                     }
                     Err(e) => {
-                        update_state(|s| s.error = Some(e));
-                        weak.update(&mut cx, |_, cx| cx.notify()).ok();
+                        this.update(&mut cx, |this, cx| {
+                            this.debug.error = Some(e);
+                            cx.notify();
+                        })
+                        .ok();
                         return;
                     }
                 }
@@ -220,47 +226,58 @@ pub(super) fn spawn_init(game_id: String, gen: u64, cx: &mut Context<AppSidebar>
                             timestamp: Some(fmt_epoch_ms(r.timestamp)),
                         })
                         .collect();
-                    update_state(|s| s.logs = rows);
+                    this.update(&mut cx, |this, _| this.debug.logs = rows).ok();
                 }
 
                 // 3. 订阅实时事件
                 let mut rx = match match_ws::subscribe_match_events(&state, &game_id) {
                     Ok(rx) => rx,
                     Err(e) => {
-                        update_state(|s| s.error = Some(e));
-                        weak.update(&mut cx, |_, cx| cx.notify()).ok();
+                        this.update(&mut cx, |this, cx| {
+                            this.debug.error = Some(e);
+                            cx.notify();
+                        })
+                        .ok();
                         return;
                     }
                 };
-                update_state(|s| s.stream_alive = true);
+                this.update(&mut cx, |this, _| this.debug.stream_alive = true)
+                    .ok();
 
                 // 4. 消费事件流
                 while let Some(val) = rx.recv().await {
                     // 该对局不再是调试焦点（已导航离开或重新进入新对局）则退出
-                    let owned = with_state(|s| {
-                        s.current_game.as_deref() == Some(game_id.as_str()) && s.generation == gen
-                    });
-                    if !owned {
+                    let owned = this
+                        .update(&mut cx, |this, _| {
+                            this.debug.current_game.as_deref() == Some(game_id.as_str())
+                                && this.debug.generation == gen
+                        })
+                        .ok();
+                    if owned != Some(true) {
                         break;
                     }
                     // 对局连接关闭：标记断开并退出（不重置 current_game，避免重复初始化）
                     if is_game_close(&val) {
-                        update_state(|s| {
-                            s.stream_alive = false;
-                            s.error = Some("对局连接已关闭（可能已停止）".to_string());
-                        });
-                        weak.update(&mut cx, |_, cx| cx.notify()).ok();
+                        this.update(&mut cx, |this, cx| {
+                            this.debug.stream_alive = false;
+                            this.debug.error = Some("对局连接已关闭（可能已停止）".to_string());
+                            cx.notify();
+                        })
+                        .ok();
                         break;
                     }
                     if let Some(row) = event_to_log(&val) {
-                        update_state(|s| s.logs.push(row));
+                        this.update(&mut cx, |this, _| this.debug.logs.push(row))
+                            .ok();
                     }
                     if let Some(msg) = event_to_agent(&val) {
-                        update_state(|s| s.messages.push(msg));
+                        this.update(&mut cx, |this, _| this.debug.messages.push(msg))
+                            .ok();
                     }
-                    weak.update(&mut cx, |_, cx| cx.notify()).ok();
+                    this.update(&mut cx, |_, cx| cx.notify()).ok();
                 }
-                update_state(|s| s.stream_alive = false);
+                this.update(&mut cx, |this, _| this.debug.stream_alive = false)
+                    .ok();
             }
         },
     )
@@ -271,8 +288,8 @@ pub(super) fn spawn_init(game_id: String, gen: u64, cx: &mut Context<AppSidebar>
 pub(super) fn run_match_cmd(game_id: String, cmd: MatchCmd, cx: &mut Context<AppSidebar>) {
     let state = provider::process_service().state.clone();
     cx.spawn(
-        move |weak: gpui::WeakEntity<AppSidebar>, cx: &mut gpui::AsyncApp| {
-            let weak = weak.clone();
+        move |this: gpui::WeakEntity<AppSidebar>, cx: &mut gpui::AsyncApp| {
+            let this = this.clone();
             let mut cx = cx.clone();
             let state = state.clone();
             let game_id = game_id.clone();
@@ -293,18 +310,31 @@ pub(super) fn run_match_cmd(game_id: String, cmd: MatchCmd, cx: &mut Context<App
                     }
                 };
                 match result {
-                    Ok(()) => update_state(|s| s.error = None),
-                    Err(e) => update_state(|s| {
-                        s.error = Some(e);
-                        match &cmd {
-                            MatchCmd::GodMode(_) => s.god_mode = !s.god_mode,
-                            MatchCmd::Cooldown(_) => s.cooldown_disabled = !s.cooldown_disabled,
-                            MatchCmd::Pause | MatchCmd::Resume => s.paused = !s.paused,
-                            _ => {}
-                        }
-                    }),
+                    Ok(()) => {
+                        this.update(&mut cx, |this, cx| {
+                            this.debug.error = None;
+                            cx.notify();
+                        })
+                        .ok();
+                    }
+                    Err(e) => {
+                        this.update(&mut cx, |this, cx| {
+                            this.debug.error = Some(e);
+                            match &cmd {
+                                MatchCmd::GodMode(_) => this.debug.god_mode = !this.debug.god_mode,
+                                MatchCmd::Cooldown(_) => {
+                                    this.debug.cooldown_disabled = !this.debug.cooldown_disabled
+                                }
+                                MatchCmd::Pause | MatchCmd::Resume => {
+                                    this.debug.paused = !this.debug.paused
+                                }
+                                _ => {}
+                            }
+                            cx.notify();
+                        })
+                        .ok();
+                    }
                 }
-                weak.update(&mut cx, |_, cx| cx.notify()).ok();
             }
         },
     )

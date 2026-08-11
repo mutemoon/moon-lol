@@ -1,6 +1,6 @@
 //! 房间详情页（对应 client `pages/rooms/[id].vue`，用 sidebar.current_room_id）。
 //!
-//! 子模块：types（thread_local 状态）、logic（拉取 / 轮询 / 房间操作）、ui（渲染片段）。
+//! 子模块：types（AppSidebar.room_detail 状态）、logic（拉取 / 轮询 / 房间操作）、ui（渲染片段）。
 
 mod logic;
 mod types;
@@ -14,9 +14,12 @@ use gpui_component::scroll::ScrollableElement;
 use gpui_component::{h_flex, v_flex, ActiveTheme, Disableable, IconName, StyledExt};
 use lol_web_protocol::room::{RoomStatus, TeamPolicy};
 use lol_web_protocol::spawn_preset::Team;
+pub use types::RoomDetailPageState;
 
-use self::logic::{spawn_dissolve_room, spawn_leave_room, spawn_load, spawn_poll, spawn_start_match};
-use self::types::{reset_state_for, update_state, with_state};
+use self::logic::{
+    spawn_dissolve_room, spawn_leave_room, spawn_load, spawn_poll, spawn_start_match,
+};
+use self::types::reset_state_for;
 use self::ui::{render_add_dialog, render_team_column};
 use crate::components::sidebar::AppSidebar;
 use crate::types::ActiveView;
@@ -26,7 +29,7 @@ use crate::types::ActiveView;
 /// 房间详情（对应 client `pages/rooms/[id].vue`，用 sidebar.current_room_id）。
 pub fn render_room_detail(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> AnyElement {
     let room_id = sidebar.current_room_id;
-    reset_state_for(room_id);
+    reset_state_for(sidebar, room_id);
 
     // ── 空态：未选中房间 ──
     let Some(id) = room_id else {
@@ -56,29 +59,23 @@ pub fn render_room_detail(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>
     };
 
     // 首次加载 + 5s 轮询（防重复 spawn）
-    let (inited, polling) = with_state(|s| (s.inited, s.polling));
+    let (inited, polling) = (sidebar.room_detail.inited, sidebar.room_detail.polling);
     if !inited {
-        update_state(|s| {
-            s.inited = true;
-            s.loading = true;
-        });
+        sidebar.room_detail.inited = true;
+        sidebar.room_detail.loading = true;
         spawn_load(cx, id);
     }
     if !polling {
-        update_state(|s| s.polling = true);
+        sidebar.room_detail.polling = true;
         spawn_poll(cx, id);
     }
 
-    let (loading, room, slots, agents, error, starting) = with_state(|s| {
-        (
-            s.loading,
-            s.room.clone(),
-            s.slots.clone(),
-            s.agents.clone(),
-            s.error.clone(),
-            s.starting,
-        )
-    });
+    let loading = sidebar.room_detail.loading;
+    let room = sidebar.room_detail.room.clone();
+    let slots = sidebar.room_detail.slots.clone();
+    let agents = sidebar.room_detail.agents.clone();
+    let error = sidebar.room_detail.error.clone();
+    let starting = sidebar.room_detail.starting;
 
     let muted = cx.theme().muted_foreground;
     let border = cx.theme().border;
@@ -288,8 +285,8 @@ pub fn render_room_detail(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>
                     "开始对局"
                 })
                 .disabled(slots.is_empty() || starting)
-                .on_click(cx.listener(move |_, _, _, cx| {
-                    spawn_start_match(cx, id);
+                .on_click(cx.listener(move |this, _, _, cx| {
+                    spawn_start_match(this, cx, id);
                 })),
         );
 
@@ -322,6 +319,6 @@ pub fn render_room_detail(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>
         )
         .child(divider())
         .child(footer)
-        .child(render_add_dialog(cx, id, &agents))
+        .child(render_add_dialog(sidebar, cx, id, &agents))
         .into_any_element()
 }
