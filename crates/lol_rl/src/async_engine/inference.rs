@@ -12,6 +12,7 @@ use crate::policy::ActorCritic;
 pub struct InferenceRequest {
     pub worker_id: usize,
     pub obs_vec: Vec<f32>,
+    pub action_mask: Option<Vec<bool>>,
     pub reply_tx: Sender<InferenceResponse>,
 }
 
@@ -90,12 +91,12 @@ impl InferenceServer {
                     continue;
                 }
 
-                // 4. 组装输入 Tensor (batch_len, state_dim)
+                // 4. 组装输入 Tensor (batch_len, state_dim) 与 Masks
                 let mut flat_states = Vec::with_capacity(batch_len * state_dim);
-                let mut obs_refs = Vec::with_capacity(batch_len);
+                let mut masks = Vec::with_capacity(batch_len);
                 for req in &batch_reqs {
                     flat_states.extend_from_slice(&req.obs_vec);
-                    obs_refs.push(req.obs_vec.as_slice());
+                    masks.push(req.action_mask.clone());
                 }
 
                 let state_tensor =
@@ -108,7 +109,9 @@ impl InferenceServer {
                     };
 
                 // 5. 批量前向推理
-                let sample_res = current_ac.sample_batch(&state_tensor, &obs_refs);
+                let has_any_mask = masks.iter().any(|m| m.is_some());
+                let masks_ref = if has_any_mask { Some(masks.as_slice()) } else { None };
+                let sample_res = current_ac.sample_batch(&state_tensor, masks_ref);
                 match sample_res {
                     Ok(results) => {
                         for (i, req) in batch_reqs.drain(..).enumerate() {

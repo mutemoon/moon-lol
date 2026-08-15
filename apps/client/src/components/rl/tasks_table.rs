@@ -67,7 +67,8 @@ impl TaskTableDelegate {
     }
 
     /// 更新数据。不触发 `TableState::refresh()`，以保留用户手动调整过的列宽。
-    pub fn set_tasks(&mut self, tasks: Vec<TaskOverviewItem>) {
+    pub fn set_tasks(&mut self, mut tasks: Vec<TaskOverviewItem>) {
+        tasks.sort_by(|a, b| b.created_at.cmp(&a.created_at));
         self.tasks = tasks;
     }
 }
@@ -675,6 +676,23 @@ impl Render for CreateTaskDialogView {
                                         h_flex()
                                             .gap_1()
                                             .child(
+                                                Button::new("env-v2-btn")
+                                                    .when(
+                                                        cfg.env_name == lol_rl_protocol::ENV_FIORA_V2,
+                                                        |b| b.primary(),
+                                                    )
+                                                    .when(
+                                                        cfg.env_name != lol_rl_protocol::ENV_FIORA_V2,
+                                                        |b| b.outline(),
+                                                    )
+                                                    .compact()
+                                                    .label("全技能实战 (V2)")
+                                                    .on_click(cx.listener(|this, _, _, cx| {
+                                                        this.form.env_name = lol_rl_protocol::ENV_FIORA_V2.to_string();
+                                                        cx.notify();
+                                                    })),
+                                            )
+                                            .child(
                                                 Button::new("env-real-btn")
                                                     .when(
                                                         cfg.env_name == lol_rl_protocol::ENV_FIORA_V1,
@@ -685,7 +703,7 @@ impl Render for CreateTaskDialogView {
                                                         |b| b.outline(),
                                                     )
                                                     .compact()
-                                                    .label("真实移动 (10f)")
+                                                    .label("真实移动 (V1)")
                                                     .on_click(cx.listener(|this, _, _, cx| {
                                                         this.form.env_name = lol_rl_protocol::ENV_FIORA_V1.to_string();
                                                         cx.notify();
@@ -702,7 +720,7 @@ impl Render for CreateTaskDialogView {
                                                         |b| b.outline(),
                                                     )
                                                     .compact()
-                                                    .label("瞬移站位 (Legacy)")
+                                                    .label("瞬移站位 (V0)")
                                                     .on_click(cx.listener(|this, _, _, cx| {
                                                         this.form.env_name = lol_rl_protocol::ENV_FIORA_V0.to_string();
                                                         cx.notify();

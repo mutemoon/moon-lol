@@ -475,6 +475,32 @@ fn render_policy_display(policy: &PolicyDisplay, cx: &Context<AppSidebar>) -> An
             .child(policy_value_row("move_z", *move_z))
             .child(policy_prob_bar("攻击", *attack_prob, cx))
             .into_any_element(),
+        PolicyDisplay::HybridMulti {
+            continuous_means,
+            discrete_probs,
+        } => {
+            let offset_x = continuous_means.first().copied().unwrap_or(0.0);
+            let offset_z = continuous_means.get(1).copied().unwrap_or(0.0);
+            v_flex()
+                .gap_1p5()
+                .child(
+                    div()
+                        .text_xs()
+                        .text_color(cx.theme().muted_foreground)
+                        .child("连续偏移 (±1 归一化)"),
+                )
+                .child(policy_value_row("offset_x", offset_x))
+                .child(policy_value_row("offset_z", offset_z))
+                .child(
+                    div()
+                        .text_xs()
+                        .text_color(cx.theme().muted_foreground)
+                        .mt_1()
+                        .child("动作类别概率 (Action Probs)"),
+                )
+                .children(discrete_probs.iter().map(|p| policy_prob_bar(&p.action, p.prob, cx)))
+                .into_any_element()
+        }
     }
 }
 

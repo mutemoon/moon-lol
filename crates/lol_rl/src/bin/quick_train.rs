@@ -3,7 +3,7 @@ use std::sync::Arc;
 use std::time::Instant;
 
 use candle_core::Device;
-use crossbeam_channel::{Receiver, Sender, unbounded};
+use crossbeam_channel::unbounded;
 use lol_env::RlEnvironment;
 use lol_env::fiora_v0::FioraVsRivenEnv;
 use lol_rl::device::select_device;
@@ -93,6 +93,7 @@ fn main() -> anyhow::Result<()> {
 
                         for _ in 0..horizon {
                             let state_vec = FioraVsRivenEnv::obs_to_vector(&current_obs);
+                            let action_mask = FioraVsRivenEnv::action_mask(&current_obs);
                             let state_tensor = candle_core::Tensor::from_vec(
                                 state_vec.clone(),
                                 (1, state_dim),
@@ -101,7 +102,7 @@ fn main() -> anyhow::Result<()> {
                             .unwrap();
 
                             let (encoded, log_prob, val) =
-                                policy.sample_action(&state_tensor, &state_vec).unwrap();
+                                policy.sample_action(&state_tensor, action_mask.as_deref()).unwrap();
 
                             let act = FioraVsRivenEnv::action_from_encoding(&encoded);
                             let res = env.step(act);
@@ -113,7 +114,7 @@ fn main() -> anyhow::Result<()> {
                                     item.value;
                             }
 
-                            buffer.push(state_vec, encoded, log_prob, res.reward, val, done);
+                            buffer.push(state_vec, encoded, log_prob, res.reward, val, done, action_mask);
 
                             if done {
                                 ep_returns.push(cur_return);

@@ -135,6 +135,20 @@ pub trait RlEnvironment: 'static {
 
     fn is_action_masked(obs: &Self::Obs, action_idx: usize) -> bool;
 
+    /// 返回动作有效性掩码（true 为有效动作，false 为被掩码屏蔽的非法动作）。
+    /// 纯离散空间对应各分类，混合空间对应离散控制头分类。
+    fn action_mask(_obs: &Self::Obs) -> Option<Vec<bool>> {
+        None
+    }
+
+    /// 关联/静态获取环境奖励公式规范（用于 UI 符号展示、参数解析及遥测指标）。
+    fn reward_formula_spec() -> Option<RewardFormulaSpec>
+    where
+        Self: Sized,
+    {
+        None
+    }
+
     fn reward_formula(&self) -> Option<RewardFormulaSpec> {
         None
     }
@@ -176,8 +190,21 @@ pub struct EnvMeta {
     pub action_labels: Vec<String>,
 }
 
+/// 集中注册的环境类型列表宏，任何需要按环境派发的地方均可直接复用该宏
+#[macro_export]
+macro_rules! for_all_rl_environments {
+    ($macro_name:ident) => {
+        $macro_name!(
+            ($crate::fiora_v2::FioraV2Env, lol_rl_protocol::ENV_FIORA_V2),
+            ($crate::fiora_v1::FioraVsRivenRealEnv, lol_rl_protocol::ENV_FIORA_V1),
+            ($crate::fiora_v0::FioraVsRivenEnv, lol_rl_protocol::ENV_FIORA_V0)
+        );
+    };
+}
+
 pub fn list_available_envs() -> Vec<EnvMeta> {
     vec![
+        crate::fiora_v2::FioraV2Env::meta(),
         crate::fiora_v1::FioraVsRivenRealEnv::meta(),
         crate::fiora_v0::FioraVsRivenEnv::meta(),
     ]

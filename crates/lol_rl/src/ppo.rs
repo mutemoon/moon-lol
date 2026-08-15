@@ -14,6 +14,8 @@ pub struct RolloutBuffer {
     pub rewards: Vec<f32>,
     pub values: Vec<f32>,
     pub dones: Vec<bool>,
+    /// 动作掩码（若环境提供）：true = 有效，false = 非法/屏蔽
+    pub action_masks: Vec<Option<Vec<bool>>>,
 }
 
 impl RolloutBuffer {
@@ -25,6 +27,7 @@ impl RolloutBuffer {
             rewards: Vec::new(),
             values: Vec::new(),
             dones: Vec::new(),
+            action_masks: Vec::new(),
         }
     }
 
@@ -36,6 +39,7 @@ impl RolloutBuffer {
         reward: f32,
         value: f32,
         done: bool,
+        action_mask: Option<Vec<bool>>,
     ) {
         self.states.push(state);
         self.actions.push(action);
@@ -43,6 +47,19 @@ impl RolloutBuffer {
         self.rewards.push(reward);
         self.values.push(value);
         self.dones.push(done);
+        self.action_masks.push(action_mask);
+    }
+
+    pub fn push_unmasked(
+        &mut self,
+        state: Vec<f32>,
+        action: Vec<f32>,
+        log_prob: f32,
+        reward: f32,
+        value: f32,
+        done: bool,
+    ) {
+        self.push(state, action, log_prob, reward, value, done, None);
     }
 
     pub fn clear(&mut self) {
@@ -52,10 +69,21 @@ impl RolloutBuffer {
         self.rewards.clear();
         self.values.clear();
         self.dones.clear();
+        self.action_masks.clear();
     }
 
     pub fn len(&self) -> usize {
         self.states.len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.states.is_empty()
+    }
+}
+
+impl Default for RolloutBuffer {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
@@ -174,8 +202,7 @@ impl PPOAgent {
             .and_then(|t| t.shape().dims().first().copied())
             .unwrap_or(hidden_dim);
 
-        // 校验 checkpoint 的动作空间结构与请求一致：依据是否存在 log_std（连续/混合）与
-        // attack_head.weight（混合）张量判定，不依赖层数/维度，避免网络结构演进时误报。
+        // 校验 checkpoint 的动作空间结构与请求一致
         let has_log_std = tensors.contains_key("log_std");
         let has_attack_head = tensors.contains_key("attack_head.weight");
         let want_log_std = !matches!(action_space, ActionSpace::Discrete(_));
@@ -267,6 +294,7 @@ impl PPOAgent {
         let old_log_probs_tensor = Tensor::from_vec(buffer.log_probs.clone(), (n,), &self.device)?;
         let returns_tensor = Tensor::from_vec(returns, (n,), &self.device)?;
         let advantages_tensor = Tensor::from_vec(advantages, (n,), &self.device)?;
+        let masks_tensor = build_masks_tensor(&buffer.action_masks, &self.device)?;
 
         let mut last_stats = PPOStats {
             policy_loss: 0.0,
@@ -281,7 +309,7 @@ impl PPOAgent {
         for _epoch in 0..self.config.ppo_epochs {
             let (new_log_probs, new_values, entropy) = self
                 .actor_critic
-                .evaluate_actions(&states_tensor, &actions_tensor)?;
+                .evaluate_actions(&states_tensor, &actions_tensor, masks_tensor.as_ref())?;
 
             // Ratio r(theta) = exp(new_log_probs - old_log_probs)
             let log_ratio = (&new_log_probs - &old_log_probs_tensor)?;
@@ -306,7 +334,7 @@ impl PPOAgent {
             // KL divergence (K1 estimator: ratio - 1 - log(ratio))
             let kl = (&ratio - 1.0 - &log_ratio)?.mean_all()?;
 
-            // clip_frac：ratio 超出 [1-eps, 1+eps] 的元素占比（训练健康度信号）
+            // clip_frac：ratio 超出 [1-eps, 1+eps] 的元素占比
             let clip_frac = (ratio.lt(1.0 - self.config.clip_eps)?.to_dtype(DType::F32)?
                 + ratio.gt(1.0 + self.config.clip_eps)?.to_dtype(DType::F32)?)?
             .mean_all()?;
@@ -340,7 +368,7 @@ impl PPOAgent {
         Ok(last_stats)
     }
 
-    /// 使用 Mini-Batch 划分更新策略网络（充分发挥 GPU 吞吐量和梯度估计稳定性）
+    /// 使用 Mini-Batch 划分更新策略网络
     pub fn update_minibatch(
         &mut self,
         buffer: &RolloutBuffer,
@@ -379,6 +407,28 @@ impl PPOAgent {
         let enc_dim = buffer.actions[0].len();
         let flat_actions: Vec<f32> = buffer.actions.iter().flatten().copied().collect();
 
+        let mask_dim = buffer
+            .action_masks
+            .iter()
+            .find_map(|m| m.as_ref().map(|v| v.len()))
+            .unwrap_or(0);
+        let has_masks = mask_dim > 0 && buffer.action_masks.iter().any(|m| m.is_some());
+        let flat_masks: Option<Vec<f32>> = if has_masks {
+            let mut fm = Vec::with_capacity(n * mask_dim);
+            for m_opt in &buffer.action_masks {
+                if let Some(m) = m_opt {
+                    for &valid in m {
+                        fm.push(if valid { 1.0f32 } else { 0.0f32 });
+                    }
+                } else {
+                    fm.extend(std::iter::repeat_n(1.0f32, mask_dim));
+                }
+            }
+            Some(fm)
+        } else {
+            None
+        };
+
         let mut last_stats = PPOStats {
             policy_loss: 0.0,
             value_loss: 0.0,
@@ -390,7 +440,7 @@ impl PPOAgent {
         };
 
         use rand::seq::SliceRandom;
-        let mut rng = rand::thread_rng();
+        let mut rng = rand::rng();
 
         for _epoch in 0..self.config.ppo_epochs {
             let mut indices: Vec<usize> = (0..n).collect();
@@ -401,6 +451,11 @@ impl PPOAgent {
             let mut shuffled_log_probs = Vec::with_capacity(n);
             let mut shuffled_returns = Vec::with_capacity(n);
             let mut shuffled_advantages = Vec::with_capacity(n);
+            let mut shuffled_masks = if has_masks {
+                Some(Vec::with_capacity(n * mask_dim))
+            } else {
+                None
+            };
 
             for &idx in &indices {
                 shuffled_states
@@ -410,6 +465,9 @@ impl PPOAgent {
                 shuffled_log_probs.push(buffer.log_probs[idx]);
                 shuffled_returns.push(returns[idx]);
                 shuffled_advantages.push(advantages[idx]);
+                if let (Some(sm), Some(fm)) = (&mut shuffled_masks, &flat_masks) {
+                    sm.extend_from_slice(&fm[idx * mask_dim..(idx + 1) * mask_dim]);
+                }
             }
 
             let states_tensor = Tensor::from_vec(shuffled_states, (n, state_dim), &self.device)?;
@@ -417,6 +475,11 @@ impl PPOAgent {
             let old_log_probs_tensor = Tensor::from_vec(shuffled_log_probs, (n,), &self.device)?;
             let returns_tensor = Tensor::from_vec(shuffled_returns, (n,), &self.device)?;
             let advantages_tensor = Tensor::from_vec(shuffled_advantages, (n,), &self.device)?;
+            let masks_tensor = if let Some(sm) = shuffled_masks {
+                Some(Tensor::from_vec(sm, (n, mask_dim), &self.device)?)
+            } else {
+                None
+            };
 
             let mut start_idx = 0;
             while start_idx < n {
@@ -428,10 +491,15 @@ impl PPOAgent {
                 let mb_old_log_probs = old_log_probs_tensor.narrow(0, start_idx, mb_len)?;
                 let mb_returns = returns_tensor.narrow(0, start_idx, mb_len)?;
                 let mb_advantages = advantages_tensor.narrow(0, start_idx, mb_len)?;
+                let mb_masks = if let Some(ref mt) = masks_tensor {
+                    Some(mt.narrow(0, start_idx, mb_len)?)
+                } else {
+                    None
+                };
 
                 let (new_log_probs, new_values, entropy) = self
                     .actor_critic
-                    .evaluate_actions(&mb_states, &mb_actions)?;
+                    .evaluate_actions(&mb_states, &mb_actions, mb_masks.as_ref())?;
 
                 let log_ratio = (&new_log_probs - &mb_old_log_probs)?;
                 let ratio = log_ratio.exp()?;
@@ -505,14 +573,25 @@ impl PPOAgent {
         let state_dim = buffers[0].states[0].len();
         let enc_dim = buffers[0].actions[0].len();
 
+        let mask_dim = buffers
+            .iter()
+            .find_map(|b| b.action_masks.iter().find_map(|m| m.as_ref().map(|v| v.len())))
+            .unwrap_or(0);
+        let has_masks = mask_dim > 0 && buffers.iter().any(|b| b.action_masks.iter().any(|m| m.is_some()));
+
         let mut all_states = Vec::with_capacity(total_n * state_dim);
         let mut all_actions = Vec::with_capacity(total_n * enc_dim);
         let mut all_old_log_probs = Vec::with_capacity(total_n);
         let mut all_returns = Vec::with_capacity(total_n);
         let mut all_advantages = Vec::with_capacity(total_n);
+        let mut all_masks: Option<Vec<f32>> = if has_masks {
+            Some(Vec::with_capacity(total_n * mask_dim))
+        } else {
+            None
+        };
 
         for (i, buffer) in buffers.iter().enumerate() {
-            if buffer.len() == 0 {
+            if buffer.is_empty() {
                 continue;
             }
             let last_val = last_vals.get(i).copied().unwrap_or(0.0);
@@ -524,6 +603,15 @@ impl PPOAgent {
                 all_old_log_probs.push(buffer.log_probs[t]);
                 all_returns.push(returns[t]);
                 all_advantages.push(advantages[t]);
+                if let Some(ref mut am) = all_masks {
+                    if let Some(ref m) = buffer.action_masks[t] {
+                        for &valid in m {
+                            am.push(if valid { 1.0f32 } else { 0.0f32 });
+                        }
+                    } else {
+                        am.extend(std::iter::repeat_n(1.0f32, mask_dim));
+                    }
+                }
             }
         }
 
@@ -550,7 +638,7 @@ impl PPOAgent {
         };
 
         use rand::seq::SliceRandom;
-        let mut rng = rand::thread_rng();
+        let mut rng = rand::rng();
 
         for _epoch in 0..self.config.ppo_epochs {
             let mut indices: Vec<usize> = (0..total_n).collect();
@@ -561,6 +649,11 @@ impl PPOAgent {
             let mut shuffled_log_probs = Vec::with_capacity(total_n);
             let mut shuffled_returns = Vec::with_capacity(total_n);
             let mut shuffled_advantages = Vec::with_capacity(total_n);
+            let mut shuffled_masks: Option<Vec<f32>> = if has_masks {
+                Some(Vec::with_capacity(total_n * mask_dim))
+            } else {
+                None
+            };
 
             for &idx in &indices {
                 shuffled_states
@@ -570,6 +663,9 @@ impl PPOAgent {
                 shuffled_log_probs.push(all_old_log_probs[idx]);
                 shuffled_returns.push(all_returns[idx]);
                 shuffled_advantages.push(all_advantages[idx]);
+                if let (Some(sm), Some(am)) = (&mut shuffled_masks, &all_masks) {
+                    sm.extend_from_slice(&am[idx * mask_dim..(idx + 1) * mask_dim]);
+                }
             }
 
             let states_tensor =
@@ -581,6 +677,11 @@ impl PPOAgent {
             let returns_tensor = Tensor::from_vec(shuffled_returns, (total_n,), &self.device)?;
             let advantages_tensor =
                 Tensor::from_vec(shuffled_advantages, (total_n,), &self.device)?;
+            let masks_tensor = if let Some(sm) = shuffled_masks {
+                Some(Tensor::from_vec(sm, (total_n, mask_dim), &self.device)?)
+            } else {
+                None
+            };
 
             let mut start_idx = 0;
             while start_idx < total_n {
@@ -592,10 +693,15 @@ impl PPOAgent {
                 let mb_old_log_probs = old_log_probs_tensor.narrow(0, start_idx, mb_len)?;
                 let mb_returns = returns_tensor.narrow(0, start_idx, mb_len)?;
                 let mb_advantages = advantages_tensor.narrow(0, start_idx, mb_len)?;
+                let mb_masks = if let Some(ref mt) = masks_tensor {
+                    Some(mt.narrow(0, start_idx, mb_len)?)
+                } else {
+                    None
+                };
 
                 let (new_log_probs, new_values, entropy) = self
                     .actor_critic
-                    .evaluate_actions(&mb_states, &mb_actions)?;
+                    .evaluate_actions(&mb_states, &mb_actions, mb_masks.as_ref())?;
 
                 let log_ratio = (&new_log_probs - &mb_old_log_probs)?;
                 let ratio = log_ratio.exp()?;
@@ -645,6 +751,34 @@ impl PPOAgent {
 
         Ok(last_stats)
     }
+}
+
+fn build_masks_tensor(
+    masks: &[Option<Vec<bool>>],
+    device: &Device,
+) -> Result<Option<Tensor>> {
+    if !masks.iter().any(|m| m.is_some()) {
+        return Ok(None);
+    }
+    let n = masks.len();
+    let dim = masks
+        .iter()
+        .find_map(|m| m.as_ref().map(|v| v.len()))
+        .unwrap_or(0);
+    if dim == 0 {
+        return Ok(None);
+    }
+    let mut flat = Vec::with_capacity(n * dim);
+    for m_opt in masks {
+        if let Some(m) = m_opt {
+            for &valid in m {
+                flat.push(if valid { 1.0f32 } else { 0.0f32 });
+            }
+        } else {
+            flat.extend(std::iter::repeat_n(1.0f32, dim));
+        }
+    }
+    Tensor::from_vec(flat, (n, dim), device).map(Some)
 }
 
 #[cfg(test)]
@@ -807,9 +941,9 @@ mod tests {
         for _ in 0..8 {
             let obs_vec: Vec<f32> = (0..state_dim).map(|i| i as f32 * 0.1).collect();
             let state = Tensor::from_vec(obs_vec.clone(), (1, state_dim), &device)?;
-            let (encoded, log_prob, value) = agent.actor_critic.sample_action(&state, &obs_vec)?;
+            let (encoded, log_prob, value) = agent.actor_critic.sample_action(&state, None)?;
             assert_eq!(encoded.len(), 3, "hybrid 编码应为 [move_x, move_z, attack]");
-            buffer.push(obs_vec, encoded, log_prob, 0.1, value, false);
+            buffer.push_unmasked(obs_vec, encoded, log_prob, 0.1, value, false);
         }
 
         let stats = agent.update(&buffer, 0.0)?;
@@ -832,10 +966,93 @@ mod tests {
         )?;
         let obs_vec: Vec<f32> = (0..state_dim).map(|i| i as f32 * 0.1).collect();
         let state = Tensor::from_vec(obs_vec.clone(), (1, state_dim), &loaded.device())?;
-        let (encoded_after, _, _) = loaded.actor_critic.sample_action(&state, &obs_vec)?;
+        let (encoded_after, _, _) = loaded.actor_critic.sample_action(&state, None)?;
         assert_eq!(encoded_after.len(), 3);
 
         let _ = std::fs::remove_file(&save_path);
+        Ok(())
+    }
+
+    #[test]
+    fn hybrid_ppo_fiora_v2_smoke() -> Result<()> {
+        let state_dim = 31;
+        let hidden_dim = 64;
+        let action_space = ActionSpace::Hybrid {
+            continuous_dims: 2,
+            discrete_classes: 6,
+        };
+        let config = PPOConfig::default();
+        let device = Device::Cpu;
+
+        let mut agent = PPOAgent::new(
+            state_dim,
+            hidden_dim,
+            action_space,
+            config.clone(),
+            device.clone(),
+        )?;
+
+        let mut buffer = RolloutBuffer::new();
+        for step in 0..16 {
+            let mut obs_vec: Vec<f32> = (0..state_dim).map(|i| (i as f32 * 0.05).sin()).collect();
+            obs_vec[16] = if step % 2 == 0 { 1.5 } else { 3.0 };
+            let state = Tensor::from_vec(obs_vec.clone(), (1, state_dim), &device)?;
+            let mask = Some(vec![true, true, step % 2 == 0, true, true, true]);
+            let (encoded, log_prob, value) = agent.actor_critic.sample_action(&state, mask.as_deref())?;
+            assert_eq!(
+                encoded.len(),
+                3,
+                "FioraV2 hybrid 动作编码应为 [offset_x, offset_z, discrete_idx]"
+            );
+            let disc_idx = encoded[2] as usize;
+            assert!(disc_idx < 6, "离散动作索引应在 [0, 5] 范围内");
+            buffer.push(obs_vec, encoded, log_prob, 0.25, value, false, mask);
+        }
+
+        let stats = agent.update(&buffer, 0.0)?;
+        assert!(
+            stats.policy_loss.is_finite(),
+            "V2 policy_loss 应为有效有限值"
+        );
+        assert!(stats.value_loss.is_finite(), "V2 value_loss 应为有效有限值");
+        assert!(
+            stats.entropy_loss.is_finite(),
+            "V2 entropy_loss 应为有效有限值"
+        );
+
+        // 验证批量采样 sample_batch
+        let states = Tensor::zeros((4, state_dim), DType::F32, &device)?;
+        let batch_samples = agent.actor_critic.sample_batch(&states, None)?;
+        assert_eq!(batch_samples.len(), 4);
+
+        // 验证策略可视化显示
+        let dummy_state = Tensor::zeros((1, state_dim), DType::F32, &device)?;
+        let labels = ["NoOp", "Move", "Attack", "Q", "E", "R"];
+        let display = agent.actor_critic.policy_display_real(&dummy_state, None, &labels)?;
+        match display {
+            lol_rl_protocol::PolicyDisplay::HybridMulti {
+                continuous_means,
+                discrete_probs,
+            } => {
+                assert_eq!(continuous_means.len(), 2);
+                assert_eq!(discrete_probs.len(), 6);
+                let sum_prob: f32 = discrete_probs.iter().map(|p| p.prob).sum();
+                assert!((sum_prob - 1.0).abs() < 1e-3, "离散概率之和应为 1.0");
+            }
+            other => panic!("预期返回 PolicyDisplay::HybridMulti，实际为 {:?}", other),
+        }
+
+        // 验证多 Buffer 掩码 Mini-Batch 更新
+        let stats_multi = agent.update_multi_buffer(&[buffer], &[0.0], 8)?;
+        assert!(
+            stats_multi.policy_loss.is_finite(),
+            "update_multi_buffer policy_loss 应为有效有限值"
+        );
+        assert!(
+            stats_multi.value_loss.is_finite(),
+            "update_multi_buffer value_loss 应为有效有限值"
+        );
+
         Ok(())
     }
 }

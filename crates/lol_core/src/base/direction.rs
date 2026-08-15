@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 /// 因为屏幕方位依赖相机朝向，所以轴向语义更通用。
 ///
 /// 二维参数约定：`Vec2.x` 对应世界 X 轴，`Vec2.y` 对应世界 Z 轴。
-#[derive(Clone, Serialize, Deserialize, Debug)]
+#[derive(Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Debug)]
 pub enum Direction {
     /// X 正轴
     X,

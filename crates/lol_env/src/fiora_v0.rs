@@ -460,7 +460,15 @@ impl RlEnvironment for FioraVsRivenEnv {
         obs.distance > ATTACK_MASK_DISTANCE && action_idx == 4
     }
 
-    fn reward_formula(&self) -> Option<lol_rl_protocol::RewardFormulaSpec> {
+    fn action_mask(obs: &Self::Obs) -> Option<Vec<bool>> {
+        let mut mask = vec![true; 5];
+        if obs.distance > ATTACK_MASK_DISTANCE {
+            mask[4] = false;
+        }
+        Some(mask)
+    }
+
+    fn reward_formula_spec() -> Option<lol_rl_protocol::RewardFormulaSpec> {
         Some(FioraVsRivenRewardModel.formula_spec())
     }
 }
@@ -701,6 +709,7 @@ pub fn step_world(
     is_vital_break = is_vital_break && prev_obs.has_vital && prev_obs.vital_is_active;
 
     // 6. Compute step reward and breakdown using structured AST formula
+    let elapsed_secs = step_count as f32 * (10.0 / 60.0);
     let (reward, reward_breakdown, reward_variables) = compute_step_reward(
         prev_riven_hp,
         curr_riven_hp,
@@ -710,6 +719,7 @@ pub fn step_world(
         action == FioraVsRivenAction::AttackRiven,
         is_vital_break,
         &prev_obs,
+        elapsed_secs,
     );
 
     let terminated = curr_riven_hp <= 0.0 || obs.fiora_hp <= 0.0;

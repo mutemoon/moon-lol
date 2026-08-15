@@ -29,6 +29,7 @@ pub struct SampleTransition {
     pub reward_breakdown: Vec<RewardItem>,
     pub reward_variables: HashMap<String, f32>,
     pub obs_payload: Option<ObsFeaturePayload>,
+    pub action_mask: Option<Vec<bool>>,
 }
 
 pub struct ActorPool {
@@ -65,12 +66,14 @@ impl ActorPool {
 
                 while running.load(Ordering::Relaxed) {
                     let obs_vec = E::obs_to_vector(&current_obs);
+                    let action_mask = E::action_mask(&current_obs);
 
                     // 1. 发送推理请求
                     if infer_tx
                         .send(InferenceRequest {
                             worker_id,
                             obs_vec: obs_vec.clone(),
+                            action_mask: action_mask.clone(),
                             reply_tx: reply_tx.clone(),
                         })
                         .is_err()
@@ -132,6 +135,7 @@ impl ActorPool {
                         reward_breakdown,
                         reward_variables: res.reward_variables,
                         obs_payload,
+                        action_mask,
                     };
 
                     if sample_tx.send(transition).is_err() {

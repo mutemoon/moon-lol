@@ -5,7 +5,6 @@ use std::time::Instant;
 
 use candle_core::Tensor;
 use chrono::Utc;
-use lol_env::RewardModel;
 pub use lol_rl_protocol::{
     CheckpointItem, InFrame, ObsFeaturePayload, OutFrame, RewardItem, TaskConfigPayload,
     TaskOverviewItem,
@@ -398,7 +397,7 @@ impl RLService {
 
     async fn broadcast_task_list(&self) {
         let tasks_lock = self.tasks.lock().await;
-        let task_items: Vec<TaskOverviewItem> = tasks_lock
+        let mut task_items: Vec<TaskOverviewItem> = tasks_lock
             .values()
             .map(|t| TaskOverviewItem {
                 id: t.id.clone(),
@@ -417,6 +416,7 @@ impl RLService {
                 created_at: t.created_at.clone(),
             })
             .collect();
+        task_items.sort_by(|a, b| b.created_at.cmp(&a.created_at));
         let _ = self.event_tx.send(OutFrame::TaskList { tasks: task_items });
     }
 
@@ -521,24 +521,35 @@ fn run_training_loop_for_task(
             .unwrap_or_default()
     };
 
-    if task_config.env_name == lol_rl_protocol::ENV_FIORA_V0 {
-        run_generic_training_loop::<lol_env::FioraVsRivenEnv>(
-            event_tx,
-            tasks,
-            repo,
-            task_id,
-            task_config,
-        );
-    } else {
-        // Default to real movement environment
-        run_generic_training_loop::<lol_env::FioraVsRivenRealEnv>(
-            event_tx,
-            tasks,
-            repo,
-            task_id,
-            task_config,
-        );
+    macro_rules! dispatch_task_env {
+        ($(($env_ty:ty, $env_name:expr)),*) => {
+            match task_config.env_name.as_str() {
+                $(
+                    s if s == $env_name => {
+                        run_generic_training_loop::<$env_ty>(
+                            event_tx,
+                            tasks,
+                            repo,
+                            task_id,
+                            task_config,
+                        );
+                    }
+                )*
+                unknown => {
+                    tracing::warn!("未知环境名称 {unknown}，降级使用默认环境");
+                    run_generic_training_loop::<lol_env::FioraVsRivenRealEnv>(
+                        event_tx,
+                        tasks,
+                        repo,
+                        task_id,
+                        task_config,
+                    );
+                }
+            }
+        };
     }
+
+    lol_env::for_all_rl_environments!(dispatch_task_env);
 }
 
 fn run_generic_training_loop<E: lol_env::RlEnvironment + 'static>(
@@ -665,6 +676,7 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment + 'static>(
 
                         for _ in 0..horizon {
                             let state_vec = E::obs_to_vector(&current_obs);
+                            let action_mask = E::action_mask(&current_obs);
                             let state_tensor = match Tensor::from_vec(
                                 state_vec.clone(),
                                 (1, state_dim),
@@ -675,7 +687,7 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment + 'static>(
                             };
 
                             let (encoded, log_prob, val) =
-                                match policy.sample_action(&state_tensor, &state_vec) {
+                                match policy.sample_action(&state_tensor, action_mask.as_deref()) {
                                     Ok(res) => res,
                                     Err(_) => break,
                                 };
@@ -694,7 +706,7 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment + 'static>(
                                 *reward_breakdown.entry(item.name).or_insert(0.0) += item.value;
                             }
 
-                            buffer.push(state_vec, encoded, log_prob, res.reward, val, done);
+                            buffer.push(state_vec, encoded, log_prob, res.reward, val, done, action_mask);
 
                             if done {
                                 ep_returns.push(cur_return);
@@ -926,8 +938,7 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment + 'static>(
 
         let obs_payload = sample_obs.as_ref().and_then(|o| E::obs_to_payload(o));
 
-        let reward_model = lol_env::reward::FioraVsRivenRewardModel;
-        let reward_formula = reward_model.formula_spec();
+        let reward_formula = E::reward_formula_spec();
 
         let out_metrics = OutFrame::Metrics {
             task_id: task_id.clone(),
@@ -948,7 +959,7 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment + 'static>(
             ep_steps_avg,
             reward_breakdown: real_reward_breakdown,
             obs_feature: obs_payload,
-            reward_formula: Some(reward_formula),
+            reward_formula,
             reward_variables: Some(last_reward_variables),
         };
 

@@ -146,18 +146,16 @@ impl AutoTuner {
         let infer_batches = [1, 2, 4, 8, 16, 24, 32, 48, 64, 96, 128];
         let mut infer_latency_us = Vec::with_capacity(infer_batches.len());
 
-        let dummy_obs = vec![0.0f32; state_dim];
         for &b in &infer_batches {
             let dummy_input = Tensor::zeros((b, state_dim), DType::F32, device)?;
-            let obs_refs: Vec<&[f32]> = vec![dummy_obs.as_slice(); b];
 
             for _ in 0..infer_warmup {
-                let _ = ac.sample_batch(&dummy_input, &obs_refs)?;
+                let _ = ac.sample_batch(&dummy_input, None)?;
             }
 
             let start = Instant::now();
             for _ in 0..infer_iters {
-                let _ = ac.sample_batch(&dummy_input, &obs_refs)?;
+                let _ = ac.sample_batch(&dummy_input, None)?;
             }
             let lat_us = (start.elapsed().as_micros() as f64) / (infer_iters as f64);
             let throughput = (b as f64) / (lat_us / 1_000_000.0);
@@ -179,12 +177,12 @@ impl AutoTuner {
             let dummy_actions = Tensor::zeros((b, enc_dim), DType::F32, device)?;
 
             for _ in 0..train_warmup {
-                let _ = ac.evaluate_actions(&dummy_states, &dummy_actions)?;
+                let _ = ac.evaluate_actions(&dummy_states, &dummy_actions, None)?;
             }
 
             let start = Instant::now();
             for _ in 0..train_iters {
-                let _ = ac.evaluate_actions(&dummy_states, &dummy_actions)?;
+                let _ = ac.evaluate_actions(&dummy_states, &dummy_actions, None)?;
             }
             let lat_us = (start.elapsed().as_micros() as f64) / (train_iters as f64);
             let throughput = (b as f64) / (lat_us / 1_000_000.0);

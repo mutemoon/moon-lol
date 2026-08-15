@@ -37,11 +37,20 @@ fn main() -> anyhow::Result<()> {
         .or_else(|| parse_arg("--env_name"))
         .unwrap_or_else(|| lol_rl_protocol::ENV_FIORA_V1.to_string());
 
-    if env_name == lol_rl_protocol::ENV_FIORA_V0 {
-        start_visual_runner_for_env::<lol_env::FioraVsRivenEnv>(port, ckpt_path, hidden_dim)
-    } else {
-        start_visual_runner_for_env::<lol_env::FioraVsRivenRealEnv>(port, ckpt_path, hidden_dim)
+    macro_rules! dispatch_visual_env {
+        ($(($env_ty:ty, $name:expr)),*) => {
+            match env_name.as_str() {
+                $(
+                    s if s == $name => start_visual_runner_for_env::<$env_ty>(port, ckpt_path, hidden_dim),
+                )*
+                unknown => {
+                    tracing::warn!("未知环境名称 {unknown}，使用默认环境");
+                    start_visual_runner_for_env::<lol_env::FioraVsRivenRealEnv>(port, ckpt_path, hidden_dim)
+                }
+            }
+        };
     }
+    lol_env::for_all_rl_environments!(dispatch_visual_env)
 }
 
 fn start_visual_runner_for_env<E: VisualEnvironment>(
@@ -125,6 +134,7 @@ fn start_visual_runner_for_env<E: VisualEnvironment>(
     let enc_dim = action_space.encoding_dim();
     let policy = move |obs: &E::Obs| -> (E::Action, PolicyDisplay) {
         let obs_vec = E::obs_to_vector(obs);
+        let mask = E::action_mask(obs);
         let state = match Tensor::from_vec(obs_vec.clone(), (1, state_dim), &device) {
             Ok(t) => t,
             Err(_) => {
@@ -138,12 +148,12 @@ fn start_visual_runner_for_env<E: VisualEnvironment>(
         let labels = E::action_labels();
         let display = agent_clone
             .actor_critic
-            .policy_display_real(&state, &obs_vec, labels)
+            .policy_display_real(&state, mask.as_deref(), labels)
             .unwrap_or(PolicyDisplay::Discrete(vec![]));
 
         let chosen = match agent_clone
             .actor_critic
-            .select_greedy_action(&state, &obs_vec)
+            .select_greedy_action(&state, mask.as_deref())
         {
             Ok(encoded) => E::action_from_encoding(&encoded),
             Err(_) => E::action_from_encoding(&vec![0.0; enc_dim]),
@@ -313,6 +323,7 @@ fn step_output_to_frame_data(output: &VisualStepOutput) -> VisualObsFrame {
         has_vital: false,
         vital_is_active: false,
         vital_direction: "None".into(),
+        ..Default::default()
     });
 
     VisualObsFrame {
@@ -323,6 +334,8 @@ fn step_output_to_frame_data(output: &VisualStepOutput) -> VisualObsFrame {
         policy,
         terminated: output.terminated,
         truncated: output.truncated,
+        self_alive: obs_payload.fiora_hp_pct > 0.0,
+        target_alive: obs_payload.riven_hp_pct > 0.0,
         fiora_alive: obs_payload.fiora_hp_pct > 0.0,
         riven_alive: obs_payload.riven_hp_pct > 0.0,
         reward_formula: output.reward_formula.clone(),

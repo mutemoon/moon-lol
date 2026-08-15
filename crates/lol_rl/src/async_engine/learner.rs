@@ -90,7 +90,15 @@ impl AsyncLearner {
                 }
                 match self.sample_rx.recv() {
                     Ok(t) => {
-                        buffer.push(t.state, t.action, t.log_prob, t.reward, t.value, t.done);
+                        buffer.push(
+                            t.state,
+                            t.action,
+                            t.log_prob,
+                            t.reward,
+                            t.value,
+                            t.done,
+                            t.action_mask,
+                        );
                         if let Some(ep) = t.episode_info {
                             if recent_ep_returns.len() >= 50 {
                                 recent_ep_returns.pop_front();

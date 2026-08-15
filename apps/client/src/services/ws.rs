@@ -34,7 +34,8 @@ pub fn spawn_ws_service(
                             sidebar.ws_connected = connected;
                         }
                         WsEvent::Frame(out_frame) => match out_frame {
-                            OutFrame::TaskList { tasks } => {
+                            OutFrame::TaskList { mut tasks } => {
+                                tasks.sort_by(|a, b| b.created_at.cmp(&a.created_at));
                                 let old_ids: Vec<String> =
                                     sidebar.task_list.iter().map(|t| t.id.clone()).collect();
                                 let new_tasks = tasks.clone();

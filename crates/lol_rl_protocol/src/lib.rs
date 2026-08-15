@@ -60,6 +60,7 @@ pub enum RewardExpr {
     Gt(Box<RewardExpr>, Box<RewardExpr>),
     Max(Box<RewardExpr>, Box<RewardExpr>),
     Min(Box<RewardExpr>, Box<RewardExpr>),
+    Exp(Box<RewardExpr>),
 }
 
 impl RewardExpr {
@@ -91,6 +92,7 @@ impl RewardExpr {
             }
             Self::Max(a, b) => a.eval(vars).max(b.eval(vars)),
             Self::Min(a, b) => a.eval(vars).min(b.eval(vars)),
+            Self::Exp(a) => a.eval(vars).exp(),
         }
     }
 
@@ -123,6 +125,7 @@ impl RewardExpr {
             Self::Gt(a, b) => format!("({} > {})", a.to_display_string(), b.to_display_string()),
             Self::Max(a, b) => format!("max({}, {})", a.to_display_string(), b.to_display_string()),
             Self::Min(a, b) => format!("min({}, {})", a.to_display_string(), b.to_display_string()),
+            Self::Exp(a) => format!("exp({})", a.to_display_string()),
         }
     }
 
@@ -174,6 +177,9 @@ impl RewardExpr {
                     a.to_latex_inner(vars),
                     b.to_latex_inner(vars)
                 )
+            }
+            Self::Exp(a) => {
+                format!(r"\exp\left({}\right)", a.to_latex_inner(vars))
             }
         }
     }
@@ -299,18 +305,49 @@ pub struct MetricsRow {
     pub reward_breakdown: Vec<RewardItem>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct ObsFeaturePayload {
-    pub fiora_hp_pct: f32,
-    pub riven_hp_pct: f32,
+    // ── 通用战斗与环境遥测指标 ──
+    #[serde(default)]
+    pub self_hp_pct: f32,
+    #[serde(default)]
+    pub target_hp_pct: f32,
+    #[serde(default)]
     pub distance: f32,
+    #[serde(default)]
+    pub metrics: HashMap<String, f32>,
+    #[serde(default)]
+    pub tags: HashMap<String, String>,
+
+    // ── 向下兼容字段（供特定环境或现有 UI 无缝使用） ──
+    #[serde(default)]
+    pub fiora_hp_pct: f32,
+    #[serde(default)]
+    pub riven_hp_pct: f32,
+    #[serde(default)]
     pub q_ready: bool,
+    #[serde(default)]
     pub w_ready: bool,
+    #[serde(default)]
     pub e_ready: bool,
+    #[serde(default)]
     pub r_ready: bool,
+    #[serde(default)]
     pub has_vital: bool,
+    #[serde(default)]
     pub vital_is_active: bool,
+    #[serde(default)]
     pub vital_direction: String,
+    #[serde(default)]
+    pub vital_active_time: f32,
+    #[serde(default)]
+    pub has_r_vital: bool,
+    #[serde(default)]
+    pub r_is_active: bool,
+    #[serde(default)]
+    pub attack_state: String,
+    #[serde(default)]
+    pub attack_timer: f32,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -330,6 +367,7 @@ pub struct TaskConfigPayload {
     pub max_steps: usize,
 }
 
+pub const ENV_FIORA_V2: &str = "FioraV2";
 pub const ENV_FIORA_V1: &str = "FioraV1";
 pub const ENV_FIORA_V0: &str = "FioraV0";
 
@@ -442,6 +480,11 @@ pub enum PolicyDisplay {
         move_z: f32,
         attack_prob: f32,
     },
+    /// 增强混合动作空间（多维连续偏移均值 + 多离散动作概率分布）
+    HybridMulti {
+        continuous_means: Vec<f32>,
+        discrete_probs: Vec<PolicyItem>,
+    },
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -496,7 +539,13 @@ pub struct VisualObsFrame {
     pub policy: PolicyDisplay,
     pub terminated: bool,
     pub truncated: bool,
+    #[serde(default)]
+    pub self_alive: bool,
+    #[serde(default)]
+    pub target_alive: bool,
+    #[serde(default)]
     pub fiora_alive: bool,
+    #[serde(default)]
     pub riven_alive: bool,
     pub reward_formula: Option<RewardFormulaSpec>,
     pub reward_variables: Option<HashMap<String, f32>>,
@@ -562,6 +611,31 @@ mod tests {
             else_branch: Box::new(RewardExpr::Constant(0.0)),
         };
         assert_eq!(if_else.eval(&vars), 10.0);
+    }
+
+    #[test]
+    fn test_reward_expr_exp() {
+        let vars = HashMap::from([("t".to_string(), 4.0)]);
+        let expr = RewardExpr::Sub(
+            Box::new(RewardExpr::Mul(
+                Box::new(RewardExpr::Constant(3.0)),
+                Box::new(RewardExpr::Exp(Box::new(RewardExpr::Mul(
+                    Box::new(RewardExpr::Constant(0.6)),
+                    Box::new(RewardExpr::Sub(
+                        Box::new(RewardExpr::Constant(4.0)),
+                        Box::new(RewardExpr::Variable("t".into())),
+                    )),
+                )))),
+            )),
+            Box::new(RewardExpr::Constant(3.0)),
+        );
+        // t = 4.0 => 3.0 * (exp(0) - 1) = 0.0
+        assert!((expr.eval(&vars) - 0.0).abs() < 1e-5);
+
+        let vars_1s = HashMap::from([("t".to_string(), 1.0)]);
+        // t = 1.0 => 3.0 * (exp(1.8) - 1) = 3.0 * (6.0496 - 1) = 15.1489
+        let val_1s = expr.eval(&vars_1s);
+        assert!((val_1s - 15.1489).abs() < 1e-2);
     }
 
     #[test]

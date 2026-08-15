@@ -1,6 +1,7 @@
 pub mod fiora_riven_common;
 pub mod fiora_v0;
 pub mod fiora_v1;
+pub mod fiora_v2;
 pub mod parallel;
 pub mod reward;
 pub mod traits;
@@ -13,10 +14,17 @@ pub use fiora_v0::{
     setup_skill_levels_world,
 };
 pub use fiora_v1::{FioraVsRivenRealAction, FioraVsRivenRealEnv, FioraVsRivenRealObs};
-pub use parallel::{ParallelEnvs, ParallelFioraVsRivenEnvs, ParallelFioraVsRivenRealEnvs};
+pub use fiora_v2::{
+    FioraV2Action, FioraV2DiscreteAction, FioraV2Env, FioraV2Obs, FioraV2RewardContext,
+    FioraV2RewardModel, V2_OBS_DISTANCE_IDX, V2_OBS_DISTANCE_SCALE,
+};
+pub use parallel::{
+    ParallelEnvs, ParallelFioraV2Envs, ParallelFioraVsRivenEnvs, ParallelFioraVsRivenRealEnvs,
+};
 pub use reward::{FioraRewardContext, FioraVsRivenRewardModel, RewardModel};
 pub use traits::{
     EnvConfig, EnvMeta, RenderMode, RewardBreakdownItem, RlEnvironment, StepResult,
     VisualEnvironment, get_env_meta, list_available_envs,
 };
 pub use visual_runner::{VisualRunnerCmd, VisualStepOutput, run_visual_env};
+

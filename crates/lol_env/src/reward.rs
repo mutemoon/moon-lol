@@ -29,6 +29,7 @@ pub struct FioraRewardContext {
     pub is_attack: bool,
     pub prev_riven_hp: f32,
     pub curr_riven_hp: f32,
+    pub elapsed_secs: f32,
 }
 
 /// Fiora vs Riven 环境的奖励模型实现
@@ -80,11 +81,20 @@ impl RewardModel for FioraVsRivenRewardModel {
                 ),
                 RewardTermSpec::new(
                     "kill_reward",
-                    "击杀目标 (Kill Reward)",
+                    "击杀基础奖励 (Kill Reward)",
                     RewardExpr::Mul(
                         Box::new(RewardExpr::Constant(2.0)),
                         Box::new(RewardExpr::Variable("is_kill".into())),
                     ),
+                ),
+                RewardTermSpec::new(
+                    "quick_kill_bonus",
+                    "极速击杀时效奖励 (Quick Kill Time Reward)",
+                    RewardExpr::IfElse {
+                        cond: Box::new(RewardExpr::Variable("is_kill".into())),
+                        then_branch: Box::new(RewardExpr::Variable("quick_kill_reward".into())),
+                        else_branch: Box::new(RewardExpr::Constant(0.0)),
+                    },
                 ),
             ],
         }
@@ -114,11 +124,23 @@ impl RewardModel for FioraVsRivenRewardModel {
             0.0
         };
 
+        // 极速击杀时效奖励：越快越高，指数上升；4s 为零界限（>4s 严格为负）；接近 1s 时奖励达到 ~15.15（高于击杀基础分）
+        let quick_kill_reward = if is_kill > 0.0 {
+            let t = ctx.elapsed_secs.max(0.05);
+            let exp_term = 3.0 * ((0.6 * (4.0 - t)).exp() - 1.0);
+            let overtime_penalty = (t - 4.0).max(0.0) * 1.0;
+            exp_term - overtime_penalty
+        } else {
+            0.0
+        };
+
         vars.insert("is_vital_break".into(), is_vital_break);
         vars.insert("is_kill".into(), is_kill);
         vars.insert("is_newly_aligned".into(), is_newly_aligned);
         vars.insert("is_misaligned_move".into(), is_misaligned_move);
         vars.insert("is_attack_missed".into(), is_attack_missed);
+        vars.insert("quick_kill_reward".into(), quick_kill_reward);
+        vars.insert("elapsed_secs".into(), ctx.elapsed_secs);
         vars.insert("step_tick".into(), 1.0);
         vars
     }

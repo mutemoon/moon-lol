@@ -104,6 +104,7 @@ impl FioraVsRivenObs {
             has_vital: self.has_vital,
             vital_is_active: self.vital_is_active,
             vital_direction: vital_dir,
+            ..Default::default()
         }
     }
 }
@@ -432,6 +433,7 @@ pub fn compute_step_reward(
     is_attack: bool,
     is_vital_break: bool,
     prev_obs: &FioraVsRivenObs,
+    elapsed_secs: f32,
 ) -> (f32, Vec<RewardBreakdownItem>, HashMap<String, f32>) {
     let prev_aligned =
         prev_obs.has_vital && is_position_aligned_with_vital(prev_fpos, riven_pos, prev_obs);
@@ -445,6 +447,7 @@ pub fn compute_step_reward(
         is_attack,
         prev_riven_hp,
         curr_riven_hp,
+        elapsed_secs,
     };
 
     let model = FioraVsRivenRewardModel;
@@ -560,7 +563,7 @@ mod tests {
 
     #[test]
     fn test_compute_step_reward_kill_and_vital() {
-        // 无破绽方向 → 对齐项为 0；击杀 + 破绽命中
+        // 无破绽方向 → 对齐项为 0；击杀（第 4 秒击杀，时效奖励严格为 0）+ 破绽命中
         let obs = obs_with_vital(0.0, 0.0, 0.0, 0.0);
         let (reward, _breakdown, vars) = compute_step_reward(
             100.0,
@@ -571,8 +574,9 @@ mod tests {
             false,
             true, // 破绽命中
             &obs,
+            4.0,  // 第 4 秒击杀
         );
-        let expected = -0.002 + 0.8 + 2.0;
+        let expected = -0.002 + 0.8 + 2.0 + 0.0;
         assert!(
             (reward - expected).abs() < 1e-4,
             "reward={reward} expected={expected}"
@@ -580,6 +584,21 @@ mod tests {
         assert_eq!(vars["is_vital_break"], 1.0);
         assert_eq!(vars["is_kill"], 1.0);
         assert_eq!(vars["is_attack_missed"], 0.0);
+        assert_eq!(vars["quick_kill_reward"], 0.0);
+
+        // 第 1 秒极速击杀：时效奖励达到 ~15.15（高于击杀基础分 2.0）
+        let (reward_1s, _, vars_1s) = compute_step_reward(
+            100.0, 0.0, Vec3::ZERO, Vec3::ZERO, Vec3::ZERO, false, true, &obs, 1.0,
+        );
+        let quick_1s = vars_1s["quick_kill_reward"];
+        assert!(quick_1s > 15.0, "1s击杀时效奖励应 > 15.0，实际为 {quick_1s}");
+        assert!(reward_1s > 17.5, "1s击杀总奖励应 > 17.5，实际为 {reward_1s}");
+
+        // 第 5 秒击杀：时效奖励严格为负（扣分）
+        let (_, _, vars_5s) = compute_step_reward(
+            100.0, 0.0, Vec3::ZERO, Vec3::ZERO, Vec3::ZERO, false, true, &obs, 5.0,
+        );
+        assert!(vars_5s["quick_kill_reward"] < 0.0, "5s击杀时效奖励应为负数");
     }
 
     #[test]
@@ -594,6 +613,7 @@ mod tests {
             true,  // 攻击
             false, // 未击破破绽
             &obs,
+            0.5,
         );
         // -0.002 (time) + -0.1 (attack_miss)
         assert!((reward - (-0.102)).abs() < 1e-4, "reward={reward}");

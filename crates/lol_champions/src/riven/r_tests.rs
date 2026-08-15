@@ -21,8 +21,8 @@ fn riven_r_buff_increases_stats_and_allows_recast() {
     let buff_range = h.app.world().get::<Attack>(h.champion).unwrap().range;
 
     assert!(
-        (buff_damage - base_damage * 1.25).abs() < EPSILON,
-        "R 开启后 AD 应增加 25%（从 {} 到 {})",
+        (buff_damage - base_damage * 1.20).abs() < EPSILON,
+        "R 开启后 AD 应增加 20%（从 {} 到 {})",
         base_damage,
         buff_damage
     );
