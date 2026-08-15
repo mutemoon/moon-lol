@@ -1,6 +1,7 @@
 use std::path::PathBuf;
 
 use bevy::app::ScheduleRunnerPlugin;
+use bevy::ecs::schedule::SingleThreadedExecutor;
 use bevy::prelude::*;
 use bevy::time::TimeUpdateStrategy;
 use lol_base::character::{ConfigCharacterRecord, ConfigSkin};
@@ -217,29 +218,21 @@ impl FioraVsRivenRealEnv {
         app.add_plugins(PluginFiora);
         app.add_plugins(PluginRiven);
 
-        if !render {
-            app.edit_schedule(bevy::app::Main, |s| {
-                s.set_executor(bevy::ecs::schedule::SingleThreadedExecutor::default());
-            });
-            app.edit_schedule(bevy::app::PreUpdate, |s| {
-                s.set_executor(bevy::ecs::schedule::SingleThreadedExecutor::default());
-            });
-            app.edit_schedule(bevy::app::FixedUpdate, |s| {
-                s.set_executor(bevy::ecs::schedule::SingleThreadedExecutor::default());
-            });
-            app.edit_schedule(bevy::app::Update, |s| {
-                s.set_executor(bevy::ecs::schedule::SingleThreadedExecutor::default());
-            });
-            app.edit_schedule(bevy::app::PostUpdate, |s| {
-                s.set_executor(bevy::ecs::schedule::SingleThreadedExecutor::default());
-            });
-        }
-
         app.insert_resource(lol_base::map::MapPaths::new("test"));
         app.insert_resource(NavigationDebug);
 
+        // finish() 触发所有插件的 finish/cleanup，确保所有 Schedule 都已注册完毕
         app.finish();
         app.cleanup();
+
+        if !render {
+            // 此时再统一遍历所有已注册的 Schedule，替换为 SingleThreadedExecutor
+            // 这样能覆盖 finish/cleanup 阶段插件新注册的所有调度，不会有遗漏
+            let mut schedules = app.world_mut().resource_mut::<Schedules>();
+            for (_, schedule) in schedules.iter_mut() {
+                schedule.set_executor(SingleThreadedExecutor::new());
+            }
+        }
 
         let (fiora_config_handle, riven_config_handle, fiora_skin_handle, riven_skin_handle) = {
             let asset_server = app.world().resource::<AssetServer>();
