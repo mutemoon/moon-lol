@@ -44,26 +44,29 @@ impl RewardModel for FioraVsRivenRewardModel {
                 RewardTermSpec::new(
                     "time_penalty",
                     "时间惩罚 (Time Penalty)",
-                    RewardExpr::Constant(-0.2),
+                    RewardExpr::Constant(-0.002),
                 ),
                 RewardTermSpec::new(
-                    "alignment_shaping",
-                    "站位引导 (Alignment Shaping)",
-                    RewardExpr::IfElse {
-                        cond: Box::new(RewardExpr::Variable("is_newly_aligned".into())),
-                        then_branch: Box::new(RewardExpr::Constant(2.0)),
-                        else_branch: Box::new(RewardExpr::IfElse {
-                            cond: Box::new(RewardExpr::Variable("is_misaligned_move".into())),
-                            then_branch: Box::new(RewardExpr::Constant(-1.0)),
-                            else_branch: Box::new(RewardExpr::Constant(0.0)),
-                        }),
-                    },
-                ),
-                RewardTermSpec::new(
-                    "missed_vital_penalty",
-                    "未打破绽失误扣分 (Missed Vital Penalty)",
+                    "alignment",
+                    "对齐破绽方向 (Alignment Bonus)",
                     RewardExpr::Mul(
-                        Box::new(RewardExpr::Constant(-10.0)),
+                        Box::new(RewardExpr::Constant(0.02)),
+                        Box::new(RewardExpr::Variable("is_newly_aligned".into())),
+                    ),
+                ),
+                RewardTermSpec::new(
+                    "misalignment",
+                    "错误方向移动 (Misalignment Penalty)",
+                    RewardExpr::Mul(
+                        Box::new(RewardExpr::Constant(-0.02)),
+                        Box::new(RewardExpr::Variable("is_misaligned_move".into())),
+                    ),
+                ),
+                RewardTermSpec::new(
+                    "attack_miss",
+                    "空挥攻击 (Attack Miss Penalty)",
+                    RewardExpr::Mul(
+                        Box::new(RewardExpr::Constant(-0.1)),
                         Box::new(RewardExpr::Variable("is_attack_missed".into())),
                     ),
                 ),
@@ -71,8 +74,16 @@ impl RewardModel for FioraVsRivenRewardModel {
                     "vital_break",
                     "打破绽成功 (Vital Break)",
                     RewardExpr::Mul(
-                        Box::new(RewardExpr::Constant(80.0)),
+                        Box::new(RewardExpr::Constant(0.8)),
                         Box::new(RewardExpr::Variable("is_vital_break".into())),
+                    ),
+                ),
+                RewardTermSpec::new(
+                    "kill_reward",
+                    "击杀目标 (Kill Reward)",
+                    RewardExpr::Mul(
+                        Box::new(RewardExpr::Constant(2.0)),
+                        Box::new(RewardExpr::Variable("is_kill".into())),
                     ),
                 ),
             ],
@@ -97,8 +108,14 @@ impl RewardModel for FioraVsRivenRewardModel {
             0.0
         };
         let is_vital_break = if ctx.is_vital_break { 1.0 } else { 0.0 };
+        let is_kill = if ctx.curr_riven_hp <= 0.0 && ctx.prev_riven_hp > 0.0 {
+            1.0
+        } else {
+            0.0
+        };
 
         vars.insert("is_vital_break".into(), is_vital_break);
+        vars.insert("is_kill".into(), is_kill);
         vars.insert("is_newly_aligned".into(), is_newly_aligned);
         vars.insert("is_misaligned_move".into(), is_misaligned_move);
         vars.insert("is_attack_missed".into(), is_attack_missed);

@@ -8,6 +8,7 @@ use gpui::*;
 use gpui_component::button::{Button, ButtonVariants};
 use gpui_component::{h_flex, v_flex, ActiveTheme, Disableable, IconName, StyledExt};
 
+use crate::components::dialog::open_form_dialog;
 use crate::components::sidebar::AppSidebar;
 use crate::services::cloud::{CloudClient, CloudError};
 
@@ -152,20 +153,16 @@ fn mode_tab(
 
 // ── 主入口 ──
 
-/// sidebar.show_auth_dialog 为 true 时返回居中弹窗，否则 None。
-pub fn render_auth_dialog(
-    sidebar: &mut AppSidebar,
-    window: &mut Window,
-    cx: &mut Context<AppSidebar>,
-) -> Option<AnyElement> {
-    if !sidebar.show_auth_dialog {
-        return None;
-    }
-    Some(render_dialog(sidebar, window, cx))
+/// 打开登录 / 认证 Dialog。
+pub fn open_auth_dialog(window: &mut Window, cx: &mut Context<AppSidebar>) {
+    let weak = cx.entity().downgrade();
+    open_form_dialog(window, cx, weak, build_auth_form, |dialog, form| {
+        dialog.w(px(400.)).overlay_closable(false).child(form)
+    });
 }
 
-fn render_dialog(
-    sidebar: &mut AppSidebar,
+fn build_auth_form(
+    sidebar: &AppSidebar,
     window: &mut Window,
     cx: &mut Context<AppSidebar>,
 ) -> AnyElement {
@@ -194,7 +191,7 @@ fn render_dialog(
     let phone_input = render_input(
         window,
         cx,
-        &*sidebar,
+        sidebar,
         "auth-phone",
         "请输入 11 位手机号",
         false,
@@ -204,7 +201,7 @@ fn render_dialog(
     let password_input = render_input(
         window,
         cx,
-        &*sidebar,
+        sidebar,
         "auth-password",
         if is_reset {
             "请输入新密码（至少 6 位）"
@@ -218,7 +215,7 @@ fn render_dialog(
     let code_input = render_input(
         window,
         cx,
-        &*sidebar,
+        sidebar,
         "auth-code",
         "请输入验证码",
         false,
@@ -233,35 +230,20 @@ fn render_dialog(
         (AuthMode::ResetPassword, "重置密码"),
     ]
     .into_iter()
-    .map(|(m, label)| mode_tab(m, label, &*sidebar, cx))
+    .map(|(m, label)| mode_tab(m, label, sidebar, cx))
     .collect();
 
     let header = h_flex()
+        .gap_2()
         .items_center()
-        .justify_between()
         .child(
-            h_flex()
-                .gap_2()
-                .items_center()
-                .child(
-                    div()
-                        .p_2()
-                        .rounded_md()
-                        .bg(cx.theme().muted)
-                        .child(IconName::CircleUser),
-                )
-                .child(div().text_lg().font_bold().child(title.to_string())),
+            div()
+                .p_2()
+                .rounded_md()
+                .bg(cx.theme().muted)
+                .child(IconName::CircleUser),
         )
-        .child(
-            Button::new("auth-close")
-                .ghost()
-                .icon(IconName::Close)
-                .on_click(cx.listener(|this, _, _, cx| {
-                    this.show_auth_dialog = false;
-                    clear_form(this);
-                    cx.notify();
-                })),
-        );
+        .child(div().text_lg().font_bold().child(title.to_string()));
 
     let submit_label = if submitting {
         "请稍候…".to_string()
@@ -303,28 +285,7 @@ fn render_dialog(
     }
     children.push(submit_btn.into_any_element());
 
-    let card = v_flex()
-        .w(px(400.))
-        .rounded_lg()
-        .border_1()
-        .border_color(cx.theme().border)
-        .bg(cx.theme().background)
-        .p_6()
-        .gap_4()
-        .children(children);
-
-    div()
-        .absolute()
-        .top_0()
-        .bottom_0()
-        .left_0()
-        .right_0()
-        .bg(rgba(0x00000073))
-        .flex()
-        .items_center()
-        .justify_center()
-        .child(card)
-        .into_any_element()
+    v_flex().gap_4().children(children).into_any_element()
 }
 
 // ── 动作：登录 / 验证码登录 / 注册 / 重置密码 ──
@@ -423,7 +384,7 @@ fn submit(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) {
                                         id: u.id as i64,
                                         phone: u.phone,
                                     });
-                                    this.show_auth_dialog = false;
+                                    this.pending_close_dialog = true;
                                     clear_form(this);
                                 }
                                 Err(e) => {

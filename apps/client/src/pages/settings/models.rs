@@ -3,6 +3,7 @@
 use gpui::prelude::*;
 use gpui::*;
 use gpui_component::button::{Button, ButtonVariants};
+use gpui_component::dialog::{DialogAction, DialogClose, DialogFooter};
 use gpui_component::menu::{DropdownMenu, PopupMenuItem};
 use gpui_component::scroll::ScrollableElement;
 use gpui_component::{h_flex, v_flex, ActiveTheme, Disableable, IconName, StyledExt};
@@ -15,6 +16,7 @@ use super::logic::{
 };
 use super::presets::{api_format_label, API_FORMATS, PROVIDER_PRESETS};
 use super::types::{NEW_KEY, PLATFORM_KEY, PRESET_PREFIX};
+use crate::components::dialog::open_form_dialog;
 use crate::components::sidebar::AppSidebar;
 
 pub(super) fn render_model_settings(
@@ -22,16 +24,11 @@ pub(super) fn render_model_settings(
     window: &mut Window,
     cx: &mut Context<AppSidebar>,
 ) -> AnyElement {
-    let show_model_dialog = sidebar.settings.show_model_dialog;
-    let show_test_result = sidebar.settings.show_test_result;
-
-    let dialog = if show_model_dialog {
-        render_model_dialog(sidebar, window, cx).into_any_element()
-    } else if show_test_result {
-        render_test_result_dialog(sidebar, cx).into_any_element()
-    } else {
-        div().into_any_element()
-    };
+    // 连接测试结果由异步完成置位，渲染帧消费并弹出结果 Dialog
+    if sidebar.settings.show_test_result {
+        sidebar.settings.show_test_result = false;
+        open_test_result_dialog(window, cx);
+    }
 
     v_flex()
         .size_full()
@@ -50,7 +47,6 @@ pub(super) fn render_model_settings(
                         .child(render_provider_form(sidebar, window, cx)),
                 ),
         )
-        .child(dialog)
         .into_any_element()
 }
 
@@ -265,14 +261,14 @@ fn render_provider_form(
                     Button::new(format!("edit-model-{}", i))
                         .ghost()
                         .label("编辑")
-                        .on_click(cx.listener(move |this, _, _, cx| {
+                        .on_click(cx.listener(move |this, _, window, cx| {
                             if let Some(m) = this.settings.form_models.get(i) {
                                 this.settings.model_form_name = m.name.clone();
                                 this.settings.model_form_max_tokens = m.max_tokens.to_string();
                             }
                             this.settings.editing_model_idx = Some(i);
-                            this.settings.show_model_dialog = true;
                             cx.notify();
+                            open_model_dialog(window, cx);
                         })),
                 )
                 .child(
@@ -359,12 +355,12 @@ fn render_provider_form(
                         .outline()
                         .icon(IconName::Plus)
                         .label("添加模型")
-                        .on_click(cx.listener(|this, _, _, cx| {
-                            this.settings.show_model_dialog = true;
+                        .on_click(cx.listener(|this, _, window, cx| {
                             this.settings.editing_model_idx = None;
                             this.settings.model_form_name.clear();
                             this.settings.model_form_max_tokens = "200000".to_string();
                             cx.notify();
+                            open_model_dialog(window, cx);
                         })),
                 ),
         )
@@ -448,112 +444,78 @@ fn render_api_format_field(
 
 // ── 模型新增 / 编辑对话框 ──
 
-fn render_model_dialog(
-    sidebar: &mut AppSidebar,
+fn build_model_form(
+    sidebar: &AppSidebar,
     window: &mut Window,
     cx: &mut Context<AppSidebar>,
 ) -> AnyElement {
     let editing = sidebar.settings.editing_model_idx.is_some();
 
-    div()
-        .absolute()
-        .inset_0()
-        .bg(gpui::black().opacity(0.4))
-        .flex()
-        .items_center()
-        .justify_center()
-        .on_any_mouse_down(cx.listener(|this, _, _, cx| {
-            this.settings.show_model_dialog = false;
-            cx.notify();
+    v_flex()
+        .gap_4()
+        .child(div().font_bold().text_sm().child(if editing {
+            "编辑模型"
+        } else {
+            "添加模型"
         }))
         .child(
             div()
-                .rounded_lg()
-                .border_1()
-                .border_color(cx.theme().border)
-                .bg(cx.theme().background)
-                .p_6()
-                .w_96()
-                .flex()
-                .flex_col()
-                .gap_4()
-                .on_any_mouse_down(|_, _, _| {})
-                .child(
-                    h_flex()
-                        .items_center()
-                        .justify_between()
-                        .child(div().font_bold().text_sm().child(if editing {
-                            "编辑模型"
-                        } else {
-                            "添加模型"
-                        }))
-                        .child(
-                            Button::new("close-model-dialog")
-                                .ghost()
-                                .icon(IconName::Close)
-                                .on_click(cx.listener(|this, _, _, cx| {
-                                    this.settings.show_model_dialog = false;
-                                    cx.notify();
-                                })),
-                        ),
-                )
-                .child(
-                    div()
-                        .text_xs()
-                        .text_color(cx.theme().muted_foreground)
-                        .child("请配置该模型的 ID / 名称以及最大上下文 Token 限制。"),
-                )
-                .child(
-                    v_flex()
-                        .gap_3()
-                        .child(render_edit_field(
-                            "model-dialog-name",
-                            "模型 ID",
-                            "如 gpt-4o, claude-3-5-sonnet",
-                            sidebar,
-                            window,
-                            cx,
-                            |t| t.settings.model_form_name.clone(),
-                            |t, v| t.settings.model_form_name = v,
-                        ))
-                        .child(render_edit_field(
-                            "model-dialog-tokens",
-                            "最大上下文 Token 数",
-                            "200000",
-                            sidebar,
-                            window,
-                            cx,
-                            |t| t.settings.model_form_max_tokens.clone(),
-                            |t, v| {
-                                t.settings.model_form_max_tokens =
-                                    v.chars().filter(|c| c.is_ascii_digit()).collect();
-                            },
-                        )),
-                )
-                .child(
-                    h_flex()
-                        .gap_2()
-                        .justify_end()
-                        .child(
-                            Button::new("model-dialog-cancel")
-                                .outline()
-                                .label("取消")
-                                .on_click(cx.listener(|this, _, _, cx| {
-                                    this.settings.show_model_dialog = false;
-                                    cx.notify();
-                                })),
-                        )
-                        .child(
-                            Button::new("model-dialog-confirm")
-                                .primary()
-                                .label("确定")
-                                .on_click(cx.listener(|this, _, _, cx| {
-                                    handle_save_model(this, cx);
-                                })),
-                        ),
-                ),
+                .text_xs()
+                .text_color(cx.theme().muted_foreground)
+                .child("请配置该模型的 ID / 名称以及最大上下文 Token 限制。"),
+        )
+        .child(
+            v_flex()
+                .gap_3()
+                .child(render_edit_field(
+                    "model-dialog-name",
+                    "模型 ID",
+                    "如 gpt-4o, claude-3-5-sonnet",
+                    sidebar,
+                    window,
+                    cx,
+                    |t| t.settings.model_form_name.clone(),
+                    |t, v| t.settings.model_form_name = v,
+                ))
+                .child(render_edit_field(
+                    "model-dialog-tokens",
+                    "最大上下文 Token 数",
+                    "200000",
+                    sidebar,
+                    window,
+                    cx,
+                    |t| t.settings.model_form_max_tokens.clone(),
+                    |t, v| {
+                        t.settings.model_form_max_tokens =
+                            v.chars().filter(|c| c.is_ascii_digit()).collect();
+                    },
+                )),
         )
         .into_any_element()
+}
+
+fn open_model_dialog(window: &mut Window, cx: &mut Context<AppSidebar>) {
+    let weak = cx.entity().downgrade();
+    let save_weak = weak.clone();
+    open_form_dialog(window, cx, weak, build_model_form, move |dialog, form| {
+        let save_weak = save_weak.clone();
+        dialog
+            .w(px(384.))
+            .child(form)
+            .footer(
+                DialogFooter::new()
+                    .child(DialogClose::new().child(
+                        Button::new("model-dialog-cancel").outline().label("取消"),
+                    ))
+                    .child(DialogAction::new().child(
+                        Button::new("model-dialog-confirm").primary().label("确定"),
+                    )),
+            )
+            .on_ok(move |_, _, cx| {
+                let _ = save_weak.update(cx, |this, cx| handle_save_model(this, cx));
+                true
+            })
+    });
 }
 
 fn handle_save_model(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) {
@@ -581,13 +543,16 @@ fn handle_save_model(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) {
                 .push(ModelConfig { name, max_tokens });
         }
     }
-    sidebar.settings.show_model_dialog = false;
     cx.notify();
 }
 
 // ── 连接测试结果对话框 ──
 
-fn render_test_result_dialog(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> AnyElement {
+fn build_test_result_form(
+    sidebar: &AppSidebar,
+    _window: &mut Window,
+    cx: &mut Context<AppSidebar>,
+) -> AnyElement {
     let success = sidebar
         .settings
         .test_result
@@ -601,77 +566,55 @@ fn render_test_result_dialog(sidebar: &mut AppSidebar, cx: &mut Context<AppSideb
         .map(|r| r.message.clone())
         .unwrap_or_default();
 
-    div()
-        .absolute()
-        .inset_0()
-        .bg(gpui::black().opacity(0.4))
-        .flex()
-        .items_center()
-        .justify_center()
-        .on_any_mouse_down(cx.listener(|this, _, _, cx| {
-            this.settings.show_test_result = false;
-            cx.notify();
-        }))
+    v_flex()
+        .gap_4()
         .child(
             div()
-                .rounded_lg()
+                .font_bold()
+                .text_sm()
+                .text_color(if success {
+                    cx.theme().accent
+                } else {
+                    cx.theme().danger
+                })
+                .child(if success {
+                    "连接测试成功"
+                } else {
+                    "连接测试失败"
+                }),
+        )
+        .child(
+            div()
+                .text_xs()
+                .text_color(cx.theme().muted_foreground)
+                .child(if success {
+                    "模型成功回复了消息："
+                } else {
+                    "测试未成功，详细错误信息如下："
+                }),
+        )
+        .child(
+            div()
+                .rounded_md()
                 .border_1()
                 .border_color(cx.theme().border)
-                .bg(cx.theme().background)
-                .p_6()
-                .w_96()
-                .flex()
-                .flex_col()
-                .gap_4()
-                .on_any_mouse_down(|_, _, _| {})
-                .child(
-                    div()
-                        .font_bold()
-                        .text_sm()
-                        .text_color(if success {
-                            cx.theme().accent
-                        } else {
-                            cx.theme().danger
-                        })
-                        .child(if success {
-                            "连接测试成功"
-                        } else {
-                            "连接测试失败"
-                        }),
-                )
-                .child(
-                    div()
-                        .text_xs()
-                        .text_color(cx.theme().muted_foreground)
-                        .child(if success {
-                            "模型成功回复了消息："
-                        } else {
-                            "测试未成功，详细错误信息如下："
-                        }),
-                )
-                .child(
-                    div()
-                        .rounded_md()
-                        .border_1()
-                        .border_color(cx.theme().border)
-                        .bg(cx.theme().muted)
-                        .p_3()
-                        .text_xs()
-                        .max_h(rems(12.))
-                        .overflow_y_scrollbar()
-                        .child(message),
-                )
-                .child(
-                    h_flex().gap_2().justify_end().child(
-                        Button::new("test-result-close")
-                            .primary()
-                            .label("确定")
-                            .on_click(cx.listener(|this, _, _, cx| {
-                                this.settings.show_test_result = false;
-                                cx.notify();
-                            })),
-                    ),
-                ),
+                .bg(cx.theme().muted)
+                .p_3()
+                .text_xs()
+                .max_h(rems(12.))
+                .overflow_y_scrollbar()
+                .child(message),
         )
         .into_any_element()
+}
+
+fn open_test_result_dialog(window: &mut Window, cx: &mut Context<AppSidebar>) {
+    let weak = cx.entity().downgrade();
+    open_form_dialog(window, cx, weak, build_test_result_form, |dialog, form| {
+        dialog.w(px(384.)).child(form).footer(
+            DialogFooter::new().child(DialogAction::new().child(
+                Button::new("test-result-close").primary().label("确定"),
+            )),
+        )
+    });
 }

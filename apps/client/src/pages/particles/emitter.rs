@@ -212,9 +212,14 @@ pub(super) fn render_emitter_editor(
             )
             .child(h_flex().gap_1().children((0..2).map(|c| {
                 let id = format!("{:08x}-{}-texdiv-{}", hash, idx, c);
-                render_number_input(window, cx, sidebar, id, tv[c], move |s: &mut AppSidebar, v| {
-                    set_tex_div_comp(s, idx, c, v)
-                })
+                render_number_input(
+                    window,
+                    cx,
+                    sidebar,
+                    id,
+                    tv[c],
+                    move |s: &mut AppSidebar, v| set_tex_div_comp(s, idx, c, v),
+                )
                 .into_any_element()
             })))
             .into_any_element(),

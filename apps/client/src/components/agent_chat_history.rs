@@ -1,8 +1,8 @@
 //! AI 决策历史 / 对话时间线共享组件。
 //!
 //! 供 history / debug / mock / observe 页面复用：渲染思维链、工具调用、公开决策、
-//! 环境观测四类消息流，支持按 kind 过滤、按轮次折叠，代码段以等宽底色块展示，
-//! 空态显示「暂无消息」。
+//! 环境观测四类消息流，支持按 kind 过滤、按轮次折叠，消息正文以 gpui-component
+//! TextView 渲染 markdown，空态显示「暂无消息」。
 //!
 //! 文案内联中文（未接入 i18n），本文件自包含、不依赖其它页面私有状态；
 //! 组件注册（mod.rs）与页面接入由主会话处理。
@@ -13,6 +13,7 @@ use gpui::prelude::*;
 use gpui::*;
 use gpui_component::button::{Button, ButtonVariants};
 use gpui_component::scroll::ScrollableElement;
+use gpui_component::text::TextView;
 use gpui_component::{h_flex, v_flex, ActiveTheme, IconName, Sizable, StyledExt};
 
 use crate::components::sidebar::AppSidebar;
@@ -243,7 +244,7 @@ pub fn render_agent_chat_history(
     // ── 消息流（按轮次分组 + 折叠） ──
     let mut list_children: Vec<AnyElement> = Vec::new();
     let mut current_round: Option<u32> = None;
-    for m in &visible {
+    for (m_idx, m) in visible.iter().enumerate() {
         if m.round != current_round {
             current_round = m.round;
             if let Some(r) = m.round {
@@ -257,7 +258,7 @@ pub fn render_agent_chat_history(
                 continue;
             }
         }
-        list_children.push(render_message_row(m, cx));
+        list_children.push(render_message_row(m_idx, m, cx));
     }
 
     // 过滤 / 折叠后为空
@@ -374,8 +375,12 @@ fn render_round_header(
         .into_any_element()
 }
 
-/// 单条消息：左侧 kind 徽标 + agent_id + content（含代码段等宽底色块）。
-fn render_message_row(msg: &AgentChatMessage, cx: &mut Context<AppSidebar>) -> AnyElement {
+/// 单条消息：左侧 kind 徽标 + agent_id + content（markdown 由 TextView 渲染）。
+fn render_message_row(
+    idx: usize,
+    msg: &AgentChatMessage,
+    cx: &mut Context<AppSidebar>,
+) -> AnyElement {
     let accent = kind_accent(&msg.kind, cx);
     let label = kind_label(&msg.kind);
 
@@ -412,43 +417,10 @@ fn render_message_row(msg: &AgentChatMessage, cx: &mut Context<AppSidebar>) -> A
                         .text_color(cx.theme().muted_foreground)
                         .child(byline),
                 )
-                .children(render_content_segments(&msg.content, cx)),
+                .child(TextView::markdown(
+                    format!("agent-chat-md-{}", idx),
+                    msg.content.as_str(),
+                )),
         )
         .into_any_element()
-}
-
-/// 将 content 拆成普通文本段与 ```fenced``` 代码段（代码段 = 等宽 + 底色块）。
-fn render_content_segments(content: &str, cx: &mut Context<AppSidebar>) -> Vec<AnyElement> {
-    let mut children: Vec<AnyElement> = Vec::new();
-    for (idx, part) in content.split("```").enumerate() {
-        let text = part.trim();
-        if text.is_empty() {
-            continue;
-        }
-        if idx % 2 == 1 {
-            children.push(
-                div()
-                    .w_full()
-                    .rounded_md()
-                    .px_2()
-                    .py_1()
-                    .mt_1()
-                    .mb_1()
-                    .bg(cx.theme().muted_foreground.opacity(0.08))
-                    .font_family("monospace")
-                    .text_xs()
-                    .child(text.to_string())
-                    .into_any_element(),
-            );
-        } else {
-            children.push(
-                div()
-                    .text_xs()
-                    .text_color(cx.theme().foreground)
-                    .child(text.to_string())
-                    .into_any_element(),
-            );
-        }
-    }
-    children
 }

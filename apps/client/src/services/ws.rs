@@ -83,11 +83,18 @@ pub fn spawn_ws_service(
                                 step,
                                 ep_return,
                                 loss,
+                                policy_loss,
+                                value_loss,
+                                total_loss,
                                 kl,
                                 entropy,
+                                clip_frac,
+                                clip_eps,
                                 value,
                                 fps,
-                                policy,
+                                ep_steps_max,
+                                ep_steps_min,
+                                ep_steps_avg,
                                 reward_breakdown,
                                 obs_feature,
                                 reward_formula,
@@ -103,10 +110,18 @@ pub fn spawn_ws_service(
                                     step,
                                     ep_return,
                                     loss,
+                                    policy_loss,
+                                    value_loss,
+                                    total_loss,
                                     kl,
                                     entropy,
+                                    clip_frac,
                                     value,
                                     fps,
+                                    ep_steps_max,
+                                    ep_steps_min,
+                                    ep_steps_avg,
+                                    reward_breakdown: reward_breakdown.clone(),
                                 };
                                 let detail = sidebar
                                     .task_details
@@ -118,18 +133,18 @@ pub fn spawn_ws_service(
                                         ep_return,
                                         checkpoints: Vec::new(),
                                         metrics_history: Vec::new(),
-                                        latest_policy: Vec::new(),
                                         latest_reward_breakdown: Vec::new(),
                                         latest_obs: None,
                                         reward_formula: None,
                                         latest_reward_variables: None,
+                                        latest_clip_eps: 0.0,
                                         logs: Vec::new(),
                                     });
                                 detail.current_step = step;
                                 detail.ep_return = ep_return;
                                 detail.metrics_history.push(metric_row);
-                                detail.latest_policy = policy;
                                 detail.latest_reward_breakdown = reward_breakdown;
+                                detail.latest_clip_eps = clip_eps;
                                 if obs_feature.is_some() {
                                     detail.latest_obs = obs_feature;
                                 }
@@ -182,11 +197,17 @@ pub fn spawn_ws_service(
                                 {
                                     let path = checkpoint.path.clone();
                                     let tid = task_id.clone();
+                                    let env_name = sidebar
+                                        .task_list
+                                        .iter()
+                                        .find(|t| t.id == task_id)
+                                        .map(|t| t.env_name.clone())
+                                        .unwrap_or_else(|| "fiora_vs_riven".to_string());
                                     let weak = entity_weak_ui.clone();
                                     cx.spawn(move |_: gpui::WeakEntity<AppSidebar>, cx: &mut gpui::AsyncApp| {
                                         let mut cx = cx.clone();
                                         async move {
-                                            spawn_visual_session(&weak, &mut cx, tid, path).await;
+                                            spawn_visual_session(&weak, &mut cx, tid, path, env_name).await;
                                         }
                                     })
                                     .detach();
@@ -208,11 +229,11 @@ pub fn spawn_ws_service(
                                         ep_return: 0.0,
                                         checkpoints: Vec::new(),
                                         metrics_history: Vec::new(),
-                                        latest_policy: Vec::new(),
                                         latest_reward_breakdown: Vec::new(),
                                         latest_obs: None,
                                         reward_formula: None,
                                         latest_reward_variables: None,
+                                        latest_clip_eps: 0.0,
                                         logs: Vec::new(),
                                     });
                                 detail.checkpoints = checkpoints;
@@ -290,6 +311,7 @@ async fn spawn_visual_session(
     cx: &mut gpui::AsyncApp,
     task_id: String,
     checkpoint_path: String,
+    env_name: String,
 ) {
     // 先关掉旧会话（kill_on_drop 已设，drop 即终止旧子进程）
     let _ = weak.update(cx, |sidebar, _| {
@@ -298,10 +320,12 @@ async fn spawn_visual_session(
         sidebar.latest_visual_frame = None;
         sidebar.visual_error = None;
         sidebar.visual_task_id = None;
+        sidebar.visual_env_name = None;
     });
 
+    let env_name_clone = env_name.clone();
     let spawned = run_on_tokio(move || async move {
-        spawn_visual_env(&checkpoint_path)
+        spawn_visual_env(&checkpoint_path, &env_name_clone)
             .await
             .map_err(|e| e.to_string())
     })
@@ -331,6 +355,7 @@ async fn spawn_visual_session(
             sidebar.visual_ws_connected = false;
             sidebar.visual_error = None;
             sidebar.visual_task_id = Some(task_id);
+            sidebar.visual_env_name = Some(env_name.clone());
         });
     }
 
@@ -353,6 +378,7 @@ async fn spawn_visual_session(
                     sidebar.visual_session = None;
                     sidebar.visual_in_tx = None;
                     sidebar.visual_task_id = None;
+                    sidebar.visual_env_name = None;
                     sidebar.visual_error = Some(format!("可视化子进程已退出 (code {:?})", code));
                 }
             }

@@ -4,13 +4,16 @@ use gpui::prelude::*;
 use gpui::*;
 use gpui_component::button::{Button, ButtonVariants};
 use gpui_component::menu::{DropdownMenu, PopupMenuItem};
-use gpui_component::{h_flex, v_flex, ActiveTheme, Disableable, IconName, Sizable, StyledExt};
+use gpui_component::{
+    h_flex, v_flex, ActiveTheme, Disableable, IconName, Sizable, StyledExt, WindowExt as _,
+};
 use lol_web_protocol::agent::Agent;
 use lol_web_protocol::room::RoomAgentSlot;
 use lol_web_protocol::spawn_preset::Team;
 use uuid::Uuid;
 
 use super::logic::{spawn_add_slot, spawn_remove_slot};
+use crate::components::dialog::open_form_dialog;
 use crate::components::sidebar::AppSidebar;
 
 // ── 展示辅助 ──
@@ -133,11 +136,12 @@ pub(super) fn render_team_column(
                         .xsmall()
                         .icon(IconName::Plus)
                         .label("添加槽位")
-                        .on_click(cx.listener(move |this, _, _, cx| {
+                        .on_click(cx.listener(move |this, _, window, cx| {
                             this.room_detail.show_add_team = Some(team);
                             this.room_detail.add_agent_id = None;
                             this.room_detail.add_error.clear();
                             cx.notify();
+                            open_add_slot_dialog(window, cx, room_id);
                         })),
                 ),
         )
@@ -163,11 +167,26 @@ pub(super) fn render_team_column(
 
 // ── 添加槽位对话框 ──
 
-pub(super) fn render_add_dialog(
-    sidebar: &mut AppSidebar,
+pub(super) fn open_add_slot_dialog(
+    window: &mut Window,
     cx: &mut Context<AppSidebar>,
     room_id: Uuid,
-    agents: &[Agent],
+) {
+    let weak = cx.entity().downgrade();
+    open_form_dialog(
+        window,
+        cx,
+        weak,
+        move |sidebar, window, cx| build_add_slot_form(sidebar, window, cx, room_id),
+        |dialog, form| dialog.w(px(384.)).child(form),
+    );
+}
+
+fn build_add_slot_form(
+    sidebar: &AppSidebar,
+    _window: &mut Window,
+    cx: &mut Context<AppSidebar>,
+    room_id: Uuid,
 ) -> AnyElement {
     let show_team = sidebar.room_detail.show_add_team;
     let add_agent_id = sidebar.room_detail.add_agent_id.clone();
@@ -180,13 +199,14 @@ pub(super) fn render_add_dialog(
         Team::Order => "添加到 Order（蓝方）".to_string(),
         Team::Chaos => "添加到 Chaos（红方）".to_string(),
     };
+    let agents = sidebar.room_detail.agents.clone();
     let agent_label = add_agent_id
         .as_deref()
         .and_then(|aid| agents.iter().find(|a| a.id.to_string() == aid))
         .map(|a| format!("{} · {}", a.name, a.champion))
         .unwrap_or_else(|| "选择 Agent…".to_string());
     let weak = cx.entity().downgrade();
-    let agents_owned = agents.to_vec();
+    let agents_owned = agents.clone();
 
     let agent_dropdown =
         Button::new("room-add-agent-dropdown")
@@ -216,85 +236,48 @@ pub(super) fn render_add_dialog(
                 m
             });
 
-    div()
-        .absolute()
-        .inset_0()
-        .bg(gpui::black().opacity(0.4))
-        .flex()
-        .items_center()
-        .justify_center()
-        .on_any_mouse_down(cx.listener(|this, _, _, cx| {
-            this.room_detail.show_add_team = None;
-            cx.notify();
-        }))
+    v_flex()
+        .gap_4()
+        .child(div().font_bold().text_sm().child(title))
         .child(
-            div()
-                .rounded_lg()
-                .border_1()
-                .border_color(cx.theme().border)
-                .bg(cx.theme().background)
-                .p_6()
-                .w_96()
-                .flex()
-                .flex_col()
-                .gap_4()
-                .on_any_mouse_down(|_, _, _| {}) // 阻止冒泡
-                .child(
-                    h_flex()
-                        .items_center()
-                        .justify_between()
-                        .child(div().font_bold().text_sm().child(title))
-                        .child(
-                            Button::new("close-add-slot")
-                                .ghost()
-                                .icon(IconName::Close)
-                                .on_click(cx.listener(|this, _, _, cx| {
-                                    this.room_detail.show_add_team = None;
-                                    cx.notify();
-                                })),
-                        ),
-                )
+            v_flex()
+                .gap_3()
                 .child(
                     v_flex()
-                        .gap_3()
-                        .child(
-                            v_flex()
-                                .gap_1()
-                                .child(div().text_xs().child("选择 Agent"))
-                                .child(agent_dropdown),
-                        )
-                        .when(!add_error.is_empty(), |d| {
-                            d.child(
-                                div()
-                                    .text_xs()
-                                    .text_color(cx.theme().danger)
-                                    .child(add_error),
-                            )
-                        }),
+                        .gap_1()
+                        .child(div().text_xs().child("选择 Agent"))
+                        .child(agent_dropdown),
+                )
+                .when(!add_error.is_empty(), |d| {
+                    d.child(
+                        div()
+                            .text_xs()
+                            .text_color(cx.theme().danger)
+                            .child(add_error),
+                    )
+                }),
+        )
+        .child(
+            h_flex()
+                .gap_2()
+                .justify_end()
+                .child(
+                    Button::new("cancel-add-slot")
+                        .ghost()
+                        .label("取消")
+                        .disabled(adding)
+                        .on_click(cx.listener(|_, _, window, cx| {
+                            window.close_dialog(cx);
+                        })),
                 )
                 .child(
-                    h_flex()
-                        .gap_2()
-                        .justify_end()
-                        .child(
-                            Button::new("cancel-add-slot")
-                                .ghost()
-                                .label("取消")
-                                .disabled(adding)
-                                .on_click(cx.listener(|this, _, _, cx| {
-                                    this.room_detail.show_add_team = None;
-                                    cx.notify();
-                                })),
-                        )
-                        .child(
-                            Button::new("confirm-add-slot")
-                                .primary()
-                                .label(if adding { "添加中…" } else { "添加" })
-                                .disabled(adding)
-                                .on_click(cx.listener(move |this, _, _, cx| {
-                                    spawn_add_slot(this, cx, room_id);
-                                })),
-                        ),
+                    Button::new("confirm-add-slot")
+                        .primary()
+                        .label(if adding { "添加中…" } else { "添加" })
+                        .disabled(adding)
+                        .on_click(cx.listener(move |this, _, _, cx| {
+                            spawn_add_slot(this, cx, room_id);
+                        })),
                 ),
         )
         .into_any_element()

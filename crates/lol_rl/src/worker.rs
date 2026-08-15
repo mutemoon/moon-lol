@@ -1,17 +1,19 @@
+use std::sync::Arc;
+
 use tokio::sync::Semaphore;
 
 /// Controls concurrent training task execution.
 /// CPU mode: up to `available_parallelism` tasks; CUDA mode: 1 task.
 /// `MOON_LOL_MAX_CONCURRENT_TASKS` env var can override.
 pub struct TrainingWorkerPool {
-    semaphore: Semaphore,
+    semaphore: Arc<Semaphore>,
 }
 
 impl TrainingWorkerPool {
     pub fn new(device_kind: crate::device::DeviceKind) -> Self {
         let max = max_concurrent_tasks(device_kind);
         Self {
-            semaphore: Semaphore::new(max),
+            semaphore: Arc::new(Semaphore::new(max)),
         }
     }
 
@@ -19,9 +21,11 @@ impl TrainingWorkerPool {
         self.semaphore.available_permits()
     }
 
-    pub async fn acquire(&self) -> tokio::sync::SemaphorePermit<'_> {
+    /// 获取一个可跨 `spawn_blocking` 移动的 owned permit，训练循环存活期间持有以限制并发。
+    pub async fn acquire(&self) -> tokio::sync::OwnedSemaphorePermit {
         self.semaphore
-            .acquire()
+            .clone()
+            .acquire_owned()
             .await
             .expect("Semaphore 不应被关闭")
     }

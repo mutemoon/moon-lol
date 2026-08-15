@@ -35,7 +35,6 @@ pub struct SettingsState {
     pub form_sort_order: i32,
     pub saving: bool,
 
-    pub show_model_dialog: bool,
     pub editing_model_idx: Option<usize>,
     pub model_form_name: String,
     pub model_form_max_tokens: String,
@@ -68,7 +67,6 @@ impl Default for SettingsState {
             form_icon_color: String::new(),
             form_sort_order: 0,
             saving: false,
-            show_model_dialog: false,
             editing_model_idx: None,
             model_form_name: String::new(),
             model_form_max_tokens: "200000".to_string(),

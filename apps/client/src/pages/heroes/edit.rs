@@ -15,8 +15,7 @@ use super::publish::{render_publish_tab, render_status_bar};
 use super::types::{HeroesMode, HeroesTab, PLATFORM_PROVIDER_ID, RL_REWARD_KEYS};
 use super::utils::champion_display;
 use super::{
-    ensure_providers_loaded, handle_export_json, handle_import_json, handle_save,
-    render_delete_modal,
+    ensure_providers_loaded, handle_export_json, handle_import_json, handle_save, open_delete_modal,
 };
 use crate::components::sidebar::AppSidebar;
 
@@ -133,15 +132,11 @@ pub(super) fn render_edit(
         .child(render_status_bar(sidebar, cx));
 
     if sidebar.heroes.show_delete_confirm {
-        v_flex()
-            .size_full()
-            .relative()
-            .child(main)
-            .child(render_delete_modal(sidebar, cx))
-            .into_any_element()
-    } else {
-        main.into_any_element()
+        sidebar.heroes.show_delete_confirm = false;
+        open_delete_modal(window, cx);
     }
+
+    main.into_any_element()
 }
 
 fn make_tab_btn(

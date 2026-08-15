@@ -22,11 +22,11 @@ app:
       zh-CN: "系统"
       en: "System"
     menu_home:
-      zh-CN: "工作台首页"
+      zh-CN: "工作台"
       en: "Workbench"
     menu_launcher:
-      zh-CN: "新建对局"
-      en: "New Match"
+      zh-CN: "启动游戏"
+      en: "Launch Game"
     menu_heroes:
       zh-CN: "英雄预设"
       en: "Heroes"
@@ -54,6 +54,9 @@ app:
     menu_logs_archive:
       zh-CN: "日志归档"
       en: "Logs Archive"
+    menu_logs_browser:
+      zh-CN: "日志浏览"
+      en: "Log Browser"
     menu_billing:
       zh-CN: "精粹与订阅"
       en: "Essence & Subs"
@@ -85,11 +88,11 @@ app:
       zh-CN: "英雄"
       en: "Hero"
     title_home:
-      zh-CN: "仿真工作台"
+      zh-CN: "工作台"
       en: "Workbench"
     title_launcher:
-      zh-CN: "对局编排"
-      en: "Match Orchestration"
+      zh-CN: "启动游戏"
+      en: "Launch Game"
     title_heroes:
       zh-CN: "英雄预设"
       en: "Heroes"
@@ -117,6 +120,9 @@ app:
     title_logs_archive:
       zh-CN: "日志归档"
       en: "Logs Archive"
+    title_logs_browser:
+      zh-CN: "日志浏览"
+      en: "Log Browser"
     title_admin:
       zh-CN: "对局池监控"
       en: "Match Pool Monitor"
@@ -162,23 +168,38 @@ app:
       zh-CN: "强化学习训练实例管理"
       en: "RL Training Instance Management (Data Table)"
     new_task:
-      zh-CN: "新建 RL 训练任务"
-      en: "New RL Training Task"
+      zh-CN: "开始训练"
+      en: "Start Training"
     refresh_list:
       zh-CN: "刷新列表"
       en: "Refresh List"
     col_task:
-      zh-CN: "任务 ID / 名称"
-      en: "Task ID / Name"
+      zh-CN: "任务名称"
+      en: "Task Name"
     col_algorithm:
-      zh-CN: "算法与环境"
-      en: "Algorithm & Env"
+      zh-CN: "算法"
+      en: "Algorithm"
+    col_env:
+      zh-CN: "环境"
+      en: "Env"
     col_status:
       zh-CN: "运行状态"
       en: "Status"
-    col_steps:
-      zh-CN: "训练步数"
-      en: "Training Steps"
+    col_steps_per_iter:
+      zh-CN: "每轮步数"
+      en: "Steps / Iter"
+    col_total_iters:
+      zh-CN: "总轮次"
+      en: "Total Iters"
+    col_hidden_dim:
+      zh-CN: "隐藏神经元"
+      en: "Hidden Dim"
+    col_parallel:
+      zh-CN: "并行局数"
+      en: "Parallel Envs"
+    col_lr:
+      zh-CN: "学习率"
+      en: "Learning Rate"
     col_return:
       zh-CN: "平均回报"
       en: "Avg Return"
@@ -299,8 +320,8 @@ app:
   # ── 侧边栏（原 Vue app.sidebar） ──
   sidebar:
     new_match:
-      zh-CN: "新建对局"
-      en: "New Match"
+      zh-CN: "启动游戏"
+      en: "Launch Game"
     new_match_shortcut:
       zh-CN: "⌘N"
       en: "⌘N"
@@ -348,8 +369,8 @@ app:
   # ── 视图标题 ──
   view_titles:
     launcher:
-      zh-CN: "对局编排"
-      en: "Match Orchestration"
+      zh-CN: "启动游戏"
+      en: "Launch Game"
     debug:
       zh-CN: "实时调试控制台"
       en: "Live Debug Console"
@@ -1093,7 +1114,7 @@ app:
     confirm_delete_btn:
       zh-CN: "删除"
       en: "Delete"
-  # ── 启动器/对局编排 ──
+  # ── 启动游戏 ──
   launcher:
     connecting:
       zh-CN: "正在连接 Bevy 游戏进程..."

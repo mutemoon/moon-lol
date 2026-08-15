@@ -260,17 +260,25 @@ impl RlRepo for PgRlRepo {
     ) -> RepoResult<()> {
         let task_uuid = Uuid::parse_str(task_id).map_err(|_| RepoError::NotFound)?;
         sqlx::query(
-            "INSERT INTO rl_metrics (task_id, step, ep_return, loss, kl, entropy, value, fps) \
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8)",
+            "INSERT INTO rl_metrics (task_id, step, ep_return, loss, policy_loss, value_loss, total_loss, kl, entropy, clip_frac, value, fps, ep_steps_max, ep_steps_min, ep_steps_avg, reward_breakdown) \
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)",
         )
         .bind(task_uuid)
         .bind(row.step as i64)
         .bind(row.ep_return)
         .bind(row.loss)
+        .bind(row.policy_loss)
+        .bind(row.value_loss)
+        .bind(row.total_loss)
         .bind(row.kl)
         .bind(row.entropy)
+        .bind(row.clip_frac)
         .bind(row.value)
         .bind(row.fps as i32)
+        .bind(row.ep_steps_max as i64)
+        .bind(row.ep_steps_min as i64)
+        .bind(row.ep_steps_avg)
+        .bind(sqlx::types::Json(&row.reward_breakdown))
         .execute(&self.pool)
         .await
         .map_err(map_db_error)?;
@@ -280,7 +288,7 @@ impl RlRepo for PgRlRepo {
     async fn list_metrics(&self, task_id: &str) -> RepoResult<Vec<lol_rl_protocol::MetricsRow>> {
         let task_uuid = Uuid::parse_str(task_id).map_err(|_| RepoError::NotFound)?;
         let rows = sqlx::query(
-            "SELECT step, ep_return, loss, kl, entropy, value, fps FROM rl_metrics WHERE task_id = $1 ORDER BY step ASC",
+            "SELECT step, ep_return, loss, policy_loss, value_loss, total_loss, kl, entropy, clip_frac, value, fps, ep_steps_max, ep_steps_min, ep_steps_avg, reward_breakdown FROM rl_metrics WHERE task_id = $1 ORDER BY step ASC",
         )
         .bind(task_uuid)
         .fetch_all(&self.pool)
@@ -291,18 +299,35 @@ impl RlRepo for PgRlRepo {
             let step: i64 = r.try_get("step")?;
             let ep_return: f32 = r.try_get("ep_return")?;
             let loss: f32 = r.try_get("loss")?;
+            let policy_loss: f32 = r.try_get("policy_loss")?;
+            let value_loss: f32 = r.try_get("value_loss")?;
+            let total_loss: f32 = r.try_get("total_loss")?;
             let kl: f32 = r.try_get("kl")?;
             let entropy: f32 = r.try_get("entropy")?;
+            let clip_frac: f32 = r.try_get("clip_frac")?;
             let value: f32 = r.try_get("value")?;
             let fps: i32 = r.try_get("fps")?;
+            let ep_steps_max: i64 = r.try_get("ep_steps_max")?;
+            let ep_steps_min: i64 = r.try_get("ep_steps_min")?;
+            let ep_steps_avg: f32 = r.try_get("ep_steps_avg")?;
+            let reward_breakdown: sqlx::types::Json<Vec<lol_rl_protocol::RewardItem>> =
+                r.try_get("reward_breakdown")?;
             metrics.push(lol_rl_protocol::MetricsRow {
                 step: step as usize,
                 ep_return,
                 loss,
+                policy_loss,
+                value_loss,
+                total_loss,
                 kl,
                 entropy,
+                clip_frac,
                 value,
                 fps: fps as usize,
+                ep_steps_max: ep_steps_max as usize,
+                ep_steps_min: ep_steps_min as usize,
+                ep_steps_avg,
+                reward_breakdown: reward_breakdown.0,
             });
         }
         Ok(metrics)

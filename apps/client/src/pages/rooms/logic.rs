@@ -153,7 +153,7 @@ fn spawn_create_room(cx: &mut Context<AppSidebar>, room_name: &str, constraints:
                     Ok(_) => {
                         if let Some(entity) = weak.upgrade() {
                             let _ = entity.update(&mut cx, |s, _| {
-                                s.rooms.show_create = false;
+                                s.pending_close_dialog = true;
                                 s.rooms.draft_name.clear();
                                 s.rooms.active_tab = RoomsTab::Mine;
                             });

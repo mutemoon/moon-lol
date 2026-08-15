@@ -6,11 +6,9 @@ use std::time::Instant;
 use candle_core::Tensor;
 use chrono::Utc;
 use lol_env::RewardModel;
-use lol_env::fiora_vs_riven::{FioraVsRivenAction, FioraVsRivenObs};
-use lol_env::parallel::ParallelFioraVsRivenEnvs;
 pub use lol_rl_protocol::{
-    CheckpointItem, InFrame, ObsFeaturePayload, OutFrame, PolicyItem, RewardItem,
-    TaskConfigPayload, TaskOverviewItem,
+    CheckpointItem, InFrame, ObsFeaturePayload, OutFrame, RewardItem, TaskConfigPayload,
+    TaskOverviewItem,
 };
 use sqlx::PgPool;
 use tokio::sync::{Mutex, broadcast, mpsc};
@@ -20,6 +18,7 @@ use uuid::Uuid;
 use crate::db::{self, CheckpointRow, PgRlRepo, RlRepo, TaskRow};
 use crate::model_store::{checkpoint_dir, new_checkpoint_path};
 use crate::ppo::{PPOAgent, PPOConfig, RolloutBuffer};
+use crate::worker::TrainingWorkerPool;
 
 /// 训练循环内保存当前权重的请求。
 #[derive(Debug, Clone)]
@@ -73,6 +72,7 @@ pub struct RLService {
     tasks: Arc<Mutex<HashMap<String, TaskState>>>,
     event_tx: broadcast::Sender<OutFrame>,
     repo: Arc<dyn RlRepo>,
+    worker_pool: Arc<TrainingWorkerPool>,
 }
 
 impl RLService {
@@ -113,11 +113,15 @@ impl RLService {
         info!("从数据库载入 {} 个任务", initial_tasks.len());
 
         let (event_tx, rx) = broadcast::channel(event_capacity);
+        let worker_pool = Arc::new(TrainingWorkerPool::new(
+            crate::device::device_kind_from_env(),
+        ));
         Ok((
             Self {
                 tasks: Arc::new(Mutex::new(initial_tasks)),
                 event_tx,
                 repo,
+                worker_pool,
             },
             rx,
         ))
@@ -202,8 +206,15 @@ impl RLService {
                 let tasks_arc = self.tasks.clone();
                 let repo = self.repo.clone();
                 let tid_clone = tid.clone();
-                tokio::task::spawn_blocking(move || {
-                    run_training_loop_for_task(event_tx, tasks_arc, repo, tid_clone);
+                let worker_pool = self.worker_pool.clone();
+                tokio::spawn(async move {
+                    // 训练循环存活期间持有 permit，限制并发训练任务数。
+                    let permit = worker_pool.acquire().await;
+                    let _ = tokio::task::spawn_blocking(move || {
+                        let _permit = permit;
+                        run_training_loop_for_task(event_tx, tasks_arc, repo, tid_clone);
+                    })
+                    .await;
                 });
             }
             InFrame::Control {
@@ -230,8 +241,14 @@ impl RLService {
                     let tasks_arc = self.tasks.clone();
                     let repo = self.repo.clone();
                     let tid = task_id.clone();
-                    tokio::task::spawn_blocking(move || {
-                        run_training_loop_for_task(event_tx, tasks_arc, repo, tid);
+                    let worker_pool = self.worker_pool.clone();
+                    tokio::spawn(async move {
+                        let permit = worker_pool.acquire().await;
+                        let _ = tokio::task::spawn_blocking(move || {
+                            let _permit = permit;
+                            run_training_loop_for_task(event_tx, tasks_arc, repo, tid);
+                        })
+                        .await;
                     });
                 }
                 "stop" => {
@@ -391,6 +408,11 @@ impl RLService {
                 current_step: t.current_step,
                 ep_return: t.ep_return,
                 checkpoints_count: t.checkpoints.len(),
+                hidden_dim: t.config.hidden_dim,
+                parallel_envs: t.config.parallel_envs,
+                lr: t.config.lr,
+                total_iterations: t.config.total_iterations,
+                rollout_steps_per_env: t.config.rollout_steps_per_env,
                 created_at: t.created_at.clone(),
             })
             .collect();
@@ -404,6 +426,12 @@ impl RLService {
             }
         });
     }
+}
+
+/// 在 `spawn_blocking` 线程内复用当前 tokio runtime 执行一次异步 DB 写，
+/// 避免每处都 `Builder::new_current_thread()` 新建临时 runtime。
+fn block_on_db<F: std::future::Future>(fut: F) -> F::Output {
+    tokio::runtime::Handle::current().block_on(fut)
 }
 
 /// 写 safetensors 权重文件 + 登记 checkpoint 到 DB + 广播。仅在训练循环内（agent 存活时）调用。
@@ -449,24 +477,9 @@ fn persist_checkpoint(
         ep_return: req.ep_return,
         created_at: now,
     };
-    // DB 插入：同步上下文 → 临时 tokio runtime
-    let insert_ok = match tokio::runtime::Builder::new_current_thread()
-        .enable_all()
-        .build()
-    {
-        Ok(rt) => match rt.block_on(repo.insert_checkpoint(&cp_row)) {
-            Ok(()) => true,
-            Err(e) => {
-                error!("写入 checkpoint DB 失败: {e}");
-                false
-            }
-        },
-        Err(e) => {
-            error!("创建临时 tokio runtime 失败: {e}");
-            false
-        }
-    };
-    if !insert_ok {
+    // DB 插入：复用当前 runtime
+    if let Err(e) = block_on_db(repo.insert_checkpoint(&cp_row)) {
+        error!("写入 checkpoint DB 失败: {e}");
         return;
     }
 
@@ -507,12 +520,41 @@ fn run_training_loop_for_task(
             .unwrap_or_default()
     };
 
-    let env_max_steps = 40; // 单局限制 40 步截断，促使 AI 快速打破绽击杀，避免无限移动刷分
-    let state_dim = FioraVsRivenObs::dim();
-    let action_dim = 5;
+    if task_config.env_name == lol_rl_protocol::ENV_FIORA_VS_RIVEN_LEGACY {
+        run_generic_training_loop::<lol_env::FioraVsRivenEnv>(
+            event_tx,
+            tasks,
+            repo,
+            task_id,
+            task_config,
+        );
+    } else {
+        // Default to real movement environment
+        run_generic_training_loop::<lol_env::FioraVsRivenRealEnv>(
+            event_tx,
+            tasks,
+            repo,
+            task_id,
+            task_config,
+        );
+    }
+}
+
+fn run_generic_training_loop<E: lol_env::RlEnvironment>(
+    event_tx: broadcast::Sender<OutFrame>,
+    tasks: Arc<Mutex<HashMap<String, TaskState>>>,
+    repo: Arc<dyn RlRepo>,
+    task_id: String,
+    task_config: TaskConfigPayload,
+) {
+    // 单局步数截断（来自任务配置 rollout_steps_per_env），促使 AI 快速打破绽击杀，避免无限移动刷分
+    let env_max_steps = task_config.rollout_steps_per_env.max(1);
+    let state_dim = E::state_dim();
+    let action_space = E::action_space();
+    let enc_dim = action_space.encoding_dim();
     let num_parallel_envs = task_config.parallel_envs.max(1);
     let total_iterations = task_config.total_iterations.max(1);
-    let hidden_dim = task_config.hidden_dim.max(16);
+    let hidden_dim = task_config.hidden_dim.max(64);
 
     let config = PPOConfig {
         lr: task_config.lr as f64,
@@ -526,7 +568,8 @@ fn run_training_loop_for_task(
 
     let device = crate::device::select_device().unwrap_or(candle_core::Device::Cpu);
 
-    let mut agent = match PPOAgent::new(state_dim, hidden_dim, action_dim, config, device.clone()) {
+    let mut agent = match PPOAgent::new(state_dim, hidden_dim, action_space, config, device.clone())
+    {
         Ok(a) => a,
         Err(e) => {
             error!("创建 PPOAgent 失败: {e}");
@@ -534,12 +577,20 @@ fn run_training_loop_for_task(
         }
     };
 
-    let par_envs = ParallelFioraVsRivenEnvs::new(num_parallel_envs, env_max_steps);
-    let mut buffer = RolloutBuffer::new();
+    let par_envs = lol_env::ParallelEnvs::<E>::new(num_parallel_envs, env_max_steps);
+    let mut env_buffers = Vec::with_capacity(num_parallel_envs);
+    for _ in 0..num_parallel_envs {
+        env_buffers.push(RolloutBuffer::new());
+    }
     let mut current_obss = par_envs.reset_all();
     let mut env_returns = vec![0.0f32; num_parallel_envs];
     let mut recent_ep_returns: std::collections::VecDeque<f32> =
         std::collections::VecDeque::with_capacity(50);
+    // 每环境当前对局已执行步数，对局结束时记入 iter_ep_steps 用于统计单局步数
+    let mut env_steps = vec![0usize; num_parallel_envs];
+    let mut iter_ep_steps: Vec<usize> = Vec::with_capacity(num_parallel_envs);
+    // 累计环境步数（跨迭代累加，用作 step 坐标与 max_steps 总步数预算）
+    let mut total_steps = 0usize;
 
     // 注册保存通道，供「保存模型」请求驱动实时落盘
     let (save_tx, mut save_rx) = mpsc::unbounded_channel::<SaveRequest>();
@@ -562,6 +613,11 @@ fn run_training_loop_for_task(
             }
         }
 
+        // 达到总步数预算则停止（max_steps > 0 时生效）
+        if task_config.max_steps > 0 && total_steps >= task_config.max_steps {
+            break;
+        }
+
         // 处理「保存模型」请求：把当前权重写盘
         while let Ok(req) = save_rx.try_recv() {
             persist_checkpoint(&task_id, req, &agent, &tasks, &repo, &event_tx);
@@ -578,46 +634,48 @@ fn run_training_loop_for_task(
 
         let iter_start = Instant::now();
 
-        buffer.clear();
+        for b in &mut env_buffers {
+            b.clear();
+        }
         let mut iter_reward_breakdown: HashMap<String, f32> = HashMap::new();
         let mut last_reward_variables: HashMap<String, f32> = HashMap::new();
+        let mut iter_value_sum = 0.0f32;
         let mut completed_envs = vec![false; num_parallel_envs];
         let mut iter_steps_count = 0usize;
 
         // 采集完整对局：持续采样直到所有并行环境本局全部结束（terminated 或 truncated）
         while !completed_envs.iter().all(|&c| c) {
             let mut actions = Vec::with_capacity(num_parallel_envs);
-            let mut action_indices = Vec::with_capacity(num_parallel_envs);
+            let mut action_encodings = Vec::with_capacity(num_parallel_envs);
             let mut log_probs = Vec::with_capacity(num_parallel_envs);
             let mut values = Vec::with_capacity(num_parallel_envs);
 
             for i in 0..num_parallel_envs {
                 if completed_envs[i] {
-                    actions.push(FioraVsRivenAction::MoveEast50);
-                    action_indices.push(0);
+                    actions.push(E::action_from_encoding(&vec![0.0; enc_dim]));
+                    action_encodings.push(vec![0.0; enc_dim]);
                     log_probs.push(0.0);
                     values.push(0.0);
                     continue;
                 }
 
                 let obs = &current_obss[i];
-                let state_vec = obs.to_vector();
+                let state_vec = E::obs_to_vector(obs);
                 let state_tensor =
                     match Tensor::from_vec(state_vec.clone(), (1, state_dim), &device) {
                         Ok(t) => t,
                         Err(_) => break,
                     };
-                if let Ok((act_idx, log_prob, val)) = agent
-                    .actor_critic
-                    .select_action_masked(&state_tensor, &state_vec)
+                if let Ok((encoded, log_prob, val)) =
+                    agent.actor_critic.sample_action(&state_tensor, &state_vec)
                 {
-                    actions.push(FioraVsRivenAction::from_index(act_idx));
-                    action_indices.push(act_idx);
+                    actions.push(E::action_from_encoding(&encoded));
+                    action_encodings.push(encoded);
                     log_probs.push(log_prob);
                     values.push(val);
                 } else {
-                    actions.push(FioraVsRivenAction::from_index(0));
-                    action_indices.push(0);
+                    actions.push(E::action_from_encoding(&vec![0.0; enc_dim]));
+                    action_encodings.push(vec![0.0; enc_dim]);
                     log_probs.push(0.0);
                     values.push(0.0);
                 }
@@ -632,6 +690,8 @@ fn run_training_loop_for_task(
                 let res = &step_results[i];
                 env_returns[i] += res.reward;
                 iter_steps_count += 1;
+                env_steps[i] += 1;
+                iter_value_sum += values[i];
                 last_reward_variables = res.reward_variables.clone();
 
                 for item in &res.reward_breakdown {
@@ -640,13 +700,13 @@ fn run_training_loop_for_task(
                         .or_insert(0.0) += item.value;
                 }
 
-                buffer.push(
-                    current_obss[i].to_vector(),
-                    action_indices[i],
+                env_buffers[i].push(
+                    E::obs_to_vector(&current_obss[i]),
+                    action_encodings[i].clone(),
                     log_probs[i],
                     res.reward,
                     values[i],
-                    res.terminated,
+                    res.terminated || res.truncated,
                 );
 
                 if res.terminated || res.truncated {
@@ -656,6 +716,8 @@ fn run_training_loop_for_task(
                         recent_ep_returns.pop_front();
                     }
                     recent_ep_returns.push_back(ep_ret);
+                    iter_ep_steps.push(env_steps[i]);
+                    env_steps[i] = 0;
                     current_obss[i] = par_envs.reset_one(i);
                     completed_envs[i] = true;
                 } else {
@@ -664,11 +726,38 @@ fn run_training_loop_for_task(
             }
         }
 
-        // 完整对局结束，终态 Bootstrap value 为 0.0
+        let mut combined_buffer = RolloutBuffer::new();
+        for b in &env_buffers {
+            for t in 0..b.len() {
+                combined_buffer.push(
+                    b.states[t].clone(),
+                    b.actions[t].clone(),
+                    b.log_probs[t],
+                    b.rewards[t],
+                    b.values[t],
+                    b.dones[t],
+                );
+            }
+        }
+
+        // 完整对局结束，终态 Bootstrap value 为 0.0（仅用于 GAE 计算）
         let last_val_scalar = 0.0f32;
 
-        if let Ok(stats) = agent.update(&buffer, last_val_scalar) {
-            let total_steps = iter * iter_steps_count;
+        // 迭代内各状态 critic 预测值均值，作为「价值」指标上报
+        let mean_value = iter_value_sum / iter_steps_count.max(1) as f32;
+
+        // 本迭代各局步数统计（每环境一局，均为一整局）
+        let ep_steps_max = iter_ep_steps.iter().copied().max().unwrap_or(0);
+        let ep_steps_min = iter_ep_steps.iter().copied().min().unwrap_or(0);
+        let ep_steps_avg = if iter_ep_steps.is_empty() {
+            0.0
+        } else {
+            iter_ep_steps.iter().sum::<usize>() as f32 / iter_ep_steps.len() as f32
+        };
+
+        total_steps += iter_steps_count;
+
+        if let Ok(stats) = agent.update(&combined_buffer, last_val_scalar) {
             let ep_return = if !recent_ep_returns.is_empty() {
                 let sum: f32 = recent_ep_returns.iter().sum();
                 sum / recent_ep_returns.len() as f32
@@ -687,84 +776,15 @@ fn run_training_loop_for_task(
 
             // Update DB progress periodically
             if iter % 5 == 0 {
-                let rt = tokio::runtime::Builder::new_current_thread()
-                    .enable_all()
-                    .build();
-                if let Ok(rt) = rt {
-                    let _ =
-                        rt.block_on(repo.update_progress(&task_id, total_steps as i64, ep_return));
-                }
+                let _ = block_on_db(repo.update_progress(&task_id, total_steps as i64, ep_return));
             }
 
             let sample_obs = &current_obss[0];
-            let sample_state_tensor =
-                match Tensor::from_vec(sample_obs.to_vector(), (1, state_dim), &device) {
-                    Ok(t) => t,
-                    Err(_) => break,
-                };
+            let obs_payload = E::obs_to_payload(sample_obs);
 
-            let obs_payload = ObsFeaturePayload {
-                fiora_hp_pct: if sample_obs.fiora_max_hp > 0.0 {
-                    sample_obs.fiora_hp / sample_obs.fiora_max_hp
-                } else {
-                    1.0
-                },
-                riven_hp_pct: if sample_obs.riven_max_hp > 0.0 {
-                    sample_obs.riven_hp / sample_obs.riven_max_hp
-                } else {
-                    1.0
-                },
-                distance: sample_obs.distance,
-                q_ready: sample_obs.q_ready,
-                w_ready: sample_obs.w_ready,
-                e_ready: sample_obs.e_ready,
-                r_ready: sample_obs.r_ready,
-                has_vital: sample_obs.has_vital,
-                vital_is_active: sample_obs.vital_is_active,
-                vital_direction: if sample_obs.vital_dir_x > 0.5 {
-                    "+X (东侧)"
-                } else if sample_obs.vital_dir_neg_x > 0.5 {
-                    "-X (西侧)"
-                } else if sample_obs.vital_dir_z > 0.5 {
-                    "+Z (北侧)"
-                } else if sample_obs.vital_dir_neg_z > 0.5 {
-                    "-Z (南侧)"
-                } else {
-                    "None"
-                }
-                .into(),
-            };
-
+            // 本迭代环境步进速率（env steps/sec），即训练吞吐
             let fps = (iter_steps_count.max(1) as f64
                 / iter_start.elapsed().as_secs_f64().max(1e-5)) as usize;
-
-            let real_policy = agent
-                .actor_critic
-                .forward(&sample_state_tensor)
-                .ok()
-                .map(|(logits, _)| {
-                    let probs = candle_nn::ops::softmax(&logits.squeeze(0).unwrap(), 0)
-                        .unwrap()
-                        .to_vec1::<f32>()
-                        .unwrap_or_default();
-                    let actions = [
-                        "MoveEast50 (东侧 50u 站位)",
-                        "MoveWest50 (西侧 50u 站位)",
-                        "MoveNorth50 (北侧 50u 站位)",
-                        "MoveSouth50 (南侧 50u 站位)",
-                        "AttackRiven (普通攻击 瑞雯)",
-                    ];
-                    probs
-                        .iter()
-                        .enumerate()
-                        .map(|(i, &p)| PolicyItem {
-                            action_id: i,
-                            action: actions[i].to_string(),
-                            prob: p,
-                        })
-                        .collect()
-                })
-                .unwrap_or_default();
 
             let real_reward_breakdown: Vec<RewardItem> = iter_reward_breakdown
                 .iter()
@@ -778,10 +798,18 @@ fn run_training_loop_for_task(
                 step: total_steps,
                 ep_return,
                 loss: stats.policy_loss + stats.value_loss,
+                policy_loss: stats.policy_loss,
+                value_loss: stats.value_loss,
+                total_loss: stats.total_loss,
                 kl: stats.kl,
-                entropy: stats.entropy_loss,
-                value: last_val_scalar,
+                entropy: stats.entropy,
+                clip_frac: stats.clip_frac,
+                value: mean_value,
                 fps,
+                ep_steps_max,
+                ep_steps_min,
+                ep_steps_avg,
+                reward_breakdown: real_reward_breakdown.clone(),
             };
 
             {
@@ -791,12 +819,7 @@ fn run_training_loop_for_task(
                 }
             }
 
-            let rt = tokio::runtime::Builder::new_current_thread()
-                .enable_all()
-                .build();
-            if let Ok(rt) = rt {
-                let _ = rt.block_on(repo.insert_metric(&task_id, &metric_row));
-            }
+            let _ = block_on_db(repo.insert_metric(&task_id, &metric_row));
 
             let reward_model = lol_env::reward::FioraVsRivenRewardModel;
             let reward_formula = reward_model.formula_spec();
@@ -806,13 +829,20 @@ fn run_training_loop_for_task(
                 step: total_steps,
                 ep_return,
                 loss: stats.policy_loss + stats.value_loss,
+                policy_loss: stats.policy_loss,
+                value_loss: stats.value_loss,
+                total_loss: stats.total_loss,
                 kl: stats.kl,
-                entropy: stats.entropy_loss,
-                value: last_val_scalar,
+                entropy: stats.entropy,
+                clip_frac: stats.clip_frac,
+                clip_eps: task_config.clip_eps,
+                value: mean_value,
                 fps,
-                policy: real_policy,
+                ep_steps_max,
+                ep_steps_min,
+                ep_steps_avg,
                 reward_breakdown: real_reward_breakdown,
-                obs_feature: Some(obs_payload),
+                obs_feature: obs_payload,
                 reward_formula: Some(reward_formula),
                 reward_variables: Some(last_reward_variables),
             };
@@ -850,12 +880,7 @@ fn run_training_loop_for_task(
                         task.logs.push(format!("[info] {}", log_msg));
                     }
                 }
-                let rt = tokio::runtime::Builder::new_current_thread()
-                    .enable_all()
-                    .build();
-                if let Ok(rt) = rt {
-                    let _ = rt.block_on(repo.insert_log(&task_id, "info", &log_msg));
-                }
+                let _ = block_on_db(repo.insert_log(&task_id, "info", &log_msg));
                 let _ = event_tx.send(OutFrame::Log {
                     task_id: task_id.clone(),
                     level: "info".into(),
@@ -898,12 +923,7 @@ fn run_training_loop_for_task(
             task.save_tx = None;
         }
     }
-    let rt = tokio::runtime::Builder::new_current_thread()
-        .enable_all()
-        .build();
-    if let Ok(rt) = rt {
-        let _ = rt.block_on(repo.update_status(&task_id, "finished"));
-    }
+    let _ = block_on_db(repo.update_status(&task_id, "finished"));
     let _ = event_tx.send(OutFrame::Status {
         task_id: task_id.clone(),
         status: "finished".into(),

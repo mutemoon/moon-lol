@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use lol_rl_protocol::{
-    CheckpointItem, MetricsRow, ObsFeaturePayload, PolicyItem, RewardFormulaSpec, RewardItem,
+    CheckpointItem, MetricsRow, ObsFeaturePayload, RewardFormulaSpec, RewardItem,
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -17,6 +17,7 @@ pub enum ActiveView {
     RlTraining,
     Particles,
     LogsArchive,
+    LogsBrowser,
     Admin,
     Settings,
     Games,
@@ -48,11 +49,12 @@ pub struct LocalTaskDetail {
     pub ep_return: f32,
     pub checkpoints: Vec<CheckpointItem>,
     pub metrics_history: Vec<MetricsRow>,
-    pub latest_policy: Vec<PolicyItem>,
     pub latest_reward_breakdown: Vec<RewardItem>,
     pub latest_obs: Option<ObsFeaturePayload>,
     pub reward_formula: Option<RewardFormulaSpec>,
     pub latest_reward_variables: Option<HashMap<String, f32>>,
+    /// PPO clip 界，用于 KL 图参考线
+    pub latest_clip_eps: f32,
     pub logs: Vec<String>,
 }
 

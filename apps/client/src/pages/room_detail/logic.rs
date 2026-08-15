@@ -136,6 +136,7 @@ pub(super) fn spawn_add_slot(
                                 s.room_detail.show_add_team = None;
                                 s.room_detail.add_agent_id = None;
                                 s.room_detail.add_error.clear();
+                                s.pending_close_dialog = true;
                                 cx.notify();
                             });
                         }

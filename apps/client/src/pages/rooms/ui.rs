@@ -5,11 +5,12 @@ use gpui::*;
 use gpui_component::button::{Button, ButtonVariants};
 use gpui_component::checkbox::Checkbox;
 use gpui_component::menu::{DropdownMenu, PopupMenuItem};
-use gpui_component::{h_flex, v_flex, ActiveTheme, Disableable, IconName, StyledExt};
+use gpui_component::{h_flex, v_flex, ActiveTheme, Disableable, IconName, StyledExt, WindowExt as _};
 use lol_web_protocol::room::{Room, RoomStatus, TeamPolicy};
 
 use super::input::render_state_input;
 use super::logic::{spawn_join_or_enter_room, try_create_room};
+use crate::components::dialog::open_form_dialog;
 use crate::components::sidebar::AppSidebar;
 
 pub(super) fn tab_button(
@@ -149,12 +150,17 @@ pub(super) fn room_card(
         .into_any_element()
 }
 
-pub(super) fn create_room_dialog(
-    sidebar: &mut AppSidebar,
+pub(super) fn open_create_room_dialog(window: &mut Window, cx: &mut Context<AppSidebar>) {
+    let weak = cx.entity().downgrade();
+    open_form_dialog(window, cx, weak, build_create_room_form, |dialog, form| {
+        dialog.w(px(384.)).child(form)
+    });
+}
+
+fn build_create_room_form(
+    sidebar: &AppSidebar,
     window: &mut Window,
     cx: &mut Context<AppSidebar>,
-    create_error: String,
-    creating: bool,
 ) -> AnyElement {
     let draft_team_policy = sidebar.rooms.draft_team_policy.clone();
     let draft_lobby_visible = sidebar.rooms.draft_lobby_visible;
@@ -164,198 +170,161 @@ pub(super) fn create_room_dialog(
     } else {
         "单阵营（每人只能在一方）"
     };
+    let create_error = sidebar.rooms.create_error.clone();
+    let creating = sidebar.rooms.creating;
     let weak = cx.entity().downgrade();
     let free_weak = weak.clone();
     let single_weak = weak.clone();
     let checkbox_weak = weak.clone();
 
-    // 遮罩 + 居中对话框
-    div()
-        .absolute()
-        .inset_0()
-        .bg(gpui::black().opacity(0.4))
-        .flex()
-        .items_center()
-        .justify_center()
-        .on_any_mouse_down(cx.listener(|this, _, _, cx| {
-            this.rooms.show_create = false;
-            cx.notify();
-        }))
+    v_flex()
+        .gap_4()
+        .child(div().font_bold().text_sm().child("创建房间"))
         .child(
-            div()
-                .rounded_lg()
-                .border_1()
-                .border_color(cx.theme().border)
-                .bg(cx.theme().background)
-                .p_6()
-                .w_96()
-                .flex()
-                .flex_col()
-                .gap_4()
-                .on_any_mouse_down(|_, _, _| {}) // 阻止冒泡
-                .child(
-                    h_flex()
-                        .items_center()
-                        .justify_between()
-                        .child(div().font_bold().text_sm().child("创建房间"))
-                        .child(
-                            Button::new("close-create-room")
-                                .ghost()
-                                .icon(IconName::Close)
-                                .on_click(cx.listener(|this, _, _, cx| {
-                                    this.rooms.show_create = false;
-                                    cx.notify();
-                                })),
-                        ),
-                )
+            v_flex()
+                .gap_3()
+                // 房间名称
                 .child(
                     v_flex()
+                        .gap_1()
+                        .child(div().text_xs().child("房间名称"))
+                        .child(render_state_input(
+                            window,
+                            cx,
+                            sidebar,
+                            "create-room-name",
+                            "周末野队挑战",
+                            |s: &AppSidebar| s.rooms.draft_name.clone(),
+                            |s: &mut AppSidebar, v| s.rooms.draft_name = v,
+                            None,
+                        )),
+                )
+                // 最大人数 / 每人 Agent 上限
+                .child(
+                    h_flex()
                         .gap_3()
-                        // 房间名称
                         .child(
                             v_flex()
                                 .gap_1()
-                                .child(div().text_xs().child("房间名称"))
+                                .flex_1()
+                                .child(div().text_xs().child("最大人数"))
                                 .child(render_state_input(
                                     window,
                                     cx,
-                                    &*sidebar,
-                                    "create-room-name",
-                                    "周末野队挑战",
-                                    |s: &AppSidebar| s.rooms.draft_name.clone(),
-                                    |s: &mut AppSidebar, v| s.rooms.draft_name = v,
+                                    sidebar,
+                                    "create-max-members",
+                                    "10",
+                                    |s: &AppSidebar| s.rooms.draft_max_members.clone(),
+                                    |s: &mut AppSidebar, v| {
+                                        s.rooms.draft_max_members = v
+                                            .chars()
+                                            .filter(|c| c.is_ascii_digit())
+                                            .collect();
+                                    },
                                     None,
                                 )),
                         )
-                        // 最大人数 / 每人 Agent 上限
-                        .child(
-                            h_flex()
-                                .gap_3()
-                                .child(
-                                    v_flex()
-                                        .gap_1()
-                                        .flex_1()
-                                        .child(div().text_xs().child("最大人数"))
-                                        .child(render_state_input(
-                                            window,
-                                            cx,
-                                            &*sidebar,
-                                            "create-max-members",
-                                            "10",
-                                            |s: &AppSidebar| s.rooms.draft_max_members.clone(),
-                                            |s: &mut AppSidebar, v| {
-                                                s.rooms.draft_max_members = v
-                                                    .chars()
-                                                    .filter(|c| c.is_ascii_digit())
-                                                    .collect();
-                                            },
-                                            None,
-                                        )),
-                                )
-                                .child(
-                                    v_flex()
-                                        .gap_1()
-                                        .flex_1()
-                                        .child(div().text_xs().child("每人 Agent 上限"))
-                                        .child(render_state_input(
-                                            window,
-                                            cx,
-                                            &*sidebar,
-                                            "create-max-agents",
-                                            "3",
-                                            |s: &AppSidebar| s.rooms.draft_max_agents.clone(),
-                                            |s: &mut AppSidebar, v| {
-                                                s.rooms.draft_max_agents = v
-                                                    .chars()
-                                                    .filter(|c| c.is_ascii_digit())
-                                                    .collect();
-                                            },
-                                            None,
-                                        )),
-                                ),
-                        )
-                        // 阵营策略
                         .child(
                             v_flex()
                                 .gap_1()
-                                .child(div().text_xs().child("阵营策略"))
-                                .child(
-                                    Button::new("create-team-policy")
-                                        .label(team_policy_label)
-                                        .icon(IconName::ChevronDown)
-                                        .outline()
-                                        .w_full()
-                                        .dropdown_menu(move |menu, _window, _cx| {
-                                            let free_weak = free_weak.clone();
-                                            let single_weak = single_weak.clone();
-                                            menu.item(
-                                                PopupMenuItem::new("自由（红蓝皆可）")
-                                                    .checked(team_policy_free)
-                                                    .on_click(move |_, _, cx| {
-                                                        let _ = free_weak.update(cx, |s, cx| {
-                                                            s.rooms.draft_team_policy =
-                                                                "free".into();
-                                                            cx.notify();
-                                                        });
-                                                    }),
-                                            )
-                                            .item(
-                                                PopupMenuItem::new("单阵营（每人只能在一方）")
-                                                    .checked(!team_policy_free)
-                                                    .on_click(move |_, _, cx| {
-                                                        let _ = single_weak.update(cx, |s, cx| {
-                                                            s.rooms.draft_team_policy =
-                                                                "single_team".into();
-                                                            cx.notify();
-                                                        });
-                                                    }),
-                                            )
-                                        }),
-                                ),
-                        )
-                        // 公开到大厅
+                                .flex_1()
+                                .child(div().text_xs().child("每人 Agent 上限"))
+                                .child(render_state_input(
+                                    window,
+                                    cx,
+                                    sidebar,
+                                    "create-max-agents",
+                                    "3",
+                                    |s: &AppSidebar| s.rooms.draft_max_agents.clone(),
+                                    |s: &mut AppSidebar, v| {
+                                        s.rooms.draft_max_agents = v
+                                            .chars()
+                                            .filter(|c| c.is_ascii_digit())
+                                            .collect();
+                                    },
+                                    None,
+                                )),
+                        ),
+                )
+                // 阵营策略
+                .child(
+                    v_flex()
+                        .gap_1()
+                        .child(div().text_xs().child("阵营策略"))
                         .child(
-                            Checkbox::new("create-lobby-visible")
-                                .checked(draft_lobby_visible)
-                                .label("公开到大厅")
-                                .on_click(move |new_checked, _, cx| {
-                                    let _ = checkbox_weak.update(cx, |s, cx| {
-                                        s.rooms.draft_lobby_visible = *new_checked;
-                                        cx.notify();
-                                    });
+                            Button::new("create-team-policy")
+                                .label(team_policy_label)
+                                .icon(IconName::ChevronDown)
+                                .outline()
+                                .w_full()
+                                .dropdown_menu(move |menu, _window, _cx| {
+                                    let free_weak = free_weak.clone();
+                                    let single_weak = single_weak.clone();
+                                    menu.item(
+                                        PopupMenuItem::new("自由（红蓝皆可）")
+                                            .checked(team_policy_free)
+                                            .on_click(move |_, _, cx| {
+                                                let _ = free_weak.update(cx, |s, cx| {
+                                                    s.rooms.draft_team_policy = "free".into();
+                                                    cx.notify();
+                                                });
+                                            }),
+                                    )
+                                    .item(
+                                        PopupMenuItem::new("单阵营（每人只能在一方）")
+                                            .checked(!team_policy_free)
+                                            .on_click(move |_, _, cx| {
+                                                let _ = single_weak.update(cx, |s, cx| {
+                                                    s.rooms.draft_team_policy =
+                                                        "single_team".into();
+                                                    cx.notify();
+                                                });
+                                            }),
+                                    )
                                 }),
                         ),
                 )
-                .when(!create_error.is_empty(), |d| {
-                    d.child(
-                        div()
-                            .text_xs()
-                            .text_color(cx.theme().danger)
-                            .child(create_error),
-                    )
-                })
+                // 公开到大厅
                 .child(
-                    h_flex()
-                        .gap_2()
-                        .justify_end()
-                        .child(
-                            Button::new("cancel-create-room")
-                                .ghost()
-                                .label("取消")
-                                .on_click(cx.listener(|this, _, _, cx| {
-                                    this.rooms.show_create = false;
-                                    cx.notify();
-                                })),
-                        )
-                        .child(
-                            Button::new("confirm-create-room")
-                                .primary()
-                                .label("创建")
-                                .disabled(creating)
-                                .on_click(cx.listener(|this, _, _, cx| {
-                                    try_create_room(this, cx);
-                                })),
-                        ),
+                    Checkbox::new("create-lobby-visible")
+                        .checked(draft_lobby_visible)
+                        .label("公开到大厅")
+                        .on_click(move |new_checked, _, cx| {
+                            let _ = checkbox_weak.update(cx, |s, cx| {
+                                s.rooms.draft_lobby_visible = *new_checked;
+                                cx.notify();
+                            });
+                        }),
+                ),
+        )
+        .when(!create_error.is_empty(), |d| {
+            d.child(
+                div()
+                    .text_xs()
+                    .text_color(cx.theme().danger)
+                    .child(create_error),
+            )
+        })
+        .child(
+            h_flex()
+                .gap_2()
+                .justify_end()
+                .child(
+                    Button::new("cancel-create-room")
+                        .ghost()
+                        .label("取消")
+                        .on_click(cx.listener(|_, _, window, cx| {
+                            window.close_dialog(cx);
+                        })),
+                )
+                .child(
+                    Button::new("confirm-create-room")
+                        .primary()
+                        .label(if creating { "创建中…" } else { "创建" })
+                        .disabled(creating)
+                        .on_click(cx.listener(|this, _, _, cx| {
+                            try_create_room(this, cx);
+                        })),
                 ),
         )
         .into_any_element()

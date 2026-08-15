@@ -11,7 +11,18 @@ pub(super) struct LauncherSlot {
     pub(super) spawn_name: String,
 }
 
+/// 启动游戏页顶层视图：模式卡片选择 / 自定义编排。
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub(super) enum LauncherView {
+    /// 模式卡片选择页
+    #[default]
+    Modes,
+    /// 自定义对局编排页
+    Custom,
+}
+
 pub struct LauncherPageState {
+    pub(super) view: LauncherView,
     pub(super) loaded: bool,
     pub(super) agents: Vec<Agent>,
     pub(super) spawns: Vec<ProtoSpawnPreset>,
@@ -28,6 +39,7 @@ pub struct LauncherPageState {
 impl Default for LauncherPageState {
     fn default() -> Self {
         Self {
+            view: LauncherView::default(),
             loaded: false,
             agents: Vec::new(),
             spawns: Vec::new(),

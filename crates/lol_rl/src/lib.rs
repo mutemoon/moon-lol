@@ -1,7 +1,6 @@
 pub mod db;
 pub mod device;
 pub mod model_store;
-pub mod obs;
 pub mod policy;
 pub mod ppo;
 pub mod server;

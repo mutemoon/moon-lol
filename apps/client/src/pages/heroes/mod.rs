@@ -14,7 +14,8 @@ mod utils;
 use gpui::prelude::*;
 use gpui::*;
 use gpui_component::button::{Button, ButtonVariants};
-use gpui_component::{h_flex, v_flex, ActiveTheme, Disableable, StyledExt};
+use gpui_component::dialog::{DialogAction, DialogClose, DialogFooter};
+use gpui_component::{v_flex, ActiveTheme, StyledExt};
 use lol_web_protocol::agent::{Agent, CreateAgentDto, UpdateAgentDto};
 use lol_web_protocol::spawn_preset::Visibility;
 pub use types::HeroesState;
@@ -23,6 +24,7 @@ use self::browse::render_browse;
 use self::edit::render_edit;
 use self::types::{default_rewards, HeroesMode, HeroesTab, PLATFORM_PROVIDER_ID};
 use self::utils::{apply_import_json, cfg_str, draft_config, export_json, pretty_config};
+use crate::components::dialog::open_form_dialog;
 use crate::components::sidebar::AppSidebar;
 
 // ── 主渲染函数 ──
@@ -79,67 +81,52 @@ pub fn render_heroes(
 
 // ── 删除确认弹窗 ──
 
-pub(super) fn render_delete_modal(
-    sidebar: &mut AppSidebar,
+pub(super) fn open_delete_modal(window: &mut Window, cx: &mut Context<AppSidebar>) {
+    let weak = cx.entity().downgrade();
+    let delete_weak = weak.clone();
+    open_form_dialog(window, cx, weak, build_delete_form, move |dialog, form| {
+        let delete_weak = delete_weak.clone();
+        dialog
+            .w(px(380.))
+            .child(form)
+            .footer(
+                DialogFooter::new()
+                    .child(
+                        DialogClose::new()
+                            .child(Button::new("delete-cancel").outline().label("取消")),
+                    )
+                    .child(
+                        DialogAction::new()
+                            .child(Button::new("delete-confirm").danger().label("删除")),
+                    ),
+            )
+            .on_ok(move |_, _, cx| {
+                let _ = delete_weak.update(cx, |this, cx| handle_delete(this, cx));
+                true
+            })
+    });
+}
+
+fn build_delete_form(
+    sidebar: &AppSidebar,
+    _window: &mut Window,
     cx: &mut Context<AppSidebar>,
 ) -> AnyElement {
     let name = sidebar.heroes.draft_name.clone();
-    let deleting = sidebar.heroes.deleting;
 
-    div()
-        .absolute()
-        .top_0()
-        .bottom_0()
-        .left_0()
-        .right_0()
-        .bg(rgba(0x00000073))
-        .flex()
-        .items_center()
-        .justify_center()
+    v_flex()
+        .gap_2()
         .child(
-            v_flex()
-                .w(px(380.))
-                .rounded_lg()
-                .border_1()
-                .border_color(cx.theme().border)
-                .bg(cx.theme().background)
-                .p_6()
-                .gap_4()
-                .child(
-                    div()
-                        .text_lg()
-                        .font_bold()
-                        .child(format!("删除选手「{}」？", name)),
-                )
-                .child(
-                    div()
-                        .text_sm()
-                        .text_color(cx.theme().muted_foreground)
-                        .child("该操作不可撤销。引用此选手的场景槽位需手动重新选择。"),
-                )
-                .child(
-                    h_flex()
-                        .justify_end()
-                        .gap_2()
-                        .child(
-                            Button::new("delete-cancel")
-                                .outline()
-                                .label("取消")
-                                .on_click(cx.listener(|this, _, _, cx| {
-                                    this.heroes.show_delete_confirm = false;
-                                    cx.notify();
-                                })),
-                        )
-                        .child(
-                            Button::new("delete-confirm")
-                                .danger()
-                                .label(if deleting { "删除中…" } else { "删除" })
-                                .disabled(deleting)
-                                .on_click(cx.listener(|this, _, _, cx| {
-                                    handle_delete(this, cx);
-                                })),
-                        ),
-                ),
+            div()
+                .text_lg()
+                .font_bold()
+                .child(format!("删除选手「{}」？", name)),
+        )
+        .child(
+            div()
+                .text_sm()
+                .text_color(cx.theme().muted_foreground)
+                .child("该操作不可撤销。引用此选手的场景槽位需手动重新选择。"),
         )
         .into_any_element()
 }
@@ -519,7 +506,6 @@ fn handle_delete(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) {
                 let result = cloud.delete_agent(&id_str).await;
                 this.update(&mut cx, |this, cx| {
                     this.heroes.deleting = false;
-                    this.heroes.show_delete_confirm = false;
                     match result {
                         Ok(()) => {
                             this.heroes.mode = HeroesMode::Browse;

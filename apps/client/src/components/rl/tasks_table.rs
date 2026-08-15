@@ -1,6 +1,7 @@
 use gpui::prelude::FluentBuilder as _;
 use gpui::*;
 use gpui_component::button::{Button, ButtonVariants};
+use gpui_component::menu::{DropdownMenu, PopupMenuItem};
 use gpui_component::scroll::ScrollableElement;
 use gpui_component::table::{Column, DataTable, TableDelegate, TableState};
 use gpui_component::{
@@ -9,8 +10,13 @@ use gpui_component::{
 use lol_rl_protocol::{InFrame, TaskConfigPayload, TaskOverviewItem};
 use rust_i18n::t;
 
+use crate::components::dialog::open_form_dialog;
 use crate::components::sidebar::AppSidebar;
+use crate::components::text_input::{render_edit_input, EditOptions};
 use crate::types::ActiveView;
+
+/// 可选算法模型（后端当前仅实现 PPO）。
+const AGENT_OPTIONS: &[&str] = &["PPO"];
 
 /// 任务概览表 delegate：驱动 `DataTable` 的列宽/单元格渲染，并反向通信到 `AppSidebar`。
 pub struct TaskTableDelegate {
@@ -25,13 +31,26 @@ impl TaskTableDelegate {
             tasks: Vec::new(),
             columns: vec![
                 Column::new("task", t!("app.rl.col_task"))
-                    .width(px(220.))
-                    .min_width(px(140.)),
-                Column::new("agent", t!("app.rl.col_algorithm")).width(px(140.)),
+                    .width(px(180.))
+                    .min_width(px(120.)),
+                Column::new("agent", t!("app.rl.col_algorithm")).width(px(90.)),
+                Column::new("env", t!("app.rl.col_env")).width(px(160.)),
                 Column::new("status", t!("app.rl.col_status"))
                     .width(px(90.))
                     .text_center(),
-                Column::new("steps", t!("app.rl.col_steps"))
+                Column::new("steps_per_iter", t!("app.rl.col_steps_per_iter"))
+                    .width(px(80.))
+                    .text_right(),
+                Column::new("total_iters", t!("app.rl.col_total_iters"))
+                    .width(px(80.))
+                    .text_right(),
+                Column::new("hidden_dim", t!("app.rl.col_hidden_dim"))
+                    .width(px(90.))
+                    .text_right(),
+                Column::new("parallel", t!("app.rl.col_parallel"))
+                    .width(px(80.))
+                    .text_right(),
+                Column::new("lr", t!("app.rl.col_lr"))
                     .width(px(80.))
                     .text_right(),
                 Column::new("return", t!("app.rl.col_return"))
@@ -41,7 +60,7 @@ impl TaskTableDelegate {
                     .width(px(70.))
                     .text_right(),
                 Column::new("actions", t!("app.rl.col_actions"))
-                    .width(px(150.))
+                    .width(px(130.))
                     .selectable(false),
             ],
             sidebar,
@@ -94,27 +113,15 @@ impl TableDelegate for TaskTableDelegate {
             return div().into_any_element();
         };
         let cell_content: AnyElement = match col_ix {
-            0 => v_flex()
-                .gap_0p5()
-                .child(div().font_bold().child(task.name.clone()))
-                .child(
-                    div()
-                        .text_xs()
-                        .text_color(cx.theme().muted_foreground)
-                        .child(task.id.clone()),
-                )
+            0 => div()
+                .font_bold()
+                .child(task.name.clone())
                 .into_any_element(),
-            1 => v_flex()
-                .gap_0p5()
-                .child(div().child(task.agent_type.clone()))
-                .child(
-                    div()
-                        .text_xs()
-                        .text_color(cx.theme().muted_foreground)
-                        .child(task.env_name.clone()),
-                )
+            1 => div()
+                .child(agent_label(&task.agent_type))
                 .into_any_element(),
-            2 => {
+            2 => div().child(task.env_name.clone()).into_any_element(),
+            3 => {
                 let is_running = task.status == "running";
                 div()
                     .px_2()
@@ -127,25 +134,45 @@ impl TableDelegate for TaskTableDelegate {
                     } else {
                         cx.theme().secondary
                     })
-                    .child(task.status.to_uppercase())
+                    .child(status_label(&task.status))
                     .into_any_element()
             }
-            3 => div()
-                .w_full()
-                .text_right()
-                .child(task.current_step.to_string())
-                .into_any_element(),
             4 => div()
                 .w_full()
                 .text_right()
-                .child(format!("{:.2}", task.ep_return))
+                .child(task.rollout_steps_per_env.to_string())
                 .into_any_element(),
             5 => div()
                 .w_full()
                 .text_right()
+                .child(task.total_iterations.to_string())
+                .into_any_element(),
+            6 => div()
+                .w_full()
+                .text_right()
+                .child(task.hidden_dim.to_string())
+                .into_any_element(),
+            7 => div()
+                .w_full()
+                .text_right()
+                .child(task.parallel_envs.to_string())
+                .into_any_element(),
+            8 => div()
+                .w_full()
+                .text_right()
+                .child(format_lr(task.lr))
+                .into_any_element(),
+            9 => div()
+                .w_full()
+                .text_right()
+                .child(format!("{:.2}", task.ep_return))
+                .into_any_element(),
+            10 => div()
+                .w_full()
+                .text_right()
                 .child(task.checkpoints_count.to_string())
                 .into_any_element(),
-            6 => render_actions(
+            11 => render_actions(
                 task.id.clone(),
                 task.status == "running",
                 self.sidebar.clone(),
@@ -161,6 +188,26 @@ impl TableDelegate for TaskTableDelegate {
             .child(cell_content)
             .into_any_element()
     }
+}
+
+fn agent_label(raw: &str) -> String {
+    raw.split_whitespace().next().unwrap_or(raw).to_string()
+}
+
+fn status_label(status: &str) -> String {
+    match status {
+        "running" => "训练中",
+        "queued" => "排队中",
+        "finished" => "已完成",
+        "stopped" => "已停止",
+        "interrupted" => "已中断",
+        other => other,
+    }
+    .to_string()
+}
+
+fn format_lr(lr: f32) -> String {
+    format!("{lr:.0e}")
 }
 
 fn render_actions(
@@ -213,26 +260,6 @@ fn render_actions(
                 }),
         )
         .child(
-            Button::new(format!("save-{task_id}"))
-                .compact()
-                .ghost()
-                .icon(IconName::HardDrive)
-                .on_click({
-                    let weak = weak.clone();
-                    let tid = task_id.clone();
-                    cx.listener(move |_, _, _, cx| {
-                        let _ = weak.update(cx, |s, s_cx| {
-                            if let Some(tx) = &s.tx {
-                                let _ = tx.send(InFrame::SaveCheckpoint {
-                                    task_id: tid.clone(),
-                                });
-                            }
-                            s_cx.notify();
-                        });
-                    })
-                }),
-        )
-        .child(
             Button::new(format!("delete-{task_id}"))
                 .compact()
                 .ghost()
@@ -267,7 +294,11 @@ fn render_actions(
 }
 
 // 渲染多强化学习任务/学习实例概览表格
-pub fn render_tasks_table(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> AnyElement {
+pub fn render_tasks_table(
+    sidebar: &mut AppSidebar,
+    _window: &mut Window,
+    cx: &mut Context<AppSidebar>,
+) -> AnyElement {
     let main_content = v_flex()
         .size_full()
         .flex_1()
@@ -294,13 +325,13 @@ pub fn render_tasks_table(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>
                                 .primary()
                                 .icon(IconName::Plus)
                                 .label(t!("app.rl.new_task"))
-                                .on_click(cx.listener(|this, _, _, cx| {
+                                .on_click(cx.listener(|this, _, window, cx| {
                                     let task_count = this.task_list.len() + 1;
                                     let mut form = TaskConfigPayload::default();
                                     form.name = format!("RL 对战训练任务 #{}", task_count);
                                     this.create_task_form = form;
-                                    this.create_task_modal_open = true;
                                     cx.notify();
+                                    open_create_task_dialog(window, cx);
                                 })),
                         )
                         .child(
@@ -330,62 +361,45 @@ pub fn render_tasks_table(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>
             None => div().flex_1().into_any_element(),
         });
 
-    if sidebar.create_task_modal_open {
-        div()
-            .relative()
-            .size_full()
-            .child(main_content)
-            .child(render_create_task_modal(sidebar, cx))
-            .into_any_element()
-    } else {
-        main_content.into_any_element()
-    }
+    main_content.into_any_element()
 }
 
-// 渲染新建 RL 任务参数配置弹窗 (Create Task Modal)
-fn render_create_task_modal(sidebar: &AppSidebar, cx: &mut Context<AppSidebar>) -> AnyElement {
-    let cfg = &sidebar.create_task_form;
+// 打开新建 RL 任务参数配置弹窗
+fn open_create_task_dialog(window: &mut Window, cx: &mut Context<AppSidebar>) {
+    let weak = cx.entity().downgrade();
+    open_form_dialog(window, cx, weak, build_create_task_form, |dialog, form| {
+        dialog
+            .w(px(640.))
+            .max_h(px(680.))
+            .overlay_closable(false)
+            .child(form)
+    });
+}
 
-    div()
-        .absolute()
-        .inset_0()
-        .bg(hsla(0.0, 0.0, 0.0, 0.65))
-        .flex()
-        .items_center()
-        .justify_center()
+// 渲染新建 RL 任务参数配置弹窗 (Create Task Modal) 表单体（不含遮罩/卡片，由 Dialog 提供）
+fn build_create_task_form(
+    sidebar: &AppSidebar,
+    window: &mut Window,
+    cx: &mut Context<AppSidebar>,
+) -> AnyElement {
+    let cfg = &sidebar.create_task_form;
+    let current_agent = cfg.agent_type.clone();
+    let weak = cx.entity().downgrade();
+
+    v_flex()
+        .gap_4()
         .child(
-            v_flex()
-                .w(px(640.))
-                .max_h(px(680.))
-                .bg(cx.theme().background)
-                .border_1()
-                .border_color(cx.theme().border)
-                .rounded_xl()
-                .shadow_lg()
-                .p_6()
-                .gap_4()
+            // 弹窗 Header
+            h_flex()
+                .items_center()
                 .child(
-                    // 弹窗 Header
                     h_flex()
-                        .justify_between()
+                        .gap_2()
                         .items_center()
-                        .child(
-                            h_flex()
-                                .gap_2()
-                                .items_center()
-                                .child(IconName::Plus)
-                                .child(div().font_bold().text_lg().child("新建 RL 对战训练任务")),
-                        )
-                        .child(
-                            Button::new("close-modal-btn")
-                                .ghost()
-                                .icon(IconName::Close)
-                                .on_click(cx.listener(|this, _, _, cx| {
-                                    this.create_task_modal_open = false;
-                                    cx.notify();
-                                })),
-                        ),
-                )
+                        .child(IconName::Plus)
+                        .child(div().font_bold().text_lg().child("开始训练")),
+                ),
+        )
                 .child(
                     // 滚动表达区域
                     v_flex()
@@ -407,12 +421,17 @@ fn render_create_task_modal(sidebar: &AppSidebar, cx: &mut Context<AppSidebar>) 
                                 )
                                 .child(
                                     div()
-                                        .p_2()
-                                        .bg(cx.theme().secondary)
-                                        .rounded_md()
-                                        .text_sm()
-                                        .font_semibold()
-                                        .child(cfg.name.clone()),
+                                        .w_full()
+                                        .child(render_edit_input(
+                                            window,
+                                            cx,
+                                            sidebar,
+                                            "rl-task-name",
+                                            "输入任务名称",
+                                            EditOptions::default(),
+                                            |this| this.create_task_form.name.clone(),
+                                            |this, v| this.create_task_form.name = v,
+                                        )),
                                 ),
                         )
                         // 2. 算法与环境标识
@@ -431,12 +450,35 @@ fn render_create_task_modal(sidebar: &AppSidebar, cx: &mut Context<AppSidebar>) 
                                                 .child("算法模型 (Agent)"),
                                         )
                                         .child(
-                                            div()
-                                                .p_2()
-                                                .bg(cx.theme().secondary)
-                                                .rounded_md()
-                                                .text_sm()
-                                                .child(cfg.agent_type.clone()),
+                                            Button::new("agent-dropdown")
+                                                .label(agent_label(&current_agent))
+                                                .dropdown_caret(true)
+                                                .outline()
+                                                .w_full()
+                                                .dropdown_menu(move |menu, _window, _cx| {
+                                                    let mut menu = menu;
+                                                    for &alg in AGENT_OPTIONS {
+                                                        let weak = weak.clone();
+                                                        let alg = alg.to_string();
+                                                        let checked = alg == current_agent;
+                                                        menu = menu.item(
+                                                            PopupMenuItem::new(alg.clone())
+                                                                .checked(checked)
+                                                                .on_click(move |_, _, cx| {
+                                                                    let _ = weak.update(
+                                                                        cx,
+                                                                        |this, cx| {
+                                                                            this.create_task_form
+                                                                                .agent_type =
+                                                                                alg.clone();
+                                                                            cx.notify();
+                                                                        },
+                                                                    );
+                                                                }),
+                                                        );
+                                                    }
+                                                    menu
+                                                }),
                                         ),
                                 )
                                 .child(
@@ -451,12 +493,50 @@ fn render_create_task_modal(sidebar: &AppSidebar, cx: &mut Context<AppSidebar>) 
                                                 .child("训练环境 (Env)"),
                                         )
                                         .child(
-                                            div()
-                                                .p_2()
-                                                .bg(cx.theme().secondary)
-                                                .rounded_md()
-                                                .text_sm()
-                                                .child(cfg.env_name.clone()),
+                                            h_flex()
+                                                .gap_1()
+                                                .child(
+                                                    Button::new("env-real-btn")
+                                                        .when(
+                                                            cfg.env_name
+                                                                == lol_rl_protocol::ENV_FIORA_VS_RIVEN_REAL,
+                                                            |b| b.primary(),
+                                                        )
+                                                        .when(
+                                                            cfg.env_name
+                                                                != lol_rl_protocol::ENV_FIORA_VS_RIVEN_REAL,
+                                                            |b| b.outline(),
+                                                        )
+                                                        .compact()
+                                                        .label("真实移动 (10f)")
+                                                        .on_click(cx.listener(|this, _, _, cx| {
+                                                            this.create_task_form.env_name =
+                                                                lol_rl_protocol::ENV_FIORA_VS_RIVEN_REAL
+                                                                    .to_string();
+                                                            cx.notify();
+                                                        })),
+                                                )
+                                                .child(
+                                                    Button::new("env-legacy-btn")
+                                                        .when(
+                                                            cfg.env_name
+                                                                == lol_rl_protocol::ENV_FIORA_VS_RIVEN_LEGACY,
+                                                            |b| b.primary(),
+                                                        )
+                                                        .when(
+                                                            cfg.env_name
+                                                                != lol_rl_protocol::ENV_FIORA_VS_RIVEN_LEGACY,
+                                                            |b| b.outline(),
+                                                        )
+                                                        .compact()
+                                                        .label("瞬移站位 (Legacy)")
+                                                        .on_click(cx.listener(|this, _, _, cx| {
+                                                            this.create_task_form.env_name =
+                                                                lol_rl_protocol::ENV_FIORA_VS_RIVEN_LEGACY
+                                                                    .to_string();
+                                                            cx.notify();
+                                                        })),
+                                                ),
                                         ),
                                 ),
                         )
@@ -581,9 +661,8 @@ fn render_create_task_modal(sidebar: &AppSidebar, cx: &mut Context<AppSidebar>) 
                                     Button::new("cancel-create-btn")
                                         .ghost()
                                         .label("取消")
-                                        .on_click(cx.listener(|this, _, _, cx| {
-                                            this.create_task_modal_open = false;
-                                            cx.notify();
+                                        .on_click(cx.listener(|_, _, window, cx| {
+                                            window.close_dialog(cx);
                                         })),
                                 )
                                 .child(
@@ -591,19 +670,17 @@ fn render_create_task_modal(sidebar: &AppSidebar, cx: &mut Context<AppSidebar>) 
                                         .primary()
                                         .icon(IconName::Plus)
                                         .label("确认创建任务")
-                                        .on_click(cx.listener(|this, _, _, cx| {
+                                        .on_click(cx.listener(|this, _, window, cx| {
                                             let mut config = this.create_task_form.clone();
                                             config.max_steps = config.parallel_envs
                                                 * config.rollout_steps_per_env
                                                 * config.total_iterations;
                                             this.send_in_frame(InFrame::CreateTask { config });
-                                            this.create_task_modal_open = false;
-                                            cx.notify();
+                                            window.close_dialog(cx);
                                         })),
                                 ),
                         ),
-                ),
-        )
+                )
         .into_any_element()
 }
 

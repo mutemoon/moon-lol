@@ -4,16 +4,15 @@ use gpui::prelude::*;
 use gpui::*;
 use gpui_component::button::{Button, ButtonVariants};
 use gpui_component::menu::{DropdownMenu, PopupMenuItem};
+use gpui_component::scroll::ScrollableElement;
 use gpui_component::{h_flex, v_flex, ActiveTheme, Disableable, IconName, Sizable, StyledExt};
 use lol_web_protocol::agent::Agent;
 use lol_web_protocol::spawn_preset::SpawnPreset as ProtoSpawnPreset;
 use lol_web_protocol::GameConfig;
 
-use super::logic::{build_all_agents, spawn_load_scenario, spawn_save_scenario};
-use super::types::LauncherSlot;
+use super::logic::{build_all_agents, spawn_launch_game, spawn_load_scenario, spawn_save_scenario};
+use super::types::{LauncherSlot, LauncherView};
 use crate::components::sidebar::AppSidebar;
-use crate::services::provider::process_service;
-use crate::types::RunningGameInfo;
 
 // ── 渲染辅助 ──
 
@@ -212,10 +211,10 @@ fn team_column(
                         .px_1p5()
                         .py_0p5()
                         .rounded_md()
-                        .bg(cx.theme().accent.opacity(0.15))
+                        .bg(cx.theme().muted)
                         .text_xs()
                         .font_bold()
-                        .text_color(cx.theme().accent)
+                        .text_color(cx.theme().foreground)
                         .child(format!("{}", slots.len())),
                 ),
         )
@@ -254,9 +253,142 @@ fn team_column(
         .into_any_element()
 }
 
+// ── 模式卡片选择页 ──
+
+/// 单张模式卡片：图标 + 标题 + 描述，点击触发回调。
+fn mode_card(
+    cx: &mut Context<AppSidebar>,
+    icon: IconName,
+    title: &str,
+    desc: &str,
+    on_click: impl Fn(&mut AppSidebar, &mut Context<AppSidebar>) + 'static,
+) -> AnyElement {
+    let theme = cx.theme();
+    div()
+        .flex_1()
+        .rounded_lg()
+        .border_1()
+        .border_color(theme.border)
+        .p_5()
+        .flex()
+        .flex_col()
+        .justify_between()
+        .h_32()
+        .hover(|s| s.bg(theme.accent.opacity(0.05)))
+        .cursor_pointer()
+        .on_any_mouse_down(cx.listener(move |this, _event, _window, cx| on_click(this, cx)))
+        .child(
+            h_flex()
+                .items_start()
+                .justify_between()
+                .child(
+                    v_flex()
+                        .gap_1()
+                        .child(div().font_bold().text_sm().child(title.to_string()))
+                        .child(
+                            div()
+                                .text_xs()
+                                .text_color(theme.muted_foreground)
+                                .child(desc.to_string()),
+                        ),
+                )
+                .child(
+                    div()
+                        .p_2()
+                        .rounded_md()
+                        .bg(theme.accent.opacity(0.1))
+                        .child(icon),
+                ),
+        )
+        .into_any_element()
+}
+
+/// 模式卡片页（顶层）：默认 / 自定义，点击自定义进入编排页。
+pub(super) fn render_mode_cards(sidebar: &AppSidebar, cx: &mut Context<AppSidebar>) -> AnyElement {
+    let default_card = mode_card(
+        cx,
+        IconName::LayoutDashboard,
+        "默认",
+        "一键启动默认对局（沙盒 · 瑞雯）",
+        |this, cx| {
+            if this.is_starting_game {
+                return;
+            }
+            this.is_starting_game = true;
+            this.launcher.message = Some("正在启动默认对局…".into());
+            this.launcher.error = None;
+            cx.notify();
+            // 与 `cargo run` 默认一致：沙盒 + Riven，省略 scene 由游戏进程用默认 classic.ron，无 AI
+            let weak = cx.entity().downgrade();
+            let config = GameConfig {
+                mode: "sandbox".into(),
+                champion: "Riven".into(),
+                scene_name: None,
+                agents: None,
+                providers: None,
+            };
+            spawn_launch_game(weak, cx, config, "默认对局已启动".into());
+        },
+    );
+    let custom_card = mode_card(
+        cx,
+        IconName::Settings,
+        "自定义",
+        "编排场景、英雄预设与出生点后启动",
+        |this, cx| {
+            this.launcher.view = LauncherView::Custom;
+            this.launcher.message = None;
+            cx.notify();
+        },
+    );
+
+    let theme = cx.theme();
+    let muted = theme.muted_foreground;
+
+    v_flex()
+        .size_full()
+        .flex_1()
+        .gap_6()
+        .overflow_y_scrollbar()
+        .child(
+            v_flex()
+                .gap_1()
+                .child(
+                    h_flex()
+                        .gap_2()
+                        .items_center()
+                        .child(IconName::Play)
+                        .child(div().font_bold().text_lg().child("启动游戏")),
+                )
+                .child(div().text_xs().text_color(muted).child("选择对局模式")),
+        )
+        .when_some(sidebar.launcher.message.clone(), |d, msg| {
+            d.child(
+                div()
+                    .px_3()
+                    .py_2()
+                    .rounded_md()
+                    .border_1()
+                    .border_color(theme.border)
+                    .bg(theme.muted)
+                    .text_xs()
+                    .text_color(theme.foreground)
+                    .child(msg),
+            )
+        })
+        .child(
+            h_flex()
+                .gap_4()
+                .items_start()
+                .child(default_card)
+                .child(custom_card),
+        )
+        .into_any_element()
+}
+
 // ── 模块化子组件 ──
 
-pub(super) fn render_header() -> AnyElement {
+pub(super) fn render_header(cx: &mut Context<AppSidebar>) -> AnyElement {
     h_flex()
         .items_center()
         .justify_between()
@@ -265,7 +397,18 @@ pub(super) fn render_header() -> AnyElement {
                 .gap_2()
                 .items_center()
                 .child(IconName::Play)
-                .child(div().font_bold().text_lg().child("启动器")),
+                .child(div().font_bold().text_lg().child("启动游戏")),
+        )
+        .child(
+            Button::new("launcher-back-to-modes")
+                .ghost()
+                .icon(IconName::ArrowLeft)
+                .label("返回模式选择")
+                .on_click(cx.listener(|this, _, _, cx| {
+                    this.launcher.view = LauncherView::Modes;
+                    this.launcher.message = None;
+                    cx.notify();
+                })),
         )
         .into_any_element()
 }
@@ -436,10 +579,10 @@ pub(super) fn render_message_banners(
                 .py_2()
                 .rounded_md()
                 .border_1()
-                .border_color(cx.theme().accent)
-                .bg(cx.theme().accent.opacity(0.1))
+                .border_color(cx.theme().border)
+                .bg(cx.theme().muted)
                 .text_xs()
-                .text_color(cx.theme().accent)
+                .text_color(cx.theme().foreground)
                 .child(msg)
                 .into_any_element(),
         );
@@ -546,49 +689,15 @@ pub(super) fn render_action_buttons(
             this.is_starting_game = true;
             this.launch_error = None;
             cx.notify();
-            cx.spawn(
-                move |weak: gpui::WeakEntity<AppSidebar>, cx: &mut gpui::AsyncApp| {
-                    let mut cx = cx.clone();
-                    let mode = mode.clone();
-                    let champ = champ.clone();
-                    async move {
-                        let config = GameConfig {
-                            mode: mode.clone(),
-                            champion: champ.clone(),
-                            scene_name: Some(scene_name.clone()),
-                            agents: Some(agents.clone()),
-                            providers: None,
-                        };
-                        match process_service().start(config).await {
-                            Ok(game) => {
-                                if let Some(entity) = weak.upgrade() {
-                                    entity.update(&mut cx, |sidebar, cx| {
-                                        sidebar.is_starting_game = false;
-                                        sidebar.current_game_id = Some(game.id.clone());
-                                        sidebar.running_games.push(RunningGameInfo {
-                                            id: game.id,
-                                            mode: mode.clone(),
-                                            champion: champ.clone(),
-                                            port: game.port as u16,
-                                        });
-                                        cx.notify();
-                                    });
-                                }
-                            }
-                            Err(e) => {
-                                if let Some(entity) = weak.upgrade() {
-                                    entity.update(&mut cx, |sidebar, cx| {
-                                        sidebar.is_starting_game = false;
-                                        sidebar.launch_error = Some(format!("启动失败: {}", e));
-                                        cx.notify();
-                                    });
-                                }
-                            }
-                        }
-                    }
-                },
-            )
-            .detach();
+            let weak = cx.entity().downgrade();
+            let config = GameConfig {
+                mode: mode.clone(),
+                champion: champ.clone(),
+                scene_name: Some(scene_name.clone()),
+                agents: Some(agents.clone()),
+                providers: None,
+            };
+            spawn_launch_game(weak, cx, config, "对局已启动".into());
         }));
 
     launch_game_btn.into_any_element()

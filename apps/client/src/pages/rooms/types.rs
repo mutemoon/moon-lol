@@ -15,7 +15,6 @@ pub struct RoomsPageState {
     pub(super) join_error: String,
     pub(super) joining: bool,
     // 创建房间
-    pub(super) show_create: bool,
     pub(super) creating: bool,
     pub(super) create_error: String,
     pub(super) draft_name: String,
@@ -36,7 +35,6 @@ impl Default for RoomsPageState {
             join_code: String::new(),
             join_error: String::new(),
             joining: false,
-            show_create: false,
             creating: false,
             create_error: String::new(),
             draft_name: String::new(),

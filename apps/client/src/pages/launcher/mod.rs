@@ -1,4 +1,4 @@
-//! 启动器页面：模式 + 场景 + 双阵营槽位编排 + 启动。
+//! 启动游戏页：模式卡片选择 →（自定义）→ 场景 + 双阵营槽位编排 + 启动。
 
 mod logic;
 mod render;
@@ -13,14 +13,23 @@ pub use types::LauncherPageState;
 use self::logic::spawn_initial_load;
 use self::render::{
     render_action_buttons, render_header, render_load_dropdown, render_message_banners,
-    render_mode_and_champion, render_scene_section, render_teams_section,
+    render_mode_and_champion, render_mode_cards, render_scene_section, render_teams_section,
 };
+use self::types::LauncherView;
 use crate::components::sidebar::AppSidebar;
 
 // ── 页面入口 ──
 
-/// 启动器页面：模式 + 场景 + 双阵营槽位编排 + 启动。
+/// 启动游戏页：顶层按视图分发（模式卡片 → 自定义编排）。
 pub fn render_launcher(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> AnyElement {
+    match sidebar.launcher.view {
+        LauncherView::Modes => render_mode_cards(sidebar, cx),
+        LauncherView::Custom => render_custom_launcher(sidebar, cx),
+    }
+}
+
+/// 自定义对局编排：场景 + 模式 + 双阵营槽位编排 + 启动。
+fn render_custom_launcher(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> AnyElement {
     let champ = sidebar.champion.clone();
     let mode = sidebar.game_mode.clone();
     let launch_error = sidebar.launch_error.clone();
@@ -34,7 +43,7 @@ pub fn render_launcher(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -
 
     let mut container = v_flex().size_full().flex_1().gap_6().overflow_y_scrollbar();
 
-    container = container.child(render_header());
+    container = container.child(render_header(cx));
     container = container.child(render_mode_and_champion(&mode, &champ, &champions, cx));
     container = container.child(render_scene_section(sidebar, load_dropdown, cx));
 

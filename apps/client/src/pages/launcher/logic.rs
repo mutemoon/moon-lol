@@ -4,11 +4,12 @@ use gpui::prelude::*;
 use gpui::*;
 use lol_web_protocol::agent::Agent;
 use lol_web_protocol::scenario::{CreateScenarioDto, UpdateScenarioDto};
-use lol_web_protocol::FrontAgentConfig;
+use lol_web_protocol::{FrontAgentConfig, GameConfig};
 
 use super::types::{LauncherPageState, LauncherSlot};
 use crate::components::sidebar::AppSidebar;
-use crate::services::provider::cloud_client;
+use crate::services::provider::{cloud_client, process_service};
+use crate::types::RunningGameInfo;
 
 // ── 组装逻辑（对应前端 useSlotConfig.toBackend / expandSlot）──
 
@@ -111,6 +112,52 @@ pub(super) fn spawn_initial_load(cx: &mut Context<AppSidebar>) {
             }
         },
     )
+    .detach();
+}
+
+/// 启动一局游戏（默认 / 自定义共用）：spawn `process_service.start`，成功登记 running_games。
+///
+/// `ok_message` 成功时写入 `launcher.message`；失败写入 `launcher.error`。
+pub(super) fn spawn_launch_game(
+    weak: WeakEntity<AppSidebar>,
+    cx: &mut Context<AppSidebar>,
+    config: GameConfig,
+    ok_message: String,
+) {
+    let mode = config.mode.clone();
+    let champ = config.champion.clone();
+    cx.spawn(move |_this: WeakEntity<AppSidebar>, cx: &mut AsyncApp| {
+        let mut cx = cx.clone();
+        async move {
+            match process_service().start(config).await {
+                Ok(game) => {
+                    weak.update(&mut cx, |sidebar, cx| {
+                        sidebar.is_starting_game = false;
+                        sidebar.current_game_id = Some(game.id.clone());
+                        sidebar.running_games.push(RunningGameInfo {
+                            id: game.id,
+                            mode: mode.clone(),
+                            champion: champ.clone(),
+                            port: game.port as u16,
+                        });
+                        sidebar.launcher.error = None;
+                        sidebar.launcher.message = Some(ok_message.clone());
+                        cx.notify();
+                    })
+                    .ok();
+                }
+                Err(e) => {
+                    weak.update(&mut cx, |sidebar, cx| {
+                        sidebar.is_starting_game = false;
+                        sidebar.launcher.message = None;
+                        sidebar.launcher.error = Some(format!("启动失败: {}", e));
+                        cx.notify();
+                    })
+                    .ok();
+                }
+            }
+        }
+    })
     .detach();
 }
 

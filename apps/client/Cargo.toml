@@ -34,5 +34,9 @@ lol_share = { workspace = true }
 league_property = { workspace = true }
 league_loader = { workspace = true }
 rayon = { workspace = true }
+ratex-parser = "0.1.14"
+ratex-layout = "0.1.14"
+ratex-types = "0.1.14"
+ratex-svg = { version = "0.1.14", features = ["standalone", "embed-fonts"] }
 
 

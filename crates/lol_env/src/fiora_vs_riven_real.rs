@@ -4,6 +4,7 @@ use bevy::app::ScheduleRunnerPlugin;
 use bevy::prelude::*;
 use bevy::time::TimeUpdateStrategy;
 use lol_base::character::{ConfigCharacterRecord, ConfigSkin};
+use lol_base_render::camera::CameraState;
 use lol_champions::fiora::passive::Vital;
 use lol_champions::fiora::{Fiora, PluginFiora};
 use lol_champions::riven::{PluginRiven, Riven};
@@ -13,15 +14,14 @@ use lol_core::navigation::navigation::NavigationDebug;
 use lol_core::team::Team;
 use lol_rl_protocol::ActionSpace;
 
+use crate::fiora_riven_common::{
+    ATTACK_MASK_DISTANCE, AttackEventTracker, FioraRivenEntities, FioraVsRivenObs,
+    VitalBreakTracker, add_common_observers, unpause_virtual_time,
+};
 // 供 `lib.rs` 与其他调用方直接复用的公共实现（收敛到 `fiora_riven_common`）。
 pub use crate::fiora_riven_common::{
-    ATTACK_MASK_DISTANCE, FioraVsRivenObs, compute_step_reward, get_obs_from_world,
-    is_position_aligned_with_vital, pause_virtual_time, reset_episode_world,
-    setup_skill_levels_world,
-};
-use crate::fiora_riven_common::{
-    AttackEventTracker, FioraRivenEntities, VitalBreakTracker, add_common_observers,
-    unpause_virtual_time,
+    compute_step_reward, get_obs_from_world, is_position_aligned_with_vital, pause_virtual_time,
+    reset_episode_world, setup_skill_levels_world,
 };
 use crate::reward::{FioraVsRivenRewardModel, RewardModel};
 pub use crate::traits::{
@@ -29,39 +29,96 @@ pub use crate::traits::{
     VisualEnvironment,
 };
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum FioraVsRivenAction {
-    MoveEast50 = 0,  // Stand 50u East (+X relative to Riven)
-    MoveWest50 = 1,  // Stand 50u West (-X relative to Riven)
-    MoveNorth50 = 2, // Stand 50u North (+Z relative to Riven)
-    MoveSouth50 = 3, // Stand 50u South (-Z relative to Riven)
-    AttackRiven = 4, // Basic attack Riven
+/// 连续动作环境与离散动作环境共用同一观测结构（收敛到 `fiora_riven_common`）。
+/// 保留此类型别名以兼容既有调用方（如 `lol_rl::bin::train_test_real`）。
+pub type FioraVsRivenRealObs = FioraVsRivenObs;
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct FioraVsRivenRealAction {
+    /// 连续位移 X 分量 ∈ [-1,1]，× MOVE_SCALE 得到目标点相对 riven 的偏移。
+    pub move_x: f32,
+    /// 连续位移 Z 分量 ∈ [-1,1]。
+    pub move_z: f32,
+    /// 是否执行攻击（二值离散动作）。
+    pub attack: bool,
 }
 
-impl FioraVsRivenAction {
-    pub fn from_index(index: usize) -> Self {
+/// 连续位移缩放：move_x/move_z ∈ [-1,1] 映射到目标点相对 riven 的 ±MOVE_SCALE 偏移。
+pub const MOVE_SCALE: f32 = 100.0;
+
+impl FioraVsRivenRealAction {
+    pub const fn new(move_x: f32, move_z: f32, attack: bool) -> Self {
+        Self {
+            move_x,
+            move_z,
+            attack,
+        }
+    }
+
+    /// 手动面板预设（旧 6 按钮）→ 连续动作，供 `action_from_index` 与可视化手动步进复用。
+    pub fn preset_from_index(index: usize) -> Self {
         match index {
-            0 => Self::MoveEast50,
-            1 => Self::MoveWest50,
-            2 => Self::MoveNorth50,
-            3 => Self::MoveSouth50,
-            4 => Self::AttackRiven,
-            _ => Self::MoveEast50,
+            0 => Self::new(1.0, 0.0, false),  // MoveToEast (+100, 0)
+            1 => Self::new(-1.0, 0.0, false), // MoveToWest (-100, 0)
+            2 => Self::new(0.0, 1.0, false),  // MoveToNorth (0, +100)
+            3 => Self::new(0.0, -1.0, false), // MoveToSouth (0, -100)
+            4 => Self::new(0.0, 0.0, false),  // ChaseRiven (追敌)
+            _ => Self::new(0.0, 0.0, true),   // AttackRiven (攻击瑞雯)
         }
     }
 
-    pub fn label(&self) -> &'static str {
-        match self {
-            Self::MoveEast50 => "MoveEast50 (东侧 50u 站位)",
-            Self::MoveWest50 => "MoveWest50 (西侧 50u 站位)",
-            Self::MoveNorth50 => "MoveNorth50 (北侧 50u 站位)",
-            Self::MoveSouth50 => "MoveSouth50 (南侧 50u 站位)",
-            Self::AttackRiven => "AttackRiven (普通攻击 瑞雯)",
+    /// 连续动作 → 最近的预设索引，用于客户端手动面板与 `action_to_index`。
+    pub fn preset_index(&self) -> usize {
+        if self.attack {
+            5
+        } else if self.move_x > 0.5 {
+            0
+        } else if self.move_x < -0.5 {
+            1
+        } else if self.move_z > 0.5 {
+            2
+        } else if self.move_z < -0.5 {
+            3
+        } else {
+            4
+        }
+    }
+
+    pub fn from_index(index: usize) -> Self {
+        Self::preset_from_index(index)
+    }
+
+    /// 从 PPO 扁平编码 [move_x, move_z, attack] 恢复动作。
+    pub fn from_encoding(encoded: &[f32]) -> Self {
+        let attack = encoded.get(2).copied().unwrap_or(0.0) > 0.5;
+        Self::new(
+            encoded.first().copied().unwrap_or(0.0),
+            encoded.get(1).copied().unwrap_or(0.0),
+            attack,
+        )
+    }
+
+    pub fn to_encoding(&self) -> Vec<f32> {
+        vec![
+            self.move_x,
+            self.move_z,
+            if self.attack { 1.0 } else { 0.0 },
+        ]
+    }
+
+    pub fn desc(&self) -> &'static str {
+        match self.preset_index() {
+            0 => "MoveToEast (+100, 0)",
+            1 => "MoveToWest (-100, 0)",
+            2 => "MoveToNorth (0, +100)",
+            3 => "MoveToSouth (0, -100)",
+            4 => "ChaseRiven (追敌)",
+            _ => "AttackRiven (攻击瑞雯)",
         }
     }
 }
 
-pub struct FioraVsRivenEnv {
+pub struct FioraVsRivenRealEnv {
     app: App,
     fiora: Entity,
     riven: Entity,
@@ -74,8 +131,8 @@ pub struct FioraVsRivenEnv {
     render_mode: RenderMode,
 }
 
-impl FioraVsRivenEnv {
-    /// Shorthand for headless training: `FioraVsRivenEnv::new(max_steps)`.
+impl FioraVsRivenRealEnv {
+    /// Shorthand for headless training: `FioraVsRivenRealEnv::new(max_steps)`.
     pub fn new(max_steps: usize) -> Self {
         Self::with_config(EnvConfig {
             max_steps,
@@ -138,7 +195,11 @@ impl FioraVsRivenEnv {
                 }));
             }
             app.add_plugins(lol_render::PluginRender);
-            app.add_plugins(lol_core::PluginCore);
+            app.add_plugins(
+                lol_core::PluginCore
+                    .build()
+                    .disable::<lol_core::PluginBarrack>(),
+            );
             app.add_plugins(lol_particle::PluginParticle);
         } else {
             app.add_plugins((
@@ -146,7 +207,11 @@ impl FioraVsRivenEnv {
                 asset_plugin,
                 bevy::world_serialization::WorldSerializationPlugin,
             ));
-            app.add_plugins(lol_core::PluginCore);
+            app.add_plugins(
+                lol_core::PluginCore
+                    .build()
+                    .disable::<lol_core::PluginBarrack>(),
+            );
         }
 
         app.add_plugins(PluginFiora);
@@ -158,19 +223,21 @@ impl FioraVsRivenEnv {
         app.finish();
         app.cleanup();
 
-        let asset_server = app.world().resource::<AssetServer>();
-        let fiora_config_handle = asset_server.load::<DynamicWorld>("characters/fiora/config.ron");
-        let riven_config_handle = asset_server.load::<DynamicWorld>("characters/Riven/config.ron");
-
-        let fiora_skin_handle = if render {
-            Some(asset_server.load::<DynamicWorld>("characters/fiora/skins/skin0.ron"))
-        } else {
-            None
-        };
-        let riven_skin_handle = if render {
-            Some(asset_server.load::<DynamicWorld>("characters/Riven/skins/skin0.ron"))
-        } else {
-            None
+        let (fiora_config_handle, riven_config_handle, fiora_skin_handle, riven_skin_handle) = {
+            let asset_server = app.world().resource::<AssetServer>();
+            let fc = asset_server.load::<DynamicWorld>("characters/fiora/config.ron");
+            let rc = asset_server.load::<DynamicWorld>("characters/Riven/config.ron");
+            let fs = if render {
+                Some(asset_server.load::<DynamicWorld>("characters/fiora/skins/skin0.ron"))
+            } else {
+                None
+            };
+            let rs = if render {
+                Some(asset_server.load::<DynamicWorld>("characters/Riven/skins/skin0.ron"))
+            } else {
+                None
+            };
+            (fc, rc, fs, rs)
         };
 
         let initial_fiora_pos = Vec3::ZERO;
@@ -329,7 +396,7 @@ impl FioraVsRivenEnv {
         setup_skill_levels_world(self.app.world_mut(), self.fiora, self.riven);
     }
 
-    pub fn reset(&mut self) -> FioraVsRivenObs {
+    pub fn reset(&mut self) -> FioraVsRivenRealObs {
         self.step_count = 0;
         reset_episode_world(
             self.app.world_mut(),
@@ -341,18 +408,18 @@ impl FioraVsRivenEnv {
         self.get_obs()
     }
 
-    pub fn get_obs(&self) -> FioraVsRivenObs {
+    pub fn get_obs(&self) -> FioraVsRivenRealObs {
         get_obs_from_world(self.app.world(), self.fiora, self.riven)
     }
 
     /// Dispatch a single action into the Bevy ECS world **without** advancing ticks.
     /// This is the shared implementation used by both `step()` and `visual_runner`.
-    pub fn dispatch_action(&mut self, action: FioraVsRivenAction) {
+    pub fn dispatch_action(&mut self, action: FioraVsRivenRealAction) {
         dispatch_action_world(self.app.world_mut(), self.fiora, self.riven, action);
     }
 
     /// Advances the environment by 1 timestep with given action
-    pub fn step(&mut self, action: FioraVsRivenAction) -> StepResult<FioraVsRivenObs> {
+    pub fn step(&mut self, action: FioraVsRivenRealAction) -> StepResult<FioraVsRivenRealObs> {
         self.step_count += 1;
         step_world(
             &mut self.app,
@@ -365,28 +432,33 @@ impl FioraVsRivenEnv {
     }
 }
 
-impl RlEnvironment for FioraVsRivenEnv {
-    type Action = FioraVsRivenAction;
-    type Obs = FioraVsRivenObs;
+impl RlEnvironment for FioraVsRivenRealEnv {
+    type Action = FioraVsRivenRealAction;
+    type Obs = FioraVsRivenRealObs;
 
     fn env_name() -> &'static str {
-        "FioraVsRivenEnv-v0"
+        "FioraVsRivenRealEnv-v1"
     }
 
     fn display_name() -> &'static str {
-        "剑姬 vs 瑞雯 (瞬移基准环境-5动作)"
+        "剑姬 vs 瑞雯 (真实物理移动-6动作)"
     }
 
     fn description() -> &'static str {
-        "剑姬与瑞雯单挑对决，移动为瞬移四个方位（东/西/南/北 50u）"
-    }
-
-    fn action_dim() -> usize {
-        5
+        "剑姬与瑞雯单挑对决，采用真实 10 帧物理移动寻路与普攻"
     }
 
     fn action_space() -> ActionSpace {
-        ActionSpace::Discrete(5)
+        ActionSpace::Hybrid {
+            continuous_dims: 2,
+            discrete_classes: 2,
+        }
+    }
+
+    /// 动作头输出维度（2 连续 + 2 离散 = 4），与 `action_labels()` 的 6 个 UI 手动预设不同：
+    /// 后者是可视化/手动步进的预设按钮，前者才是策略网络实际输出的动作空间维度。
+    fn action_dim() -> usize {
+        Self::action_space().actor_head_dim()
     }
 
     fn state_dim() -> usize {
@@ -395,24 +467,33 @@ impl RlEnvironment for FioraVsRivenEnv {
 
     fn action_labels() -> &'static [&'static str] {
         &[
-            "MoveEast50 (东侧50u)",
-            "MoveWest50 (西侧50u)",
-            "MoveNorth50 (北侧50u)",
-            "MoveSouth50 (南侧50u)",
+            "MoveToEast (+100, 0)",
+            "MoveToWest (-100, 0)",
+            "MoveToNorth (0, +100)",
+            "MoveToSouth (0, -100)",
+            "ChaseRiven (追敌)",
             "AttackRiven (攻击瑞雯)",
         ]
     }
 
     fn action_from_index(idx: usize) -> Self::Action {
-        FioraVsRivenAction::from_index(idx)
+        FioraVsRivenRealAction::preset_from_index(idx)
     }
 
     fn action_to_index(action: Self::Action) -> usize {
-        action as usize
+        action.preset_index()
+    }
+
+    fn action_from_encoding(encoded: &[f32]) -> Self::Action {
+        FioraVsRivenRealAction::from_encoding(encoded)
+    }
+
+    fn action_to_encoding(action: Self::Action) -> Vec<f32> {
+        action.to_encoding()
     }
 
     fn action_name(action: Self::Action) -> &'static str {
-        action.label()
+        action.desc()
     }
 
     fn new(max_steps: usize) -> Self {
@@ -440,7 +521,7 @@ impl RlEnvironment for FioraVsRivenEnv {
     }
 
     fn is_action_masked(obs: &Self::Obs, action_idx: usize) -> bool {
-        obs.distance > ATTACK_MASK_DISTANCE && action_idx == 4
+        obs.distance > ATTACK_MASK_DISTANCE && action_idx == 5
     }
 
     fn reward_formula(&self) -> Option<lol_rl_protocol::RewardFormulaSpec> {
@@ -448,13 +529,13 @@ impl RlEnvironment for FioraVsRivenEnv {
     }
 }
 
-impl VisualEnvironment for FioraVsRivenEnv {
+impl VisualEnvironment for FioraVsRivenRealEnv {
     fn take_app(&mut self) -> App {
         std::mem::replace(&mut self.app, App::new())
     }
 
     fn window_title(&self) -> &'static str {
-        "Fiora vs Riven (Teleport) - RL Visual Viewer"
+        "Fiora vs Riven (Real Move 10f) - RL Visual Viewer"
     }
 
     fn is_assets_loaded(&self, world: &World) -> bool {
@@ -490,6 +571,40 @@ impl VisualEnvironment for FioraVsRivenEnv {
         get_obs_from_world(world, self.fiora, self.riven)
     }
 
+    /// 将窗口鼠标点击（逻辑视口坐标）翻译为一步动作：
+    /// 射线与 y = riven.y 平面求交得世界点 P；P 距 riven 水平距离 < 60 → 攻击，否则连续移动到 P。
+    fn action_from_screen_click(
+        &mut self,
+        world: &mut World,
+        screen_pos: Vec2,
+    ) -> Option<FioraVsRivenRealAction> {
+        let ray = {
+            let mut q = world.query_filtered::<(&Camera, &GlobalTransform), With<CameraState>>();
+            let Ok((cam, cam_tf)) = q.single(world) else {
+                return None;
+            };
+            cam.viewport_to_world(cam_tf, screen_pos).ok()?
+        };
+        let rpos = world.get::<Transform>(self.riven)?.translation;
+        // 射线与水平面 y = riven.y 求交
+        let t = (rpos.y - ray.origin.y) / ray.direction.y;
+        if !t.is_finite() || t <= 0.0 {
+            return None;
+        }
+        let p = ray.origin + ray.direction * t;
+        let dx = (p.x - rpos.x) / MOVE_SCALE;
+        let dz = (p.z - rpos.z) / MOVE_SCALE;
+        if Vec2::new(dx, dz).length() * MOVE_SCALE < 60.0 {
+            Some(FioraVsRivenRealAction::new(0.0, 0.0, true))
+        } else {
+            Some(FioraVsRivenRealAction::new(
+                dx.clamp(-1.0, 1.0),
+                dz.clamp(-1.0, 1.0),
+                false,
+            ))
+        }
+    }
+
     fn step_world(
         &mut self,
         app: &mut App,
@@ -503,143 +618,133 @@ impl VisualEnvironment for FioraVsRivenEnv {
 
 // ── Shared World/App Level Helper Functions ─────────────────────────────────
 
-/// Dispatch an action to the Bevy ECS world without advancing frames.
 pub fn dispatch_action_world(
     world: &mut World,
     fiora: Entity,
-    riven: Entity,
-    action: FioraVsRivenAction,
+    _riven: Entity,
+    action: FioraVsRivenRealAction,
 ) {
-    let riven_pos = world
-        .get::<Transform>(riven)
-        .map(|t| t.translation)
-        .unwrap_or(Vec3::new(250.0, 0.0, 0.0));
-
-    match action {
-        FioraVsRivenAction::MoveEast50 => {
-            if let Some(mut t) = world.get_mut::<Transform>(fiora) {
-                t.translation = Vec3::new(riven_pos.x + 50.0, riven_pos.y, riven_pos.z);
-            }
-        }
-        FioraVsRivenAction::MoveWest50 => {
-            if let Some(mut t) = world.get_mut::<Transform>(fiora) {
-                t.translation = Vec3::new(riven_pos.x - 50.0, riven_pos.y, riven_pos.z);
-            }
-        }
-        FioraVsRivenAction::MoveNorth50 => {
-            if let Some(mut t) = world.get_mut::<Transform>(fiora) {
-                t.translation = Vec3::new(riven_pos.x, riven_pos.y, riven_pos.z + 50.0);
-            }
-        }
-        FioraVsRivenAction::MoveSouth50 => {
-            if let Some(mut t) = world.get_mut::<Transform>(fiora) {
-                t.translation = Vec3::new(riven_pos.x, riven_pos.y, riven_pos.z - 50.0);
-            }
-        }
-        FioraVsRivenAction::AttackRiven => {
-            // CommandAction::Attack will be triggered in advance_action_simulation after waiting for vital to actually spawn/activate.
-        }
+    if action.attack {
+        // Attack logic is triggered inside advance_action_simulation
+    } else {
+        // We will trigger Action::Move inside advance_action_simulation,
+        // but we can clear any existing attack targets here just in case.
+        world.trigger(CommandAction {
+            entity: fiora,
+            action: Action::Stop,
+        });
     }
 }
 
 /// Advance simulation for a given action until completion (including attack event cycle).
-/// Returns the observation captured right before the attack command is released (if action is AttackRiven),
+/// Returns the observation captured right before the attack command is released (if attack=true),
 /// ensuring vital activation is correctly reflected for reward evaluation.
 pub fn advance_action_simulation(
     app: &mut App,
     fiora: Entity,
     riven: Entity,
-    action: FioraVsRivenAction,
-) -> Option<FioraVsRivenObs> {
-    match action {
-        FioraVsRivenAction::MoveEast50
-        | FioraVsRivenAction::MoveWest50
-        | FioraVsRivenAction::MoveNorth50
-        | FioraVsRivenAction::MoveSouth50 => {
-            // Instant movement requires only 1 frame / 1 tick update
+    action: FioraVsRivenRealAction,
+) -> Option<FioraVsRivenRealObs> {
+    if action.attack {
+        // 攻击动作前：等待破绽生成并激活后再释放攻击命令
+        let mut wait_frames = 0;
+        while wait_frames < 300 {
+            let vital_active = app
+                .world()
+                .get::<Vital>(riven)
+                .map(|v| v.is_active())
+                .unwrap_or(false);
+            if vital_active {
+                break;
+            }
             app.update();
-            None
+            wait_frames += 1;
         }
-        FioraVsRivenAction::AttackRiven => {
-            // 攻击动作前：等待破绽真的生成并激活再释放攻击命令
-            let mut wait_frames = 0;
-            while wait_frames < 300 {
-                let vital_active = app
-                    .world()
-                    .get::<Vital>(riven)
-                    .map(|v| v.is_active())
-                    .unwrap_or(false);
-                if vital_active {
-                    break;
-                }
-                app.update();
-                wait_frames += 1;
+
+        // 采样攻击命令释放时刻的 observation（破绽已激活）
+        let attack_obs = get_obs_from_world(app.world(), fiora, riven);
+
+        // 破绽生成并激活后，释放攻击命令
+        app.world_mut().trigger(CommandAction {
+            entity: fiora,
+            action: Action::Attack(riven),
+        });
+
+        {
+            let mut tracker = app
+                .world_mut()
+                .get_resource_mut::<AttackEventTracker>()
+                .unwrap();
+            tracker.attack_hit = false;
+            tracker.attack_ready = false;
+        }
+        {
+            let mut tracker = app
+                .world_mut()
+                .get_resource_mut::<VitalBreakTracker>()
+                .unwrap();
+            tracker.hit = false;
+        }
+
+        // Run initial frame to trigger CommandAttackAutoStart and CommandAttackStart
+        app.update();
+
+        // Advance world until both attack hit (EventAttackEnd) and attack ready (EventAttackReady) events are received
+        let mut attack_frames = 0;
+        while attack_frames < 100 {
+            let (hit, ready) = app
+                .world()
+                .get_resource::<AttackEventTracker>()
+                .map(|t| (t.attack_hit, t.attack_ready))
+                .unwrap_or((true, true));
+            if hit && ready {
+                break;
             }
-
-            // 采样攻击命令释放时刻的 observation (破绽已激活)
-            let attack_obs = get_obs_from_world(app.world(), fiora, riven);
-
-            // 破绽生成并激活后，释放攻击命令
-            app.world_mut().trigger(CommandAction {
-                entity: fiora,
-                action: Action::Attack(riven),
-            });
-
-            {
-                let mut tracker = app
-                    .world_mut()
-                    .get_resource_mut::<AttackEventTracker>()
-                    .unwrap();
-                tracker.attack_hit = false;
-                tracker.attack_ready = false;
-            }
-            // Remove redundant tracker clear since we clear it at the start of step_world
-            {
-                let mut tracker = app
-                    .world_mut()
-                    .get_resource_mut::<AttackEventTracker>()
-                    .unwrap();
-                tracker.attack_hit = false;
-                tracker.attack_ready = false;
-            }
-
-            // Run initial frame to trigger CommandAttackAutoStart and CommandAttackStart
             app.update();
-
-            // Advance world until both attack hit (EventAttackEnd) and attack ready (EventAttackReady) events are received
-            let mut attack_frames = 0;
-            while attack_frames < 100 {
-                let (hit, ready) = app
-                    .world()
-                    .get_resource::<AttackEventTracker>()
-                    .map(|t| (t.attack_hit, t.attack_ready))
-                    .unwrap_or((true, true));
-                if hit && ready {
-                    break;
-                }
-                app.update();
-                attack_frames += 1;
-            }
-
-            // Stop auto attack repeat so Fiora does not start another attack after this one
-            app.world_mut()
-                .trigger(lol_core::attack_auto::CommandAttackAutoStop { entity: fiora });
-
-            Some(attack_obs)
+            attack_frames += 1;
         }
+
+        // Stop auto attack repeat so Fiora does not start another attack after this one
+        app.world_mut()
+            .trigger(lol_core::attack_auto::CommandAttackAutoStop { entity: fiora });
+
+        Some(attack_obs)
+    } else {
+        // 连续移动：目标点 = riven 位置 + [move_x, move_z] × MOVE_SCALE
+        let riven_pos = app.world().get::<Transform>(riven).unwrap().translation;
+        let offset = Vec3::new(
+            action.move_x.clamp(-1.0, 1.0) * MOVE_SCALE,
+            0.0,
+            action.move_z.clamp(-1.0, 1.0) * MOVE_SCALE,
+        );
+        let target = riven_pos + offset;
+
+        app.world_mut().trigger(CommandAction {
+            entity: fiora,
+            action: Action::Move(Vec2::new(target.x, target.z)),
+        });
+
+        // Simulate for a fixed 10 frames for movement
+        let mut move_frames = 0;
+        while move_frames < 10 {
+            app.update();
+            move_frames += 1;
+        }
+
+        None
     }
 }
 
 /// Execute a complete single timestep simulation in the Bevy ECS World/App.
-/// Shared across headless training (`FioraVsRivenEnv::step`) and GUI (`visual_runner`).
+/// Shared across headless training (`FioraVsRivenRealEnv::step`) and GUI (`visual_runner`).
 pub fn step_world(
     app: &mut App,
     fiora: Entity,
     riven: Entity,
-    action: FioraVsRivenAction,
+    action: FioraVsRivenRealAction,
     step_count: usize,
     max_steps: usize,
-) -> StepResult<FioraVsRivenObs> {
+) -> StepResult<FioraVsRivenRealObs> {
     let prev_obs = get_obs_from_world(app.world(), fiora, riven);
     let prev_riven_hp = prev_obs.riven_hp;
 
@@ -678,7 +783,7 @@ pub fn step_world(
         prev_obs.fiora_pos,
         obs.fiora_pos,
         prev_obs.riven_pos,
-        action == FioraVsRivenAction::AttackRiven,
+        action.attack,
         is_vital_break,
         &prev_obs,
     );

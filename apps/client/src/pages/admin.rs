@@ -3,12 +3,14 @@ use std::time::Duration;
 use gpui::prelude::*;
 use gpui::*;
 use gpui_component::button::{Button, ButtonVariants};
+use gpui_component::dialog::{DialogAction, DialogClose, DialogFooter};
 use gpui_component::scroll::ScrollableElement;
-use gpui_component::{h_flex, v_flex, ActiveTheme, Disableable, IconName, StyledExt};
+use gpui_component::{h_flex, v_flex, ActiveTheme, IconName, StyledExt};
 use lol_web_protocol::admin::AdminMetrics;
 use lol_web_protocol::match_::Match;
 use rust_i18n::t;
 
+use crate::components::dialog::open_form_dialog;
 use crate::components::sidebar::AppSidebar;
 use crate::services::cloud::CloudClient;
 use crate::services::provider;
@@ -110,17 +112,24 @@ fn start_polling(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) {
 // ── 公开入口 ──
 
 /// Admin 指标、运行中对局、强制中止。首次渲染即加载，并每 3 秒自动轮询刷新。
-pub fn render_admin(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> AnyElement {
+pub fn render_admin(
+    sidebar: &mut AppSidebar,
+    window: &mut Window,
+    cx: &mut Context<AppSidebar>,
+) -> AnyElement {
     // 首次渲染即启动 3 秒轮询（polling 标志位防止重复 spawn）
     if !sidebar.admin.polling {
         start_polling(sidebar, cx);
     }
 
-    let (metrics, running, abort_target, aborting, loading, error) = (
+    // 强制中止确认由按钮置位 abort_target，渲染帧消费并弹出 Dialog
+    if let Some(target) = sidebar.admin.abort_target.take() {
+        open_abort_dialog(window, cx, target);
+    }
+
+    let (metrics, running, loading, error) = (
         sidebar.admin.metrics.clone(),
         sidebar.admin.running.clone(),
-        sidebar.admin.abort_target.clone(),
-        sidebar.admin.aborting,
         sidebar.admin.loading,
         sidebar.admin.error.clone(),
     );
@@ -416,104 +425,78 @@ pub fn render_admin(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> A
                 )
                 .into_any_element(),
         )
-        // ── 中止确认对话框 ──
-        .when_some(abort_target.as_ref(), |d, target| {
-            let t = target.clone();
-            let tid = t.id.to_string();
-            d.child(
-                div()
-                    .absolute()
-                    .inset_0()
-                    .bg(black().opacity(0.5))
-                    .flex()
-                    .items_center()
-                    .justify_center()
+        .into_any_element()
+}
+
+fn open_abort_dialog(window: &mut Window, cx: &mut Context<AppSidebar>, target: Match) {
+    let weak = cx.entity().downgrade();
+    let abort_weak = weak.clone();
+    let aid = target.id.to_string();
+    let client = provider::cloud_client().clone();
+    open_form_dialog(window, cx, weak, build_abort_form, move |dialog, form| {
+        let abort_weak = abort_weak.clone();
+        let aid = aid.clone();
+        let client = client.clone();
+        dialog
+            .w(px(384.))
+            .child(form)
+            .footer(
+                DialogFooter::new()
                     .child(
-                        div()
-                            .rounded_lg()
-                            .border_1()
-                            .border_color(cx.theme().border)
-                            .bg(cx.theme().background)
-                            .p_6()
-                            .w(rems(24.))
-                            .flex()
-                            .flex_col()
-                            .gap_4()
-                            .child(
-                                v_flex()
-                                    .gap_1()
-                                    .child(div().font_bold().text_sm().child("强制中止对局"))
-                                    .child(
-                                        div()
-                                            .text_xs()
-                                            .text_color(cx.theme().muted_foreground)
-                                            .child(
-                                                "该对局将被立即终止并释放算力。此操作不可恢复。",
-                                            ),
-                                    ),
-                            )
-                            .child(
-                                h_flex()
-                                    .gap_2()
-                                    .justify_end()
-                                    .child(
-                                        Button::new("cancel-abort-btn")
-                                            .ghost()
-                                            .label("取消")
-                                            .on_click(cx.listener(|this, _, _, cx| {
-                                                this.admin.abort_target = None;
-                                                cx.notify();
-                                            })),
-                                    )
-                                    .child({
-                                        let aid = tid.clone();
-                                        let client = provider::cloud_client().clone();
-                                        Button::new("confirm-abort-btn")
-                                            .label("确认中止")
-                                            .when(aborting, |b| b.disabled(true))
-                                            .on_click(cx.listener(move |this, _, _, cx| {
-                                                this.admin.aborting = true;
-                                                let aid2 = aid.clone();
-                                                let client2 = client.clone();
-                                                cx.spawn(
-                                                    move |weak: gpui::WeakEntity<AppSidebar>,
-                                                     cx: &mut gpui::AsyncApp| {
-                                                        let weak = weak.clone();
-                                                        let mut cx = cx.clone();
-                                                        let aid3 = aid2.clone();
-                                                        let client3 = client2.clone();
-                                                        async move {
-                                                            let _ = client3
-                                                                .force_abort_match(&aid3)
-                                                                .await;
-                                                            refresh_admin_data(
-                                                                &client3,
-                                                                &weak,
-                                                                &mut cx,
-                                                            )
-                                                            .await;
-                                                            if let Some(e) = weak.upgrade() {
-                                                                let _ = e.update(
-                                                                    &mut cx,
-                                                                    |this, cx| {
-                                                                        this.admin.aborting = false;
-                                                                        this.admin.abort_target =
-                                                                            None;
-                                                                        cx.notify();
-                                                                    },
-                                                                );
-                                                            }
-                                                        }
-                                                    },
-                                                )
-                                                .detach();
-                                            }))
-                                    }),
-                            ),
+                        DialogClose::new()
+                            .child(Button::new("cancel-abort-btn").ghost().label("取消")),
+                    )
+                    .child(
+                        DialogAction::new()
+                            .child(Button::new("confirm-abort-btn").label("确认中止")),
                     ),
             )
-        })
+            .on_ok(move |_, _, cx| {
+                start_abort(abort_weak.clone(), aid.clone(), client.clone(), cx);
+                true
+            })
+    });
+}
+
+fn build_abort_form(
+    _sidebar: &AppSidebar,
+    _window: &mut Window,
+    cx: &mut Context<AppSidebar>,
+) -> AnyElement {
+    v_flex()
+        .gap_1()
+        .child(div().font_bold().text_sm().child("强制中止对局"))
+        .child(
+            div()
+                .text_xs()
+                .text_color(cx.theme().muted_foreground)
+                .child("该对局将被立即终止并释放算力。此操作不可恢复。"),
+        )
         .into_any_element()
+}
+
+fn start_abort(weak: WeakEntity<AppSidebar>, aid: String, client: CloudClient, cx: &mut App) {
+    let _ = weak.update(cx, |this, cx| {
+        this.admin.aborting = true;
+        cx.notify();
+    });
+    cx.spawn(move |cx: &mut gpui::AsyncApp| {
+        let weak = weak.clone();
+        let mut cx = cx.clone();
+        let aid = aid.clone();
+        let client = client.clone();
+        async move {
+            let _ = client.force_abort_match(&aid).await;
+            refresh_admin_data(&client, &weak, &mut cx).await;
+            if let Some(e) = weak.upgrade() {
+                let _ = e.update(&mut cx, |this, cx| {
+                    this.admin.aborting = false;
+                    cx.notify();
+                });
+            }
+        }
+    })
+    .detach();
 }
 
 fn stat_card(

@@ -46,7 +46,7 @@ use buffs::shield_white::PluginShieldWhite;
 use character::PluginCharacter;
 use cooldown::PluginCooldown;
 use damage::PluginDamage;
-use entities::barrack::PluginBarrack;
+pub use entities::barrack::PluginBarrack;
 use entities::champion::PluginChampion;
 use entities::inhibitor::PluginInhibitor;
 use entities::minion::PluginMinion;

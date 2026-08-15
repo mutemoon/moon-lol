@@ -1,3 +1,4 @@
+pub mod math;
 pub mod metrics;
 pub mod models;
 pub mod visual;
@@ -42,11 +43,11 @@ pub fn render_task_detail(
             ep_return: 0.0,
             checkpoints: vec![],
             metrics_history: vec![],
-            latest_policy: vec![],
             latest_reward_breakdown: vec![],
             latest_obs: None,
             reward_formula: None,
             latest_reward_variables: None,
+            latest_clip_eps: 0.0,
             logs: vec![],
         });
 

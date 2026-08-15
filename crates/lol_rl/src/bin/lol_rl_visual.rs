@@ -4,13 +4,12 @@ use std::sync::{Arc, mpsc};
 
 use candle_core::Tensor;
 use futures_util::{SinkExt, StreamExt};
-use lol_env::fiora_vs_riven::{FioraVsRivenAction, FioraVsRivenObs};
-use lol_env::visual_runner::{PolicyOutputItem, VisualRunnerCmd, VisualStepOutput, run_visual_env};
-use lol_env::{EnvConfig, FioraVsRivenEnv, RenderMode, RewardModel};
+use lol_env::visual_runner::{VisualRunnerCmd, VisualStepOutput, run_visual_env};
+use lol_env::{EnvConfig, RenderMode, VisualEnvironment};
 use lol_rl::device::select_device;
 use lol_rl::ppo::{PPOAgent, PPOConfig};
 use lol_rl_protocol::{
-    ObsFeaturePayload, PolicyItem, RewardItem, VisualInFrame, VisualObsFrame, VisualOutFrame,
+    ObsFeaturePayload, PolicyDisplay, RewardItem, VisualInFrame, VisualObsFrame, VisualOutFrame,
 };
 use tokio::net::TcpStream;
 use tokio_tungstenite::tungstenite::Message;
@@ -26,19 +25,39 @@ fn main() -> anyhow::Result<()> {
         .or_else(|| parse_arg("--hidden_dim"))
         .and_then(|s| s.parse::<usize>().ok())
         .unwrap_or(64);
+    let env_name = parse_arg("--env")
+        .or_else(|| parse_arg("--env_name"))
+        .unwrap_or_else(|| lol_rl_protocol::ENV_FIORA_VS_RIVEN_REAL.to_string());
 
-    println!(">>> 正在启动 Fiora vs Riven 可视化环境 (Port: {port})...");
+    if env_name == lol_rl_protocol::ENV_FIORA_VS_RIVEN_LEGACY {
+        start_visual_runner_for_env::<lol_env::FioraVsRivenEnv>(port, ckpt_path, hidden_dim)
+    } else {
+        start_visual_runner_for_env::<lol_env::FioraVsRivenRealEnv>(port, ckpt_path, hidden_dim)
+    }
+}
+
+fn start_visual_runner_for_env<E: VisualEnvironment>(
+    port: u16,
+    ckpt_path: Option<PathBuf>,
+    hidden_dim: usize,
+) -> anyhow::Result<()> {
+    let env_name = E::env_name().to_string();
+    let display_name = E::display_name();
+    println!(">>> 正在启动 {display_name} 可视化环境 (Port: {port})...");
 
     let device = select_device()?;
     let config = PPOConfig::default();
-    let state_dim = FioraVsRivenObs::dim();
+    let state_dim = E::state_dim();
+    let action_space = E::action_space();
+    let action_labels: Vec<String> = E::action_labels().iter().map(|s| s.to_string()).collect();
+
     let agent = if let Some(ref path) = ckpt_path {
         if path.exists() {
             println!(">>> 加载 Checkpoint: {}", path.display());
             Arc::new(PPOAgent::load(
                 state_dim,
                 hidden_dim,
-                5,
+                action_space,
                 config,
                 device.clone(),
                 path,
@@ -51,7 +70,7 @@ fn main() -> anyhow::Result<()> {
             Arc::new(PPOAgent::new(
                 state_dim,
                 hidden_dim,
-                5,
+                action_space,
                 config,
                 device.clone(),
             )?)
@@ -61,14 +80,13 @@ fn main() -> anyhow::Result<()> {
         Arc::new(PPOAgent::new(
             state_dim,
             hidden_dim,
-            5,
+            action_space,
             config,
             device.clone(),
         )?)
     };
 
-    // Construct unified Env in Window render mode
-    let env = FioraVsRivenEnv::with_config(EnvConfig {
+    let env = E::with_config(EnvConfig {
         max_steps: 0,
         render_mode: RenderMode::WindowCustomLoop,
     });
@@ -78,51 +96,52 @@ fn main() -> anyhow::Result<()> {
 
     let ckpt_path_clone = ckpt_path.unwrap_or_else(|| PathBuf::from("default_random"));
     let cmd_tx_clone = cmd_tx.clone();
+    let env_name_clone = env_name.clone();
+    let action_labels_clone = action_labels.clone();
     std::thread::spawn(move || {
         let rt = tokio::runtime::Builder::new_current_thread()
             .enable_all()
             .build()
             .expect("tokio runtime");
-        rt.block_on(ws_server(port, step_rx, ckpt_path_clone, cmd_tx_clone));
+        rt.block_on(ws_server(
+            port,
+            step_rx,
+            ckpt_path_clone,
+            env_name_clone,
+            action_labels_clone,
+            cmd_tx_clone,
+        ));
     });
 
     let agent_clone = agent.clone();
-    let policy = move |obs: &FioraVsRivenObs| -> (FioraVsRivenAction, Vec<PolicyOutputItem>) {
-        let obs_vec = obs.to_vector();
+    let enc_dim = action_space.encoding_dim();
+    let policy = move |obs: &E::Obs| -> (E::Action, PolicyDisplay) {
+        let obs_vec = E::obs_to_vector(obs);
         let state = match Tensor::from_vec(obs_vec.clone(), (1, state_dim), &device) {
             Ok(t) => t,
             Err(_) => {
-                return (FioraVsRivenAction::AttackRiven, vec![]);
+                return (
+                    E::action_from_encoding(&vec![0.0; enc_dim]),
+                    PolicyDisplay::Discrete(vec![]),
+                );
             }
         };
 
-        let probs = agent_clone
+        let labels = E::action_labels();
+        let display = agent_clone
             .actor_critic
-            .policy_probs(&state, &obs_vec)
-            .unwrap_or_default();
-
-        let policy_items: Vec<PolicyOutputItem> = probs
-            .into_iter()
-            .enumerate()
-            .map(|(idx, prob)| {
-                let action = FioraVsRivenAction::from_index(idx);
-                PolicyOutputItem {
-                    action_id: idx,
-                    action_label: action.label().to_string(),
-                    prob,
-                }
-            })
-            .collect();
+            .policy_display_real(&state, &obs_vec, labels)
+            .unwrap_or(PolicyDisplay::Discrete(vec![]));
 
         let chosen = match agent_clone
             .actor_critic
-            .select_greedy_action_masked(&state, &obs_vec)
+            .select_greedy_action(&state, &obs_vec)
         {
-            Ok(idx) => FioraVsRivenAction::from_index(idx),
-            Err(_) => FioraVsRivenAction::AttackRiven,
+            Ok(encoded) => E::action_from_encoding(&encoded),
+            Err(_) => E::action_from_encoding(&vec![0.0; enc_dim]),
         };
 
-        (chosen, policy_items)
+        (chosen, display)
     };
 
     run_visual_env(env, policy, cmd_rx, step_tx);
@@ -134,6 +153,8 @@ async fn ws_server(
     port: u16,
     step_rx: mpsc::Receiver<VisualStepOutput>,
     ckpt_path: PathBuf,
+    env_name: String,
+    action_labels: Vec<String>,
     cmd_tx: mpsc::Sender<VisualRunnerCmd>,
 ) {
     let listener = match TcpListener::bind(format!("127.0.0.1:{port}")) {
@@ -148,7 +169,6 @@ async fn ws_server(
 
     tracing::info!("视觉 WS 服务启动在 ws://127.0.0.1:{}", port);
 
-    // 广播通道与最新帧缓存，确保新接入的客户端能立即获得当前最新遥测数据
     let (broadcast_tx, _) = tokio::sync::broadcast::channel::<VisualObsFrame>(512);
     let latest_frame = Arc::new(std::sync::Mutex::new(None::<VisualObsFrame>));
 
@@ -169,9 +189,21 @@ async fn ws_server(
         let cmd = cmd_tx.clone();
         let frame_rx = broadcast_tx.subscribe();
         let latest_frame_sub = latest_frame.clone();
+        let env_name_sub = env_name.clone();
+        let action_labels_sub = action_labels.clone();
 
         tokio::spawn(async move {
-            if let Err(e) = handle_ws_client(stream, frame_rx, latest_frame_sub, ckpt, cmd).await {
+            if let Err(e) = handle_ws_client(
+                stream,
+                frame_rx,
+                latest_frame_sub,
+                ckpt,
+                env_name_sub,
+                action_labels_sub,
+                cmd,
+            )
+            .await
+            {
                 tracing::warn!("WS 客户端连接关闭: {}", e);
             }
         });
@@ -183,15 +215,19 @@ async fn handle_ws_client(
     mut frame_rx: tokio::sync::broadcast::Receiver<VisualObsFrame>,
     latest_frame: Arc<std::sync::Mutex<Option<VisualObsFrame>>>,
     ckpt_path: PathBuf,
+    env_name: String,
+    action_labels: Vec<String>,
     cmd_tx: mpsc::Sender<VisualRunnerCmd>,
 ) -> anyhow::Result<()> {
     let ws_stream = tokio_tungstenite::accept_async(stream).await?;
     let (mut ws_writer, mut ws_reader) = ws_stream.split();
 
-    // 1. 发送 Ready 帧
+    // 1. 发送包含环境与动作元数据的 Ready 帧
     let ready = VisualOutFrame::Ready {
         checkpoint_path: ckpt_path.to_string_lossy().to_string(),
+        env_name,
         env_max_steps: 100,
+        action_labels,
     };
     let bytes = bincode::serialize(&ready)?;
     ws_writer.send(Message::Binary(bytes.into())).await?;
@@ -245,12 +281,9 @@ async fn handle_ws_client(
     Ok(())
 }
 
-/// Convert a `VisualStepOutput` (from lol_env) to a `VisualObsFrame`.
+/// Convert a generic `VisualStepOutput` (from lol_env) to a `VisualObsFrame`.
 fn step_output_to_frame_data(output: &VisualStepOutput) -> VisualObsFrame {
-    let r = &output.step_result;
-    let obs = &r.obs;
-
-    let breakdown: Vec<RewardItem> = r
+    let breakdown: Vec<RewardItem> = output
         .reward_breakdown
         .iter()
         .map(|b| RewardItem {
@@ -259,62 +292,33 @@ fn step_output_to_frame_data(output: &VisualStepOutput) -> VisualObsFrame {
         })
         .collect();
 
-    let vital_direction = if obs.vital_dir_x > 0.5 {
-        "+X (东侧)"
-    } else if obs.vital_dir_neg_x > 0.5 {
-        "-X (西侧)"
-    } else if obs.vital_dir_z > 0.5 {
-        "+Z (北侧)"
-    } else if obs.vital_dir_neg_z > 0.5 {
-        "-Z (南侧)"
-    } else {
-        "None"
-    };
+    let policy = output.policy.clone();
 
-    let policy: Vec<PolicyItem> = output
-        .policy
-        .iter()
-        .map(|p| PolicyItem {
-            action_id: p.action_id,
-            action: p.action_label.clone(),
-            prob: p.prob,
-        })
-        .collect();
-
-    let reward_model = lol_env::reward::FioraVsRivenRewardModel;
-    let formula = reward_model.formula_spec();
+    let obs_payload = output.obs_payload.clone().unwrap_or(ObsFeaturePayload {
+        fiora_hp_pct: 1.0,
+        riven_hp_pct: 1.0,
+        distance: 0.0,
+        q_ready: true,
+        w_ready: true,
+        e_ready: true,
+        r_ready: true,
+        has_vital: false,
+        vital_is_active: false,
+        vital_direction: "None".into(),
+    });
 
     VisualObsFrame {
-        step: r.step,
-        obs: ObsFeaturePayload {
-            fiora_hp_pct: if obs.fiora_max_hp > 0.0 {
-                obs.fiora_hp / obs.fiora_max_hp
-            } else {
-                1.0
-            },
-            riven_hp_pct: if obs.riven_max_hp > 0.0 {
-                obs.riven_hp / obs.riven_max_hp
-            } else {
-                1.0
-            },
-            distance: obs.distance,
-            q_ready: obs.q_ready,
-            w_ready: obs.w_ready,
-            e_ready: obs.e_ready,
-            r_ready: obs.r_ready,
-            has_vital: obs.has_vital,
-            vital_is_active: obs.vital_is_active,
-            vital_direction: vital_direction.into(),
-        },
-        reward: r.reward,
+        step: output.step,
+        obs: obs_payload.clone(),
+        reward: output.reward,
         reward_breakdown: breakdown,
         policy,
-        terminated: r.terminated,
-        truncated: r.truncated,
-        fiora_alive: obs.fiora_hp > 0.0,
-        riven_alive: obs.riven_hp > 0.0,
-        reward_formula: Some(formula),
-        reward_variables: Some(r.reward_variables.clone()),
+        terminated: output.terminated,
+        truncated: output.truncated,
+        fiora_alive: obs_payload.fiora_hp_pct > 0.0,
+        riven_alive: obs_payload.riven_hp_pct > 0.0,
+        reward_formula: output.reward_formula.clone(),
+        reward_variables: Some(output.reward_variables.clone()),
     }
 }
 

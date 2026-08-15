@@ -37,23 +37,28 @@ fn make_test_grid() -> ConfigNavigationGrid {
         srx_flags: GridFlagsSRX::from(0),
     };
 
+    const GRID_SIZE: usize = 100;
+    const CELL_SIZE: f32 = 50.0;
+    let half_extent = (GRID_SIZE as f32 * CELL_SIZE) / 2.0;
+
     ConfigNavigationGrid {
-        min_position: Vec2::new(0.0, 0.0),
-        cell_size: 50.0,
-        x_len: 100,
-        y_len: 100,
-        cells: vec![vec![cell; 100]; 100],
-        height_x_len: 2,
-        height_y_len: 2,
-        height_samples: vec![vec![0.0; 100]; 100],
+        min_position: Vec2::new(-half_extent, -half_extent),
+        cell_size: CELL_SIZE,
+        x_len: GRID_SIZE,
+        y_len: GRID_SIZE,
+        cells: vec![vec![cell; GRID_SIZE]; GRID_SIZE],
+        height_x_len: GRID_SIZE,
+        height_y_len: GRID_SIZE,
+        height_samples: vec![vec![0.0; GRID_SIZE]; GRID_SIZE],
         occupied_cells: Default::default(),
         exclude_cells: Default::default(),
     }
 }
 
-/// 将导航网格写入 bin 文件
+/// 将导航网格写入 bin 文件（bevy 资产根为 workspace_root/assets）
 fn write_nav_grid(grid: &ConfigNavigationGrid, path: &str) {
-    let path = std::path::Path::new(path);
+    let full_path = format!("assets/{}", path);
+    let path = std::path::Path::new(&full_path);
     if let Some(parent) = path.parent() {
         std::fs::create_dir_all(parent).expect("无法创建目录");
     }

@@ -2,12 +2,14 @@ use std::path::Path;
 
 use candle_core::{DType, Device, Result, Tensor};
 use candle_nn::{AdamW, Optimizer, ParamsAdamW, VarBuilder, VarMap};
+use lol_rl_protocol::ActionSpace;
 
 use crate::policy::ActorCritic;
 
 pub struct RolloutBuffer {
     pub states: Vec<Vec<f32>>,
-    pub actions: Vec<u32>,
+    /// 扁平编码动作向量：Discrete=[idx]，Continuous=[v0..]，Hybrid=[v0, v1, attack_idx]。
+    pub actions: Vec<Vec<f32>>,
     pub log_probs: Vec<f32>,
     pub rewards: Vec<f32>,
     pub values: Vec<f32>,
@@ -29,14 +31,14 @@ impl RolloutBuffer {
     pub fn push(
         &mut self,
         state: Vec<f32>,
-        action: usize,
+        action: Vec<f32>,
         log_prob: f32,
         reward: f32,
         value: f32,
         done: bool,
     ) {
         self.states.push(state);
-        self.actions.push(action as u32);
+        self.actions.push(action);
         self.log_probs.push(log_prob);
         self.rewards.push(reward);
         self.values.push(value);
@@ -87,8 +89,12 @@ pub struct PPOStats {
     pub policy_loss: f32,
     pub value_loss: f32,
     pub entropy_loss: f32,
+    /// 平均策略熵（正值，上报/展示用），与 entropy_loss（负值，参与总损失）区分。
+    pub entropy: f32,
     pub total_loss: f32,
     pub kl: f32,
+    /// 本 epoch 被 clip 的比例（ratio 超出 [1-eps, 1+eps] 的占比）
+    pub clip_frac: f32,
 }
 
 pub struct PPOAgent {
@@ -103,14 +109,14 @@ impl PPOAgent {
     pub fn new(
         state_dim: usize,
         hidden_dim: usize,
-        action_dim: usize,
+        action_space: ActionSpace,
         config: PPOConfig,
         device: Device,
     ) -> Result<Self> {
         let varmap = VarMap::new();
         let vb = VarBuilder::from_varmap(&varmap, DType::F32, &device);
 
-        let actor_critic = ActorCritic::new(state_dim, hidden_dim, action_dim, vb)?;
+        let actor_critic = ActorCritic::new(state_dim, hidden_dim, action_space, vb)?;
 
         let params = ParamsAdamW {
             lr: config.lr,
@@ -149,7 +155,7 @@ impl PPOAgent {
     pub fn load(
         state_dim: usize,
         hidden_dim: usize,
-        action_dim: usize,
+        action_space: ActionSpace,
         config: PPOConfig,
         device: Device,
         path: &Path,
@@ -159,32 +165,32 @@ impl PPOAgent {
         if meta.len() == 0 {
             return Err(candle_core::Error::Msg("checkpoint 文件为空".to_string()));
         }
-        let hidden_dim = if let Ok(tensors) = candle_core::safetensors::load(path, &device) {
-            if let Some(fc2_bias) = tensors.get("fc2.bias").or_else(|| tensors.get("fc1.bias")) {
-                let dims = fc2_bias.shape().dims();
-                if !dims.is_empty() {
-                    dims[0]
-                } else {
-                    hidden_dim
-                }
-            } else {
-                hidden_dim
-            }
-        } else {
-            hidden_dim
-        };
+        let tensors = candle_core::safetensors::load(path, &device)?;
+
+        // 从 fc2.bias（或 fc1.bias）的形状自动推断隐藏层维度，兼容不同 hidden_dim 的 checkpoint。
+        let hidden_dim = tensors
+            .get("fc2.bias")
+            .or_else(|| tensors.get("fc1.bias"))
+            .and_then(|t| t.shape().dims().first().copied())
+            .unwrap_or(hidden_dim);
+
+        // 校验 checkpoint 的动作空间结构与请求一致：依据是否存在 log_std（连续/混合）与
+        // attack_head.weight（混合）张量判定，不依赖层数/维度，避免网络结构演进时误报。
+        let has_log_std = tensors.contains_key("log_std");
+        let has_attack_head = tensors.contains_key("attack_head.weight");
+        let want_log_std = !matches!(action_space, ActionSpace::Discrete(_));
+        let want_attack_head = matches!(action_space, ActionSpace::Hybrid { .. });
+        if has_log_std != want_log_std || has_attack_head != want_attack_head {
+            return Err(candle_core::Error::Msg(format!(
+                "checkpoint 动作空间不匹配: 期望 log_std={want_log_std} attack_head={want_attack_head}, \
+                 实际 log_std={has_log_std} attack_head={has_attack_head}"
+            )));
+        }
 
         let mut varmap = VarMap::new();
         let vb = VarBuilder::from_varmap(&varmap, DType::F32, &device);
-        let actor_critic = ActorCritic::new(state_dim, hidden_dim, action_dim, vb)?;
+        let actor_critic = ActorCritic::new(state_dim, hidden_dim, action_space, vb)?;
         varmap.load(path)?;
-        let var_count = varmap.all_vars().len();
-        if var_count != 8 {
-            return Err(candle_core::Error::Msg(format!(
-                "checkpoint 变量数异常: 期望 8, 实际 {}",
-                var_count
-            )));
-        }
         let params = ParamsAdamW {
             lr: config.lr,
             ..Default::default()
@@ -240,8 +246,10 @@ impl PPOAgent {
                 policy_loss: 0.0,
                 value_loss: 0.0,
                 entropy_loss: 0.0,
+                entropy: 0.0,
                 total_loss: 0.0,
                 kl: 0.0,
+                clip_frac: 0.0,
             });
         }
 
@@ -252,7 +260,9 @@ impl PPOAgent {
         let state_dim = buffer.states[0].len();
 
         let states_tensor = Tensor::from_vec(flat_states, (n, state_dim), &self.device)?;
-        let actions_tensor = Tensor::from_vec(buffer.actions.clone(), (n,), &self.device)?;
+        let enc_dim = buffer.actions[0].len();
+        let flat_actions: Vec<f32> = buffer.actions.iter().flatten().copied().collect();
+        let actions_tensor = Tensor::from_vec(flat_actions, (n, enc_dim), &self.device)?;
         let old_log_probs_tensor = Tensor::from_vec(buffer.log_probs.clone(), (n,), &self.device)?;
         let returns_tensor = Tensor::from_vec(returns, (n,), &self.device)?;
         let advantages_tensor = Tensor::from_vec(advantages, (n,), &self.device)?;
@@ -261,8 +271,10 @@ impl PPOAgent {
             policy_loss: 0.0,
             value_loss: 0.0,
             entropy_loss: 0.0,
+            entropy: 0.0,
             total_loss: 0.0,
             kl: 0.0,
+            clip_frac: 0.0,
         };
 
         for _epoch in 0..self.config.ppo_epochs {
@@ -293,10 +305,17 @@ impl PPOAgent {
             // KL divergence (K1 estimator: ratio - 1 - log(ratio))
             let kl = (&ratio - 1.0 - &log_ratio)?.mean_all()?;
 
+            // clip_frac：ratio 超出 [1-eps, 1+eps] 的元素占比（训练健康度信号）
+            let clip_frac = (ratio.lt(1.0 - self.config.clip_eps)?.to_dtype(DType::F32)?
+                + ratio.gt(1.0 + self.config.clip_eps)?.to_dtype(DType::F32)?)?
+            .mean_all()?;
+
             let p_loss_val: f32 = policy_loss.to_scalar()?;
             let v_loss_val: f32 = value_loss.to_scalar()?;
             let e_loss_val: f32 = entropy_loss.to_scalar()?;
+            let entropy_val: f32 = entropy.mean_all()?.to_scalar()?;
             let kl_val: f32 = kl.to_scalar()?;
+            let clip_frac_val: f32 = clip_frac.to_scalar()?;
 
             // Total Loss = Policy Loss + c1 * Value Loss + c2 * Entropy Loss
             let c1_val = (&policy_loss + (value_loss.affine(self.config.c1 as f64, 0.0)?))?;
@@ -310,8 +329,10 @@ impl PPOAgent {
                 policy_loss: p_loss_val,
                 value_loss: v_loss_val,
                 entropy_loss: e_loss_val,
+                entropy: entropy_val,
                 total_loss: tot_loss_val,
                 kl: kl_val,
+                clip_frac: clip_frac_val,
             };
         }
 
@@ -336,7 +357,7 @@ mod tests {
         let agent = PPOAgent::new(
             state_dim,
             hidden_dim,
-            action_dim,
+            ActionSpace::Discrete(action_dim),
             config.clone(),
             device.clone(),
         )?;
@@ -357,7 +378,7 @@ mod tests {
         let loaded = PPOAgent::load(
             state_dim,
             hidden_dim,
-            action_dim,
+            ActionSpace::Discrete(action_dim),
             config.clone(),
             device.clone(),
             &save_path,
@@ -390,7 +411,14 @@ mod tests {
         let empty_path = tmp_dir.join("empty.safetensors");
         std::fs::write(&empty_path, []).ok();
 
-        let result = PPOAgent::load(17, 64, 9, PPOConfig::default(), Device::Cpu, &empty_path);
+        let result = PPOAgent::load(
+            17,
+            64,
+            ActionSpace::Discrete(9),
+            PPOConfig::default(),
+            Device::Cpu,
+            &empty_path,
+        );
         assert!(result.is_err());
 
         let _ = std::fs::remove_file(&empty_path);
@@ -407,7 +435,7 @@ mod tests {
         let agent = PPOAgent::new(
             state_dim,
             hidden_dim,
-            action_dim,
+            ActionSpace::Discrete(action_dim),
             config.clone(),
             device.clone(),
         )?;
@@ -422,7 +450,7 @@ mod tests {
         let loaded = PPOAgent::load(
             state_dim,
             64,
-            action_dim,
+            ActionSpace::Discrete(action_dim),
             config,
             device.clone(),
             &save_path,
@@ -441,11 +469,66 @@ mod tests {
         let result = PPOAgent::load(
             17,
             64,
-            9,
+            ActionSpace::Discrete(9),
             PPOConfig::default(),
             Device::Cpu,
             &PathBuf::from("/nonexistent/path/checkpoint.safetensors"),
         );
         assert!(result.is_err());
+    }
+
+    #[test]
+    fn hybrid_ppo_smoke() -> Result<()> {
+        let state_dim = 9;
+        let hidden_dim = 32;
+        let action_space = ActionSpace::Hybrid {
+            continuous_dims: 2,
+            discrete_classes: 2,
+        };
+        let config = PPOConfig::default();
+        let device = Device::Cpu;
+
+        let mut agent = PPOAgent::new(
+            state_dim,
+            hidden_dim,
+            action_space,
+            config.clone(),
+            device.clone(),
+        )?;
+
+        let mut buffer = RolloutBuffer::new();
+        for _ in 0..8 {
+            let obs_vec: Vec<f32> = (0..state_dim).map(|i| i as f32 * 0.1).collect();
+            let state = Tensor::from_vec(obs_vec.clone(), (1, state_dim), &device)?;
+            let (encoded, log_prob, value) = agent.actor_critic.sample_action(&state, &obs_vec)?;
+            assert_eq!(encoded.len(), 3, "hybrid 编码应为 [move_x, move_z, attack]");
+            buffer.push(obs_vec, encoded, log_prob, 0.1, value, false);
+        }
+
+        let stats = agent.update(&buffer, 0.0)?;
+        assert!(stats.policy_loss.is_finite(), "policy_loss 应为有限值");
+        assert!(stats.value_loss.is_finite(), "value_loss 应为有限值");
+
+        // 保存/加载混合 checkpoint
+        let tmp_dir = std::env::temp_dir().join("moon_lol_test_hybrid");
+        std::fs::create_dir_all(&tmp_dir).ok();
+        let save_path = tmp_dir.join("hybrid_ckpt.safetensors");
+        let _ = std::fs::remove_file(&save_path);
+        agent.save(&save_path)?;
+        let loaded = PPOAgent::load(
+            state_dim,
+            hidden_dim,
+            action_space,
+            config,
+            device,
+            &save_path,
+        )?;
+        let obs_vec: Vec<f32> = (0..state_dim).map(|i| i as f32 * 0.1).collect();
+        let state = Tensor::from_vec(obs_vec.clone(), (1, state_dim), &loaded.device())?;
+        let (encoded_after, _, _) = loaded.actor_critic.sample_action(&state, &obs_vec)?;
+        assert_eq!(encoded_after.len(), 3);
+
+        let _ = std::fs::remove_file(&save_path);
+        Ok(())
     }
 }

@@ -20,7 +20,7 @@ use self::logic::{
     spawn_dissolve_room, spawn_leave_room, spawn_load, spawn_poll, spawn_start_match,
 };
 use self::types::reset_state_for;
-use self::ui::{render_add_dialog, render_team_column};
+use self::ui::render_team_column;
 use crate::components::sidebar::AppSidebar;
 use crate::types::ActiveView;
 
@@ -319,6 +319,5 @@ pub fn render_room_detail(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>
         )
         .child(divider())
         .child(footer)
-        .child(render_add_dialog(sidebar, cx, id, &agents))
         .into_any_element()
 }

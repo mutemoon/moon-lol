@@ -15,7 +15,7 @@ pub use types::RoomsPageState;
 use self::input::render_state_input;
 use self::logic::{spawn_refresh_rooms, try_join_by_code};
 use self::types::RoomsTab;
-use self::ui::{create_room_dialog, room_card, tab_button};
+use self::ui::{open_create_room_dialog, room_card, tab_button};
 use crate::components::sidebar::AppSidebar;
 
 /// 房间列表/创建/加入/解散页面。
@@ -33,26 +33,13 @@ pub fn render_rooms(
         spawn_refresh_rooms(cx);
     }
 
-    let (
-        lobby_count,
-        my_count,
-        loading,
-        active_tab,
-        join_error,
-        joining,
-        show_create,
-        creating,
-        create_error,
-    ) = (
+    let (lobby_count, my_count, loading, active_tab, join_error, joining) = (
         sidebar.rooms.lobby_rooms.len(),
         sidebar.rooms.my_rooms.len(),
         sidebar.rooms.loading,
         sidebar.rooms.active_tab,
         sidebar.rooms.join_error.clone(),
         sidebar.rooms.joining,
-        sidebar.rooms.show_create,
-        sidebar.rooms.creating,
-        sidebar.rooms.create_error.clone(),
     );
     let lobby_rooms = sidebar.rooms.lobby_rooms.clone();
     let my_rooms = sidebar.rooms.my_rooms.clone();
@@ -95,10 +82,10 @@ pub fn render_rooms(
                                 .icon(IconName::Plus)
                                 .label("创建房间")
                                 .disabled(!logged_in)
-                                .on_click(cx.listener(|this, _, _, cx| {
-                                    this.rooms.show_create = true;
+                                .on_click(cx.listener(|this, _, window, cx| {
                                     this.rooms.create_error.clear();
                                     cx.notify();
+                                    open_create_room_dialog(window, cx);
                                 })),
                         ),
                 ),
@@ -223,15 +210,5 @@ pub fn render_rooms(
                     )
                 }),
         )
-        // ── 创建房间对话框 ──
-        .when(show_create, |d| {
-            d.child(create_room_dialog(
-                sidebar,
-                window,
-                cx,
-                create_error,
-                creating,
-            ))
-        })
         .into_any_element()
 }

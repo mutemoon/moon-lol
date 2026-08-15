@@ -1,25 +1,26 @@
-//! Visual runner: drives a Bevy `App` (constructed in `RenderMode::Window`) through a
+//! Visual runner: drives a Bevy `App` (constructed in `RenderMode::WindowCustomLoop`) through a
 //! custom winit event loop, accepting external commands and emitting step results.
 //!
-//! This module has **no knowledge** of WebSocket or any specific transport protocol.
-//! Callers bridge `VisualRunnerCmd` / `VisualStepOutput` to their own transport layer.
+//! This module is generic over `VisualEnvironment` and has **no knowledge** of WebSocket
+//! or any specific transport protocol.
 
 use std::sync::mpsc::{Receiver, Sender};
 use std::sync::{Arc, Mutex};
 
 use bevy::prelude::*;
 use bevy::window::{PrimaryWindow, RawHandleWrapper, WindowWrapper};
+use lol_rl_protocol::{ObsFeaturePayload, PolicyDisplay, RewardFormulaSpec};
 use winit::application::ApplicationHandler;
 use winit::dpi::LogicalSize;
-use winit::event::WindowEvent;
+use winit::event::{ElementState, MouseButton, WindowEvent};
 use winit::event_loop::{ActiveEventLoop, ControlFlow, EventLoop};
 use winit::window::{Window as WinitWindow, WindowId};
 
-use crate::fiora_vs_riven::{
-    FioraVsRivenAction, FioraVsRivenEnv, FioraVsRivenObs, StepResult, get_obs_from_world,
-    pause_virtual_time, reset_episode_world, setup_skill_levels_world, step_world,
-    unpause_virtual_time,
-};
+use crate::traits::{RewardBreakdownItem, VisualEnvironment};
+
+/// 可视化窗口逻辑分辨率（与 env 的 bevy Window resolution 一致，用于把物理鼠标坐标归一化为逻辑视口坐标）。
+const VIEWPORT_W: f32 = 1280.0;
+const VIEWPORT_H: f32 = 720.0;
 
 // ── Public types (WS-agnostic) ──────────────────────────────────────────────
 
@@ -33,53 +34,65 @@ pub enum VisualRunnerCmd {
     StepWithAction(usize),
 }
 
-/// Per-action probability output from the policy.
-#[derive(Debug, Clone)]
-pub struct PolicyOutputItem {
-    pub action_id: usize,
-    pub action_label: String,
-    pub prob: f32,
-}
-
-/// Output emitted by the visual runner after each RL step.
+/// Output emitted by the visual runner after each RL step or state change.
 #[derive(Debug, Clone)]
 pub struct VisualStepOutput {
-    pub step_result: StepResult,
-    pub policy: Vec<PolicyOutputItem>,
+    pub step: usize,
+    pub reward: f32,
+    pub terminated: bool,
+    pub truncated: bool,
+    pub reward_breakdown: Vec<RewardBreakdownItem>,
+    pub reward_variables: std::collections::HashMap<String, f32>,
+    pub policy: PolicyDisplay,
+    pub obs_payload: Option<ObsFeaturePayload>,
+    pub reward_formula: Option<RewardFormulaSpec>,
 }
 
-type PolicyFn =
-    dyn FnMut(&FioraVsRivenObs) -> (FioraVsRivenAction, Vec<PolicyOutputItem>) + Send + 'static;
+type PolicyFn<E> = dyn FnMut(
+        &<E as crate::traits::RlEnvironment>::Obs,
+    ) -> (<E as crate::traits::RlEnvironment>::Action, PolicyDisplay)
+    + Send
+    + 'static;
+
+pub fn pause_virtual_time(world: &mut World) {
+    if let Some(mut time) = world.get_resource_mut::<Time<Virtual>>() {
+        time.pause();
+    }
+}
+
+pub fn unpause_virtual_time(world: &mut World) {
+    if let Some(mut time) = world.get_resource_mut::<Time<Virtual>>() {
+        time.unpause();
+    }
+}
 
 // ── Custom winit runner ─────────────────────────────────────────────────────
 
-struct CustomVisualRunner {
+struct CustomVisualRunner<E: VisualEnvironment> {
     app: App,
-    policy_arc: Arc<Mutex<PolicyFn>>,
+    env: E,
+    policy_arc: Arc<Mutex<PolicyFn<E>>>,
     cmd_rx: Receiver<VisualRunnerCmd>,
     step_tx: Sender<VisualStepOutput>,
     max_steps: usize,
-    initial_fiora_pos: Vec3,
-    initial_riven_pos: Vec3,
-    fiora: Entity,
-    riven: Entity,
-    fiora_skin_handle: Handle<DynamicWorld>,
-    riven_skin_handle: Handle<DynamicWorld>,
     paused: bool,
     step_count: usize,
     current_ep_steps: usize,
     assets_loaded: bool,
     load_wait_frames: usize,
-    pending_manual_action: Option<usize>,
+    pending_manual_action: Option<E::Action>,
     pending_step_once: bool,
     window_created: bool,
+    window_size: Option<Vec2>,
+    cursor_pos: Option<Vec2>,
+    pending_click: Option<Vec2>,
 }
 
-impl ApplicationHandler for CustomVisualRunner {
+impl<E: VisualEnvironment> ApplicationHandler for CustomVisualRunner<E> {
     fn resumed(&mut self, event_loop: &ActiveEventLoop) {
         if !self.window_created {
             let window_attributes = WinitWindow::default_attributes()
-                .with_title("Fiora vs Riven - RL Visual Viewer")
+                .with_title(self.env.window_title())
                 .with_inner_size(LogicalSize::new(1280.0, 720.0));
 
             let winit_window = event_loop.create_window(window_attributes).unwrap();
@@ -104,9 +117,36 @@ impl ApplicationHandler for CustomVisualRunner {
         &mut self,
         _event_loop: &ActiveEventLoop,
         _window_id: WindowId,
-        _event: WindowEvent,
+        event: WindowEvent,
     ) {
-        // 无需处理输入事件
+        match event {
+            WindowEvent::Resized(size) => {
+                self.window_size = Some(Vec2::new(size.width as f32, size.height as f32));
+            }
+            WindowEvent::CursorMoved { position, .. } => {
+                // 参考 bevy 默认窗口插件（bevy_winit/state.rs）：物理坐标 → 逻辑视口坐标，
+                // 用窗口物理尺寸归一化到 VIEWPORT_W×VIEWPORT_H，绕开 WinitPlugin 关闭导致的 scale_factor 失真。
+                let Some(size) = self.window_size else {
+                    return;
+                };
+                if size.x <= 0.0 || size.y <= 0.0 {
+                    return;
+                }
+                let logical = Vec2::new(
+                    position.x as f32 / size.x * VIEWPORT_W,
+                    position.y as f32 / size.y * VIEWPORT_H,
+                );
+                self.cursor_pos = Some(logical);
+            }
+            WindowEvent::MouseInput {
+                state: ElementState::Pressed,
+                button: MouseButton::Left,
+                ..
+            } => {
+                self.pending_click = self.cursor_pos;
+            }
+            _ => {}
+        }
     }
 
     fn about_to_wait(&mut self, event_loop: &ActiveEventLoop) {
@@ -120,19 +160,18 @@ impl ApplicationHandler for CustomVisualRunner {
                     self.pending_step_once = false;
                     pause_virtual_time(self.app.world_mut());
 
-                    let obs = get_obs_from_world(self.app.world(), self.fiora, self.riven);
+                    let obs = self.env.get_current_obs(self.app.world());
                     let (_, policy_items) = (self.policy_arc.lock().unwrap())(&obs);
                     let pause_output = VisualStepOutput {
-                        step_result: StepResult {
-                            obs,
-                            reward: 0.0,
-                            terminated: false,
-                            truncated: false,
-                            step: self.step_count,
-                            reward_breakdown: Vec::new(),
-                            reward_variables: std::collections::HashMap::new(),
-                        },
+                        step: self.step_count,
+                        reward: 0.0,
+                        terminated: false,
+                        truncated: false,
+                        reward_breakdown: Vec::new(),
+                        reward_variables: std::collections::HashMap::new(),
                         policy: policy_items,
+                        obs_payload: E::obs_to_payload(&obs),
+                        reward_formula: self.env.reward_formula(),
                     };
                     let _ = self.step_tx.send(pause_output);
                 }
@@ -143,26 +182,19 @@ impl ApplicationHandler for CustomVisualRunner {
                 }
                 VisualRunnerCmd::Reset => {
                     self.current_ep_steps = 0;
-                    reset_episode_world(
-                        self.app.world_mut(),
-                        self.fiora,
-                        self.riven,
-                        self.initial_fiora_pos,
-                        self.initial_riven_pos,
-                    );
-                    let obs = get_obs_from_world(self.app.world(), self.fiora, self.riven);
+                    self.env.reset_world(self.app.world_mut());
+                    let obs = self.env.get_current_obs(self.app.world());
                     let (_, policy_items) = (self.policy_arc.lock().unwrap())(&obs);
                     let initial_output = VisualStepOutput {
-                        step_result: StepResult {
-                            obs,
-                            reward: 0.0,
-                            terminated: false,
-                            truncated: false,
-                            step: 0,
-                            reward_breakdown: Vec::new(),
-                            reward_variables: std::collections::HashMap::new(),
-                        },
+                        step: 0,
+                        reward: 0.0,
+                        terminated: false,
+                        truncated: false,
+                        reward_breakdown: Vec::new(),
+                        reward_variables: std::collections::HashMap::new(),
                         policy: policy_items,
+                        obs_payload: E::obs_to_payload(&obs),
+                        reward_formula: self.env.reward_formula(),
                     };
                     let _ = self.step_tx.send(initial_output);
                 }
@@ -172,7 +204,7 @@ impl ApplicationHandler for CustomVisualRunner {
                 }
                 VisualRunnerCmd::StepWithAction(action_id) => {
                     self.pending_step_once = true;
-                    self.pending_manual_action = Some(action_id);
+                    self.pending_manual_action = Some(E::action_from_index(action_id));
                 }
             }
         }
@@ -180,43 +212,44 @@ impl ApplicationHandler for CustomVisualRunner {
         // 2. Asset loading wait (with fallback timeout)
         if !self.assets_loaded {
             self.load_wait_frames += 1;
-            let fiora_ready = {
-                let asset_server = self.app.world().resource::<AssetServer>();
-                asset_server
-                    .get_recursive_dependency_load_state(&self.fiora_skin_handle)
-                    .is_some_and(|s| s.is_loaded())
-            };
-            let riven_ready = {
-                let asset_server = self.app.world().resource::<AssetServer>();
-                asset_server
-                    .get_recursive_dependency_load_state(&self.riven_skin_handle)
-                    .is_some_and(|s| s.is_loaded())
-            };
-
-            if (fiora_ready && riven_ready) || self.load_wait_frames >= 60 {
+            if self.env.is_assets_loaded(self.app.world()) || self.load_wait_frames >= 60 {
                 self.assets_loaded = true;
-                setup_skill_levels_world(self.app.world_mut(), self.fiora, self.riven);
+                self.env.on_assets_loaded(self.app.world_mut());
 
-                // 发送初始第一帧数据到前端
-                let obs = get_obs_from_world(self.app.world(), self.fiora, self.riven);
+                // Send initial first frame to front-end
+                let obs = self.env.get_current_obs(self.app.world());
                 let (_, policy_items) = (self.policy_arc.lock().unwrap())(&obs);
                 let initial_output = VisualStepOutput {
-                    step_result: StepResult {
-                        obs,
-                        reward: 0.0,
-                        terminated: false,
-                        truncated: false,
-                        step: 0,
-                        reward_breakdown: Vec::new(),
-                        reward_variables: std::collections::HashMap::new(),
-                    },
+                    step: 0,
+                    reward: 0.0,
+                    terminated: false,
+                    truncated: false,
+                    reward_breakdown: Vec::new(),
+                    reward_variables: std::collections::HashMap::new(),
                     policy: policy_items,
+                    obs_payload: E::obs_to_payload(&obs),
+                    reward_formula: self.env.reward_formula(),
                 };
                 let _ = self.step_tx.send(initial_output);
             }
 
             self.app.update();
             return;
+        }
+
+        // 2.5 鼠标点击 → 手动 step action（仅暂停时生效；点击在窗口插件内消费，不经过 Controller/on_click_map 移动管线）
+        if self.paused {
+            if let Some(screen_pos) = self.pending_click.take() {
+                if let Some(action) = self
+                    .env
+                    .action_from_screen_click(self.app.world_mut(), screen_pos)
+                {
+                    self.pending_manual_action = Some(action);
+                    self.pending_step_once = true;
+                }
+            }
+        } else {
+            self.pending_click = None;
         }
 
         // 3. Determine if an RL step should execute
@@ -235,31 +268,32 @@ impl ApplicationHandler for CustomVisualRunner {
             self.step_count += 1;
             self.current_ep_steps += 1;
 
-            let prev_obs = get_obs_from_world(self.app.world(), self.fiora, self.riven);
-            let (action, policy_items) = {
-                let (policy_action, policy_items) = (self.policy_arc.lock().unwrap())(&prev_obs);
-                if let Some(manual_id) = self.pending_manual_action.take() {
-                    (FioraVsRivenAction::from_index(manual_id), policy_items)
-                } else {
-                    (policy_action, policy_items)
-                }
+            let prev_obs = self.env.get_current_obs(self.app.world());
+            let action = {
+                let (policy_action, _) = (self.policy_arc.lock().unwrap())(&prev_obs);
+                self.pending_manual_action.take().unwrap_or(policy_action)
             };
 
-            let step_result = step_world(
-                &mut self.app,
-                self.fiora,
-                self.riven,
-                action,
-                self.step_count,
-                self.max_steps,
-            );
+            let step_result =
+                self.env
+                    .step_world(&mut self.app, action, self.step_count, self.max_steps);
 
             let terminated = step_result.terminated;
             let truncated = step_result.truncated;
 
+            // 展示「下一步」预测：基于 step 后观测重新计算，而非本步执行前的策略。
+            let (_, next_policy) = (self.policy_arc.lock().unwrap())(&step_result.obs);
+
             let output = VisualStepOutput {
-                step_result,
-                policy: policy_items,
+                step: step_result.step,
+                reward: step_result.reward,
+                terminated: step_result.terminated,
+                truncated: step_result.truncated,
+                reward_breakdown: step_result.reward_breakdown,
+                reward_variables: step_result.reward_variables,
+                policy: next_policy,
+                obs_payload: E::obs_to_payload(&step_result.obs),
+                reward_formula: self.env.reward_formula(),
             };
             let _ = self.step_tx.send(output);
 
@@ -267,28 +301,21 @@ impl ApplicationHandler for CustomVisualRunner {
                 self.paused = true;
                 self.current_ep_steps = 0;
                 pause_virtual_time(self.app.world_mut());
-                reset_episode_world(
-                    self.app.world_mut(),
-                    self.fiora,
-                    self.riven,
-                    self.initial_fiora_pos,
-                    self.initial_riven_pos,
-                );
+                self.env.reset_world(self.app.world_mut());
 
-                // 对局结束并重置后，发送重置后的新起点帧，使前端遥测卡片立即呈现新一局状态
-                let next_obs = get_obs_from_world(self.app.world(), self.fiora, self.riven);
+                // Send newly reset start frame
+                let next_obs = self.env.get_current_obs(self.app.world());
                 let (_, next_policy_items) = (self.policy_arc.lock().unwrap())(&next_obs);
                 let reset_output = VisualStepOutput {
-                    step_result: StepResult {
-                        obs: next_obs,
-                        reward: 0.0,
-                        terminated: false,
-                        truncated: false,
-                        step: self.step_count,
-                        reward_breakdown: Vec::new(),
-                        reward_variables: std::collections::HashMap::new(),
-                    },
+                    step: self.step_count,
+                    reward: 0.0,
+                    terminated: false,
+                    truncated: false,
+                    reward_breakdown: Vec::new(),
+                    reward_variables: std::collections::HashMap::new(),
                     policy: next_policy_items,
+                    obs_payload: E::obs_to_payload(&next_obs),
+                    reward_formula: self.env.reward_formula(),
                 };
                 let _ = self.step_tx.send(reset_output);
             } else if self.paused {
@@ -309,45 +336,30 @@ impl ApplicationHandler for CustomVisualRunner {
 
 /// Run a visual Bevy loop with a given Env, policy function, and external cmd/step channels.
 ///
-/// The `env` **must** have been constructed with `RenderMode::Window`.
-/// The WS protocol or any other transport is **not** the concern of this function —
-/// callers bridge `VisualRunnerCmd` / `VisualStepOutput` to their own transport layer.
-pub fn run_visual_env<F>(
-    mut env: FioraVsRivenEnv,
+/// The `env` **must** have been constructed with `RenderMode::WindowCustomLoop`.
+pub fn run_visual_env<E, F>(
+    mut env: E,
     policy: F,
     cmd_rx: Receiver<VisualRunnerCmd>,
     step_tx: Sender<VisualStepOutput>,
 ) where
-    F: FnMut(&FioraVsRivenObs) -> (FioraVsRivenAction, Vec<PolicyOutputItem>) + Send + 'static,
+    E: VisualEnvironment,
+    F: FnMut(&E::Obs) -> (E::Action, PolicyDisplay) + Send + 'static,
 {
-    // Extract all data we need before set_runner consumes the App
-    let fiora = env.fiora();
-    let riven = env.riven();
-    let initial_fiora_pos = env.initial_fiora_pos();
-    let initial_riven_pos = env.initial_riven_pos();
-    let max_steps = env.max_steps();
-
-    let asset_server = env.app().world().resource::<AssetServer>();
-    let fiora_skin_handle = asset_server.load::<DynamicWorld>("characters/fiora/skins/skin0.ron");
-    let riven_skin_handle = asset_server.load::<DynamicWorld>("characters/Riven/skins/skin0.ron");
-
+    let max_steps = 0; // unlimited in visual viewer mode
     let policy_arc = Arc::new(Mutex::new(policy));
+    let mut app = env.take_app();
 
-    // Register custom runner that disables WinitPlugin and creates window + runs event loop manually
-    env.app_mut().set_runner(move |app: App| {
+    app.set_runner(move |app: App| {
         let event_loop = EventLoop::new().unwrap();
+
         let mut runner = CustomVisualRunner {
             app,
+            env,
             policy_arc,
             cmd_rx,
             step_tx,
             max_steps,
-            initial_fiora_pos,
-            initial_riven_pos,
-            fiora,
-            riven,
-            fiora_skin_handle,
-            riven_skin_handle,
             paused: false,
             step_count: 0,
             current_ep_steps: 0,
@@ -356,11 +368,14 @@ pub fn run_visual_env<F>(
             pending_manual_action: None,
             pending_step_once: false,
             window_created: false,
+            window_size: None,
+            cursor_pos: None,
+            pending_click: None,
         };
 
         let _ = event_loop.run_app(&mut runner);
         bevy::app::AppExit::Success
     });
 
-    env.app_mut().run();
+    app.run();
 }

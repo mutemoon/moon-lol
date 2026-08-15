@@ -1,7 +1,6 @@
-//! 日志归档：
-//! 1) 我的对局（24h）列表 + 下载 SQLite DB；
-//! 2) 加载本地 .sqlite 校验大小；
-//! 3) 按 game_id 查询日志（级别/实体/类别筛选、分页、清空）。
+//! 日志工具：
+//! 1) 日志归档（在线）：我的对局（24h）列表 + 下载 SQLite DB + 按 game_id 查询日志；
+//! 2) 日志浏览（离线）：加载本地 .sqlite 校验大小（本地回放浏览后续提供）。
 
 mod input;
 mod logic;
@@ -25,10 +24,7 @@ use crate::components::sidebar::AppSidebar;
 use crate::services::log_service;
 use crate::services::types::{LogCategory, LogEntity, LogRow};
 
-/// 日志归档：
-/// 1) 我的对局（24h）列表 + 下载 SQLite DB；
-/// 2) 加载本地 .sqlite 校验大小；
-/// 3) 按 game_id 查询日志（级别/实体/类别筛选、分页、清空）。
+/// 日志归档（在线）：我的对局（24h）列表 + 下载 SQLite DB + 按 game_id 查询日志。
 pub fn render_logs_archive(
     sidebar: &mut AppSidebar,
     window: &mut Window,
@@ -80,8 +76,6 @@ pub fn render_logs_archive(
     let matches_error = sidebar.logs_archive.matches_error.clone();
     let downloading = sidebar.logs_archive.downloading.clone();
     let download_msg = sidebar.logs_archive.download_msg.clone();
-    let local_size = sidebar.logs_archive.local_size;
-    let local_msg = sidebar.logs_archive.local_msg.clone();
 
     let entity_list: Vec<LogEntity> = sidebar
         .logs_archive
@@ -308,109 +302,6 @@ pub fn render_logs_archive(
                             )
                         }),
                 )
-                // ── 加载本地 SQLite ──
-                .child(
-                    div()
-                        .rounded_lg()
-                        .border_1()
-                        .border_color(cx.theme().border)
-                        .p_4()
-                        .child(
-                            v_flex()
-                                .gap_3()
-                                .child(
-                                    h_flex()
-                                        .items_center()
-                                        .justify_between()
-                                        .flex_wrap()
-                                        .child(
-                                            v_flex()
-                                                .gap_1()
-                                                .child(
-                                                    h_flex()
-                                                        .gap_1p5()
-                                                        .items_center()
-                                                        .child(IconName::File)
-                                                        .child(
-                                                            div()
-                                                                .text_sm()
-                                                                .font_bold()
-                                                                .child("加载本地 SQLite"),
-                                                        ),
-                                                )
-                                                .child(
-                                                    div()
-                                                        .text_xs()
-                                                        .text_color(cx.theme().muted_foreground)
-                                                        .child(
-                                                            if let Some(sz) = local_size {
-                                                                format!(
-                                                                    "已加载 {} bytes（{:.1} MB）",
-                                                                    sz,
-                                                                    sz as f64
-                                                                        / 1024.0
-                                                                        / 1024.0
-                                                                )
-                                                            } else {
-                                                                "输入之前下载的 .sqlite 文件路径，校验文件存在并显示大小（回放分析将在后续版本提供）".to_string()
-                                                            },
-                                                        ),
-                                                ),
-                                        )
-                                        .child(
-                                            h_flex()
-                                                .gap_2()
-                                                .items_center()
-                                                .child(
-                                                    div().w(rems(24.)).child(render_text_input(
-                                                        window,
-                                                        cx,
-                                                        &*sidebar,
-                                                        "logs-local-path",
-                                                        "输入 .sqlite 文件路径…",
-                                                        |s: &AppSidebar| {
-                                                            s.logs_archive.local_path.clone()
-                                                        },
-                                                        |s: &mut AppSidebar, v: String| {
-                                                            s.logs_archive.local_path = v;
-                                                            s.logs_archive.local_size = None;
-                                                            s.logs_archive.local_msg = None;
-                                                        },
-                                                    )),
-                                                )
-                                                .child(
-                                                    Button::new("logs-local-load")
-                                                        .icon(IconName::Play)
-                                                        .label("加载")
-                                                        .on_click(cx.listener(|this, _, _, cx| {
-                                                            load_local_sqlite(this, cx);
-                                                        })),
-                                                )
-                                                .child(
-                                                    Button::new("logs-local-clear")
-                                                        .ghost()
-                                                        .label("清除")
-                                                        .on_click(cx.listener(|this, _, _, cx| {
-                                                            this.logs_archive.local_path.clear();
-                                                            this.logs_archive.local_size = None;
-                                                            this.logs_archive.local_msg = None;
-                                                            cx.notify();
-                                                        })),
-                                                ),
-                                        ),
-                                )
-                                .when_some(local_msg.as_ref(), |d, msg| {
-                                    d.child(
-                                        div()
-                                            .text_xs()
-                                            .text_color(cx.theme().muted_foreground)
-                                            .child(msg.clone()),
-                                    )
-                                }),
-                        ),
-                )
-                // ── 分隔线 ──
-                .child(div().w_full().h_px().bg(cx.theme().border))
                 // ── Game ID 输入与操作行 ──
                 .child(
                     h_flex()
@@ -917,5 +808,157 @@ fn render_log_row(cx: &mut Context<AppSidebar>, row: &LogRow) -> AnyElement {
                 .child(row.category.clone().unwrap_or_else(|| "—".to_string())),
         )
         .child(div().flex_1().text_xs().child(row.message.clone()))
+        .into_any_element()
+}
+
+// ── 日志浏览（离线）──
+
+/// 日志浏览（离线）：加载本地 .sqlite 校验大小，本地回放浏览后续提供。
+pub fn render_logs_browser(
+    sidebar: &mut AppSidebar,
+    window: &mut Window,
+    cx: &mut Context<AppSidebar>,
+) -> AnyElement {
+    let local_size = sidebar.logs_archive.local_size;
+    let local_msg = sidebar.logs_archive.local_msg.clone();
+
+    div()
+        .size_full()
+        .flex_1()
+        .overflow_hidden()
+        .child(
+            div()
+                .size_full()
+                .flex()
+                .flex_col()
+                .gap_4()
+                .overflow_y_scrollbar()
+                .p_6()
+                .child(
+                    v_flex()
+                        .gap_1()
+                        .child(
+                            h_flex()
+                                .gap_2()
+                                .items_center()
+                                .child(IconName::HardDrive)
+                                .child(
+                                    div()
+                                        .font_bold()
+                                        .text_lg()
+                                        .child(t!("app.nav.title_logs_browser")),
+                                ),
+                        )
+                        .child(
+                            div()
+                                .text_xs()
+                                .text_color(cx.theme().muted_foreground)
+                                .child(
+                                "离线浏览本地 SQLite 日志库（从「日志归档」下载的 .sqlite 文件），无需连接服务器。",
+                            ),
+                        ),
+                )
+                // ── 加载本地 SQLite ──
+                .child(
+                    div()
+                        .rounded_lg()
+                        .border_1()
+                        .border_color(cx.theme().border)
+                        .p_4()
+                        .child(
+                            v_flex()
+                                .gap_3()
+                                .child(
+                                    h_flex()
+                                        .items_center()
+                                        .justify_between()
+                                        .flex_wrap()
+                                        .child(
+                                            v_flex()
+                                                .gap_1()
+                                                .child(
+                                                    h_flex()
+                                                        .gap_1p5()
+                                                        .items_center()
+                                                        .child(IconName::File)
+                                                        .child(
+                                                            div()
+                                                                .text_sm()
+                                                                .font_bold()
+                                                                .child("加载本地 SQLite"),
+                                                        ),
+                                                )
+                                                .child(
+                                                    div()
+                                                        .text_xs()
+                                                        .text_color(cx.theme().muted_foreground)
+                                                        .child(
+                                                            if let Some(sz) = local_size {
+                                                                format!(
+                                                                    "已加载 {} bytes（{:.1} MB）",
+                                                                    sz,
+                                                                    sz as f64
+                                                                        / 1024.0
+                                                                        / 1024.0
+                                                                )
+                                                            } else {
+                                                                "输入之前下载的 .sqlite 文件路径，校验文件存在并显示大小（本地回放浏览将在后续版本提供）".to_string()
+                                                            },
+                                                        ),
+                                                ),
+                                        )
+                                        .child(
+                                            h_flex()
+                                                .gap_2()
+                                                .items_center()
+                                                .child(
+                                                    div().w(rems(24.)).child(render_text_input(
+                                                        window,
+                                                        cx,
+                                                        &*sidebar,
+                                                        "logs-local-path",
+                                                        "输入 .sqlite 文件路径…",
+                                                        |s: &AppSidebar| {
+                                                            s.logs_archive.local_path.clone()
+                                                        },
+                                                        |s: &mut AppSidebar, v: String| {
+                                                            s.logs_archive.local_path = v;
+                                                            s.logs_archive.local_size = None;
+                                                            s.logs_archive.local_msg = None;
+                                                        },
+                                                    )),
+                                                )
+                                                .child(
+                                                    Button::new("logs-local-load")
+                                                        .icon(IconName::Play)
+                                                        .label("加载")
+                                                        .on_click(cx.listener(|this, _, _, cx| {
+                                                            load_local_sqlite(this, cx);
+                                                        })),
+                                                )
+                                                .child(
+                                                    Button::new("logs-local-clear")
+                                                        .ghost()
+                                                        .label("清除")
+                                                        .on_click(cx.listener(|this, _, _, cx| {
+                                                            this.logs_archive.local_path.clear();
+                                                            this.logs_archive.local_size = None;
+                                                            this.logs_archive.local_msg = None;
+                                                            cx.notify();
+                                                        })),
+                                                ),
+                                        ),
+                                )
+                                .when_some(local_msg.as_ref(), |d, msg| {
+                                    d.child(
+                                        div()
+                                            .text_xs()
+                                            .text_color(cx.theme().muted_foreground)
+                                            .child(msg.clone()),
+                                    )
+                                }),
+                        ),
+                ),
+        )
         .into_any_element()
 }

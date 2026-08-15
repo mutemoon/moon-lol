@@ -1,13 +1,14 @@
 use gpui::prelude::FluentBuilder;
 use gpui::*;
 use gpui_component::button::{Button, ButtonVariants};
+use gpui_component::menu::{DropdownMenu, PopupMenuItem};
 use gpui_component::sidebar::{
-    Sidebar, SidebarFooter, SidebarGroup, SidebarHeader, SidebarMenu, SidebarMenuItem,
-    SidebarToggleButton,
+    Sidebar, SidebarGroup, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarToggleButton,
 };
-use gpui_component::{h_flex, ActiveTheme, Collapsible, Disableable, IconName, StyledExt};
+use gpui_component::{h_flex, Collapsible, Disableable, IconName, StyledExt};
 use rust_i18n::t;
 
+use crate::components::auth_dialog::open_auth_dialog;
 use crate::components::sidebar::AppSidebar;
 use crate::types::ActiveView;
 
@@ -116,6 +117,7 @@ pub fn render_topbar(
                     ActiveView::RlTraining => t!("app.nav.title_rl_training"),
                     ActiveView::Particles => t!("app.nav.title_particles"),
                     ActiveView::LogsArchive => t!("app.nav.title_logs_archive"),
+                    ActiveView::LogsBrowser => t!("app.nav.title_logs_browser"),
                     ActiveView::Admin => t!("app.nav.title_admin"),
                     ActiveView::Settings => t!("app.nav.title_settings"),
                     ActiveView::Games => t!("app.nav.title_games"),
@@ -195,6 +197,15 @@ pub fn render_sidebar_menu(sidebar: &AppSidebar, cx: &mut Context<AppSidebar>) -
     let active = sidebar.active_view;
     let collapsed = sidebar.sidebar_collapsed;
 
+    // footer 账号菜单：状态快照 + 弱句柄
+    let account_label = sidebar
+        .current_user
+        .as_ref()
+        .map(|u| u.phone.clone())
+        .unwrap_or_else(|| "点击登录".to_string());
+    let logged_in = sidebar.current_user.is_some();
+    let weak = cx.entity().downgrade();
+
     Sidebar::new("app-sidebar")
         .collapsed(collapsed)
         .header(
@@ -208,9 +219,9 @@ pub fn render_sidebar_menu(sidebar: &AppSidebar, cx: &mut Context<AppSidebar>) -
                     }),
             ),
         )
-        // ── 核心组：首页、新建对局、英雄预设 ──
+        // ── 在线组（无标题）：对局 / 账号等在线功能 ──
         .child(
-            SidebarGroup::new(t!("app.nav.group_core")).child(
+            SidebarGroup::new("").child(
                 SidebarMenu::new()
                     .child(
                         SidebarMenuItem::new(t!("app.nav.menu_home"))
@@ -247,13 +258,7 @@ pub fn render_sidebar_menu(sidebar: &AppSidebar, cx: &mut Context<AppSidebar>) -
                                 this.navigate_to(ActiveView::Hero);
                                 cx.notify();
                             })),
-                    ),
-            ),
-        )
-        // ── 对局组：房间、Rank、排行榜、社区 ──
-        .child(
-            SidebarGroup::new(t!("app.nav.group_match")).child(
-                SidebarMenu::new()
+                    )
                     .child(
                         SidebarMenuItem::new(t!("app.nav.menu_rooms"))
                             .icon(IconName::Inbox)
@@ -325,10 +330,37 @@ pub fn render_sidebar_menu(sidebar: &AppSidebar, cx: &mut Context<AppSidebar>) -
                                 this.navigate_to(ActiveView::RoomDetail);
                                 cx.notify();
                             })),
+                    )
+                    .child(
+                        SidebarMenuItem::new(t!("app.nav.menu_billing"))
+                            .icon(IconName::Star)
+                            .active(active == ActiveView::Billing)
+                            .on_click(cx.listener(|this, _, _, cx| {
+                                this.navigate_to(ActiveView::Billing);
+                                cx.notify();
+                            })),
+                    )
+                    .child(
+                        SidebarMenuItem::new(t!("app.nav.menu_admin"))
+                            .icon(IconName::Inspector)
+                            .active(active == ActiveView::Admin)
+                            .on_click(cx.listener(|this, _, _, cx| {
+                                this.navigate_to(ActiveView::Admin);
+                                cx.notify();
+                            })),
+                    )
+                    .child(
+                        SidebarMenuItem::new(t!("app.nav.menu_logs_archive"))
+                            .icon(IconName::HardDrive)
+                            .active(active == ActiveView::LogsArchive)
+                            .on_click(cx.listener(|this, _, _, cx| {
+                                this.navigate_to(ActiveView::LogsArchive);
+                                cx.notify();
+                            })),
                     ),
             ),
         )
-        // ── 工具组：RL 训练、粒子播放、日志归档 ──
+        // ── 工具组：离线工具 ──
         .child(
             SidebarGroup::new(t!("app.nav.group_tools")).child(
                 SidebarMenu::new()
@@ -351,11 +383,11 @@ pub fn render_sidebar_menu(sidebar: &AppSidebar, cx: &mut Context<AppSidebar>) -
                             })),
                     )
                     .child(
-                        SidebarMenuItem::new(t!("app.nav.menu_logs_archive"))
+                        SidebarMenuItem::new(t!("app.nav.menu_logs_browser"))
                             .icon(IconName::File)
-                            .active(active == ActiveView::LogsArchive)
+                            .active(active == ActiveView::LogsBrowser)
                             .on_click(cx.listener(|this, _, _, cx| {
-                                this.navigate_to(ActiveView::LogsArchive);
+                                this.navigate_to(ActiveView::LogsBrowser);
                                 cx.notify();
                             })),
                     )
@@ -406,100 +438,66 @@ pub fn render_sidebar_menu(sidebar: &AppSidebar, cx: &mut Context<AppSidebar>) -
                     ),
             ),
         )
-        // ── 系统组：精粹订阅、对局池监控、设置 ──
+        // ── 设置（置底：账号卡上方）──
         .child(
-            SidebarGroup::new(t!("app.nav.group_system")).child(
-                SidebarMenu::new()
-                    .child(
-                        SidebarMenuItem::new(t!("app.nav.menu_billing"))
-                            .icon(IconName::Star)
-                            .active(active == ActiveView::Billing)
-                            .on_click(cx.listener(|this, _, _, cx| {
-                                this.navigate_to(ActiveView::Billing);
-                                cx.notify();
-                            })),
-                    )
-                    .child(
-                        SidebarMenuItem::new(t!("app.nav.menu_admin"))
-                            .icon(IconName::Inspector)
-                            .active(active == ActiveView::Admin)
-                            .on_click(cx.listener(|this, _, _, cx| {
-                                this.navigate_to(ActiveView::Admin);
-                                cx.notify();
-                            })),
-                    )
-                    .child(
-                        SidebarMenuItem::new(t!("app.nav.menu_settings"))
-                            .icon(IconName::Settings)
-                            .active(active == ActiveView::Settings)
-                            .on_click(cx.listener(|this, _, _, cx| {
-                                this.navigate_to(ActiveView::Settings);
-                                cx.notify();
-                            })),
-                    ),
+            SidebarGroup::new("").child(
+                SidebarMenu::new().child(
+                    SidebarMenuItem::new(t!("app.nav.menu_settings"))
+                        .icon(IconName::Settings)
+                        .active(active == ActiveView::Settings)
+                        .on_click(cx.listener(|this, _, _, cx| {
+                            this.navigate_to(ActiveView::Settings);
+                            cx.notify();
+                        })),
+                ),
             ),
         )
         .footer(
-            SidebarFooter::new().child(if let Some(user) = &sidebar.current_user {
-                h_flex()
-                    .w_full()
-                    .items_center()
-                    .justify_between()
-                    .child(
-                        h_flex()
-                            .gap_2()
-                            .items_center()
-                            .child(IconName::CircleUser)
-                            .when(!collapsed, |this| {
-                                this.child(
-                                    div()
-                                        .text_sm()
-                                        .text_color(cx.theme().foreground)
-                                        .child(user.phone.clone()),
+            h_flex()
+                .w_full()
+                .px_2()
+                .py_1p5()
+                .items_center()
+                // 账号菜单：点卡片弹动作菜单（设置 / 退出 / 登录）
+                .child(
+                    Button::new("sidebar-account")
+                        .ghost()
+                        .icon(IconName::CircleUser)
+                        .label(if collapsed {
+                            ""
+                        } else {
+                            account_label.as_str()
+                        })
+                        .dropdown_menu(move |menu, _window, _cx| {
+                            if logged_in {
+                                menu.item(PopupMenuItem::new("退出登录").on_click({
+                                    let w = weak.clone();
+                                    move |_, _, cx| {
+                                        w.update(cx, |this, cx| {
+                                            this.cloud.logout();
+                                            this.current_user = None;
+                                            this.auth_token = None;
+                                            cx.notify();
+                                        })
+                                        .ok();
+                                    }
+                                }))
+                            } else {
+                                menu.item(
+                                    PopupMenuItem::new("登录")
+                                        .icon(IconName::CircleUser)
+                                        .on_click({
+                                            let w = weak.clone();
+                                            move |_, window, cx| {
+                                                let _ = w.update(cx, |_, cx| {
+                                                    open_auth_dialog(window, cx)
+                                                });
+                                            }
+                                        }),
                                 )
-                            }),
-                    )
-                    .child(
-                        Button::new("sidebar-logout")
-                            .ghost()
-                            .label(if collapsed { "退" } else { "退出" })
-                            .on_click(cx.listener(|this, _, _, cx| {
-                                this.cloud.logout();
-                                this.current_user = None;
-                                this.auth_token = None;
-                                cx.notify();
-                            })),
-                    )
-            } else {
-                h_flex()
-                    .w_full()
-                    .items_center()
-                    .justify_between()
-                    .child(
-                        h_flex()
-                            .gap_2()
-                            .items_center()
-                            .child(IconName::CircleUser)
-                            .when(!collapsed, |this| {
-                                this.child(
-                                    div()
-                                        .text_sm()
-                                        .text_color(cx.theme().muted_foreground)
-                                        .child("未登录"),
-                                )
-                            }),
-                    )
-                    .child(
-                        Button::new("sidebar-login")
-                            .primary()
-                            .label(if collapsed { "" } else { "登录" })
-                            .icon(IconName::CircleUser)
-                            .on_click(cx.listener(|this, _, _, cx| {
-                                this.show_auth_dialog = true;
-                                cx.notify();
-                            })),
-                    )
-            }),
+                            }
+                        }),
+                ),
         )
         .into_any_element()
 }

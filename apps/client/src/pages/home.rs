@@ -75,7 +75,7 @@ fn spawn_refresh(cx: &mut Context<AppSidebar>) {
     .detach();
 }
 
-/// 工作台首页：运行中对局、场景模板、对局历史概览。
+/// 工作台：运行中对局、场景模板、对局历史概览。
 pub fn render_home(sidebar: &mut AppSidebar, cx: &mut Context<AppSidebar>) -> AnyElement {
     let running_count = sidebar.running_games.len();
     let (inited, history_count, scenarios) = {

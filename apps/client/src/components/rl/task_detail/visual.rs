@@ -2,9 +2,10 @@ use gpui::*;
 use gpui_component::button::{Button, ButtonVariants};
 use gpui_component::scroll::ScrollableElement;
 use gpui_component::{h_flex, v_flex, ActiveTheme, IconName, StyledExt};
-use lol_rl_protocol::{VisualInFrame, VisualObsFrame};
+use lol_rl_protocol::{PolicyDisplay, VisualInFrame, VisualObsFrame, ENV_FIORA_VS_RIVEN_LEGACY};
 use rust_i18n::t;
 
+use crate::components::rl::task_detail::math::render_math;
 use crate::components::sidebar::AppSidebar;
 use crate::types::TaskDetailTab;
 
@@ -31,8 +32,13 @@ pub fn render_running_visual(sidebar: &AppSidebar, cx: &mut Context<AppSidebar>)
         .child(header)
         .child(telemetry);
 
-    if is_paused && sidebar.visual_ws_connected {
-        container = container.child(render_manual_action_panel(cx));
+    // 连续动作 env（FioraVsRivenRealEnv）靠点击地图控制，无需手动按钮；
+    // 离散动作 env（FioraVsRivenEnv）没有点击控制，仍要显示手动 action 按钮。
+    if is_paused
+        && sidebar.visual_ws_connected
+        && sidebar.visual_env_name.as_deref() == Some(ENV_FIORA_VS_RIVEN_LEGACY)
+    {
+        container = container.child(render_manual_action_panel(sidebar, cx));
     }
 
     container.into_any_element()
@@ -168,6 +174,7 @@ fn render_visual_controls(is_paused: bool, cx: &mut Context<AppSidebar>) -> AnyE
                     this.visual_ws_connected = false;
                     this.visual_paused = false;
                     this.visual_task_id = None;
+                    this.visual_env_name = None;
                     this.running_visual_model = None;
                     this.task_detail_tab = TaskDetailTab::Models;
                     cx.notify();
@@ -436,45 +443,75 @@ fn render_telemetry_policy_card(f: &VisualObsFrame, cx: &Context<AppSidebar>) ->
                         .text_sm()
                         .child("实时动作概率 (Policy Probs)"),
                 )
-                .child(if f.policy.is_empty() {
-                    div()
-                        .text_xs()
-                        .text_color(cx.theme().muted_foreground)
-                        .child("无概率数据")
-                        .into_any_element()
-                } else {
-                    v_flex()
-                        .gap_1()
-                        .children(f.policy.iter().map(|p| {
-                            v_flex()
-                                .gap_0p5()
-                                .child(
-                                    h_flex()
-                                        .justify_between()
-                                        .text_xs()
-                                        .child(div().child(p.action.clone()))
-                                        .child(
-                                            div()
-                                                .font_bold()
-                                                .child(format!("{:.1}%", p.prob * 100.0)),
-                                        ),
-                                )
-                                .child(
-                                    div()
-                                        .h_1p5()
-                                        .w_full()
-                                        .rounded_full()
-                                        .bg(cx.theme().secondary)
-                                        .child(
-                                            div().h_full().rounded_full().bg(cx.theme().accent).w(
-                                                Length::Definite(DefiniteLength::Fraction(p.prob)),
-                                            ),
-                                        ),
-                                )
-                        }))
-                        .into_any_element()
-                }),
+                .child(render_policy_display(&f.policy, cx)),
         )
+        .into_any_element()
+}
+
+fn render_policy_display(policy: &PolicyDisplay, cx: &Context<AppSidebar>) -> AnyElement {
+    match policy {
+        PolicyDisplay::Discrete(items) if items.is_empty() => div()
+            .text_xs()
+            .text_color(cx.theme().muted_foreground)
+            .child("无概率数据")
+            .into_any_element(),
+        PolicyDisplay::Discrete(items) => v_flex()
+            .gap_1()
+            .children(items.iter().map(|p| policy_prob_bar(&p.action, p.prob, cx)))
+            .into_any_element(),
+        PolicyDisplay::Hybrid {
+            move_x,
+            move_z,
+            attack_prob,
+        } => v_flex()
+            .gap_1p5()
+            .child(
+                div()
+                    .text_xs()
+                    .text_color(cx.theme().muted_foreground)
+                    .child("预测下一步移动偏移 (±1 归一化)"),
+            )
+            .child(policy_value_row("move_x", *move_x))
+            .child(policy_value_row("move_z", *move_z))
+            .child(policy_prob_bar("攻击", *attack_prob, cx))
+            .into_any_element(),
+    }
+}
+
+fn policy_prob_bar(label: &str, prob: f32, cx: &Context<AppSidebar>) -> AnyElement {
+    let prob = prob.clamp(0.0, 1.0);
+    v_flex()
+        .gap_0p5()
+        .child(
+            h_flex()
+                .justify_between()
+                .text_xs()
+                .child(div().child(label.to_string()))
+                .child(div().font_bold().child(format!("{:.1}%", prob * 100.0))),
+        )
+        .child(
+            div()
+                .h_1p5()
+                .w_full()
+                .rounded_full()
+                .bg(cx.theme().secondary)
+                .child(
+                    div()
+                        .h_full()
+                        .rounded_full()
+                        .bg(cx.theme().accent)
+                        .w(Length::Definite(DefiniteLength::Fraction(prob))),
+                ),
+        )
+        .into_any_element()
+}
+
+fn policy_value_row(label: &str, value: f32) -> AnyElement {
+    h_flex()
+        .justify_between()
+        .text_xs()
+        .child(div().child(label.to_string()))
+        .child(div().font_bold().child(format!("{value:+.2}")))
         .into_any_element()
 }
 
@@ -516,42 +553,21 @@ fn render_telemetry_reward_card(f: &VisualObsFrame, cx: &Context<AppSidebar>) ->
                 )
                 .child(if let Some(formula) = &f.reward_formula {
                     v_flex()
-                        .gap_1p5()
-                        .children(formula.terms.iter().map(|term| {
-                            let term_val = term.eval(vars);
-                            let formula_str = term.expr.to_display_string();
-
-                            v_flex()
-                                .p_1p5()
-                                .rounded_md()
-                                .bg(cx.theme().secondary)
-                                .gap_0p5()
-                                .child(
-                                    h_flex()
-                                        .justify_between()
-                                        .items_center()
-                                        .child(
-                                            div().font_bold().text_xs().child(term.label.clone()),
-                                        )
-                                        .child(
-                                            div()
-                                                .font_bold()
-                                                .text_xs()
-                                                .text_color(if term_val >= 0.0 {
-                                                    cx.theme().accent
-                                                } else {
-                                                    cx.theme().muted_foreground
-                                                })
-                                                .child(format!("{:+}", term_val)),
-                                        ),
-                                )
-                                .child(
-                                    div()
-                                        .text_xs()
-                                        .text_color(cx.theme().muted_foreground)
-                                        .child(format!("公式: {}", formula_str)),
-                                )
-                        }))
+                        .gap_2()
+                        .child(
+                            div()
+                                .text_xs()
+                                .text_color(cx.theme().muted_foreground)
+                                .child("公式 (符号)"),
+                        )
+                        .child(render_math(&formula.to_latex(), cx))
+                        .child(
+                            div()
+                                .text_xs()
+                                .text_color(cx.theme().muted_foreground)
+                                .child("代入当前步"),
+                        )
+                        .child(render_math(&formula.to_latex_substituted(vars), cx))
                         .into_any_element()
                 } else if !f.reward_breakdown.is_empty() {
                     v_flex()
@@ -588,14 +604,20 @@ fn render_telemetry_reward_card(f: &VisualObsFrame, cx: &Context<AppSidebar>) ->
         .into_any_element()
 }
 
-fn render_manual_action_panel(cx: &mut Context<AppSidebar>) -> AnyElement {
-    const ACTIONS: &[(usize, &str)] = &[
-        (0, "移动东50u"),
-        (1, "移动西50u"),
-        (2, "移动北50u"),
-        (3, "移动南50u"),
-        (4, "攻击瑞雯"),
-    ];
+fn render_manual_action_panel(sidebar: &AppSidebar, cx: &mut Context<AppSidebar>) -> AnyElement {
+    let actions: Vec<(usize, String)> = sidebar
+        .latest_visual_frame
+        .as_ref()
+        .and_then(|frame| match &frame.policy {
+            PolicyDisplay::Discrete(items) if !items.is_empty() => Some(
+                items
+                    .iter()
+                    .map(|p| (p.action_id, p.action.clone()))
+                    .collect(),
+            ),
+            _ => None,
+        })
+        .unwrap_or_else(legacy_manual_actions);
 
     v_flex()
         .id("manual-action-panel-container")
@@ -617,23 +639,36 @@ fn render_manual_action_panel(cx: &mut Context<AppSidebar>) -> AnyElement {
                 .id("manual-action-buttons-flex")
                 .flex_wrap()
                 .gap_2()
-                .children(ACTIONS.iter().map(|(id, label)| {
-                    let action_id = *id;
+                .children(actions.into_iter().map(|(action_id, label)| {
                     let btn_id = SharedString::from(format!("manual-action-btn-{}", action_id));
                     let wrapper_id =
                         SharedString::from(format!("manual-action-wrap-{}", action_id));
-                    div().id(wrapper_id).child(
-                        Button::new(btn_id)
-                            .outline()
-                            .label(*label)
-                            .on_click(cx.listener(move |this, _, _, cx| {
-                                this.send_visual_cmd(VisualInFrame::StepWithAction { action_id });
-                                cx.notify();
-                            })),
-                    )
+                    div()
+                        .id(wrapper_id)
+                        .child(
+                            Button::new(btn_id)
+                                .outline()
+                                .label(label)
+                                .on_click(cx.listener(move |this, _, _, cx| {
+                                    this.send_visual_cmd(VisualInFrame::StepWithAction {
+                                        action_id,
+                                    });
+                                    cx.notify();
+                                })),
+                        )
                 })),
         )
         .into_any_element()
+}
+
+fn legacy_manual_actions() -> Vec<(usize, String)> {
+    vec![
+        (0, "MoveEast50 (东侧50u)".to_string()),
+        (1, "MoveWest50 (西侧50u)".to_string()),
+        (2, "MoveNorth50 (北侧50u)".to_string()),
+        (3, "MoveSouth50 (南侧50u)".to_string()),
+        (4, "AttackRiven (攻击瑞雯)".to_string()),
+    ]
 }
 
 fn skill_badge(name: &'static str, ready: bool, cx: &Context<AppSidebar>) -> AnyElement {

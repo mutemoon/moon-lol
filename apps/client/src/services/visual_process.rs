@@ -12,10 +12,15 @@ pub fn pick_free_port() -> Option<u16> {
 
 /// Spawn the visual environment subprocess.
 /// Returns the child process handle and the port it listens on.
-pub async fn spawn_visual_env(checkpoint_path: &str) -> anyhow::Result<(Child, u16)> {
+pub async fn spawn_visual_env(
+    checkpoint_path: &str,
+    env_name: &str,
+) -> anyhow::Result<(Child, u16)> {
     let port = pick_free_port().ok_or_else(|| anyhow::anyhow!("没有可用端口"))?;
 
-    println!(">>> 从客户端启动 lol_rl_visual (Port: {port}, Checkpoint: {checkpoint_path})...");
+    println!(
+        ">>> 从客户端启动 lol_rl_visual (Port: {port}, Env: {env_name}, Checkpoint: {checkpoint_path})..."
+    );
 
     let (program, prefix_args) = lol_client::launch::resolve_executable("lol_rl", "lol_rl_visual");
     let mut cmd = Command::new(&program);
@@ -24,6 +29,8 @@ pub async fn spawn_visual_env(checkpoint_path: &str) -> anyhow::Result<(Child, u
         .arg(port.to_string())
         .arg("--checkpoint")
         .arg(checkpoint_path)
+        .arg("--env")
+        .arg(env_name)
         .stdout(std::process::Stdio::inherit())
         .stderr(std::process::Stdio::inherit());
     if let Some(root) = lol_client::launch::install_root() {
