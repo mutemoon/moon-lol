@@ -338,6 +338,119 @@ impl PPOAgent {
 
         Ok(last_stats)
     }
+
+    /// 使用 Mini-Batch 划分更新策略网络（充分发挥 GPU 吞吐量和梯度估计稳定性）
+    pub fn update_minibatch(
+        &mut self,
+        buffer: &RolloutBuffer,
+        last_val: f32,
+        mini_batch_size: usize,
+    ) -> Result<PPOStats> {
+        let n = buffer.len();
+        if n == 0 {
+            return Ok(PPOStats {
+                policy_loss: 0.0,
+                value_loss: 0.0,
+                entropy_loss: 0.0,
+                entropy: 0.0,
+                total_loss: 0.0,
+                kl: 0.0,
+                clip_frac: 0.0,
+            });
+        }
+
+        if mini_batch_size >= n {
+            return self.update(buffer, last_val);
+        }
+
+        let (returns, advantages) = self.compute_gae(buffer, last_val);
+
+        let flat_states: Vec<f32> = buffer.states.iter().flatten().copied().collect();
+        let state_dim = buffer.states[0].len();
+        let states_tensor = Tensor::from_vec(flat_states, (n, state_dim), &self.device)?;
+
+        let enc_dim = buffer.actions[0].len();
+        let flat_actions: Vec<f32> = buffer.actions.iter().flatten().copied().collect();
+        let actions_tensor = Tensor::from_vec(flat_actions, (n, enc_dim), &self.device)?;
+
+        let old_log_probs_tensor = Tensor::from_vec(buffer.log_probs.clone(), (n,), &self.device)?;
+        let returns_tensor = Tensor::from_vec(returns, (n,), &self.device)?;
+        let advantages_tensor = Tensor::from_vec(advantages, (n,), &self.device)?;
+
+        let mut last_stats = PPOStats {
+            policy_loss: 0.0,
+            value_loss: 0.0,
+            entropy_loss: 0.0,
+            entropy: 0.0,
+            total_loss: 0.0,
+            kl: 0.0,
+            clip_frac: 0.0,
+        };
+
+        for _epoch in 0..self.config.ppo_epochs {
+            let mut start_idx = 0;
+            while start_idx < n {
+                let end_idx = (start_idx + mini_batch_size).min(n);
+                let mb_len = end_idx - start_idx;
+
+                let mb_states = states_tensor.narrow(0, start_idx, mb_len)?;
+                let mb_actions = actions_tensor.narrow(0, start_idx, mb_len)?;
+                let mb_old_log_probs = old_log_probs_tensor.narrow(0, start_idx, mb_len)?;
+                let mb_returns = returns_tensor.narrow(0, start_idx, mb_len)?;
+                let mb_advantages = advantages_tensor.narrow(0, start_idx, mb_len)?;
+
+                let (new_log_probs, new_values, entropy) = self
+                    .actor_critic
+                    .evaluate_actions(&mb_states, &mb_actions)?;
+
+                let log_ratio = (&new_log_probs - &mb_old_log_probs)?;
+                let ratio = log_ratio.exp()?;
+
+                let surr1 = (&ratio * &mb_advantages)?;
+                let clamped_ratio =
+                    ratio.clamp(1.0 - self.config.clip_eps, 1.0 + self.config.clip_eps)?;
+                let surr2 = (&clamped_ratio * &mb_advantages)?;
+
+                let policy_loss = surr1.minimum(&surr2)?.neg()?.mean_all()?;
+                let val_diff = (&new_values - &mb_returns)?;
+                let value_loss = (&val_diff * &val_diff)?.mean_all()?.affine(0.5, 0.0)?;
+                let entropy_loss = entropy.neg()?.mean_all()?;
+
+                let kl = (&ratio - 1.0 - &log_ratio)?.mean_all()?;
+                let clip_frac = (ratio.lt(1.0 - self.config.clip_eps)?.to_dtype(DType::F32)?
+                    + ratio.gt(1.0 + self.config.clip_eps)?.to_dtype(DType::F32)?)?
+                .mean_all()?;
+
+                let p_loss_val: f32 = policy_loss.to_scalar()?;
+                let v_loss_val: f32 = value_loss.to_scalar()?;
+                let e_loss_val: f32 = entropy_loss.to_scalar()?;
+                let entropy_val: f32 = entropy.mean_all()?.to_scalar()?;
+                let kl_val: f32 = kl.to_scalar()?;
+                let clip_frac_val: f32 = clip_frac.to_scalar()?;
+
+                let c1_val = (&policy_loss + (value_loss.affine(self.config.c1 as f64, 0.0)?))?;
+                let total_loss = (c1_val + (entropy_loss.affine(self.config.c2 as f64, 0.0)?))?;
+                let tot_loss_val: f32 = total_loss.to_scalar()?;
+
+                let grads = total_loss.backward()?;
+                self.optimizer.step(&grads)?;
+
+                last_stats = PPOStats {
+                    policy_loss: p_loss_val,
+                    value_loss: v_loss_val,
+                    entropy_loss: e_loss_val,
+                    entropy: entropy_val,
+                    total_loss: tot_loss_val,
+                    kl: kl_val,
+                    clip_frac: clip_frac_val,
+                };
+
+                start_idx += mini_batch_size;
+            }
+        }
+
+        Ok(last_stats)
+    }
 }
 
 #[cfg(test)]

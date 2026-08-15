@@ -9849,14 +9849,18 @@ name = "lol_rl"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "arc-swap",
  "async-trait",
  "bincode",
  "candle-core",
  "candle-nn",
  "chrono",
+ "crossbeam-channel",
+ "ctrlc",
  "futures-util",
  "lol_env",
  "lol_rl_protocol",
+ "num_cpus",
  "rand 0.9.4",
  "serde",
  "serde_json",

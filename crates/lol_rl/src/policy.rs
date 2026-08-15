@@ -139,6 +139,126 @@ impl ActorCritic {
         }
     }
 
+    /// 批量从策略采样动作（一次 GPU/CPU 前向计算），返回每个样本的 (encoded_action, log_prob, value)。
+    pub fn sample_batch(
+        &self,
+        states: &Tensor,
+        obs_vecs: &[&[f32]],
+    ) -> Result<Vec<(Vec<f32>, f32, f32)>> {
+        let b = states.dim(0)?;
+        if b == 0 {
+            return Ok(Vec::new());
+        }
+        let h2 = self.hidden(states)?;
+        let values = self.critic_head.forward(&h2)?;
+        let val_vec: Vec<f32> = values.squeeze(1)?.to_vec1()?;
+
+        let mut results = Vec::with_capacity(b);
+
+        match self.action_space {
+            ActionSpace::Discrete(_) => {
+                let logits = self.actor_head.forward(&h2)?;
+                let logits_mat: Vec<Vec<f32>> = logits.to_vec2()?;
+                for i in 0..b {
+                    let raw = &logits_mat[i];
+                    let mut masked = raw.clone();
+                    if let Some(&dist_norm) = obs_vecs[i].get(OBS_DISTANCE_IDX) {
+                        let dist = dist_norm * OBS_DISTANCE_SCALE;
+                        if dist > ATTACK_MASK_DISTANCE {
+                            if let Some(last) = masked.last_mut() {
+                                *last = f32::NEG_INFINITY;
+                            }
+                        }
+                    }
+                    // softmax
+                    let max_l = masked.iter().cloned().fold(f32::NEG_INFINITY, f32::max);
+                    let exps: Vec<f32> = masked.iter().map(|&x| (x - max_l).exp()).collect();
+                    let sum_exp: f32 = exps.iter().sum();
+                    let probs: Vec<f32> = if sum_exp > 0.0 {
+                        exps.iter().map(|&e| e / sum_exp).collect()
+                    } else {
+                        vec![1.0 / raw.len() as f32; raw.len()]
+                    };
+                    let idx = sample_from_probs(&probs);
+                    let log_prob = if probs[idx] > 1e-12 {
+                        probs[idx].ln()
+                    } else {
+                        -20.0
+                    };
+                    results.push((vec![idx as f32], log_prob, val_vec[i]));
+                }
+            }
+            ActionSpace::Continuous(d) => {
+                let means_mat: Vec<Vec<f32>> = self.actor_head.forward(&h2)?.to_vec2()?;
+                let log_std: Vec<f32> = self.log_std.as_ref().unwrap().to_vec1()?;
+                let mut rng = rand::rng();
+                for i in 0..b {
+                    let means = &means_mat[i];
+                    let mut encoded = Vec::with_capacity(d);
+                    let mut log_prob = 0.0;
+                    for j in 0..d {
+                        let std = log_std[j].exp();
+                        let a = means[j] + std * sample_gaussian(&mut rng);
+                        encoded.push(a);
+                        log_prob += gaussian_log_prob(means[j], std, a);
+                    }
+                    results.push((encoded, log_prob, val_vec[i]));
+                }
+            }
+            ActionSpace::Hybrid {
+                continuous_dims, ..
+            } => {
+                let means_mat: Vec<Vec<f32>> = self.actor_head.forward(&h2)?.to_vec2()?;
+                let log_std: Vec<f32> = self.log_std.as_ref().unwrap().to_vec1()?;
+                let attack_logits_mat: Vec<Vec<f32>> = self.attack_head.as_ref().unwrap().forward(&h2)?.to_vec2()?;
+                let mut rng = rand::rng();
+
+                for i in 0..b {
+                    let means = &means_mat[i];
+                    let mut encoded = Vec::with_capacity(continuous_dims + 1);
+                    let mut log_prob = 0.0;
+                    for j in 0..continuous_dims {
+                        let std = log_std[j].exp();
+                        let a = means[j] + std * sample_gaussian(&mut rng);
+                        encoded.push(a);
+                        log_prob += gaussian_log_prob(means[j], std, a);
+                    }
+
+                    // 离散攻击头
+                    let raw = &attack_logits_mat[i];
+                    let mut masked = raw.clone();
+                    if let Some(&dist_norm) = obs_vecs[i].get(OBS_DISTANCE_IDX) {
+                        let dist = dist_norm * OBS_DISTANCE_SCALE;
+                        if dist > ATTACK_MASK_DISTANCE {
+                            if let Some(last) = masked.last_mut() {
+                                *last = f32::NEG_INFINITY;
+                            }
+                        }
+                    }
+                    let max_l = masked.iter().cloned().fold(f32::NEG_INFINITY, f32::max);
+                    let exps: Vec<f32> = masked.iter().map(|&x| (x - max_l).exp()).collect();
+                    let sum_exp: f32 = exps.iter().sum();
+                    let probs: Vec<f32> = if sum_exp > 0.0 {
+                        exps.iter().map(|&e| e / sum_exp).collect()
+                    } else {
+                        vec![1.0 / raw.len() as f32; raw.len()]
+                    };
+                    let idx = sample_from_probs(&probs);
+                    let attack_log_prob = if probs[idx] > 1e-12 {
+                        probs[idx].ln()
+                    } else {
+                        -20.0
+                    };
+                    encoded.push(idx as f32);
+                    log_prob += attack_log_prob;
+                    results.push((encoded, log_prob, val_vec[i]));
+                }
+            }
+        }
+
+        Ok(results)
+    }
+
     /// 确定性贪心动作（连续取均值、攻击取 argmax），用于可视化。
     pub fn select_greedy_action(&self, state: &Tensor, obs_vec: &[f32]) -> Result<Vec<f32>> {
         let h2 = self.hidden(state)?;

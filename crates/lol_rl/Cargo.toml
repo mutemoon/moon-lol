@@ -30,6 +30,10 @@ async-trait = "0.1"
 uuid = { version = "1", features = ["v4", "serde"] }
 chrono = "0.4"
 thiserror.workspace = true
+crossbeam-channel.workspace = true
+num_cpus = "1.16"
+arc-swap = "1.7"
+ctrlc = "3.4"
 
 [features]
 default = []
