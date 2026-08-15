@@ -6,7 +6,7 @@ use bevy::app::{FixedUpdate, PostUpdate, PreUpdate, Update};
 use bevy::ecs::system::Res;
 use bevy::prelude::Resource;
 use lol_env::FioraVsRivenRealEnv;
-use lol_env::fiora_vs_riven_real::FioraVsRivenRealAction;
+use lol_env::fiora_v1::FioraVsRivenRealAction;
 
 #[derive(Resource, Clone, Default)]
 struct ThreadProbe {

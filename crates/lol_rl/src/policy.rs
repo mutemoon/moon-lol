@@ -61,6 +61,59 @@ impl ActorCritic {
         })
     }
 
+    /// 将策略网络权重复制并迁移到指定计算设备（例如将 GPU 权重克隆至 CPU）
+    pub fn to_device(&self, device: &candle_core::Device) -> Result<Self> {
+        let fc1_w = self.fc1.weight().to_device(device)?;
+        let fc1_b = self.fc1.bias().map(|b| b.to_device(device)).transpose()?;
+        let fc1 = Linear::new(fc1_w, fc1_b);
+
+        let fc2_w = self.fc2.weight().to_device(device)?;
+        let fc2_b = self.fc2.bias().map(|b| b.to_device(device)).transpose()?;
+        let fc2 = Linear::new(fc2_w, fc2_b);
+
+        let actor_w = self.actor_head.weight().to_device(device)?;
+        let actor_b = self
+            .actor_head
+            .bias()
+            .map(|b| b.to_device(device))
+            .transpose()?;
+        let actor_head = Linear::new(actor_w, actor_b);
+
+        let critic_w = self.critic_head.weight().to_device(device)?;
+        let critic_b = self
+            .critic_head
+            .bias()
+            .map(|b| b.to_device(device))
+            .transpose()?;
+        let critic_head = Linear::new(critic_w, critic_b);
+
+        let log_std = self
+            .log_std
+            .as_ref()
+            .map(|s| s.to_device(device))
+            .transpose()?;
+
+        let attack_head = self
+            .attack_head
+            .as_ref()
+            .map(|a| -> Result<Linear> {
+                let w = a.weight().to_device(device)?;
+                let b = a.bias().map(|b| b.to_device(device)).transpose()?;
+                Ok(Linear::new(w, b))
+            })
+            .transpose()?;
+
+        Ok(Self {
+            fc1,
+            fc2,
+            actor_head,
+            log_std,
+            attack_head,
+            critic_head,
+            action_space: self.action_space.clone(),
+        })
+    }
+
     pub fn action_space(&self) -> &ActionSpace {
         &self.action_space
     }
@@ -78,6 +131,13 @@ impl ActorCritic {
         let out = self.actor_head.forward(&h2)?;
         let values = self.critic_head.forward(&h2)?;
         Ok((out, values))
+    }
+
+    /// 批量获取 Critic 状态价值估值
+    pub fn get_values(&self, state: &Tensor) -> Result<Vec<f32>> {
+        let h2 = self.hidden(state)?;
+        let values = self.critic_head.forward(&h2)?;
+        values.squeeze(1)?.to_vec1()
     }
 
     /// 从策略采样一个动作。返回 (编码动作向量, log_prob, value)。

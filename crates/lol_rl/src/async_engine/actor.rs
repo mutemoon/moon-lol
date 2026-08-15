@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::thread::{self, JoinHandle};
@@ -5,9 +6,16 @@ use std::time::Duration;
 
 use crossbeam_channel::{Sender, unbounded};
 use lol_env::RlEnvironment;
+use lol_rl_protocol::{ObsFeaturePayload, RewardItem};
 use tracing::info;
 
 use super::inference::{InferenceRequest, InferenceResponse};
+
+#[derive(Debug, Clone)]
+pub struct EpisodeInfo {
+    pub ep_return: f32,
+    pub ep_steps: usize,
+}
 
 #[derive(Debug, Clone)]
 pub struct SampleTransition {
@@ -17,6 +25,10 @@ pub struct SampleTransition {
     pub reward: f32,
     pub value: f32,
     pub done: bool,
+    pub episode_info: Option<EpisodeInfo>,
+    pub reward_breakdown: Vec<RewardItem>,
+    pub reward_variables: HashMap<String, f32>,
+    pub obs_payload: Option<ObsFeaturePayload>,
 }
 
 pub struct ActorPool {
@@ -48,6 +60,8 @@ impl ActorPool {
                 let mut env = E::new(max_steps);
                 let mut current_obs = env.reset();
                 let (reply_tx, reply_rx) = unbounded::<InferenceResponse>();
+                let mut current_ep_return = 0.0f32;
+                let mut current_ep_steps = 0usize;
 
                 while running.load(Ordering::Relaxed) {
                     let obs_vec = E::obs_to_vector(&current_obs);
@@ -80,6 +94,32 @@ impl ActorPool {
                     let res = env.step(action);
                     let done = res.terminated || res.truncated;
 
+                    current_ep_return += res.reward;
+                    current_ep_steps += 1;
+
+                    let episode_info = if done {
+                        let info = EpisodeInfo {
+                            ep_return: current_ep_return,
+                            ep_steps: current_ep_steps,
+                        };
+                        current_ep_return = 0.0;
+                        current_ep_steps = 0;
+                        Some(info)
+                    } else {
+                        None
+                    };
+
+                    let reward_breakdown = res
+                        .reward_breakdown
+                        .into_iter()
+                        .map(|item| RewardItem {
+                            name: item.name,
+                            value: item.value,
+                        })
+                        .collect();
+
+                    let obs_payload = E::obs_to_payload(&res.obs);
+
                     // 4. 将采样结果推送到训练样本队列
                     let transition = SampleTransition {
                         state: obs_vec,
@@ -88,6 +128,10 @@ impl ActorPool {
                         reward: res.reward,
                         value: resp.value,
                         done,
+                        episode_info,
+                        reward_breakdown,
+                        reward_variables: res.reward_variables,
+                        obs_payload,
                     };
 
                     if sample_tx.send(transition).is_err() {

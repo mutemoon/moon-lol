@@ -135,6 +135,5 @@ impl<E: RlEnvironment> ParallelEnvs<E> {
     }
 }
 
-pub type ParallelFioraVsRivenEnvs = ParallelEnvs<crate::fiora_vs_riven::FioraVsRivenEnv>;
-pub type ParallelFioraVsRivenRealEnvs =
-    ParallelEnvs<crate::fiora_vs_riven_real::FioraVsRivenRealEnv>;
+pub type ParallelFioraVsRivenEnvs = ParallelEnvs<crate::fiora_v0::FioraVsRivenEnv>;
+pub type ParallelFioraVsRivenRealEnvs = ParallelEnvs<crate::fiora_v1::FioraVsRivenRealEnv>;

@@ -330,15 +330,15 @@ pub struct TaskConfigPayload {
     pub max_steps: usize,
 }
 
-pub const ENV_FIORA_VS_RIVEN_REAL: &str = "FioraVsRivenRealEnv-v1";
-pub const ENV_FIORA_VS_RIVEN_LEGACY: &str = "FioraVsRivenEnv-v0";
+pub const ENV_FIORA_V1: &str = "FioraV1";
+pub const ENV_FIORA_V0: &str = "FioraV0";
 
 impl Default for TaskConfigPayload {
     fn default() -> Self {
         Self {
             name: "RL 对战训练任务".to_string(),
             agent_type: "PPO".to_string(),
-            env_name: ENV_FIORA_VS_RIVEN_REAL.to_string(),
+            env_name: ENV_FIORA_V1.to_string(),
             lr: 3e-4,
             gamma: 0.99,
             gae_lambda: 0.95,

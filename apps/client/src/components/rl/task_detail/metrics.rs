@@ -5,7 +5,6 @@ use gpui_component::plot::scale::{Scale, ScaleLinear, ScalePoint};
 use gpui_component::plot::shape::Line;
 use gpui_component::plot::tooltip::{CrossLine, Dot, Tooltip, TooltipState};
 use gpui_component::plot::{AxisText, Grid, IntoPlot, Plot, PlotAxis, StrokeStyle, AXIS_GAP};
-use gpui_component::scroll::ScrollableElement;
 use gpui_component::{h_flex, v_flex, ActiveTheme, StyledExt};
 use lol_rl_protocol::MetricsRow;
 use rust_i18n::t;
@@ -332,11 +331,11 @@ fn ep_steps_chart(rows: &[MetricsRow], cx: &Context<AppSidebar>) -> AnyElement {
         .into_any_element()
 }
 
-/// 性能分区：FPS 与训练指标分开，附累计步数上下文。
+/// 性能分区：SPS 与训练指标分开，附累计步数上下文。
 fn perf_section(rows: &[MetricsRow], cx: &Context<AppSidebar>) -> AnyElement {
     let summary = rows
         .last()
-        .map(|last| format!("累计步数 {} | 最新 FPS {}", last.step, last.fps))
+        .map(|last| format!("累计步数 {} | 最新吞吐量 {} SPS", last.step, last.fps))
         .unwrap_or_default();
     v_flex()
         .gap_2()
@@ -360,7 +359,7 @@ fn perf_section(rows: &[MetricsRow], cx: &Context<AppSidebar>) -> AnyElement {
                         .id("chart-fps")
                         .x(|r| r.step)
                         .tick_margin((rows.len() / 8).max(1))
-                        .series("FPS", cx.theme().chart_1, |r| r.fps as f64),
+                        .series("SPS", cx.theme().chart_1, |r| r.fps as f64),
                 ),
         )
         .into_any_element()

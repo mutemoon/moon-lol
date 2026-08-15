@@ -15,7 +15,15 @@ use tokio::net::TcpStream;
 use tokio_tungstenite::tungstenite::Message;
 
 fn main() -> anyhow::Result<()> {
-    tracing_subscriber::fmt::init();
+    tracing_subscriber::fmt()
+        .with_env_filter(
+            tracing_subscriber::EnvFilter::try_from_default_env().unwrap_or_else(|_| {
+                tracing_subscriber::EnvFilter::new(
+                    "warn,lol_rl=info,lol_rl_protocol=info,lol_rl_visual=info",
+                )
+            }),
+        )
+        .init();
 
     let port = parse_arg("--port")
         .unwrap_or_else(|| "9320".to_string())
@@ -27,9 +35,9 @@ fn main() -> anyhow::Result<()> {
         .unwrap_or(64);
     let env_name = parse_arg("--env")
         .or_else(|| parse_arg("--env_name"))
-        .unwrap_or_else(|| lol_rl_protocol::ENV_FIORA_VS_RIVEN_REAL.to_string());
+        .unwrap_or_else(|| lol_rl_protocol::ENV_FIORA_V1.to_string());
 
-    if env_name == lol_rl_protocol::ENV_FIORA_VS_RIVEN_LEGACY {
+    if env_name == lol_rl_protocol::ENV_FIORA_V0 {
         start_visual_runner_for_env::<lol_env::FioraVsRivenEnv>(port, ckpt_path, hidden_dim)
     } else {
         start_visual_runner_for_env::<lol_env::FioraVsRivenRealEnv>(port, ckpt_path, hidden_dim)

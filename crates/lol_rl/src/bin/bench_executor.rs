@@ -1,6 +1,6 @@
 /// bench_executor: 专用于对比 SingleThreadedExecutor 开关对并发 SPS 的影响
 /// 只运行 AutoTuner 快速基准探测，不执行实际训练，目标 1 分钟内完成
-use lol_env::fiora_vs_riven_real::FioraVsRivenRealObs;
+use lol_env::fiora_v1::FioraVsRivenRealObs;
 use lol_env::{FioraVsRivenRealEnv, RlEnvironment};
 use lol_rl::autotune::AutoTuner;
 use lol_rl::device::select_device;

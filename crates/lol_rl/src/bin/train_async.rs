@@ -2,7 +2,7 @@ use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
 
 use crossbeam_channel::unbounded;
-use lol_env::fiora_vs_riven_real::FioraVsRivenRealObs;
+use lol_env::fiora_v1::FioraVsRivenRealObs;
 use lol_env::{FioraVsRivenRealEnv, RlEnvironment};
 use lol_rl::async_engine::actor::SampleTransition;
 use lol_rl::async_engine::{ActorPool, AsyncLearner, InferenceServer};
@@ -14,8 +14,11 @@ use tracing::info;
 fn main() -> anyhow::Result<()> {
     tracing_subscriber::fmt()
         .with_env_filter(
-            tracing_subscriber::EnvFilter::try_from_default_env()
-                .unwrap_or_else(|_| tracing_subscriber::EnvFilter::new("info")),
+            tracing_subscriber::EnvFilter::try_from_default_env().unwrap_or_else(|_| {
+                tracing_subscriber::EnvFilter::new(
+                    "warn,lol_rl=info,lol_rl_protocol=info,train_async=info",
+                )
+            }),
         )
         .init();
 
@@ -95,7 +98,7 @@ fn main() -> anyhow::Result<()> {
     .ok();
 
     // 8. 执行异步训练循环
-    learner.run_loop(total_iterations, is_running.clone(), |metrics| {
+    learner.run_loop(total_iterations, is_running.clone(), |metrics, _agent| {
         if metrics.iteration % 5 == 0 || metrics.iteration == 1 {
             info!(
                 "📈 [Iter {:03}/{}] SPS: {:6.1} | Loss: {:6.3} (P: {:6.3}, V: {:6.3}, Ent: {:5.2}) | KL: {:6.4} | ClipFrac: {:4.1}% | Samples: {}",
@@ -111,6 +114,7 @@ fn main() -> anyhow::Result<()> {
                 metrics.total_samples
             );
         }
+        Ok(())
     })?;
 
     // 9. 资源回收与停止

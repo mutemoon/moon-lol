@@ -2,7 +2,7 @@ use gpui::*;
 use gpui_component::button::{Button, ButtonVariants};
 use gpui_component::scroll::ScrollableElement;
 use gpui_component::{h_flex, v_flex, ActiveTheme, IconName, StyledExt};
-use lol_rl_protocol::{PolicyDisplay, VisualInFrame, VisualObsFrame, ENV_FIORA_VS_RIVEN_LEGACY};
+use lol_rl_protocol::{PolicyDisplay, VisualInFrame, VisualObsFrame, ENV_FIORA_V0};
 use rust_i18n::t;
 
 use crate::components::rl::task_detail::math::render_math;
@@ -36,7 +36,7 @@ pub fn render_running_visual(sidebar: &AppSidebar, cx: &mut Context<AppSidebar>)
     // 离散动作 env（FioraVsRivenEnv）没有点击控制，仍要显示手动 action 按钮。
     if is_paused
         && sidebar.visual_ws_connected
-        && sidebar.visual_env_name.as_deref() == Some(ENV_FIORA_VS_RIVEN_LEGACY)
+        && sidebar.visual_env_name.as_deref() == Some(ENV_FIORA_V0)
     {
         container = container.child(render_manual_action_panel(sidebar, cx));
     }

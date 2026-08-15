@@ -2,7 +2,7 @@ CREATE TABLE IF NOT EXISTS rl_tasks (
     id           UUID PRIMARY KEY,
     name         TEXT NOT NULL,
     agent_type   TEXT NOT NULL DEFAULT 'PPO (Candle)',
-    env_name     TEXT NOT NULL DEFAULT 'FioraVsRivenEnv-v0',
+    env_name     TEXT NOT NULL DEFAULT 'FioraV0',
     status       TEXT NOT NULL DEFAULT 'queued',
     config_json  JSONB NOT NULL DEFAULT '{}',
     current_step BIGINT NOT NULL DEFAULT 0,

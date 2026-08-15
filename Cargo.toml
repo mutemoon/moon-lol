@@ -138,3 +138,12 @@ debug = "line-tables-only"
 [profile.dev.package."*"]
 # 为了开启 bevy 的动态链接
 opt-level = 3
+
+[profile.dev.package.lol_env]
+opt-level = 3
+
+[profile.dev.package.lol_core]
+opt-level = 3
+
+[profile.dev.package.lol_rl]
+opt-level = 3

@@ -178,8 +178,8 @@ pub struct EnvMeta {
 
 pub fn list_available_envs() -> Vec<EnvMeta> {
     vec![
-        crate::fiora_vs_riven_real::FioraVsRivenRealEnv::meta(),
-        crate::fiora_vs_riven::FioraVsRivenEnv::meta(),
+        crate::fiora_v1::FioraVsRivenRealEnv::meta(),
+        crate::fiora_v0::FioraVsRivenEnv::meta(),
     ]
 }
 

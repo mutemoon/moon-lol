@@ -1,7 +1,7 @@
 use gpui::prelude::FluentBuilder as _;
 use gpui::*;
 use gpui_component::button::{Button, ButtonVariants};
-use gpui_component::input::{Input, InputEvent, InputState};
+use gpui_component::input::{Input, InputEvent, InputState, NumberInput};
 use gpui_component::menu::{DropdownMenu, PopupMenuItem};
 use gpui_component::scroll::ScrollableElement;
 use gpui_component::table::{Column, DataTable, TableDelegate, TableState};
@@ -378,6 +378,30 @@ pub struct CreateTaskDialogView {
     pub default_name: String,
     pub tx: Option<tokio::sync::mpsc::UnboundedSender<InFrame>>,
     pub name_input: Entity<InputState>,
+    pub lr_input: Entity<InputState>,
+    pub gamma_input: Entity<InputState>,
+    pub gae_lambda_input: Entity<InputState>,
+    pub clip_eps_input: Entity<InputState>,
+    pub ppo_epochs_input: Entity<InputState>,
+    pub hidden_dim_input: Entity<InputState>,
+    pub total_iterations_input: Entity<InputState>,
+}
+
+macro_rules! bind_num_input {
+    ($cx:expr, $window:expr, $form:expr, $field:ident, $type:ty) => {{
+        let input =
+            $cx.new(|cx| InputState::new($window, cx).default_value(&$form.$field.to_string()));
+        let sub = input.clone();
+        $cx.subscribe(&sub, |this: &mut Self, state, event: &InputEvent, cx| {
+            if matches!(event, InputEvent::Change) {
+                if let Ok(val) = state.read(cx).value().parse::<$type>() {
+                    this.form.$field = val;
+                }
+            }
+        })
+        .detach();
+        input
+    }};
 }
 
 impl CreateTaskDialogView {
@@ -407,18 +431,33 @@ impl CreateTaskDialogView {
         })
         .detach();
 
+        let lr_input = bind_num_input!(cx, window, form, lr, f32);
+        let gamma_input = bind_num_input!(cx, window, form, gamma, f32);
+        let gae_lambda_input = bind_num_input!(cx, window, form, gae_lambda, f32);
+        let clip_eps_input = bind_num_input!(cx, window, form, clip_eps, f32);
+        let ppo_epochs_input = bind_num_input!(cx, window, form, ppo_epochs, usize);
+        let hidden_dim_input = bind_num_input!(cx, window, form, hidden_dim, usize);
+        let total_iterations_input = bind_num_input!(cx, window, form, total_iterations, usize);
+
         Self {
             form,
             default_name,
             tx,
             name_input,
+            lr_input,
+            gamma_input,
+            gae_lambda_input,
+            clip_eps_input,
+            ppo_epochs_input,
+            hidden_dim_input,
+            total_iterations_input,
         }
     }
 
     fn render_num_setting<F>(
         &self,
         label: &str,
-        display_val: String,
+        input_entity: &Entity<InputState>,
         presets: Vec<(&'static str, f32)>,
         current_val: f32,
         cx: &mut Context<Self>,
@@ -427,22 +466,21 @@ impl CreateTaskDialogView {
     where
         F: Fn(&mut Self, f32) + Send + Sync + 'static + Copy,
     {
+        let weak_input = input_entity.downgrade();
         v_flex()
-            .gap_1()
+            .w_full()
+            .gap_2()
             .child(
-                h_flex()
-                    .justify_between()
-                    .child(
-                        div()
-                            .text_xs()
-                            .font_bold()
-                            .text_color(cx.theme().muted_foreground)
-                            .child(label.to_string()),
-                    )
-                    .child(div().text_xs().font_bold().child(display_val)),
+                div()
+                    .text_xs()
+                    .font_bold()
+                    .text_color(cx.theme().muted_foreground)
+                    .child(label.to_string()),
             )
+            .child(div().w_full().child(NumberInput::new(input_entity)))
             .child(
                 h_flex()
+                    .w_full()
                     .gap_1()
                     .children(presets.into_iter().map(|(name, val)| {
                         let is_selected = (val - current_val).abs() < 1e-6;
@@ -450,15 +488,21 @@ impl CreateTaskDialogView {
                             Button::new(format!("preset-{label}-{name}"))
                                 .primary()
                                 .compact()
+                                .flex_1()
                                 .label(name)
                         } else {
                             Button::new(format!("preset-{label}-{name}"))
                                 .outline()
                                 .compact()
+                                .flex_1()
                                 .label(name)
                         };
-                        btn.on_click(cx.listener(move |this, _, _, cx| {
+                        let weak_input = weak_input.clone();
+                        btn.on_click(cx.listener(move |this, _, window, cx| {
                             setter(this, val);
+                            if let Some(input) = weak_input.upgrade() {
+                                input.update(cx, |i, cx| i.set_value(val.to_string(), window, cx));
+                            }
                             cx.notify();
                         }))
                     })),
@@ -469,6 +513,7 @@ impl CreateTaskDialogView {
     fn render_int_setting<F>(
         &self,
         label: &str,
+        input_entity: &Entity<InputState>,
         current_val: usize,
         presets: Vec<usize>,
         cx: &mut Context<Self>,
@@ -477,38 +522,47 @@ impl CreateTaskDialogView {
     where
         F: Fn(&mut Self, usize) + Send + Sync + 'static + Copy,
     {
+        let weak_input = input_entity.downgrade();
         v_flex()
-            .gap_1()
+            .w_full()
+            .gap_2()
+            .child(
+                div()
+                    .text_xs()
+                    .font_bold()
+                    .text_color(cx.theme().muted_foreground)
+                    .child(label.to_string()),
+            )
+            .child(div().w_full().child(NumberInput::new(input_entity)))
             .child(
                 h_flex()
-                    .justify_between()
-                    .child(
-                        div()
-                            .text_xs()
-                            .font_bold()
-                            .text_color(cx.theme().muted_foreground)
-                            .child(label.to_string()),
-                    )
-                    .child(div().text_xs().font_bold().child(current_val.to_string())),
+                    .w_full()
+                    .gap_1()
+                    .children(presets.into_iter().map(|val| {
+                        let is_selected = val == current_val;
+                        let btn = if is_selected {
+                            Button::new(format!("preset-int-{label}-{val}"))
+                                .primary()
+                                .compact()
+                                .flex_1()
+                                .label(val.to_string())
+                        } else {
+                            Button::new(format!("preset-int-{label}-{val}"))
+                                .outline()
+                                .compact()
+                                .flex_1()
+                                .label(val.to_string())
+                        };
+                        let weak_input = weak_input.clone();
+                        btn.on_click(cx.listener(move |this, _, window, cx| {
+                            setter(this, val);
+                            if let Some(input) = weak_input.upgrade() {
+                                input.update(cx, |i, cx| i.set_value(val.to_string(), window, cx));
+                            }
+                            cx.notify();
+                        }))
+                    })),
             )
-            .child(h_flex().gap_1().children(presets.into_iter().map(|val| {
-                let is_selected = val == current_val;
-                let btn = if is_selected {
-                    Button::new(format!("preset-int-{label}-{val}"))
-                        .primary()
-                        .compact()
-                        .label(val.to_string())
-                } else {
-                    Button::new(format!("preset-int-{label}-{val}"))
-                        .outline()
-                        .compact()
-                        .label(val.to_string())
-                };
-                btn.on_click(cx.listener(move |this, _, _, cx| {
-                    setter(this, val);
-                    cx.notify();
-                }))
-            })))
             .into_any_element()
     }
 }
@@ -623,34 +677,34 @@ impl Render for CreateTaskDialogView {
                                             .child(
                                                 Button::new("env-real-btn")
                                                     .when(
-                                                        cfg.env_name == lol_rl_protocol::ENV_FIORA_VS_RIVEN_REAL,
+                                                        cfg.env_name == lol_rl_protocol::ENV_FIORA_V1,
                                                         |b| b.primary(),
                                                     )
                                                     .when(
-                                                        cfg.env_name != lol_rl_protocol::ENV_FIORA_VS_RIVEN_REAL,
+                                                        cfg.env_name != lol_rl_protocol::ENV_FIORA_V1,
                                                         |b| b.outline(),
                                                     )
                                                     .compact()
                                                     .label("真实移动 (10f)")
                                                     .on_click(cx.listener(|this, _, _, cx| {
-                                                        this.form.env_name = lol_rl_protocol::ENV_FIORA_VS_RIVEN_REAL.to_string();
+                                                        this.form.env_name = lol_rl_protocol::ENV_FIORA_V1.to_string();
                                                         cx.notify();
                                                     })),
                                             )
                                             .child(
                                                 Button::new("env-legacy-btn")
                                                     .when(
-                                                        cfg.env_name == lol_rl_protocol::ENV_FIORA_VS_RIVEN_LEGACY,
+                                                        cfg.env_name == lol_rl_protocol::ENV_FIORA_V0,
                                                         |b| b.primary(),
                                                     )
                                                     .when(
-                                                        cfg.env_name != lol_rl_protocol::ENV_FIORA_VS_RIVEN_LEGACY,
+                                                        cfg.env_name != lol_rl_protocol::ENV_FIORA_V0,
                                                         |b| b.outline(),
                                                     )
                                                     .compact()
                                                     .label("瞬移站位 (Legacy)")
                                                     .on_click(cx.listener(|this, _, _, cx| {
-                                                        this.form.env_name = lol_rl_protocol::ENV_FIORA_VS_RIVEN_LEGACY.to_string();
+                                                        this.form.env_name = lol_rl_protocol::ENV_FIORA_V0.to_string();
                                                         cx.notify();
                                                     })),
                                             ),
@@ -660,7 +714,7 @@ impl Render for CreateTaskDialogView {
                     // 3. 学习率
                     .child(self.render_num_setting(
                         "学习率 (Learning Rate / lr)",
-                        format!("{:.5}", cfg.lr),
+                        &self.lr_input,
                         vec![
                             ("1e-4", 0.0001),
                             ("3e-4", 0.0003),
@@ -674,7 +728,7 @@ impl Render for CreateTaskDialogView {
                     // 4. 折扣因子 Gamma
                     .child(self.render_num_setting(
                         "折扣因子 (Gamma / γ)",
-                        format!("{:.3}", cfg.gamma),
+                        &self.gamma_input,
                         vec![
                             ("0.90", 0.90),
                             ("0.95", 0.95),
@@ -689,7 +743,7 @@ impl Render for CreateTaskDialogView {
                     // 5. GAE Lambda
                     .child(self.render_num_setting(
                         "GAE 因子 (Lambda / λ)",
-                        format!("{:.2}", cfg.gae_lambda),
+                        &self.gae_lambda_input,
                         vec![
                             ("0.80", 0.80),
                             ("0.90", 0.90),
@@ -703,7 +757,7 @@ impl Render for CreateTaskDialogView {
                     // 6. PPO Clip Epsilon
                     .child(self.render_num_setting(
                         "PPO Clip 范围 (Clip Epsilon / ε)",
-                        format!("{:.2}", cfg.clip_eps),
+                        &self.clip_eps_input,
                         vec![
                             ("0.10", 0.10),
                             ("0.15", 0.15),
@@ -721,6 +775,7 @@ impl Render for CreateTaskDialogView {
                             .gap_4()
                             .child(div().flex_1().child(self.render_int_setting(
                                 "每轮训练 Epochs",
+                                &self.ppo_epochs_input,
                                 cfg.ppo_epochs,
                                 vec![1, 2, 4, 8],
                                 cx,
@@ -728,6 +783,7 @@ impl Render for CreateTaskDialogView {
                             )))
                             .child(div().flex_1().child(self.render_int_setting(
                                 "隐藏层神经元 (Hidden Dim)",
+                                &self.hidden_dim_input,
                                 cfg.hidden_dim,
                                 vec![32, 64, 128, 256],
                                 cx,
@@ -740,6 +796,7 @@ impl Render for CreateTaskDialogView {
                             .gap_2()
                             .child(self.render_int_setting(
                                 "总训练迭代轮次 (Total Iterations)",
+                                &self.total_iterations_input,
                                 cfg.total_iterations,
                                 vec![20, 50, 80, 150, 300],
                                 cx,

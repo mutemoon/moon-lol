@@ -292,13 +292,26 @@ impl ConfigNavigationGrid {
     }
 
     pub fn get_height_by_position(&self, position: &Vec2) -> f32 {
-        let x = (((position.x - self.min_position.x) / self.get_width())
-            * (self.height_x_len - 1) as f32)
-            .round() as usize;
+        if self.height_samples.is_empty() || self.height_samples[0].is_empty() {
+            return 0.0;
+        }
+        let w = self.get_width();
+        let h = self.get_height();
+        if w <= 0.0 || h <= 0.0 || self.height_x_len == 0 || self.height_y_len == 0 {
+            return 0.0;
+        }
 
-        let y = (((position.y - self.min_position.y) / self.get_height())
-            * (self.height_y_len - 1) as f32)
-            .round() as usize;
+        let max_x = (self.height_x_len - 1) as f32;
+        let max_y = (self.height_y_len - 1) as f32;
+
+        let ratio_x = ((position.x - self.min_position.x) / w).clamp(0.0, 1.0);
+        let ratio_y = ((position.y - self.min_position.y) / h).clamp(0.0, 1.0);
+
+        let x = (ratio_x * max_x).round() as usize;
+        let y = (ratio_y * max_y).round() as usize;
+
+        let y = y.min(self.height_samples.len().saturating_sub(1));
+        let x = x.min(self.height_samples[y].len().saturating_sub(1));
 
         self.height_samples[y][x]
     }
@@ -324,13 +337,32 @@ impl ConfigNavigationGrid {
     }
 
     pub fn get_cell_xy_by_position(&self, position: &Vec2) -> (usize, usize) {
-        let x = ((position.x - self.min_position.x) / self.cell_size).floor() as usize;
-        let y = ((position.y - self.min_position.y) / self.cell_size).floor() as usize;
+        if self.cell_size <= 0.0 || self.x_len == 0 || self.y_len == 0 {
+            return (0, 0);
+        }
+        let max_x = self.x_len.saturating_sub(1);
+        let max_y = self.y_len.saturating_sub(1);
+
+        let fx = ((position.x - self.min_position.x) / self.cell_size).floor();
+        let fy = ((position.y - self.min_position.y) / self.cell_size).floor();
+
+        let x = if fx < 0.0 {
+            0
+        } else {
+            (fx as usize).min(max_x)
+        };
+        let y = if fy < 0.0 {
+            0
+        } else {
+            (fy as usize).min(max_y)
+        };
         (x, y)
     }
 
     pub fn get_cell_by_xy(&self, (x, y): (usize, usize)) -> &ConfigNavigationGridCell {
-        &self.cells[y.clamp(0, self.y_len - 1)][x.clamp(0, self.x_len - 1)]
+        let y = y.clamp(0, self.y_len.saturating_sub(1));
+        let x = x.clamp(0, self.x_len.saturating_sub(1));
+        &self.cells[y][x]
     }
 
     pub fn get_cell_by_position(&self, pos: &Vec2) -> &ConfigNavigationGridCell {

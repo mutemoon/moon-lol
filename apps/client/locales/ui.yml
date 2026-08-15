@@ -288,8 +288,8 @@ app:
       zh-CN: "价值估计"
       en: "Value"
     m_fps:
-      zh-CN: "吞吐量"
-      en: "FPS"
+      zh-CN: "训练吞吐 (SPS)"
+      en: "SPS"
     visual_pause:
       zh-CN: "暂停"
       en: "Pause"

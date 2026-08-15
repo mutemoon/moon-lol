@@ -228,14 +228,7 @@ impl PPOAgent {
             returns[t] = gae + buffer.values[t];
         }
 
-        // Normalize advantages
-        let mean = advantages.iter().sum::<f32>() / n as f32;
-        let variance = advantages.iter().map(|a| (a - mean).powi(2)).sum::<f32>() / n as f32;
-        let std = (variance + 1e-8).sqrt();
-
-        let norm_advantages: Vec<f32> = advantages.iter().map(|a| (a - mean) / std).collect();
-
-        (returns, norm_advantages)
+        (returns, advantages)
     }
 
     /// Update policy using buffer data
@@ -253,7 +246,15 @@ impl PPOAgent {
             });
         }
 
-        let (returns, advantages) = self.compute_gae(buffer, last_val);
+        let (returns, mut advantages) = self.compute_gae(buffer, last_val);
+
+        // Normalize advantages globally
+        let mean = advantages.iter().sum::<f32>() / n as f32;
+        let variance = advantages.iter().map(|a| (a - mean).powi(2)).sum::<f32>() / n as f32;
+        let std = (variance + 1e-8).sqrt();
+        for a in advantages.iter_mut() {
+            *a = (*a - mean) / std;
+        }
 
         // Convert buffer to tensors
         let flat_states: Vec<f32> = buffer.states.iter().flatten().copied().collect();
@@ -363,19 +364,20 @@ impl PPOAgent {
             return self.update(buffer, last_val);
         }
 
-        let (returns, advantages) = self.compute_gae(buffer, last_val);
+        let (returns, mut advantages) = self.compute_gae(buffer, last_val);
+
+        // Normalize advantages globally
+        let mean = advantages.iter().sum::<f32>() / n as f32;
+        let variance = advantages.iter().map(|a| (a - mean).powi(2)).sum::<f32>() / n as f32;
+        let std = (variance + 1e-8).sqrt();
+        for a in advantages.iter_mut() {
+            *a = (*a - mean) / std;
+        }
 
         let flat_states: Vec<f32> = buffer.states.iter().flatten().copied().collect();
         let state_dim = buffer.states[0].len();
-        let states_tensor = Tensor::from_vec(flat_states, (n, state_dim), &self.device)?;
-
         let enc_dim = buffer.actions[0].len();
         let flat_actions: Vec<f32> = buffer.actions.iter().flatten().copied().collect();
-        let actions_tensor = Tensor::from_vec(flat_actions, (n, enc_dim), &self.device)?;
-
-        let old_log_probs_tensor = Tensor::from_vec(buffer.log_probs.clone(), (n,), &self.device)?;
-        let returns_tensor = Tensor::from_vec(returns, (n,), &self.device)?;
-        let advantages_tensor = Tensor::from_vec(advantages, (n,), &self.device)?;
 
         let mut last_stats = PPOStats {
             policy_loss: 0.0,
@@ -387,10 +389,202 @@ impl PPOAgent {
             clip_frac: 0.0,
         };
 
+        use rand::seq::SliceRandom;
+        let mut rng = rand::thread_rng();
+
         for _epoch in 0..self.config.ppo_epochs {
+            let mut indices: Vec<usize> = (0..n).collect();
+            indices.shuffle(&mut rng);
+
+            let mut shuffled_states = Vec::with_capacity(n * state_dim);
+            let mut shuffled_actions = Vec::with_capacity(n * enc_dim);
+            let mut shuffled_log_probs = Vec::with_capacity(n);
+            let mut shuffled_returns = Vec::with_capacity(n);
+            let mut shuffled_advantages = Vec::with_capacity(n);
+
+            for &idx in &indices {
+                shuffled_states
+                    .extend_from_slice(&flat_states[idx * state_dim..(idx + 1) * state_dim]);
+                shuffled_actions
+                    .extend_from_slice(&flat_actions[idx * enc_dim..(idx + 1) * enc_dim]);
+                shuffled_log_probs.push(buffer.log_probs[idx]);
+                shuffled_returns.push(returns[idx]);
+                shuffled_advantages.push(advantages[idx]);
+            }
+
+            let states_tensor = Tensor::from_vec(shuffled_states, (n, state_dim), &self.device)?;
+            let actions_tensor = Tensor::from_vec(shuffled_actions, (n, enc_dim), &self.device)?;
+            let old_log_probs_tensor = Tensor::from_vec(shuffled_log_probs, (n,), &self.device)?;
+            let returns_tensor = Tensor::from_vec(shuffled_returns, (n,), &self.device)?;
+            let advantages_tensor = Tensor::from_vec(shuffled_advantages, (n,), &self.device)?;
+
             let mut start_idx = 0;
             while start_idx < n {
                 let end_idx = (start_idx + mini_batch_size).min(n);
+                let mb_len = end_idx - start_idx;
+
+                let mb_states = states_tensor.narrow(0, start_idx, mb_len)?;
+                let mb_actions = actions_tensor.narrow(0, start_idx, mb_len)?;
+                let mb_old_log_probs = old_log_probs_tensor.narrow(0, start_idx, mb_len)?;
+                let mb_returns = returns_tensor.narrow(0, start_idx, mb_len)?;
+                let mb_advantages = advantages_tensor.narrow(0, start_idx, mb_len)?;
+
+                let (new_log_probs, new_values, entropy) = self
+                    .actor_critic
+                    .evaluate_actions(&mb_states, &mb_actions)?;
+
+                let log_ratio = (&new_log_probs - &mb_old_log_probs)?;
+                let ratio = log_ratio.exp()?;
+
+                let surr1 = (&ratio * &mb_advantages)?;
+                let clamped_ratio =
+                    ratio.clamp(1.0 - self.config.clip_eps, 1.0 + self.config.clip_eps)?;
+                let surr2 = (&clamped_ratio * &mb_advantages)?;
+
+                let policy_loss = surr1.minimum(&surr2)?.neg()?.mean_all()?;
+                let val_diff = (&new_values - &mb_returns)?;
+                let value_loss = (&val_diff * &val_diff)?.mean_all()?.affine(0.5, 0.0)?;
+                let entropy_loss = entropy.neg()?.mean_all()?;
+
+                let kl = (&ratio - 1.0 - &log_ratio)?.mean_all()?;
+                let clip_frac = (ratio.lt(1.0 - self.config.clip_eps)?.to_dtype(DType::F32)?
+                    + ratio.gt(1.0 + self.config.clip_eps)?.to_dtype(DType::F32)?)?
+                .mean_all()?;
+
+                let p_loss_val: f32 = policy_loss.to_scalar()?;
+                let v_loss_val: f32 = value_loss.to_scalar()?;
+                let e_loss_val: f32 = entropy_loss.to_scalar()?;
+                let entropy_val: f32 = entropy.mean_all()?.to_scalar()?;
+                let kl_val: f32 = kl.to_scalar()?;
+                let clip_frac_val: f32 = clip_frac.to_scalar()?;
+
+                let c1_val = (&policy_loss + (value_loss.affine(self.config.c1 as f64, 0.0)?))?;
+                let total_loss = (c1_val + (entropy_loss.affine(self.config.c2 as f64, 0.0)?))?;
+                let tot_loss_val: f32 = total_loss.to_scalar()?;
+
+                let grads = total_loss.backward()?;
+                self.optimizer.step(&grads)?;
+
+                last_stats = PPOStats {
+                    policy_loss: p_loss_val,
+                    value_loss: v_loss_val,
+                    entropy_loss: e_loss_val,
+                    entropy: entropy_val,
+                    total_loss: tot_loss_val,
+                    kl: kl_val,
+                    clip_frac: clip_frac_val,
+                };
+
+                start_idx += mini_batch_size;
+            }
+        }
+
+        Ok(last_stats)
+    }
+
+    /// 多环境独立 GAE 计算 + 全样本 GPU Mini-Batch PPO 更新
+    pub fn update_multi_buffer(
+        &mut self,
+        buffers: &[RolloutBuffer],
+        last_vals: &[f32],
+        mini_batch_size: usize,
+    ) -> Result<PPOStats> {
+        let total_n: usize = buffers.iter().map(|b| b.len()).sum();
+        if total_n == 0 {
+            return Ok(PPOStats {
+                policy_loss: 0.0,
+                value_loss: 0.0,
+                entropy_loss: 0.0,
+                entropy: 0.0,
+                total_loss: 0.0,
+                kl: 0.0,
+                clip_frac: 0.0,
+            });
+        }
+
+        let state_dim = buffers[0].states[0].len();
+        let enc_dim = buffers[0].actions[0].len();
+
+        let mut all_states = Vec::with_capacity(total_n * state_dim);
+        let mut all_actions = Vec::with_capacity(total_n * enc_dim);
+        let mut all_old_log_probs = Vec::with_capacity(total_n);
+        let mut all_returns = Vec::with_capacity(total_n);
+        let mut all_advantages = Vec::with_capacity(total_n);
+
+        for (i, buffer) in buffers.iter().enumerate() {
+            if buffer.len() == 0 {
+                continue;
+            }
+            let last_val = last_vals.get(i).copied().unwrap_or(0.0);
+            let (returns, advantages) = self.compute_gae(buffer, last_val);
+
+            for t in 0..buffer.len() {
+                all_states.extend_from_slice(&buffer.states[t]);
+                all_actions.extend_from_slice(&buffer.actions[t]);
+                all_old_log_probs.push(buffer.log_probs[t]);
+                all_returns.push(returns[t]);
+                all_advantages.push(advantages[t]);
+            }
+        }
+
+        // Normalize advantages globally across all buffers
+        let mean = all_advantages.iter().sum::<f32>() / total_n as f32;
+        let variance = all_advantages
+            .iter()
+            .map(|a| (a - mean).powi(2))
+            .sum::<f32>()
+            / total_n as f32;
+        let std = (variance + 1e-8).sqrt();
+        for a in all_advantages.iter_mut() {
+            *a = (*a - mean) / std;
+        }
+
+        let mut last_stats = PPOStats {
+            policy_loss: 0.0,
+            value_loss: 0.0,
+            entropy_loss: 0.0,
+            entropy: 0.0,
+            total_loss: 0.0,
+            kl: 0.0,
+            clip_frac: 0.0,
+        };
+
+        use rand::seq::SliceRandom;
+        let mut rng = rand::thread_rng();
+
+        for _epoch in 0..self.config.ppo_epochs {
+            let mut indices: Vec<usize> = (0..total_n).collect();
+            indices.shuffle(&mut rng);
+
+            let mut shuffled_states = Vec::with_capacity(total_n * state_dim);
+            let mut shuffled_actions = Vec::with_capacity(total_n * enc_dim);
+            let mut shuffled_log_probs = Vec::with_capacity(total_n);
+            let mut shuffled_returns = Vec::with_capacity(total_n);
+            let mut shuffled_advantages = Vec::with_capacity(total_n);
+
+            for &idx in &indices {
+                shuffled_states
+                    .extend_from_slice(&all_states[idx * state_dim..(idx + 1) * state_dim]);
+                shuffled_actions
+                    .extend_from_slice(&all_actions[idx * enc_dim..(idx + 1) * enc_dim]);
+                shuffled_log_probs.push(all_old_log_probs[idx]);
+                shuffled_returns.push(all_returns[idx]);
+                shuffled_advantages.push(all_advantages[idx]);
+            }
+
+            let states_tensor =
+                Tensor::from_vec(shuffled_states, (total_n, state_dim), &self.device)?;
+            let actions_tensor =
+                Tensor::from_vec(shuffled_actions, (total_n, enc_dim), &self.device)?;
+            let old_log_probs_tensor =
+                Tensor::from_vec(shuffled_log_probs, (total_n,), &self.device)?;
+            let returns_tensor = Tensor::from_vec(shuffled_returns, (total_n,), &self.device)?;
+            let advantages_tensor =
+                Tensor::from_vec(shuffled_advantages, (total_n,), &self.device)?;
+
+            let mut start_idx = 0;
+            while start_idx < total_n {
+                let end_idx = (start_idx + mini_batch_size).min(total_n);
                 let mb_len = end_idx - start_idx;
 
                 let mb_states = states_tensor.narrow(0, start_idx, mb_len)?;

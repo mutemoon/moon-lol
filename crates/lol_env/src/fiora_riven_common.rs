@@ -1,20 +1,16 @@
-//! `FioraVsRivenEnv` 与 `FioraVsRivenRealEnv` 共享的观测、世界读写、事件追踪与奖励计算。
-//!
-//! 两个环境仅动作空间不同（离散瞬移 / 连续移动+攻击），观测与奖励口径完全一致，
-//! 故统一收敛到本模块，避免两份几乎逐行相同的副本漂移。
-
 use std::collections::HashMap;
 
 use bevy::prelude::*;
+use bevy::world_serialization::DynamicWorld;
+use lol_base::character::{ConfigCharacterRecord, ConfigSkin};
+use lol_champions::fiora::Fiora;
 use lol_champions::fiora::passive::Vital;
-use lol_core::attack::AttackState;
-use lol_core::attack_auto::AttackAuto;
+use lol_champions::riven::Riven;
 use lol_core::base::direction::Direction;
 use lol_core::damage::{DamageType, EventDamageCreate};
-use lol_core::life::{Death, Health, RespawnTimer};
-use lol_core::rotate::Rotate;
-use lol_core::run::Run;
+use lol_core::life::Health;
 use lol_core::skill::{CoolDown, Skill, SkillRecastWindow, Skills, is_skill_ready};
+use lol_core::team::Team;
 
 use crate::reward::{FioraRewardContext, FioraVsRivenRewardModel, RewardModel};
 use crate::traits::RewardBreakdownItem;
@@ -42,7 +38,6 @@ pub struct FioraVsRivenObs {
     pub w_ready: bool,
     pub e_ready: bool,
     pub r_ready: bool,
-    // Vital observation
     pub has_vital: bool,
     pub vital_is_active: bool,
     pub vital_dir_x: f32,
@@ -52,6 +47,7 @@ pub struct FioraVsRivenObs {
 }
 
 impl FioraVsRivenObs {
+    /// 转换为强化学习策略网络输入向量。
     pub fn to_vector(&self) -> Vec<f32> {
         let rel_x = self.fiora_pos.x - self.riven_pos.x;
         let rel_z = self.fiora_pos.z - self.riven_pos.z;
@@ -247,47 +243,126 @@ pub fn get_obs_from_world(world: &World, fiora: Entity, riven: Entity) -> FioraV
     }
 }
 
-/// Reset entities in the Bevy ECS world for a new episode.
+/// 销毁世界中的英雄实体及其附带技能
+pub fn despawn_entities_world(world: &mut World, fiora: Entity, riven: Entity) {
+    for champion in [fiora, riven] {
+        if let Ok(entity_ref) = world.get_entity(champion) {
+            if let Some(skills) = entity_ref.get::<Skills>() {
+                for s in skills.to_vec() {
+                    if let Ok(s_mut) = world.get_entity_mut(s) {
+                        s_mut.despawn();
+                    }
+                }
+            }
+        }
+        if let Ok(entity_mut) = world.get_entity_mut(champion) {
+            entity_mut.despawn();
+        }
+    }
+}
+
+/// 在世界中重新生成 Fiora 和 Riven 实体
+pub fn spawn_champions_world(
+    world: &mut World,
+    fiora_config_handle: Handle<DynamicWorld>,
+    riven_config_handle: Handle<DynamicWorld>,
+    fiora_skin_handle: Option<Handle<DynamicWorld>>,
+    riven_skin_handle: Option<Handle<DynamicWorld>>,
+    initial_fiora_pos: Vec3,
+    initial_riven_pos: Vec3,
+    render: bool,
+) -> (Entity, Entity) {
+    let mut fiora_builder = world.spawn((
+        Fiora::default(),
+        Transform::from_translation(initial_fiora_pos),
+        Team::Order,
+        ConfigCharacterRecord {
+            character_record: fiora_config_handle,
+        },
+        Health::new(500.0),
+        lol_core::damage::Armor(35.0),
+        lol_core::movement::Movement { speed: 345.0 },
+    ));
+
+    if render {
+        if let Some(skin) = fiora_skin_handle {
+            fiora_builder.insert((
+                lol_render::controller::SelfPlayer,
+                lol_base_render::camera::Focus,
+                ConfigSkin { skin },
+            ));
+        }
+    }
+
+    let fiora = fiora_builder.id();
+
+    let mut riven_builder = world.spawn((
+        Riven::default(),
+        Transform::from_translation(initial_riven_pos),
+        Team::Chaos,
+        ConfigCharacterRecord {
+            character_record: riven_config_handle,
+        },
+        Health::new(500.0),
+        lol_core::damage::Armor(33.0),
+        lol_core::movement::Movement { speed: 340.0 },
+    ));
+
+    if render {
+        if let Some(skin) = riven_skin_handle {
+            riven_builder.insert(ConfigSkin { skin });
+        }
+    }
+
+    let riven = riven_builder.id();
+
+    (fiora, riven)
+}
+
+/// Reset entities in the Bevy ECS world for a new episode by despawning and respawning.
 pub fn reset_episode_world(
     world: &mut World,
     fiora: Entity,
     riven: Entity,
+    fiora_config_handle: &Handle<DynamicWorld>,
+    riven_config_handle: &Handle<DynamicWorld>,
+    fiora_skin_handle: &Option<Handle<DynamicWorld>>,
+    riven_skin_handle: &Option<Handle<DynamicWorld>>,
     initial_fiora_pos: Vec3,
     initial_riven_pos: Vec3,
-) {
-    for champion in [fiora, riven] {
-        let mut entity_mut = world.entity_mut(champion);
-        entity_mut.remove::<Death>();
-        entity_mut.remove::<RespawnTimer>();
-        entity_mut.remove::<AttackAuto>();
-        entity_mut.remove::<AttackState>();
-        entity_mut.remove::<Run>();
-        entity_mut.remove::<Rotate>();
+    render: bool,
+) -> (Entity, Entity) {
+    // 1. 销毁旧实体
+    despawn_entities_world(world, fiora, riven);
+
+    // 2. 重新生成新实体
+    let (new_fiora, new_riven) = spawn_champions_world(
+        world,
+        fiora_config_handle.clone(),
+        riven_config_handle.clone(),
+        fiora_skin_handle.clone(),
+        riven_skin_handle.clone(),
+        initial_fiora_pos,
+        initial_riven_pos,
+        render,
+    );
+
+    // 3. 更新实体引用资源
+    world.insert_resource(FioraRivenEntities {
+        fiora: new_fiora,
+        riven: new_riven,
+    });
+
+    // 4. 重置事件追踪器
+    if let Some(mut tracker) = world.get_resource_mut::<AttackEventTracker>() {
+        tracker.attack_hit = false;
+        tracker.attack_ready = false;
+    }
+    if let Some(mut tracker) = world.get_resource_mut::<VitalBreakTracker>() {
+        tracker.hit = false;
     }
 
-    if let Some(mut t) = world.get_mut::<Transform>(fiora) {
-        t.translation = initial_fiora_pos;
-    }
-    if let Some(mut t) = world.get_mut::<Transform>(riven) {
-        t.translation = initial_riven_pos;
-    }
-    if let Some(mut h) = world.get_mut::<Health>(fiora) {
-        h.value = if h.max > 0.0 { h.max } else { 500.0 };
-    }
-    if let Some(mut h) = world.get_mut::<Health>(riven) {
-        h.value = if h.max > 0.0 { h.max } else { 500.0 };
-    }
-
-    if let Some(skills) = world.get::<Skills>(fiora) {
-        let skill_entities = skills.to_vec();
-        for s_entity in skill_entities {
-            if let Some(mut cd) = world.get_mut::<CoolDown>(s_entity) {
-                cd.timer = None;
-            }
-        }
-    }
-
-    // 随机为目标生成一个初始已激活的破绽 (Active Vital)
+    // 5. 随机为目标生成一个初始已激活的破绽 (Active Vital)
     let random_dir = match rand::random::<u8>() % 4 {
         0 => Direction::X,
         1 => Direction::NegX,
@@ -298,15 +373,9 @@ pub fn reset_episode_world(
     initial_vital
         .active_timer
         .tick(std::time::Duration::from_millis(1));
-    world.entity_mut(riven).insert(initial_vital);
+    world.entity_mut(new_riven).insert(initial_vital);
 
-    if let Some(mut tracker) = world.get_resource_mut::<AttackEventTracker>() {
-        tracker.attack_hit = false;
-        tracker.attack_ready = false;
-    }
-    if let Some(mut tracker) = world.get_resource_mut::<VitalBreakTracker>() {
-        tracker.hit = false;
-    }
+    (new_fiora, new_riven)
 }
 
 /// Set skill levels for Fiora and Riven in the Bevy ECS world.

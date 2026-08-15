@@ -36,7 +36,7 @@ arc-swap = "1.7"
 ctrlc = "3.4"
 
 [features]
-default = []
+default = ["cuda"]
 cuda = ["candle-core/cuda", "candle-nn/cuda"]
 
 [[bin]]

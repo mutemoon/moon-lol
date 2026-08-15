@@ -521,7 +521,7 @@ fn run_training_loop_for_task(
             .unwrap_or_default()
     };
 
-    if task_config.env_name == lol_rl_protocol::ENV_FIORA_VS_RIVEN_LEGACY {
+    if task_config.env_name == lol_rl_protocol::ENV_FIORA_V0 {
         run_generic_training_loop::<lol_env::FioraVsRivenEnv>(
             event_tx,
             tasks,
@@ -541,50 +541,65 @@ fn run_training_loop_for_task(
     }
 }
 
-fn run_generic_training_loop<E: lol_env::RlEnvironment>(
+fn run_generic_training_loop<E: lol_env::RlEnvironment + 'static>(
     event_tx: broadcast::Sender<OutFrame>,
     tasks: Arc<Mutex<HashMap<String, TaskState>>>,
     repo: Arc<dyn RlRepo>,
     task_id: String,
     task_config: TaskConfigPayload,
 ) {
-    // 单局步数截断（来自任务配置 rollout_steps_per_env），促使 AI 快速打破绽击杀，避免无限移动刷分
     let env_max_steps = task_config.rollout_steps_per_env.max(1);
     let state_dim = E::state_dim();
     let action_space = E::action_space();
-    let enc_dim = action_space.encoding_dim();
     let total_iterations = task_config.total_iterations.max(1);
     let hidden_dim = task_config.hidden_dim.max(64);
     let device = crate::device::select_device().unwrap_or(candle_core::Device::Cpu);
 
-    let num_parallel_envs = if task_config.parallel_envs > 0 {
-        task_config.parallel_envs
-    } else {
-        match AutoTuner::profile::<E>(state_dim, hidden_dim, &action_space, &device) {
-            Ok(profile) => {
-                let tuned =
-                    AutoTuner::solve(&profile, env_max_steps, task_config.ppo_epochs.max(1));
-                info!(
-                    "🎯 [AutoTuner] 为任务 {} 自动求解最优吞吐并发: N={}, 预估 SPS: {:.1}",
-                    task_id, tuned.num_parallel_envs, tuned.estimated_sps
-                );
-                {
-                    let mut t = tasks.blocking_lock();
-                    if let Some(task) = t.get_mut(&task_id) {
-                        task.config.parallel_envs = tuned.num_parallel_envs;
-                    }
-                }
-                tuned.num_parallel_envs
-            }
-            Err(e) => {
-                let fallback = num_cpus::get().clamp(2, 16);
-                tracing::warn!("AutoTuner 探测失败 ({e}), 降级使用默认并发数: {fallback}");
-                fallback
+    // 1. 自动吞吐探测与求解
+    let tuned = match AutoTuner::profile::<E>(state_dim, hidden_dim, &action_space, &device) {
+        Ok(profile) => {
+            let res = AutoTuner::solve(&profile, env_max_steps, task_config.ppo_epochs.max(1));
+            info!(
+                "🎯 [AutoTuner] 为任务 {} 自动求解最优吞吐配置: 并发 Actors={}, 推理 Batch={}, 训练 MiniBatch={}, 预估 SPS: {:.1}",
+                task_id,
+                res.num_parallel_envs,
+                res.infer_batch_size,
+                res.train_batch_size,
+                res.estimated_sps
+            );
+            res
+        }
+        Err(e) => {
+            let fallback_actors = if task_config.parallel_envs > 0 {
+                task_config.parallel_envs
+            } else {
+                num_cpus::get().clamp(2, 16)
+            };
+            tracing::warn!("AutoTuner 探测失败 ({e}), 降级使用默认配置: {fallback_actors}");
+            crate::autotune::TunedConfig {
+                num_parallel_envs: fallback_actors,
+                infer_batch_size: fallback_actors.min(32),
+                train_batch_size: (fallback_actors * 16).clamp(32, 256),
+                dynamic_batch_timeout_us: 200,
+                estimated_sps: 2000.0,
             }
         }
     };
 
-    let config = PPOConfig {
+    let num_parallel_envs = if task_config.parallel_envs > 0 {
+        task_config.parallel_envs
+    } else {
+        tuned.num_parallel_envs
+    };
+
+    {
+        let mut t = tasks.blocking_lock();
+        if let Some(task) = t.get_mut(&task_id) {
+            task.config.parallel_envs = num_parallel_envs;
+        }
+    }
+
+    let ppo_config = PPOConfig {
         lr: task_config.lr as f64,
         gamma: task_config.gamma,
         gae_lambda: task_config.gae_lambda,
@@ -594,8 +609,13 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment>(
         ppo_epochs: task_config.ppo_epochs.max(1),
     };
 
-    let mut agent = match PPOAgent::new(state_dim, hidden_dim, action_space, config, device.clone())
-    {
+    let mut agent = match PPOAgent::new(
+        state_dim,
+        hidden_dim,
+        action_space.clone(),
+        ppo_config,
+        device.clone(),
+    ) {
         Ok(a) => a,
         Err(e) => {
             error!("创建 PPOAgent 失败: {e}");
@@ -603,22 +623,127 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment>(
         }
     };
 
-    let par_envs = lol_env::ParallelEnvs::<E>::new(num_parallel_envs, env_max_steps);
-    let mut env_buffers = Vec::with_capacity(num_parallel_envs);
-    for _ in 0..num_parallel_envs {
-        env_buffers.push(RolloutBuffer::new());
+    // 2. 启动长驻持久化 Worker 线程池（环境只在任务启动时初始化一次）
+    let horizon = 64usize; // 每轮采样 64 步
+    struct WorkerTrajectory<O> {
+        buffer: RolloutBuffer,
+        last_value: f32,
+        ep_returns: Vec<f32>,
+        completed_steps: Vec<usize>,
+        reward_breakdown: HashMap<String, f32>,
+        last_reward_variables: HashMap<String, f32>,
+        last_obs: Option<O>,
     }
-    let mut current_obss = par_envs.reset_all();
-    let mut env_returns = vec![0.0f32; num_parallel_envs];
+
+    enum WorkerCommand {
+        Rollout(Arc<crate::policy::ActorCritic>),
+        Stop,
+    }
+
+    let mut cmd_senders = Vec::with_capacity(num_parallel_envs);
+    let mut resp_receivers = Vec::with_capacity(num_parallel_envs);
+    let mut thread_handles = Vec::with_capacity(num_parallel_envs);
+
+    for _ in 0..num_parallel_envs {
+        let (cmd_tx, cmd_rx) = crossbeam_channel::unbounded::<WorkerCommand>();
+        let (resp_tx, resp_rx) = crossbeam_channel::unbounded::<WorkerTrajectory<E::Obs>>();
+
+        let handle = std::thread::spawn(move || {
+            let mut env = E::new(env_max_steps);
+            let mut current_obs = env.reset();
+            let mut cur_return = 0.0f32;
+            let mut cur_steps = 0usize;
+
+            while let Ok(cmd) = cmd_rx.recv() {
+                match cmd {
+                    WorkerCommand::Rollout(policy) => {
+                        let mut buffer = RolloutBuffer::new();
+                        let mut ep_returns = Vec::new();
+                        let mut completed_steps = Vec::new();
+                        let mut reward_breakdown = HashMap::new();
+                        let mut last_reward_variables = HashMap::new();
+
+                        for _ in 0..horizon {
+                            let state_vec = E::obs_to_vector(&current_obs);
+                            let state_tensor = match Tensor::from_vec(
+                                state_vec.clone(),
+                                (1, state_dim),
+                                &candle_core::Device::Cpu,
+                            ) {
+                                Ok(t) => t,
+                                Err(_) => break,
+                            };
+
+                            let (encoded, log_prob, val) =
+                                match policy.sample_action(&state_tensor, &state_vec) {
+                                    Ok(res) => res,
+                                    Err(_) => break,
+                                };
+
+                            let act = E::action_from_encoding(&encoded);
+                            let res = env.step(act);
+                            let done = res.terminated || res.truncated;
+
+                            cur_return += res.reward;
+                            cur_steps += 1;
+
+                            if !res.reward_variables.is_empty() {
+                                last_reward_variables = res.reward_variables;
+                            }
+                            for item in res.reward_breakdown {
+                                *reward_breakdown.entry(item.name).or_insert(0.0) += item.value;
+                            }
+
+                            buffer.push(state_vec, encoded, log_prob, res.reward, val, done);
+
+                            if done {
+                                ep_returns.push(cur_return);
+                                completed_steps.push(cur_steps);
+                                cur_return = 0.0;
+                                cur_steps = 0;
+                                current_obs = env.reset();
+                            } else {
+                                current_obs = res.obs;
+                            }
+                        }
+
+                        let last_state_vec = E::obs_to_vector(&current_obs);
+                        let last_state_tensor = Tensor::from_vec(
+                            last_state_vec.clone(),
+                            (1, state_dim),
+                            &candle_core::Device::Cpu,
+                        )
+                        .unwrap();
+                        let last_value = policy
+                            .get_values(&last_state_tensor)
+                            .map(|v| v.first().copied().unwrap_or(0.0))
+                            .unwrap_or(0.0);
+
+                        let _ = resp_tx.send(WorkerTrajectory {
+                            buffer,
+                            last_value,
+                            ep_returns,
+                            completed_steps,
+                            reward_breakdown,
+                            last_reward_variables,
+                            last_obs: Some(current_obs.clone()),
+                        });
+                    }
+                    WorkerCommand::Stop => break,
+                }
+            }
+        });
+
+        cmd_senders.push(cmd_tx);
+        resp_receivers.push(resp_rx);
+        thread_handles.push(handle);
+    }
+
+    let mut total_steps = 0usize;
     let mut recent_ep_returns: std::collections::VecDeque<f32> =
         std::collections::VecDeque::with_capacity(50);
-    // 每环境当前对局已执行步数，对局结束时记入 iter_ep_steps 用于统计单局步数
-    let mut env_steps = vec![0usize; num_parallel_envs];
-    let mut iter_ep_steps: Vec<usize> = Vec::with_capacity(num_parallel_envs);
-    // 累计环境步数（跨迭代累加，用作 step 坐标与 max_steps 总步数预算）
-    let mut total_steps = 0usize;
 
-    // 注册保存通道，供「保存模型」请求驱动实时落盘
+    // 注册保存通道
     let (save_tx, mut save_rx) = mpsc::unbounded_channel::<SaveRequest>();
     {
         let mut t = tasks.blocking_lock();
@@ -626,6 +751,9 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment>(
             task.save_tx = Some(save_tx);
         }
     }
+
+    let mut final_saved_step = 0usize;
+    let mut final_saved_return = 0.0f32;
 
     for iter in 1..=total_iterations {
         {
@@ -639,17 +767,18 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment>(
             }
         }
 
-        // 达到总步数预算则停止（max_steps > 0 时生效）
         if task_config.max_steps > 0 && total_steps >= task_config.max_steps {
             break;
         }
 
-        // 处理「保存模型」请求：把当前权重写盘
+        // 处理实时保存模型请求
         while let Ok(req) = save_rx.try_recv() {
             persist_checkpoint(&task_id, req, &agent, &tasks, &repo, &event_tx);
         }
 
-        // 动态衰减熵系数（Entropy Annealing）：从 0.05 线性衰减至 0.001，使训练末期策略逼近确定性/贪婪策略
+        let iter_start = Instant::now();
+
+        // 动态衰减策略熵
         let progress = if total_iterations > 1 {
             (iter - 1) as f32 / (total_iterations - 1) as f32
         } else {
@@ -658,289 +787,244 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment>(
         let current_c2 = (0.05 * (1.0 - progress) + 0.001 * progress).max(0.001);
         agent.set_entropy_coef(current_c2);
 
-        let iter_start = Instant::now();
+        // 1. 克隆 CPU 采样策略
+        let cpu_policy = match agent.actor_critic.to_device(&candle_core::Device::Cpu) {
+            Ok(p) => Arc::new(p),
+            Err(e) => {
+                error!("迁移策略至 CPU 失败: {e}");
+                break;
+            }
+        };
 
-        for b in &mut env_buffers {
-            b.clear();
+        // 2. 触发持久化 Worker 并行采样
+        for tx in &cmd_senders {
+            let _ = tx.send(WorkerCommand::Rollout(cpu_policy.clone()));
         }
+
+        let mut env_buffers = Vec::with_capacity(num_parallel_envs);
+        let mut last_values = Vec::with_capacity(num_parallel_envs);
+        let mut completed_ep_steps = Vec::new();
         let mut iter_reward_breakdown: HashMap<String, f32> = HashMap::new();
-        let mut last_reward_variables: HashMap<String, f32> = HashMap::new();
-        let mut iter_value_sum = 0.0f32;
-        let mut completed_envs = vec![false; num_parallel_envs];
-        let mut iter_steps_count = 0usize;
+        let mut last_reward_variables = HashMap::new();
+        let mut sample_obs: Option<E::Obs> = None;
 
-        // 采集完整对局：持续采样直到所有并行环境本局全部结束（terminated 或 truncated）
-        while !completed_envs.iter().all(|&c| c) {
-            let mut actions = Vec::with_capacity(num_parallel_envs);
-            let mut action_encodings = Vec::with_capacity(num_parallel_envs);
-            let mut log_probs = Vec::with_capacity(num_parallel_envs);
-            let mut values = Vec::with_capacity(num_parallel_envs);
+        for rx in &resp_receivers {
+            let traj = match rx.recv() {
+                Ok(t) => t,
+                Err(_) => break,
+            };
 
-            for i in 0..num_parallel_envs {
-                if completed_envs[i] {
-                    actions.push(E::action_from_encoding(&vec![0.0; enc_dim]));
-                    action_encodings.push(vec![0.0; enc_dim]);
-                    log_probs.push(0.0);
-                    values.push(0.0);
-                    continue;
+            for ret in traj.ep_returns {
+                if recent_ep_returns.len() >= 50 {
+                    recent_ep_returns.pop_front();
                 }
-
-                let obs = &current_obss[i];
-                let state_vec = E::obs_to_vector(obs);
-                let state_tensor =
-                    match Tensor::from_vec(state_vec.clone(), (1, state_dim), &device) {
-                        Ok(t) => t,
-                        Err(_) => break,
-                    };
-                if let Ok((encoded, log_prob, val)) =
-                    agent.actor_critic.sample_action(&state_tensor, &state_vec)
-                {
-                    actions.push(E::action_from_encoding(&encoded));
-                    action_encodings.push(encoded);
-                    log_probs.push(log_prob);
-                    values.push(val);
-                } else {
-                    actions.push(E::action_from_encoding(&vec![0.0; enc_dim]));
-                    action_encodings.push(vec![0.0; enc_dim]);
-                    log_probs.push(0.0);
-                    values.push(0.0);
-                }
+                recent_ep_returns.push_back(ret);
+            }
+            completed_ep_steps.extend(traj.completed_steps);
+            for (k, v) in traj.reward_breakdown {
+                *iter_reward_breakdown.entry(k).or_insert(0.0) += v;
+            }
+            if !traj.last_reward_variables.is_empty() {
+                last_reward_variables = traj.last_reward_variables;
+            }
+            if sample_obs.is_none() {
+                sample_obs = traj.last_obs;
             }
 
-            let step_results = par_envs.step_all(&actions);
-            for i in 0..num_parallel_envs {
-                if completed_envs[i] {
-                    continue;
-                }
-
-                let res = &step_results[i];
-                env_returns[i] += res.reward;
-                iter_steps_count += 1;
-                env_steps[i] += 1;
-                iter_value_sum += values[i];
-                last_reward_variables = res.reward_variables.clone();
-
-                for item in &res.reward_breakdown {
-                    *iter_reward_breakdown
-                        .entry(item.name.clone())
-                        .or_insert(0.0) += item.value;
-                }
-
-                env_buffers[i].push(
-                    E::obs_to_vector(&current_obss[i]),
-                    action_encodings[i].clone(),
-                    log_probs[i],
-                    res.reward,
-                    values[i],
-                    res.terminated || res.truncated,
-                );
-
-                if res.terminated || res.truncated {
-                    let ep_ret = env_returns[i];
-                    env_returns[i] = 0.0;
-                    if recent_ep_returns.len() >= 50 {
-                        recent_ep_returns.pop_front();
-                    }
-                    recent_ep_returns.push_back(ep_ret);
-                    iter_ep_steps.push(env_steps[i]);
-                    env_steps[i] = 0;
-                    current_obss[i] = par_envs.reset_one(i);
-                    completed_envs[i] = true;
-                } else {
-                    current_obss[i] = res.obs.clone();
-                }
-            }
+            env_buffers.push(traj.buffer);
+            last_values.push(traj.last_value);
         }
 
-        let mut combined_buffer = RolloutBuffer::new();
-        for b in &env_buffers {
-            for t in 0..b.len() {
-                combined_buffer.push(
-                    b.states[t].clone(),
-                    b.actions[t].clone(),
-                    b.log_probs[t],
-                    b.rewards[t],
-                    b.values[t],
-                    b.dones[t],
-                );
-            }
-        }
+        let num_samples = num_parallel_envs * horizon;
+        total_steps += num_samples;
 
-        // 完整对局结束，终态 Bootstrap value 为 0.0（仅用于 GAE 计算）
-        let last_val_scalar = 0.0f32;
+        // 3. GPU Mini-Batch PPO 更新
+        let stats =
+            match agent.update_multi_buffer(&env_buffers, &last_values, tuned.train_batch_size) {
+                Ok(s) => s,
+                Err(e) => {
+                    error!("PPO update_multi_buffer 失败: {e}");
+                    break;
+                }
+            };
 
-        // 迭代内各状态 critic 预测值均值，作为「价值」指标上报
-        let mean_value = iter_value_sum / iter_steps_count.max(1) as f32;
+        let elapsed_sec = iter_start.elapsed().as_secs_f64();
+        let sps = (num_samples as f64) / elapsed_sec.max(0.0001);
 
-        // 本迭代各局步数统计（每环境一局，均为一整局）
-        let ep_steps_max = iter_ep_steps.iter().copied().max().unwrap_or(0);
-        let ep_steps_min = iter_ep_steps.iter().copied().min().unwrap_or(0);
-        let ep_steps_avg = if iter_ep_steps.is_empty() {
-            0.0
+        let ep_return = if !recent_ep_returns.is_empty() {
+            recent_ep_returns.iter().sum::<f32>() / recent_ep_returns.len() as f32
         } else {
-            iter_ep_steps.iter().sum::<usize>() as f32 / iter_ep_steps.len() as f32
+            0.0
         };
 
-        total_steps += iter_steps_count;
+        final_saved_step = total_steps;
+        final_saved_return = ep_return;
 
-        if let Ok(stats) = agent.update(&combined_buffer, last_val_scalar) {
-            let ep_return = if !recent_ep_returns.is_empty() {
-                let sum: f32 = recent_ep_returns.iter().sum();
-                sum / recent_ep_returns.len() as f32
-            } else {
-                let sum: f32 = env_returns.iter().sum();
-                sum / num_parallel_envs.max(1) as f32
-            };
+        let (ep_steps_max, ep_steps_min, ep_steps_avg) = if !completed_ep_steps.is_empty() {
+            let max = completed_ep_steps.iter().copied().max().unwrap_or(0);
+            let min = completed_ep_steps.iter().copied().min().unwrap_or(0);
+            let avg =
+                completed_ep_steps.iter().sum::<usize>() as f32 / completed_ep_steps.len() as f32;
+            (max, min, avg)
+        } else {
+            (0, 0, 0.0)
+        };
 
-            {
-                let mut t = tasks.blocking_lock();
-                if let Some(task) = t.get_mut(&task_id) {
-                    task.current_step = total_steps;
-                    task.ep_return = ep_return;
-                }
+        let real_reward_breakdown: Vec<RewardItem> = iter_reward_breakdown
+            .into_iter()
+            .map(|(k, v)| RewardItem {
+                name: k,
+                value: v / (num_samples as f32).max(1.0),
+            })
+            .collect();
+
+        let val_sum: f32 = env_buffers
+            .iter()
+            .map(|b| b.values.iter().sum::<f32>())
+            .sum();
+        let val_cnt: usize = env_buffers.iter().map(|b| b.values.len()).sum();
+        let mean_value = val_sum / (val_cnt as f32).max(1.0);
+
+        {
+            let mut t = tasks.blocking_lock();
+            if let Some(task) = t.get_mut(&task_id) {
+                task.current_step = total_steps;
+                task.ep_return = ep_return;
             }
+        }
 
-            // Update DB progress periodically
-            if iter % 5 == 0 {
-                let _ = block_on_db(repo.update_progress(&task_id, total_steps as i64, ep_return));
+        if iter % 5 == 0 {
+            let _ = block_on_db(repo.update_progress(&task_id, total_steps as i64, ep_return));
+        }
+
+        let metric_row = lol_rl_protocol::MetricsRow {
+            step: total_steps,
+            ep_return,
+            loss: stats.policy_loss + stats.value_loss,
+            policy_loss: stats.policy_loss,
+            value_loss: stats.value_loss,
+            total_loss: stats.total_loss,
+            kl: stats.kl,
+            entropy: stats.entropy,
+            clip_frac: stats.clip_frac,
+            value: mean_value,
+            fps: sps as usize,
+            ep_steps_max,
+            ep_steps_min,
+            ep_steps_avg,
+            reward_breakdown: real_reward_breakdown.clone(),
+        };
+
+        {
+            let mut t = tasks.blocking_lock();
+            if let Some(task) = t.get_mut(&task_id) {
+                task.metrics_history.push(metric_row.clone());
             }
+        }
 
-            let sample_obs = &current_obss[0];
-            let obs_payload = E::obs_to_payload(sample_obs);
+        let _ = block_on_db(repo.insert_metric(&task_id, &metric_row));
 
-            // 本迭代环境步进速率（env steps/sec），即训练吞吐
-            let fps = (iter_steps_count.max(1) as f64
-                / iter_start.elapsed().as_secs_f64().max(1e-5)) as usize;
+        let obs_payload = sample_obs.as_ref().and_then(|o| E::obs_to_payload(o));
 
-            let real_reward_breakdown: Vec<RewardItem> = iter_reward_breakdown
-                .iter()
-                .map(|(k, v)| RewardItem {
-                    name: k.clone(),
-                    value: v / (iter_steps_count as f32).max(1.0),
-                })
-                .collect();
+        let reward_model = lol_env::reward::FioraVsRivenRewardModel;
+        let reward_formula = reward_model.formula_spec();
 
-            let metric_row = lol_rl_protocol::MetricsRow {
-                step: total_steps,
+        let out_metrics = OutFrame::Metrics {
+            task_id: task_id.clone(),
+            step: total_steps,
+            ep_return,
+            loss: stats.policy_loss + stats.value_loss,
+            policy_loss: stats.policy_loss,
+            value_loss: stats.value_loss,
+            total_loss: stats.total_loss,
+            kl: stats.kl,
+            entropy: stats.entropy,
+            clip_frac: stats.clip_frac,
+            clip_eps: task_config.clip_eps,
+            value: mean_value,
+            fps: sps as usize,
+            ep_steps_max,
+            ep_steps_min,
+            ep_steps_avg,
+            reward_breakdown: real_reward_breakdown,
+            obs_feature: obs_payload,
+            reward_formula: Some(reward_formula),
+            reward_variables: Some(last_reward_variables),
+        };
+
+        let _ = event_tx.send(out_metrics);
+
+        // 每 10 次迭代自动保存一个 Checkpoint
+        if iter % 10 == 0 {
+            let ckpt_id = format!("ckpt-{}", total_steps);
+            let path = new_checkpoint_path(&task_id, &ckpt_id)
+                .to_string_lossy()
+                .to_string();
+            persist_checkpoint(
+                &task_id,
+                SaveRequest {
+                    ckpt_id,
+                    path,
+                    ep_return,
+                },
+                &agent,
+                &tasks,
+                &repo,
+                &event_tx,
+            );
+        }
+
+        if iter % 5 == 0 || iter == 1 {
+            let log_msg = format!(
+                "[{}] Iter {:2}/{} | SPS: {:6.1} | Reward: {:6.2} | P-Loss: {:7.4} | V-Loss: {:7.4}",
+                task_id,
+                iter,
+                total_iterations,
+                sps,
                 ep_return,
-                loss: stats.policy_loss + stats.value_loss,
-                policy_loss: stats.policy_loss,
-                value_loss: stats.value_loss,
-                total_loss: stats.total_loss,
-                kl: stats.kl,
-                entropy: stats.entropy,
-                clip_frac: stats.clip_frac,
-                value: mean_value,
-                fps,
-                ep_steps_max,
-                ep_steps_min,
-                ep_steps_avg,
-                reward_breakdown: real_reward_breakdown.clone(),
-            };
-
+                stats.policy_loss,
+                stats.value_loss
+            );
             {
                 let mut t = tasks.blocking_lock();
                 if let Some(task) = t.get_mut(&task_id) {
-                    task.metrics_history.push(metric_row.clone());
+                    task.logs.push(format!("[info] {}", log_msg));
                 }
             }
-
-            let _ = block_on_db(repo.insert_metric(&task_id, &metric_row));
-
-            let reward_model = lol_env::reward::FioraVsRivenRewardModel;
-            let reward_formula = reward_model.formula_spec();
-
-            let out_metrics = OutFrame::Metrics {
+            let _ = block_on_db(repo.insert_log(&task_id, "info", &log_msg));
+            let _ = event_tx.send(OutFrame::Log {
                 task_id: task_id.clone(),
-                step: total_steps,
-                ep_return,
-                loss: stats.policy_loss + stats.value_loss,
-                policy_loss: stats.policy_loss,
-                value_loss: stats.value_loss,
-                total_loss: stats.total_loss,
-                kl: stats.kl,
-                entropy: stats.entropy,
-                clip_frac: stats.clip_frac,
-                clip_eps: task_config.clip_eps,
-                value: mean_value,
-                fps,
-                ep_steps_max,
-                ep_steps_min,
-                ep_steps_avg,
-                reward_breakdown: real_reward_breakdown,
-                obs_feature: obs_payload,
-                reward_formula: Some(reward_formula),
-                reward_variables: Some(last_reward_variables),
-            };
-
-            let _ = event_tx.send(out_metrics);
-
-            // 每 10 次迭代自动保存一个 Checkpoint
-            if iter % 10 == 0 {
-                let ckpt_id = format!("ckpt-{}", total_steps);
-                let path = new_checkpoint_path(&task_id, &ckpt_id)
-                    .to_string_lossy()
-                    .to_string();
-                persist_checkpoint(
-                    &task_id,
-                    SaveRequest {
-                        ckpt_id,
-                        path,
-                        ep_return,
-                    },
-                    &agent,
-                    &tasks,
-                    &repo,
-                    &event_tx,
-                );
-            }
-
-            if iter % 5 == 0 || iter == 1 {
-                let log_msg = format!(
-                    "[{}] Iter {:2}/{} | Avg Reward: {:6.2} | P-Loss: {:7.4} | V-Loss: {:7.4}",
-                    task_id, iter, total_iterations, ep_return, stats.policy_loss, stats.value_loss
-                );
-                {
-                    let mut t = tasks.blocking_lock();
-                    if let Some(task) = t.get_mut(&task_id) {
-                        task.logs.push(format!("[info] {}", log_msg));
-                    }
-                }
-                let _ = block_on_db(repo.insert_log(&task_id, "info", &log_msg));
-                let _ = event_tx.send(OutFrame::Log {
-                    task_id: task_id.clone(),
-                    level: "info".into(),
-                    message: log_msg,
-                });
-            }
+                level: "info".into(),
+                message: log_msg,
+            });
         }
     }
 
-    // 训练收敛：自动保存最终模型
-    {
-        let (final_step, ep_return) = {
-            let t = tasks.blocking_lock();
-            t.get(&task_id)
-                .map(|x| (x.current_step, x.ep_return))
-                .unwrap_or((0, 0.0))
-        };
-        let ckpt_id = format!("ckpt-{}", final_step);
-        let path = new_checkpoint_path(&task_id, &ckpt_id)
-            .to_string_lossy()
-            .to_string();
-        persist_checkpoint(
-            &task_id,
-            SaveRequest {
-                ckpt_id,
-                path,
-                ep_return,
-            },
-            &agent,
-            &tasks,
-            &repo,
-            &event_tx,
-        );
+    // 关闭 Worker 线程池
+    for tx in cmd_senders {
+        let _ = tx.send(WorkerCommand::Stop);
     }
+    for h in thread_handles {
+        let _ = h.join();
+    }
+
+    // 4. 训练收敛：自动保存最终模型
+    let ckpt_id = format!("ckpt-{}", final_saved_step);
+    let path = new_checkpoint_path(&task_id, &ckpt_id)
+        .to_string_lossy()
+        .to_string();
+    persist_checkpoint(
+        &task_id,
+        SaveRequest {
+            ckpt_id,
+            path,
+            ep_return: final_saved_return,
+        },
+        &agent,
+        &tasks,
+        &repo,
+        &event_tx,
+    );
 
     {
         let mut t = tasks.blocking_lock();

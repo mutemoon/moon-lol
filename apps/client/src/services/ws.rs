@@ -202,7 +202,7 @@ pub fn spawn_ws_service(
                                         .iter()
                                         .find(|t| t.id == task_id)
                                         .map(|t| t.env_name.clone())
-                                        .unwrap_or_else(|| "fiora_vs_riven".to_string());
+                                        .unwrap_or_else(|| "fiora_v0".to_string());
                                     let weak = entity_weak_ui.clone();
                                     cx.spawn(move |_: gpui::WeakEntity<AppSidebar>, cx: &mut gpui::AsyncApp| {
                                         let mut cx = cx.clone();

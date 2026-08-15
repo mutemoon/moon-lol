@@ -1,6 +1,6 @@
 use std::time::Instant;
 
-use lol_env::fiora_vs_riven::{FioraVsRivenAction, FioraVsRivenEnv};
+use lol_env::fiora_v0::{FioraVsRivenAction, FioraVsRivenEnv};
 use lol_env::parallel::ParallelFioraVsRivenEnvs;
 
 fn main() -> anyhow::Result<()> {
