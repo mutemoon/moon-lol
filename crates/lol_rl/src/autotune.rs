@@ -15,6 +15,8 @@ pub struct SystemProfile {
     pub is_cuda: bool,
     /// 单环境单步耗时 (微秒)
     pub env_step_us: f64,
+    /// (并发环境数 N, 多实例并发 1 步耗时微秒)
+    pub parallel_env_us: Vec<(usize, f64)>,
     /// (batch_size, 推理耗时微秒)
     pub infer_latency_us: Vec<(usize, f64)>,
     /// (batch_size, 训练 step 耗时微秒)
@@ -39,7 +41,7 @@ pub struct TunedConfig {
 pub struct AutoTuner;
 
 impl AutoTuner {
-    /// 执行深度基准探测（耗时约 2.0 ~ 3.0 秒，充分预热并实测多线程争用拐点）
+    /// 执行深度基准探测（多环境实例真实并发压测 + GPU 批处理曲线）
     pub fn profile<E: RlEnvironment + 'static>(
         state_dim: usize,
         hidden_dim: usize,
@@ -55,31 +57,79 @@ impl AutoTuner {
             cpu_cores
         );
 
-        // 1. 深度探针：无头游戏环境单步与稳态耗时 (充分预热 200 步，实测 1000 步)
-        let mut env = E::new(100);
-        let _ = env.reset();
+        // 1. 深度探针：单环境稳态预热
+        let mut single_env = E::new(100);
+        let _ = single_env.reset();
         let act = E::action_from_index(0);
-        // 预热：让 CPU 提升调度频率并填满 CPU L1/L2 缓存
-        for _ in 0..200 {
-            let res = env.step(act.clone());
+        for _ in 0..100 {
+            let res = single_env.step(act.clone());
             if res.terminated || res.truncated {
-                let _ = env.reset();
+                let _ = single_env.reset();
             }
         }
         let env_start = Instant::now();
-        let test_steps = 1000;
+        let test_steps = 300;
         for _ in 0..test_steps {
-            let res = env.step(act.clone());
+            let res = single_env.step(act.clone());
             if res.terminated || res.truncated {
-                let _ = env.reset();
+                let _ = single_env.reset();
             }
         }
         let env_step_us = (env_start.elapsed().as_micros() as f64) / (test_steps as f64);
-        info!(
-            "  ⚡ [1/3] 环境稳态单步耗时: {:.2} µs (单环境稳态上限: {:.0} FPS)",
-            env_step_us,
-            1_000_000.0 / env_step_us.max(1.0)
-        );
+
+        // 2. 真实多环境实例并发压测 (测试候选并发数: 2, 4, 8, 12, 16, 20, 24, 28, 32...)
+        info!("  ⚡ [1/3] 真实多环境实例并发压测 (测量多核并发争用与真实吞吐):");
+        let mut candidate_n = Vec::new();
+        for &n in &[2, 4, 8, 12, 16, 20, 24, 28, 32] {
+            if n <= cpu_cores * 2 {
+                candidate_n.push(n);
+            }
+        }
+        if !candidate_n.contains(&cpu_cores) && cpu_cores <= 64 {
+            candidate_n.push(cpu_cores);
+            candidate_n.sort_unstable();
+        }
+
+        let mut parallel_env_us = Vec::with_capacity(candidate_n.len());
+        for &n in &candidate_n {
+            let barrier = std::sync::Arc::new(std::sync::Barrier::new(n + 1));
+            let steps_per_env = 100;
+            let mut handles = Vec::with_capacity(n);
+
+            for _ in 0..n {
+                let b = barrier.clone();
+                let h = std::thread::spawn(move || {
+                    let mut env = E::new(100);
+                    let _ = env.reset();
+                    let act = E::action_from_index(0);
+                    // 等待所有线程准备就绪统一发车
+                    b.wait();
+                    for _ in 0..steps_per_env {
+                        let res = env.step(act.clone());
+                        if res.terminated || res.truncated {
+                            let _ = env.reset();
+                        }
+                    }
+                });
+                handles.push(h);
+            }
+
+            // 主线程发车并开始计时
+            barrier.wait();
+            let start = Instant::now();
+            for h in handles {
+                let _ = h.join();
+            }
+            let total_dur_us = start.elapsed().as_micros() as f64;
+            let step_batch_us = total_dur_us / (steps_per_env as f64);
+            let real_fps = ((n * steps_per_env) as f64) / (total_dur_us / 1_000_000.0);
+            parallel_env_us.push((n, step_batch_us));
+
+            info!(
+                "    ├─ 并发实例 {:2}: 并发步耗时 {:7.2} µs | 真实并发吞吐: {:8.1} FPS",
+                n, step_batch_us, real_fps
+            );
+        }
 
         // 创建临时 Policy 用于测试计算性能
         let varmap = VarMap::new();
@@ -148,6 +198,7 @@ impl AutoTuner {
             cpu_cores,
             is_cuda,
             env_step_us,
+            parallel_env_us,
             infer_latency_us,
             train_step_us,
         })
@@ -169,9 +220,13 @@ impl AutoTuner {
             profile.cpu_cores.saturating_sub(2).max(2)
         };
 
-        let candidate_n_list: Vec<usize> = (2..=max_n)
-            .filter(|&n| n % 2 == 0 || n == profile.cpu_cores)
-            .collect();
+        let candidate_n_list: Vec<usize> = if !profile.parallel_env_us.is_empty() {
+            profile.parallel_env_us.iter().map(|&(n, _)| n).collect()
+        } else {
+            (2..=max_n)
+                .filter(|&n| n % 2 == 0 || n == profile.cpu_cores)
+                .collect()
+        };
 
         for &n in &candidate_n_list {
             // 插值或匹配最接近的推理延迟
@@ -188,13 +243,19 @@ impl AutoTuner {
                         .unwrap_or(500.0)
                 });
 
-            // 多线程环境 Step 耗时（考虑核心饱和度）
-            let parallel_scale = if n <= profile.cpu_cores {
-                1.05 // 线程切换开销极小
-            } else {
-                1.0 + (n as f64 - profile.cpu_cores as f64) / (profile.cpu_cores as f64) * 0.8
-            };
-            let env_batch_us = profile.env_step_us * parallel_scale;
+            // 使用真实多实例并发测得的单步批耗时
+            let env_batch_us = profile
+                .parallel_env_us
+                .iter()
+                .find(|&&(cand_n, _)| cand_n == n)
+                .map(|&(_, us)| us)
+                .unwrap_or_else(|| {
+                    if n <= profile.cpu_cores {
+                        profile.env_step_us * 1.05
+                    } else {
+                        profile.env_step_us * (1.0 + (n as f64 - profile.cpu_cores as f64) / (profile.cpu_cores as f64) * 0.8)
+                    }
+                });
 
             let rollout_time_us = (env_batch_us + infer_lat_us) * (horizon as f64);
             let total_samples = n * horizon;
@@ -256,6 +317,7 @@ mod tests {
             cpu_cores: 16,
             is_cuda: true,
             env_step_us: 50.0,
+            parallel_env_us: vec![(2, 52.0), (4, 55.0), (8, 60.0), (16, 75.0), (32, 120.0)],
             infer_latency_us: vec![(1, 100.0), (4, 120.0), (16, 180.0), (32, 250.0), (64, 400.0)],
             train_step_us: vec![(32, 800.0), (64, 900.0), (128, 1200.0), (256, 1800.0)],
         };
@@ -266,4 +328,5 @@ mod tests {
         assert!(tuned.estimated_fps > 0.0);
     }
 }
+
 
