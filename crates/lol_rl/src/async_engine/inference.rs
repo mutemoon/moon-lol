@@ -47,7 +47,10 @@ impl InferenceServer {
             let timeout = Duration::from_micros(timeout_us);
             let mut batch_reqs = Vec::with_capacity(max_batch_size);
 
-            info!("🚀 [InferenceServer] 启动 CUDA/CPU 动态批处理推理引擎 (MaxBatch: {}, Timeout: {}µs)", max_batch_size, timeout_us);
+            info!(
+                "🚀 [InferenceServer] 启动 CUDA/CPU 动态批处理推理引擎 (MaxBatch: {}, Timeout: {}µs)",
+                max_batch_size, timeout_us
+            );
 
             while running_clone.load(Ordering::Relaxed) {
                 // 1. 检查是否有模型权重更新
@@ -95,13 +98,14 @@ impl InferenceServer {
                     obs_refs.push(req.obs_vec.as_slice());
                 }
 
-                let state_tensor = match Tensor::from_vec(flat_states, (batch_len, state_dim), &device) {
-                    Ok(t) => t,
-                    Err(e) => {
-                        error!("创建推理 Tensor 失败: {e}");
-                        continue;
-                    }
-                };
+                let state_tensor =
+                    match Tensor::from_vec(flat_states, (batch_len, state_dim), &device) {
+                        Ok(t) => t,
+                        Err(e) => {
+                            error!("创建推理 Tensor 失败: {e}");
+                            continue;
+                        }
+                    };
 
                 // 5. 批量前向推理
                 let sample_res = current_ac.sample_batch(&state_tensor, &obs_refs);

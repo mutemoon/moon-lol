@@ -345,10 +345,10 @@ impl Default for TaskConfigPayload {
             clip_eps: 0.2,
             ppo_epochs: 4,
             hidden_dim: 64,
-            parallel_envs: 4,
+            parallel_envs: 0,
             rollout_steps_per_env: 80,
             total_iterations: 80,
-            max_steps: 25600,
+            max_steps: 0,
         }
     }
 }

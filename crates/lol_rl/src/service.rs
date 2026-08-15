@@ -15,6 +15,7 @@ use tokio::sync::{Mutex, broadcast, mpsc};
 use tracing::{error, info};
 use uuid::Uuid;
 
+use crate::autotune::AutoTuner;
 use crate::db::{self, CheckpointRow, PgRlRepo, RlRepo, TaskRow};
 use crate::model_store::{checkpoint_dir, new_checkpoint_path};
 use crate::ppo::{PPOAgent, PPOConfig, RolloutBuffer};
@@ -552,9 +553,36 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment>(
     let state_dim = E::state_dim();
     let action_space = E::action_space();
     let enc_dim = action_space.encoding_dim();
-    let num_parallel_envs = task_config.parallel_envs.max(1);
     let total_iterations = task_config.total_iterations.max(1);
     let hidden_dim = task_config.hidden_dim.max(64);
+    let device = crate::device::select_device().unwrap_or(candle_core::Device::Cpu);
+
+    let num_parallel_envs = if task_config.parallel_envs > 0 {
+        task_config.parallel_envs
+    } else {
+        match AutoTuner::profile::<E>(state_dim, hidden_dim, &action_space, &device) {
+            Ok(profile) => {
+                let tuned =
+                    AutoTuner::solve(&profile, env_max_steps, task_config.ppo_epochs.max(1));
+                info!(
+                    "🎯 [AutoTuner] 为任务 {} 自动求解最优吞吐并发: N={}, 预估 SPS: {:.1}",
+                    task_id, tuned.num_parallel_envs, tuned.estimated_sps
+                );
+                {
+                    let mut t = tasks.blocking_lock();
+                    if let Some(task) = t.get_mut(&task_id) {
+                        task.config.parallel_envs = tuned.num_parallel_envs;
+                    }
+                }
+                tuned.num_parallel_envs
+            }
+            Err(e) => {
+                let fallback = num_cpus::get().clamp(2, 16);
+                tracing::warn!("AutoTuner 探测失败 ({e}), 降级使用默认并发数: {fallback}");
+                fallback
+            }
+        }
+    };
 
     let config = PPOConfig {
         lr: task_config.lr as f64,
@@ -565,8 +593,6 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment>(
         c2: 0.05,
         ppo_epochs: task_config.ppo_epochs.max(1),
     };
-
-    let device = crate::device::select_device().unwrap_or(candle_core::Device::Cpu);
 
     let mut agent = match PPOAgent::new(state_dim, hidden_dim, action_space, config, device.clone())
     {

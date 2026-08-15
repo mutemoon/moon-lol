@@ -504,12 +504,14 @@ fn open_model_dialog(window: &mut Window, cx: &mut Context<AppSidebar>) {
             .child(form)
             .footer(
                 DialogFooter::new()
-                    .child(DialogClose::new().child(
-                        Button::new("model-dialog-cancel").outline().label("取消"),
-                    ))
-                    .child(DialogAction::new().child(
-                        Button::new("model-dialog-confirm").primary().label("确定"),
-                    )),
+                    .child(
+                        DialogClose::new()
+                            .child(Button::new("model-dialog-cancel").outline().label("取消")),
+                    )
+                    .child(
+                        DialogAction::new()
+                            .child(Button::new("model-dialog-confirm").primary().label("确定")),
+                    ),
             )
             .on_ok(move |_, _, cx| {
                 let _ = save_weak.update(cx, |this, cx| handle_save_model(this, cx));
@@ -611,10 +613,11 @@ fn build_test_result_form(
 fn open_test_result_dialog(window: &mut Window, cx: &mut Context<AppSidebar>) {
     let weak = cx.entity().downgrade();
     open_form_dialog(window, cx, weak, build_test_result_form, |dialog, form| {
-        dialog.w(px(384.)).child(form).footer(
-            DialogFooter::new().child(DialogAction::new().child(
-                Button::new("test-result-close").primary().label("确定"),
-            )),
-        )
+        dialog
+            .w(px(384.))
+            .child(form)
+            .footer(DialogFooter::new().child(
+                DialogAction::new().child(Button::new("test-result-close").primary().label("确定")),
+            ))
     });
 }

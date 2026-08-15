@@ -34,7 +34,10 @@ impl ActorPool {
         let is_running = Arc::new(AtomicBool::new(true));
         let mut handles = Vec::with_capacity(num_actors);
 
-        info!("🎮 [ActorPool] 启动 {} 个并行无头环境 Actor 线程...", num_actors);
+        info!(
+            "🎮 [ActorPool] 启动 {} 个并行无头环境 Actor 线程...",
+            num_actors
+        );
 
         for worker_id in 0..num_actors {
             let running = is_running.clone();
@@ -122,4 +125,3 @@ impl Drop for ActorPool {
         self.stop();
     }
 }
-

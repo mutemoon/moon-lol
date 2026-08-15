@@ -1,6 +1,7 @@
 use gpui::prelude::FluentBuilder as _;
 use gpui::*;
 use gpui_component::button::{Button, ButtonVariants};
+use gpui_component::input::{Input, InputEvent, InputState};
 use gpui_component::menu::{DropdownMenu, PopupMenuItem};
 use gpui_component::scroll::ScrollableElement;
 use gpui_component::table::{Column, DataTable, TableDelegate, TableState};
@@ -10,9 +11,7 @@ use gpui_component::{
 use lol_rl_protocol::{InFrame, TaskConfigPayload, TaskOverviewItem};
 use rust_i18n::t;
 
-use crate::components::dialog::open_form_dialog;
 use crate::components::sidebar::AppSidebar;
-use crate::components::text_input::{render_edit_input, EditOptions};
 use crate::types::ActiveView;
 
 /// 可选算法模型（后端当前仅实现 PPO）。
@@ -155,7 +154,11 @@ impl TableDelegate for TaskTableDelegate {
             7 => div()
                 .w_full()
                 .text_right()
-                .child(task.parallel_envs.to_string())
+                .child(if task.parallel_envs == 0 {
+                    "自适应".to_string()
+                } else {
+                    task.parallel_envs.to_string()
+                })
                 .into_any_element(),
             8 => div()
                 .w_full()
@@ -327,11 +330,17 @@ pub fn render_tasks_table(
                                 .label(t!("app.rl.new_task"))
                                 .on_click(cx.listener(|this, _, window, cx| {
                                     let task_count = this.task_list.len() + 1;
-                                    let mut form = TaskConfigPayload::default();
-                                    form.name = format!("RL 对战训练任务 #{}", task_count);
-                                    this.create_task_form = form;
-                                    cx.notify();
-                                    open_create_task_dialog(window, cx);
+                                    let tx = this.tx.clone();
+                                    let dialog_view = cx.new(|cx| {
+                                        CreateTaskDialogView::new(task_count, tx, window, cx)
+                                    });
+                                    window.open_dialog(cx, move |dialog, _window, _cx| {
+                                        dialog
+                                            .w(px(640.))
+                                            .max_h(px(680.))
+                                            .overlay_closable(false)
+                                            .child(dialog_view.clone())
+                                    });
                                 })),
                         )
                         .child(
@@ -364,422 +373,445 @@ pub fn render_tasks_table(
     main_content.into_any_element()
 }
 
-// 打开新建 RL 任务参数配置弹窗
-fn open_create_task_dialog(window: &mut Window, cx: &mut Context<AppSidebar>) {
-    let weak = cx.entity().downgrade();
-    open_form_dialog(window, cx, weak, build_create_task_form, |dialog, form| {
-        dialog
-            .w(px(640.))
-            .max_h(px(680.))
-            .overlay_closable(false)
-            .child(form)
-    });
+pub struct CreateTaskDialogView {
+    pub form: TaskConfigPayload,
+    pub default_name: String,
+    pub tx: Option<tokio::sync::mpsc::UnboundedSender<InFrame>>,
+    pub name_input: Entity<InputState>,
 }
 
-// 渲染新建 RL 任务参数配置弹窗 (Create Task Modal) 表单体（不含遮罩/卡片，由 Dialog 提供）
-fn build_create_task_form(
-    sidebar: &AppSidebar,
-    window: &mut Window,
-    cx: &mut Context<AppSidebar>,
-) -> AnyElement {
-    let cfg = &sidebar.create_task_form;
-    let current_agent = cfg.agent_type.clone();
-    let weak = cx.entity().downgrade();
+impl CreateTaskDialogView {
+    pub fn new(
+        task_count: usize,
+        tx: Option<tokio::sync::mpsc::UnboundedSender<InFrame>>,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) -> Self {
+        let default_name = format!("RL 对战训练任务 #{}", task_count);
+        let mut form = TaskConfigPayload::default();
+        form.name = default_name.clone();
+        form.parallel_envs = 0; // 自适应吞吐探测
+        form.max_steps = 0;
 
-    v_flex()
-        .gap_4()
-        .child(
-            // 弹窗 Header
-            h_flex()
-                .items_center()
-                .child(
-                    h_flex()
-                        .gap_2()
-                        .items_center()
-                        .child(IconName::Plus)
-                        .child(div().font_bold().text_lg().child("开始训练")),
-                ),
-        )
-                .child(
-                    // 滚动表达区域
-                    v_flex()
-                        .id("modal-form-scroll")
-                        .flex_1()
-                        .gap_4()
-                        .overflow_y_scrollbar()
-                        .p_1()
-                        // 1. 任务名称
-                        .child(
-                            v_flex()
-                                .gap_1()
-                                .child(
-                                    div()
-                                        .text_xs()
-                                        .font_bold()
-                                        .text_color(cx.theme().muted_foreground)
-                                        .child("任务名称"),
-                                )
-                                .child(
-                                    div()
-                                        .w_full()
-                                        .child(render_edit_input(
-                                            window,
-                                            cx,
-                                            sidebar,
-                                            "rl-task-name",
-                                            "输入任务名称",
-                                            EditOptions::default(),
-                                            |this| this.create_task_form.name.clone(),
-                                            |this, v| this.create_task_form.name = v,
-                                        )),
-                                ),
-                        )
-                        // 2. 算法与环境标识
-                        .child(
-                            h_flex()
-                                .gap_4()
-                                .child(
-                                    v_flex()
-                                        .flex_1()
-                                        .gap_1()
-                                        .child(
-                                            div()
-                                                .text_xs()
-                                                .font_bold()
-                                                .text_color(cx.theme().muted_foreground)
-                                                .child("算法模型 (Agent)"),
-                                        )
-                                        .child(
-                                            Button::new("agent-dropdown")
-                                                .label(agent_label(&current_agent))
-                                                .dropdown_caret(true)
-                                                .outline()
-                                                .w_full()
-                                                .dropdown_menu(move |menu, _window, _cx| {
+        let name_input = cx.new(|cx| {
+            InputState::new(window, cx)
+                .placeholder("输入任务名称")
+                .default_value(&form.name)
+        });
+
+        let sub_entity = name_input.clone();
+        cx.subscribe(&sub_entity, |this, state, event: &InputEvent, cx| {
+            if matches!(event, InputEvent::Change) {
+                this.form.name = state.read(cx).value().to_string();
+            }
+        })
+        .detach();
+
+        Self {
+            form,
+            default_name,
+            tx,
+            name_input,
+        }
+    }
+
+    fn render_num_setting<F>(
+        &self,
+        label: &str,
+        display_val: String,
+        presets: Vec<(&'static str, f32)>,
+        current_val: f32,
+        cx: &mut Context<Self>,
+        setter: F,
+    ) -> AnyElement
+    where
+        F: Fn(&mut Self, f32) + Send + Sync + 'static + Copy,
+    {
+        v_flex()
+            .gap_1()
+            .child(
+                h_flex()
+                    .justify_between()
+                    .child(
+                        div()
+                            .text_xs()
+                            .font_bold()
+                            .text_color(cx.theme().muted_foreground)
+                            .child(label.to_string()),
+                    )
+                    .child(div().text_xs().font_bold().child(display_val)),
+            )
+            .child(
+                h_flex()
+                    .gap_1()
+                    .children(presets.into_iter().map(|(name, val)| {
+                        let is_selected = (val - current_val).abs() < 1e-6;
+                        let btn = if is_selected {
+                            Button::new(format!("preset-{label}-{name}"))
+                                .primary()
+                                .compact()
+                                .label(name)
+                        } else {
+                            Button::new(format!("preset-{label}-{name}"))
+                                .outline()
+                                .compact()
+                                .label(name)
+                        };
+                        btn.on_click(cx.listener(move |this, _, _, cx| {
+                            setter(this, val);
+                            cx.notify();
+                        }))
+                    })),
+            )
+            .into_any_element()
+    }
+
+    fn render_int_setting<F>(
+        &self,
+        label: &str,
+        current_val: usize,
+        presets: Vec<usize>,
+        cx: &mut Context<Self>,
+        setter: F,
+    ) -> AnyElement
+    where
+        F: Fn(&mut Self, usize) + Send + Sync + 'static + Copy,
+    {
+        v_flex()
+            .gap_1()
+            .child(
+                h_flex()
+                    .justify_between()
+                    .child(
+                        div()
+                            .text_xs()
+                            .font_bold()
+                            .text_color(cx.theme().muted_foreground)
+                            .child(label.to_string()),
+                    )
+                    .child(div().text_xs().font_bold().child(current_val.to_string())),
+            )
+            .child(h_flex().gap_1().children(presets.into_iter().map(|val| {
+                let is_selected = val == current_val;
+                let btn = if is_selected {
+                    Button::new(format!("preset-int-{label}-{val}"))
+                        .primary()
+                        .compact()
+                        .label(val.to_string())
+                } else {
+                    Button::new(format!("preset-int-{label}-{val}"))
+                        .outline()
+                        .compact()
+                        .label(val.to_string())
+                };
+                btn.on_click(cx.listener(move |this, _, _, cx| {
+                    setter(this, val);
+                    cx.notify();
+                }))
+            })))
+            .into_any_element()
+    }
+}
+
+impl Render for CreateTaskDialogView {
+    fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+        let cfg = &self.form;
+        let current_agent = cfg.agent_type.clone();
+
+        v_flex()
+            .gap_4()
+            .child(
+                // 弹窗 Header
+                h_flex()
+                    .items_center()
+                    .child(
+                        h_flex()
+                            .gap_2()
+                            .items_center()
+                            .child(IconName::Plus)
+                            .child(div().font_bold().text_lg().child("开始训练")),
+                    ),
+            )
+            .child(
+                // 滚动表单区域
+                v_flex()
+                    .id("modal-form-scroll")
+                    .flex_1()
+                    .gap_4()
+                    .overflow_y_scrollbar()
+                    .p_1()
+                    // 1. 任务名称
+                    .child(
+                        v_flex()
+                            .gap_1()
+                            .child(
+                                div()
+                                    .text_xs()
+                                    .font_bold()
+                                    .text_color(cx.theme().muted_foreground)
+                                    .child("任务名称"),
+                            )
+                            .child(
+                                div()
+                                    .w_full()
+                                    .child(Input::new(&self.name_input)),
+                            ),
+                    )
+                    // 2. 算法与环境标识
+                    .child(
+                        h_flex()
+                            .gap_4()
+                            .child(
+                                v_flex()
+                                    .flex_1()
+                                    .gap_1()
+                                    .child(
+                                        div()
+                                            .text_xs()
+                                            .font_bold()
+                                            .text_color(cx.theme().muted_foreground)
+                                            .child("算法模型 (Agent)"),
+                                    )
+                                    .child(
+                                        Button::new("agent-dropdown")
+                                            .label(agent_label(&current_agent))
+                                            .dropdown_caret(true)
+                                            .outline()
+                                            .w_full()
+                                            .dropdown_menu({
+                                                let current_agent = current_agent.clone();
+                                                let weak = cx.entity().downgrade();
+                                                move |menu, _window, _cx| {
                                                     let mut menu = menu;
                                                     for &alg in AGENT_OPTIONS {
-                                                        let weak = weak.clone();
                                                         let alg = alg.to_string();
                                                         let checked = alg == current_agent;
+                                                        let weak = weak.clone();
+                                                        let alg_val = alg.clone();
                                                         menu = menu.item(
                                                             PopupMenuItem::new(alg.clone())
                                                                 .checked(checked)
                                                                 .on_click(move |_, _, cx| {
-                                                                    let _ = weak.update(
-                                                                        cx,
-                                                                        |this, cx| {
-                                                                            this.create_task_form
-                                                                                .agent_type =
-                                                                                alg.clone();
+                                                                    if let Some(view) = weak.upgrade() {
+                                                                        let _ = view.update(cx, |this, cx| {
+                                                                            this.form.agent_type = alg_val.clone();
                                                                             cx.notify();
-                                                                        },
-                                                                    );
+                                                                        });
+                                                                    }
                                                                 }),
                                                         );
                                                     }
                                                     menu
-                                                }),
-                                        ),
-                                )
-                                .child(
-                                    v_flex()
-                                        .flex_1()
-                                        .gap_1()
-                                        .child(
-                                            div()
-                                                .text_xs()
-                                                .font_bold()
-                                                .text_color(cx.theme().muted_foreground)
-                                                .child("训练环境 (Env)"),
-                                        )
-                                        .child(
-                                            h_flex()
-                                                .gap_1()
-                                                .child(
-                                                    Button::new("env-real-btn")
-                                                        .when(
-                                                            cfg.env_name
-                                                                == lol_rl_protocol::ENV_FIORA_VS_RIVEN_REAL,
-                                                            |b| b.primary(),
-                                                        )
-                                                        .when(
-                                                            cfg.env_name
-                                                                != lol_rl_protocol::ENV_FIORA_VS_RIVEN_REAL,
-                                                            |b| b.outline(),
-                                                        )
-                                                        .compact()
-                                                        .label("真实移动 (10f)")
-                                                        .on_click(cx.listener(|this, _, _, cx| {
-                                                            this.create_task_form.env_name =
-                                                                lol_rl_protocol::ENV_FIORA_VS_RIVEN_REAL
-                                                                    .to_string();
-                                                            cx.notify();
-                                                        })),
-                                                )
-                                                .child(
-                                                    Button::new("env-legacy-btn")
-                                                        .when(
-                                                            cfg.env_name
-                                                                == lol_rl_protocol::ENV_FIORA_VS_RIVEN_LEGACY,
-                                                            |b| b.primary(),
-                                                        )
-                                                        .when(
-                                                            cfg.env_name
-                                                                != lol_rl_protocol::ENV_FIORA_VS_RIVEN_LEGACY,
-                                                            |b| b.outline(),
-                                                        )
-                                                        .compact()
-                                                        .label("瞬移站位 (Legacy)")
-                                                        .on_click(cx.listener(|this, _, _, cx| {
-                                                            this.create_task_form.env_name =
-                                                                lol_rl_protocol::ENV_FIORA_VS_RIVEN_LEGACY
-                                                                    .to_string();
-                                                            cx.notify();
-                                                        })),
-                                                ),
-                                        ),
-                                ),
-                        )
-                        // 3. 学习率 Learning Rate (lr)
-                        .child(render_num_setting(
-                            "学习率 (Learning Rate / lr)",
-                            format!("{:.5}", cfg.lr),
-                            vec![
-                                ("1e-4", 0.0001),
-                                ("3e-4", 0.0003),
-                                ("5e-4", 0.0005),
-                                ("1e-3", 0.0010),
-                            ],
-                            cfg.lr,
-                            cx,
-                            |this, val| this.create_task_form.lr = val,
-                        ))
-                        // 4. 折扣因子 Gamma
-                        .child(render_num_setting(
-                            "折扣因子 (Gamma / γ)",
-                            format!("{:.3}", cfg.gamma),
-                            vec![
-                                ("0.90", 0.90),
-                                ("0.95", 0.95),
-                                ("0.98", 0.98),
-                                ("0.99", 0.99),
-                                ("0.999", 0.999),
-                            ],
-                            cfg.gamma,
-                            cx,
-                            |this, val| this.create_task_form.gamma = val,
-                        ))
-                        // 5. GAE Lambda
-                        .child(render_num_setting(
-                            "GAE 因子 (Lambda / λ)",
-                            format!("{:.2}", cfg.gae_lambda),
-                            vec![
-                                ("0.80", 0.80),
-                                ("0.90", 0.90),
-                                ("0.95", 0.95),
-                                ("0.98", 0.98),
-                            ],
-                            cfg.gae_lambda,
-                            cx,
-                            |this, val| this.create_task_form.gae_lambda = val,
-                        ))
-                        // 6. PPO Clip Epsilon
-                        .child(render_num_setting(
-                            "PPO Clip 范围 (Clip Epsilon / ε)",
-                            format!("{:.2}", cfg.clip_eps),
-                            vec![
-                                ("0.10", 0.10),
-                                ("0.15", 0.15),
-                                ("0.20", 0.20),
-                                ("0.25", 0.25),
-                                ("0.30", 0.30),
-                            ],
-                            cfg.clip_eps,
-                            cx,
-                            |this, val| this.create_task_form.clip_eps = val,
-                        ))
-                        // 7. PPO Epochs & 隐藏层维度
-                        .child(
-                            h_flex()
-                                .gap_4()
-                                .child(div().flex_1().child(render_int_setting(
-                                    "每轮训练 Epochs",
-                                    cfg.ppo_epochs,
-                                    vec![1, 2, 4, 8],
-                                    cx,
-                                    |this, val| this.create_task_form.ppo_epochs = val,
-                                )))
-                                .child(div().flex_1().child(render_int_setting(
-                                    "隐藏层神经元 (Hidden Dim)",
-                                    cfg.hidden_dim,
-                                    vec![32, 64, 128, 256],
-                                    cx,
-                                    |this, val| this.create_task_form.hidden_dim = val,
-                                ))),
-                        )
-                        // 8. 并行对局数与总训练轮次
-                        .child(
-                            h_flex()
-                                .gap_4()
-                                .child(div().flex_1().child(render_int_setting(
-                                    "并行对局数 (Parallel Envs)",
-                                    cfg.parallel_envs,
-                                    vec![1, 2, 4, 8, 16],
-                                    cx,
-                                    |this, val| this.create_task_form.parallel_envs = val,
-                                )))
-                                .child(div().flex_1().child(render_int_setting(
-                                    "总训练迭代轮次 (Total Iterations)",
-                                    cfg.total_iterations,
-                                    vec![20, 50, 80, 150, 300],
-                                    cx,
-                                    |this, val| this.create_task_form.total_iterations = val,
-                                ))),
-                        ),
-                )
-                .child(
-                    // 底部 Action
-                    h_flex()
-                        .justify_between()
-                        .items_center()
-                        .child(
-                            Button::new("reset-default-btn")
-                                .outline()
-                                .label("恢复默认配置")
-                                .on_click(cx.listener(|this, _, _, cx| {
-                                    let name = this.create_task_form.name.clone();
-                                    let mut def = TaskConfigPayload::default();
-                                    def.name = name;
-                                    this.create_task_form = def;
-                                    cx.notify();
-                                })),
-                        )
-                        .child(
-                            h_flex()
-                                .gap_2()
-                                .child(
-                                    Button::new("cancel-create-btn")
-                                        .ghost()
-                                        .label("取消")
-                                        .on_click(cx.listener(|_, _, window, cx| {
-                                            window.close_dialog(cx);
-                                        })),
-                                )
-                                .child(
+                                                }
+                                            }),
+                                    ),
+                            )
+                            .child(
+                                v_flex()
+                                    .flex_1()
+                                    .gap_1()
+                                    .child(
+                                        div()
+                                            .text_xs()
+                                            .font_bold()
+                                            .text_color(cx.theme().muted_foreground)
+                                            .child("训练环境 (Env)"),
+                                    )
+                                    .child(
+                                        h_flex()
+                                            .gap_1()
+                                            .child(
+                                                Button::new("env-real-btn")
+                                                    .when(
+                                                        cfg.env_name == lol_rl_protocol::ENV_FIORA_VS_RIVEN_REAL,
+                                                        |b| b.primary(),
+                                                    )
+                                                    .when(
+                                                        cfg.env_name != lol_rl_protocol::ENV_FIORA_VS_RIVEN_REAL,
+                                                        |b| b.outline(),
+                                                    )
+                                                    .compact()
+                                                    .label("真实移动 (10f)")
+                                                    .on_click(cx.listener(|this, _, _, cx| {
+                                                        this.form.env_name = lol_rl_protocol::ENV_FIORA_VS_RIVEN_REAL.to_string();
+                                                        cx.notify();
+                                                    })),
+                                            )
+                                            .child(
+                                                Button::new("env-legacy-btn")
+                                                    .when(
+                                                        cfg.env_name == lol_rl_protocol::ENV_FIORA_VS_RIVEN_LEGACY,
+                                                        |b| b.primary(),
+                                                    )
+                                                    .when(
+                                                        cfg.env_name != lol_rl_protocol::ENV_FIORA_VS_RIVEN_LEGACY,
+                                                        |b| b.outline(),
+                                                    )
+                                                    .compact()
+                                                    .label("瞬移站位 (Legacy)")
+                                                    .on_click(cx.listener(|this, _, _, cx| {
+                                                        this.form.env_name = lol_rl_protocol::ENV_FIORA_VS_RIVEN_LEGACY.to_string();
+                                                        cx.notify();
+                                                    })),
+                                            ),
+                                    ),
+                            ),
+                    )
+                    // 3. 学习率
+                    .child(self.render_num_setting(
+                        "学习率 (Learning Rate / lr)",
+                        format!("{:.5}", cfg.lr),
+                        vec![
+                            ("1e-4", 0.0001),
+                            ("3e-4", 0.0003),
+                            ("5e-4", 0.0005),
+                            ("1e-3", 0.0010),
+                        ],
+                        cfg.lr,
+                        cx,
+                        |this, val| this.form.lr = val,
+                    ))
+                    // 4. 折扣因子 Gamma
+                    .child(self.render_num_setting(
+                        "折扣因子 (Gamma / γ)",
+                        format!("{:.3}", cfg.gamma),
+                        vec![
+                            ("0.90", 0.90),
+                            ("0.95", 0.95),
+                            ("0.98", 0.98),
+                            ("0.99", 0.99),
+                            ("0.999", 0.999),
+                        ],
+                        cfg.gamma,
+                        cx,
+                        |this, val| this.form.gamma = val,
+                    ))
+                    // 5. GAE Lambda
+                    .child(self.render_num_setting(
+                        "GAE 因子 (Lambda / λ)",
+                        format!("{:.2}", cfg.gae_lambda),
+                        vec![
+                            ("0.80", 0.80),
+                            ("0.90", 0.90),
+                            ("0.95", 0.95),
+                            ("0.98", 0.98),
+                        ],
+                        cfg.gae_lambda,
+                        cx,
+                        |this, val| this.form.gae_lambda = val,
+                    ))
+                    // 6. PPO Clip Epsilon
+                    .child(self.render_num_setting(
+                        "PPO Clip 范围 (Clip Epsilon / ε)",
+                        format!("{:.2}", cfg.clip_eps),
+                        vec![
+                            ("0.10", 0.10),
+                            ("0.15", 0.15),
+                            ("0.20", 0.20),
+                            ("0.25", 0.25),
+                            ("0.30", 0.30),
+                        ],
+                        cfg.clip_eps,
+                        cx,
+                        |this, val| this.form.clip_eps = val,
+                    ))
+                    // 7. PPO Epochs & 隐藏层维度
+                    .child(
+                        h_flex()
+                            .gap_4()
+                            .child(div().flex_1().child(self.render_int_setting(
+                                "每轮训练 Epochs",
+                                cfg.ppo_epochs,
+                                vec![1, 2, 4, 8],
+                                cx,
+                                |this, val| this.form.ppo_epochs = val,
+                            )))
+                            .child(div().flex_1().child(self.render_int_setting(
+                                "隐藏层神经元 (Hidden Dim)",
+                                cfg.hidden_dim,
+                                vec![32, 64, 128, 256],
+                                cx,
+                                |this, val| this.form.hidden_dim = val,
+                            ))),
+                    )
+                    // 8. 总训练迭代轮次与自适应吞吐
+                    .child(
+                        v_flex()
+                            .gap_2()
+                            .child(self.render_int_setting(
+                                "总训练迭代轮次 (Total Iterations)",
+                                cfg.total_iterations,
+                                vec![20, 50, 80, 150, 300],
+                                cx,
+                                |this, val| this.form.total_iterations = val,
+                            ))
+                            .child(
+                                h_flex()
+                                    .items_center()
+                                    .gap_2()
+                                    .p_2()
+                                    .rounded_md()
+                                    .bg(cx.theme().muted.opacity(0.3))
+                                    .child(
+                                        div()
+                                            .text_xs()
+                                            .text_color(cx.theme().muted_foreground)
+                                            .child("⚡ 并行对局数与 GPU 推理/训练批大小将由 AutoTuner 在任务启动时自动探测硬件算力并求解最优吞吐。"),
+                                    ),
+                            ),
+                    ),
+            )
+            .child(
+                // 底部 Action
+                h_flex()
+                    .justify_between()
+                    .items_center()
+                    .child(
+                        Button::new("reset-default-btn")
+                            .outline()
+                            .label("恢复默认配置")
+                            .on_click(cx.listener(|this, _, window, cx| {
+                                let name = this.default_name.clone();
+                                let mut def = TaskConfigPayload::default();
+                                def.name = name.clone();
+                                def.parallel_envs = 0;
+                                def.max_steps = 0;
+                                this.form = def;
+                                this.name_input.update(cx, |input, cx| {
+                                    input.set_value(name, window, cx);
+                                });
+                                cx.notify();
+                            })),
+                    )
+                    .child(
+                        h_flex()
+                            .gap_2()
+                            .child(
+                                Button::new("cancel-create-btn")
+                                    .ghost()
+                                    .label("取消")
+                                    .on_click(cx.listener(|_, _, window, cx| {
+                                        window.close_dialog(cx);
+                                    })),
+                            )
+                            .child(
                                     Button::new("confirm-create-btn")
                                         .primary()
                                         .icon(IconName::Plus)
                                         .label("确认创建任务")
                                         .on_click(cx.listener(|this, _, window, cx| {
-                                            let mut config = this.create_task_form.clone();
-                                            config.max_steps = config.parallel_envs
-                                                * config.rollout_steps_per_env
-                                                * config.total_iterations;
-                                            this.send_in_frame(InFrame::CreateTask { config });
+                                            let mut config = this.form.clone();
+                                            config.parallel_envs = 0;
+                                            config.max_steps = 0;
+                                            if let Some(tx) = &this.tx {
+                                                let _ = tx.send(InFrame::CreateTask { config });
+                                            }
                                             window.close_dialog(cx);
                                         })),
-                                ),
-                        ),
-                )
-        .into_any_element()
-}
-
-// 帮助组件：渲染浮点参数面板及预设 Pill 按钮
-fn render_num_setting<F>(
-    label: &str,
-    display_val: String,
-    presets: Vec<(&'static str, f32)>,
-    current_val: f32,
-    cx: &mut Context<AppSidebar>,
-    setter: F,
-) -> AnyElement
-where
-    F: Fn(&mut AppSidebar, f32) + Send + Sync + 'static + Copy,
-{
-    v_flex()
-        .gap_1()
-        .child(
-            h_flex()
-                .justify_between()
-                .child(
-                    div()
-                        .text_xs()
-                        .font_bold()
-                        .text_color(cx.theme().muted_foreground)
-                        .child(label.to_string()),
-                )
-                .child(div().text_xs().font_bold().child(display_val)),
-        )
-        .child(
-            h_flex()
-                .gap_1()
-                .children(presets.into_iter().map(|(name, val)| {
-                    let is_selected = (val - current_val).abs() < 1e-6;
-                    let btn = if is_selected {
-                        Button::new(format!("preset-{label}-{name}"))
-                            .primary()
-                            .compact()
-                            .label(name)
-                    } else {
-                        Button::new(format!("preset-{label}-{name}"))
-                            .outline()
-                            .compact()
-                            .label(name)
-                    };
-                    btn.on_click(cx.listener(move |this, _, _, cx| {
-                        setter(this, val);
-                        cx.notify();
-                    }))
-                })),
-        )
-        .into_any_element()
-}
-
-// 帮助组件：渲染整数参数面板及预设 Pill 按钮
-fn render_int_setting<F>(
-    label: &str,
-    current_val: usize,
-    presets: Vec<usize>,
-    cx: &mut Context<AppSidebar>,
-    setter: F,
-) -> AnyElement
-where
-    F: Fn(&mut AppSidebar, usize) + Send + Sync + 'static + Copy,
-{
-    v_flex()
-        .gap_1()
-        .child(
-            h_flex()
-                .justify_between()
-                .child(
-                    div()
-                        .text_xs()
-                        .font_bold()
-                        .text_color(cx.theme().muted_foreground)
-                        .child(label.to_string()),
-                )
-                .child(div().text_xs().font_bold().child(current_val.to_string())),
-        )
-        .child(h_flex().gap_1().children(presets.into_iter().map(|val| {
-            let is_selected = val == current_val;
-            let val_str = val.to_string();
-            let btn = if is_selected {
-                Button::new(format!("preset-int-{label}-{val}"))
-                    .primary()
-                    .compact()
-                    .label(val_str)
-            } else {
-                Button::new(format!("preset-int-{label}-{val}"))
-                    .outline()
-                    .compact()
-                    .label(val_str)
-            };
-            btn.on_click(cx.listener(move |this, _, _, cx| {
-                setter(this, val);
-                cx.notify();
-            }))
-        })))
-        .into_any_element()
+                            ),
+                    ),
+            )
+    }
 }
 
 // WebSocket 连接状态：小圆点 + 简洁文案，位于标题行右侧

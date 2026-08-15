@@ -210,7 +210,8 @@ impl ActorCritic {
             } => {
                 let means_mat: Vec<Vec<f32>> = self.actor_head.forward(&h2)?.to_vec2()?;
                 let log_std: Vec<f32> = self.log_std.as_ref().unwrap().to_vec1()?;
-                let attack_logits_mat: Vec<Vec<f32>> = self.attack_head.as_ref().unwrap().forward(&h2)?.to_vec2()?;
+                let attack_logits_mat: Vec<Vec<f32>> =
+                    self.attack_head.as_ref().unwrap().forward(&h2)?.to_vec2()?;
                 let mut rng = rand::rng();
 
                 for i in 0..b {

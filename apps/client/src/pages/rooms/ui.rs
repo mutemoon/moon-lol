@@ -5,7 +5,9 @@ use gpui::*;
 use gpui_component::button::{Button, ButtonVariants};
 use gpui_component::checkbox::Checkbox;
 use gpui_component::menu::{DropdownMenu, PopupMenuItem};
-use gpui_component::{h_flex, v_flex, ActiveTheme, Disableable, IconName, StyledExt, WindowExt as _};
+use gpui_component::{
+    h_flex, v_flex, ActiveTheme, Disableable, IconName, StyledExt, WindowExt as _,
+};
 use lol_web_protocol::room::{Room, RoomStatus, TeamPolicy};
 
 use super::input::render_state_input;
@@ -216,10 +218,8 @@ fn build_create_room_form(
                                     "10",
                                     |s: &AppSidebar| s.rooms.draft_max_members.clone(),
                                     |s: &mut AppSidebar, v| {
-                                        s.rooms.draft_max_members = v
-                                            .chars()
-                                            .filter(|c| c.is_ascii_digit())
-                                            .collect();
+                                        s.rooms.draft_max_members =
+                                            v.chars().filter(|c| c.is_ascii_digit()).collect();
                                     },
                                     None,
                                 )),
@@ -237,10 +237,8 @@ fn build_create_room_form(
                                     "3",
                                     |s: &AppSidebar| s.rooms.draft_max_agents.clone(),
                                     |s: &mut AppSidebar, v| {
-                                        s.rooms.draft_max_agents = v
-                                            .chars()
-                                            .filter(|c| c.is_ascii_digit())
-                                            .collect();
+                                        s.rooms.draft_max_agents =
+                                            v.chars().filter(|c| c.is_ascii_digit()).collect();
                                     },
                                     None,
                                 )),

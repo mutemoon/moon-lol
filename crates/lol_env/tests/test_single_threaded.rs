@@ -48,7 +48,10 @@ fn test_env_runs_strictly_on_single_thread() {
 
     // 4. 验证记录到的所有线程 ID
     let seen_threads = thread_records.lock().unwrap().clone();
-    println!("🔍 [Bevy Systems Thread Records] 内部系统记录到的所有线程集合: {:?}", seen_threads);
+    println!(
+        "🔍 [Bevy Systems Thread Records] 内部系统记录到的所有线程集合: {:?}",
+        seen_threads
+    );
 
     assert_eq!(
         seen_threads.len(),
@@ -114,4 +117,3 @@ fn test_multiple_envs_isolated_on_their_own_threads() {
     );
     println!("✅ [验证通过] 多个环境实例在各自独立的线程上互不干扰、严格单线程闭环！");
 }
-

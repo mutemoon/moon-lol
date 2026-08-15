@@ -55,7 +55,6 @@ pub fn render_task_detail(
     let is_vis_running = sidebar.running_visual_model.is_some();
 
     v_flex()
-        .size_full()
         .flex_1()
         .gap_4()
         .overflow_hidden()

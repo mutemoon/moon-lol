@@ -19,17 +19,12 @@ const MAX_POINTS: usize = 1200;
 
 /// Tab 1: 图表与训练指标面板
 pub fn render_tab_metrics(detail: &LocalTaskDetail, cx: &mut Context<AppSidebar>) -> AnyElement {
-    let mut container = v_flex()
-        .size_full()
-        .flex_1()
-        .gap_4()
-        .overflow_hidden()
-        .child(
-            div()
-                .font_bold()
-                .text_base()
-                .child(t!("app.rl.metrics_title")),
-        );
+    let mut container = v_flex().flex_1().overflow_hidden().child(
+        div()
+            .font_bold()
+            .text_base()
+            .child(t!("app.rl.metrics_title")),
+    );
 
     if let Some(formula) = &detail.reward_formula {
         container = container.child(
@@ -58,8 +53,8 @@ pub fn render_tab_metrics(detail: &LocalTaskDetail, cx: &mut Context<AppSidebar>
             div()
                 .id("metrics-charts-scroll")
                 .flex_1()
-                .overflow_y_scrollbar()
-                .child(v_flex().gap_4().p_1().children([
+                .overflow_y_scroll()
+                .children([
                     // 训练目标
                     metric_chart(
                         t!("app.rl.m_episode_return"),
@@ -112,7 +107,7 @@ pub fn render_tab_metrics(detail: &LocalTaskDetail, cx: &mut Context<AppSidebar>
                     ),
                     // 性能
                     perf_section(&rows, cx),
-                ]))
+                ])
                 .into_any_element()
         })
         .into_any_element()

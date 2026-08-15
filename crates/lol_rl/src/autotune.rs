@@ -52,35 +52,44 @@ impl AutoTuner {
         let is_cuda = !device.is_cpu();
 
         info!(
-            "🔍 [AutoTuner] 开始高精度硬件算力探测 (Device: {:?}, CPU逻辑核心: {})...",
+            "🔍 [AutoTuner] 开始硬件算力探测 (Device: {:?}, CPU逻辑核心: {})...",
             if is_cuda { "CUDA / GPU" } else { "CPU" },
             cpu_cores
         );
 
-        // 1. 深度探针：单环境稳态预热
+        let warmup_steps = 100;
+        let single_steps = 300;
+        let steps_per_env = 100;
+        let infer_warmup = 30;
+        let infer_iters = 200;
+        let train_warmup = 10;
+        let train_iters = 50;
+
+        let candidate_pool: &[usize] = &[2, 4, 8, 12, 16, 20, 24, 28, 32];
+
+        // 1. 单环境稳态预热
         let mut single_env = E::new(100);
         let _ = single_env.reset();
         let act = E::action_from_index(0);
-        for _ in 0..100 {
+        for _ in 0..warmup_steps {
             let res = single_env.step(act.clone());
             if res.terminated || res.truncated {
                 let _ = single_env.reset();
             }
         }
         let env_start = Instant::now();
-        let test_steps = 300;
-        for _ in 0..test_steps {
+        for _ in 0..single_steps {
             let res = single_env.step(act.clone());
             if res.terminated || res.truncated {
                 let _ = single_env.reset();
             }
         }
-        let env_step_us = (env_start.elapsed().as_micros() as f64) / (test_steps as f64);
+        let env_step_us = (env_start.elapsed().as_micros() as f64) / (single_steps as f64);
 
-        // 2. 真实多环境实例并发压测 (测试候选并发数: 2, 4, 8, 12, 16, 20, 24, 28, 32...)
+        // 2. 真实多环境实例并发压测
         info!("  ⚡ [1/3] 真实多环境实例并发压测 (测量多核并发争用与真实吞吐):");
         let mut candidate_n = Vec::new();
-        for &n in &[2, 4, 8, 12, 16, 20, 24, 28, 32] {
+        for &n in candidate_pool {
             if n <= cpu_cores * 2 {
                 candidate_n.push(n);
             }
@@ -93,7 +102,6 @@ impl AutoTuner {
         let mut parallel_env_us = Vec::with_capacity(candidate_n.len());
         for &n in &candidate_n {
             let barrier = std::sync::Arc::new(std::sync::Barrier::new(n + 1));
-            let steps_per_env = 100;
             let mut handles = Vec::with_capacity(n);
 
             for _ in 0..n {
@@ -102,7 +110,6 @@ impl AutoTuner {
                     let mut env = E::new(100);
                     let _ = env.reset();
                     let act = E::action_from_index(0);
-                    // 等待所有线程准备就绪统一发车
                     b.wait();
                     for _ in 0..steps_per_env {
                         let res = env.step(act.clone());
@@ -114,7 +121,6 @@ impl AutoTuner {
                 handles.push(h);
             }
 
-            // 主线程发车并开始计时
             barrier.wait();
             let start = Instant::now();
             for h in handles {
@@ -136,7 +142,7 @@ impl AutoTuner {
         let vb = VarBuilder::from_varmap(&varmap, DType::F32, device);
         let ac = ActorCritic::new(state_dim, hidden_dim, action_space.clone(), vb)?;
 
-        // 2. 深度探针：神经网络批量推理耗时曲线 (更充分采样与稳态计时)
+        // 3. 神经网络批量推理耗时曲线
         let infer_batches = [1, 2, 4, 8, 16, 24, 32, 48, 64, 96, 128];
         let mut infer_latency_us = Vec::with_capacity(infer_batches.len());
 
@@ -145,17 +151,15 @@ impl AutoTuner {
             let dummy_input = Tensor::zeros((b, state_dim), DType::F32, device)?;
             let obs_refs: Vec<&[f32]> = vec![dummy_obs.as_slice(); b];
 
-            // 预热 GPU / SIMD kernel
-            for _ in 0..30 {
+            for _ in 0..infer_warmup {
                 let _ = ac.sample_batch(&dummy_input, &obs_refs)?;
             }
 
             let start = Instant::now();
-            let iters = 200;
-            for _ in 0..iters {
+            for _ in 0..infer_iters {
                 let _ = ac.sample_batch(&dummy_input, &obs_refs)?;
             }
-            let lat_us = (start.elapsed().as_micros() as f64) / (iters as f64);
+            let lat_us = (start.elapsed().as_micros() as f64) / (infer_iters as f64);
             let throughput = (b as f64) / (lat_us / 1_000_000.0);
             infer_latency_us.push((b, lat_us));
             info!(
@@ -164,7 +168,7 @@ impl AutoTuner {
             );
         }
 
-        // 3. 深度探针：神经网络训练 Mini-Batch 评估与反向传播耗时 (更充分样本)
+        // 4. 训练 Mini-Batch 梯度计算耗时
         let train_batches = [32, 64, 128, 256, 512];
         let mut train_step_us = Vec::with_capacity(train_batches.len());
         let enc_dim = action_space.encoding_dim();
@@ -174,17 +178,15 @@ impl AutoTuner {
             let dummy_states = Tensor::zeros((b, state_dim), DType::F32, device)?;
             let dummy_actions = Tensor::zeros((b, enc_dim), DType::F32, device)?;
 
-            // 预热
-            for _ in 0..10 {
+            for _ in 0..train_warmup {
                 let _ = ac.evaluate_actions(&dummy_states, &dummy_actions)?;
             }
 
             let start = Instant::now();
-            let iters = 50;
-            for _ in 0..iters {
+            for _ in 0..train_iters {
                 let _ = ac.evaluate_actions(&dummy_states, &dummy_actions)?;
             }
-            let lat_us = (start.elapsed().as_micros() as f64) / (iters as f64);
+            let lat_us = (start.elapsed().as_micros() as f64) / (train_iters as f64);
             let throughput = (b as f64) / (lat_us / 1_000_000.0);
             train_step_us.push((b, lat_us));
             info!(
@@ -253,7 +255,11 @@ impl AutoTuner {
                     if n <= profile.cpu_cores {
                         profile.env_step_us * 1.05
                     } else {
-                        profile.env_step_us * (1.0 + (n as f64 - profile.cpu_cores as f64) / (profile.cpu_cores as f64) * 0.8)
+                        profile.env_step_us
+                            * (1.0
+                                + (n as f64 - profile.cpu_cores as f64)
+                                    / (profile.cpu_cores as f64)
+                                    * 0.8)
                     }
                 });
 
@@ -297,11 +303,11 @@ impl AutoTuner {
         info!("  ├─ 并行环境数 (Actors N): {}", tuned.num_parallel_envs);
         info!("  ├─ 推理 Batch 大小: {}", tuned.infer_batch_size);
         info!("  ├─ 训练 Mini-Batch: {}", tuned.train_batch_size);
+        info!("  ├─ 动态批聚合超时: {} µs", tuned.dynamic_batch_timeout_us);
         info!(
-            "  ├─ 动态批聚合超时: {} µs",
-            tuned.dynamic_batch_timeout_us
+            "  └─ 预估训练吞吐量: {:.1} SPS (Steps/s)",
+            tuned.estimated_sps
         );
-        info!("  └─ 预估训练吞吐量: {:.1} SPS (Steps/s)", tuned.estimated_sps);
 
         tuned
     }
@@ -318,7 +324,13 @@ mod tests {
             is_cuda: true,
             env_step_us: 50.0,
             parallel_env_us: vec![(2, 52.0), (4, 55.0), (8, 60.0), (16, 75.0), (32, 120.0)],
-            infer_latency_us: vec![(1, 100.0), (4, 120.0), (16, 180.0), (32, 250.0), (64, 400.0)],
+            infer_latency_us: vec![
+                (1, 100.0),
+                (4, 120.0),
+                (16, 180.0),
+                (32, 250.0),
+                (64, 400.0),
+            ],
             train_step_us: vec![(32, 800.0), (64, 900.0), (128, 1200.0), (256, 1800.0)],
         };
 
@@ -328,5 +340,3 @@ mod tests {
         assert!(tuned.estimated_sps > 0.0);
     }
 }
-
-

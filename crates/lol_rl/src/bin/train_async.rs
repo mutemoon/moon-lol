@@ -43,12 +43,8 @@ fn main() -> anyhow::Result<()> {
     };
 
     // 2. 自动吞吐探测与最优配置求解
-    let profile = AutoTuner::profile::<FioraVsRivenRealEnv>(
-        state_dim,
-        hidden_dim,
-        &action_space,
-        &device,
-    )?;
+    let profile =
+        AutoTuner::profile::<FioraVsRivenRealEnv>(state_dim, hidden_dim, &action_space, &device)?;
     let tuned = AutoTuner::solve(&profile, horizon, ppo_config.ppo_epochs);
 
     // 3. 初始化 PPO Agent

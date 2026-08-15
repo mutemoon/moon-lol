@@ -76,8 +76,6 @@ pub struct AppSidebar {
     pub visual_env_name: Option<String>,
     /// 任务概览 DataTable 状态（惰性创建）
     pub table_state: Option<Entity<TableState<TaskTableDelegate>>>,
-    /// 新建 RL 训练任务表单
-    pub create_task_form: lol_rl_protocol::TaskConfigPayload,
 
     // ── 全局状态：Auth（M3/M4 对接 cloud REST 客户端后填充） ──
     pub auth_token: Option<String>,
@@ -189,7 +187,6 @@ impl AppSidebar {
             visual_task_id: None,
             visual_env_name: None,
             table_state: None,
-            create_task_form: lol_rl_protocol::TaskConfigPayload::default(),
             // Auth
             auth_token: None,
             current_user: None,
@@ -437,19 +434,16 @@ impl Render for AppSidebar {
             ActiveView::Settings => render_settings(self, window, cx),
         };
 
-        let content = div()
-            .size_full()
+        let content = v_flex()
+            .h_full()
             .flex_1()
             .p_4()
             .pt_0()
-            .flex()
-            .flex_col()
-            .overflow_hidden()
             .child(render_topbar(self, window, cx))
-            .child(div().flex_1().overflow_hidden().child(main_view_content));
+            .child(main_view_content);
 
         let body = h_flex()
-            .size_full()
+            .flex_1()
             .overflow_hidden()
             .child(render_sidebar_menu(self, cx))
             .child(content);
@@ -457,7 +451,7 @@ impl Render for AppSidebar {
         v_flex()
             .size_full()
             .relative()
-            .child(div().flex_1().overflow_hidden().child(body))
+            .child(body)
             .children(Root::render_dialog_layer(window, cx))
             .children(Root::render_sheet_layer(window, cx))
             .children(Root::render_notification_layer(window, cx))
