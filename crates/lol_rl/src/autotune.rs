@@ -34,8 +34,8 @@ pub struct TunedConfig {
     pub train_batch_size: usize,
     /// 动态批处理最大等待微秒（Dynamic batching wait timeout）
     pub dynamic_batch_timeout_us: u64,
-    /// 预估综合吞吐量 (Samples/sec 或 FPS)
-    pub estimated_fps: f64,
+    /// 预估综合训练步吞吐量 (Steps Per Second, SPS)
+    pub estimated_sps: f64,
 }
 
 pub struct AutoTuner;
@@ -122,12 +122,12 @@ impl AutoTuner {
             }
             let total_dur_us = start.elapsed().as_micros() as f64;
             let step_batch_us = total_dur_us / (steps_per_env as f64);
-            let real_fps = ((n * steps_per_env) as f64) / (total_dur_us / 1_000_000.0);
+            let real_sps = ((n * steps_per_env) as f64) / (total_dur_us / 1_000_000.0);
             parallel_env_us.push((n, step_batch_us));
 
             info!(
-                "    ├─ 并发实例 {:2}: 并发步耗时 {:7.2} µs | 真实并发吞吐: {:8.1} FPS",
-                n, step_batch_us, real_fps
+                "    ├─ 并发实例 {:2}: 并发步耗时 {:7.2} µs | 真实并发吞吐: {:8.1} SPS",
+                n, step_batch_us, real_sps
             );
         }
 
@@ -206,7 +206,7 @@ impl AutoTuner {
 
     /// 数学规划求解最优参数配置
     pub fn solve(profile: &SystemProfile, horizon: usize, ppo_epochs: usize) -> TunedConfig {
-        let mut best_fps = 0.0;
+        let mut best_sps = 0.0;
         let mut best_n = 4;
         let mut best_train_b = 64;
         let mut best_infer_b = 4;
@@ -271,10 +271,10 @@ impl AutoTuner {
 
                 let iter_total_us = rollout_time_us + train_total_us;
                 let iter_sec = iter_total_us / 1_000_000.0;
-                let fps = (total_samples as f64) / iter_sec.max(0.0001);
+                let sps = (total_samples as f64) / iter_sec.max(0.0001);
 
-                if fps > best_fps {
-                    best_fps = fps;
+                if sps > best_sps {
+                    best_sps = sps;
                     best_n = n;
                     best_train_b = b_train;
                     best_infer_b = n.next_power_of_two().min(128);
@@ -290,7 +290,7 @@ impl AutoTuner {
             infer_batch_size: best_infer_b,
             train_batch_size: best_train_b,
             dynamic_batch_timeout_us,
-            estimated_fps: best_fps,
+            estimated_sps: best_sps,
         };
 
         info!("🎯 [AutoTuner] 自适应配置求解完成:");
@@ -301,7 +301,7 @@ impl AutoTuner {
             "  ├─ 动态批聚合超时: {} µs",
             tuned.dynamic_batch_timeout_us
         );
-        info!("  └─ 预估训练吞吐量: {:.1} Steps/s (FPS)", tuned.estimated_fps);
+        info!("  └─ 预估训练吞吐量: {:.1} SPS (Steps/s)", tuned.estimated_sps);
 
         tuned
     }
@@ -325,7 +325,7 @@ mod tests {
         let tuned = AutoTuner::solve(&profile, 64, 4);
         assert!(tuned.num_parallel_envs >= 2);
         assert!(tuned.train_batch_size >= 32);
-        assert!(tuned.estimated_fps > 0.0);
+        assert!(tuned.estimated_sps > 0.0);
     }
 }
 
