@@ -119,7 +119,7 @@ impl FioraVsRivenRealAction {
 }
 
 pub struct FioraVsRivenRealEnv {
-    app: App,
+    pub app: App,
     fiora: Entity,
     riven: Entity,
     fiora_skin_handle: Option<Handle<DynamicWorld>>,
@@ -216,6 +216,24 @@ impl FioraVsRivenRealEnv {
 
         app.add_plugins(PluginFiora);
         app.add_plugins(PluginRiven);
+
+        if !render {
+            app.edit_schedule(bevy::app::Main, |s| {
+                s.set_executor(bevy::ecs::schedule::SingleThreadedExecutor::default());
+            });
+            app.edit_schedule(bevy::app::PreUpdate, |s| {
+                s.set_executor(bevy::ecs::schedule::SingleThreadedExecutor::default());
+            });
+            app.edit_schedule(bevy::app::FixedUpdate, |s| {
+                s.set_executor(bevy::ecs::schedule::SingleThreadedExecutor::default());
+            });
+            app.edit_schedule(bevy::app::Update, |s| {
+                s.set_executor(bevy::ecs::schedule::SingleThreadedExecutor::default());
+            });
+            app.edit_schedule(bevy::app::PostUpdate, |s| {
+                s.set_executor(bevy::ecs::schedule::SingleThreadedExecutor::default());
+            });
+        }
 
         app.insert_resource(lol_base::map::MapPaths::new("test"));
         app.insert_resource(NavigationDebug);
