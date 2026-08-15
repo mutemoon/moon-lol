@@ -19,7 +19,7 @@ use rand::random;
 use serde::{Deserialize, Serialize};
 
 use crate::fiora::Fiora;
-use crate::fiora::r::BuffFioraR;
+use crate::fiora::r::RVitalTarget;
 
 const VITAL_DISTANCE: f32 = 1000.0;
 pub(crate) const FIORA_PASSIVE_ACTIVE_DURATION: f32 = 1.7;
@@ -119,12 +119,20 @@ fn vital_current_particle_key(vital: &Vital) -> String {
     vital_particle_key(&vital.direction, variant)
 }
 
+/// [`vital_current_particle_key`] 的公开版本，供 `r.rs` 施放大招时清理已有破绽粒子。
+pub fn vital_current_particle_key_pub(vital: &Vital) -> String {
+    vital_current_particle_key(vital)
+}
+
 pub fn update_add_vital(
     mut commands: Commands,
-    q_target_without_vital: Query<(Entity, &Transform, &Team), (With<Champion>, Without<Vital>)>,
+    // Without<RVitalTarget>: 大招期间目标标记了 RVitalTarget，不再刺生普通被动破绽
+    q_target_without_vital: Query<
+        (Entity, &Transform, &Team),
+        (With<Champion>, Without<Vital>, Without<RVitalTarget>),
+    >,
     q_skill_of_with_ability: Query<&PassiveSkillOf, With<AbilityFioraPassive>>,
     q_transform_team: Query<(&Transform, &Team)>,
-    q_buff_fiora_r: Query<&BuffOf, With<BuffFioraR>>,
     mut last_direction: ResMut<FioraVitalLastDirection>,
 ) {
     for skill_of in q_skill_of_with_ability.iter() {
@@ -149,16 +157,6 @@ pub fn update_add_vital(
                 .distance(transform.translation.xz());
 
             if distance > VITAL_DISTANCE {
-                continue;
-            }
-
-            let mut found = false;
-            for buff_of in q_buff_fiora_r.iter() {
-                if buff_of.get() == target_entity {
-                    found = true;
-                }
-            }
-            if found {
                 continue;
             }
 

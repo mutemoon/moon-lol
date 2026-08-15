@@ -2,6 +2,10 @@
 //!
 //! 对一名敌方英雄施放，标记四个方向要害，持续 8 秒。
 //! 击破要害造成最大生命值真实伤害。四要害全破后触发治疗光环。
+//!
+//! # 关于被动破绽互斥
+//! 大招期间目标上会挂 `RVitalTarget` 标记组件，`update_add_vital` 通过
+//! `Without<RVitalTarget>` 过滤，确保大招四方向要害期间不会出现普通被动破绽。
 
 use bevy::prelude::*;
 use lol_base::render_cmd::{
@@ -18,7 +22,17 @@ use lol_core::skill::{EventSkillCast, Skill, SkillSlot, get_skill_data_value};
 use lol_core::team::Team;
 
 use crate::fiora::Fiora;
-use crate::fiora::passive::{direction_particle_suffix, hit_particle_rotation};
+use crate::fiora::passive::{
+    Vital, direction_particle_suffix, hit_particle_rotation, vital_current_particle_key_pub,
+};
+
+/// 目标正处于 Fiora 大招四要害期间的标记组件。
+///
+/// 施放大招时插入目标，大招 buff 结束（到期或四破）后移除。
+/// `update_add_vital` 通过 `Without<RVitalTarget>` 跳过该目标，
+/// 防止大招期间出现普通被动破绽。
+#[derive(Component, Debug, Default)]
+pub struct RVitalTarget;
 
 /// 要害过期前红色闪烁预警时长（秒），游戏手感常数，不来自 RON。
 const VITAL_R_TIMEOUT: f32 = 1.5;
@@ -158,7 +172,7 @@ pub fn fixed_update(
         buff.remove_timer.tick(time.delta());
 
         if buff.remove_timer.is_finished() {
-            // 到时未破：撤下剩余标记粒子
+            // 到时未破：撤下剩余标记粒子，移除大招目标标记
             for direction in &buff.vitals {
                 commands.trigger(CommandSkinParticleDespawn {
                     entity: target,
@@ -166,6 +180,7 @@ pub fn fixed_update(
                     resolver_entity: Some(buff.caster),
                 });
             }
+            commands.entity(target).remove::<RVitalTarget>();
             commands.entity(entity).despawn();
         }
     }
@@ -212,6 +227,7 @@ pub fn on_fiora_r(
     q_transform: Query<&Transform>,
     q_team: Query<&Team>,
     q_targets: Query<(Entity, &Transform, &Team), (With<Champion>, Without<Death>)>,
+    q_vital: Query<&Vital>,
     res_spells: Res<Assets<Spell>>,
 ) {
     let entity = trigger.event_target();
@@ -264,6 +280,20 @@ pub fn on_fiora_r(
     let heal_duration = get_skill_data_value(spell_obj, "HealDuration", skill.level).unwrap_or(5.0);
     let heal_radius =
         get_skill_data_value(spell_obj, "HealRingRadius", skill.level).unwrap_or(550.0);
+
+    // 若目标上存在普通被动破绽（Vital），立即移除并撤下其粒子
+    if let Ok(vital) = q_vital.get(target) {
+        let key = vital_current_particle_key_pub(vital);
+        commands.trigger(CommandSkinParticleDespawn {
+            entity: target,
+            hash: key,
+            resolver_entity: Some(entity),
+        });
+        commands.entity(target).remove::<Vital>();
+    }
+
+    // 插入大招目标标记，阻止被动在大招期间再次添加 Vital
+    commands.entity(target).insert(RVitalTarget);
 
     commands
         .entity(target)
@@ -388,7 +418,7 @@ pub fn on_r_damage_create(
     let all_broken = buff_fiora_r.vitals.is_empty();
     let target_dead = hp.value <= 0.0;
     if all_broken || target_dead {
-        // 提前结束：撤下剩余标记粒子
+        // 提前结束：撤下剩余标记粒子，移除大招目标标记
         for direction in &buff_fiora_r.vitals {
             commands.trigger(CommandSkinParticleDespawn {
                 entity: target_entity,
@@ -396,6 +426,7 @@ pub fn on_r_damage_create(
                 resolver_entity: Some(trigger.source),
             });
         }
+        commands.entity(target_entity).remove::<RVitalTarget>();
         // 光环实体自带位置，Heal_Zone 粒子锚定其上、随实体销毁而消失
         let center = Vec3::new(target_position.x, 0.0, target_position.y);
         let heal_entity = commands
