@@ -1,10 +1,72 @@
 use candle_core::{D, DType, Result, Tensor};
-use candle_nn::{Linear, Module, VarBuilder, linear};
+use candle_nn::{Linear, Module, VarBuilder};
 use lol_rl_protocol::{ActionSpace, PolicyDisplay, PolicyItem};
 use rand::Rng;
 
 /// 0.5·ln(2π)，用于高斯策略的 log_prob / 熵。
 const HALF_LN_2PI: f32 = 0.9189385;
+
+/// 生成标准正交权重矩阵（Modified Gram-Schmidt），用于工业级深度网络初始化。
+pub fn orthogonal_weight(out_dim: usize, in_dim: usize, gain: f32) -> Vec<f32> {
+    let rows = out_dim.max(in_dim);
+    let cols = out_dim.min(in_dim);
+    let mut rng = rand::rng();
+
+    // 生成 rows x cols 的标准正态分布随机矩阵（Box-Muller 变换）
+    let mut mat = Vec::with_capacity(rows * cols);
+    while mat.len() < rows * cols {
+        let u1: f32 = rng.random_range(1e-7..1.0);
+        let u2: f32 = rng.random_range(0.0..std::f32::consts::TAU);
+        let r = (-2.0 * u1.ln()).sqrt();
+        let z0 = r * u2.cos();
+        let z1 = r * u2.sin();
+        mat.push(z0);
+        if mat.len() < rows * cols {
+            mat.push(z1);
+        }
+    }
+
+    // Modified Gram-Schmidt QR 分解正交化每一列
+    for j in 0..cols {
+        for k in 0..j {
+            let mut dot = 0.0f32;
+            for r in 0..rows {
+                dot += mat[r * cols + j] * mat[r * cols + k];
+            }
+            for r in 0..rows {
+                mat[r * cols + j] -= dot * mat[r * cols + k];
+            }
+        }
+        let mut norm_sq = 0.0f32;
+        for r in 0..rows {
+            norm_sq += mat[r * cols + j] * mat[r * cols + j];
+        }
+        let inv_norm = if norm_sq > 1e-12 {
+            1.0 / norm_sq.sqrt()
+        } else {
+            0.0
+        };
+        for r in 0..rows {
+            mat[r * cols + j] *= inv_norm;
+        }
+    }
+
+    let mut result = vec![0.0f32; out_dim * in_dim];
+    if out_dim >= in_dim {
+        for r in 0..out_dim {
+            for c in 0..in_dim {
+                result[r * in_dim + c] = mat[r * cols + c] * gain;
+            }
+        }
+    } else {
+        for r in 0..out_dim {
+            for c in 0..in_dim {
+                result[r * in_dim + c] = mat[c * cols + r] * gain;
+            }
+        }
+    }
+    result
+}
 
 #[derive(Clone)]
 pub struct ActorCritic {
@@ -27,15 +89,15 @@ impl ActorCritic {
         action_space: ActionSpace,
         vb: VarBuilder,
     ) -> Result<Self> {
-        let fc1 = linear(state_dim, hidden_dim, vb.pp("fc1"))?;
-        let fc2 = linear(hidden_dim, hidden_dim, vb.pp("fc2"))?;
-        let critic_head = linear(hidden_dim, 1, vb.pp("critic_head"))?;
+        let fc1 = candle_nn::linear(state_dim, hidden_dim, vb.pp("fc1"))?;
+        let fc2 = candle_nn::linear(hidden_dim, hidden_dim, vb.pp("fc2"))?;
+        let critic_head = candle_nn::linear(hidden_dim, 1, vb.pp("critic_head"))?;
 
         let (actor_out_dim, log_std, attack_head) = match action_space {
             ActionSpace::Discrete(n) => (n, None, None),
             ActionSpace::Continuous(d) => (
                 d,
-                Some(vb.get_with_hints((d,), "log_std", Default::default())?),
+                Some(vb.get_with_hints((d,), "log_std", candle_nn::Init::Const(0.0))?),
                 None,
             ),
             ActionSpace::Hybrid {
@@ -43,11 +105,11 @@ impl ActorCritic {
                 discrete_classes,
             } => (
                 continuous_dims,
-                Some(vb.get_with_hints((continuous_dims,), "log_std", Default::default())?),
-                Some(linear(hidden_dim, discrete_classes, vb.pp("attack_head"))?),
+                Some(vb.get_with_hints((continuous_dims,), "log_std", candle_nn::Init::Const(0.0))?),
+                Some(candle_nn::linear(hidden_dim, discrete_classes, vb.pp("attack_head"))?),
             ),
         };
-        let actor_head = linear(hidden_dim, actor_out_dim, vb.pp("actor_head"))?;
+        let actor_head = candle_nn::linear(hidden_dim, actor_out_dim, vb.pp("actor_head"))?;
 
         Ok(Self {
             fc1,

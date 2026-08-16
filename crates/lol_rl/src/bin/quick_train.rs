@@ -52,6 +52,8 @@ fn main() -> anyhow::Result<()> {
         c1: 0.5,
         c2: 0.01,
         ppo_epochs: 4,
+        clip_vloss: true,
+        max_grad_norm: 0.5,
     };
 
     let mut agent = PPOAgent::new(

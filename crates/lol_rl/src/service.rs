@@ -470,6 +470,29 @@ fn persist_checkpoint(
         .and_then(|s| s.parse::<usize>().ok())
         .unwrap_or(0);
     let now = Utc::now();
+
+    // 同步写入自描述元数据 JSON（包含环境、输入输出维度与训练指标）
+    let meta_path = Path::new(&req.path).with_extension("meta.json");
+    let task_meta_opt = {
+        let t = tasks.blocking_lock();
+        t.get(task_id).map(|task| (task.env_name.clone(), task.config.hidden_dim, task.agent_type.clone()))
+    };
+    if let Some((env_name, hidden_dim, agent_type)) = task_meta_opt {
+        let meta_json = serde_json::json!({
+            "task_id": task_id,
+            "ckpt_id": req.ckpt_id,
+            "step": step,
+            "ep_return": req.ep_return,
+            "agent_type": agent_type,
+            "env_name": env_name,
+            "hidden_dim": hidden_dim,
+            "created_at": now.to_rfc3339(),
+        });
+        if let Ok(meta_str) = serde_json::to_string_pretty(&meta_json) {
+            let _ = std::fs::write(&meta_path, meta_str);
+        }
+    }
+
     let cp_row = CheckpointRow {
         id: Uuid::new_v4(),
         task_id: Uuid::parse_str(task_id).unwrap_or_default(),
@@ -618,6 +641,8 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment + 'static>(
         c1: 0.5,
         c2: 0.05,
         ppo_epochs: task_config.ppo_epochs.max(1),
+        clip_vloss: true,
+        max_grad_norm: 0.5,
     };
 
     let mut agent = match PPOAgent::new(
@@ -794,7 +819,7 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment + 'static>(
 
         let iter_start = Instant::now();
 
-        // 动态衰减策略熵
+        // 动态退火策略熵与学习率 (PPO2 Industrial Standard)
         let progress = if total_iterations > 1 {
             (iter - 1) as f32 / (total_iterations - 1) as f32
         } else {
@@ -802,6 +827,10 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment + 'static>(
         };
         let current_c2 = (0.05 * (1.0 - progress) + 0.001 * progress).max(0.001);
         agent.set_entropy_coef(current_c2);
+
+        let initial_lr = task_config.lr as f64;
+        let current_lr = (initial_lr * (1.0 - progress as f64)).max(initial_lr * 0.05);
+        let _ = agent.set_lr(current_lr);
 
         // 1. 克隆 CPU 采样策略
         let cpu_policy = match agent.actor_critic.to_device(&candle_core::Device::Cpu) {

@@ -42,6 +42,8 @@ fn main() -> anyhow::Result<()> {
         c1: 0.5,
         c2: 0.05,
         ppo_epochs: 4,
+        clip_vloss: true,
+        max_grad_norm: 0.5,
     };
 
     // 2. 自动吞吐探测与最优配置求解

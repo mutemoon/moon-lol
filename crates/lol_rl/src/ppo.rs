@@ -96,6 +96,10 @@ pub struct PPOConfig {
     pub c1: f32, // Value loss coefficient
     pub c2: f32, // Entropy coefficient
     pub ppo_epochs: usize,
+    /// 价值函数损失截断 (Value Loss Clipping, PPO2 工业级标准)
+    pub clip_vloss: bool,
+    /// 全局梯度 L2 范数截断上限 (0.0 为不截断，推荐 0.5)
+    pub max_grad_norm: f32,
 }
 
 impl Default for PPOConfig {
@@ -108,6 +112,8 @@ impl Default for PPOConfig {
             c1: 0.5,
             c2: 0.05,
             ppo_epochs: 4,
+            clip_vloss: true,
+            max_grad_norm: 0.5,
         }
     }
 }
@@ -141,10 +147,38 @@ impl PPOAgent {
         config: PPOConfig,
         device: Device,
     ) -> Result<Self> {
-        let varmap = VarMap::new();
+        let mut varmap = VarMap::new();
         let vb = VarBuilder::from_varmap(&varmap, DType::F32, &device);
 
         let actor_critic = ActorCritic::new(state_dim, hidden_dim, action_space, vb)?;
+
+        // 对网络权重应用工业级正交初始化（正交矩阵 + 分层增益 Gain）
+        let hidden_gain = std::f32::consts::SQRT_2;
+        let fc1_w = Tensor::from_vec(
+            crate::policy::orthogonal_weight(hidden_dim, state_dim, hidden_gain),
+            (hidden_dim, state_dim),
+            &device,
+        )?;
+        let fc2_w = Tensor::from_vec(
+            crate::policy::orthogonal_weight(hidden_dim, hidden_dim, hidden_gain),
+            (hidden_dim, hidden_dim),
+            &device,
+        )?;
+        let actor_w = Tensor::from_vec(
+            crate::policy::orthogonal_weight(actor_critic.action_space().actor_head_dim(), hidden_dim, 0.01),
+            (actor_critic.action_space().actor_head_dim(), hidden_dim),
+            &device,
+        )?;
+        let critic_w = Tensor::from_vec(
+            crate::policy::orthogonal_weight(1, hidden_dim, 1.0),
+            (1, hidden_dim),
+            &device,
+        )?;
+
+        let _ = varmap.set_one("fc1.weight", fc1_w);
+        let _ = varmap.set_one("fc2.weight", fc2_w);
+        let _ = varmap.set_one("actor_head.weight", actor_w);
+        let _ = varmap.set_one("critic_head.weight", critic_w);
 
         let params = ParamsAdamW {
             lr: config.lr,
@@ -167,6 +201,43 @@ impl PPOAgent {
 
     pub fn set_entropy_coef(&mut self, c2: f32) {
         self.config.c2 = c2;
+    }
+
+    pub fn set_lr(&mut self, lr: f64) -> Result<()> {
+        self.config.lr = lr;
+        let params = ParamsAdamW {
+            lr,
+            ..Default::default()
+        };
+        self.optimizer = AdamW::new(self.varmap.all_vars(), params)?;
+        Ok(())
+    }
+
+    /// 全局梯度 L2 范数裁剪（Industrial PPO Standard: max_grad_norm = 0.5）
+    pub fn clip_grad_norm(&self, grads: &mut candle_core::backprop::GradStore) -> Result<f32> {
+        if self.config.max_grad_norm <= 0.0 {
+            return Ok(0.0);
+        }
+        let vars = self.varmap.all_vars();
+        let mut total_norm_sq = 0.0f32;
+        for var in &vars {
+            if let Some(grad) = grads.get(var) {
+                let norm_sq: f32 = (grad * grad)?.sum_all()?.to_scalar()?;
+                total_norm_sq += norm_sq;
+            }
+        }
+        let total_norm = total_norm_sq.sqrt();
+        let max_norm = self.config.max_grad_norm;
+        if total_norm > max_norm {
+            let scale = (max_norm / (total_norm + 1e-6)) as f64;
+            for var in &vars {
+                if let Some(grad) = grads.get(var) {
+                    let scaled_grad = grad.affine(scale, 0.0)?;
+                    grads.insert(var, scaled_grad);
+                }
+            }
+        }
+        Ok(total_norm)
     }
 
     pub fn save(&self, path: &Path) -> Result<()> {
@@ -292,6 +363,7 @@ impl PPOAgent {
         let flat_actions: Vec<f32> = buffer.actions.iter().flatten().copied().collect();
         let actions_tensor = Tensor::from_vec(flat_actions, (n, enc_dim), &self.device)?;
         let old_log_probs_tensor = Tensor::from_vec(buffer.log_probs.clone(), (n,), &self.device)?;
+        let old_values_tensor = Tensor::from_vec(buffer.values.clone(), (n,), &self.device)?;
         let returns_tensor = Tensor::from_vec(returns, (n,), &self.device)?;
         let advantages_tensor = Tensor::from_vec(advantages, (n,), &self.device)?;
         let masks_tensor = build_masks_tensor(&buffer.action_masks, &self.device)?;
@@ -326,9 +398,18 @@ impl PPOAgent {
             // Policy Loss = - mean(min(surr1, surr2))
             let policy_loss = surr1.minimum(&surr2)?.neg()?.mean_all()?;
 
-            // Value Loss = 0.5 * mean((new_values - returns)^2)
-            let val_diff = (&new_values - &returns_tensor)?;
-            let value_loss = (&val_diff * &val_diff)?.mean_all()?.affine(0.5, 0.0)?;
+            // Value Loss: PPO2 Clipped Value Loss
+            let value_loss = if self.config.clip_vloss {
+                let v_diff = (&new_values - &old_values_tensor)?;
+                let v_clamped_diff = v_diff.clamp(-self.config.clip_eps, self.config.clip_eps)?;
+                let v_clipped = (&old_values_tensor + &v_clamped_diff)?;
+                let v_loss_unclipped = (&new_values - &returns_tensor)?.powf(2.0)?;
+                let v_loss_clipped = (&v_clipped - &returns_tensor)?.powf(2.0)?;
+                v_loss_unclipped.maximum(&v_loss_clipped)?.mean_all()?.affine(0.5, 0.0)?
+            } else {
+                let val_diff = (&new_values - &returns_tensor)?;
+                (&val_diff * &val_diff)?.mean_all()?.affine(0.5, 0.0)?
+            };
 
             // Entropy Loss = - mean(entropy)
             let entropy_loss = entropy.neg()?.mean_all()?;
@@ -353,7 +434,8 @@ impl PPOAgent {
             let total_loss = (c1_val + (entropy_loss.affine(self.config.c2 as f64, 0.0)?))?;
             let tot_loss_val: f32 = total_loss.to_scalar()?;
 
-            let grads = total_loss.backward()?;
+            let mut grads = total_loss.backward()?;
+            self.clip_grad_norm(&mut grads)?;
             self.optimizer.step(&grads)?;
 
             last_stats = PPOStats {
@@ -451,6 +533,7 @@ impl PPOAgent {
             let mut shuffled_states = Vec::with_capacity(n * state_dim);
             let mut shuffled_actions = Vec::with_capacity(n * enc_dim);
             let mut shuffled_log_probs = Vec::with_capacity(n);
+            let mut shuffled_old_values = Vec::with_capacity(n);
             let mut shuffled_returns = Vec::with_capacity(n);
             let mut shuffled_advantages = Vec::with_capacity(n);
             let mut shuffled_masks = if has_masks {
@@ -465,6 +548,7 @@ impl PPOAgent {
                 shuffled_actions
                     .extend_from_slice(&flat_actions[idx * enc_dim..(idx + 1) * enc_dim]);
                 shuffled_log_probs.push(buffer.log_probs[idx]);
+                shuffled_old_values.push(buffer.values[idx]);
                 shuffled_returns.push(returns[idx]);
                 shuffled_advantages.push(advantages[idx]);
                 if let (Some(sm), Some(fm)) = (&mut shuffled_masks, &flat_masks) {
@@ -475,6 +559,7 @@ impl PPOAgent {
             let states_tensor = Tensor::from_vec(shuffled_states, (n, state_dim), &self.device)?;
             let actions_tensor = Tensor::from_vec(shuffled_actions, (n, enc_dim), &self.device)?;
             let old_log_probs_tensor = Tensor::from_vec(shuffled_log_probs, (n,), &self.device)?;
+            let old_values_tensor = Tensor::from_vec(shuffled_old_values, (n,), &self.device)?;
             let returns_tensor = Tensor::from_vec(shuffled_returns, (n,), &self.device)?;
             let advantages_tensor = Tensor::from_vec(shuffled_advantages, (n,), &self.device)?;
             let masks_tensor = if let Some(sm) = shuffled_masks {
@@ -491,12 +576,24 @@ impl PPOAgent {
                 let mb_states = states_tensor.narrow(0, start_idx, mb_len)?;
                 let mb_actions = actions_tensor.narrow(0, start_idx, mb_len)?;
                 let mb_old_log_probs = old_log_probs_tensor.narrow(0, start_idx, mb_len)?;
+                let mb_old_values = old_values_tensor.narrow(0, start_idx, mb_len)?;
                 let mb_returns = returns_tensor.narrow(0, start_idx, mb_len)?;
                 let mb_advantages = advantages_tensor.narrow(0, start_idx, mb_len)?;
                 let mb_masks = if let Some(ref mt) = masks_tensor {
                     Some(mt.narrow(0, start_idx, mb_len)?)
                 } else {
                     None
+                };
+
+                // Mini-Batch 内部优势重归一化 (CleanRL / PPO2 Detail)
+                let mb_advantages_norm = if mb_len > 1 {
+                    let mean = mb_advantages.mean_all()?;
+                    let diff = mb_advantages.broadcast_sub(&mean)?;
+                    let var = (&diff * &diff)?.mean_all()?;
+                    let std = (var + 1e-8)?.sqrt()?;
+                    diff.broadcast_div(&std)?
+                } else {
+                    mb_advantages
                 };
 
                 let (new_log_probs, new_values, entropy) = self.actor_critic.evaluate_actions(
@@ -508,14 +605,26 @@ impl PPOAgent {
                 let log_ratio = (&new_log_probs - &mb_old_log_probs)?;
                 let ratio = log_ratio.exp()?;
 
-                let surr1 = (&ratio * &mb_advantages)?;
+                let surr1 = (&ratio * &mb_advantages_norm)?;
                 let clamped_ratio =
                     ratio.clamp(1.0 - self.config.clip_eps, 1.0 + self.config.clip_eps)?;
-                let surr2 = (&clamped_ratio * &mb_advantages)?;
+                let surr2 = (&clamped_ratio * &mb_advantages_norm)?;
 
                 let policy_loss = surr1.minimum(&surr2)?.neg()?.mean_all()?;
-                let val_diff = (&new_values - &mb_returns)?;
-                let value_loss = (&val_diff * &val_diff)?.mean_all()?.affine(0.5, 0.0)?;
+
+                // Value Loss: PPO2 Clipped Value Loss
+                let value_loss = if self.config.clip_vloss {
+                    let v_diff = (&new_values - &mb_old_values)?;
+                    let v_clamped_diff = v_diff.clamp(-self.config.clip_eps, self.config.clip_eps)?;
+                    let v_clipped = (&mb_old_values + &v_clamped_diff)?;
+                    let v_loss_unclipped = (&new_values - &mb_returns)?.powf(2.0)?;
+                    let v_loss_clipped = (&v_clipped - &mb_returns)?.powf(2.0)?;
+                    v_loss_unclipped.maximum(&v_loss_clipped)?.mean_all()?.affine(0.5, 0.0)?
+                } else {
+                    let val_diff = (&new_values - &mb_returns)?;
+                    (&val_diff * &val_diff)?.mean_all()?.affine(0.5, 0.0)?
+                };
+
                 let entropy_loss = entropy.neg()?.mean_all()?;
 
                 let kl = (&ratio - 1.0 - &log_ratio)?.mean_all()?;
@@ -534,7 +643,8 @@ impl PPOAgent {
                 let total_loss = (c1_val + (entropy_loss.affine(self.config.c2 as f64, 0.0)?))?;
                 let tot_loss_val: f32 = total_loss.to_scalar()?;
 
-                let grads = total_loss.backward()?;
+                let mut grads = total_loss.backward()?;
+                self.clip_grad_norm(&mut grads)?;
                 self.optimizer.step(&grads)?;
 
                 last_stats = PPOStats {
@@ -593,6 +703,7 @@ impl PPOAgent {
         let mut all_states = Vec::with_capacity(total_n * state_dim);
         let mut all_actions = Vec::with_capacity(total_n * enc_dim);
         let mut all_old_log_probs = Vec::with_capacity(total_n);
+        let mut all_old_values = Vec::with_capacity(total_n);
         let mut all_returns = Vec::with_capacity(total_n);
         let mut all_advantages = Vec::with_capacity(total_n);
         let mut all_masks: Option<Vec<f32>> = if has_masks {
@@ -612,6 +723,7 @@ impl PPOAgent {
                 all_states.extend_from_slice(&buffer.states[t]);
                 all_actions.extend_from_slice(&buffer.actions[t]);
                 all_old_log_probs.push(buffer.log_probs[t]);
+                all_old_values.push(buffer.values[t]);
                 all_returns.push(returns[t]);
                 all_advantages.push(advantages[t]);
                 if let Some(ref mut am) = all_masks {
@@ -658,6 +770,7 @@ impl PPOAgent {
             let mut shuffled_states = Vec::with_capacity(total_n * state_dim);
             let mut shuffled_actions = Vec::with_capacity(total_n * enc_dim);
             let mut shuffled_log_probs = Vec::with_capacity(total_n);
+            let mut shuffled_old_values = Vec::with_capacity(total_n);
             let mut shuffled_returns = Vec::with_capacity(total_n);
             let mut shuffled_advantages = Vec::with_capacity(total_n);
             let mut shuffled_masks: Option<Vec<f32>> = if has_masks {
@@ -672,6 +785,7 @@ impl PPOAgent {
                 shuffled_actions
                     .extend_from_slice(&all_actions[idx * enc_dim..(idx + 1) * enc_dim]);
                 shuffled_log_probs.push(all_old_log_probs[idx]);
+                shuffled_old_values.push(all_old_values[idx]);
                 shuffled_returns.push(all_returns[idx]);
                 shuffled_advantages.push(all_advantages[idx]);
                 if let (Some(sm), Some(am)) = (&mut shuffled_masks, &all_masks) {
@@ -685,6 +799,8 @@ impl PPOAgent {
                 Tensor::from_vec(shuffled_actions, (total_n, enc_dim), &self.device)?;
             let old_log_probs_tensor =
                 Tensor::from_vec(shuffled_log_probs, (total_n,), &self.device)?;
+            let old_values_tensor =
+                Tensor::from_vec(shuffled_old_values, (total_n,), &self.device)?;
             let returns_tensor = Tensor::from_vec(shuffled_returns, (total_n,), &self.device)?;
             let advantages_tensor =
                 Tensor::from_vec(shuffled_advantages, (total_n,), &self.device)?;
@@ -702,12 +818,24 @@ impl PPOAgent {
                 let mb_states = states_tensor.narrow(0, start_idx, mb_len)?;
                 let mb_actions = actions_tensor.narrow(0, start_idx, mb_len)?;
                 let mb_old_log_probs = old_log_probs_tensor.narrow(0, start_idx, mb_len)?;
+                let mb_old_values = old_values_tensor.narrow(0, start_idx, mb_len)?;
                 let mb_returns = returns_tensor.narrow(0, start_idx, mb_len)?;
                 let mb_advantages = advantages_tensor.narrow(0, start_idx, mb_len)?;
                 let mb_masks = if let Some(ref mt) = masks_tensor {
                     Some(mt.narrow(0, start_idx, mb_len)?)
                 } else {
                     None
+                };
+
+                // Mini-Batch 内部优势重归一化 (CleanRL / PPO2 Detail)
+                let mb_advantages_norm = if mb_len > 1 {
+                    let mean = mb_advantages.mean_all()?;
+                    let diff = mb_advantages.broadcast_sub(&mean)?;
+                    let var = (&diff * &diff)?.mean_all()?;
+                    let std = (var + 1e-8)?.sqrt()?;
+                    diff.broadcast_div(&std)?
+                } else {
+                    mb_advantages
                 };
 
                 let (new_log_probs, new_values, entropy) = self.actor_critic.evaluate_actions(
@@ -719,14 +847,26 @@ impl PPOAgent {
                 let log_ratio = (&new_log_probs - &mb_old_log_probs)?;
                 let ratio = log_ratio.exp()?;
 
-                let surr1 = (&ratio * &mb_advantages)?;
+                let surr1 = (&ratio * &mb_advantages_norm)?;
                 let clamped_ratio =
                     ratio.clamp(1.0 - self.config.clip_eps, 1.0 + self.config.clip_eps)?;
-                let surr2 = (&clamped_ratio * &mb_advantages)?;
+                let surr2 = (&clamped_ratio * &mb_advantages_norm)?;
 
                 let policy_loss = surr1.minimum(&surr2)?.neg()?.mean_all()?;
-                let val_diff = (&new_values - &mb_returns)?;
-                let value_loss = (&val_diff * &val_diff)?.mean_all()?.affine(0.5, 0.0)?;
+
+                // Value Loss: PPO2 Clipped Value Loss
+                let value_loss = if self.config.clip_vloss {
+                    let v_diff = (&new_values - &mb_old_values)?;
+                    let v_clamped_diff = v_diff.clamp(-self.config.clip_eps, self.config.clip_eps)?;
+                    let v_clipped = (&mb_old_values + &v_clamped_diff)?;
+                    let v_loss_unclipped = (&new_values - &mb_returns)?.powf(2.0)?;
+                    let v_loss_clipped = (&v_clipped - &mb_returns)?.powf(2.0)?;
+                    v_loss_unclipped.maximum(&v_loss_clipped)?.mean_all()?.affine(0.5, 0.0)?
+                } else {
+                    let val_diff = (&new_values - &mb_returns)?;
+                    (&val_diff * &val_diff)?.mean_all()?.affine(0.5, 0.0)?
+                };
+
                 let entropy_loss = entropy.neg()?.mean_all()?;
 
                 let kl = (&ratio - 1.0 - &log_ratio)?.mean_all()?;
@@ -745,7 +885,8 @@ impl PPOAgent {
                 let total_loss = (c1_val + (entropy_loss.affine(self.config.c2 as f64, 0.0)?))?;
                 let tot_loss_val: f32 = total_loss.to_scalar()?;
 
-                let grads = total_loss.backward()?;
+                let mut grads = total_loss.backward()?;
+                self.clip_grad_norm(&mut grads)?;
                 self.optimizer.step(&grads)?;
 
                 last_stats = PPOStats {
@@ -1065,6 +1206,66 @@ mod tests {
             stats_multi.value_loss.is_finite(),
             "update_multi_buffer value_loss 应为有效有限值"
         );
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_orthogonal_weight_properties() {
+        use crate::policy::orthogonal_weight;
+        let out_dim = 16;
+        let in_dim = 32;
+        let gain = 1.414f32;
+        let w = orthogonal_weight(out_dim, in_dim, gain);
+        assert_eq!(w.len(), out_dim * in_dim);
+
+        // 验证行向量正交性：W * W^T ≈ gain^2 * I
+        for r1 in 0..out_dim {
+            for r2 in 0..out_dim {
+                let dot: f32 = (0..in_dim)
+                    .map(|c| w[r1 * in_dim + c] * w[r2 * in_dim + c])
+                    .sum();
+                if r1 == r2 {
+                    let expected = gain * gain;
+                    assert!(
+                        (dot - expected).abs() < 1e-3,
+                        "对角元素 dot ({dot}) 应接近 gain^2 ({expected})"
+                    );
+                } else {
+                    assert!(
+                        dot.abs() < 1e-3,
+                        "非对角元素 dot ({dot}) 应接近 0 (正交)"
+                    );
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn test_industrial_ppo_clip_vloss_and_grad_norm() -> Result<()> {
+        let state_dim = 8;
+        let hidden_dim = 32;
+        let action_space = ActionSpace::Discrete(4);
+        let mut config = PPOConfig::default();
+        config.clip_vloss = true;
+        config.max_grad_norm = 0.5;
+        let device = Device::Cpu;
+
+        let mut agent = PPOAgent::new(state_dim, hidden_dim, action_space, config, device)?;
+        agent.set_lr(1e-4)?;
+
+        let mut buffer = RolloutBuffer::new();
+        for _ in 0..10 {
+            let obs = vec![0.5f32; state_dim];
+            buffer.push_unmasked(obs, vec![0.0], -0.5, 1.0, 0.2, false);
+        }
+
+        let stats = agent.update(&buffer, 0.0)?;
+        assert!(stats.policy_loss.is_finite());
+        assert!(stats.value_loss.is_finite());
+        assert!(stats.total_loss.is_finite());
+        assert!(stats.kl.is_finite());
+        assert!(stats.clip_frac >= 0.0 && stats.clip_frac <= 1.0);
 
         Ok(())
     }
