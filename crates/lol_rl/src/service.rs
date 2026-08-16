@@ -559,7 +559,7 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment + 'static>(
     task_id: String,
     task_config: TaskConfigPayload,
 ) {
-    let env_max_steps = task_config.rollout_steps_per_env.max(1);
+    let rollout_steps = task_config.rollout_steps_per_env.max(1);
     let state_dim = E::state_dim();
     let action_space = E::action_space();
     let total_iterations = task_config.total_iterations.max(1);
@@ -569,7 +569,7 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment + 'static>(
     // 1. 自动吞吐探测与求解
     let tuned = match AutoTuner::profile::<E>(state_dim, hidden_dim, &action_space, &device) {
         Ok(profile) => {
-            let res = AutoTuner::solve(&profile, env_max_steps, task_config.ppo_epochs.max(1));
+            let res = AutoTuner::solve(&profile, rollout_steps, task_config.ppo_epochs.max(1));
             info!(
                 "🎯 [AutoTuner] 为任务 {} 自动求解最优吞吐配置: 并发 Actors={}, 推理 Batch={}, 训练 MiniBatch={}, 预估 SPS: {:.1}",
                 task_id,
@@ -635,7 +635,7 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment + 'static>(
     };
 
     // 2. 启动长驻持久化 Worker 线程池（环境只在任务启动时初始化一次）
-    let horizon = 64usize; // 每轮采样 64 步
+    let horizon = rollout_steps;
     struct WorkerTrajectory<O> {
         buffer: RolloutBuffer,
         last_value: f32,
@@ -660,7 +660,7 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment + 'static>(
         let (resp_tx, resp_rx) = crossbeam_channel::unbounded::<WorkerTrajectory<E::Obs>>();
 
         let handle = std::thread::spawn(move || {
-            let mut env = E::new(env_max_steps);
+            let mut env = E::new();
             let mut current_obs = env.reset();
             let mut cur_return = 0.0f32;
             let mut cur_steps = 0usize;
@@ -706,7 +706,15 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment + 'static>(
                                 *reward_breakdown.entry(item.name).or_insert(0.0) += item.value;
                             }
 
-                            buffer.push(state_vec, encoded, log_prob, res.reward, val, done, action_mask);
+                            buffer.push(
+                                state_vec,
+                                encoded,
+                                log_prob,
+                                res.reward,
+                                val,
+                                done,
+                                action_mask,
+                            );
 
                             if done {
                                 ep_returns.push(cur_return);
@@ -777,10 +785,6 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment + 'static>(
             } else {
                 break;
             }
-        }
-
-        if task_config.max_steps > 0 && total_steps >= task_config.max_steps {
-            break;
         }
 
         // 处理实时保存模型请求

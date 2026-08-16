@@ -10,7 +10,7 @@ use lol_rpc::CommandWsRequest as TypedCommandWsRequest;
 use serde_json::{Value, json};
 
 use crate::params::RlResetParams;
-use crate::rl::{DEFAULT_MAX_STEPS, MoonLoLEnv, RewardShaper, RlEnvs};
+use crate::rl::{MoonLoLEnv, RewardShaper, RlEnvs};
 use crate::systems::obs::{PlayerQ, observe};
 
 pub fn on_rl_reset(
@@ -51,7 +51,7 @@ pub fn on_rl_reset(
             .map(RewardShaper::from_config_json)
             .unwrap_or_default();
 
-        let mut env = MoonLoLEnv::new(shaper, DEFAULT_MAX_STEPS);
+        let mut env = MoonLoLEnv::new(shaper);
         env.reset(obs.clone());
         rl_envs.0.insert(target_entity, env);
 

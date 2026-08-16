@@ -495,11 +495,14 @@ fn build_model_form(
 }
 
 fn open_model_dialog(window: &mut Window, cx: &mut Context<AppSidebar>) {
+    let is_new = cx.entity().read(cx).settings.editing_model_idx.is_none();
+    let title = if is_new { "添加模型" } else { "编辑模型" };
     let weak = cx.entity().downgrade();
     let save_weak = weak.clone();
     open_form_dialog(window, cx, weak, build_model_form, move |dialog, form| {
         let save_weak = save_weak.clone();
         dialog
+            .title(title)
             .w(px(384.))
             .child(form)
             .footer(
@@ -614,6 +617,7 @@ fn open_test_result_dialog(window: &mut Window, cx: &mut Context<AppSidebar>) {
     let weak = cx.entity().downgrade();
     open_form_dialog(window, cx, weak, build_test_result_form, |dialog, form| {
         dialog
+            .title("连通性测试结果")
             .w(px(384.))
             .child(form)
             .footer(DialogFooter::new().child(

@@ -278,11 +278,7 @@ impl ActorCritic {
     }
 
     /// 确定性贪心动作（连续取均值、离散取 argmax），用于可视化与评估。
-    pub fn select_greedy_action(
-        &self,
-        state: &Tensor,
-        mask: Option<&[bool]>,
-    ) -> Result<Vec<f32>> {
+    pub fn select_greedy_action(&self, state: &Tensor, mask: Option<&[bool]>) -> Result<Vec<f32>> {
         let h2 = self.hidden(state)?;
         match self.action_space {
             ActionSpace::Discrete(_) => {
@@ -324,26 +320,32 @@ impl ActorCritic {
         match self.action_space {
             ActionSpace::Discrete(_) => {
                 let logits: Vec<f32> = self.actor_head.forward(&h2)?.squeeze(0)?.to_vec1()?;
+                let raw_probs_vec = softmax_slice(&logits);
                 let masked = mask_logits_slice(&logits, mask);
                 let probs_vec = softmax_slice(&masked);
                 Ok(PolicyDisplay::Discrete(
                     probs_vec
                         .into_iter()
                         .enumerate()
-                        .map(|(i, p)| PolicyItem {
-                            action_id: i,
-                            action: labels
-                                .get(i)
-                                .map(|s| s.to_string())
-                                .unwrap_or_else(|| format!("Action {}", i)),
-                            prob: p,
+                        .map(|(i, p)| {
+                            let is_masked = mask
+                                .map(|m| !m.get(i).copied().unwrap_or(true))
+                                .unwrap_or(false);
+                            PolicyItem {
+                                action_id: i,
+                                action: labels
+                                    .get(i)
+                                    .map(|s| s.to_string())
+                                    .unwrap_or_else(|| format!("Action {}", i)),
+                                prob: p,
+                                raw_prob: raw_probs_vec.get(i).copied().unwrap_or(0.0),
+                                is_masked,
+                            }
                         })
                         .collect(),
                 ))
             }
-            ActionSpace::Continuous(_) => {
-                Ok(PolicyDisplay::Discrete(Vec::new()))
-            }
+            ActionSpace::Continuous(_) => Ok(PolicyDisplay::Discrete(Vec::new())),
             ActionSpace::Hybrid {
                 continuous_dims,
                 discrete_classes,
@@ -356,17 +358,24 @@ impl ActorCritic {
                     .forward(&h2)?
                     .squeeze(0)?
                     .to_vec1()?;
+                let raw_discrete_probs_vec = softmax_slice(&attack_logits);
                 let masked = mask_logits_slice(&attack_logits, mask);
                 let discrete_probs_vec = softmax_slice(&masked);
 
                 if discrete_classes == 2 {
                     let p_attack = discrete_probs_vec.last().copied().unwrap_or(0.0);
+                    let raw_p_attack = raw_discrete_probs_vec.last().copied().unwrap_or(0.0);
+                    let is_attack_masked = mask
+                        .map(|m| !m.get(1).copied().unwrap_or(true))
+                        .unwrap_or(false);
                     let move_x = means.first().copied().unwrap_or(0.0).clamp(-1.0, 1.0);
                     let move_z = means.get(1).copied().unwrap_or(0.0).clamp(-1.0, 1.0);
                     Ok(PolicyDisplay::Hybrid {
                         move_x,
                         move_z,
                         attack_prob: p_attack,
+                        raw_attack_prob: raw_p_attack,
+                        is_attack_masked,
                     })
                 } else {
                     let discrete_probs = discrete_probs_vec
@@ -377,10 +386,15 @@ impl ActorCritic {
                                 .get(i)
                                 .map(|s| s.to_string())
                                 .unwrap_or_else(|| format!("Act_{}", i));
+                            let is_masked = mask
+                                .map(|m| !m.get(i).copied().unwrap_or(true))
+                                .unwrap_or(false);
                             PolicyItem {
                                 action_id: i,
                                 action: action_label,
                                 prob,
+                                raw_prob: raw_discrete_probs_vec.get(i).copied().unwrap_or(0.0),
+                                is_masked,
                             }
                         })
                         .collect();

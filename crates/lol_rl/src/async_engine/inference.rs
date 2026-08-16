@@ -110,7 +110,11 @@ impl InferenceServer {
 
                 // 5. 批量前向推理
                 let has_any_mask = masks.iter().any(|m| m.is_some());
-                let masks_ref = if has_any_mask { Some(masks.as_slice()) } else { None };
+                let masks_ref = if has_any_mask {
+                    Some(masks.as_slice())
+                } else {
+                    None
+                };
                 let sample_res = current_ac.sample_batch(&state_tensor, masks_ref);
                 match sample_res {
                     Ok(results) => {

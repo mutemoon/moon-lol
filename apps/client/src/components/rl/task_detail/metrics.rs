@@ -60,7 +60,7 @@ pub fn render_tab_metrics(detail: &LocalTaskDetail, cx: &mut Context<AppSidebar>
                         "chart-ep-return",
                         &rows,
                         |m| m.ep_return as f64,
-                        cx.theme().chart_1,
+                        hsla(215.0 / 360.0, 0.9, 0.6, 1.0),
                         None,
                         cx,
                     ),
@@ -69,7 +69,7 @@ pub fn render_tab_metrics(detail: &LocalTaskDetail, cx: &mut Context<AppSidebar>
                         "chart-value",
                         &rows,
                         |m| m.value as f64,
-                        cx.theme().chart_5,
+                        hsla(25.0 / 360.0, 0.95, 0.58, 1.0),
                         None,
                         cx,
                     ),
@@ -82,7 +82,7 @@ pub fn render_tab_metrics(detail: &LocalTaskDetail, cx: &mut Context<AppSidebar>
                         "chart-kl",
                         &rows,
                         |m| m.kl as f64,
-                        cx.theme().chart_3,
+                        hsla(280.0 / 360.0, 0.85, 0.65, 1.0),
                         Some(clip_eps as f64),
                         cx,
                     ),
@@ -91,7 +91,7 @@ pub fn render_tab_metrics(detail: &LocalTaskDetail, cx: &mut Context<AppSidebar>
                         "chart-entropy",
                         &rows,
                         |m| m.entropy as f64,
-                        cx.theme().chart_4,
+                        hsla(145.0 / 360.0, 0.8, 0.48, 1.0),
                         None,
                         cx,
                     ),
@@ -100,7 +100,7 @@ pub fn render_tab_metrics(detail: &LocalTaskDetail, cx: &mut Context<AppSidebar>
                         "chart-clip-frac",
                         &rows,
                         |m| m.clip_frac as f64,
-                        cx.theme().chart_2,
+                        hsla(45.0 / 360.0, 0.95, 0.5, 1.0),
                         None,
                         cx,
                     ),
@@ -193,15 +193,19 @@ fn metric_chart(
         .into_any_element()
 }
 
-/// PPO 损失拆解：policy / value / total 三线，替代原先 policy+value 混合的 loss 图。
+/// PPO 损失拆解：policy / value / total 三线，使用鲜艳对比彩色区分。
 fn loss_breakdown_chart(rows: &[MetricsRow], cx: &Context<AppSidebar>) -> AnyElement {
+    let color_policy = hsla(215.0 / 360.0, 0.9, 0.6, 1.0); // 蓝
+    let color_value = hsla(25.0 / 360.0, 0.95, 0.58, 1.0); // 橙
+    let color_total = hsla(145.0 / 360.0, 0.8, 0.48, 1.0); // 绿
+
     v_flex()
         .gap_2()
         .child(div().font_semibold().text_sm().child("PPO 损失拆解"))
         .child(h_flex().gap_4().children([
-            legend_item("policy".into(), cx.theme().chart_1, cx),
-            legend_item("value".into(), cx.theme().chart_2, cx),
-            legend_item("total".into(), cx.theme().chart_3, cx),
+            legend_item("policy".into(), color_policy, cx),
+            legend_item("value".into(), color_value, cx),
+            legend_item("total".into(), color_total, cx),
         ]))
         .child(
             div()
@@ -216,15 +220,15 @@ fn loss_breakdown_chart(rows: &[MetricsRow], cx: &Context<AppSidebar>) -> AnyEle
                         .id("chart-loss-breakdown")
                         .x(|r| r.step)
                         .tick_margin((rows.len() / 8).max(1))
-                        .series("policy", cx.theme().chart_1, |r| r.policy_loss as f64)
-                        .series("value", cx.theme().chart_2, |r| r.value_loss as f64)
-                        .series("total", cx.theme().chart_3, |r| r.total_loss as f64),
+                        .series("policy", color_policy, |r| r.policy_loss as f64)
+                        .series("value", color_value, |r| r.value_loss as f64)
+                        .series("total", color_total, |r| r.total_loss as f64),
                 ),
         )
         .into_any_element()
 }
 
-/// 奖励构成：每个奖励项一条线（每迭代每步平均贡献），能看出策略在靠什么拿分。
+/// 奖励构成：每个奖励项一条线（每迭代每步平均贡献），采用多色系高对比 Palette。
 fn reward_breakdown_chart(rows: &[MetricsRow], cx: &Context<AppSidebar>) -> AnyElement {
     let mut terms: Vec<String> = Vec::new();
     for r in rows {
@@ -235,12 +239,14 @@ fn reward_breakdown_chart(rows: &[MetricsRow], cx: &Context<AppSidebar>) -> AnyE
         }
     }
     let colors = [
-        cx.theme().chart_1,
-        cx.theme().chart_2,
-        cx.theme().chart_3,
-        cx.theme().chart_4,
-        cx.theme().chart_5,
-        cx.theme().accent,
+        hsla(215.0 / 360.0, 0.9, 0.6, 1.0),   // 蓝
+        hsla(25.0 / 360.0, 0.95, 0.58, 1.0),  // 橙
+        hsla(145.0 / 360.0, 0.8, 0.48, 1.0),  // 绿
+        hsla(280.0 / 360.0, 0.85, 0.65, 1.0), // 紫
+        hsla(45.0 / 360.0, 0.95, 0.5, 1.0),   // 金黄
+        hsla(185.0 / 360.0, 0.85, 0.5, 1.0),  // 青
+        hsla(340.0 / 360.0, 0.85, 0.6, 1.0),  // 洋红/粉红
+        hsla(250.0 / 360.0, 0.85, 0.65, 1.0), // 靛蓝
     ];
     let mut chart = MultiLineChart::new(rows.to_vec())
         .id("chart-reward-breakdown")
@@ -289,8 +295,12 @@ fn term_value(r: &MetricsRow, term: &str) -> f64 {
         .unwrap_or(0.0)
 }
 
-/// 单局步数（最大/最小/平均）三线图卡片。
+/// 单局步数（最大/最小/平均）三线图卡片，采用多色系区分。
 fn ep_steps_chart(rows: &[MetricsRow], cx: &Context<AppSidebar>) -> AnyElement {
+    let color_max = hsla(280.0 / 360.0, 0.85, 0.65, 1.0); // 紫
+    let color_min = hsla(190.0 / 360.0, 0.9, 0.55, 1.0); // 青
+    let color_avg = hsla(45.0 / 360.0, 0.95, 0.52, 1.0); // 金黄
+
     v_flex()
         .gap_2()
         .child(
@@ -300,9 +310,9 @@ fn ep_steps_chart(rows: &[MetricsRow], cx: &Context<AppSidebar>) -> AnyElement {
                 .child("单局步数 (每迭代每环境各一局)"),
         )
         .child(h_flex().gap_4().children([
-            legend_item("最大步数".into(), cx.theme().chart_1, cx),
-            legend_item("最小步数".into(), cx.theme().chart_2, cx),
-            legend_item("平均步数".into(), cx.theme().chart_3, cx),
+            legend_item("最大步数".into(), color_max, cx),
+            legend_item("最小步数".into(), color_min, cx),
+            legend_item("平均步数".into(), color_avg, cx),
         ]))
         .child(
             div()
@@ -317,15 +327,9 @@ fn ep_steps_chart(rows: &[MetricsRow], cx: &Context<AppSidebar>) -> AnyElement {
                         .id("chart-ep-steps")
                         .x(|r| r.step)
                         .tick_margin((rows.len() / 8).max(1))
-                        .series("最大步数", cx.theme().chart_1, |r| {
-                            r.ep_steps_max as f64
-                        })
-                        .series("最小步数", cx.theme().chart_2, |r| {
-                            r.ep_steps_min as f64
-                        })
-                        .series("平均步数", cx.theme().chart_3, |r| {
-                            r.ep_steps_avg as f64
-                        }),
+                        .series("最大步数", color_max, |r| r.ep_steps_max as f64)
+                        .series("最小步数", color_min, |r| r.ep_steps_min as f64)
+                        .series("平均步数", color_avg, |r| r.ep_steps_avg as f64),
                 ),
         )
         .into_any_element()
@@ -343,7 +347,7 @@ fn perf_section(rows: &[MetricsRow], cx: &Context<AppSidebar>) -> AnyElement {
         .child(
             div()
                 .text_xs()
-                .text_color(cx.theme().muted_foreground)
+                .text_color(cx.theme().foreground.opacity(0.85))
                 .child(summary),
         )
         .child(
@@ -359,20 +363,20 @@ fn perf_section(rows: &[MetricsRow], cx: &Context<AppSidebar>) -> AnyElement {
                         .id("chart-fps")
                         .x(|r| r.step)
                         .tick_margin((rows.len() / 8).max(1))
-                        .series("SPS", cx.theme().chart_1, |r| r.fps as f64),
+                        .series("SPS", hsla(185.0 / 360.0, 0.85, 0.5, 1.0), |r| r.fps as f64),
                 ),
         )
         .into_any_element()
 }
 
 /// 图例小圆点 + 标签。
-fn legend_item(label: SharedString, color: Hsla, cx: &Context<AppSidebar>) -> AnyElement {
+fn legend_item(label: SharedString, color: Hsla, _cx: &Context<AppSidebar>) -> AnyElement {
     h_flex()
         .gap_1p5()
         .items_center()
         .text_xs()
         .child(div().size_2().rounded_full().bg(color))
-        .child(div().text_color(cx.theme().muted_foreground).child(label))
+        .child(div().child(label))
         .into_any_element()
 }
 

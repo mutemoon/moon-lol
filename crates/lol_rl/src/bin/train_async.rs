@@ -28,7 +28,6 @@ fn main() -> anyhow::Result<()> {
     let device = select_device().unwrap_or(candle_core::Device::Cpu);
     info!("💻 运算设备: {:?}", device);
 
-    let env_max_steps = 40;
     let state_dim = FioraVsRivenRealObs::dim();
     let action_space = FioraVsRivenRealEnv::action_space();
     let hidden_dim = 64;
@@ -74,7 +73,6 @@ fn main() -> anyhow::Result<()> {
     // 6. 启动多环境 Actors 并行池
     let mut actor_pool = ActorPool::spawn::<FioraVsRivenRealEnv>(
         tuned.num_parallel_envs,
-        env_max_steps,
         infer_server.req_tx.clone(),
         sample_tx,
     );

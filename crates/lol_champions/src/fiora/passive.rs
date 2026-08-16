@@ -360,7 +360,7 @@ pub fn on_passive_damage_create(
     });
     commands.trigger(CommandSkinSoundPlay {
         entity: trigger.source,
-        key: "FioraPassiveHitSound_OnHit".to_string(),
+        key: "FioraPassiveHitSound_OnBuffCast".to_string(),
     });
 
     let direction = match last_direction.entity_to_last_direction.get(&target_entity) {

@@ -364,30 +364,121 @@ pub struct TaskConfigPayload {
     pub parallel_envs: usize,
     pub rollout_steps_per_env: usize,
     pub total_iterations: usize,
-    pub max_steps: usize,
 }
 
 pub const ENV_FIORA_V2: &str = "FioraV2";
 pub const ENV_FIORA_V1: &str = "FioraV1";
 pub const ENV_FIORA_V0: &str = "FioraV0";
 
-impl Default for TaskConfigPayload {
-    fn default() -> Self {
+/// 环境自带的训练超参数规范（作为环境默认超参数的唯一真实来源）。
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
+pub struct EnvTrainingParams {
+    pub lr: f32,
+    pub gamma: f32,
+    pub gae_lambda: f32,
+    pub clip_eps: f32,
+    pub ppo_epochs: usize,
+    pub hidden_dim: usize,
+    pub rollout_steps_per_env: usize,
+    pub total_iterations: usize,
+}
+
+/// 环境规范与展示元数据
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct EnvSpec {
+    pub name: &'static str,
+    pub label: &'static str,
+    pub tag: &'static str,
+    pub description: &'static str,
+    pub default_params: EnvTrainingParams,
+}
+
+pub const ENV_FIORA_V2_SPEC: EnvSpec = EnvSpec {
+    name: ENV_FIORA_V2,
+    label: "全技能实战 (V2)",
+    tag: "V2",
+    description: "无缝融合 Q/W/E/R 全技能连招与真实移动走位，高维状态空间与复杂动作分支",
+    default_params: EnvTrainingParams {
+        lr: 3e-4,
+        gamma: 0.99,
+        gae_lambda: 0.95,
+        clip_eps: 0.2,
+        ppo_epochs: 8,
+        hidden_dim: 256,
+        rollout_steps_per_env: 160,
+        total_iterations: 300,
+    },
+};
+
+pub const ENV_FIORA_V1_SPEC: EnvSpec = EnvSpec {
+    name: ENV_FIORA_V1,
+    label: "真实移动 (V1)",
+    tag: "V1",
+    description: "模拟真实微操移动与普攻破绽打击，连续空间离散化动作",
+    default_params: EnvTrainingParams {
+        lr: 3e-4,
+        gamma: 0.99,
+        gae_lambda: 0.95,
+        clip_eps: 0.2,
+        ppo_epochs: 4,
+        hidden_dim: 64,
+        rollout_steps_per_env: 80,
+        total_iterations: 80,
+    },
+};
+
+pub const ENV_FIORA_V0_SPEC: EnvSpec = EnvSpec {
+    name: ENV_FIORA_V0,
+    label: "瞬移站位 (V0)",
+    tag: "V0",
+    description: "简化版瞬移站位打弱点机制，快速收敛验证基础 PPO 策略",
+    default_params: EnvTrainingParams {
+        lr: 3e-4,
+        gamma: 0.99,
+        gae_lambda: 0.95,
+        clip_eps: 0.2,
+        ppo_epochs: 4,
+        hidden_dim: 64,
+        rollout_steps_per_env: 80,
+        total_iterations: 50,
+    },
+};
+
+pub const AVAILABLE_ENVS: &[EnvSpec] = &[ENV_FIORA_V2_SPEC, ENV_FIORA_V1_SPEC, ENV_FIORA_V0_SPEC];
+
+pub fn get_env_spec(name: &str) -> Option<&'static EnvSpec> {
+    AVAILABLE_ENVS.iter().find(|e| e.name == name)
+}
+
+pub fn get_env_training_params(name: &str) -> EnvTrainingParams {
+    get_env_spec(name)
+        .map(|s| s.default_params.clone())
+        .unwrap_or(ENV_FIORA_V2_SPEC.default_params)
+}
+
+impl TaskConfigPayload {
+    pub fn default_for_env(env_name: &str) -> Self {
+        let params = get_env_training_params(env_name);
         Self {
             name: "RL 对战训练任务".to_string(),
             agent_type: "PPO".to_string(),
-            env_name: ENV_FIORA_V1.to_string(),
-            lr: 3e-4,
-            gamma: 0.99,
-            gae_lambda: 0.95,
-            clip_eps: 0.2,
-            ppo_epochs: 4,
-            hidden_dim: 64,
+            env_name: env_name.to_string(),
+            lr: params.lr,
+            gamma: params.gamma,
+            gae_lambda: params.gae_lambda,
+            clip_eps: params.clip_eps,
+            ppo_epochs: params.ppo_epochs,
+            hidden_dim: params.hidden_dim,
             parallel_envs: 0,
-            rollout_steps_per_env: 80,
-            total_iterations: 80,
-            max_steps: 0,
+            rollout_steps_per_env: params.rollout_steps_per_env,
+            total_iterations: params.total_iterations,
         }
+    }
+}
+
+impl Default for TaskConfigPayload {
+    fn default() -> Self {
+        Self::default_for_env(ENV_FIORA_V2)
     }
 }
 
@@ -466,7 +557,14 @@ pub enum OutFrame {
 pub struct PolicyItem {
     pub action_id: usize,
     pub action: String,
+    /// Mask 后的有效采样概率
     pub prob: f32,
+    /// 未 Mask 的网络原始 Softmax 概率
+    #[serde(default)]
+    pub raw_prob: f32,
+    /// 当前步是否被 Action Mask 屏蔽
+    #[serde(default)]
+    pub is_masked: bool,
 }
 
 /// 可视化策略展示：按真实动作空间区分（连续/混合环境不再用 preset 伪分布）。
@@ -479,6 +577,10 @@ pub enum PolicyDisplay {
         move_x: f32,
         move_z: f32,
         attack_prob: f32,
+        #[serde(default)]
+        raw_attack_prob: f32,
+        #[serde(default)]
+        is_attack_masked: bool,
     },
     /// 增强混合动作空间（多维连续偏移均值 + 多离散动作概率分布）
     HybridMulti {
@@ -535,6 +637,9 @@ pub struct VisualObsFrame {
     pub step: usize,
     pub obs: ObsFeaturePayload,
     pub reward: f32,
+    /// 本局从开始累积到当前步的总奖励（每次对局重置后归零）。
+    #[serde(default)]
+    pub episode_reward: f32,
     pub reward_breakdown: Vec<RewardItem>,
     pub policy: PolicyDisplay,
     pub terminated: bool,
@@ -549,6 +654,12 @@ pub struct VisualObsFrame {
     pub riven_alive: bool,
     pub reward_formula: Option<RewardFormulaSpec>,
     pub reward_variables: Option<HashMap<String, f32>>,
+    /// 策略真实输入的观测向量（与 `obs_labels` 一一对应）。
+    #[serde(default)]
+    pub obs_vector: Vec<f32>,
+    /// 观测向量每一维的简要说明。
+    #[serde(default)]
+    pub obs_labels: Vec<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]

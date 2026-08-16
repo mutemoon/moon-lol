@@ -69,6 +69,22 @@ pub trait RlEnvironment: 'static {
     where
         Self: Sized;
 
+    /// 环境固有的单回合默认最大步数（Horizon）。
+    fn default_max_steps() -> usize
+    where
+        Self: Sized;
+
+    /// 环境自带的推荐训练超参数（唯一真实来源直接从 lol_rl_protocol 获取）。
+    fn default_training_params() -> lol_rl_protocol::EnvTrainingParams
+    where
+        Self: Sized,
+    {
+        lol_rl_protocol::get_env_training_params(Self::env_name())
+    }
+
+    /// 获取当前环境实例配置的最大步数（0 为无限制或由环境自身决定）。
+    fn max_steps(&self) -> usize;
+
     /// 动作空间描述（离散 / 连续 / 混合），训练与可视化循环据此分派采样与更新。
     fn action_space() -> ActionSpace
     where
@@ -88,6 +104,15 @@ pub trait RlEnvironment: 'static {
     fn action_labels() -> &'static [&'static str]
     where
         Self: Sized;
+
+    /// 观测向量每一维的简要说明（与 `obs_to_vector` 的布局一一对应），
+    /// 供可视化 UI 逐维展示真实计算出的观测值。默认空（UI 退化为仅显示下标）。
+    fn obs_dim_labels() -> &'static [&'static str]
+    where
+        Self: Sized,
+    {
+        &[]
+    }
 
     fn action_from_index(idx: usize) -> Self::Action
     where
@@ -117,10 +142,12 @@ pub trait RlEnvironment: 'static {
         vec![Self::action_to_index(action) as f32]
     }
 
-    fn new(max_steps: usize) -> Self
+    /// 构造一个使用默认配置（使用环境自身默认最大步数、Headless 模式）的环境实例。
+    fn new() -> Self
     where
         Self: Sized;
 
+    /// 使用指定配置构造环境实例。若 config.max_steps == 0，则采用环境默认步数。
     fn with_config(config: EnvConfig) -> Self
     where
         Self: Sized;
@@ -170,13 +197,7 @@ pub trait VisualEnvironment: RlEnvironment {
     ) -> Option<Self::Action> {
         None
     }
-    fn step_world(
-        &mut self,
-        app: &mut App,
-        action: Self::Action,
-        step_count: usize,
-        max_steps: usize,
-    ) -> StepResult<Self::Obs>;
+    fn step_world(&mut self, app: &mut App, action: Self::Action) -> StepResult<Self::Obs>;
 }
 
 /// Metadata description of an RL environment for registry & UI listings.
@@ -196,8 +217,14 @@ macro_rules! for_all_rl_environments {
     ($macro_name:ident) => {
         $macro_name!(
             ($crate::fiora_v2::FioraV2Env, lol_rl_protocol::ENV_FIORA_V2),
-            ($crate::fiora_v1::FioraVsRivenRealEnv, lol_rl_protocol::ENV_FIORA_V1),
-            ($crate::fiora_v0::FioraVsRivenEnv, lol_rl_protocol::ENV_FIORA_V0)
+            (
+                $crate::fiora_v1::FioraVsRivenRealEnv,
+                lol_rl_protocol::ENV_FIORA_V1
+            ),
+            (
+                $crate::fiora_v0::FioraVsRivenEnv,
+                lol_rl_protocol::ENV_FIORA_V0
+            )
         );
     };
 }

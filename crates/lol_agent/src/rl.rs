@@ -186,7 +186,13 @@ pub struct MoonLoLEnv {
 }
 
 impl MoonLoLEnv {
-    pub fn new(shaper: RewardShaper, max_steps: u32) -> Self {
+    pub const DEFAULT_MAX_STEPS: u32 = 10_000;
+
+    pub fn new(shaper: RewardShaper) -> Self {
+        Self::with_max_steps(shaper, Self::DEFAULT_MAX_STEPS)
+    }
+
+    pub fn with_max_steps(shaper: RewardShaper, max_steps: u32) -> Self {
         Self {
             shaper,
             last_obs: None,
@@ -338,7 +344,7 @@ mod tests {
 
     #[test]
     fn env_reset_and_step_terminates_on_death() {
-        let mut env = MoonLoLEnv::new(RewardShaper::default(), 100);
+        let mut env = MoonLoLEnv::new(RewardShaper::default());
         env.reset(obs(myself(0, 0, 0, 0, 100.0), None));
         let alive = env.step(obs(myself(1, 0, 0, 0, 100.0), None));
         assert_eq!(alive.step, 1);
@@ -350,7 +356,7 @@ mod tests {
 
     #[test]
     fn env_truncates_at_max_steps() {
-        let mut env = MoonLoLEnv::new(RewardShaper::default(), 2);
+        let mut env = MoonLoLEnv::with_max_steps(RewardShaper::default(), 2);
         env.reset(obs(myself(0, 0, 0, 0, 100.0), None));
         assert!(!env.step(obs(myself(0, 0, 0, 0, 100.0), None)).truncated);
         assert!(env.step(obs(myself(0, 0, 0, 0, 100.0), None)).truncated);
@@ -358,7 +364,7 @@ mod tests {
 
     #[test]
     fn step_result_serializes_for_telemetry() {
-        let mut env = MoonLoLEnv::new(RewardShaper::default(), 100);
+        let mut env = MoonLoLEnv::new(RewardShaper::default());
         env.reset(obs(myself(0, 0, 0, 0, 100.0), None));
         let r = env.step(obs(myself(3, 0, 0, 0, 100.0), None));
         let v = serde_json::to_value(&r).unwrap();

@@ -173,12 +173,17 @@ pub(super) fn open_add_slot_dialog(
     room_id: Uuid,
 ) {
     let weak = cx.entity().downgrade();
+    let team_title = match cx.entity().read(cx).room_detail.show_add_team {
+        Some(Team::Order) => "添加到 Order（蓝方）",
+        Some(Team::Chaos) => "添加到 Chaos（红方）",
+        None => "添加 Agent 槽位",
+    };
     open_form_dialog(
         window,
         cx,
         weak,
         move |sidebar, window, cx| build_add_slot_form(sidebar, window, cx, room_id),
-        |dialog, form| dialog.w(px(384.)).child(form),
+        move |dialog, form| dialog.title(team_title).w(px(384.)).child(form),
     );
 }
 
@@ -192,12 +197,8 @@ fn build_add_slot_form(
     let add_agent_id = sidebar.room_detail.add_agent_id.clone();
     let add_error = sidebar.room_detail.add_error.clone();
     let adding = sidebar.room_detail.adding;
-    let Some(team) = show_team else {
+    let Some(_team) = show_team else {
         return div().into_any_element();
-    };
-    let title = match team {
-        Team::Order => "添加到 Order（蓝方）".to_string(),
-        Team::Chaos => "添加到 Chaos（红方）".to_string(),
     };
     let agents = sidebar.room_detail.agents.clone();
     let agent_label = add_agent_id
@@ -238,7 +239,6 @@ fn build_add_slot_form(
 
     v_flex()
         .gap_4()
-        .child(div().font_bold().text_sm().child(title))
         .child(
             v_flex()
                 .gap_3()

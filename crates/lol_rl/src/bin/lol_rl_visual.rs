@@ -9,7 +9,8 @@ use lol_env::{EnvConfig, RenderMode, VisualEnvironment};
 use lol_rl::device::select_device;
 use lol_rl::ppo::{PPOAgent, PPOConfig};
 use lol_rl_protocol::{
-    ObsFeaturePayload, PolicyDisplay, RewardItem, VisualInFrame, VisualObsFrame, VisualOutFrame,
+    ActionSpace, ObsFeaturePayload, PolicyDisplay, RewardItem, VisualInFrame, VisualObsFrame,
+    VisualOutFrame,
 };
 use tokio::net::TcpStream;
 use tokio_tungstenite::tungstenite::Message;
@@ -107,6 +108,7 @@ fn start_visual_runner_for_env<E: VisualEnvironment>(
         max_steps: 0,
         render_mode: RenderMode::WindowCustomLoop,
     });
+    let env_max_steps = env.max_steps();
 
     let (cmd_tx, cmd_rx) = mpsc::channel::<VisualRunnerCmd>();
     let (step_tx, step_rx) = mpsc::channel::<VisualStepOutput>();
@@ -125,6 +127,7 @@ fn start_visual_runner_for_env<E: VisualEnvironment>(
             step_rx,
             ckpt_path_clone,
             env_name_clone,
+            env_max_steps,
             action_labels_clone,
             cmd_tx_clone,
         ));
@@ -132,6 +135,19 @@ fn start_visual_runner_for_env<E: VisualEnvironment>(
 
     let agent_clone = agent.clone();
     let enc_dim = action_space.encoding_dim();
+    // 按「离散动作类别」构造真实标注（policy_display_real 按下标取标签；
+    // 注意与 `action_labels()` 的 UI 预设按钮标签区分——两者索引空间不同）。
+    let class_labels: Vec<&str> = match action_space {
+        ActionSpace::Discrete(n) => (0..n)
+            .map(|i| E::action_name(E::action_from_encoding(&[i as f32])))
+            .collect(),
+        ActionSpace::Hybrid {
+            discrete_classes, ..
+        } => (0..discrete_classes)
+            .map(|i| E::action_name(E::action_from_encoding(&[0.0, 0.0, i as f32])))
+            .collect(),
+        ActionSpace::Continuous(_) => Vec::new(),
+    };
     let policy = move |obs: &E::Obs| -> (E::Action, PolicyDisplay) {
         let obs_vec = E::obs_to_vector(obs);
         let mask = E::action_mask(obs);
@@ -145,10 +161,9 @@ fn start_visual_runner_for_env<E: VisualEnvironment>(
             }
         };
 
-        let labels = E::action_labels();
         let display = agent_clone
             .actor_critic
-            .policy_display_real(&state, mask.as_deref(), labels)
+            .policy_display_real(&state, mask.as_deref(), &class_labels)
             .unwrap_or(PolicyDisplay::Discrete(vec![]));
 
         let chosen = match agent_clone
@@ -172,6 +187,7 @@ async fn ws_server(
     step_rx: mpsc::Receiver<VisualStepOutput>,
     ckpt_path: PathBuf,
     env_name: String,
+    env_max_steps: usize,
     action_labels: Vec<String>,
     cmd_tx: mpsc::Sender<VisualRunnerCmd>,
 ) {
@@ -217,6 +233,7 @@ async fn ws_server(
                 latest_frame_sub,
                 ckpt,
                 env_name_sub,
+                env_max_steps,
                 action_labels_sub,
                 cmd,
             )
@@ -234,6 +251,7 @@ async fn handle_ws_client(
     latest_frame: Arc<std::sync::Mutex<Option<VisualObsFrame>>>,
     ckpt_path: PathBuf,
     env_name: String,
+    env_max_steps: usize,
     action_labels: Vec<String>,
     cmd_tx: mpsc::Sender<VisualRunnerCmd>,
 ) -> anyhow::Result<()> {
@@ -244,7 +262,7 @@ async fn handle_ws_client(
     let ready = VisualOutFrame::Ready {
         checkpoint_path: ckpt_path.to_string_lossy().to_string(),
         env_name,
-        env_max_steps: 100,
+        env_max_steps,
         action_labels,
     };
     let bytes = bincode::serialize(&ready)?;
@@ -330,6 +348,7 @@ fn step_output_to_frame_data(output: &VisualStepOutput) -> VisualObsFrame {
         step: output.step,
         obs: obs_payload.clone(),
         reward: output.reward,
+        episode_reward: output.episode_reward,
         reward_breakdown: breakdown,
         policy,
         terminated: output.terminated,
@@ -340,6 +359,8 @@ fn step_output_to_frame_data(output: &VisualStepOutput) -> VisualObsFrame {
         riven_alive: obs_payload.riven_hp_pct > 0.0,
         reward_formula: output.reward_formula.clone(),
         reward_variables: Some(output.reward_variables.clone()),
+        obs_vector: output.obs_vector.clone(),
+        obs_labels: output.obs_labels.clone(),
     }
 }
 

@@ -438,6 +438,7 @@ fn open_abort_dialog(window: &mut Window, cx: &mut Context<AppSidebar>, target: 
         let aid = aid.clone();
         let client = client.clone();
         dialog
+            .title("强制中止对局")
             .w(px(384.))
             .child(form)
             .footer(
@@ -463,15 +464,10 @@ fn build_abort_form(
     _window: &mut Window,
     cx: &mut Context<AppSidebar>,
 ) -> AnyElement {
-    v_flex()
-        .gap_1()
-        .child(div().font_bold().text_sm().child("强制中止对局"))
-        .child(
-            div()
-                .text_xs()
-                .text_color(cx.theme().muted_foreground)
-                .child("该对局将被立即终止并释放算力。此操作不可恢复。"),
-        )
+    div()
+        .text_xs()
+        .text_color(cx.theme().muted_foreground)
+        .child("该对局将被立即终止并释放算力。此操作不可恢复。")
         .into_any_element()
 }
 

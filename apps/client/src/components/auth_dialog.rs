@@ -6,7 +6,7 @@
 use gpui::prelude::*;
 use gpui::*;
 use gpui_component::button::{Button, ButtonVariants};
-use gpui_component::{h_flex, v_flex, ActiveTheme, Disableable, IconName, StyledExt};
+use gpui_component::{h_flex, v_flex, ActiveTheme, Disableable, StyledExt};
 
 use crate::components::dialog::open_form_dialog;
 use crate::components::sidebar::AppSidebar;
@@ -157,7 +157,11 @@ fn mode_tab(
 pub fn open_auth_dialog(window: &mut Window, cx: &mut Context<AppSidebar>) {
     let weak = cx.entity().downgrade();
     open_form_dialog(window, cx, weak, build_auth_form, |dialog, form| {
-        dialog.w(px(400.)).overlay_closable(false).child(form)
+        dialog
+            .title("账号登录与认证")
+            .w(px(400.))
+            .overlay_closable(false)
+            .child(form)
     });
 }
 
@@ -171,13 +175,6 @@ fn build_auth_form(
     let info = sidebar.auth.info.clone();
     let submitting = sidebar.auth.submitting;
     let is_reset = mode == AuthMode::ResetPassword;
-
-    let title = match mode {
-        AuthMode::CodeLogin => "验证码登录 / 注册",
-        AuthMode::PasswordLogin => "密码登录",
-        AuthMode::Register => "注册账号",
-        AuthMode::ResetPassword => "重置密码",
-    };
 
     let show_password = matches!(
         mode,
@@ -233,18 +230,6 @@ fn build_auth_form(
     .map(|(m, label)| mode_tab(m, label, sidebar, cx))
     .collect();
 
-    let header = h_flex()
-        .gap_2()
-        .items_center()
-        .child(
-            div()
-                .p_2()
-                .rounded_md()
-                .bg(cx.theme().muted)
-                .child(IconName::CircleUser),
-        )
-        .child(div().text_lg().font_bold().child(title.to_string()));
-
     let submit_label = if submitting {
         "请稍候…".to_string()
     } else {
@@ -264,7 +249,6 @@ fn build_auth_form(
         .on_click(cx.listener(|this, _, _, cx| submit(this, cx)));
 
     let mut children: Vec<AnyElement> = vec![
-        header.into_any_element(),
         h_flex().gap_2().children(tabs).into_any_element(),
         field("手机号", phone_input),
     ];

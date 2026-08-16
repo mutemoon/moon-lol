@@ -307,9 +307,11 @@ impl PPOAgent {
         };
 
         for _epoch in 0..self.config.ppo_epochs {
-            let (new_log_probs, new_values, entropy) = self
-                .actor_critic
-                .evaluate_actions(&states_tensor, &actions_tensor, masks_tensor.as_ref())?;
+            let (new_log_probs, new_values, entropy) = self.actor_critic.evaluate_actions(
+                &states_tensor,
+                &actions_tensor,
+                masks_tensor.as_ref(),
+            )?;
 
             // Ratio r(theta) = exp(new_log_probs - old_log_probs)
             let log_ratio = (&new_log_probs - &old_log_probs_tensor)?;
@@ -497,9 +499,11 @@ impl PPOAgent {
                     None
                 };
 
-                let (new_log_probs, new_values, entropy) = self
-                    .actor_critic
-                    .evaluate_actions(&mb_states, &mb_actions, mb_masks.as_ref())?;
+                let (new_log_probs, new_values, entropy) = self.actor_critic.evaluate_actions(
+                    &mb_states,
+                    &mb_actions,
+                    mb_masks.as_ref(),
+                )?;
 
                 let log_ratio = (&new_log_probs - &mb_old_log_probs)?;
                 let ratio = log_ratio.exp()?;
@@ -575,9 +579,16 @@ impl PPOAgent {
 
         let mask_dim = buffers
             .iter()
-            .find_map(|b| b.action_masks.iter().find_map(|m| m.as_ref().map(|v| v.len())))
+            .find_map(|b| {
+                b.action_masks
+                    .iter()
+                    .find_map(|m| m.as_ref().map(|v| v.len()))
+            })
             .unwrap_or(0);
-        let has_masks = mask_dim > 0 && buffers.iter().any(|b| b.action_masks.iter().any(|m| m.is_some()));
+        let has_masks = mask_dim > 0
+            && buffers
+                .iter()
+                .any(|b| b.action_masks.iter().any(|m| m.is_some()));
 
         let mut all_states = Vec::with_capacity(total_n * state_dim);
         let mut all_actions = Vec::with_capacity(total_n * enc_dim);
@@ -699,9 +710,11 @@ impl PPOAgent {
                     None
                 };
 
-                let (new_log_probs, new_values, entropy) = self
-                    .actor_critic
-                    .evaluate_actions(&mb_states, &mb_actions, mb_masks.as_ref())?;
+                let (new_log_probs, new_values, entropy) = self.actor_critic.evaluate_actions(
+                    &mb_states,
+                    &mb_actions,
+                    mb_masks.as_ref(),
+                )?;
 
                 let log_ratio = (&new_log_probs - &mb_old_log_probs)?;
                 let ratio = log_ratio.exp()?;
@@ -753,10 +766,7 @@ impl PPOAgent {
     }
 }
 
-fn build_masks_tensor(
-    masks: &[Option<Vec<bool>>],
-    device: &Device,
-) -> Result<Option<Tensor>> {
+fn build_masks_tensor(masks: &[Option<Vec<bool>>], device: &Device) -> Result<Option<Tensor>> {
     if !masks.iter().any(|m| m.is_some()) {
         return Ok(None);
     }
@@ -975,11 +985,11 @@ mod tests {
 
     #[test]
     fn hybrid_ppo_fiora_v2_smoke() -> Result<()> {
-        let state_dim = 31;
+        let state_dim = 33;
         let hidden_dim = 64;
         let action_space = ActionSpace::Hybrid {
             continuous_dims: 2,
-            discrete_classes: 6,
+            discrete_classes: 7,
         };
         let config = PPOConfig::default();
         let device = Device::Cpu;
@@ -997,15 +1007,16 @@ mod tests {
             let mut obs_vec: Vec<f32> = (0..state_dim).map(|i| (i as f32 * 0.05).sin()).collect();
             obs_vec[16] = if step % 2 == 0 { 1.5 } else { 3.0 };
             let state = Tensor::from_vec(obs_vec.clone(), (1, state_dim), &device)?;
-            let mask = Some(vec![true, true, step % 2 == 0, true, true, true]);
-            let (encoded, log_prob, value) = agent.actor_critic.sample_action(&state, mask.as_deref())?;
+            let mask = Some(vec![true, true, step % 2 == 0, true, true, true, true]);
+            let (encoded, log_prob, value) =
+                agent.actor_critic.sample_action(&state, mask.as_deref())?;
             assert_eq!(
                 encoded.len(),
                 3,
                 "FioraV2 hybrid 动作编码应为 [offset_x, offset_z, discrete_idx]"
             );
             let disc_idx = encoded[2] as usize;
-            assert!(disc_idx < 6, "离散动作索引应在 [0, 5] 范围内");
+            assert!(disc_idx < 7, "离散动作索引应在 [0, 6] 范围内");
             buffer.push(obs_vec, encoded, log_prob, 0.25, value, false, mask);
         }
 
@@ -1027,15 +1038,17 @@ mod tests {
 
         // 验证策略可视化显示
         let dummy_state = Tensor::zeros((1, state_dim), DType::F32, &device)?;
-        let labels = ["NoOp", "Move", "Attack", "Q", "E", "R"];
-        let display = agent.actor_critic.policy_display_real(&dummy_state, None, &labels)?;
+        let labels = ["NoOp", "Move", "Attack", "Q", "E", "R", "Flash"];
+        let display = agent
+            .actor_critic
+            .policy_display_real(&dummy_state, None, &labels)?;
         match display {
             lol_rl_protocol::PolicyDisplay::HybridMulti {
                 continuous_means,
                 discrete_probs,
             } => {
                 assert_eq!(continuous_means.len(), 2);
-                assert_eq!(discrete_probs.len(), 6);
+                assert_eq!(discrete_probs.len(), 7);
                 let sum_prob: f32 = discrete_probs.iter().map(|p| p.prob).sum();
                 assert!((sum_prob - 1.0).abs() < 1e-3, "离散概率之和应为 1.0");
             }

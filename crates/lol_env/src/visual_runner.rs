@@ -39,12 +39,18 @@ pub enum VisualRunnerCmd {
 pub struct VisualStepOutput {
     pub step: usize,
     pub reward: f32,
+    /// 本局从开始累积到当前步的总奖励（每次对局重置后归零）。
+    pub episode_reward: f32,
     pub terminated: bool,
     pub truncated: bool,
     pub reward_breakdown: Vec<RewardBreakdownItem>,
     pub reward_variables: std::collections::HashMap<String, f32>,
     pub policy: PolicyDisplay,
     pub obs_payload: Option<ObsFeaturePayload>,
+    /// 策略真实输入的观测向量（与 `obs_labels` 一一对应）。
+    pub obs_vector: Vec<f32>,
+    /// 观测向量每一维的简要说明。
+    pub obs_labels: Vec<String>,
     pub reward_formula: Option<RewardFormulaSpec>,
 }
 
@@ -53,6 +59,14 @@ type PolicyFn<E> = dyn FnMut(
     ) -> (<E as crate::traits::RlEnvironment>::Action, PolicyDisplay)
     + Send
     + 'static;
+
+/// 从观测生成「原始向量 + 每维说明」，供可视化 UI 逐维展示真实计算值。
+fn obs_vector_with_labels<E: VisualEnvironment>(obs: &E::Obs) -> (Vec<f32>, Vec<String>) {
+    (
+        E::obs_to_vector(obs),
+        E::obs_dim_labels().iter().map(|s| s.to_string()).collect(),
+    )
+}
 
 pub fn pause_virtual_time(world: &mut World) {
     if let Some(mut time) = world.get_resource_mut::<Time<Virtual>>() {
@@ -74,10 +88,10 @@ struct CustomVisualRunner<E: VisualEnvironment> {
     policy_arc: Arc<Mutex<PolicyFn<E>>>,
     cmd_rx: Receiver<VisualRunnerCmd>,
     step_tx: Sender<VisualStepOutput>,
-    max_steps: usize,
     paused: bool,
     step_count: usize,
     current_ep_steps: usize,
+    episode_reward: f32,
     assets_loaded: bool,
     load_wait_frames: usize,
     pending_manual_action: Option<E::Action>,
@@ -162,15 +176,19 @@ impl<E: VisualEnvironment> ApplicationHandler for CustomVisualRunner<E> {
 
                     let obs = self.env.get_current_obs(self.app.world());
                     let (_, policy_items) = (self.policy_arc.lock().unwrap())(&obs);
+                    let (obs_vector, obs_labels) = obs_vector_with_labels::<E>(&obs);
                     let pause_output = VisualStepOutput {
                         step: self.step_count,
                         reward: 0.0,
+                        episode_reward: self.episode_reward,
                         terminated: false,
                         truncated: false,
                         reward_breakdown: Vec::new(),
                         reward_variables: std::collections::HashMap::new(),
                         policy: policy_items,
                         obs_payload: E::obs_to_payload(&obs),
+                        obs_vector,
+                        obs_labels,
                         reward_formula: self.env.reward_formula(),
                     };
                     let _ = self.step_tx.send(pause_output);
@@ -182,18 +200,23 @@ impl<E: VisualEnvironment> ApplicationHandler for CustomVisualRunner<E> {
                 }
                 VisualRunnerCmd::Reset => {
                     self.current_ep_steps = 0;
+                    self.episode_reward = 0.0;
                     self.env.reset_world(self.app.world_mut());
                     let obs = self.env.get_current_obs(self.app.world());
                     let (_, policy_items) = (self.policy_arc.lock().unwrap())(&obs);
+                    let (obs_vector, obs_labels) = obs_vector_with_labels::<E>(&obs);
                     let initial_output = VisualStepOutput {
                         step: 0,
                         reward: 0.0,
+                        episode_reward: 0.0,
                         terminated: false,
                         truncated: false,
                         reward_breakdown: Vec::new(),
                         reward_variables: std::collections::HashMap::new(),
                         policy: policy_items,
                         obs_payload: E::obs_to_payload(&obs),
+                        obs_vector,
+                        obs_labels,
                         reward_formula: self.env.reward_formula(),
                     };
                     let _ = self.step_tx.send(initial_output);
@@ -219,15 +242,19 @@ impl<E: VisualEnvironment> ApplicationHandler for CustomVisualRunner<E> {
                 // Send initial first frame to front-end
                 let obs = self.env.get_current_obs(self.app.world());
                 let (_, policy_items) = (self.policy_arc.lock().unwrap())(&obs);
+                let (obs_vector, obs_labels) = obs_vector_with_labels::<E>(&obs);
                 let initial_output = VisualStepOutput {
                     step: 0,
                     reward: 0.0,
+                    episode_reward: 0.0,
                     terminated: false,
                     truncated: false,
                     reward_breakdown: Vec::new(),
                     reward_variables: std::collections::HashMap::new(),
                     policy: policy_items,
                     obs_payload: E::obs_to_payload(&obs),
+                    obs_vector,
+                    obs_labels,
                     reward_formula: self.env.reward_formula(),
                 };
                 let _ = self.step_tx.send(initial_output);
@@ -274,25 +301,30 @@ impl<E: VisualEnvironment> ApplicationHandler for CustomVisualRunner<E> {
                 self.pending_manual_action.take().unwrap_or(policy_action)
             };
 
-            let step_result =
-                self.env
-                    .step_world(&mut self.app, action, self.step_count, self.max_steps);
+            let step_result = self.env.step_world(&mut self.app, action);
+
+            // 累计本局奖励
+            self.episode_reward += step_result.reward;
 
             let terminated = step_result.terminated;
             let truncated = step_result.truncated;
 
             // 展示「下一步」预测：基于 step 后观测重新计算，而非本步执行前的策略。
             let (_, next_policy) = (self.policy_arc.lock().unwrap())(&step_result.obs);
+            let (obs_vector, obs_labels) = obs_vector_with_labels::<E>(&step_result.obs);
 
             let output = VisualStepOutput {
                 step: step_result.step,
                 reward: step_result.reward,
+                episode_reward: self.episode_reward,
                 terminated: step_result.terminated,
                 truncated: step_result.truncated,
                 reward_breakdown: step_result.reward_breakdown,
                 reward_variables: step_result.reward_variables,
                 policy: next_policy,
                 obs_payload: E::obs_to_payload(&step_result.obs),
+                obs_vector,
+                obs_labels,
                 reward_formula: self.env.reward_formula(),
             };
             let _ = self.step_tx.send(output);
@@ -302,19 +334,24 @@ impl<E: VisualEnvironment> ApplicationHandler for CustomVisualRunner<E> {
                 self.current_ep_steps = 0;
                 pause_virtual_time(self.app.world_mut());
                 self.env.reset_world(self.app.world_mut());
+                self.episode_reward = 0.0;
 
                 // Send newly reset start frame
                 let next_obs = self.env.get_current_obs(self.app.world());
                 let (_, next_policy_items) = (self.policy_arc.lock().unwrap())(&next_obs);
+                let (obs_vector, obs_labels) = obs_vector_with_labels::<E>(&next_obs);
                 let reset_output = VisualStepOutput {
                     step: self.step_count,
                     reward: 0.0,
+                    episode_reward: 0.0,
                     terminated: false,
                     truncated: false,
                     reward_breakdown: Vec::new(),
                     reward_variables: std::collections::HashMap::new(),
                     policy: next_policy_items,
                     obs_payload: E::obs_to_payload(&next_obs),
+                    obs_vector,
+                    obs_labels,
                     reward_formula: self.env.reward_formula(),
                 };
                 let _ = self.step_tx.send(reset_output);
@@ -346,7 +383,6 @@ pub fn run_visual_env<E, F>(
     E: VisualEnvironment,
     F: FnMut(&E::Obs) -> (E::Action, PolicyDisplay) + Send + 'static,
 {
-    let max_steps = 0; // unlimited in visual viewer mode
     let policy_arc = Arc::new(Mutex::new(policy));
     let mut app = env.take_app();
 
@@ -359,10 +395,10 @@ pub fn run_visual_env<E, F>(
             policy_arc,
             cmd_rx,
             step_tx,
-            max_steps,
             paused: false,
             step_count: 0,
             current_ep_steps: 0,
+            episode_reward: 0.0,
             assets_loaded: false,
             load_wait_frames: 0,
             pending_manual_action: None,

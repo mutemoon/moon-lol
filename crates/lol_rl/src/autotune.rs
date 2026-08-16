@@ -68,7 +68,7 @@ impl AutoTuner {
         let candidate_pool: &[usize] = &[2, 4, 8, 12, 16, 20, 24, 28, 32];
 
         // 1. 单环境稳态预热
-        let mut single_env = E::new(100);
+        let mut single_env = E::new();
         let _ = single_env.reset();
         let act = E::action_from_index(0);
         for _ in 0..warmup_steps {
@@ -107,7 +107,7 @@ impl AutoTuner {
             for _ in 0..n {
                 let b = barrier.clone();
                 let h = std::thread::spawn(move || {
-                    let mut env = E::new(100);
+                    let mut env = E::new();
                     let _ = env.reset();
                     let act = E::action_from_index(0);
                     b.wait();

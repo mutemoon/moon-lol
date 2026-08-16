@@ -21,12 +21,16 @@ pub struct EnvWorker<E: RlEnvironment> {
 }
 
 impl<E: RlEnvironment> EnvWorker<E> {
-    pub fn new(max_steps: usize) -> Self {
+    pub fn new() -> Self {
+        Self::with_config(crate::traits::EnvConfig::default())
+    }
+
+    pub fn with_config(config: crate::traits::EnvConfig) -> Self {
         let (tx_cmd, rx_cmd) = channel::<WorkerCmd<E::Action>>();
         let (tx_resp, rx_resp) = channel::<WorkerResp<E::Obs>>();
 
         let handle = thread::spawn(move || {
-            let mut env = E::new(max_steps);
+            let mut env = E::with_config(config);
             while let Ok(cmd) = rx_cmd.recv() {
                 match cmd {
                     WorkerCmd::Reset => {
@@ -100,8 +104,15 @@ pub struct ParallelEnvs<E: RlEnvironment> {
 }
 
 impl<E: RlEnvironment> ParallelEnvs<E> {
-    pub fn new(num_envs: usize, max_steps: usize) -> Self {
-        let workers = (0..num_envs).map(|_| EnvWorker::new(max_steps)).collect();
+    pub fn new(num_envs: usize) -> Self {
+        let workers = (0..num_envs).map(|_| EnvWorker::new()).collect();
+        Self { workers }
+    }
+
+    pub fn with_config(num_envs: usize, config: crate::traits::EnvConfig) -> Self {
+        let workers = (0..num_envs)
+            .map(|_| EnvWorker::with_config(config.clone()))
+            .collect();
         Self { workers }
     }
 

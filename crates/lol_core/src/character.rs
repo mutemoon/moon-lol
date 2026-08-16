@@ -26,6 +26,12 @@ pub struct Character;
 #[reflect(Component)]
 pub struct CharacterReady;
 
+/// 角色配置 (DynamicWorld) 完全加载并写入实体后触发的事件
+#[derive(Event, Debug, Clone, Copy, Reflect)]
+pub struct EventCharacterReady {
+    pub entity: Entity,
+}
+
 fn on_event_dead(
     event: On<EventDead>,
     query: Query<(Entity, &GlobalTransform, &ExperienceDrop, &Team)>,
@@ -128,6 +134,7 @@ fn try_load_config_characters(
                 debug!("{} -> {}", source_entity.entity, entity);
                 dynamic_world.write_to_world(world, &mut map)?;
                 world.entity_mut(entity).insert(CharacterReady);
+                world.trigger(EventCharacterReady { entity });
                 Ok::<(), WorldInstanceSpawnError>(())
             })
         });

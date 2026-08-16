@@ -195,7 +195,7 @@ pub fn on_fiora_q_dash_end(
             // Q 命中音效（FioraQAttack 独立 cue），只在命中时播
             commands.trigger(CommandSkinSoundPlay {
                 entity,
-                key: "FioraQAttack_OnHit".to_string(),
+                key: "FioraQAttack_OnBuffCast".to_string(),
             });
 
             let refund = get_skill_data_value(spell_object, FIORA_Q_CD_REFUND_KEY, pending.level)

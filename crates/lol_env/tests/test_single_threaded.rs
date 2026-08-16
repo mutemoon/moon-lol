@@ -24,7 +24,7 @@ fn test_env_runs_strictly_on_single_thread() {
     println!("📍 [Caller Thread] 外部调用线程 ID: {:?}", caller_thread_id);
 
     // 1. 初始化无头环境（内部已默认配置 SingleThreadedExecutor）
-    let mut env = FioraVsRivenRealEnv::new(100);
+    let mut env = FioraVsRivenRealEnv::new();
     let _ = env.reset();
 
     // 2. 注入探针系统到 Bevy 的多个关键调度阶段
@@ -76,7 +76,7 @@ fn test_multiple_envs_isolated_on_their_own_threads() {
     for worker_id in 0..num_workers {
         let handle = thread::spawn(move || {
             let my_tid = thread::current().id();
-            let mut env = FioraVsRivenRealEnv::new(100);
+            let mut env = FioraVsRivenRealEnv::new();
             let _ = env.reset();
 
             let probe = ThreadProbe::default();

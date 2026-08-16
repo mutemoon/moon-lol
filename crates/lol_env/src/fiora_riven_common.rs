@@ -7,6 +7,7 @@ use lol_champions::fiora::Fiora;
 use lol_champions::fiora::passive::Vital;
 use lol_champions::riven::Riven;
 use lol_core::base::direction::Direction;
+use lol_core::character::CharacterReady;
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::life::Health;
 use lol_core::skill::{CoolDown, Skill, SkillRecastWindow, Skills, is_skill_ready};
@@ -163,6 +164,37 @@ pub fn add_common_observers(app: &mut App) {
     app.add_observer(on_attack_end);
     app.add_observer(on_attack_ready);
     app.add_observer(on_vital_break_damage);
+    app.add_observer(on_character_ready_set_skill_levels);
+}
+
+/// 角色配置写入完成后（`CharacterReady` 由 `try_load_config_characters` 显式插入，
+/// 此时 `Skills` 关系组件已挂载到英雄实体上），同步设置 Q/W/E/R 技能等级。
+///
+/// 修复重置对局后技能等级缺失的问题：`reset_episode_world` 重新生成英雄后，
+/// 技能实体要等下一次 `FixedUpdate` 才挂载，若在挂载前调用 `setup_skill_levels_world`
+/// 会因 `Skills` 不存在而空转，导致技能 `level == 0`、施放被 `NotLearned` 拒绝。
+/// 本观察者在技能挂载的同一时刻补点，初始生成与每次重置（RL 路径 / 视觉 Reset /
+/// 对局结束自动重置）都会自动生效。
+pub fn on_character_ready_set_skill_levels(
+    trigger: On<Add, CharacterReady>,
+    q_skills: Query<&Skills>,
+    mut q_skill: Query<&mut Skill>,
+) {
+    let entity = trigger.entity;
+    let Ok(skills) = q_skills.get(entity) else {
+        return;
+    };
+    let skill_entities = skills.to_vec();
+    if skill_entities.len() < 4 {
+        return;
+    }
+    // 与 `setup_skill_levels_world` 一致：Q=3 / W=1 / E=1 / R=1
+    let levels = [3usize, 1, 1, 1];
+    for (idx, level) in levels.into_iter().enumerate() {
+        if let Ok(mut skill) = q_skill.get_mut(skill_entities[idx]) {
+            skill.level = level;
+        }
+    }
 }
 
 // ── 世界读写 ────────────────────────────────────────────────────────────────
@@ -574,7 +606,7 @@ mod tests {
             false,
             true, // 破绽命中
             &obs,
-            4.0,  // 第 4 秒击杀
+            4.0, // 第 4 秒击杀
         );
         let expected = -0.002 + 0.8 + 2.0 + 0.0;
         assert!(
@@ -588,15 +620,37 @@ mod tests {
 
         // 第 1 秒极速击杀：时效奖励达到 ~15.15（高于击杀基础分 2.0）
         let (reward_1s, _, vars_1s) = compute_step_reward(
-            100.0, 0.0, Vec3::ZERO, Vec3::ZERO, Vec3::ZERO, false, true, &obs, 1.0,
+            100.0,
+            0.0,
+            Vec3::ZERO,
+            Vec3::ZERO,
+            Vec3::ZERO,
+            false,
+            true,
+            &obs,
+            1.0,
         );
         let quick_1s = vars_1s["quick_kill_reward"];
-        assert!(quick_1s > 15.0, "1s击杀时效奖励应 > 15.0，实际为 {quick_1s}");
-        assert!(reward_1s > 17.5, "1s击杀总奖励应 > 17.5，实际为 {reward_1s}");
+        assert!(
+            quick_1s > 15.0,
+            "1s击杀时效奖励应 > 15.0，实际为 {quick_1s}"
+        );
+        assert!(
+            reward_1s > 17.5,
+            "1s击杀总奖励应 > 17.5，实际为 {reward_1s}"
+        );
 
         // 第 5 秒击杀：时效奖励严格为负（扣分）
         let (_, _, vars_5s) = compute_step_reward(
-            100.0, 0.0, Vec3::ZERO, Vec3::ZERO, Vec3::ZERO, false, true, &obs, 5.0,
+            100.0,
+            0.0,
+            Vec3::ZERO,
+            Vec3::ZERO,
+            Vec3::ZERO,
+            false,
+            true,
+            &obs,
+            5.0,
         );
         assert!(vars_5s["quick_kill_reward"] < 0.0, "5s击杀时效奖励应为负数");
     }

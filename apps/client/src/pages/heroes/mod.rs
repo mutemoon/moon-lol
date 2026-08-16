@@ -15,7 +15,7 @@ use gpui::prelude::*;
 use gpui::*;
 use gpui_component::button::{Button, ButtonVariants};
 use gpui_component::dialog::{DialogAction, DialogClose, DialogFooter};
-use gpui_component::{v_flex, ActiveTheme, StyledExt};
+use gpui_component::{v_flex, ActiveTheme};
 use lol_web_protocol::agent::{Agent, CreateAgentDto, UpdateAgentDto};
 use lol_web_protocol::spawn_preset::Visibility;
 pub use types::HeroesState;
@@ -84,9 +84,11 @@ pub fn render_heroes(
 pub(super) fn open_delete_modal(window: &mut Window, cx: &mut Context<AppSidebar>) {
     let weak = cx.entity().downgrade();
     let delete_weak = weak.clone();
+    let title = format!("删除选手「{}」？", cx.entity().read(cx).heroes.draft_name);
     open_form_dialog(window, cx, weak, build_delete_form, move |dialog, form| {
         let delete_weak = delete_weak.clone();
         dialog
+            .title(title.clone())
             .w(px(380.))
             .child(form)
             .footer(
@@ -108,26 +110,14 @@ pub(super) fn open_delete_modal(window: &mut Window, cx: &mut Context<AppSidebar
 }
 
 fn build_delete_form(
-    sidebar: &AppSidebar,
+    _sidebar: &AppSidebar,
     _window: &mut Window,
     cx: &mut Context<AppSidebar>,
 ) -> AnyElement {
-    let name = sidebar.heroes.draft_name.clone();
-
-    v_flex()
-        .gap_2()
-        .child(
-            div()
-                .text_lg()
-                .font_bold()
-                .child(format!("删除选手「{}」？", name)),
-        )
-        .child(
-            div()
-                .text_sm()
-                .text_color(cx.theme().muted_foreground)
-                .child("该操作不可撤销。引用此选手的场景槽位需手动重新选择。"),
-        )
+    div()
+        .text_sm()
+        .text_color(cx.theme().muted_foreground)
+        .child("该操作不可撤销。引用此选手的场景槽位需手动重新选择。")
         .into_any_element()
 }
 

@@ -3,11 +3,12 @@ use std::path::PathBuf;
 use bevy::app::ScheduleRunnerPlugin;
 use bevy::prelude::*;
 use bevy::time::TimeUpdateStrategy;
-use lol_base::character::{ConfigCharacterRecord, ConfigSkin};
+use lol_base::character::{ConfigCharacterRecord, ConfigSkin, Skin};
 use lol_champions::fiora::passive::Vital;
 use lol_champions::fiora::{Fiora, PluginFiora};
 use lol_champions::riven::{PluginRiven, Riven};
 use lol_core::action::{Action, CommandAction};
+use lol_core::character::CharacterReady;
 use lol_core::life::Health;
 use lol_core::navigation::navigation::NavigationDebug;
 use lol_core::team::Team;
@@ -77,8 +78,15 @@ pub struct FioraVsRivenEnv {
 }
 
 impl FioraVsRivenEnv {
-    /// Shorthand for headless training: `FioraVsRivenEnv::new(max_steps)`.
-    pub fn new(max_steps: usize) -> Self {
+    pub const DEFAULT_MAX_STEPS: usize = 40;
+
+    /// 使用环境固有默认最大步数构造 Headless 训练实例。
+    pub fn new() -> Self {
+        Self::with_config(EnvConfig::default())
+    }
+
+    /// 使用显式最大步数构造 Headless 训练实例。
+    pub fn new_with_max_steps(max_steps: usize) -> Self {
         Self::with_config(EnvConfig {
             max_steps,
             render_mode: RenderMode::Headless,
@@ -87,7 +95,11 @@ impl FioraVsRivenEnv {
 
     /// Construct with full configuration.
     pub fn with_config(config: EnvConfig) -> Self {
-        let max_steps = config.max_steps;
+        let max_steps = if config.max_steps > 0 {
+            config.max_steps
+        } else {
+            Self::DEFAULT_MAX_STEPS
+        };
         let render = matches!(
             config.render_mode,
             RenderMode::Window | RenderMode::WindowCustomLoop
@@ -176,7 +188,7 @@ impl FioraVsRivenEnv {
         };
 
         let initial_fiora_pos = Vec3::ZERO;
-        let initial_riven_pos = Vec3::new(250.0, 0.0, 0.0);
+        let initial_riven_pos = Vec3::new(50.0, 0.0, 0.0);
 
         // Spawn Level 6 Fiora (Order team)
         let mut fiora_builder = app.world_mut().spawn((
@@ -229,32 +241,18 @@ impl FioraVsRivenEnv {
             .insert_resource(FioraRivenEntities { fiora, riven });
         add_common_observers(&mut app);
 
-        // Wait for config and skin assets to load completely
+        // 等待 DynamicWorld 资产加载并完成向实体写入 (以 CharacterReady 为准)
         for _ in 0..500 {
-            let asset_server = app.world().resource::<AssetServer>();
-            let fiora_ready = if render {
-                asset_server
-                    .get_recursive_dependency_load_state(&fiora_skin_handle.clone().unwrap())
-                    .is_some_and(|s| s.is_loaded())
-            } else {
-                asset_server
-                    .get_recursive_dependency_load_state(&fiora_config_handle)
-                    .is_some_and(|s| s.is_loaded())
-            };
-            let riven_ready = if render {
-                asset_server
-                    .get_recursive_dependency_load_state(&riven_skin_handle.clone().unwrap())
-                    .is_some_and(|s| s.is_loaded())
-            } else {
-                asset_server
-                    .get_recursive_dependency_load_state(&riven_config_handle)
-                    .is_some_and(|s| s.is_loaded())
-            };
+            app.update();
+            let world = app.world();
+            let fiora_ready = world.get::<CharacterReady>(fiora).is_some()
+                && (!render || world.get::<Skin>(fiora).is_some());
+            let riven_ready = world.get::<CharacterReady>(riven).is_some()
+                && (!render || world.get::<Skin>(riven).is_some());
 
             if fiora_ready && riven_ready {
                 break;
             }
-            app.update();
         }
 
         let mut env = Self {
@@ -420,6 +418,20 @@ impl RlEnvironment for FioraVsRivenEnv {
         ]
     }
 
+    fn obs_dim_labels() -> &'static [&'static str] {
+        &[
+            "被动破绽 +X 方向 (vital_dir_x)",
+            "被动破绽 -X 方向 (vital_dir_neg_x)",
+            "被动破绽 +Z 方向 (vital_dir_z)",
+            "被动破绽 -Z 方向 (vital_dir_neg_z)",
+            "存在被动破绽 (has_vital)",
+            "被动破绽已激活 (vital_is_active)",
+            "相对 X 偏移 (rel_x, 归一化)",
+            "相对 Z 偏移 (rel_z, 归一化)",
+            "英雄间距 (distance, 归一化)",
+        ]
+    }
+
     fn action_from_index(idx: usize) -> Self::Action {
         FioraVsRivenAction::from_index(idx)
     }
@@ -432,8 +444,16 @@ impl RlEnvironment for FioraVsRivenEnv {
         action.label()
     }
 
-    fn new(max_steps: usize) -> Self {
-        Self::new(max_steps)
+    fn default_max_steps() -> usize {
+        Self::DEFAULT_MAX_STEPS
+    }
+
+    fn max_steps(&self) -> usize {
+        self.max_steps
+    }
+
+    fn new() -> Self {
+        Self::new()
     }
 
     fn with_config(config: EnvConfig) -> Self {
@@ -483,17 +503,10 @@ impl VisualEnvironment for FioraVsRivenEnv {
     }
 
     fn is_assets_loaded(&self, world: &World) -> bool {
-        let asset_server = world.resource::<AssetServer>();
-        let fiora_ready = self.fiora_skin_handle.as_ref().map_or(true, |h| {
-            asset_server
-                .get_recursive_dependency_load_state(h)
-                .is_some_and(|s| s.is_loaded())
-        });
-        let riven_ready = self.riven_skin_handle.as_ref().map_or(true, |h| {
-            asset_server
-                .get_recursive_dependency_load_state(h)
-                .is_some_and(|s| s.is_loaded())
-        });
+        let fiora_ready = world.get::<CharacterReady>(self.fiora).is_some()
+            && (self.fiora_skin_handle.is_none() || world.get::<Skin>(self.fiora).is_some());
+        let riven_ready = world.get::<CharacterReady>(self.riven).is_some()
+            && (self.riven_skin_handle.is_none() || world.get::<Skin>(self.riven).is_some());
         fiora_ready && riven_ready
     }
 
@@ -502,6 +515,7 @@ impl VisualEnvironment for FioraVsRivenEnv {
     }
 
     fn reset_world(&mut self, world: &mut World) {
+        self.step_count = 0;
         let render = matches!(
             self.render_mode,
             RenderMode::Window | RenderMode::WindowCustomLoop
@@ -527,14 +541,16 @@ impl VisualEnvironment for FioraVsRivenEnv {
         get_obs_from_world(world, self.fiora, self.riven)
     }
 
-    fn step_world(
-        &mut self,
-        app: &mut App,
-        action: Self::Action,
-        step_count: usize,
-        max_steps: usize,
-    ) -> StepResult<Self::Obs> {
-        step_world(app, self.fiora, self.riven, action, step_count, max_steps)
+    fn step_world(&mut self, app: &mut App, action: Self::Action) -> StepResult<Self::Obs> {
+        self.step_count += 1;
+        step_world(
+            app,
+            self.fiora,
+            self.riven,
+            action,
+            self.step_count,
+            self.max_steps,
+        )
     }
 }
 

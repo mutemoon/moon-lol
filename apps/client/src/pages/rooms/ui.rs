@@ -155,7 +155,7 @@ pub(super) fn room_card(
 pub(super) fn open_create_room_dialog(window: &mut Window, cx: &mut Context<AppSidebar>) {
     let weak = cx.entity().downgrade();
     open_form_dialog(window, cx, weak, build_create_room_form, |dialog, form| {
-        dialog.w(px(384.)).child(form)
+        dialog.title("创建房间").w(px(384.)).child(form)
     });
 }
 
@@ -181,7 +181,6 @@ fn build_create_room_form(
 
     v_flex()
         .gap_4()
-        .child(div().font_bold().text_sm().child("创建房间"))
         .child(
             v_flex()
                 .gap_3()

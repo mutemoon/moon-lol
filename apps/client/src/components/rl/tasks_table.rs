@@ -1,6 +1,7 @@
 use gpui::prelude::FluentBuilder as _;
 use gpui::*;
 use gpui_component::button::{Button, ButtonVariants};
+use gpui_component::dialog::DialogFooter;
 use gpui_component::input::{Input, InputEvent, InputState, NumberInput};
 use gpui_component::menu::{DropdownMenu, PopupMenuItem};
 use gpui_component::scroll::ScrollableElement;
@@ -336,11 +337,68 @@ pub fn render_tasks_table(
                                         CreateTaskDialogView::new(task_count, tx, window, cx)
                                     });
                                     window.open_dialog(cx, move |dialog, _window, _cx| {
+                                        let dialog_view = dialog_view.clone();
                                         dialog
-                                            .w(px(640.))
-                                            .max_h(px(680.))
+                                            .title("开始训练")
+                                            .w(px(680.))
+                                            .max_h(px(720.))
                                             .overlay_closable(false)
                                             .child(dialog_view.clone())
+                                            .footer(
+                                                DialogFooter::new()
+                                                    .justify_between()
+                                                    .child(
+                                                        Button::new("reset-default-btn")
+                                                            .outline()
+                                                            .label("恢复默认配置")
+                                                            .on_click({
+                                                                let dialog_view = dialog_view.clone();
+                                                                move |_, window, cx| {
+                                                                    dialog_view.update(cx, |this, cx| {
+                                                                        let name = this.default_name.clone();
+                                                                        let current_env = this.form.env_name.clone();
+                                                                        this.apply_env_params(&current_env, window, cx);
+                                                                        this.form.name = name.clone();
+                                                                        this.name_input.update(cx, |input, cx| {
+                                                                            input.set_value(name, window, cx);
+                                                                        });
+                                                                        cx.notify();
+                                                                    });
+                                                                }
+                                                            }),
+                                                    )
+                                                    .child(
+                                                        h_flex()
+                                                            .gap_2()
+                                                            .child(
+                                                                Button::new("cancel-create-btn")
+                                                                    .ghost()
+                                                                    .label("取消")
+                                                                    .on_click(|_, window, cx| {
+                                                                        window.close_dialog(cx);
+                                                                    }),
+                                                            )
+                                                            .child(
+                                                                Button::new("confirm-create-btn")
+                                                                    .primary()
+                                                                    .icon(IconName::Plus)
+                                                                    .label("确认创建任务")
+                                                                    .on_click({
+                                                                        let dialog_view = dialog_view.clone();
+                                                                        move |_, window, cx| {
+                                                                            dialog_view.update(cx, |this, _cx| {
+                                                                                let mut config = this.form.clone();
+                                                                                config.parallel_envs = 0;
+                                                                                if let Some(tx) = &this.tx {
+                                                                                    let _ = tx.send(InFrame::CreateTask { config });
+                                                                                }
+                                                                            });
+                                                                            window.close_dialog(cx);
+                                                                        }
+                                                                    }),
+                                                            ),
+                                                    ),
+                                            )
                                     });
                                 })),
                         )
@@ -416,7 +474,6 @@ impl CreateTaskDialogView {
         let mut form = TaskConfigPayload::default();
         form.name = default_name.clone();
         form.parallel_envs = 0; // 自适应吞吐探测
-        form.max_steps = 0;
 
         let name_input = cx.new(|cx| {
             InputState::new(window, cx)
@@ -455,6 +512,48 @@ impl CreateTaskDialogView {
         }
     }
 
+    /// 应用指定环境的自带推荐参数（唯一真实来源来自 lol_rl_protocol）。
+    pub fn apply_env_params(
+        &mut self,
+        env_name: &str,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) {
+        let params = lol_rl_protocol::get_env_training_params(env_name);
+        self.form.env_name = env_name.to_string();
+        self.form.lr = params.lr;
+        self.form.gamma = params.gamma;
+        self.form.gae_lambda = params.gae_lambda;
+        self.form.clip_eps = params.clip_eps;
+        self.form.ppo_epochs = params.ppo_epochs;
+        self.form.hidden_dim = params.hidden_dim;
+        self.form.rollout_steps_per_env = params.rollout_steps_per_env;
+        self.form.total_iterations = params.total_iterations;
+
+        // 同步刷新所有输入框的文本
+        self.lr_input
+            .update(cx, |i, cx| i.set_value(params.lr.to_string(), window, cx));
+        self.gamma_input.update(cx, |i, cx| {
+            i.set_value(params.gamma.to_string(), window, cx)
+        });
+        self.gae_lambda_input.update(cx, |i, cx| {
+            i.set_value(params.gae_lambda.to_string(), window, cx)
+        });
+        self.clip_eps_input.update(cx, |i, cx| {
+            i.set_value(params.clip_eps.to_string(), window, cx)
+        });
+        self.ppo_epochs_input.update(cx, |i, cx| {
+            i.set_value(params.ppo_epochs.to_string(), window, cx)
+        });
+        self.hidden_dim_input.update(cx, |i, cx| {
+            i.set_value(params.hidden_dim.to_string(), window, cx)
+        });
+        self.total_iterations_input.update(cx, |i, cx| {
+            i.set_value(params.total_iterations.to_string(), window, cx)
+        });
+        cx.notify();
+    }
+
     fn render_num_setting<F>(
         &self,
         label: &str,
@@ -468,45 +567,55 @@ impl CreateTaskDialogView {
         F: Fn(&mut Self, f32) + Send + Sync + 'static + Copy,
     {
         let weak_input = input_entity.downgrade();
-        v_flex()
+        h_flex()
             .w_full()
-            .gap_2()
+            .items_start()
+            .gap_3()
             .child(
                 div()
+                    .w(px(140.))
+                    .flex_shrink_0()
+                    .pt_1p5()
                     .text_xs()
-                    .font_bold()
+                    .font_medium()
                     .text_color(cx.theme().muted_foreground)
                     .child(label.to_string()),
             )
-            .child(div().w_full().child(NumberInput::new(input_entity)))
             .child(
-                h_flex()
-                    .w_full()
+                v_flex()
+                    .flex_1()
                     .gap_1()
-                    .children(presets.into_iter().map(|(name, val)| {
-                        let is_selected = (val - current_val).abs() < 1e-6;
-                        let btn = if is_selected {
-                            Button::new(format!("preset-{label}-{name}"))
-                                .primary()
-                                .compact()
-                                .flex_1()
-                                .label(name)
-                        } else {
-                            Button::new(format!("preset-{label}-{name}"))
-                                .outline()
-                                .compact()
-                                .flex_1()
-                                .label(name)
-                        };
-                        let weak_input = weak_input.clone();
-                        btn.on_click(cx.listener(move |this, _, window, cx| {
-                            setter(this, val);
-                            if let Some(input) = weak_input.upgrade() {
-                                input.update(cx, |i, cx| i.set_value(val.to_string(), window, cx));
-                            }
-                            cx.notify();
-                        }))
-                    })),
+                    .child(div().w_full().child(NumberInput::new(input_entity)))
+                    .child(h_flex().w_full().gap_1().children(presets.into_iter().map(
+                        |(name, val)| {
+                            let is_selected = (val - current_val).abs() < 1e-6;
+                            let btn = if is_selected {
+                                Button::new(format!("preset-{label}-{name}"))
+                                    .primary()
+                                    .xsmall()
+                                    .compact()
+                                    .flex_1()
+                                    .label(name)
+                            } else {
+                                Button::new(format!("preset-{label}-{name}"))
+                                    .outline()
+                                    .xsmall()
+                                    .compact()
+                                    .flex_1()
+                                    .label(name)
+                            };
+                            let weak_input = weak_input.clone();
+                            btn.on_click(cx.listener(move |this, _, window, cx| {
+                                setter(this, val);
+                                if let Some(input) = weak_input.upgrade() {
+                                    input.update(cx, |i, cx| {
+                                        i.set_value(val.to_string(), window, cx)
+                                    });
+                                }
+                                cx.notify();
+                            }))
+                        },
+                    ))),
             )
             .into_any_element()
     }
@@ -524,45 +633,58 @@ impl CreateTaskDialogView {
         F: Fn(&mut Self, usize) + Send + Sync + 'static + Copy,
     {
         let weak_input = input_entity.downgrade();
-        v_flex()
+        h_flex()
             .w_full()
-            .gap_2()
+            .items_start()
+            .gap_3()
             .child(
                 div()
+                    .w(px(140.))
+                    .flex_shrink_0()
+                    .pt_1p5()
                     .text_xs()
-                    .font_bold()
+                    .font_medium()
                     .text_color(cx.theme().muted_foreground)
                     .child(label.to_string()),
             )
-            .child(div().w_full().child(NumberInput::new(input_entity)))
             .child(
-                h_flex()
-                    .w_full()
+                v_flex()
+                    .flex_1()
                     .gap_1()
-                    .children(presets.into_iter().map(|val| {
-                        let is_selected = val == current_val;
-                        let btn = if is_selected {
-                            Button::new(format!("preset-int-{label}-{val}"))
-                                .primary()
-                                .compact()
-                                .flex_1()
-                                .label(val.to_string())
-                        } else {
-                            Button::new(format!("preset-int-{label}-{val}"))
-                                .outline()
-                                .compact()
-                                .flex_1()
-                                .label(val.to_string())
-                        };
-                        let weak_input = weak_input.clone();
-                        btn.on_click(cx.listener(move |this, _, window, cx| {
-                            setter(this, val);
-                            if let Some(input) = weak_input.upgrade() {
-                                input.update(cx, |i, cx| i.set_value(val.to_string(), window, cx));
-                            }
-                            cx.notify();
-                        }))
-                    })),
+                    .child(div().w_full().child(NumberInput::new(input_entity)))
+                    .child(
+                        h_flex()
+                            .w_full()
+                            .gap_1()
+                            .children(presets.into_iter().map(|val| {
+                                let is_selected = val == current_val;
+                                let btn = if is_selected {
+                                    Button::new(format!("preset-int-{label}-{val}"))
+                                        .primary()
+                                        .xsmall()
+                                        .compact()
+                                        .flex_1()
+                                        .label(val.to_string())
+                                } else {
+                                    Button::new(format!("preset-int-{label}-{val}"))
+                                        .outline()
+                                        .xsmall()
+                                        .compact()
+                                        .flex_1()
+                                        .label(val.to_string())
+                                };
+                                let weak_input = weak_input.clone();
+                                btn.on_click(cx.listener(move |this, _, window, cx| {
+                                    setter(this, val);
+                                    if let Some(input) = weak_input.upgrade() {
+                                        input.update(cx, |i, cx| {
+                                            i.set_value(val.to_string(), window, cx)
+                                        });
+                                    }
+                                    cx.notify();
+                                }))
+                            })),
+                    ),
             )
             .into_any_element()
     }
@@ -572,254 +694,292 @@ impl Render for CreateTaskDialogView {
     fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         let cfg = &self.form;
         let current_agent = cfg.agent_type.clone();
+        let current_env_spec = lol_rl_protocol::get_env_spec(&cfg.env_name);
+        let current_env_tag = current_env_spec.map(|s| s.tag).unwrap_or("Env");
 
         v_flex()
+            .id("modal-form-scroll")
+            .size_full()
             .gap_4()
-            .child(
-                // 弹窗 Header
-                h_flex()
-                    .items_center()
-                    .child(
-                        h_flex()
-                            .gap_2()
-                            .items_center()
-                            .child(IconName::Plus)
-                            .child(div().font_bold().text_lg().child("开始训练")),
-                    ),
-            )
-            .child(
-                // 滚动表单区域
-                v_flex()
-                    .id("modal-form-scroll")
-                    .flex_1()
-                    .gap_4()
-                    .overflow_y_scrollbar()
-                    .p_1()
-                    // 1. 任务名称
+            .overflow_y_scrollbar()
+            .p_1()
+                    // ══════════════════════════════════════════════════
+                    // 第一层级：核心基础配置 (任务名称、训练环境、算法模型)
+                    // ══════════════════════════════════════════════════
                     .child(
                         v_flex()
-                            .gap_1()
+                            .gap_3()
+                            .p_3()
+                            .rounded_lg()
+                            .bg(cx.theme().muted.opacity(0.15))
+                            .border_1()
+                            .border_color(cx.theme().border.opacity(0.6))
+                            // 1. 任务名称
                             .child(
-                                div()
-                                    .text_xs()
-                                    .font_bold()
-                                    .text_color(cx.theme().muted_foreground)
-                                    .child("任务名称"),
-                            )
-                            .child(
-                                div()
+                                h_flex()
                                     .w_full()
-                                    .child(Input::new(&self.name_input)),
-                            ),
-                    )
-                    // 2. 算法与环境标识
-                    .child(
-                        h_flex()
-                            .gap_4()
-                            .child(
-                                v_flex()
-                                    .flex_1()
-                                    .gap_1()
+                                    .items_center()
+                                    .gap_3()
                                     .child(
                                         div()
+                                            .w(px(140.))
+                                            .flex_shrink_0()
                                             .text_xs()
-                                            .font_bold()
-                                            .text_color(cx.theme().muted_foreground)
-                                            .child("算法模型 (Agent)"),
+                                            .font_semibold()
+                                            .text_color(cx.theme().foreground)
+                                            .child("任务名称"),
                                     )
                                     .child(
-                                        Button::new("agent-dropdown")
-                                            .label(agent_label(&current_agent))
-                                            .dropdown_caret(true)
-                                            .outline()
-                                            .w_full()
-                                            .dropdown_menu({
-                                                let current_agent = current_agent.clone();
-                                                let weak = cx.entity().downgrade();
-                                                move |menu, _window, _cx| {
-                                                    let mut menu = menu;
-                                                    for &alg in AGENT_OPTIONS {
-                                                        let alg = alg.to_string();
-                                                        let checked = alg == current_agent;
-                                                        let weak = weak.clone();
-                                                        let alg_val = alg.clone();
-                                                        menu = menu.item(
-                                                            PopupMenuItem::new(alg.clone())
-                                                                .checked(checked)
-                                                                .on_click(move |_, _, cx| {
-                                                                    if let Some(view) = weak.upgrade() {
-                                                                        let _ = view.update(cx, |this, cx| {
-                                                                            this.form.agent_type = alg_val.clone();
-                                                                            cx.notify();
-                                                                        });
-                                                                    }
-                                                                }),
-                                                        );
-                                                    }
-                                                    menu
-                                                }
-                                            }),
+                                        div()
+                                            .flex_1()
+                                            .child(Input::new(&self.name_input)),
                                     ),
                             )
+                            // 2. 选择环境
                             .child(
-                                v_flex()
-                                    .flex_1()
-                                    .gap_1()
+                                h_flex()
+                                    .w_full()
+                                    .items_center()
+                                    .gap_3()
                                     .child(
                                         div()
+                                            .w(px(140.))
+                                            .flex_shrink_0()
                                             .text_xs()
-                                            .font_bold()
-                                            .text_color(cx.theme().muted_foreground)
+                                            .font_semibold()
+                                            .text_color(cx.theme().foreground)
                                             .child("训练环境 (Env)"),
                                     )
                                     .child(
                                         h_flex()
+                                            .flex_1()
                                             .gap_1()
+                                            .children(lol_rl_protocol::AVAILABLE_ENVS.iter().map(|spec| {
+                                                let is_active = cfg.env_name == spec.name;
+                                                let env_name = spec.name;
+                                                let btn = if is_active {
+                                                    Button::new(format!("env-btn-{}", spec.name))
+                                                        .primary()
+                                                        .compact()
+                                                        .flex_1()
+                                                        .label(spec.label)
+                                                } else {
+                                                    Button::new(format!("env-btn-{}", spec.name))
+                                                        .outline()
+                                                        .compact()
+                                                        .flex_1()
+                                                        .label(spec.label)
+                                                };
+                                                btn.on_click(cx.listener(move |this, _, window, cx| {
+                                                    this.apply_env_params(env_name, window, cx);
+                                                }))
+                                            })),
+                                    ),
+                            )
+                            // 环境特性与自带参数摘要说明
+                            .when_some(current_env_spec, |this, spec| {
+                                this.child(
+                                    h_flex()
+                                        .w_full()
+                                        .items_center()
+                                        .gap_3()
+                                        .child(div().w(px(140.)).flex_shrink_0())
+                                        .child(
+                                            div()
+                                                .flex_1()
+                                                .px_2()
+                                                .py_1p5()
+                                                .rounded_md()
+                                                .bg(cx.theme().muted.opacity(0.35))
+                                                .text_xs()
+                                                .text_color(cx.theme().muted_foreground)
+                                                .child(format!(
+                                                    "💡 特性: {} (单局上限 {} 步, 推荐总轮次: {} 轮, 隐藏层: {})",
+                                                    spec.description,
+                                                    spec.default_params.rollout_steps_per_env,
+                                                    spec.default_params.total_iterations,
+                                                    spec.default_params.hidden_dim
+                                                )),
+                                        ),
+                                )
+                            })
+                            // 3. 算法模型
+                            .child(
+                                h_flex()
+                                    .w_full()
+                                    .items_center()
+                                    .gap_3()
+                                    .child(
+                                        div()
+                                            .w(px(140.))
+                                            .flex_shrink_0()
+                                            .text_xs()
+                                            .font_semibold()
+                                            .text_color(cx.theme().foreground)
+                                            .child("算法模型 (Agent)"),
+                                    )
+                                    .child(
+                                        div()
+                                            .flex_1()
                                             .child(
-                                                Button::new("env-v2-btn")
-                                                    .when(
-                                                        cfg.env_name == lol_rl_protocol::ENV_FIORA_V2,
-                                                        |b| b.primary(),
-                                                    )
-                                                    .when(
-                                                        cfg.env_name != lol_rl_protocol::ENV_FIORA_V2,
-                                                        |b| b.outline(),
-                                                    )
-                                                    .compact()
-                                                    .label("全技能实战 (V2)")
-                                                    .on_click(cx.listener(|this, _, _, cx| {
-                                                        this.form.env_name = lol_rl_protocol::ENV_FIORA_V2.to_string();
-                                                        cx.notify();
-                                                    })),
-                                            )
-                                            .child(
-                                                Button::new("env-real-btn")
-                                                    .when(
-                                                        cfg.env_name == lol_rl_protocol::ENV_FIORA_V1,
-                                                        |b| b.primary(),
-                                                    )
-                                                    .when(
-                                                        cfg.env_name != lol_rl_protocol::ENV_FIORA_V1,
-                                                        |b| b.outline(),
-                                                    )
-                                                    .compact()
-                                                    .label("真实移动 (V1)")
-                                                    .on_click(cx.listener(|this, _, _, cx| {
-                                                        this.form.env_name = lol_rl_protocol::ENV_FIORA_V1.to_string();
-                                                        cx.notify();
-                                                    })),
-                                            )
-                                            .child(
-                                                Button::new("env-legacy-btn")
-                                                    .when(
-                                                        cfg.env_name == lol_rl_protocol::ENV_FIORA_V0,
-                                                        |b| b.primary(),
-                                                    )
-                                                    .when(
-                                                        cfg.env_name != lol_rl_protocol::ENV_FIORA_V0,
-                                                        |b| b.outline(),
-                                                    )
-                                                    .compact()
-                                                    .label("瞬移站位 (V0)")
-                                                    .on_click(cx.listener(|this, _, _, cx| {
-                                                        this.form.env_name = lol_rl_protocol::ENV_FIORA_V0.to_string();
-                                                        cx.notify();
-                                                    })),
+                                                Button::new("agent-dropdown")
+                                                    .label(agent_label(&current_agent))
+                                                    .dropdown_caret(true)
+                                                    .outline()
+                                                    .w_full()
+                                                    .dropdown_menu({
+                                                        let current_agent = current_agent.clone();
+                                                        let weak = cx.entity().downgrade();
+                                                        move |menu, _window, _cx| {
+                                                            let mut menu = menu;
+                                                            for &alg in AGENT_OPTIONS {
+                                                                let alg = alg.to_string();
+                                                                let checked = alg == current_agent;
+                                                                let weak = weak.clone();
+                                                                let alg_val = alg.clone();
+                                                                menu = menu.item(
+                                                                    PopupMenuItem::new(alg.clone())
+                                                                        .checked(checked)
+                                                                        .on_click(move |_, _, cx| {
+                                                                            if let Some(view) = weak.upgrade() {
+                                                                                let _ = view.update(cx, |this, cx| {
+                                                                                    this.form.agent_type = alg_val.clone();
+                                                                                    cx.notify();
+                                                                                });
+                                                                            }
+                                                                        }),
+                                                                );
+                                                            }
+                                                            menu
+                                                        }
+                                                    }),
                                             ),
                                     ),
                             ),
                     )
-                    // 3. 学习率
-                    .child(self.render_num_setting(
-                        "学习率 (Learning Rate / lr)",
-                        &self.lr_input,
-                        vec![
-                            ("1e-4", 0.0001),
-                            ("3e-4", 0.0003),
-                            ("5e-4", 0.0005),
-                            ("1e-3", 0.0010),
-                        ],
-                        cfg.lr,
-                        cx,
-                        |this, val| this.form.lr = val,
-                    ))
-                    // 4. 折扣因子 Gamma
-                    .child(self.render_num_setting(
-                        "折扣因子 (Gamma / γ)",
-                        &self.gamma_input,
-                        vec![
-                            ("0.90", 0.90),
-                            ("0.95", 0.95),
-                            ("0.98", 0.98),
-                            ("0.99", 0.99),
-                            ("0.999", 0.999),
-                        ],
-                        cfg.gamma,
-                        cx,
-                        |this, val| this.form.gamma = val,
-                    ))
-                    // 5. GAE Lambda
-                    .child(self.render_num_setting(
-                        "GAE 因子 (Lambda / λ)",
-                        &self.gae_lambda_input,
-                        vec![
-                            ("0.80", 0.80),
-                            ("0.90", 0.90),
-                            ("0.95", 0.95),
-                            ("0.98", 0.98),
-                        ],
-                        cfg.gae_lambda,
-                        cx,
-                        |this, val| this.form.gae_lambda = val,
-                    ))
-                    // 6. PPO Clip Epsilon
-                    .child(self.render_num_setting(
-                        "PPO Clip 范围 (Clip Epsilon / ε)",
-                        &self.clip_eps_input,
-                        vec![
-                            ("0.10", 0.10),
-                            ("0.15", 0.15),
-                            ("0.20", 0.20),
-                            ("0.25", 0.25),
-                            ("0.30", 0.30),
-                        ],
-                        cfg.clip_eps,
-                        cx,
-                        |this, val| this.form.clip_eps = val,
-                    ))
-                    // 7. PPO Epochs & 隐藏层维度
+                    // ══════════════════════════════════════════════════
+                    // 第二层级：高级超参数配置 (PPO Hyperparameters)
+                    // ══════════════════════════════════════════════════
                     .child(
-                        h_flex()
-                            .gap_4()
-                            .child(div().flex_1().child(self.render_int_setting(
+                        v_flex()
+                            .gap_3()
+                            .p_3()
+                            .rounded_lg()
+                            .border_1()
+                            .border_color(cx.theme().border.opacity(0.8))
+                            .child(
+                                // 第二层级 Header
+                                h_flex()
+                                    .justify_between()
+                                    .items_center()
+                                    .pb_2()
+                                    .border_b_1()
+                                    .border_color(cx.theme().border.opacity(0.4))
+                                    .child(
+                                        h_flex()
+                                            .gap_1p5()
+                                            .items_center()
+                                            .child(
+                                                div()
+                                                    .font_semibold()
+                                                    .text_xs()
+                                                    .text_color(cx.theme().foreground)
+                                                    .child("高级超参数配置 (Hyperparameters)"),
+                                            ),
+                                    )
+                                    .child(
+                                        div()
+                                            .text_xs()
+                                            .text_color(cx.theme().accent)
+                                            .child(format!("已联动 {} 推荐参数", current_env_tag)),
+                                    ),
+                            )
+                            // 学习率
+                            .child(self.render_num_setting(
+                                "学习率 (Learning Rate / lr)",
+                                &self.lr_input,
+                                vec![
+                                    ("1e-4", 0.0001),
+                                    ("3e-4", 0.0003),
+                                    ("5e-4", 0.0005),
+                                    ("1e-3", 0.0010),
+                                ],
+                                cfg.lr,
+                                cx,
+                                |this, val| this.form.lr = val,
+                            ))
+                            // 折扣因子 Gamma
+                            .child(self.render_num_setting(
+                                "折扣因子 (Gamma / γ)",
+                                &self.gamma_input,
+                                vec![
+                                    ("0.90", 0.90),
+                                    ("0.95", 0.95),
+                                    ("0.98", 0.98),
+                                    ("0.99", 0.99),
+                                    ("0.999", 0.999),
+                                ],
+                                cfg.gamma,
+                                cx,
+                                |this, val| this.form.gamma = val,
+                            ))
+                            // GAE Lambda
+                            .child(self.render_num_setting(
+                                "GAE 因子 (Lambda / λ)",
+                                &self.gae_lambda_input,
+                                vec![
+                                    ("0.80", 0.80),
+                                    ("0.90", 0.90),
+                                    ("0.95", 0.95),
+                                    ("0.98", 0.98),
+                                ],
+                                cfg.gae_lambda,
+                                cx,
+                                |this, val| this.form.gae_lambda = val,
+                            ))
+                            // PPO Clip Epsilon
+                            .child(self.render_num_setting(
+                                "PPO Clip (Clip Eps / ε)",
+                                &self.clip_eps_input,
+                                vec![
+                                    ("0.10", 0.10),
+                                    ("0.15", 0.15),
+                                    ("0.20", 0.20),
+                                    ("0.25", 0.25),
+                                    ("0.30", 0.30),
+                                ],
+                                cfg.clip_eps,
+                                cx,
+                                |this, val| this.form.clip_eps = val,
+                            ))
+                            // 每轮训练 Epochs
+                            .child(self.render_int_setting(
                                 "每轮训练 Epochs",
                                 &self.ppo_epochs_input,
                                 cfg.ppo_epochs,
                                 vec![1, 2, 4, 8],
                                 cx,
                                 |this, val| this.form.ppo_epochs = val,
-                            )))
-                            .child(div().flex_1().child(self.render_int_setting(
-                                "隐藏层神经元 (Hidden Dim)",
+                            ))
+                            // 隐藏层维度
+                            .child(self.render_int_setting(
+                                "隐藏层维度 (Hidden Dim)",
                                 &self.hidden_dim_input,
                                 cfg.hidden_dim,
                                 vec![32, 64, 128, 256],
                                 cx,
                                 |this, val| this.form.hidden_dim = val,
-                            ))),
-                    )
-                    // 8. 总训练迭代轮次与自适应吞吐
-                    .child(
-                        v_flex()
-                            .gap_2()
+                            ))
+                            // 总训练迭代轮次
                             .child(self.render_int_setting(
-                                "总训练迭代轮次 (Total Iterations)",
+                                "总迭代轮次 (Iterations)",
                                 &self.total_iterations_input,
                                 cfg.total_iterations,
-                                vec![20, 50, 80, 150, 300],
+                                vec![20, 50, 80, 100, 150, 300],
                                 cx,
                                 |this, val| this.form.total_iterations = val,
                             ))
+                            // 自适应吞吐提示
                             .child(
                                 h_flex()
                                     .items_center()
@@ -834,58 +994,7 @@ impl Render for CreateTaskDialogView {
                                             .child("⚡ 并行对局数与 GPU 推理/训练批大小将由 AutoTuner 在任务启动时自动探测硬件算力并求解最优吞吐。"),
                                     ),
                             ),
-                    ),
-            )
-            .child(
-                // 底部 Action
-                h_flex()
-                    .justify_between()
-                    .items_center()
-                    .child(
-                        Button::new("reset-default-btn")
-                            .outline()
-                            .label("恢复默认配置")
-                            .on_click(cx.listener(|this, _, window, cx| {
-                                let name = this.default_name.clone();
-                                let mut def = TaskConfigPayload::default();
-                                def.name = name.clone();
-                                def.parallel_envs = 0;
-                                def.max_steps = 0;
-                                this.form = def;
-                                this.name_input.update(cx, |input, cx| {
-                                    input.set_value(name, window, cx);
-                                });
-                                cx.notify();
-                            })),
                     )
-                    .child(
-                        h_flex()
-                            .gap_2()
-                            .child(
-                                Button::new("cancel-create-btn")
-                                    .ghost()
-                                    .label("取消")
-                                    .on_click(cx.listener(|_, _, window, cx| {
-                                        window.close_dialog(cx);
-                                    })),
-                            )
-                            .child(
-                                    Button::new("confirm-create-btn")
-                                        .primary()
-                                        .icon(IconName::Plus)
-                                        .label("确认创建任务")
-                                        .on_click(cx.listener(|this, _, window, cx| {
-                                            let mut config = this.form.clone();
-                                            config.parallel_envs = 0;
-                                            config.max_steps = 0;
-                                            if let Some(tx) = &this.tx {
-                                                let _ = tx.send(InFrame::CreateTask { config });
-                                            }
-                                            window.close_dialog(cx);
-                                        })),
-                            ),
-                    ),
-            )
     }
 }
 

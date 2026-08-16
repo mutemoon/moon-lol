@@ -35,7 +35,6 @@ fn main() -> anyhow::Result<()> {
     let num_parallel_envs = 12;
     let horizon = 128; // 12 * 128 = 1536 样本/轮
     let total_iterations = 20;
-    let env_max_steps = 120;
     let hidden_dim = 128;
     let train_batch_size = 512;
 
@@ -80,7 +79,7 @@ fn main() -> anyhow::Result<()> {
         let (resp_tx, resp_rx) = unbounded::<WorkerTrajectoryResult>();
 
         let handle = std::thread::spawn(move || {
-            let mut env = FioraVsRivenEnv::new(env_max_steps);
+            let mut env = FioraVsRivenEnv::new();
             let mut current_obs = env.reset();
             let mut cur_return = 0.0f32;
 
@@ -101,8 +100,9 @@ fn main() -> anyhow::Result<()> {
                             )
                             .unwrap();
 
-                            let (encoded, log_prob, val) =
-                                policy.sample_action(&state_tensor, action_mask.as_deref()).unwrap();
+                            let (encoded, log_prob, val) = policy
+                                .sample_action(&state_tensor, action_mask.as_deref())
+                                .unwrap();
 
                             let act = FioraVsRivenEnv::action_from_encoding(&encoded);
                             let res = env.step(act);
@@ -114,7 +114,15 @@ fn main() -> anyhow::Result<()> {
                                     item.value;
                             }
 
-                            buffer.push(state_vec, encoded, log_prob, res.reward, val, done, action_mask);
+                            buffer.push(
+                                state_vec,
+                                encoded,
+                                log_prob,
+                                res.reward,
+                                val,
+                                done,
+                                action_mask,
+                            );
 
                             if done {
                                 ep_returns.push(cur_return);

@@ -7,7 +7,7 @@ fn main() -> anyhow::Result<()> {
     println!("=== lol_env: Level 6 Fiora vs Riven Fast Kill RL Env ===");
 
     println!("\n[1] Testing Single Environment Step (Single-Threaded Bevy App)");
-    let mut env = FioraVsRivenEnv::new(300);
+    let mut env = FioraVsRivenEnv::new();
     let initial_obs = env.reset();
 
     println!("Initial Observation:");
@@ -54,7 +54,7 @@ fn main() -> anyhow::Result<()> {
     let total_steps = 100;
 
     let start_time = Instant::now();
-    let par_envs = ParallelFioraVsRivenEnvs::new(num_parallel_envs, 200);
+    let par_envs = ParallelFioraVsRivenEnvs::new(num_parallel_envs);
     par_envs.reset_all();
 
     let par_actions = vec![FioraVsRivenAction::AttackRiven; num_parallel_envs];

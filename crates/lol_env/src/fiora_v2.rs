@@ -5,16 +5,18 @@ use bevy::app::ScheduleRunnerPlugin;
 use bevy::ecs::schedule::SingleThreadedExecutor;
 use bevy::prelude::*;
 use bevy::time::TimeUpdateStrategy;
+use lol_base::character::Skin;
 use lol_base_render::camera::CameraState;
-use lol_champions::fiora::PluginFiora;
 use lol_champions::fiora::e::BuffFioraE;
 use lol_champions::fiora::passive::Vital;
 use lol_champions::fiora::r::BuffFioraR;
+use lol_champions::fiora::{Fiora, PluginFiora};
 use lol_champions::riven::PluginRiven;
 use lol_core::action::{Action, CommandAction};
 use lol_core::attack::{Attack, AttackState, AttackStatus};
 use lol_core::base::buff::Buffs;
 use lol_core::base::direction::Direction;
+use lol_core::character::CharacterReady;
 use lol_core::life::Health;
 use lol_core::navigation::navigation::NavigationDebug;
 use lol_core::skill::{CoolDown, SkillRecastWindow, Skills, is_skill_ready};
@@ -35,9 +37,28 @@ pub use crate::traits::{
 /// 连续位移与 Q 突刺偏移缩放：offset_x/offset_z ∈ [-1,1] 映射到相对 riven 的 ±OFFSET_SCALE 偏移。
 pub const OFFSET_SCALE: f32 = 100.0;
 
+/// 闪现瞬移距离（单位）：沿 offset 连续值方向瞬移 300 单位。
+pub const FLASH_DISTANCE: f32 = 300.0;
+
+/// 闪现冷却时长（秒），与英雄联盟召唤师技能一致。
+pub const FLASH_COOLDOWN_SECS: f32 = 300.0;
+
 /// 观测向量中「相对距离归一化列」的下标，与 [`FioraV2Obs::to_vector`] 的布局一致。
 pub const V2_OBS_DISTANCE_IDX: usize = 16;
 pub const V2_OBS_DISTANCE_SCALE: f32 = 100.0;
+
+/// 靶子瑞雯在 V2 中的生命值上限与初始值（避免被角色配置默认血量覆盖）
+pub const RIVEN_V2_HP: f32 = 10000.0;
+
+/// 设置 V2 靶子瑞雯的生命值为 10000.0
+pub fn setup_v2_riven_health_world(world: &mut World, riven: Entity) {
+    if let Some(mut health) = world.get_mut::<Health>(riven) {
+        health.value = RIVEN_V2_HP;
+        health.max = RIVEN_V2_HP;
+    } else {
+        world.entity_mut(riven).insert(Health::new(RIVEN_V2_HP));
+    }
+}
 
 // ── 离散动作与混合动作定义 ─────────────────────────────────────────────────────
 
@@ -56,6 +77,8 @@ pub enum FioraV2DiscreteAction {
     CastE = 4,
     /// 5: 对瑞雯施放 R 技能（套上 4 破绽）
     CastR = 5,
+    /// 6: 闪现：沿 offset 方向瞬移 300 单位（手动实现，无游戏侧技能）
+    CastFlash = 6,
 }
 
 impl FioraV2DiscreteAction {
@@ -67,6 +90,7 @@ impl FioraV2DiscreteAction {
             3 => Self::CastQ,
             4 => Self::CastE,
             5 => Self::CastR,
+            6 => Self::CastFlash,
             _ => Self::NoOp,
         }
     }
@@ -78,11 +102,11 @@ impl FioraV2DiscreteAction {
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct FioraV2Action {
-    /// 连续偏移 X 分量 ∈ [-1, 1]，相对 riven 的 X 偏移（Move 与 CastQ 共用）
+    /// 连续偏移 X 分量 ∈ [-1, 1]，相对 riven 的 X 偏移（Move / CastQ / CastFlash 共用）
     pub offset_x: f32,
-    /// 连续偏移 Z 分量 ∈ [-1, 1]，相对 riven 的 Z 偏移（Move 与 CastQ 共用）
+    /// 连续偏移 Z 分量 ∈ [-1, 1]，相对 riven 的 Z 偏移（Move / CastQ / CastFlash 共用）
     pub offset_z: f32,
-    /// 离散动作类别 (0: NoOp, 1: Move, 2: Attack, 3: CastQ, 4: CastE, 5: CastR)
+    /// 离散动作类别 (0: NoOp, 1: Move, 2: Attack, 3: CastQ, 4: CastE, 5: CastR, 6: CastFlash)
     pub discrete: FioraV2DiscreteAction,
 }
 
@@ -111,7 +135,7 @@ impl FioraV2Action {
         vec![self.offset_x, self.offset_z, self.discrete.to_u8() as f32]
     }
 
-    /// UI 手动面板预设（10 按钮）
+    /// UI 手动面板预设（11 按钮）
     pub fn preset_from_index(index: usize) -> Self {
         match index {
             0 => Self::new(0.0, 0.0, FioraV2DiscreteAction::NoOp),
@@ -124,6 +148,7 @@ impl FioraV2Action {
             7 => Self::new(1.0, 0.0, FioraV2DiscreteAction::CastQ), // Q East
             8 => Self::new(0.0, 0.0, FioraV2DiscreteAction::CastE), // E
             9 => Self::new(0.0, 0.0, FioraV2DiscreteAction::CastR), // R
+            10 => Self::new(1.0, 0.0, FioraV2DiscreteAction::CastFlash), // Flash East
             _ => Self::new(0.0, 0.0, FioraV2DiscreteAction::NoOp),
         }
     }
@@ -148,6 +173,7 @@ impl FioraV2Action {
             FioraV2DiscreteAction::CastQ => 7,
             FioraV2DiscreteAction::CastE => 8,
             FioraV2DiscreteAction::CastR => 9,
+            FioraV2DiscreteAction::CastFlash => 10,
         }
     }
 
@@ -159,6 +185,63 @@ impl FioraV2Action {
             FioraV2DiscreteAction::CastQ => "CastQ (Q突刺)",
             FioraV2DiscreteAction::CastE => "CastE (E剑术)",
             FioraV2DiscreteAction::CastR => "CastR (R无双挑战)",
+            FioraV2DiscreteAction::CastFlash => "Flash (闪现)",
+        }
+    }
+}
+
+// ── 闪现（Flash） ──────────────────────────────────────────────────────────────
+
+/// 闪现冷却状态（挂在剑姬实体上）。`None` = 已就绪；`Some(timer)` = 冷却中。
+///
+/// 游戏中没有召唤师技能/闪现机制，闪现由本环境手动实现：
+/// `dispatch_action_world` 直接瞬移剑姬 `Transform`，冷却由本组件 + FixedUpdate 系统推进。
+#[derive(Component, Default)]
+pub struct FlashCooldown(pub Option<Timer>);
+
+impl FlashCooldown {
+    pub fn is_ready(&self) -> bool {
+        self.0.as_ref().map_or(true, |t| t.is_finished())
+    }
+
+    pub fn remaining_secs(&self) -> f32 {
+        self.0
+            .as_ref()
+            .map(|t| {
+                if t.is_finished() {
+                    0.0
+                } else {
+                    t.remaining_secs()
+                }
+            })
+            .unwrap_or(0.0)
+    }
+
+    /// 施放闪现后开始 300s 冷却。
+    pub fn start(&mut self) {
+        self.0 = Some(Timer::from_seconds(FLASH_COOLDOWN_SECS, TimerMode::Once));
+    }
+}
+
+/// FixedUpdate 中推进剑姬的闪现冷却；未挂载冷却组件的剑姬自动挂载（初始即就绪）。
+pub fn tick_flash_cooldown(
+    time: Res<Time<Fixed>>,
+    mut commands: Commands,
+    mut q: Query<(Entity, Option<&mut FlashCooldown>), With<Fiora>>,
+) {
+    for (entity, flash) in q.iter_mut() {
+        match flash {
+            Some(mut flash) => {
+                if let Some(timer) = flash.0.as_mut() {
+                    timer.tick(time.delta());
+                    if timer.is_finished() {
+                        flash.0 = None;
+                    }
+                }
+            }
+            None => {
+                commands.entity(entity).insert(FlashCooldown::default());
+            }
         }
     }
 }
@@ -213,13 +296,17 @@ pub struct FioraV2Obs {
     pub r_ready: bool,
     pub r_cd_remaining: f32,
 
+    // 闪现状态
+    pub flash_ready: bool,
+    pub flash_cd_remaining: f32,
+
     // E Buff 状态
     pub has_buff_e: bool,
     pub buff_e_left: i32,
 }
 
 impl FioraV2Obs {
-    /// 转换为强化学习策略网络输入向量（31 维）
+    /// 转换为强化学习策略网络输入向量（33 维）
     pub fn to_vector(&self) -> Vec<f32> {
         let rel_x = self.fiora_pos.x - self.riven_pos.x;
         let rel_z = self.fiora_pos.z - self.riven_pos.z;
@@ -272,11 +359,14 @@ impl FioraV2Obs {
             } else {
                 1.0
             },
+            // 31..33: 闪现就绪与冷却
+            if self.flash_ready { 1.0 } else { 0.0 },
+            self.flash_cd_remaining / FLASH_COOLDOWN_SECS,
         ]
     }
 
     pub fn dim() -> usize {
-        31
+        33
     }
 
     pub fn to_payload(&self) -> ObsFeaturePayload {
@@ -342,6 +432,7 @@ pub struct FioraV2RewardContext {
     pub is_vital_break: bool,
     pub prev_riven_hp: f32,
     pub curr_riven_hp: f32,
+    pub riven_max_hp: f32,
     pub elapsed_secs: f32,
 }
 
@@ -356,31 +447,15 @@ impl RewardModel for FioraV2RewardModel {
             terms: vec![
                 RewardTermSpec::new(
                     "time_penalty",
-                    "时间惩罚 (Time Penalty)",
-                    RewardExpr::Constant(-0.002),
+                    "时间步惩罚 (Step Penalty)",
+                    RewardExpr::Constant(-0.001),
                 ),
                 RewardTermSpec::new(
                     "damage_dealt",
-                    "伤害收益 (Damage Dealt)",
+                    "伤害收益 (Damage Dealt, 归一化)",
                     RewardExpr::Mul(
-                        Box::new(RewardExpr::Constant(0.005)),
-                        Box::new(RewardExpr::Variable("hp_diff".into())),
-                    ),
-                ),
-                RewardTermSpec::new(
-                    "alignment",
-                    "对齐破绽方向 (Alignment Bonus)",
-                    RewardExpr::Mul(
-                        Box::new(RewardExpr::Constant(0.01)),
-                        Box::new(RewardExpr::Variable("is_aligned".into())),
-                    ),
-                ),
-                RewardTermSpec::new(
-                    "vital_break",
-                    "打破绽成功 (Vital Break)",
-                    RewardExpr::Mul(
-                        Box::new(RewardExpr::Constant(0.8)),
-                        Box::new(RewardExpr::Variable("is_vital_break".into())),
+                        Box::new(RewardExpr::Constant(2.5)),
+                        Box::new(RewardExpr::Variable("damage_ratio".into())),
                     ),
                 ),
                 RewardTermSpec::new(
@@ -391,45 +466,28 @@ impl RewardModel for FioraV2RewardModel {
                         Box::new(RewardExpr::Variable("is_kill".into())),
                     ),
                 ),
-                RewardTermSpec::new(
-                    "quick_kill_bonus",
-                    "极速击杀时效奖励 (Quick Kill Time Reward)",
-                    RewardExpr::IfElse {
-                        cond: Box::new(RewardExpr::Variable("is_kill".into())),
-                        then_branch: Box::new(RewardExpr::Variable("quick_kill_reward".into())),
-                        else_branch: Box::new(RewardExpr::Constant(0.0)),
-                    },
-                ),
             ],
         }
     }
 
     fn extract_variables(&self, ctx: &FioraV2RewardContext) -> HashMap<String, f32> {
         let mut vars = HashMap::new();
+        let max_hp = if ctx.riven_max_hp > 0.0 {
+            ctx.riven_max_hp
+        } else {
+            1000.0
+        };
         let hp_diff = (ctx.prev_riven_hp - ctx.curr_riven_hp).max(0.0);
-        let is_vital_break = if ctx.is_vital_break { 1.0 } else { 0.0 };
+        let damage_ratio = hp_diff / max_hp;
         let is_kill = if ctx.curr_riven_hp <= 0.0 && ctx.prev_riven_hp > 0.0 {
             1.0
         } else {
             0.0
         };
-        let is_aligned = if ctx.curr_aligned { 1.0 } else { 0.0 };
 
-        // 极速击杀时效奖励：越快越高，指数上升；4s 为零界限（>4s 严格为负）；接近 1s 时奖励达到 ~15.15（高于击杀基础分）
-        let quick_kill_reward = if is_kill > 0.0 {
-            let t = ctx.elapsed_secs.max(0.05);
-            let exp_term = 3.0 * ((0.6 * (4.0 - t)).exp() - 1.0);
-            let overtime_penalty = (t - 4.0).max(0.0) * 1.0;
-            exp_term - overtime_penalty
-        } else {
-            0.0
-        };
-
+        vars.insert("damage_ratio".into(), damage_ratio);
         vars.insert("hp_diff".into(), hp_diff);
-        vars.insert("is_vital_break".into(), is_vital_break);
         vars.insert("is_kill".into(), is_kill);
-        vars.insert("is_aligned".into(), is_aligned);
-        vars.insert("quick_kill_reward".into(), quick_kill_reward);
         vars.insert("elapsed_secs".into(), ctx.elapsed_secs);
         vars.insert("step_tick".into(), 1.0);
         vars
@@ -440,8 +498,8 @@ impl RewardModel for FioraV2RewardModel {
 
 pub struct FioraV2Env {
     pub app: App,
-    fiora: Entity,
-    riven: Entity,
+    pub fiora: Entity,
+    pub riven: Entity,
     fiora_config_handle: Handle<DynamicWorld>,
     riven_config_handle: Handle<DynamicWorld>,
     fiora_skin_handle: Option<Handle<DynamicWorld>>,
@@ -454,15 +512,31 @@ pub struct FioraV2Env {
 }
 
 impl FioraV2Env {
-    pub fn new(max_steps: usize) -> Self {
+    pub const DEFAULT_MAX_STEPS: usize = 160;
+
+    /// 使用环境固有默认最大步数构造 Headless 训练实例。
+    pub fn new() -> Self {
+        Self::with_config(EnvConfig::default())
+    }
+
+    /// 使用显式最大步数构造 Headless 训练实例。
+    pub fn new_with_max_steps(max_steps: usize) -> Self {
         Self::with_config(EnvConfig {
             max_steps,
             render_mode: RenderMode::Headless,
         })
     }
 
+    pub fn max_steps(&self) -> usize {
+        self.max_steps
+    }
+
     pub fn with_config(config: EnvConfig) -> Self {
-        let max_steps = config.max_steps;
+        let max_steps = if config.max_steps > 0 {
+            config.max_steps
+        } else {
+            Self::DEFAULT_MAX_STEPS
+        };
         let render = matches!(
             config.render_mode,
             RenderMode::Window | RenderMode::WindowCustomLoop
@@ -534,6 +608,9 @@ impl FioraV2Env {
         app.add_plugins(PluginFiora);
         app.add_plugins(PluginRiven);
 
+        // 闪现冷却推进（手动实现，无游戏侧技能）
+        app.add_systems(FixedUpdate, tick_flash_cooldown);
+
         app.insert_resource(lol_base::map::MapPaths::new("test"));
         app.insert_resource(NavigationDebug);
 
@@ -565,7 +642,7 @@ impl FioraV2Env {
         };
 
         let initial_fiora_pos = Vec3::ZERO;
-        let initial_riven_pos = Vec3::new(250.0, 0.0, 0.0);
+        let initial_riven_pos = Vec3::new(50.0, 0.0, 0.0);
 
         let (fiora, riven) = spawn_champions_world(
             app.world_mut(),
@@ -582,32 +659,22 @@ impl FioraV2Env {
             .insert_resource(FioraRivenEntities { fiora, riven });
         add_common_observers(&mut app);
 
+        // 等待 DynamicWorld 资产加载并完成向实体写入 (以 CharacterReady 为准)
         for _ in 0..500 {
-            let asset_server = app.world().resource::<AssetServer>();
-            let fiora_ready = if render {
-                asset_server
-                    .get_recursive_dependency_load_state(&fiora_skin_handle.clone().unwrap())
-                    .is_some_and(|s| s.is_loaded())
-            } else {
-                asset_server
-                    .get_recursive_dependency_load_state(&fiora_config_handle)
-                    .is_some_and(|s| s.is_loaded())
-            };
-            let riven_ready = if render {
-                asset_server
-                    .get_recursive_dependency_load_state(&riven_skin_handle.clone().unwrap())
-                    .is_some_and(|s| s.is_loaded())
-            } else {
-                asset_server
-                    .get_recursive_dependency_load_state(&riven_config_handle)
-                    .is_some_and(|s| s.is_loaded())
-            };
+            app.update();
+            let world = app.world();
+            let fiora_ready = world.get::<CharacterReady>(fiora).is_some()
+                && (!render || world.get::<Skin>(fiora).is_some());
+            let riven_ready = world.get::<CharacterReady>(riven).is_some()
+                && (!render || world.get::<Skin>(riven).is_some());
 
             if fiora_ready && riven_ready {
                 break;
             }
-            app.update();
         }
+
+        // 避免被加载后的血量覆盖，加载完成后把 riven 血量设置为 10000.0
+        setup_v2_riven_health_world(app.world_mut(), riven);
 
         let mut env = Self {
             app,
@@ -668,6 +735,8 @@ impl FioraV2Env {
         self.riven = new_riven;
         self.app.update();
         self.setup_champion_skill_levels();
+        // 避免被加载后的血量覆盖，重置并完成世界更新后将 riven 血量设置为 10000.0
+        setup_v2_riven_health_world(self.app.world_mut(), self.riven);
         self.get_obs()
     }
 
@@ -703,14 +772,22 @@ impl RlEnvironment for FioraV2Env {
     }
 
     fn description() -> &'static str {
-        "剑姬与瑞雯实战对决，支持 Q/E/R 技能、普攻与 NoOp 空动作，无辅助 10 帧物理推演"
+        "剑姬与瑞雯实战对决，支持 Q/E/R 技能、普攻、闪现（300 单位瞬移）与 NoOp 空动作，无辅助 10 帧物理推演"
     }
 
     fn action_space() -> ActionSpace {
         ActionSpace::Hybrid {
             continuous_dims: 2,
-            discrete_classes: 6,
+            discrete_classes: 7,
         }
+    }
+
+    fn default_max_steps() -> usize {
+        Self::DEFAULT_MAX_STEPS
+    }
+
+    fn max_steps(&self) -> usize {
+        self.max_steps
     }
 
     fn action_dim() -> usize {
@@ -733,6 +810,45 @@ impl RlEnvironment for FioraV2Env {
             "CastQ East (Q突刺)",
             "CastE (E剑术)",
             "CastR (R无双挑战)",
+            "Flash (闪现)",
+        ]
+    }
+
+    fn obs_dim_labels() -> &'static [&'static str] {
+        &[
+            "被动破绽 +X 方向 (vital_dir_x)",
+            "被动破绽 -X 方向 (vital_dir_neg_x)",
+            "被动破绽 +Z 方向 (vital_dir_z)",
+            "被动破绽 -Z 方向 (vital_dir_neg_z)",
+            "存在被动破绽 (has_vital)",
+            "被动破绽已激活 (vital_is_active)",
+            "被动破绽激活剩余 (归一化 /1.7s)",
+            "被动破绽移除剩余 (归一化 /4s)",
+            "大招破绽 东 (r_vital_east)",
+            "大招破绽 西 (r_vital_west)",
+            "大招破绽 北 (r_vital_north)",
+            "大招破绽 南 (r_vital_south)",
+            "存在大招破绽 (has_r_vital)",
+            "大招已激活 (r_is_active)",
+            "大招激活剩余 (归一化 /0.5s)",
+            "大招移除剩余 (归一化 /8s)",
+            "英雄间距 (distance, 归一化)",
+            "相对 X 偏移 (rel_x, 归一化)",
+            "相对 Z 偏移 (rel_z, 归一化)",
+            "普攻就绪 (attack_ready)",
+            "普攻前摇中 (attack_windup)",
+            "普攻后摇冷却中 (attack_cooldown)",
+            "普攻计时剩余 (归一化 /1s)",
+            "Q 就绪 (q_ready)",
+            "Q 冷却剩余 (归一化 /10s)",
+            "E 就绪 (e_ready)",
+            "E 冷却剩余 (归一化 /10s)",
+            "R 就绪 (r_ready)",
+            "R 冷却剩余 (归一化 /60s)",
+            "菲奥娜血量百分比",
+            "瑞雯血量百分比",
+            "闪现就绪 (flash_ready)",
+            "闪现冷却剩余 (归一化 /300s)",
         ]
     }
 
@@ -756,8 +872,8 @@ impl RlEnvironment for FioraV2Env {
         action.desc()
     }
 
-    fn new(max_steps: usize) -> Self {
-        Self::new(max_steps)
+    fn new() -> Self {
+        Self::new()
     }
 
     fn with_config(config: EnvConfig) -> Self {
@@ -781,20 +897,42 @@ impl RlEnvironment for FioraV2Env {
     }
 
     fn is_action_masked(obs: &Self::Obs, action_idx: usize) -> bool {
-        // 当距离过远时，普攻（preset index 6）掩码
-        obs.distance > ATTACK_MASK_DISTANCE && action_idx == 6
+        match action_idx {
+            6 => obs.distance > ATTACK_MASK_DISTANCE, // 普攻：超出攻击距离掩码
+            7 => !obs.q_ready,                        // Q 突刺：冷却中掩码
+            8 => !obs.e_ready,                        // E 剑术：冷却中掩码
+            9 => !obs.r_ready,                        // R 大招：冷却中掩码
+            10 => !obs.flash_ready,                   // 闪现：冷却中掩码
+            _ => false,
+        }
     }
 
     fn action_mask(obs: &Self::Obs) -> Option<Vec<bool>> {
-        let mut mask = vec![true; 6];
+        let mut mask = vec![true; 7];
         if obs.distance > ATTACK_MASK_DISTANCE {
-            mask[2] = false;
+            mask[2] = false; // 2: Attack
+        }
+        if !obs.q_ready {
+            mask[3] = false; // 3: CastQ
+        }
+        if !obs.e_ready {
+            mask[4] = false; // 4: CastE
+        }
+        if !obs.r_ready {
+            mask[5] = false; // 5: CastR
+        }
+        if !obs.flash_ready {
+            mask[6] = false; // 6: CastFlash
         }
         Some(mask)
     }
 
     fn reward_formula_spec() -> Option<RewardFormulaSpec> {
         Some(FioraV2RewardModel.formula_spec())
+    }
+
+    fn reward_formula(&self) -> Option<RewardFormulaSpec> {
+        Self::reward_formula_spec()
     }
 }
 
@@ -806,21 +944,14 @@ impl VisualEnvironment for FioraV2Env {
     }
 
     fn window_title(&self) -> &'static str {
-        "Fiora vs Riven (V2 Full Skills 10f) - RL Visual Viewer"
+        "Fiora vs Riven (V2 Full Skills)"
     }
 
     fn is_assets_loaded(&self, world: &World) -> bool {
-        let asset_server = world.resource::<AssetServer>();
-        let fiora_ready = self.fiora_skin_handle.as_ref().map_or(true, |h| {
-            asset_server
-                .get_recursive_dependency_load_state(h)
-                .is_some_and(|s| s.is_loaded())
-        });
-        let riven_ready = self.riven_skin_handle.as_ref().map_or(true, |h| {
-            asset_server
-                .get_recursive_dependency_load_state(h)
-                .is_some_and(|s| s.is_loaded())
-        });
+        let fiora_ready = world.get::<CharacterReady>(self.fiora).is_some()
+            && (self.fiora_skin_handle.is_none() || world.get::<Skin>(self.fiora).is_some());
+        let riven_ready = world.get::<CharacterReady>(self.riven).is_some()
+            && (self.riven_skin_handle.is_none() || world.get::<Skin>(self.riven).is_some());
         fiora_ready && riven_ready
     }
 
@@ -829,6 +960,7 @@ impl VisualEnvironment for FioraV2Env {
     }
 
     fn reset_world(&mut self, world: &mut World) {
+        self.step_count = 0;
         let render = matches!(
             self.render_mode,
             RenderMode::Window | RenderMode::WindowCustomLoop
@@ -885,14 +1017,16 @@ impl VisualEnvironment for FioraV2Env {
         }
     }
 
-    fn step_world(
-        &mut self,
-        app: &mut App,
-        action: Self::Action,
-        step_count: usize,
-        max_steps: usize,
-    ) -> StepResult<Self::Obs> {
-        step_v2_world(app, self.fiora, self.riven, action, step_count, max_steps)
+    fn step_world(&mut self, app: &mut App, action: Self::Action) -> StepResult<Self::Obs> {
+        self.step_count += 1;
+        step_v2_world(
+            app,
+            self.fiora,
+            self.riven,
+            action,
+            self.step_count,
+            self.max_steps,
+        )
     }
 }
 
@@ -1050,6 +1184,12 @@ pub fn get_v2_obs_from_world(world: &World, fiora: Entity, riven: Entity) -> Fio
         }
     }
 
+    // 6. 闪现状态
+    let flash_info = world
+        .get::<FlashCooldown>(fiora)
+        .map(|f| (f.is_ready(), f.remaining_secs()))
+        .unwrap_or((true, 0.0));
+
     FioraV2Obs {
         fiora_pos: fpos,
         fiora_hp: fhp.map(|h| h.value).unwrap_or(0.0),
@@ -1088,6 +1228,8 @@ pub fn get_v2_obs_from_world(world: &World, fiora: Entity, riven: Entity) -> Fio
         e_cd_remaining: e_info.1,
         r_ready: r_info_cd.0,
         r_cd_remaining: r_info_cd.1,
+        flash_ready: flash_info.0,
+        flash_cd_remaining: flash_info.1,
         has_buff_e: buff_e_info.0,
         buff_e_left: buff_e_info.1,
     }
@@ -1156,6 +1298,41 @@ pub fn dispatch_action_world(
                     point: Vec2::new(rpos.x, rpos.z),
                 },
             });
+        }
+        FioraV2DiscreteAction::CastFlash => {
+            // 闪现：沿 offset 连续值方向瞬移 300 单位（手动实现，无游戏侧技能）。
+            // 冷却中或死亡时不瞬移。
+            let ready = world
+                .get::<FlashCooldown>(fiora)
+                .map(|f| f.is_ready())
+                .unwrap_or(true);
+            let alive = world
+                .get::<Health>(fiora)
+                .map(|h| h.value > 0.0)
+                .unwrap_or(true);
+            if !ready || !alive {
+                return;
+            }
+            let mut dir = Vec2::new(
+                action.offset_x.clamp(-1.0, 1.0),
+                action.offset_z.clamp(-1.0, 1.0),
+            );
+            if dir.length_squared() < 1e-4 {
+                // offset 为零时回退为指向瑞雯的方向（与 Move 追敌语义一致）
+                dir = Vec2::new(rpos.x - fpos.x, rpos.z - fpos.z);
+            }
+            let dir = dir.normalize_or_zero();
+            if dir.length_squared() < 1e-4 {
+                return;
+            }
+            let target = Vec2::new(fpos.x, fpos.z) + dir * FLASH_DISTANCE;
+            if let Some(mut tf) = world.get_mut::<Transform>(fiora) {
+                tf.translation.x = target.x;
+                tf.translation.z = target.y;
+            }
+            if let Some(mut flash) = world.get_mut::<FlashCooldown>(fiora) {
+                flash.start();
+            }
         }
     }
 }
@@ -1231,6 +1408,7 @@ pub fn step_v2_world(
         is_vital_break,
         prev_riven_hp,
         curr_riven_hp,
+        riven_max_hp: obs.riven_max_hp,
         elapsed_secs,
     };
 

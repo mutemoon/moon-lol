@@ -40,7 +40,6 @@ pub struct ActorPool {
 impl ActorPool {
     pub fn spawn<E: RlEnvironment + 'static>(
         num_actors: usize,
-        max_steps: usize,
         infer_tx: Sender<InferenceRequest>,
         sample_tx: Sender<SampleTransition>,
     ) -> Self {
@@ -58,7 +57,7 @@ impl ActorPool {
             let sample_tx = sample_tx.clone();
 
             let handle = thread::spawn(move || {
-                let mut env = E::new(max_steps);
+                let mut env = E::new();
                 let mut current_obs = env.reset();
                 let (reply_tx, reply_rx) = unbounded::<InferenceResponse>();
                 let mut current_ep_return = 0.0f32;

@@ -2,7 +2,7 @@ use gpui::*;
 use gpui_component::button::{Button, ButtonVariants};
 use gpui_component::scroll::ScrollableElement;
 use gpui_component::{h_flex, v_flex, ActiveTheme, IconName, StyledExt};
-use lol_rl_protocol::{PolicyDisplay, VisualInFrame, VisualObsFrame, ENV_FIORA_V0};
+use lol_rl_protocol::{PolicyDisplay, PolicyItem, VisualInFrame, VisualObsFrame, ENV_FIORA_V0};
 use rust_i18n::t;
 
 use crate::components::rl::task_detail::math::render_math;
@@ -19,7 +19,7 @@ pub fn render_running_visual(sidebar: &AppSidebar, cx: &mut Context<AppSidebar>)
     let header = render_visual_header(sidebar, &model_id, is_paused, cx);
     let telemetry = render_visual_telemetry(sidebar, cx);
 
-    let mut container = v_flex()
+    v_flex()
         .size_full()
         .flex_1()
         .overflow_y_scrollbar()
@@ -30,18 +30,8 @@ pub fn render_running_visual(sidebar: &AppSidebar, cx: &mut Context<AppSidebar>)
         .border_color(cx.theme().accent)
         .bg(cx.theme().accent.opacity(0.08))
         .child(header)
-        .child(telemetry);
-
-    // 连续动作 env（FioraVsRivenRealEnv）靠点击地图控制，无需手动按钮；
-    // 离散动作 env（FioraVsRivenEnv）没有点击控制，仍要显示手动 action 按钮。
-    if is_paused
-        && sidebar.visual_ws_connected
-        && sidebar.visual_env_name.as_deref() == Some(ENV_FIORA_V0)
-    {
-        container = container.child(render_manual_action_panel(sidebar, cx));
-    }
-
-    container.into_any_element()
+        .child(telemetry)
+        .into_any_element()
 }
 
 fn render_visual_empty(cx: &mut Context<AppSidebar>) -> AnyElement {
@@ -96,7 +86,7 @@ fn render_visual_header(
             (t!("app.rl.visual_connected"), cx.theme().success)
         }
     } else {
-        (t!("app.rl.visual_starting"), cx.theme().muted_foreground)
+        (t!("app.rl.visual_starting"), cx.theme().primary)
     };
 
     h_flex()
@@ -188,60 +178,58 @@ fn render_visual_telemetry(sidebar: &AppSidebar, cx: &mut Context<AppSidebar>) -
         return div()
             .p_4()
             .text_sm()
-            .text_color(cx.theme().muted_foreground)
+            .text_color(cx.theme().foreground.opacity(0.85))
             .child("正在等待视觉 ENV 画面与遥测数据...")
             .into_any_element();
     };
 
-    v_flex()
+    let is_paused = sidebar.visual_paused;
+    let show_manual_actions = is_paused
+        && sidebar.visual_ws_connected
+        && sidebar.visual_env_name.as_deref() == Some(ENV_FIORA_V0);
+
+    let mut left_cards = v_flex()
+        .flex_1()
+        .gap_3()
+        .child(render_telemetry_status_card(f, cx))
+        .child(render_telemetry_policy_card(f, cx))
+        .child(render_telemetry_reward_card(f, cx));
+
+    if show_manual_actions {
+        left_cards = left_cards.child(render_manual_action_panel(sidebar, cx));
+    }
+
+    let right_card = div()
+        .w(px(290.0))
+        .flex_shrink_0()
+        .child(render_telemetry_obs_card(f, cx));
+
+    h_flex()
+        .items_start()
         .gap_3()
         .w_full()
-        .child(
-            h_flex()
-                .gap_3()
-                .w_full()
-                .child(render_telemetry_status_card(f, cx))
-                .child(render_telemetry_obs_card(f, cx)),
-        )
-        .child(
-            h_flex()
-                .gap_3()
-                .w_full()
-                .child(render_telemetry_policy_card(f, cx))
-                .child(render_telemetry_reward_card(f, cx)),
-        )
+        .child(left_cards)
+        .child(right_card)
         .into_any_element()
 }
 
 fn render_telemetry_obs_card(f: &VisualObsFrame, cx: &Context<AppSidebar>) -> AnyElement {
-    let obs = &f.obs;
-
-    let vec_preview = format!(
-        "[{:.1}, {:.1}, {:.1}, {:.1}]",
-        if obs.vital_direction.contains("+X") {
-            1.0
-        } else {
-            0.0
-        },
-        if obs.vital_direction.contains("-X") {
-            1.0
-        } else {
-            0.0
-        },
-        if obs.vital_direction.contains("+Z") {
-            1.0
-        } else {
-            0.0
-        },
-        if obs.vital_direction.contains("-Z") {
-            1.0
-        } else {
-            0.0
-        },
-    );
+    let rows: Vec<(String, f32)> = f
+        .obs_vector
+        .iter()
+        .enumerate()
+        .map(|(i, v)| {
+            let label = f
+                .obs_labels
+                .get(i)
+                .cloned()
+                .unwrap_or_else(|| format!("dim {i}"));
+            (label, *v)
+        })
+        .collect();
 
     div()
-        .flex_1()
+        .w_full()
         .p_3()
         .rounded_md()
         .border_1()
@@ -253,118 +241,44 @@ fn render_telemetry_obs_card(f: &VisualObsFrame, cx: &Context<AppSidebar>) -> An
                 .child(
                     h_flex()
                         .justify_between()
-                        .child(
-                            div()
-                                .font_bold()
-                                .text_sm()
-                                .child("实时步进观测 (Step Observe)"),
-                        )
+                        .child(div().font_bold().text_sm().child("实时观测向量 (Raw Obs)"))
                         .child(
                             div()
                                 .text_xs()
                                 .font_bold()
-                                .text_color(cx.theme().accent)
-                                .child(format!("Step #{}", f.step)),
+                                .text_color(cx.theme().primary)
+                                .child(format!("{} 维", rows.len())),
                         ),
                 )
-                .child(
+                .child(if rows.is_empty() {
+                    div()
+                        .text_xs()
+                        .text_color(cx.theme().foreground.opacity(0.75))
+                        .child("暂无观测向量数据")
+                        .into_any_element()
+                } else {
                     v_flex()
                         .gap_1()
-                        .child(
+                        .children(rows.iter().map(|(label, value)| {
                             h_flex()
                                 .justify_between()
                                 .text_xs()
                                 .child(
                                     div()
-                                        .text_color(cx.theme().muted_foreground)
-                                        .child("菲奥娜/瑞雯血量"),
+                                        .text_color(cx.theme().foreground.opacity(0.85))
+                                        .child(label.clone()),
                                 )
-                                .child(div().font_semibold().child(format!(
-                                    "{:.1}% / {:.1}%",
-                                    obs.fiora_hp_pct * 100.0,
-                                    obs.riven_hp_pct * 100.0
-                                ))),
-                        )
-                        .child(
-                            h_flex()
-                                .justify_between()
-                                .text_xs()
-                                .child(
-                                    div()
-                                        .text_color(cx.theme().muted_foreground)
-                                        .child("英雄间极坐标距离"),
-                                )
-                                .child(
-                                    div().font_semibold().child(format!("{:.1}u", obs.distance)),
-                                ),
-                        )
-                        .child(
-                            h_flex()
-                                .justify_between()
-                                .text_xs()
-                                .child(
-                                    div()
-                                        .text_color(cx.theme().muted_foreground)
-                                        .child("弱点破绽 (Vital)"),
-                                )
-                                .child(div().font_semibold().child(if obs.has_vital {
-                                    format!(
-                                        "{} ({})",
-                                        if obs.vital_is_active {
-                                            "激活"
-                                        } else {
-                                            "未激活"
-                                        },
-                                        obs.vital_direction
-                                    )
-                                } else {
-                                    "无破绽".into()
-                                })),
-                        )
-                        .child(
-                            h_flex()
-                                .justify_between()
-                                .text_xs()
-                                .child(
-                                    div()
-                                        .text_color(cx.theme().muted_foreground)
-                                        .child("存活状态 (Alive)"),
-                                )
-                                .child(div().font_semibold().child(format!(
-                                    "菲奥娜: {} | 瑞雯: {}",
-                                    if f.fiora_alive { "存活" } else { "阵亡" },
-                                    if f.riven_alive { "存活" } else { "阵亡" }
-                                ))),
-                        )
-                        .child(
-                            v_flex()
-                                .gap_1()
-                                .mt_1()
-                                .child(
-                                    div()
-                                        .text_xs()
-                                        .font_bold()
-                                        .text_color(cx.theme().muted_foreground)
-                                        .child("4维破绽方向观察向量 (Obs Vector Preview):"),
-                                )
-                                .child(
-                                    div()
-                                        .p_1p5()
-                                        .rounded_md()
-                                        .bg(cx.theme().secondary)
-                                        .text_xs()
-                                        .overflow_x_hidden()
-                                        .child(vec_preview),
-                                ),
-                        ),
-                ),
+                                .child(div().font_semibold().child(format!("{value:.3}")))
+                        }))
+                        .into_any_element()
+                }),
         )
         .into_any_element()
 }
 
 fn render_telemetry_status_card(f: &VisualObsFrame, cx: &Context<AppSidebar>) -> AnyElement {
     div()
-        .flex_1()
+        .w_full()
         .p_3()
         .rounded_md()
         .border_1()
@@ -384,7 +298,7 @@ fn render_telemetry_status_card(f: &VisualObsFrame, cx: &Context<AppSidebar>) ->
                                 .text_color(if f.terminated {
                                     cx.theme().danger
                                 } else {
-                                    cx.theme().accent
+                                    cx.theme().success
                                 })
                                 .child(if f.terminated {
                                     "战斗结束"
@@ -397,30 +311,32 @@ fn render_telemetry_status_card(f: &VisualObsFrame, cx: &Context<AppSidebar>) ->
                     h_flex()
                         .justify_between()
                         .text_xs()
-                        .child(div().child(format!("Step: {}", f.step)))
-                        .child(div().child(format!("Step Reward: {:.2}", f.reward))),
+                        .child(
+                            div()
+                                .text_color(cx.theme().foreground.opacity(0.85))
+                                .child("当前 Step"),
+                        )
+                        .child(div().font_semibold().child(format!("{}", f.step))),
                 )
-                .child(hp_bar("菲奥娜", f.obs.fiora_hp_pct, cx))
-                .child(hp_bar("瑞雯", f.obs.riven_hp_pct, cx))
                 .child(
                     h_flex()
                         .justify_between()
                         .text_xs()
-                        .child(div().child(format!("距离: {:.1}u", f.obs.distance)))
-                        .child(div().child(format!(
-                            "破绽: {} ({})",
-                            if f.obs.has_vital { "在场" } else { "无" },
-                            f.obs.vital_direction
-                        ))),
-                )
-                .child(
-                    h_flex()
-                        .gap_2()
-                        .text_xs()
-                        .child(skill_badge("Q", f.obs.q_ready, cx))
-                        .child(skill_badge("W", f.obs.w_ready, cx))
-                        .child(skill_badge("E", f.obs.e_ready, cx))
-                        .child(skill_badge("R", f.obs.r_ready, cx)),
+                        .child(
+                            div()
+                                .text_color(cx.theme().foreground.opacity(0.85))
+                                .child("当前累积奖励"),
+                        )
+                        .child(
+                            div()
+                                .font_bold()
+                                .text_color(if f.episode_reward >= 0.0 {
+                                    cx.theme().success
+                                } else {
+                                    cx.theme().danger
+                                })
+                                .child(format!("{:+.3}", f.episode_reward)),
+                        ),
                 ),
         )
         .into_any_element()
@@ -428,7 +344,7 @@ fn render_telemetry_status_card(f: &VisualObsFrame, cx: &Context<AppSidebar>) ->
 
 fn render_telemetry_policy_card(f: &VisualObsFrame, cx: &Context<AppSidebar>) -> AnyElement {
     div()
-        .flex_1()
+        .w_full()
         .p_3()
         .rounded_md()
         .border_1()
@@ -452,29 +368,42 @@ fn render_policy_display(policy: &PolicyDisplay, cx: &Context<AppSidebar>) -> An
     match policy {
         PolicyDisplay::Discrete(items) if items.is_empty() => div()
             .text_xs()
-            .text_color(cx.theme().muted_foreground)
+            .text_color(cx.theme().foreground.opacity(0.75))
             .child("无概率数据")
             .into_any_element(),
-        PolicyDisplay::Discrete(items) => v_flex()
-            .gap_1()
-            .children(items.iter().map(|p| policy_prob_bar(&p.action, p.prob, cx)))
-            .into_any_element(),
+        PolicyDisplay::Discrete(items) => render_policy_items_table(items, cx),
         PolicyDisplay::Hybrid {
             move_x,
             move_z,
             attack_prob,
-        } => v_flex()
-            .gap_1p5()
-            .child(
-                div()
-                    .text_xs()
-                    .text_color(cx.theme().muted_foreground)
-                    .child("预测下一步移动偏移 (±1 归一化)"),
-            )
-            .child(policy_value_row("move_x", *move_x))
-            .child(policy_value_row("move_z", *move_z))
-            .child(policy_prob_bar("攻击", *attack_prob, cx))
-            .into_any_element(),
+            raw_attack_prob,
+            is_attack_masked,
+        } => {
+            let item = PolicyItem {
+                action_id: 1,
+                action: "攻击".to_string(),
+                prob: *attack_prob,
+                raw_prob: *raw_attack_prob,
+                is_masked: *is_attack_masked,
+            };
+            v_flex()
+                .gap_1p5()
+                .child(
+                    div()
+                        .text_xs()
+                        .text_color(cx.theme().foreground.opacity(0.85))
+                        .child("预测下一步移动偏移 (±1 归一化)"),
+                )
+                .child(policy_value_row("move_x", *move_x))
+                .child(policy_value_row("move_z", *move_z))
+                .child(
+                    v_flex()
+                        .gap_1()
+                        .mt_1()
+                        .child(render_policy_items_table(&[item], cx)),
+                )
+                .into_any_element()
+        }
         PolicyDisplay::HybridMulti {
             continuous_means,
             discrete_probs,
@@ -486,7 +415,7 @@ fn render_policy_display(policy: &PolicyDisplay, cx: &Context<AppSidebar>) -> An
                 .child(
                     div()
                         .text_xs()
-                        .text_color(cx.theme().muted_foreground)
+                        .text_color(cx.theme().foreground.opacity(0.85))
                         .child("连续偏移 (±1 归一化)"),
                 )
                 .child(policy_value_row("offset_x", offset_x))
@@ -494,39 +423,176 @@ fn render_policy_display(policy: &PolicyDisplay, cx: &Context<AppSidebar>) -> An
                 .child(
                     div()
                         .text_xs()
-                        .text_color(cx.theme().muted_foreground)
+                        .text_color(cx.theme().foreground.opacity(0.85))
                         .mt_1()
                         .child("动作类别概率 (Action Probs)"),
                 )
-                .children(discrete_probs.iter().map(|p| policy_prob_bar(&p.action, p.prob, cx)))
+                .child(render_policy_items_table(discrete_probs, cx))
                 .into_any_element()
         }
     }
 }
 
-fn policy_prob_bar(label: &str, prob: f32, cx: &Context<AppSidebar>) -> AnyElement {
-    let prob = prob.clamp(0.0, 1.0);
-    v_flex()
-        .gap_0p5()
-        .child(
-            h_flex()
-                .justify_between()
-                .text_xs()
-                .child(div().child(label.to_string()))
-                .child(div().font_bold().child(format!("{:.1}%", prob * 100.0))),
-        )
+fn render_policy_table_header(cx: &Context<AppSidebar>) -> AnyElement {
+    h_flex()
+        .items_center()
+        .gap_2()
+        .w_full()
+        .pb_1()
+        .border_b_1()
+        .border_color(cx.theme().border)
         .child(
             div()
-                .h_1p5()
-                .w_full()
-                .rounded_full()
-                .bg(cx.theme().secondary)
+                .w(px(100.0))
+                .text_xs()
+                .font_bold()
+                .text_color(cx.theme().foreground)
+                .child("动作类别"),
+        )
+        .child(
+            h_flex()
+                .flex_1()
+                .gap_3()
                 .child(
                     div()
-                        .h_full()
-                        .rounded_full()
-                        .bg(cx.theme().accent)
-                        .w(Length::Definite(DefiniteLength::Fraction(prob))),
+                        .flex_1()
+                        .text_xs()
+                        .font_bold()
+                        .text_color(hsla(215.0 / 360.0, 0.85, 0.58, 1.0))
+                        .child("未 Mask (模型倾向)"),
+                )
+                .child(
+                    div()
+                        .flex_1()
+                        .text_xs()
+                        .font_bold()
+                        .text_color(cx.theme().success)
+                        .child("Mask 后 (实际执行)"),
+                ),
+        )
+        .into_any_element()
+}
+
+fn render_policy_items_table(items: &[PolicyItem], cx: &Context<AppSidebar>) -> AnyElement {
+    v_flex()
+        .gap_1p5()
+        .w_full()
+        .child(render_policy_table_header(cx))
+        .children(items.iter().map(|item| policy_prob_row(item, cx)))
+        .into_any_element()
+}
+
+fn policy_prob_row(item: &PolicyItem, cx: &Context<AppSidebar>) -> AnyElement {
+    let raw_p = item.raw_prob.clamp(0.0, 1.0);
+    let masked_p = item.prob.clamp(0.0, 1.0);
+
+    h_flex()
+        .items_center()
+        .gap_2()
+        .w_full()
+        .child(
+            div()
+                .w(px(100.0))
+                .text_xs()
+                .font_semibold()
+                .text_color(if item.is_masked {
+                    cx.theme().foreground.opacity(0.6)
+                } else {
+                    cx.theme().foreground
+                })
+                .child(item.action.clone()),
+        )
+        .child(
+            h_flex()
+                .flex_1()
+                .gap_3()
+                .child(
+                    // 左栏：未 Mask
+                    v_flex()
+                        .flex_1()
+                        .gap_0p5()
+                        .child(
+                            h_flex()
+                                .justify_between()
+                                .text_xs()
+                                .child(
+                                    div()
+                                        .text_color(cx.theme().foreground.opacity(0.8))
+                                        .child("原始"),
+                                )
+                                .child(
+                                    div()
+                                        .font_bold()
+                                        .text_color(hsla(215.0 / 360.0, 0.85, 0.58, 1.0))
+                                        .child(format!("{:.1}%", raw_p * 100.0)),
+                                ),
+                        )
+                        .child(
+                            div()
+                                .h_1p5()
+                                .w_full()
+                                .rounded_full()
+                                .bg(cx.theme().secondary)
+                                .child(
+                                    div()
+                                        .h_full()
+                                        .rounded_full()
+                                        .bg(hsla(215.0 / 360.0, 0.85, 0.58, 1.0))
+                                        .w(Length::Definite(DefiniteLength::Fraction(raw_p))),
+                                ),
+                        ),
+                )
+                .child(
+                    // 右栏：Mask 后
+                    v_flex()
+                        .flex_1()
+                        .gap_0p5()
+                        .child(
+                            h_flex()
+                                .justify_between()
+                                .text_xs()
+                                .child(
+                                    div()
+                                        .text_color(if item.is_masked {
+                                            cx.theme().danger
+                                        } else {
+                                            cx.theme().foreground.opacity(0.8)
+                                        })
+                                        .child(if item.is_masked {
+                                            "已屏蔽"
+                                        } else {
+                                            "有效"
+                                        }),
+                                )
+                                .child(
+                                    div()
+                                        .font_bold()
+                                        .text_color(if item.is_masked {
+                                            cx.theme().danger
+                                        } else {
+                                            cx.theme().success
+                                        })
+                                        .child(format!("{:.1}%", masked_p * 100.0)),
+                                ),
+                        )
+                        .child(
+                            div()
+                                .h_1p5()
+                                .w_full()
+                                .rounded_full()
+                                .bg(cx.theme().secondary)
+                                .child(
+                                    div()
+                                        .h_full()
+                                        .rounded_full()
+                                        .bg(if item.is_masked {
+                                            cx.theme().danger.opacity(0.3)
+                                        } else {
+                                            cx.theme().success
+                                        })
+                                        .w(Length::Definite(DefiniteLength::Fraction(masked_p))),
+                                ),
+                        ),
                 ),
         )
         .into_any_element()
@@ -546,7 +612,7 @@ fn render_telemetry_reward_card(f: &VisualObsFrame, cx: &Context<AppSidebar>) ->
     let vars = f.reward_variables.as_ref().unwrap_or(&empty_vars);
 
     div()
-        .flex_1()
+        .w_full()
         .p_3()
         .rounded_md()
         .border_1()
@@ -566,15 +632,31 @@ fn render_telemetry_reward_card(f: &VisualObsFrame, cx: &Context<AppSidebar>) ->
                                 .child("结构化单步奖励推导 (Reward Formula)"),
                         )
                         .child(
-                            div()
-                                .font_bold()
-                                .text_xs()
-                                .text_color(if f.reward >= 0.0 {
-                                    cx.theme().accent
-                                } else {
-                                    cx.theme().muted_foreground
-                                })
-                                .child(format!("单步总奖励: {:+.2}", f.reward)),
+                            v_flex()
+                                .items_end()
+                                .gap_0p5()
+                                .child(
+                                    div()
+                                        .font_bold()
+                                        .text_xs()
+                                        .text_color(if f.reward >= 0.0 {
+                                            cx.theme().success
+                                        } else {
+                                            cx.theme().danger
+                                        })
+                                        .child(format!("单步奖励: {:+.3}", f.reward)),
+                                )
+                                .child(
+                                    div()
+                                        .font_bold()
+                                        .text_xs()
+                                        .text_color(if f.episode_reward >= 0.0 {
+                                            cx.theme().success
+                                        } else {
+                                            cx.theme().danger
+                                        })
+                                        .child(format!("累积奖励: {:+.3}", f.episode_reward)),
+                                ),
                         ),
                 )
                 .child(if let Some(formula) = &f.reward_formula {
@@ -583,14 +665,14 @@ fn render_telemetry_reward_card(f: &VisualObsFrame, cx: &Context<AppSidebar>) ->
                         .child(
                             div()
                                 .text_xs()
-                                .text_color(cx.theme().muted_foreground)
+                                .text_color(cx.theme().foreground.opacity(0.85))
                                 .child("公式 (符号)"),
                         )
                         .child(render_math(&formula.to_latex(), cx))
                         .child(
                             div()
                                 .text_xs()
-                                .text_color(cx.theme().muted_foreground)
+                                .text_color(cx.theme().foreground.opacity(0.85))
                                 .child("代入当前步"),
                         )
                         .child(render_math(&formula.to_latex_substituted(vars), cx))
@@ -611,9 +693,9 @@ fn render_telemetry_reward_card(f: &VisualObsFrame, cx: &Context<AppSidebar>) ->
                                         .font_bold()
                                         .text_xs()
                                         .text_color(if r.value >= 0.0 {
-                                            cx.theme().accent
+                                            cx.theme().success
                                         } else {
-                                            cx.theme().muted_foreground
+                                            cx.theme().danger
                                         })
                                         .child(format!("{:+}", r.value)),
                                 )
@@ -622,7 +704,7 @@ fn render_telemetry_reward_card(f: &VisualObsFrame, cx: &Context<AppSidebar>) ->
                 } else {
                     div()
                         .text_xs()
-                        .text_color(cx.theme().muted_foreground)
+                        .text_color(cx.theme().foreground.opacity(0.75))
                         .child("无细拆项")
                         .into_any_element()
                 }),
@@ -657,7 +739,7 @@ fn render_manual_action_panel(sidebar: &AppSidebar, cx: &mut Context<AppSidebar>
         .child(
             div()
                 .text_xs()
-                .text_color(cx.theme().muted_foreground)
+                .text_color(cx.theme().foreground.opacity(0.85))
                 .child("点击下方按钮执行对应 action 并步进一步"),
         )
         .child(
@@ -695,50 +777,4 @@ fn legacy_manual_actions() -> Vec<(usize, String)> {
         (3, "MoveSouth50 (南侧50u)".to_string()),
         (4, "AttackRiven (攻击瑞雯)".to_string()),
     ]
-}
-
-fn skill_badge(name: &'static str, ready: bool, cx: &Context<AppSidebar>) -> AnyElement {
-    div()
-        .px_1p5()
-        .py_0p5()
-        .rounded_md()
-        .text_xs()
-        .font_bold()
-        .bg(if ready {
-            cx.theme().accent.opacity(0.2)
-        } else {
-            cx.theme().secondary
-        })
-        .text_color(if ready {
-            cx.theme().accent
-        } else {
-            cx.theme().muted_foreground
-        })
-        .child(format!("{}: {}", name, if ready { "READY" } else { "CD" }))
-        .into_any_element()
-}
-
-/// 单个英雄血量进度条（pct ∈ [0, 1]）。
-fn hp_bar(label: &'static str, pct: f32, cx: &Context<AppSidebar>) -> AnyElement {
-    let pct = pct.clamp(0.0, 1.0);
-    h_flex()
-        .gap_2()
-        .items_center()
-        .child(div().w_16().text_xs().child(label))
-        .child(
-            div()
-                .flex_1()
-                .h_2()
-                .rounded_full()
-                .bg(cx.theme().secondary)
-                .child(
-                    div()
-                        .h_full()
-                        .rounded_full()
-                        .bg(cx.theme().accent)
-                        .w(Length::Definite(DefiniteLength::Fraction(pct))),
-                ),
-        )
-        .child(div().w_12().text_xs().child(format!("{:.0}%", pct * 100.0)))
-        .into_any_element()
 }
