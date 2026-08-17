@@ -32,11 +32,11 @@ chrono = "0.4"
 thiserror.workspace = true
 crossbeam-channel.workspace = true
 num_cpus = "1.16"
-arc-swap = "1.7"
 ctrlc = "3.4"
+bevy.workspace = true
 
 [features]
-default = ["cuda"]
+default = ["cuda", "bevy/dynamic_linking"]
 cuda = ["candle-core/cuda", "candle-nn/cuda"]
 
 [[bin]]

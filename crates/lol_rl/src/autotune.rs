@@ -70,17 +70,17 @@ impl AutoTuner {
         // 1. 单环境稳态预热
         let mut single_env = E::new();
         let _ = single_env.reset();
-        let act = E::action_from_index(0);
+        let acts = vec![E::action_from_index(0); E::num_agents()];
         for _ in 0..warmup_steps {
-            let res = single_env.step(act.clone());
-            if res.terminated || res.truncated {
+            let res = single_env.step(&acts);
+            if res.iter().any(|r| r.terminated || r.truncated) {
                 let _ = single_env.reset();
             }
         }
         let env_start = Instant::now();
         for _ in 0..single_steps {
-            let res = single_env.step(act.clone());
-            if res.terminated || res.truncated {
+            let res = single_env.step(&acts);
+            if res.iter().any(|r| r.terminated || r.truncated) {
                 let _ = single_env.reset();
             }
         }
@@ -109,11 +109,11 @@ impl AutoTuner {
                 let h = std::thread::spawn(move || {
                     let mut env = E::new();
                     let _ = env.reset();
-                    let act = E::action_from_index(0);
+                    let acts = vec![E::action_from_index(0); E::num_agents()];
                     b.wait();
                     for _ in 0..steps_per_env {
-                        let res = env.step(act.clone());
-                        if res.terminated || res.truncated {
+                        let res = env.step(&acts);
+                        if res.iter().any(|r| r.terminated || r.truncated) {
                             let _ = env.reset();
                         }
                     }

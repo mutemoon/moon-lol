@@ -374,3 +374,58 @@ pub async fn apply_schema(pool: &PgPool) -> Result<(), sqlx::Error> {
     }
     Ok(())
 }
+
+/// 内存/空操作仓储实现，供直接调用内部训练循环（测试、快速验证、基准测试）使用。
+#[derive(Debug, Default, Clone)]
+pub struct NoopRlRepo;
+
+#[async_trait]
+impl RlRepo for NoopRlRepo {
+    async fn insert_task(&self, _task: &TaskRow) -> RepoResult<()> {
+        Ok(())
+    }
+    async fn list_tasks(&self) -> RepoResult<Vec<TaskRow>> {
+        Ok(Vec::new())
+    }
+    async fn get_task(&self, _id: &str) -> RepoResult<Option<TaskRow>> {
+        Ok(None)
+    }
+    async fn update_status(&self, _id: &str, _status: &str) -> RepoResult<()> {
+        Ok(())
+    }
+    async fn update_progress(&self, _id: &str, _step: i64, _ep_return: f32) -> RepoResult<()> {
+        Ok(())
+    }
+    async fn mark_all_running_interrupted(&self) -> RepoResult<usize> {
+        Ok(0)
+    }
+    async fn insert_checkpoint(&self, _cp: &CheckpointRow) -> RepoResult<()> {
+        Ok(())
+    }
+    async fn list_checkpoints(&self, _task_id: &str) -> RepoResult<Vec<CheckpointRow>> {
+        Ok(Vec::new())
+    }
+    async fn get_checkpoint(&self, _task_id: &str, _id: &str) -> RepoResult<Option<CheckpointRow>> {
+        Ok(None)
+    }
+    async fn delete_task(&self, _id: &str) -> RepoResult<()> {
+        Ok(())
+    }
+    async fn insert_metric(
+        &self,
+        _task_id: &str,
+        _row: &lol_rl_protocol::MetricsRow,
+    ) -> RepoResult<()> {
+        Ok(())
+    }
+    async fn list_metrics(&self, _task_id: &str) -> RepoResult<Vec<lol_rl_protocol::MetricsRow>> {
+        Ok(Vec::new())
+    }
+    async fn insert_log(&self, _task_id: &str, _level: &str, _message: &str) -> RepoResult<()> {
+        Ok(())
+    }
+    async fn list_logs(&self, _task_id: &str) -> RepoResult<Vec<String>> {
+        Ok(Vec::new())
+    }
+}
+

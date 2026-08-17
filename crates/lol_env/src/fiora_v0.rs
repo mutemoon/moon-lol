@@ -460,12 +460,13 @@ impl RlEnvironment for FioraVsRivenEnv {
         Self::with_config(config)
     }
 
-    fn reset(&mut self) -> Self::Obs {
-        self.reset()
+    fn reset(&mut self) -> Vec<Self::Obs> {
+        vec![self.reset()]
     }
 
-    fn step(&mut self, action: Self::Action) -> StepResult<Self::Obs> {
-        self.step(action)
+    fn step(&mut self, actions: &[Self::Action]) -> Vec<StepResult<Self::Obs>> {
+        let action = actions.first().copied().unwrap_or(FioraVsRivenAction::MoveEast50);
+        vec![self.step(action)]
     }
 
     fn obs_to_vector(obs: &Self::Obs) -> Vec<f32> {
@@ -514,7 +515,7 @@ impl VisualEnvironment for FioraVsRivenEnv {
         setup_skill_levels_world(world, self.fiora, self.riven);
     }
 
-    fn reset_world(&mut self, world: &mut World) {
+    fn reset_world(&mut self, world: &mut World) -> Vec<Self::Obs> {
         self.step_count = 0;
         let render = matches!(
             self.render_mode,
@@ -535,22 +536,29 @@ impl VisualEnvironment for FioraVsRivenEnv {
         self.fiora = new_fiora;
         self.riven = new_riven;
         setup_skill_levels_world(world, self.fiora, self.riven);
+        vec![self.get_current_obs(world)]
     }
 
-    fn get_current_obs(&self, world: &World) -> Self::Obs {
-        get_obs_from_world(world, self.fiora, self.riven)
+    fn get_current_obs_all(&self, world: &World) -> Vec<Self::Obs> {
+        vec![get_obs_from_world(world, self.fiora, self.riven)]
     }
 
-    fn step_world(&mut self, app: &mut App, action: Self::Action) -> StepResult<Self::Obs> {
+    fn step_world(
+        &mut self,
+        app: &mut App,
+        actions: &[Self::Action],
+    ) -> Vec<StepResult<Self::Obs>> {
         self.step_count += 1;
-        step_world(
+        let action = actions.first().copied().unwrap_or(FioraVsRivenAction::MoveEast50);
+        let res = step_world(
             app,
             self.fiora,
             self.riven,
             action,
             self.step_count,
             self.max_steps,
-        )
+        );
+        vec![res]
     }
 }
 

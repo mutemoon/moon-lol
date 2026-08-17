@@ -142,6 +142,22 @@ pub trait RlEnvironment: 'static {
         vec![Self::action_to_index(action) as f32]
     }
 
+    /// 智能体数量（单智能体为 1，2人自博弈为 2，未来 5v5 为 10）。
+    fn num_agents() -> usize
+    where
+        Self: Sized,
+    {
+        1
+    }
+
+    /// 各智能体角色名称（如 ["Fiora", "Riven"] 或 ["Agent"]）。
+    fn agent_names() -> &'static [&'static str]
+    where
+        Self: Sized,
+    {
+        &["Agent"]
+    }
+
     /// 构造一个使用默认配置（使用环境自身默认最大步数、Headless 模式）的环境实例。
     fn new() -> Self
     where
@@ -152,9 +168,24 @@ pub trait RlEnvironment: 'static {
     where
         Self: Sized;
 
-    fn reset(&mut self) -> Self::Obs;
+    /// 重置环境，返回所有智能体的初始观测（长度与 num_agents 一致）。
+    fn reset(&mut self) -> Vec<Self::Obs>;
 
-    fn step(&mut self, action: Self::Action) -> StepResult<Self::Obs>;
+    /// 接收所有智能体的动作切片（actions.len() == num_agents()），推演并返回所有智能体的 StepResult。
+    fn step(&mut self, actions: &[Self::Action]) -> Vec<StepResult<Self::Obs>>;
+
+    /// 单智能体便捷 reset（仅限 num_agents() == 1）。
+    fn reset_single(&mut self) -> Self::Obs {
+        self.reset().into_iter().next().expect("empty obs")
+    }
+
+    /// 单智能体便捷 step（仅限 num_agents() == 1）。
+    fn step_single(&mut self, action: Self::Action) -> StepResult<Self::Obs> {
+        self.step(&[action])
+            .into_iter()
+            .next()
+            .expect("empty step result")
+    }
 
     fn obs_to_vector(obs: &Self::Obs) -> Vec<f32>;
 
@@ -187,8 +218,14 @@ pub trait VisualEnvironment: RlEnvironment {
     fn window_title(&self) -> &'static str;
     fn is_assets_loaded(&self, world: &World) -> bool;
     fn on_assets_loaded(&mut self, world: &mut World);
-    fn reset_world(&mut self, world: &mut World);
-    fn get_current_obs(&self, world: &World) -> Self::Obs;
+    fn reset_world(&mut self, world: &mut World) -> Vec<Self::Obs>;
+    fn get_current_obs_all(&self, world: &World) -> Vec<Self::Obs>;
+    fn get_current_obs(&self, world: &World) -> Self::Obs {
+        self.get_current_obs_all(world)
+            .into_iter()
+            .next()
+            .expect("empty obs")
+    }
     /// 将可视化窗口的鼠标点击（逻辑视口坐标）翻译为一步动作；默认无点击控制。
     fn action_from_screen_click(
         &mut self,
@@ -197,7 +234,11 @@ pub trait VisualEnvironment: RlEnvironment {
     ) -> Option<Self::Action> {
         None
     }
-    fn step_world(&mut self, app: &mut App, action: Self::Action) -> StepResult<Self::Obs>;
+    fn step_world(
+        &mut self,
+        app: &mut App,
+        actions: &[Self::Action],
+    ) -> Vec<StepResult<Self::Obs>>;
 }
 
 /// Metadata description of an RL environment for registry & UI listings.
@@ -216,6 +257,10 @@ pub struct EnvMeta {
 macro_rules! for_all_rl_environments {
     ($macro_name:ident) => {
         $macro_name!(
+            (
+                $crate::fiora_riven_selfplay::FioraRivenSelfPlayEnv,
+                lol_rl_protocol::ENV_FIORA_RIVEN_SELFPLAY
+            ),
             ($crate::fiora_v2::FioraV2Env, lol_rl_protocol::ENV_FIORA_V2),
             (
                 $crate::fiora_v1::FioraVsRivenRealEnv,
@@ -231,6 +276,7 @@ macro_rules! for_all_rl_environments {
 
 pub fn list_available_envs() -> Vec<EnvMeta> {
     vec![
+        crate::fiora_riven_selfplay::FioraRivenSelfPlayEnv::meta(),
         crate::fiora_v2::FioraV2Env::meta(),
         crate::fiora_v1::FioraVsRivenRealEnv::meta(),
         crate::fiora_v0::FioraVsRivenEnv::meta(),

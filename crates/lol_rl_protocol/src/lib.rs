@@ -366,6 +366,7 @@ pub struct TaskConfigPayload {
     pub total_iterations: usize,
 }
 
+pub const ENV_FIORA_RIVEN_SELFPLAY: &str = "FioraRivenSelfPlay";
 pub const ENV_FIORA_V2: &str = "FioraV2";
 pub const ENV_FIORA_V1: &str = "FioraV1";
 pub const ENV_FIORA_V0: &str = "FioraV0";
@@ -392,6 +393,23 @@ pub struct EnvSpec {
     pub description: &'static str,
     pub default_params: EnvTrainingParams,
 }
+
+pub const ENV_FIORA_RIVEN_SELFPLAY_SPEC: EnvSpec = EnvSpec {
+    name: ENV_FIORA_RIVEN_SELFPLAY,
+    label: "剑姬 vs 瑞雯 (双Agent自博弈)",
+    tag: "SelfPlay",
+    description: "单神经网络通过 role_id (0:剑姬, 1:瑞雯) 自博弈对抗，对称零和奖励与自我中心化全技能对决",
+    default_params: EnvTrainingParams {
+        lr: 3e-4,
+        gamma: 0.99,
+        gae_lambda: 0.95,
+        clip_eps: 0.2,
+        ppo_epochs: 8,
+        hidden_dim: 256,
+        rollout_steps_per_env: 160,
+        total_iterations: 500,
+    },
+};
 
 pub const ENV_FIORA_V2_SPEC: EnvSpec = EnvSpec {
     name: ENV_FIORA_V2,
@@ -444,7 +462,12 @@ pub const ENV_FIORA_V0_SPEC: EnvSpec = EnvSpec {
     },
 };
 
-pub const AVAILABLE_ENVS: &[EnvSpec] = &[ENV_FIORA_V2_SPEC, ENV_FIORA_V1_SPEC, ENV_FIORA_V0_SPEC];
+pub const AVAILABLE_ENVS: &[EnvSpec] = &[
+    ENV_FIORA_RIVEN_SELFPLAY_SPEC,
+    ENV_FIORA_V2_SPEC,
+    ENV_FIORA_V1_SPEC,
+    ENV_FIORA_V0_SPEC,
+];
 
 pub fn get_env_spec(name: &str) -> Option<&'static EnvSpec> {
     AVAILABLE_ENVS.iter().find(|e| e.name == name)

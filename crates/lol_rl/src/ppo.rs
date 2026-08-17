@@ -14,6 +14,10 @@ pub struct RolloutBuffer {
     pub rewards: Vec<f32>,
     pub values: Vec<f32>,
     pub dones: Vec<bool>,
+    /// 是否为超时截断 (truncated)：true 表示时间步耗尽
+    pub truncateds: Vec<bool>,
+    /// 当该步发生超时截断时，超时瞬间真实残局状态 s_T 对应的无偏价值 V(s_T)
+    pub truncated_next_values: Vec<Option<f32>>,
     /// 动作掩码（若环境提供）：true = 有效，false = 非法/屏蔽
     pub action_masks: Vec<Option<Vec<bool>>>,
 }
@@ -27,6 +31,8 @@ impl RolloutBuffer {
             rewards: Vec::new(),
             values: Vec::new(),
             dones: Vec::new(),
+            truncateds: Vec::new(),
+            truncated_next_values: Vec::new(),
             action_masks: Vec::new(),
         }
     }
@@ -47,6 +53,31 @@ impl RolloutBuffer {
         self.rewards.push(reward);
         self.values.push(value);
         self.dones.push(done);
+        self.truncateds.push(false);
+        self.truncated_next_values.push(None);
+        self.action_masks.push(action_mask);
+    }
+
+    pub fn push_full(
+        &mut self,
+        state: Vec<f32>,
+        action: Vec<f32>,
+        log_prob: f32,
+        reward: f32,
+        value: f32,
+        terminated: bool,
+        truncated: bool,
+        truncated_next_value: Option<f32>,
+        action_mask: Option<Vec<bool>>,
+    ) {
+        self.states.push(state);
+        self.actions.push(action);
+        self.log_probs.push(log_prob);
+        self.rewards.push(reward);
+        self.values.push(value);
+        self.dones.push(terminated || truncated);
+        self.truncateds.push(truncated);
+        self.truncated_next_values.push(truncated_next_value);
         self.action_masks.push(action_mask);
     }
 
@@ -69,6 +100,8 @@ impl RolloutBuffer {
         self.rewards.clear();
         self.values.clear();
         self.dones.clear();
+        self.truncateds.clear();
+        self.truncated_next_values.clear();
         self.action_masks.clear();
     }
 
@@ -165,7 +198,11 @@ impl PPOAgent {
             &device,
         )?;
         let actor_w = Tensor::from_vec(
-            crate::policy::orthogonal_weight(actor_critic.action_space().actor_head_dim(), hidden_dim, 0.01),
+            crate::policy::orthogonal_weight(
+                actor_critic.action_space().actor_head_dim(),
+                hidden_dim,
+                0.01,
+            ),
             (actor_critic.action_space().actor_head_dim(), hidden_dim),
             &device,
         )?;
@@ -303,7 +340,7 @@ impl PPOAgent {
         })
     }
 
-    /// Compute GAE advantages and returns
+    /// Compute GAE advantages and returns with True Truncation Bootstrapping
     pub fn compute_gae(&self, buffer: &RolloutBuffer, last_val: f32) -> (Vec<f32>, Vec<f32>) {
         let n = buffer.len();
         let mut returns = vec![0.0; n];
@@ -311,16 +348,33 @@ impl PPOAgent {
 
         let mut gae = 0.0;
         for t in (0..n).rev() {
-            let next_val = if t + 1 < n {
+            let truncated = buffer.truncateds.get(t).copied().unwrap_or(false);
+            let done = buffer.dones.get(t).copied().unwrap_or(false);
+            let terminated = done && !truncated;
+
+            // 超时截断时，优先使用真实残局状态 s_T 的价值 V(s_T)，避免被新回合重置后的开局价值污染
+            let next_val = if truncated {
+                buffer
+                    .truncated_next_values
+                    .get(t)
+                    .and_then(|v| *v)
+                    .unwrap_or_else(|| if t + 1 < n { buffer.values[t + 1] } else { last_val })
+            } else if t + 1 < n {
                 buffer.values[t + 1]
             } else {
                 last_val
             };
-            let next_non_terminal = if buffer.dones[t] { 0.0 } else { 1.0 };
+
+            // 真正的胜负/阵亡终止(terminated)没有未来价值(0.0)；
+            // 超时截断(truncated)或正常推进保留未来期望价值 bootstrap (1.0)
+            let next_non_terminal = if terminated { 0.0 } else { 1.0 };
 
             let delta = buffer.rewards[t] + self.config.gamma * next_val * next_non_terminal
                 - buffer.values[t];
-            gae = delta + self.config.gamma * self.config.gae_lambda * next_non_terminal * gae;
+
+            // 回合结束（无论是 terminated 还是 truncated），GAE 优势递归在此步截断，不跨 episode 传递
+            let gae_discount = if done { 0.0 } else { 1.0 };
+            gae = delta + self.config.gamma * self.config.gae_lambda * gae_discount * gae;
 
             advantages[t] = gae;
             returns[t] = gae + buffer.values[t];
@@ -405,7 +459,10 @@ impl PPOAgent {
                 let v_clipped = (&old_values_tensor + &v_clamped_diff)?;
                 let v_loss_unclipped = (&new_values - &returns_tensor)?.powf(2.0)?;
                 let v_loss_clipped = (&v_clipped - &returns_tensor)?.powf(2.0)?;
-                v_loss_unclipped.maximum(&v_loss_clipped)?.mean_all()?.affine(0.5, 0.0)?
+                v_loss_unclipped
+                    .maximum(&v_loss_clipped)?
+                    .mean_all()?
+                    .affine(0.5, 0.0)?
             } else {
                 let val_diff = (&new_values - &returns_tensor)?;
                 (&val_diff * &val_diff)?.mean_all()?.affine(0.5, 0.0)?
@@ -615,11 +672,15 @@ impl PPOAgent {
                 // Value Loss: PPO2 Clipped Value Loss
                 let value_loss = if self.config.clip_vloss {
                     let v_diff = (&new_values - &mb_old_values)?;
-                    let v_clamped_diff = v_diff.clamp(-self.config.clip_eps, self.config.clip_eps)?;
+                    let v_clamped_diff =
+                        v_diff.clamp(-self.config.clip_eps, self.config.clip_eps)?;
                     let v_clipped = (&mb_old_values + &v_clamped_diff)?;
                     let v_loss_unclipped = (&new_values - &mb_returns)?.powf(2.0)?;
                     let v_loss_clipped = (&v_clipped - &mb_returns)?.powf(2.0)?;
-                    v_loss_unclipped.maximum(&v_loss_clipped)?.mean_all()?.affine(0.5, 0.0)?
+                    v_loss_unclipped
+                        .maximum(&v_loss_clipped)?
+                        .mean_all()?
+                        .affine(0.5, 0.0)?
                 } else {
                     let val_diff = (&new_values - &mb_returns)?;
                     (&val_diff * &val_diff)?.mean_all()?.affine(0.5, 0.0)?
@@ -857,11 +918,15 @@ impl PPOAgent {
                 // Value Loss: PPO2 Clipped Value Loss
                 let value_loss = if self.config.clip_vloss {
                     let v_diff = (&new_values - &mb_old_values)?;
-                    let v_clamped_diff = v_diff.clamp(-self.config.clip_eps, self.config.clip_eps)?;
+                    let v_clamped_diff =
+                        v_diff.clamp(-self.config.clip_eps, self.config.clip_eps)?;
                     let v_clipped = (&mb_old_values + &v_clamped_diff)?;
                     let v_loss_unclipped = (&new_values - &mb_returns)?.powf(2.0)?;
                     let v_loss_clipped = (&v_clipped - &mb_returns)?.powf(2.0)?;
-                    v_loss_unclipped.maximum(&v_loss_clipped)?.mean_all()?.affine(0.5, 0.0)?
+                    v_loss_unclipped
+                        .maximum(&v_loss_clipped)?
+                        .mean_all()?
+                        .affine(0.5, 0.0)?
                 } else {
                     let val_diff = (&new_values - &mb_returns)?;
                     (&val_diff * &val_diff)?.mean_all()?.affine(0.5, 0.0)?
@@ -1211,6 +1276,67 @@ mod tests {
     }
 
     #[test]
+    fn selfplay_single_policy_smoke() -> Result<()> {
+        let state_dim = 36; // 包含 role_id
+        let hidden_dim = 64;
+        let action_space = ActionSpace::Hybrid {
+            continuous_dims: 2,
+            discrete_classes: 8,
+        };
+        let config = PPOConfig::default();
+        let device = Device::Cpu;
+
+        let mut agent = PPOAgent::new(
+            state_dim,
+            hidden_dim,
+            action_space,
+            config.clone(),
+            device.clone(),
+        )?;
+
+        let mut buffer_f = RolloutBuffer::new();
+        let mut buffer_r = RolloutBuffer::new();
+
+        // 模拟自博弈推演：双方 Agent 各自维护独立的轨迹 Buffer
+        for step in 0..10 {
+            // 1. Fiora 视角
+            let mut obs_f = vec![0.0f32; state_dim];
+            obs_f[0] = 0.0; // role_id = 0.0 (Fiora)
+            obs_f[17] = 1.2; // distance / 100
+            let state_f = Tensor::from_vec(obs_f.clone(), (1, state_dim), &device)?;
+            let mask_f = Some(vec![true, true, true, true, true, true, true, true]);
+            let (act_f, log_prob_f, val_f) =
+                agent.actor_critic.sample_action(&state_f, mask_f.as_deref())?;
+            assert_eq!(act_f.len(), 3);
+            let reward_f = if step % 2 == 0 { 0.5 } else { -0.5 };
+            buffer_f.push(obs_f, act_f, log_prob_f, reward_f, val_f, false, mask_f);
+
+            // 2. Riven 视角
+            let mut obs_r = vec![0.0f32; state_dim];
+            obs_r[0] = 1.0; // role_id = 1.0 (Riven)
+            obs_r[17] = 1.2; // distance / 100
+            let state_r = Tensor::from_vec(obs_r.clone(), (1, state_dim), &device)?;
+            let mask_r = Some(vec![true, true, true, true, true, true, true, true]);
+            let (act_r, log_prob_r, val_r) =
+                agent.actor_critic.sample_action(&state_r, mask_r.as_deref())?;
+            assert_eq!(act_r.len(), 3);
+            let reward_r = -reward_f; // 严格零和
+            buffer_r.push(obs_r, act_r, log_prob_r, reward_r, val_r, false, mask_r);
+        }
+
+        assert_eq!(buffer_f.len(), 10);
+        assert_eq!(buffer_r.len(), 10);
+
+        // 执行单模型多角色样本独立 GAE + 联合 Mini-Batch PPO 更新
+        let stats = agent.update_multi_buffer(&[buffer_f, buffer_r], &[0.0, 0.0], 8)?;
+        assert!(stats.policy_loss.is_finite());
+        assert!(stats.value_loss.is_finite());
+        assert!(stats.entropy_loss.is_finite());
+
+        Ok(())
+    }
+
+    #[test]
     fn test_orthogonal_weight_properties() {
         use crate::policy::orthogonal_weight;
         let out_dim = 16;
@@ -1232,10 +1358,7 @@ mod tests {
                         "对角元素 dot ({dot}) 应接近 gain^2 ({expected})"
                     );
                 } else {
-                    assert!(
-                        dot.abs() < 1e-3,
-                        "非对角元素 dot ({dot}) 应接近 0 (正交)"
-                    );
+                    assert!(dot.abs() < 1e-3, "非对角元素 dot ({dot}) 应接近 0 (正交)");
                 }
             }
         }
@@ -1269,4 +1392,55 @@ mod tests {
 
         Ok(())
     }
+
+    #[test]
+    fn test_truncation_vs_termination_gae() -> Result<()> {
+        let state_dim = 4;
+        let hidden_dim = 16;
+        let action_space = ActionSpace::Discrete(2);
+        let mut config = PPOConfig::default();
+        config.gamma = 0.99;
+        config.gae_lambda = 0.95;
+        let device = Device::Cpu;
+
+        let agent = PPOAgent::new(state_dim, hidden_dim, action_space, config, device)?;
+
+        // 场景 1: 真正终止 (terminated = true, truncated = false)
+        let mut buffer_term = RolloutBuffer::new();
+        buffer_term.push_full(
+            vec![0.0; state_dim],
+            vec![0.0],
+            -0.1,
+            1.0,
+            0.5,
+            true,  // terminated
+            false, // truncated
+            None,
+            None,
+        );
+        let (_, adv_term) = agent.compute_gae(&buffer_term, 2.0);
+        // delta = reward(1.0) + gamma * next_val(2.0) * 0.0 - val(0.5) = 0.5
+        assert!((adv_term[0] - 0.5).abs() < 1e-5, "真正终止不应 bootstrap 任何未来价值");
+
+        // 场景 2: 超时截断 (terminated = false, truncated = true, 指定真实残局价值 3.0)
+        let mut buffer_trunc = RolloutBuffer::new();
+        buffer_trunc.push_full(
+            vec![0.0; state_dim],
+            vec![0.0],
+            -0.1,
+            1.0,
+            0.5,
+            false, // terminated
+            true,  // truncated
+            Some(3.0), // 真实残局价值
+            None,
+        );
+        // 传入 last_val = 0.0 (开局重置价值)，但应优先使用 3.0 真实残局价值
+        let (_, adv_trunc) = agent.compute_gae(&buffer_trunc, 0.0);
+        // delta = reward(1.0) + gamma(0.99) * next_val(3.0) * 1.0 - val(0.5) = 1.0 + 2.97 - 0.5 = 3.47
+        assert!((adv_trunc[0] - 3.47).abs() < 1e-4, "超时截断必须优先使用真实残局价值进行无偏 bootstrap");
+
+        Ok(())
+    }
 }
+

@@ -283,6 +283,14 @@ pub struct ConfigNavigationGrid {
 }
 
 impl ConfigNavigationGrid {
+    pub fn get_min_position(&self) -> Vec2 {
+        self.min_position
+    }
+
+    pub fn get_max_position(&self) -> Vec2 {
+        self.min_position + Vec2::new(self.get_width(), self.get_height())
+    }
+
     pub fn get_width(&self) -> f32 {
         self.x_len as f32 * self.cell_size
     }

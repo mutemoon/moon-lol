@@ -121,7 +121,7 @@ impl TableDelegate for TaskTableDelegate {
             1 => div()
                 .child(agent_label(&task.agent_type))
                 .into_any_element(),
-            2 => div().child(task.env_name.clone()).into_any_element(),
+            2 => div().child(env_label(&task.env_name)).into_any_element(),
             3 => {
                 let is_running = task.status == "running";
                 div()
@@ -197,6 +197,14 @@ impl TableDelegate for TaskTableDelegate {
 
 fn agent_label(raw: &str) -> String {
     raw.split_whitespace().next().unwrap_or(raw).to_string()
+}
+
+fn env_label(raw: &str) -> String {
+    if let Some(spec) = lol_rl_protocol::get_env_spec(raw) {
+        format!("{} ({})", spec.label, spec.tag)
+    } else {
+        raw.to_string()
+    }
 }
 
 fn status_label(status: &str) -> String {

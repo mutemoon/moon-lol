@@ -64,40 +64,54 @@ impl ActorPool {
                 let mut current_ep_steps = 0usize;
 
                 while running.load(Ordering::Relaxed) {
-                    let obs_vec = E::obs_to_vector(&current_obs);
-                    let action_mask = E::action_mask(&current_obs);
+                    let mut actions = Vec::with_capacity(current_obs.len());
+                    let mut pending_transitions = Vec::with_capacity(current_obs.len());
 
-                    // 1. 发送推理请求
-                    if infer_tx
-                        .send(InferenceRequest {
-                            worker_id,
-                            obs_vec: obs_vec.clone(),
-                            action_mask: action_mask.clone(),
-                            reply_tx: reply_tx.clone(),
-                        })
-                        .is_err()
-                    {
+                    for obs in &current_obs {
+                        let obs_vec = E::obs_to_vector(obs);
+                        let action_mask = E::action_mask(obs);
+
+                        // 1. 发送推理请求
+                        if infer_tx
+                            .send(InferenceRequest {
+                                worker_id,
+                                obs_vec: obs_vec.clone(),
+                                action_mask: action_mask.clone(),
+                                reply_tx: reply_tx.clone(),
+                            })
+                            .is_err()
+                        {
+                            break;
+                        }
+
+                        // 2. 等待推理响应
+                        let resp = match reply_rx.recv_timeout(Duration::from_secs(5)) {
+                            Ok(r) => r,
+                            Err(_) => {
+                                if !running.load(Ordering::Relaxed) {
+                                    break;
+                                }
+                                continue;
+                            }
+                        };
+
+                        let action = E::action_from_encoding(&resp.encoded_action);
+                        actions.push(action);
+                        pending_transitions.push((obs_vec, resp, action_mask));
+                    }
+
+                    if actions.len() != current_obs.len() {
                         break;
                     }
 
-                    // 2. 等待推理响应
-                    let resp = match reply_rx.recv_timeout(Duration::from_secs(5)) {
-                        Ok(r) => r,
-                        Err(_) => {
-                            if !running.load(Ordering::Relaxed) {
-                                break;
-                            }
-                            continue;
-                        }
-                    };
-
                     // 3. 执行环境 step
-                    let action = E::action_from_encoding(&resp.encoded_action);
-                    let res = env.step(action);
-                    let done = res.terminated || res.truncated;
+                    let step_results = env.step(&actions);
+                    let done = step_results.iter().any(|r| r.terminated || r.truncated);
 
-                    current_ep_return += res.reward;
-                    current_ep_steps += 1;
+                    if let Some(r0) = step_results.first() {
+                        current_ep_return += r0.reward;
+                        current_ep_steps += 1;
+                    }
 
                     let episode_info = if done {
                         let info = EpisodeInfo {
@@ -111,41 +125,45 @@ impl ActorPool {
                         None
                     };
 
-                    let reward_breakdown = res
-                        .reward_breakdown
-                        .into_iter()
-                        .map(|item| RewardItem {
-                            name: item.name,
-                            value: item.value,
-                        })
-                        .collect();
-
-                    let obs_payload = E::obs_to_payload(&res.obs);
-
                     // 4. 将采样结果推送到训练样本队列
-                    let transition = SampleTransition {
-                        state: obs_vec,
-                        action: resp.encoded_action,
-                        log_prob: resp.log_prob,
-                        reward: res.reward,
-                        value: resp.value,
-                        done,
-                        episode_info,
-                        reward_breakdown,
-                        reward_variables: res.reward_variables,
-                        obs_payload,
-                        action_mask,
-                    };
+                    for ((obs_vec, resp, action_mask), res) in
+                        pending_transitions.into_iter().zip(step_results.iter())
+                    {
+                        let reward_breakdown = res
+                            .reward_breakdown
+                            .iter()
+                            .map(|item| RewardItem {
+                                name: item.name.clone(),
+                                value: item.value,
+                            })
+                            .collect();
 
-                    if sample_tx.send(transition).is_err() {
-                        break;
+                        let obs_payload = E::obs_to_payload(&res.obs);
+
+                        let transition = SampleTransition {
+                            state: obs_vec,
+                            action: resp.encoded_action,
+                            log_prob: resp.log_prob,
+                            reward: res.reward,
+                            value: resp.value,
+                            done,
+                            episode_info: episode_info.clone(),
+                            reward_breakdown,
+                            reward_variables: res.reward_variables.clone(),
+                            obs_payload,
+                            action_mask,
+                        };
+
+                        if sample_tx.send(transition).is_err() {
+                            break;
+                        }
                     }
 
                     // 5. 更新环境
                     if done {
                         current_obs = env.reset();
                     } else {
-                        current_obs = res.obs;
+                        current_obs = step_results.into_iter().map(|r| r.obs).collect();
                     }
                 }
             });

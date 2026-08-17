@@ -105,8 +105,16 @@ impl ActorCritic {
                 discrete_classes,
             } => (
                 continuous_dims,
-                Some(vb.get_with_hints((continuous_dims,), "log_std", candle_nn::Init::Const(0.0))?),
-                Some(candle_nn::linear(hidden_dim, discrete_classes, vb.pp("attack_head"))?),
+                Some(vb.get_with_hints(
+                    (continuous_dims,),
+                    "log_std",
+                    candle_nn::Init::Const(0.0),
+                )?),
+                Some(candle_nn::linear(
+                    hidden_dim,
+                    discrete_classes,
+                    vb.pp("attack_head"),
+                )?),
             ),
         };
         let actor_head = candle_nn::linear(hidden_dim, actor_out_dim, vb.pp("actor_head"))?;

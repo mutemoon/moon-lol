@@ -103,7 +103,9 @@ fn test_fiora_v2_reset_keeps_skill_levels() {
     });
 
     let _ = env.reset();
-    let _ = env.reset(); // 第二次重置（复现 bug 的路径）
+    let obs = env.reset(); // 第二次重置（复现 bug 的路径）
+    assert_eq!(obs.riven_hp, 10000.0, "重置后 Riven 血量应保持为 10000.0");
+    assert_eq!(obs.riven_max_hp, 10000.0, "重置后 Riven 最大血量应保持为 10000.0");
 
     {
         let world = env.app.world();
@@ -125,9 +127,11 @@ fn test_fiora_v2_reset_keeps_skill_levels() {
         }
     }
 
-    // CastQ 应可正常施放（技能等级 > 0）
+    // CastQ 正常施放（命中造成伤害后 riven_max_hp 仍为 10000.0，且受到 Q 伤害血量扣减）
     let res = env.step(FioraV2Action::new(0.0, 0.0, FioraV2DiscreteAction::CastQ));
     assert_eq!(res.step, 1);
+    assert_eq!(res.obs.riven_max_hp, 10000.0, "step 后 Riven 最大血量应保持 10000.0");
+    assert!(res.obs.riven_hp < 10000.0 && res.obs.riven_hp > 9000.0, "CastQ 击中后应正确扣减 10000 血量中的伤害，实际 {}", res.obs.riven_hp);
 }
 
 /// 闪现：瞬移约 300 单位、进入冷却、冷却中不再瞬移。
@@ -265,3 +269,26 @@ fn test_fiora_v2_default_max_steps_and_truncation() {
     let r3 = short_env.step(noop);
     assert!(r3.truncated, "达到 max_steps 后应触发 truncated: true");
 }
+
+#[test]
+fn test_fiora_v2_riven_moves() {
+    let mut env = FioraV2Env::with_config(EnvConfig {
+        max_steps: 50,
+        render_mode: RenderMode::Headless,
+    });
+
+    let obs0 = env.reset();
+    let rpos0 = obs0.riven_pos;
+
+    // 执行几步 NoOp，瑞雯应该自主移动并产生位移
+    let mut moved = false;
+    for _ in 0..5 {
+        let res = env.step(FioraV2Action::new(0.0, 0.0, FioraV2DiscreteAction::NoOp));
+        if (res.obs.riven_pos - rpos0).length() > 1.0 {
+            moved = true;
+            break;
+        }
+    }
+    assert!(moved, "Riven 在 V2 环境中应随时间步自主移动");
+}
+

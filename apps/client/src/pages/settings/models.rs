@@ -496,7 +496,11 @@ fn build_model_form(
 
 fn open_model_dialog(window: &mut Window, cx: &mut Context<AppSidebar>) {
     let is_new = cx.entity().read(cx).settings.editing_model_idx.is_none();
-    let title = if is_new { "添加模型" } else { "编辑模型" };
+    let title = if is_new {
+        "添加模型"
+    } else {
+        "编辑模型"
+    };
     let weak = cx.entity().downgrade();
     let save_weak = weak.clone();
     open_form_dialog(window, cx, weak, build_model_form, move |dialog, form| {

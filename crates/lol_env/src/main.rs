@@ -60,7 +60,7 @@ fn main() -> anyhow::Result<()> {
     let par_actions = vec![FioraVsRivenAction::AttackRiven; num_parallel_envs];
 
     for _ in 0..total_steps {
-        par_envs.step_all(&par_actions);
+        par_envs.step_all_flat(&par_actions);
     }
 
     let elapsed = start_time.elapsed();

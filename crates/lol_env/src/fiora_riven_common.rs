@@ -276,16 +276,21 @@ pub fn get_obs_from_world(world: &World, fiora: Entity, riven: Entity) -> FioraV
     }
 }
 
-/// 销毁世界中的英雄实体及其附带技能
+/// 销毁世界中的英雄实体及其附带技能与 Buff
 pub fn despawn_entities_world(world: &mut World, fiora: Entity, riven: Entity) {
     for champion in [fiora, riven] {
+        let mut to_despawn = Vec::new();
         if let Ok(entity_ref) = world.get_entity(champion) {
             if let Some(skills) = entity_ref.get::<Skills>() {
-                for s in skills.to_vec() {
-                    if let Ok(s_mut) = world.get_entity_mut(s) {
-                        s_mut.despawn();
-                    }
-                }
+                to_despawn.extend(skills.to_vec());
+            }
+            if let Some(buffs) = entity_ref.get::<lol_core::base::buff::Buffs>() {
+                to_despawn.extend(buffs.iter());
+            }
+        }
+        for sub in to_despawn {
+            if let Ok(sub_mut) = world.get_entity_mut(sub) {
+                sub_mut.despawn();
             }
         }
         if let Ok(entity_mut) = world.get_entity_mut(champion) {

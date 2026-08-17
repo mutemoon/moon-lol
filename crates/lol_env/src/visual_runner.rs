@@ -295,15 +295,25 @@ impl<E: VisualEnvironment> ApplicationHandler for CustomVisualRunner<E> {
             self.step_count += 1;
             self.current_ep_steps += 1;
 
-            let prev_obs = self.env.get_current_obs(self.app.world());
-            let action = {
-                let (policy_action, _) = (self.policy_arc.lock().unwrap())(&prev_obs);
-                self.pending_manual_action.take().unwrap_or(policy_action)
-            };
+            let obs_all = self.env.get_current_obs_all(self.app.world());
+            let mut actions = Vec::with_capacity(obs_all.len());
+            for (agent_idx, obs) in obs_all.iter().enumerate() {
+                let (policy_action, _) = (self.policy_arc.lock().unwrap())(obs);
+                let chosen = if agent_idx == 0 {
+                    self.pending_manual_action.take().unwrap_or(policy_action)
+                } else {
+                    policy_action
+                };
+                actions.push(chosen);
+            }
 
-            let step_result = self.env.step_world(&mut self.app, action);
+            let step_results = self.env.step_world(&mut self.app, &actions);
+            let step_result = step_results
+                .into_iter()
+                .next()
+                .expect("empty step result from step_world");
 
-            // 累计本局奖励
+            // 累计本局主视角奖励
             self.episode_reward += step_result.reward;
 
             let terminated = step_result.terminated;

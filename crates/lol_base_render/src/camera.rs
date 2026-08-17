@@ -8,6 +8,7 @@ use bevy::render::render_resource::{
     Extent3d, TextureDescriptor, TextureDimension, TextureFormat, TextureUsages,
 };
 use bevy::window::{CursorGrabMode, CursorOptions};
+use lol_base::grid::ConfigNavigationGrid;
 
 // 相机距离和位置配置
 pub const CAMERA_FAR_Z: f32 = 22000.0;
@@ -27,6 +28,20 @@ pub const CAMERA_MAP_CONSTRAIN_OFFSET_TOP: f32 = 6000.0;
 pub const CAMERA_MAP_CONSTRAIN_OFFSET_BOTTOM: f32 = -2000.0;
 
 pub const CAMERA_OFFSET: Vec3 = Vec3::new(0.0, 1911.85, -1289.56);
+
+/// 获取相机的移动/聚焦点边界（优先使用导航网格的最小点和最大点，未提供或未加载时使用常量默认值）
+pub fn get_camera_bounds(
+    assets_grid: Option<&Assets<ConfigNavigationGrid>>,
+) -> (f32, f32, f32, f32) {
+    if let Some(assets) = assets_grid {
+        if let Some((_, grid)) = assets.iter().next() {
+            let min = grid.get_min_position();
+            let max = grid.get_max_position();
+            return (min.x, max.x, min.y, max.y);
+        }
+    }
+    (CAMERA_MIN_X, CAMERA_MAX_X, CAMERA_MIN_Y, CAMERA_MAX_Y)
+}
 
 #[derive(SystemSet, Debug, Hash, PartialEq, Eq, Clone)]
 pub struct CameraInit;
@@ -59,9 +74,25 @@ pub struct CameraState {
 
 impl CameraState {
     pub fn set_position(&mut self, position: Vec3) {
-        self.position.x = position.x.clamp(CAMERA_MIN_X, CAMERA_MAX_X);
-        self.position.z = position.z.clamp(CAMERA_MIN_Y, CAMERA_MAX_Y);
-        // self.position = position;
+        self.set_position_bounded(
+            position,
+            CAMERA_MIN_X,
+            CAMERA_MAX_X,
+            CAMERA_MIN_Y,
+            CAMERA_MAX_Y,
+        );
+    }
+
+    pub fn set_position_bounded(
+        &mut self,
+        position: Vec3,
+        min_x: f32,
+        max_x: f32,
+        min_z: f32,
+        max_z: f32,
+    ) {
+        self.position.x = position.x.clamp(min_x, max_x);
+        self.position.z = position.z.clamp(min_z, max_z);
     }
 
     pub fn set_scale(&mut self, scale: f32) {
@@ -140,7 +171,11 @@ fn update(mut q_camera: Query<(&mut Transform, &CameraState), Changed<CameraStat
     transform.look_at(camera_state.position, Vec3::Y);
 }
 
-fn update_focus(mut q_camera: Query<&mut CameraState>, q_focus: Query<&Transform, With<Focus>>) {
+fn update_focus(
+    mut q_camera: Query<&mut CameraState>,
+    q_focus: Query<&Transform, With<Focus>>,
+    assets_grid: Option<Res<Assets<ConfigNavigationGrid>>>,
+) {
     let Ok(transform) = q_focus.single() else {
         return;
     };
@@ -149,7 +184,8 @@ fn update_focus(mut q_camera: Query<&mut CameraState>, q_focus: Query<&Transform
         return;
     };
 
-    camera_state.set_position(transform.translation);
+    let (min_x, max_x, min_z, max_z) = get_camera_bounds(assets_grid.as_deref());
+    camera_state.set_position_bounded(transform.translation, min_x, max_x, min_z, max_z);
 }
 
 fn on_wheel(
@@ -181,7 +217,11 @@ fn on_wheel(
     }
 }
 
-fn on_mouse_scroll(window: Query<&Window>, mut camera: Query<&mut CameraState>) {
+fn on_mouse_scroll(
+    window: Query<&Window>,
+    mut camera: Query<&mut CameraState>,
+    assets_grid: Option<Res<Assets<ConfigNavigationGrid>>>,
+) {
     let Ok(window) = window.single() else {
         return;
     };
@@ -229,7 +269,8 @@ fn on_mouse_scroll(window: Query<&Window>, mut camera: Query<&mut CameraState>) 
                 CAMERA_KEYBOARD_ORBIT_SPEED_Y,
             );
 
-    camera_state.set_position(new_position);
+    let (min_x, max_x, min_z, max_z) = get_camera_bounds(assets_grid.as_deref());
+    camera_state.set_position_bounded(new_position, min_x, max_x, min_z, max_z);
 }
 
 #[derive(Clone, Copy, Debug)]

@@ -60,6 +60,18 @@ pub fn setup_v2_riven_health_world(world: &mut World, riven: Entity) {
     }
 }
 
+/// 角色配置写入完成后（`CharacterReady` 插入时，覆盖了 DynamicWorld 的默认血量），自动将 V2 瑞雯血量设为 10000.0
+pub fn on_v2_character_ready_setup_riven_health(
+    trigger: On<Add, CharacterReady>,
+    mut q_health: Query<&mut Health, With<lol_champions::riven::Riven>>,
+) {
+    let entity = trigger.entity;
+    if let Ok(mut health) = q_health.get_mut(entity) {
+        health.value = RIVEN_V2_HP;
+        health.max = RIVEN_V2_HP;
+    }
+}
+
 // ── 离散动作与混合动作定义 ─────────────────────────────────────────────────────
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -223,24 +235,16 @@ impl FlashCooldown {
     }
 }
 
-/// FixedUpdate 中推进剑姬的闪现冷却；未挂载冷却组件的剑姬自动挂载（初始即就绪）。
+/// FixedUpdate 中推进剑姬的闪现冷却。
 pub fn tick_flash_cooldown(
     time: Res<Time<Fixed>>,
-    mut commands: Commands,
-    mut q: Query<(Entity, Option<&mut FlashCooldown>), With<Fiora>>,
+    mut q: Query<&mut FlashCooldown, With<Fiora>>,
 ) {
-    for (entity, flash) in q.iter_mut() {
-        match flash {
-            Some(mut flash) => {
-                if let Some(timer) = flash.0.as_mut() {
-                    timer.tick(time.delta());
-                    if timer.is_finished() {
-                        flash.0 = None;
-                    }
-                }
-            }
-            None => {
-                commands.entity(entity).insert(FlashCooldown::default());
+    for mut flash in q.iter_mut() {
+        if let Some(timer) = flash.0.as_mut() {
+            timer.tick(time.delta());
+            if timer.is_finished() {
+                flash.0 = None;
             }
         }
     }
@@ -658,6 +662,7 @@ impl FioraV2Env {
         app.world_mut()
             .insert_resource(FioraRivenEntities { fiora, riven });
         add_common_observers(&mut app);
+        app.add_observer(on_v2_character_ready_setup_riven_health);
 
         // 等待 DynamicWorld 资产加载并完成向实体写入 (以 CharacterReady 为准)
         for _ in 0..500 {
@@ -711,6 +716,12 @@ impl FioraV2Env {
 
     fn setup_champion_skill_levels(&mut self) {
         setup_skill_levels_world(self.app.world_mut(), self.fiora, self.riven);
+        let world = self.app.world_mut();
+        if let Some(mut flash) = world.get_mut::<FlashCooldown>(self.fiora) {
+            flash.0 = None;
+        } else {
+            world.entity_mut(self.fiora).insert(FlashCooldown::default());
+        }
     }
 
     pub fn reset(&mut self) -> FioraV2Obs {
@@ -733,7 +744,15 @@ impl FioraV2Env {
         );
         self.fiora = new_fiora;
         self.riven = new_riven;
-        self.app.update();
+        for _ in 0..500 {
+            self.app.update();
+            let world = self.app.world();
+            if world.get::<CharacterReady>(self.fiora).is_some()
+                && world.get::<CharacterReady>(self.riven).is_some()
+            {
+                break;
+            }
+        }
         self.setup_champion_skill_levels();
         // 避免被加载后的血量覆盖，重置并完成世界更新后将 riven 血量设置为 10000.0
         setup_v2_riven_health_world(self.app.world_mut(), self.riven);
@@ -796,6 +815,18 @@ impl RlEnvironment for FioraV2Env {
 
     fn state_dim() -> usize {
         FioraV2Obs::dim()
+    }
+
+    fn reset(&mut self) -> Vec<Self::Obs> {
+        vec![self.reset()]
+    }
+
+    fn step(&mut self, actions: &[Self::Action]) -> Vec<StepResult<Self::Obs>> {
+        let action = actions
+            .first()
+            .copied()
+            .unwrap_or(FioraV2Action::new(0.0, 0.0, FioraV2DiscreteAction::NoOp));
+        vec![self.step(action)]
     }
 
     fn action_labels() -> &'static [&'static str] {
@@ -880,14 +911,6 @@ impl RlEnvironment for FioraV2Env {
         Self::with_config(config)
     }
 
-    fn reset(&mut self) -> Self::Obs {
-        self.reset()
-    }
-
-    fn step(&mut self, action: Self::Action) -> StepResult<Self::Obs> {
-        self.step(action)
-    }
-
     fn obs_to_vector(obs: &Self::Obs) -> Vec<f32> {
         obs.to_vector()
     }
@@ -957,9 +980,10 @@ impl VisualEnvironment for FioraV2Env {
 
     fn on_assets_loaded(&mut self, world: &mut World) {
         setup_skill_levels_world(world, self.fiora, self.riven);
+        setup_v2_riven_health_world(world, self.riven);
     }
 
-    fn reset_world(&mut self, world: &mut World) {
+    fn reset_world(&mut self, world: &mut World) -> Vec<Self::Obs> {
         self.step_count = 0;
         let render = matches!(
             self.render_mode,
@@ -980,10 +1004,12 @@ impl VisualEnvironment for FioraV2Env {
         self.fiora = new_fiora;
         self.riven = new_riven;
         setup_skill_levels_world(world, self.fiora, self.riven);
+        setup_v2_riven_health_world(world, self.riven);
+        vec![self.get_current_obs(world)]
     }
 
-    fn get_current_obs(&self, world: &World) -> Self::Obs {
-        get_v2_obs_from_world(world, self.fiora, self.riven)
+    fn get_current_obs_all(&self, world: &World) -> Vec<Self::Obs> {
+        vec![get_v2_obs_from_world(world, self.fiora, self.riven)]
     }
 
     fn action_from_screen_click(
@@ -1017,16 +1043,25 @@ impl VisualEnvironment for FioraV2Env {
         }
     }
 
-    fn step_world(&mut self, app: &mut App, action: Self::Action) -> StepResult<Self::Obs> {
+    fn step_world(
+        &mut self,
+        app: &mut App,
+        actions: &[Self::Action],
+    ) -> Vec<StepResult<Self::Obs>> {
         self.step_count += 1;
-        step_v2_world(
+        let action = actions
+            .first()
+            .copied()
+            .unwrap_or(FioraV2Action::new(0.0, 0.0, FioraV2DiscreteAction::NoOp));
+        let res = step_v2_world(
             app,
             self.fiora,
             self.riven,
             action,
             self.step_count,
             self.max_steps,
-        )
+        );
+        vec![res]
     }
 }
 
@@ -1335,6 +1370,52 @@ pub fn dispatch_action_world(
             }
         }
     }
+
+    // 派发 riven 的随机移动策略（主要 0.5 概率往远离 fiora 的相反方向移动）
+    dispatch_v2_riven_action(world, fiora, riven);
+}
+
+/// 瑞雯在 V2 中的 AI 行为：随机移动，主要（0.5 概率）向远离剑姬（Fiora）的相反方向移动
+pub fn dispatch_v2_riven_action(world: &mut World, fiora: Entity, riven: Entity) {
+    let riven_alive = world
+        .get::<Health>(riven)
+        .map(|h| h.value > 0.0)
+        .unwrap_or(true);
+    if !riven_alive {
+        return;
+    }
+
+    let rpos = world
+        .get::<Transform>(riven)
+        .map(|t| t.translation)
+        .unwrap_or_default();
+    let fpos = world
+        .get::<Transform>(fiora)
+        .map(|t| t.translation)
+        .unwrap_or_default();
+
+    let rpos2 = Vec2::new(rpos.x, rpos.z);
+    let fpos2 = Vec2::new(fpos.x, fpos.z);
+
+    // 0.5 概率往远离剑姬的相反方向移动，其余 0.5 概率往随机方向移动
+    let move_dir = if rand::random::<f32>() < 0.5 {
+        let away = rpos2 - fpos2;
+        if away.length_squared() > 1e-4 {
+            away.normalize()
+        } else {
+            let angle = rand::random::<f32>() * std::f32::consts::TAU;
+            Vec2::new(angle.cos(), angle.sin())
+        }
+    } else {
+        let angle = rand::random::<f32>() * std::f32::consts::TAU;
+        Vec2::new(angle.cos(), angle.sin())
+    };
+
+    let target_pos = rpos2 + move_dir * 300.0;
+    world.trigger(CommandAction {
+        entity: riven,
+        action: Action::Move(target_pos),
+    });
 }
 
 pub fn is_v2_aligned_with_vital(fpos: Vec3, rpos: Vec3, obs: &FioraV2Obs) -> bool {

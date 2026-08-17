@@ -151,23 +151,24 @@ fn sync_cc_markers(
         }
     }
 
-    let mut entity = commands.entity(char);
-    if move_block {
-        entity.insert(MovementBlock);
-    } else {
-        entity.remove::<MovementBlock>();
-    }
-    if cast_block {
-        entity.insert(CastBlock);
-    } else {
-        entity.remove::<CastBlock>();
-    }
-    if slow_percent > 0.0 {
-        entity.insert(MovementSlow {
-            percent: slow_percent,
-        });
-    } else {
-        entity.remove::<MovementSlow>();
+    if let Ok(mut entity) = commands.get_entity(char) {
+        if move_block {
+            entity.insert(MovementBlock);
+        } else {
+            entity.remove::<MovementBlock>();
+        }
+        if cast_block {
+            entity.insert(CastBlock);
+        } else {
+            entity.remove::<CastBlock>();
+        }
+        if slow_percent > 0.0 {
+            entity.insert(MovementSlow {
+                percent: slow_percent,
+            });
+        } else {
+            entity.remove::<MovementSlow>();
+        }
     }
 }
 
