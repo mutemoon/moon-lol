@@ -8,6 +8,7 @@ pub mod process_service;
 pub mod prop_ron;
 pub mod provider;
 pub mod runtime;
+pub mod tool_checker_service;
 pub mod types;
 pub mod visual_process;
 pub mod visual_ws;
