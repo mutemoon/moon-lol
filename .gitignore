@@ -6,6 +6,7 @@ node_modules
 assets/*
 !assets/games
 !assets/characters
+!assets/tools
 !assets/maps
 !assets/ui
 !assets/CommunityDragon-Data
