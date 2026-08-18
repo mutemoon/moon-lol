@@ -683,6 +683,9 @@ pub struct VisualObsFrame {
     /// 观测向量每一维的简要说明。
     #[serde(default)]
     pub obs_labels: Vec<String>,
+    /// 当前是否处于暂停状态。
+    #[serde(default)]
+    pub is_paused: bool,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -694,6 +697,7 @@ pub enum VisualOutFrame {
         action_labels: Vec<String>,
     },
     Frame(VisualObsFrame),
+    Paused(bool),
     Log {
         level: String,
         message: String,
@@ -710,6 +714,7 @@ pub enum VisualInFrame {
     Resume,
     StepOnce,
     StepWithAction { action_id: usize },
+    SetAutoPause(bool),
 }
 
 #[cfg(test)]

@@ -1,6 +1,7 @@
 use gpui::*;
 use gpui_component::button::{Button, ButtonVariants};
 use gpui_component::scroll::ScrollableElement;
+use gpui_component::switch::Switch;
 use gpui_component::{h_flex, v_flex, ActiveTheme, IconName, StyledExt};
 use lol_rl_protocol::{PolicyDisplay, PolicyItem, VisualInFrame, VisualObsFrame, ENV_FIORA_V0};
 use rust_i18n::t;
@@ -15,8 +16,7 @@ pub fn render_running_visual(sidebar: &AppSidebar, cx: &mut Context<AppSidebar>)
         return render_visual_empty(cx);
     };
 
-    let is_paused = sidebar.visual_paused;
-    let header = render_visual_header(sidebar, &model_id, is_paused, cx);
+    let header = render_visual_header(sidebar, &model_id, cx);
     let telemetry = render_visual_telemetry(sidebar, cx);
 
     v_flex()
@@ -62,7 +62,6 @@ fn render_visual_empty(cx: &mut Context<AppSidebar>) -> AnyElement {
 fn render_visual_header(
     sidebar: &AppSidebar,
     model_id: &str,
-    is_paused: bool,
     cx: &mut Context<AppSidebar>,
 ) -> AnyElement {
     let is_terminated = sidebar
@@ -104,14 +103,31 @@ fn render_visual_header(
                     .child(div().text_xs().text_color(status_color).child(status_text)),
             ),
         )
-        .child(render_visual_controls(is_paused, cx))
+        .child(render_visual_controls(sidebar, cx))
         .into_any_element()
 }
 
-fn render_visual_controls(is_paused: bool, cx: &mut Context<AppSidebar>) -> AnyElement {
+fn render_visual_controls(sidebar: &AppSidebar, cx: &mut Context<AppSidebar>) -> AnyElement {
+    let is_paused = sidebar.visual_paused;
+    let auto_pause = sidebar.visual_auto_pause;
     h_flex()
         .id("vis-controls-bar")
         .gap_2()
+        .items_center()
+        .child(
+            h_flex()
+                .items_center()
+                .gap_1p5()
+                .child(
+                    Switch::new("vis-auto-pause-switch")
+                        .checked(auto_pause)
+                        .on_click(cx.listener(|this, checked: &bool, _window, cx| {
+                            this.set_visual_auto_pause(*checked);
+                            cx.notify();
+                        })),
+                )
+                .child(div().text_xs().text_color(cx.theme().muted_foreground).child("局末自动暂停")),
+        )
         .child(div().id("vis-pause-resume-toggle").child(if is_paused {
             Button::new("vis-resume")
                 .primary()

@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use lol_rl_protocol::{InFrame, OutFrame, VisualOutFrame, DEFAULT_RL_SERVER_ADDR};
+use lol_rl_protocol::{InFrame, OutFrame, VisualInFrame, VisualOutFrame, DEFAULT_RL_SERVER_ADDR};
 use tokio::sync::mpsc;
 use tokio::time::sleep;
 
@@ -364,13 +364,21 @@ async fn spawn_visual_session(
     while let Some(ev) = vis_event_rx.recv().await {
         let _ = weak.update(cx, |sidebar, cx| {
             match ev {
-                VisualWsEvent::Connected => sidebar.visual_ws_connected = true,
+                VisualWsEvent::Connected => {
+                    sidebar.visual_ws_connected = true;
+                    if let Some(tx) = &sidebar.visual_in_tx {
+                        let _ = tx.send(VisualInFrame::SetAutoPause(sidebar.visual_auto_pause));
+                    }
+                }
                 VisualWsEvent::Disconnected => sidebar.visual_ws_connected = false,
                 VisualWsEvent::Frame(VisualOutFrame::Frame(f)) => {
-                    if f.terminated {
+                    if f.is_paused || (f.terminated && sidebar.visual_auto_pause) {
                         sidebar.visual_paused = true;
                     }
                     sidebar.latest_visual_frame = Some(f);
+                }
+                VisualWsEvent::Frame(VisualOutFrame::Paused(paused)) => {
+                    sidebar.visual_paused = paused;
                 }
                 VisualWsEvent::Frame(VisualOutFrame::Ready { .. }) => {}
                 VisualWsEvent::Frame(VisualOutFrame::Log { .. }) => {}

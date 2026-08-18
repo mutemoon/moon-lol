@@ -307,6 +307,7 @@ async fn handle_ws_client(
                     VisualInFrame::StepWithAction { action_id } => {
                         VisualRunnerCmd::StepWithAction(action_id)
                     }
+                    VisualInFrame::SetAutoPause(auto) => VisualRunnerCmd::SetAutoPause(auto),
                 };
                 let _ = cmd_tx.send(vcmd);
             }
@@ -361,6 +362,7 @@ fn step_output_to_frame_data(output: &VisualStepOutput) -> VisualObsFrame {
         reward_variables: Some(output.reward_variables.clone()),
         obs_vector: output.obs_vector.clone(),
         obs_labels: output.obs_labels.clone(),
+        is_paused: output.is_paused,
     }
 }
 

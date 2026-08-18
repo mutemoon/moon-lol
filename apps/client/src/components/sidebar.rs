@@ -67,6 +67,7 @@ pub struct AppSidebar {
     pub visual_session: Option<VisualSession>,
     pub visual_ws_connected: bool,
     pub visual_paused: bool,
+    pub visual_auto_pause: bool,
     pub latest_visual_frame: Option<VisualObsFrame>,
     pub visual_in_tx: Option<mpsc::UnboundedSender<VisualInFrame>>,
     pub visual_error: Option<String>,
@@ -181,6 +182,7 @@ impl AppSidebar {
             visual_session: None,
             visual_ws_connected: false,
             visual_paused: false,
+            visual_auto_pause: true,
             latest_visual_frame: None,
             visual_in_tx: None,
             visual_error: None,
@@ -324,6 +326,11 @@ impl AppSidebar {
         if let Some(tx) = &self.visual_in_tx {
             let _ = tx.send(cmd);
         }
+    }
+
+    pub fn set_visual_auto_pause(&mut self, enabled: bool) {
+        self.visual_auto_pause = enabled;
+        self.send_visual_cmd(VisualInFrame::SetAutoPause(enabled));
     }
 }
 

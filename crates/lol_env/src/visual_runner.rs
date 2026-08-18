@@ -32,6 +32,7 @@ pub enum VisualRunnerCmd {
     Resume,
     StepOnce,
     StepWithAction(usize),
+    SetAutoPause(bool),
 }
 
 /// Output emitted by the visual runner after each RL step or state change.
@@ -43,6 +44,7 @@ pub struct VisualStepOutput {
     pub episode_reward: f32,
     pub terminated: bool,
     pub truncated: bool,
+    pub is_paused: bool,
     pub reward_breakdown: Vec<RewardBreakdownItem>,
     pub reward_variables: std::collections::HashMap<String, f32>,
     pub policy: PolicyDisplay,
@@ -89,6 +91,7 @@ struct CustomVisualRunner<E: VisualEnvironment> {
     cmd_rx: Receiver<VisualRunnerCmd>,
     step_tx: Sender<VisualStepOutput>,
     paused: bool,
+    auto_pause_on_done: bool,
     step_count: usize,
     current_ep_steps: usize,
     episode_reward: f32,
@@ -183,6 +186,7 @@ impl<E: VisualEnvironment> ApplicationHandler for CustomVisualRunner<E> {
                         episode_reward: self.episode_reward,
                         terminated: false,
                         truncated: false,
+                        is_paused: true,
                         reward_breakdown: Vec::new(),
                         reward_variables: std::collections::HashMap::new(),
                         policy: policy_items,
@@ -211,6 +215,7 @@ impl<E: VisualEnvironment> ApplicationHandler for CustomVisualRunner<E> {
                         episode_reward: 0.0,
                         terminated: false,
                         truncated: false,
+                        is_paused: self.paused,
                         reward_breakdown: Vec::new(),
                         reward_variables: std::collections::HashMap::new(),
                         policy: policy_items,
@@ -228,6 +233,9 @@ impl<E: VisualEnvironment> ApplicationHandler for CustomVisualRunner<E> {
                 VisualRunnerCmd::StepWithAction(action_id) => {
                     self.pending_step_once = true;
                     self.pending_manual_action = Some(E::action_from_index(action_id));
+                }
+                VisualRunnerCmd::SetAutoPause(auto) => {
+                    self.auto_pause_on_done = auto;
                 }
             }
         }
@@ -249,6 +257,7 @@ impl<E: VisualEnvironment> ApplicationHandler for CustomVisualRunner<E> {
                     episode_reward: 0.0,
                     terminated: false,
                     truncated: false,
+                    is_paused: self.paused,
                     reward_breakdown: Vec::new(),
                     reward_variables: std::collections::HashMap::new(),
                     policy: policy_items,
@@ -323,12 +332,14 @@ impl<E: VisualEnvironment> ApplicationHandler for CustomVisualRunner<E> {
             let (_, next_policy) = (self.policy_arc.lock().unwrap())(&step_result.obs);
             let (obs_vector, obs_labels) = obs_vector_with_labels::<E>(&step_result.obs);
 
+            let will_pause = (terminated || truncated) && self.auto_pause_on_done;
             let output = VisualStepOutput {
                 step: step_result.step,
                 reward: step_result.reward,
                 episode_reward: self.episode_reward,
                 terminated: step_result.terminated,
                 truncated: step_result.truncated,
+                is_paused: self.paused || will_pause,
                 reward_breakdown: step_result.reward_breakdown,
                 reward_variables: step_result.reward_variables,
                 policy: next_policy,
@@ -340,9 +351,11 @@ impl<E: VisualEnvironment> ApplicationHandler for CustomVisualRunner<E> {
             let _ = self.step_tx.send(output);
 
             if terminated || truncated {
-                self.paused = true;
+                if self.auto_pause_on_done {
+                    self.paused = true;
+                    pause_virtual_time(self.app.world_mut());
+                }
                 self.current_ep_steps = 0;
-                pause_virtual_time(self.app.world_mut());
                 self.env.reset_world(self.app.world_mut());
                 self.episode_reward = 0.0;
 
@@ -356,6 +369,7 @@ impl<E: VisualEnvironment> ApplicationHandler for CustomVisualRunner<E> {
                     episode_reward: 0.0,
                     terminated: false,
                     truncated: false,
+                    is_paused: self.paused,
                     reward_breakdown: Vec::new(),
                     reward_variables: std::collections::HashMap::new(),
                     policy: next_policy_items,
@@ -406,6 +420,7 @@ pub fn run_visual_env<E, F>(
             cmd_rx,
             step_tx,
             paused: false,
+            auto_pause_on_done: true,
             step_count: 0,
             current_ep_steps: 0,
             episode_reward: 0.0,
