@@ -358,7 +358,13 @@ impl PPOAgent {
                     .truncated_next_values
                     .get(t)
                     .and_then(|v| *v)
-                    .unwrap_or_else(|| if t + 1 < n { buffer.values[t + 1] } else { last_val })
+                    .unwrap_or_else(|| {
+                        if t + 1 < n {
+                            buffer.values[t + 1]
+                        } else {
+                            last_val
+                        }
+                    })
             } else if t + 1 < n {
                 buffer.values[t + 1]
             } else {
@@ -1305,8 +1311,9 @@ mod tests {
             obs_f[17] = 1.2; // distance / 100
             let state_f = Tensor::from_vec(obs_f.clone(), (1, state_dim), &device)?;
             let mask_f = Some(vec![true, true, true, true, true, true, true, true]);
-            let (act_f, log_prob_f, val_f) =
-                agent.actor_critic.sample_action(&state_f, mask_f.as_deref())?;
+            let (act_f, log_prob_f, val_f) = agent
+                .actor_critic
+                .sample_action(&state_f, mask_f.as_deref())?;
             assert_eq!(act_f.len(), 3);
             let reward_f = if step % 2 == 0 { 0.5 } else { -0.5 };
             buffer_f.push(obs_f, act_f, log_prob_f, reward_f, val_f, false, mask_f);
@@ -1317,8 +1324,9 @@ mod tests {
             obs_r[17] = 1.2; // distance / 100
             let state_r = Tensor::from_vec(obs_r.clone(), (1, state_dim), &device)?;
             let mask_r = Some(vec![true, true, true, true, true, true, true, true]);
-            let (act_r, log_prob_r, val_r) =
-                agent.actor_critic.sample_action(&state_r, mask_r.as_deref())?;
+            let (act_r, log_prob_r, val_r) = agent
+                .actor_critic
+                .sample_action(&state_r, mask_r.as_deref())?;
             assert_eq!(act_r.len(), 3);
             let reward_r = -reward_f; // 严格零和
             buffer_r.push(obs_r, act_r, log_prob_r, reward_r, val_r, false, mask_r);
@@ -1420,7 +1428,10 @@ mod tests {
         );
         let (_, adv_term) = agent.compute_gae(&buffer_term, 2.0);
         // delta = reward(1.0) + gamma * next_val(2.0) * 0.0 - val(0.5) = 0.5
-        assert!((adv_term[0] - 0.5).abs() < 1e-5, "真正终止不应 bootstrap 任何未来价值");
+        assert!(
+            (adv_term[0] - 0.5).abs() < 1e-5,
+            "真正终止不应 bootstrap 任何未来价值"
+        );
 
         // 场景 2: 超时截断 (terminated = false, truncated = true, 指定真实残局价值 3.0)
         let mut buffer_trunc = RolloutBuffer::new();
@@ -1430,17 +1441,19 @@ mod tests {
             -0.1,
             1.0,
             0.5,
-            false, // terminated
-            true,  // truncated
+            false,     // terminated
+            true,      // truncated
             Some(3.0), // 真实残局价值
             None,
         );
         // 传入 last_val = 0.0 (开局重置价值)，但应优先使用 3.0 真实残局价值
         let (_, adv_trunc) = agent.compute_gae(&buffer_trunc, 0.0);
         // delta = reward(1.0) + gamma(0.99) * next_val(3.0) * 1.0 - val(0.5) = 1.0 + 2.97 - 0.5 = 3.47
-        assert!((adv_trunc[0] - 3.47).abs() < 1e-4, "超时截断必须优先使用真实残局价值进行无偏 bootstrap");
+        assert!(
+            (adv_trunc[0] - 3.47).abs() < 1e-4,
+            "超时截断必须优先使用真实残局价值进行无偏 bootstrap"
+        );
 
         Ok(())
     }
 }
-

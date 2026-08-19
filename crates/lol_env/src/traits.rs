@@ -234,11 +234,8 @@ pub trait VisualEnvironment: RlEnvironment {
     ) -> Option<Self::Action> {
         None
     }
-    fn step_world(
-        &mut self,
-        app: &mut App,
-        actions: &[Self::Action],
-    ) -> Vec<StepResult<Self::Obs>>;
+    fn step_world(&mut self, app: &mut App, actions: &[Self::Action])
+    -> Vec<StepResult<Self::Obs>>;
 }
 
 /// Metadata description of an RL environment for registry & UI listings.

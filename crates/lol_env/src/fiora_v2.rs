@@ -236,10 +236,7 @@ impl FlashCooldown {
 }
 
 /// FixedUpdate 中推进剑姬的闪现冷却。
-pub fn tick_flash_cooldown(
-    time: Res<Time<Fixed>>,
-    mut q: Query<&mut FlashCooldown, With<Fiora>>,
-) {
+pub fn tick_flash_cooldown(time: Res<Time<Fixed>>, mut q: Query<&mut FlashCooldown, With<Fiora>>) {
     for mut flash in q.iter_mut() {
         if let Some(timer) = flash.0.as_mut() {
             timer.tick(time.delta());
@@ -720,7 +717,9 @@ impl FioraV2Env {
         if let Some(mut flash) = world.get_mut::<FlashCooldown>(self.fiora) {
             flash.0 = None;
         } else {
-            world.entity_mut(self.fiora).insert(FlashCooldown::default());
+            world
+                .entity_mut(self.fiora)
+                .insert(FlashCooldown::default());
         }
     }
 
@@ -822,10 +821,11 @@ impl RlEnvironment for FioraV2Env {
     }
 
     fn step(&mut self, actions: &[Self::Action]) -> Vec<StepResult<Self::Obs>> {
-        let action = actions
-            .first()
-            .copied()
-            .unwrap_or(FioraV2Action::new(0.0, 0.0, FioraV2DiscreteAction::NoOp));
+        let action = actions.first().copied().unwrap_or(FioraV2Action::new(
+            0.0,
+            0.0,
+            FioraV2DiscreteAction::NoOp,
+        ));
         vec![self.step(action)]
     }
 
@@ -1049,10 +1049,11 @@ impl VisualEnvironment for FioraV2Env {
         actions: &[Self::Action],
     ) -> Vec<StepResult<Self::Obs>> {
         self.step_count += 1;
-        let action = actions
-            .first()
-            .copied()
-            .unwrap_or(FioraV2Action::new(0.0, 0.0, FioraV2DiscreteAction::NoOp));
+        let action = actions.first().copied().unwrap_or(FioraV2Action::new(
+            0.0,
+            0.0,
+            FioraV2DiscreteAction::NoOp,
+        ));
         let res = step_v2_world(
             app,
             self.fiora,

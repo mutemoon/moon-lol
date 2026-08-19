@@ -126,7 +126,12 @@ fn render_visual_controls(sidebar: &AppSidebar, cx: &mut Context<AppSidebar>) ->
                             cx.notify();
                         })),
                 )
-                .child(div().text_xs().text_color(cx.theme().muted_foreground).child("局末自动暂停")),
+                .child(
+                    div()
+                        .text_xs()
+                        .text_color(cx.theme().muted_foreground)
+                        .child("局末自动暂停"),
+                ),
         )
         .child(div().id("vis-pause-resume-toggle").child(if is_paused {
             Button::new("vis-resume")

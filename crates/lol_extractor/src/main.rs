@@ -90,9 +90,18 @@ fn main() {
 }
 
 fn run(args: &Args, assets_dir: &Path) -> Result<(), String> {
-    log(STEP_GIT, "[PREFLIGHT] 启动提取 Worker 运行时前置环境检测...");
-    log(STEP_GIT, format!("[PREFLIGHT] 游戏数据源路径: {}", args.game_path));
-    log(STEP_GIT, format!("[PREFLIGHT] 资源输出目标: {}", assets_dir.display()));
+    log(
+        STEP_GIT,
+        "[PREFLIGHT] 启动提取 Worker 运行时前置环境检测...",
+    );
+    log(
+        STEP_GIT,
+        format!("[PREFLIGHT] 游戏数据源路径: {}", args.game_path),
+    );
+    log(
+        STEP_GIT,
+        format!("[PREFLIGHT] 资源输出目标: {}", assets_dir.display()),
+    );
 
     let game_path_buf = Path::new(&args.game_path);
     if !game_path_buf.exists() {

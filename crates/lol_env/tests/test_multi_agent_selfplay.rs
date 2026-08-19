@@ -1,4 +1,6 @@
-use lol_env::fiora_riven_selfplay::{FioraRivenSelfPlayEnv, SelfPlayAction, SelfPlayDiscreteAction};
+use lol_env::fiora_riven_selfplay::{
+    FioraRivenSelfPlayEnv, SelfPlayAction, SelfPlayDiscreteAction,
+};
 use lol_env::parallel::ParallelFioraRivenSelfPlayEnvs;
 use lol_env::traits::{EnvConfig, RenderMode, RlEnvironment};
 
@@ -50,10 +52,8 @@ fn test_multi_agent_parallel_envs_batch_throughput() {
         "展平观测应包含 8 个智能体样本"
     );
 
-    let flat_actions = vec![
-        SelfPlayAction::new(0.0, 0.0, SelfPlayDiscreteAction::NoOp);
-        num_envs * 2
-    ];
+    let flat_actions =
+        vec![SelfPlayAction::new(0.0, 0.0, SelfPlayDiscreteAction::NoOp); num_envs * 2];
     let flat_res = par_envs.step_all_flat(&flat_actions);
     assert_eq!(
         flat_res.len(),

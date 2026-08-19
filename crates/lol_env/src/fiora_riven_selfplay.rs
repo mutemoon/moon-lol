@@ -8,9 +8,9 @@ use bevy::time::TimeUpdateStrategy;
 use bevy::world_serialization::DynamicWorld;
 use lol_base::character::Skin;
 use lol_base_render::camera::CameraState;
+use lol_champions::fiora::PluginFiora;
 use lol_champions::fiora::passive::Vital;
 use lol_champions::fiora::r::BuffFioraR;
-use lol_champions::fiora::PluginFiora;
 use lol_champions::riven::PluginRiven;
 use lol_core::action::{Action, CommandAction};
 use lol_core::attack::{AttackState, AttackStatus};
@@ -407,11 +407,7 @@ impl SelfPlayObs {
             0.0
         };
 
-        let (f_hp, r_hp) = if is_fiora {
-            (s_hp, t_hp)
-        } else {
-            (t_hp, s_hp)
-        };
+        let (f_hp, r_hp) = if is_fiora { (s_hp, t_hp) } else { (t_hp, s_hp) };
 
         ObsFeaturePayload {
             self_hp_pct: s_hp,
@@ -694,14 +690,16 @@ impl FioraRivenSelfPlayEnv {
     }
 
     pub fn step(&mut self, actions: &[SelfPlayAction]) -> Vec<StepResult<SelfPlayObs>> {
-        let act_fiora = actions
-            .get(0)
-            .copied()
-            .unwrap_or(SelfPlayAction::new(0.0, 0.0, SelfPlayDiscreteAction::NoOp));
-        let act_riven = actions
-            .get(1)
-            .copied()
-            .unwrap_or(SelfPlayAction::new(0.0, 0.0, SelfPlayDiscreteAction::NoOp));
+        let act_fiora = actions.get(0).copied().unwrap_or(SelfPlayAction::new(
+            0.0,
+            0.0,
+            SelfPlayDiscreteAction::NoOp,
+        ));
+        let act_riven = actions.get(1).copied().unwrap_or(SelfPlayAction::new(
+            0.0,
+            0.0,
+            SelfPlayDiscreteAction::NoOp,
+        ));
         let (res_fiora, res_riven) = self.step_both(act_fiora, act_riven);
         vec![res_fiora, res_riven]
     }
@@ -844,14 +842,16 @@ impl RlEnvironment for FioraRivenSelfPlayEnv {
     }
 
     fn step(&mut self, actions: &[Self::Action]) -> Vec<StepResult<Self::Obs>> {
-        let act_fiora = actions
-            .get(0)
-            .copied()
-            .unwrap_or(SelfPlayAction::new(0.0, 0.0, SelfPlayDiscreteAction::NoOp));
-        let act_riven = actions
-            .get(1)
-            .copied()
-            .unwrap_or(SelfPlayAction::new(0.0, 0.0, SelfPlayDiscreteAction::NoOp));
+        let act_fiora = actions.get(0).copied().unwrap_or(SelfPlayAction::new(
+            0.0,
+            0.0,
+            SelfPlayDiscreteAction::NoOp,
+        ));
+        let act_riven = actions.get(1).copied().unwrap_or(SelfPlayAction::new(
+            0.0,
+            0.0,
+            SelfPlayDiscreteAction::NoOp,
+        ));
         let (res_fiora, res_riven) = self.step_both(act_fiora, act_riven);
         vec![res_fiora, res_riven]
     }
@@ -1005,7 +1005,11 @@ impl VisualEnvironment for FioraRivenSelfPlayEnv {
         let dx = (p.x - rpos.x) / SELFPLAY_OFFSET_SCALE;
         let dz = (p.z - rpos.z) / SELFPLAY_OFFSET_SCALE;
         if Vec2::new(dx, dz).length() * SELFPLAY_OFFSET_SCALE < 60.0 {
-            Some(SelfPlayAction::new(0.0, 0.0, SelfPlayDiscreteAction::Attack))
+            Some(SelfPlayAction::new(
+                0.0,
+                0.0,
+                SelfPlayDiscreteAction::Attack,
+            ))
         } else {
             Some(SelfPlayAction::new(
                 dx.clamp(-1.0, 1.0),
@@ -1021,14 +1025,16 @@ impl VisualEnvironment for FioraRivenSelfPlayEnv {
         actions: &[Self::Action],
     ) -> Vec<StepResult<Self::Obs>> {
         self.step_count += 1;
-        let act_fiora = actions
-            .get(0)
-            .copied()
-            .unwrap_or(SelfPlayAction::new(0.0, 0.0, SelfPlayDiscreteAction::NoOp));
-        let act_riven = actions
-            .get(1)
-            .copied()
-            .unwrap_or(SelfPlayAction::new(0.0, 0.0, SelfPlayDiscreteAction::NoOp));
+        let act_fiora = actions.get(0).copied().unwrap_or(SelfPlayAction::new(
+            0.0,
+            0.0,
+            SelfPlayDiscreteAction::NoOp,
+        ));
+        let act_riven = actions.get(1).copied().unwrap_or(SelfPlayAction::new(
+            0.0,
+            0.0,
+            SelfPlayDiscreteAction::NoOp,
+        ));
         let (res_fiora, res_riven) = step_selfplay_world(
             app,
             self.fiora,
@@ -1467,14 +1473,26 @@ pub fn step_selfplay_world(
     let truncated = max_steps > 0 && step_count >= max_steps;
 
     let mut vars_fiora = HashMap::new();
-    vars_fiora.insert("self_damage_dealt_reward".to_string(), fiora_dmg_dealt * 3.0);
-    vars_fiora.insert("self_damage_taken_penalty".to_string(), -riven_dmg_dealt * 3.0);
+    vars_fiora.insert(
+        "self_damage_dealt_reward".to_string(),
+        fiora_dmg_dealt * 3.0,
+    );
+    vars_fiora.insert(
+        "self_damage_taken_penalty".to_string(),
+        -riven_dmg_dealt * 3.0,
+    );
     vars_fiora.insert("vital_reward".to_string(), vital_bonus);
     vars_fiora.insert("kill_reward".to_string(), kill_bonus_fiora);
 
     let mut vars_riven = HashMap::new();
-    vars_riven.insert("self_damage_dealt_reward".to_string(), riven_dmg_dealt * 3.0);
-    vars_riven.insert("self_damage_taken_penalty".to_string(), -fiora_dmg_dealt * 3.0);
+    vars_riven.insert(
+        "self_damage_dealt_reward".to_string(),
+        riven_dmg_dealt * 3.0,
+    );
+    vars_riven.insert(
+        "self_damage_taken_penalty".to_string(),
+        -fiora_dmg_dealt * 3.0,
+    );
     vars_riven.insert("vital_reward".to_string(), -vital_bonus);
     vars_riven.insert("kill_reward".to_string(), -kill_bonus_fiora);
 

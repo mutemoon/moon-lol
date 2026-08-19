@@ -200,34 +200,31 @@ pub fn render_extractor(
                 .rounded_lg()
                 .gap_2()
                 .child(
-                    h_flex()
-                        .justify_between()
-                        .items_center()
-                        .child(
-                            h_flex()
-                                .gap_2()
-                                .items_center()
-                                .child(div().font_bold().text_lg().child("资源提取中心 (Resource Extractor)"))
-                                .child(
-                                    div()
-                                        .px_2()
-                                        .py_0p5()
-                                        .bg(theme.accent.opacity(0.2))
-                                        .rounded_sm()
-                                        .text_xs()
-                                        .child("Production Tool"),
-                                ),
-                        ),
+                    h_flex().justify_between().items_center().child(
+                        h_flex()
+                            .gap_2()
+                            .items_center()
+                            .child(
+                                div()
+                                    .font_bold()
+                                    .text_lg()
+                                    .child("资源提取中心 (Resource Extractor)"),
+                            )
+                            .child(
+                                div()
+                                    .px_2()
+                                    .py_0p5()
+                                    .bg(theme.accent.opacity(0.2))
+                                    .rounded_sm()
+                                    .text_xs()
+                                    .child("Production Tool"),
+                            ),
+                    ),
                 )
-                .child(
-                    div()
-                        .text_xs()
-                        .text_color(theme.muted_fg)
-                        .child(format!(
-                            "当前输出目标 Assets 目录: {} (根据运行环境自动切换为 Dev/Release 资源路径)",
-                            assets_dir.display()
-                        )),
-                ),
+                .child(div().text_xs().text_color(theme.muted_fg).child(format!(
+                    "当前输出目标 Assets 目录: {} (根据运行环境自动切换为 Dev/Release 资源路径)",
+                    assets_dir.display()
+                ))),
         )
         .child(
             // 环境工具体检看板卡片
@@ -255,16 +252,13 @@ pub fn render_extractor(
                     v_flex()
                         .gap_1()
                         .child(div().text_xs().font_medium().child("英雄联盟 Game 根目录"))
-                        .child(
-                            h_flex()
-                                .w_full()
-                                .gap_2()
-                                .child(if let Some(ed) = &game_path_input {
-                                    Input::new(ed).flex_1().into_any_element()
-                                } else {
-                                    div().into_any_element()
-                                }),
-                        ),
+                        .child(h_flex().w_full().gap_2().child(
+                            if let Some(ed) = &game_path_input {
+                                Input::new(ed).flex_1().into_any_element()
+                            } else {
+                                div().into_any_element()
+                            },
+                        )),
                 )
                 // 勾选项集合
                 .child(
@@ -286,7 +280,8 @@ pub fn render_extractor(
                                 .label("ShaderCache 着色器反编译与编译")
                                 .checked(extract_shaders)
                                 .on_click(cx.listener(|this, _, _window, cx| {
-                                    this.extractor.extract_shaders = !this.extractor.extract_shaders;
+                                    this.extractor.extract_shaders =
+                                        !this.extractor.extract_shaders;
                                     cx.notify();
                                 })),
                         )
@@ -314,18 +309,19 @@ pub fn render_extractor(
                     v_flex()
                         .gap_2()
                         .child(
-                            h_flex()
-                                .gap_3()
-                                .items_center()
-                                .child(
-                                    Button::new("btn_start_extract")
-                                        .primary()
-                                        .label(if is_extracting { "正在提取中..." } else { "开始全量提取" })
-                                        .disabled(is_extracting)
-                                        .on_click(cx.listener(|this, _, _window, cx| {
-                                            start_extraction_process(this, cx);
-                                        })),
-                                ),
+                            h_flex().gap_3().items_center().child(
+                                Button::new("btn_start_extract")
+                                    .primary()
+                                    .label(if is_extracting {
+                                        "正在提取中..."
+                                    } else {
+                                        "开始全量提取"
+                                    })
+                                    .disabled(is_extracting)
+                                    .on_click(cx.listener(|this, _, _window, cx| {
+                                        start_extraction_process(this, cx);
+                                    })),
+                            ),
                         )
                         .when_some(status, |this, msg| {
                             this.child(
@@ -358,7 +354,12 @@ pub fn render_extractor(
                     h_flex()
                         .justify_between()
                         .items_center()
-                        .child(div().font_bold().text_sm().child("提取步骤与实时过程 (Vertical Pipeline Steps)"))
+                        .child(
+                            div()
+                                .font_bold()
+                                .text_sm()
+                                .child("提取步骤与实时过程 (Vertical Pipeline Steps)"),
+                        )
                         .child(
                             div()
                                 .text_xs()
@@ -368,7 +369,10 @@ pub fn render_extractor(
                 )
                 .children(steps.into_iter().enumerate().map(|(idx, step_info)| {
                     let is_active = is_extracting && current_step_idx == idx;
-                    let is_finished = current_step_idx > idx || (!is_extracting && current_step_idx == total_steps - 1 && step_status_desc == "提取任务已全量完成");
+                    let is_finished = current_step_idx > idx
+                        || (!is_extracting
+                            && current_step_idx == total_steps - 1
+                            && step_status_desc == "提取任务已全量完成");
                     let is_expanded = expanded_steps.get(&idx).copied().unwrap_or(is_active);
                     let logs = step_logs.get(&idx).cloned().unwrap_or_default();
                     let log_count = logs.len();
@@ -484,7 +488,7 @@ pub fn render_extractor(
                                                 .opacity(0.6)
                                                 .child(format!("{} 条日志", log_count)),
                                         ),
-                                 ),
+                                ),
                         )
                         .when(is_expanded && !logs.is_empty(), |this| {
                             // 步骤内部内嵌控制台日志
@@ -500,9 +504,7 @@ pub fn render_extractor(
                                     .gap_1()
                                     .max_h_48()
                                     .overflow_y_scrollbar()
-                                    .children(logs.into_iter().map(|log| {
-                                        div().child(log)
-                                    })),
+                                    .children(logs.into_iter().map(|log| div().child(log))),
                             )
                         })
                 })),
@@ -609,7 +611,11 @@ fn render_health_check_panel(
                         .child(
                             Button::new("btn_recheck_health")
                                 .outline()
-                                .label(if is_checking { "检测中..." } else { "重新体检" })
+                                .label(if is_checking {
+                                    "检测中..."
+                                } else {
+                                    "重新体检"
+                                })
                                 .disabled(is_checking)
                                 .on_click(cx.listener(|this, _, _window, cx| {
                                     trigger_health_check(this, cx);
@@ -618,7 +624,11 @@ fn render_health_check_panel(
                         .child(
                             Button::new("btn_toggle_health_panel")
                                 .ghost()
-                                .label(if is_expanded { "收起" } else { "展开详情" })
+                                .label(if is_expanded {
+                                    "收起"
+                                } else {
+                                    "展开详情"
+                                })
                                 .on_click(cx.listener(|this, _, _window, cx| {
                                     this.extractor.health_panel_expanded =
                                         !this.extractor.health_panel_expanded;
@@ -630,12 +640,11 @@ fn render_health_check_panel(
         .when(is_expanded, |this| {
             if let Some(r) = &report {
                 this.child(
-                    v_flex()
-                        .w_full()
-                        .gap_2()
-                        .children(r.items.iter().map(|item| {
-                            render_tool_check_row(item, theme)
-                        })),
+                    v_flex().w_full().gap_2().children(
+                        r.items
+                            .iter()
+                            .map(|item| render_tool_check_row(item, theme)),
+                    ),
                 )
             } else {
                 this.child(
@@ -801,11 +810,9 @@ fn start_extraction_process(sidebar: &mut AppSidebar, cx: &mut Context<AppSideba
 
     // 1. 提取前环境健康检查与拦截
     if let Some(report) = &state.health_report {
-        if let Err(errors) = validate_before_extraction(
-            report,
-            state.extract_shaders,
-            state.skip_map_geo,
-        ) {
+        if let Err(errors) =
+            validate_before_extraction(report, state.extract_shaders, state.skip_map_geo)
+        {
             state.status_message = Some(format!(
                 "环境体检未通过，已拦截提取:\n• {}",
                 errors.join("\n• ")

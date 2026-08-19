@@ -428,4 +428,3 @@ impl RlRepo for NoopRlRepo {
         Ok(Vec::new())
     }
 }
-

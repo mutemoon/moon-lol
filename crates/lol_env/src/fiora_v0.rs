@@ -465,7 +465,10 @@ impl RlEnvironment for FioraVsRivenEnv {
     }
 
     fn step(&mut self, actions: &[Self::Action]) -> Vec<StepResult<Self::Obs>> {
-        let action = actions.first().copied().unwrap_or(FioraVsRivenAction::MoveEast50);
+        let action = actions
+            .first()
+            .copied()
+            .unwrap_or(FioraVsRivenAction::MoveEast50);
         vec![self.step(action)]
     }
 
@@ -549,7 +552,10 @@ impl VisualEnvironment for FioraVsRivenEnv {
         actions: &[Self::Action],
     ) -> Vec<StepResult<Self::Obs>> {
         self.step_count += 1;
-        let action = actions.first().copied().unwrap_or(FioraVsRivenAction::MoveEast50);
+        let action = actions
+            .first()
+            .copied()
+            .unwrap_or(FioraVsRivenAction::MoveEast50);
         let res = step_world(
             app,
             self.fiora,

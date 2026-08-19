@@ -719,8 +719,9 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment + 'static>(
                         // 当对抗历史对手时仅主策略扮演的角色学习更新；纯自博弈时双方均收集更新
                         let train_agent_count = if has_opp_policy { 1 } else { num_agents };
 
-                        let mut buffers: Vec<RolloutBuffer> =
-                            (0..train_agent_count).map(|_| RolloutBuffer::new()).collect();
+                        let mut buffers: Vec<RolloutBuffer> = (0..train_agent_count)
+                            .map(|_| RolloutBuffer::new())
+                            .collect();
                         let mut ep_returns = Vec::new();
                         let mut completed_steps = Vec::new();
                         let mut reward_breakdown = HashMap::new();
@@ -753,15 +754,14 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment + 'static>(
                                         break;
                                     }
                                 };
-                                let batch_samples = match main_policy
-                                    .sample_batch(&batch_tensor, Some(&masks))
-                                {
-                                    Ok(res) => res,
-                                    Err(e) => {
-                                        error!("Worker 批量采样失败: {e}");
-                                        break;
-                                    }
-                                };
+                                let batch_samples =
+                                    match main_policy.sample_batch(&batch_tensor, Some(&masks)) {
+                                        Ok(res) => res,
+                                        Err(e) => {
+                                            error!("Worker 批量采样失败: {e}");
+                                            break;
+                                        }
+                                    };
                                 for ((state_vec, mask), (encoded, log_prob, val)) in state_vecs
                                     .into_iter()
                                     .zip(masks.into_iter())
@@ -875,10 +875,12 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment + 'static>(
                             for (
                                 agent_idx,
                                 ((state_vec, encoded, log_prob, val, action_mask), res),
-                            ) in step_samples.into_iter().zip(step_results.iter()).enumerate()
+                            ) in step_samples
+                                .into_iter()
+                                .zip(step_results.iter())
+                                .enumerate()
                             {
-                                let trunc_val =
-                                    trunc_next_vals.get(agent_idx).copied().flatten();
+                                let trunc_val = trunc_next_vals.get(agent_idx).copied().flatten();
                                 if !has_opp_policy {
                                     // 纯自博弈：双方样本均写入对应 buffer
                                     if agent_idx < buffers.len() {
@@ -1029,7 +1031,8 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment + 'static>(
         agent.set_entropy_coef(current_c2);
 
         let initial_lr = task_config.lr as f64;
-        let current_lr = (initial_lr * 0.1 + (initial_lr - initial_lr * 0.1) * (cos_progress as f64))
+        let current_lr = (initial_lr * 0.1
+            + (initial_lr - initial_lr * 0.1) * (cos_progress as f64))
             .max(initial_lr * 0.05);
         let _ = agent.set_lr(current_lr);
 
@@ -1147,8 +1150,7 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment + 'static>(
         let (ep_steps_max, ep_steps_min, ep_steps_avg) = if !recent_ep_steps.is_empty() {
             let max = recent_ep_steps.iter().copied().max().unwrap_or(0);
             let min = recent_ep_steps.iter().copied().min().unwrap_or(0);
-            let avg =
-                recent_ep_steps.iter().sum::<usize>() as f32 / recent_ep_steps.len() as f32;
+            let avg = recent_ep_steps.iter().sum::<usize>() as f32 / recent_ep_steps.len() as f32;
             (max, min, avg)
         } else {
             (0, 0, 0.0)

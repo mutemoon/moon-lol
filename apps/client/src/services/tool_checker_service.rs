@@ -152,7 +152,9 @@ async fn check_git() -> ToolCheckItem {
             status: ToolHealthStatus::Failed,
             version_or_path: None,
             description: "用于自动拉取与同步 CommunityDragon-Data 哈希字典仓库".into(),
-            remedy_hint: Some("未检测到 git，请安装 Git (https://git-scm.com/) 并配置环境变量 PATH".into()),
+            remedy_hint: Some(
+                "未检测到 git，请安装 Git (https://git-scm.com/) 并配置环境变量 PATH".into(),
+            ),
         },
     }
 }
@@ -180,7 +182,9 @@ async fn check_worker() -> ToolCheckItem {
                 status: ToolHealthStatus::Failed,
                 version_or_path: None,
                 description: "资源提取核心管线后台 Worker 进程".into(),
-                remedy_hint: Some("开发模式下未检测到 Cargo，请安装 Rust 工具链 (https://rustup.rs/)".into()),
+                remedy_hint: Some(
+                    "开发模式下未检测到 Cargo，请安装 Rust 工具链 (https://rustup.rs/)".into(),
+                ),
             },
         }
     } else {
@@ -266,7 +270,10 @@ async fn check_game_path(game_path: &str) -> ToolCheckItem {
             status: ToolHealthStatus::Warning,
             version_or_path: Some(p.display().to_string()),
             description: "游戏核心原始 WAD / 数据包所在目录".into(),
-            remedy_hint: Some("目录存在但未发现 League of Legends.exe 或 DATA 目录，提取可能无法找到完整 WAD".into()),
+            remedy_hint: Some(
+                "目录存在但未发现 League of Legends.exe 或 DATA 目录，提取可能无法找到完整 WAD"
+                    .into(),
+            ),
         }
     }
 }
@@ -335,7 +342,10 @@ async fn check_dxbc_compiler() -> ToolCheckItem {
             status: ToolHealthStatus::Warning,
             version_or_path: Some(compiler_path.display().to_string()),
             description: "用于将 ShaderCache 中的 DXBC 字节码转译编译为 SPIR-V 着色器".into(),
-            remedy_hint: Some(format!("未在 {} 找到 dxbc-compiler，若提取 Shader 则需放置该工具", compiler_path.display())),
+            remedy_hint: Some(format!(
+                "未在 {} 找到 dxbc-compiler，若提取 Shader 则需放置该工具",
+                compiler_path.display()
+            )),
         }
     }
 }
@@ -421,13 +431,20 @@ pub fn validate_before_extraction(
     for item in &report.items {
         // 1. 必备项未通过直接报错
         if item.category == ToolCategory::Required && item.status == ToolHealthStatus::Failed {
-            let hint = item.remedy_hint.clone().unwrap_or_else(|| "工具缺失".into());
+            let hint = item
+                .remedy_hint
+                .clone()
+                .unwrap_or_else(|| "工具缺失".into());
             errors.push(format!("【{}】未就绪: {}", item.name, hint));
         }
 
         // 2. 勾选了 Shader 提取但 dxbc-compiler 缺失
-        if extract_shaders && item.id == "dxbc_compiler" && item.status != ToolHealthStatus::Passed {
-            errors.push("【Shader 提取】需 dxbc-compiler 工具，请在 assets/tools 中放置 dxbc-compiler.exe".into());
+        if extract_shaders && item.id == "dxbc_compiler" && item.status != ToolHealthStatus::Passed
+        {
+            errors.push(
+                "【Shader 提取】需 dxbc-compiler 工具，请在 assets/tools 中放置 dxbc-compiler.exe"
+                    .into(),
+            );
         }
     }
 
@@ -507,4 +524,3 @@ mod tests {
         assert!(res_failed_git.is_err());
     }
 }
-
