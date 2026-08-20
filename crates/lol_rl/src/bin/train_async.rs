@@ -77,6 +77,7 @@ fn main() -> anyhow::Result<()> {
         tuned.num_parallel_envs,
         infer_server.req_tx.clone(),
         sample_tx,
+        vec![(0, 0); tuned.num_parallel_envs], // 单智能体：无对手池
     );
 
     // 7. 构建异步训练器

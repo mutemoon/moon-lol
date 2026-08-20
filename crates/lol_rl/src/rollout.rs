@@ -1,0 +1,298 @@
+//! 持久化环境 Rollout Worker：真实训练循环与 AutoTuner 探测器共用的唯一真实来源。
+//!
+//! 训练循环与探测器都通过 [`RolloutWorker::rollout`] 驱动环境采样，
+//! 保证探测到的每步耗时与真实训练（含 obs→vector、策略采样、采样簿记、env step）完全一致。
+
+use std::collections::HashMap;
+use std::sync::Arc;
+
+use candle_core::{Device, Result, Tensor};
+use lol_env::RlEnvironment;
+
+use crate::policy::ActorCritic;
+use crate::ppo::RolloutBuffer;
+
+/// 一次 Rollout 的完整产出（单个 Worker 一次 horizon 推演）。
+pub struct WorkerTrajectory<O> {
+    /// 参与训练的轨迹 Buffer（自博弈：每智能体一个；对抗历史对手：仅主角色一个）。
+    pub buffers: Vec<RolloutBuffer>,
+    /// 与 buffers 一一对齐的末尾价值（GAE bootstrap 用）。
+    pub last_values: Vec<f32>,
+    pub ep_returns: Vec<f32>,
+    pub completed_steps: Vec<usize>,
+    pub reward_breakdown: HashMap<String, f32>,
+    pub last_reward_variables: HashMap<String, f32>,
+    pub last_obs: Option<O>,
+}
+
+impl<O> WorkerTrajectory<O> {
+    pub fn empty() -> Self {
+        Self {
+            buffers: Vec::new(),
+            last_values: Vec::new(),
+            ep_returns: Vec::new(),
+            completed_steps: Vec::new(),
+            reward_breakdown: HashMap::new(),
+            last_reward_variables: HashMap::new(),
+            last_obs: None,
+        }
+    }
+}
+
+/// 发给持久化 Worker 的命令。
+pub enum WorkerCommand {
+    Rollout {
+        main_policy: Arc<ActorCritic>,
+        opponent_policy: Option<Arc<ActorCritic>>,
+        main_agent_idx: usize,
+    },
+    Stop,
+}
+
+/// 一个常驻环境 + 回合累计状态的 Rollout Worker。
+pub struct RolloutWorker<E: RlEnvironment> {
+    env: E,
+    current_obs: Vec<E::Obs>,
+    cur_return: f32,
+    cur_steps: usize,
+}
+
+impl<E: RlEnvironment> RolloutWorker<E> {
+    /// 创建 Worker 并初始化环境（环境只在启动时初始化一次，全程复用）。
+    pub fn new() -> Self {
+        let mut env = E::new();
+        let current_obs = env.reset();
+        Self {
+            env,
+            current_obs,
+            cur_return: 0.0,
+            cur_steps: 0,
+        }
+    }
+
+    /// 执行一次完整 Rollout。
+    ///
+    /// - `opponent_policy = None`：纯自博弈，双方同策略推理，所有智能体样本都写入对应 buffer；
+    /// - `opponent_policy = Some(_)`：对抗历史对手，仅主策略扮演的角色（`main_agent_idx`）样本进 buffer；
+    /// - `sampler_device`：采样前向在哪个设备执行。传 `Device::Cpu` 为原 CPU 推理路径（默认），
+    ///   传 GPU device 则把每次策略前向放到 GPU（需 `main_policy`/`opponent_policy` 已迁到该 device）。
+    pub fn rollout(
+        &mut self,
+        main_policy: &ActorCritic,
+        opponent_policy: Option<&ActorCritic>,
+        main_agent_idx: usize,
+        horizon: usize,
+        state_dim: usize,
+        sampler_device: &Device,
+    ) -> Result<WorkerTrajectory<E::Obs>> {
+        let has_opp_policy = opponent_policy.is_some();
+        let opp_policy = opponent_policy.unwrap_or(main_policy);
+        let num_agents = self.current_obs.len().max(1);
+        let train_agent_count = if has_opp_policy { 1 } else { num_agents };
+
+        let mut buffers: Vec<RolloutBuffer> = (0..train_agent_count)
+            .map(|_| RolloutBuffer::new())
+            .collect();
+        let mut ep_returns = Vec::new();
+        let mut completed_steps = Vec::new();
+        let mut reward_breakdown = HashMap::new();
+        let mut last_reward_variables = HashMap::new();
+
+        for _ in 0..horizon {
+            let mut actions = Vec::with_capacity(self.current_obs.len());
+            let mut step_samples = Vec::with_capacity(self.current_obs.len());
+
+            if !has_opp_policy && self.current_obs.len() > 1 {
+                // 批量推理优化：双方使用同一策略时单次前向完成采样
+                let mut batch_flat = Vec::with_capacity(self.current_obs.len() * state_dim);
+                let mut masks = Vec::with_capacity(self.current_obs.len());
+                let mut state_vecs = Vec::with_capacity(self.current_obs.len());
+                for obs in &self.current_obs {
+                    let sv = E::obs_to_vector(obs);
+                    batch_flat.extend_from_slice(&sv);
+                    masks.push(E::action_mask(obs));
+                    state_vecs.push(sv);
+                }
+                let batch_tensor = Tensor::from_vec(
+                    batch_flat,
+                    (self.current_obs.len(), state_dim),
+                    sampler_device,
+                )?;
+                let batch_samples = main_policy.sample_batch(&batch_tensor, Some(&masks))?;
+                for ((state_vec, mask), (encoded, log_prob, val)) in state_vecs
+                    .into_iter()
+                    .zip(masks.into_iter())
+                    .zip(batch_samples.into_iter())
+                {
+                    let act = E::action_from_encoding(&encoded);
+                    actions.push(act);
+                    step_samples.push((state_vec, encoded, log_prob, val, mask));
+                }
+            } else {
+                // 逐 Agent 采样（支持主策略与历史对手策略分别推理，并根据 main_agent_idx 确定角色）
+                for (agent_idx, obs) in self.current_obs.iter().enumerate() {
+                    let state_vec = E::obs_to_vector(obs);
+                    let action_mask = E::action_mask(obs);
+                    let state_tensor =
+                        Tensor::from_vec(state_vec.clone(), (1, state_dim), sampler_device)?;
+
+                    let active_policy = if !has_opp_policy || agent_idx == main_agent_idx {
+                        main_policy
+                    } else {
+                        opp_policy
+                    };
+
+                    let (encoded, log_prob, val) =
+                        active_policy.sample_action(&state_tensor, action_mask.as_deref())?;
+
+                    let act = E::action_from_encoding(&encoded);
+                    actions.push(act);
+                    step_samples.push((state_vec, encoded, log_prob, val, action_mask));
+                }
+            }
+
+            if actions.len() != self.current_obs.len() {
+                break;
+            }
+
+            // 执行环境 step
+            let step_results = self.env.step(&actions);
+            let done = step_results.iter().any(|r| r.terminated || r.truncated);
+
+            let primary_res = if has_opp_policy {
+                step_results.get(main_agent_idx)
+            } else {
+                step_results.first()
+            };
+            if let Some(res) = primary_res {
+                self.cur_return += res.reward;
+                self.cur_steps += 1;
+                if !res.reward_variables.is_empty() {
+                    last_reward_variables = res.reward_variables.clone();
+                }
+                for item in &res.reward_breakdown {
+                    *reward_breakdown.entry(item.name.clone()).or_insert(0.0) += item.value;
+                }
+            }
+
+            // 若发生超时截断 (truncated)，在 env.reset() 前基于真实残局观测推断真实价值 V(s_T)
+            let trunc_next_vals: Vec<Option<f32>> = step_results
+                .iter()
+                .enumerate()
+                .map(|(idx, res)| {
+                    if res.truncated {
+                        let sv = E::obs_to_vector(&res.obs);
+                        let active_policy = if !has_opp_policy || idx == main_agent_idx {
+                            main_policy
+                        } else {
+                            opp_policy
+                        };
+                        match Tensor::from_vec(sv, (1, state_dim), sampler_device) {
+                            Ok(t) => active_policy
+                                .get_values(&t)
+                                .ok()
+                                .and_then(|v| v.first().copied()),
+                            Err(_) => None,
+                        }
+                    } else {
+                        None
+                    }
+                })
+                .collect();
+
+            // 将采样结果写入对应轨迹 Buffer
+            for (agent_idx, ((state_vec, encoded, log_prob, val, action_mask), res)) in step_samples
+                .into_iter()
+                .zip(step_results.iter())
+                .enumerate()
+            {
+                let trunc_val = trunc_next_vals.get(agent_idx).copied().flatten();
+                if !has_opp_policy {
+                    // 纯自博弈：双方样本均写入对应 buffer
+                    if agent_idx < buffers.len() {
+                        buffers[agent_idx].push_full(
+                            state_vec,
+                            encoded,
+                            log_prob,
+                            res.reward,
+                            val,
+                            res.terminated,
+                            res.truncated,
+                            trunc_val,
+                            action_mask,
+                        );
+                    }
+                } else if agent_idx == main_agent_idx {
+                    // 对抗历史对手：仅主策略扮演的角色写入 buffers[0] 用于梯度更新
+                    buffers[0].push_full(
+                        state_vec,
+                        encoded,
+                        log_prob,
+                        res.reward,
+                        val,
+                        res.terminated,
+                        res.truncated,
+                        trunc_val,
+                        action_mask,
+                    );
+                }
+            }
+
+            // 更新环境观测
+            if done {
+                ep_returns.push(self.cur_return);
+                completed_steps.push(self.cur_steps);
+                self.cur_return = 0.0;
+                self.cur_steps = 0;
+                self.current_obs = self.env.reset();
+            } else {
+                self.current_obs = step_results.into_iter().map(|r| r.obs).collect();
+            }
+        }
+
+        // 独立推断未完成轨迹的末尾价值 last_values
+        let mut last_values = Vec::with_capacity(train_agent_count);
+        if !has_opp_policy {
+            for obs in &self.current_obs {
+                let last_state_vec = E::obs_to_vector(obs);
+                let last_val =
+                    match Tensor::from_vec(last_state_vec, (1, state_dim), sampler_device) {
+                        Ok(tensor) => main_policy
+                            .get_values(&tensor)
+                            .map(|v| v.first().copied().unwrap_or(0.0))
+                            .unwrap_or(0.0),
+                        Err(_) => 0.0,
+                    };
+                last_values.push(last_val);
+            }
+        } else if let Some(obs) = self.current_obs.get(main_agent_idx) {
+            let last_state_vec = E::obs_to_vector(obs);
+            let last_val = match Tensor::from_vec(last_state_vec, (1, state_dim), sampler_device) {
+                Ok(tensor) => main_policy
+                    .get_values(&tensor)
+                    .map(|v| v.first().copied().unwrap_or(0.0))
+                    .unwrap_or(0.0),
+                Err(_) => 0.0,
+            };
+            last_values.push(last_val);
+        }
+
+        let last_obs_primary = self.current_obs.first().cloned();
+
+        Ok(WorkerTrajectory {
+            buffers,
+            last_values,
+            ep_returns,
+            completed_steps,
+            reward_breakdown,
+            last_reward_variables,
+            last_obs: last_obs_primary,
+        })
+    }
+}
+
+impl<E: RlEnvironment> Default for RolloutWorker<E> {
+    fn default() -> Self {
+        Self::new()
+    }
+}

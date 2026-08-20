@@ -1,9 +1,7 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, VecDeque};
 use std::path::Path;
 use std::sync::Arc;
-use std::time::Instant;
 
-use candle_core::Tensor;
 use chrono::Utc;
 pub use lol_rl_protocol::{
     CheckpointItem, InFrame, ObsFeaturePayload, OutFrame, RewardItem, TaskConfigPayload,
@@ -17,7 +15,8 @@ use uuid::Uuid;
 use crate::autotune::AutoTuner;
 use crate::db::{self, CheckpointRow, PgRlRepo, RlRepo, TaskRow};
 use crate::model_store::{checkpoint_dir, new_checkpoint_path};
-use crate::ppo::{PPOAgent, PPOConfig, RolloutBuffer};
+use crate::ppo::{PPOAgent, PPOConfig};
+use crate::training::TrainingSession;
 use crate::worker::TrainingWorkerPool;
 
 /// 训练循环内保存当前权重的请求。
@@ -602,7 +601,7 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment + 'static>(
     let device = crate::device::select_device().unwrap_or(candle_core::Device::Cpu);
 
     // 1. 自动吞吐探测与求解
-    let tuned = match AutoTuner::profile::<E>(state_dim, hidden_dim, &action_space, &device) {
+    let mut tuned = match AutoTuner::profile::<E>(state_dim, hidden_dim, &action_space, &device) {
         Ok(profile) => {
             let res = AutoTuner::solve(&profile, rollout_steps, task_config.ppo_epochs.max(1));
             info!(
@@ -638,6 +637,34 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment + 'static>(
         tuned.num_parallel_envs
     };
 
+    // 1b. 真实校准：用实际生效配置复用真实 AsyncTrainingSession 跑 K 轮迭代，
+    //     实测 SPS（与 UI 同口径）覆盖组件级预估
+    let mut calib_config = tuned.clone();
+    calib_config.num_parallel_envs = num_parallel_envs;
+    match AutoTuner::calibrate::<E>(
+        state_dim,
+        hidden_dim,
+        &action_space,
+        &device,
+        rollout_steps,
+        task_config.ppo_epochs.max(1),
+        &calib_config,
+    ) {
+        Ok(measured) => {
+            tuned.estimated_sps = measured;
+            info!(
+                "🎯 [AutoTuner] 为任务 {} 真实校准完成，实测 SPS: {:.1}",
+                task_id, measured
+            );
+        }
+        Err(e) => {
+            tracing::warn!(
+                "AutoTuner 校准失败 ({e})，沿用组件级预估 SPS: {:.1}",
+                tuned.estimated_sps
+            );
+        }
+    }
+
     {
         let mut t = tasks.blocking_lock();
         if let Some(task) = t.get_mut(&task_id) {
@@ -657,7 +684,7 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment + 'static>(
         max_grad_norm: 0.5,
     };
 
-    let mut agent = match PPOAgent::new(
+    let agent = match PPOAgent::new(
         state_dim,
         hidden_dim,
         action_space.clone(),
@@ -671,323 +698,16 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment + 'static>(
         }
     };
 
-    // 2. 启动长驻持久化 Worker 线程池（环境只在任务启动时初始化一次）
-    let horizon = rollout_steps;
-    struct WorkerTrajectory<O> {
-        buffers: Vec<RolloutBuffer>,
-        last_values: Vec<f32>,
-        ep_returns: Vec<f32>,
-        completed_steps: Vec<usize>,
-        reward_breakdown: HashMap<String, f32>,
-        last_reward_variables: HashMap<String, f32>,
-        last_obs: Option<O>,
-    }
-
-    enum WorkerCommand {
-        Rollout {
-            main_policy: Arc<crate::policy::ActorCritic>,
-            opponent_policy: Option<Arc<crate::policy::ActorCritic>>,
-            main_agent_idx: usize,
-        },
-        Stop,
-    }
-
-    let mut cmd_senders = Vec::with_capacity(num_parallel_envs);
-    let mut resp_receivers = Vec::with_capacity(num_parallel_envs);
-    let mut thread_handles = Vec::with_capacity(num_parallel_envs);
-
-    for _ in 0..num_parallel_envs {
-        let (cmd_tx, cmd_rx) = crossbeam_channel::unbounded::<WorkerCommand>();
-        let (resp_tx, resp_rx) = crossbeam_channel::unbounded::<WorkerTrajectory<E::Obs>>();
-
-        let handle = std::thread::spawn(move || {
-            let mut env = E::new();
-            let mut current_obs = env.reset();
-            let num_agents = current_obs.len().max(1);
-            let mut cur_return = 0.0f32;
-            let mut cur_steps = 0usize;
-
-            while let Ok(cmd) = cmd_rx.recv() {
-                match cmd {
-                    WorkerCommand::Rollout {
-                        main_policy,
-                        opponent_policy,
-                        main_agent_idx,
-                    } => {
-                        let has_opp_policy = opponent_policy.is_some();
-                        let opp_policy_arc = opponent_policy.as_ref().unwrap_or(&main_policy);
-                        // 当对抗历史对手时仅主策略扮演的角色学习更新；纯自博弈时双方均收集更新
-                        let train_agent_count = if has_opp_policy { 1 } else { num_agents };
-
-                        let mut buffers: Vec<RolloutBuffer> = (0..train_agent_count)
-                            .map(|_| RolloutBuffer::new())
-                            .collect();
-                        let mut ep_returns = Vec::new();
-                        let mut completed_steps = Vec::new();
-                        let mut reward_breakdown = HashMap::new();
-                        let mut last_reward_variables = HashMap::new();
-
-                        for _ in 0..horizon {
-                            let mut actions = Vec::with_capacity(current_obs.len());
-                            let mut step_samples = Vec::with_capacity(current_obs.len());
-
-                            if !has_opp_policy && current_obs.len() > 1 {
-                                // 批量推理优化：双方使用同一策略时单次前向完成采样
-                                let mut batch_flat =
-                                    Vec::with_capacity(current_obs.len() * state_dim);
-                                let mut masks = Vec::with_capacity(current_obs.len());
-                                let mut state_vecs = Vec::with_capacity(current_obs.len());
-                                for obs in &current_obs {
-                                    let sv = E::obs_to_vector(obs);
-                                    batch_flat.extend_from_slice(&sv);
-                                    masks.push(E::action_mask(obs));
-                                    state_vecs.push(sv);
-                                }
-                                let batch_tensor = match Tensor::from_vec(
-                                    batch_flat,
-                                    (current_obs.len(), state_dim),
-                                    &candle_core::Device::Cpu,
-                                ) {
-                                    Ok(t) => t,
-                                    Err(e) => {
-                                        error!("Worker 创建 batch_tensor 失败: {e}");
-                                        break;
-                                    }
-                                };
-                                let batch_samples =
-                                    match main_policy.sample_batch(&batch_tensor, Some(&masks)) {
-                                        Ok(res) => res,
-                                        Err(e) => {
-                                            error!("Worker 批量采样失败: {e}");
-                                            break;
-                                        }
-                                    };
-                                for ((state_vec, mask), (encoded, log_prob, val)) in state_vecs
-                                    .into_iter()
-                                    .zip(masks.into_iter())
-                                    .zip(batch_samples.into_iter())
-                                {
-                                    let act = E::action_from_encoding(&encoded);
-                                    actions.push(act);
-                                    step_samples.push((state_vec, encoded, log_prob, val, mask));
-                                }
-                            } else {
-                                // 逐 Agent 采样（支持主策略与历史对手策略分别推理，并根据 main_agent_idx 确定角色）
-                                for (agent_idx, obs) in current_obs.iter().enumerate() {
-                                    let state_vec = E::obs_to_vector(obs);
-                                    let action_mask = E::action_mask(obs);
-                                    let state_tensor = match Tensor::from_vec(
-                                        state_vec.clone(),
-                                        (1, state_dim),
-                                        &candle_core::Device::Cpu,
-                                    ) {
-                                        Ok(t) => t,
-                                        Err(e) => {
-                                            error!("Worker 创建 state_tensor 失败: {e}");
-                                            break;
-                                        }
-                                    };
-
-                                    let active_policy =
-                                        if !has_opp_policy || agent_idx == main_agent_idx {
-                                            &main_policy
-                                        } else {
-                                            opp_policy_arc
-                                        };
-
-                                    let (encoded, log_prob, val) = match active_policy
-                                        .sample_action(&state_tensor, action_mask.as_deref())
-                                    {
-                                        Ok(res) => res,
-                                        Err(e) => {
-                                            error!("Worker 采样动作失败: {e}");
-                                            break;
-                                        }
-                                    };
-
-                                    let act = E::action_from_encoding(&encoded);
-                                    actions.push(act);
-                                    step_samples.push((
-                                        state_vec,
-                                        encoded,
-                                        log_prob,
-                                        val,
-                                        action_mask,
-                                    ));
-                                }
-                            }
-
-                            if actions.len() != current_obs.len() {
-                                break;
-                            }
-
-                            let step_results = env.step(&actions);
-                            let done = step_results.iter().any(|r| r.terminated || r.truncated);
-
-                            let primary_res = if has_opp_policy {
-                                step_results.get(main_agent_idx)
-                            } else {
-                                step_results.first()
-                            };
-
-                            if let Some(res) = primary_res {
-                                cur_return += res.reward;
-                                cur_steps += 1;
-                                if !res.reward_variables.is_empty() {
-                                    last_reward_variables = res.reward_variables.clone();
-                                }
-                                for item in &res.reward_breakdown {
-                                    *reward_breakdown.entry(item.name.clone()).or_insert(0.0) +=
-                                        item.value;
-                                }
-                            }
-
-                            // 若发生超时截断 (truncated)，在 env.reset() 前基于真实残局观测推断真实价值 V(s_T)
-                            let trunc_next_vals: Vec<Option<f32>> = step_results
-                                .iter()
-                                .enumerate()
-                                .map(|(idx, res)| {
-                                    if res.truncated {
-                                        let sv = E::obs_to_vector(&res.obs);
-                                        let active_policy =
-                                            if !has_opp_policy || idx == main_agent_idx {
-                                                &main_policy
-                                            } else {
-                                                opp_policy_arc
-                                            };
-                                        match Tensor::from_vec(
-                                            sv,
-                                            (1, state_dim),
-                                            &candle_core::Device::Cpu,
-                                        ) {
-                                            Ok(t) => active_policy
-                                                .get_values(&t)
-                                                .ok()
-                                                .and_then(|v| v.first().copied()),
-                                            Err(_) => None,
-                                        }
-                                    } else {
-                                        None
-                                    }
-                                })
-                                .collect();
-
-                            for (
-                                agent_idx,
-                                ((state_vec, encoded, log_prob, val, action_mask), res),
-                            ) in step_samples
-                                .into_iter()
-                                .zip(step_results.iter())
-                                .enumerate()
-                            {
-                                let trunc_val = trunc_next_vals.get(agent_idx).copied().flatten();
-                                if !has_opp_policy {
-                                    // 纯自博弈：双方样本均写入对应 buffer
-                                    if agent_idx < buffers.len() {
-                                        buffers[agent_idx].push_full(
-                                            state_vec,
-                                            encoded,
-                                            log_prob,
-                                            res.reward,
-                                            val,
-                                            res.terminated,
-                                            res.truncated,
-                                            trunc_val,
-                                            action_mask,
-                                        );
-                                    }
-                                } else if agent_idx == main_agent_idx {
-                                    // 对抗历史对手：仅主策略扮演的角色写入 buffers[0] 用于梯度更新
-                                    buffers[0].push_full(
-                                        state_vec,
-                                        encoded,
-                                        log_prob,
-                                        res.reward,
-                                        val,
-                                        res.terminated,
-                                        res.truncated,
-                                        trunc_val,
-                                        action_mask,
-                                    );
-                                }
-                            }
-
-                            if done {
-                                ep_returns.push(cur_return);
-                                completed_steps.push(cur_steps);
-                                cur_return = 0.0;
-                                cur_steps = 0;
-                                current_obs = env.reset();
-                            } else {
-                                current_obs = step_results.into_iter().map(|r| r.obs).collect();
-                            }
-                        }
-
-                        // 独立推断未完成轨迹的末尾价值 last_values
-                        let mut last_values = Vec::with_capacity(train_agent_count);
-                        if !has_opp_policy {
-                            for obs in &current_obs {
-                                let last_state_vec = E::obs_to_vector(obs);
-                                let last_val = match Tensor::from_vec(
-                                    last_state_vec,
-                                    (1, state_dim),
-                                    &candle_core::Device::Cpu,
-                                ) {
-                                    Ok(tensor) => main_policy
-                                        .get_values(&tensor)
-                                        .map(|v| v.first().copied().unwrap_or(0.0))
-                                        .unwrap_or(0.0),
-                                    Err(_) => 0.0,
-                                };
-                                last_values.push(last_val);
-                            }
-                        } else if let Some(obs) = current_obs.get(main_agent_idx) {
-                            let last_state_vec = E::obs_to_vector(obs);
-                            let last_val = match Tensor::from_vec(
-                                last_state_vec,
-                                (1, state_dim),
-                                &candle_core::Device::Cpu,
-                            ) {
-                                Ok(tensor) => main_policy
-                                    .get_values(&tensor)
-                                    .map(|v| v.first().copied().unwrap_or(0.0))
-                                    .unwrap_or(0.0),
-                                Err(_) => 0.0,
-                            };
-                            last_values.push(last_val);
-                        }
-
-                        let last_obs_primary = current_obs.first().cloned();
-
-                        let _ = resp_tx.send(WorkerTrajectory {
-                            buffers,
-                            last_values,
-                            ep_returns,
-                            completed_steps,
-                            reward_breakdown,
-                            last_reward_variables,
-                            last_obs: last_obs_primary,
-                        });
-                    }
-                    WorkerCommand::Stop => break,
-                }
-            }
-        });
-
-        cmd_senders.push(cmd_tx);
-        resp_receivers.push(resp_rx);
-        thread_handles.push(handle);
-    }
-
-    let mut total_steps = 0usize;
-    let mut recent_ep_returns: std::collections::VecDeque<f32> =
-        std::collections::VecDeque::with_capacity(50);
-    let mut recent_ep_steps: std::collections::VecDeque<usize> =
-        std::collections::VecDeque::with_capacity(50);
-
-    // 历史对手模型池（League Training / Policy Pool，防止策略循环与灾难性遗忘）
-    let mut opponent_pool: std::collections::VecDeque<Arc<crate::policy::ActorCritic>> =
-        std::collections::VecDeque::with_capacity(8);
+    // 2. 启动 TrainingSession（机制 A：同步 Rollout Worker 池 + PPOAgent，CPU 推理）
+    let mut session = TrainingSession::<E>::new(
+        agent,
+        num_parallel_envs,
+        state_dim,
+        rollout_steps,
+        candle_core::Device::Cpu,
+    );
+    let mut recent_ep_returns: VecDeque<f32> = VecDeque::with_capacity(50);
+    let mut recent_ep_steps: VecDeque<usize> = VecDeque::with_capacity(50);
 
     // 注册保存通道
     let (save_tx, mut save_rx) = mpsc::unbounded_channel::<SaveRequest>();
@@ -1015,10 +735,8 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment + 'static>(
 
         // 处理实时保存模型请求
         while let Ok(req) = save_rx.try_recv() {
-            persist_checkpoint(&task_id, req, &agent, &tasks, &repo, &event_tx);
+            persist_checkpoint(&task_id, req, &session.agent, &tasks, &repo, &event_tx);
         }
-
-        let iter_start = Instant::now();
 
         // 平滑余弦退火策略熵与学习率 (Cosine Schedule with Safe Entropy Floor)
         let progress = if total_iterations > 1 {
@@ -1028,115 +746,40 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment + 'static>(
         };
         let cos_progress = (1.0 + (std::f32::consts::PI * progress).cos()) * 0.5;
         let current_c2 = (0.015 + (0.05 - 0.015) * cos_progress).max(0.015);
-        agent.set_entropy_coef(current_c2);
-
         let initial_lr = task_config.lr as f64;
         let current_lr = (initial_lr * 0.1
             + (initial_lr - initial_lr * 0.1) * (cos_progress as f64))
             .max(initial_lr * 0.05);
-        let _ = agent.set_lr(current_lr);
 
-        // 1. 克隆 CPU 采样策略
-        let cpu_policy = match agent.actor_critic.to_device(&candle_core::Device::Cpu) {
-            Ok(p) => Arc::new(p),
+        // 3. 一次真实训练迭代（调度→克隆 CPU 策略→Worker Rollout→聚合→PPO 更新）
+        let outcome = match session.step_once(iter, current_lr, current_c2, tuned.train_batch_size)
+        {
+            Ok(o) => o,
             Err(e) => {
-                error!("迁移策略至 CPU 失败: {e}");
+                error!("训练迭代失败: {e}");
                 break;
             }
         };
 
-        let is_multi_agent = E::num_agents() > 1;
+        let total_steps = session.total_steps;
+        let num_samples = outcome.num_samples;
+        let sps = outcome.sps;
+        let stats = outcome.stats;
+        let mean_value = outcome.mean_value;
 
-        // 定期将策略快照存入历史对手池（仅多智能体自博弈环境启用，每 5 轮或第二轮开始）
-        if is_multi_agent && (iter % 5 == 0 || (iter == 2 && opponent_pool.is_empty())) {
-            if opponent_pool.len() >= 8 {
-                opponent_pool.pop_front();
+        // 回合回报/步数合并进近 50 轮滑动窗口
+        for ret in outcome.ep_returns {
+            if recent_ep_returns.len() >= 50 {
+                recent_ep_returns.pop_front();
             }
-            opponent_pool.push_back(cpu_policy.clone());
+            recent_ep_returns.push_back(ret);
         }
-
-        // 2. 触发持久化 Worker 并行采样 (多智能体自博弈: 75% 最新对抗最新，25% 历史对手双角色轮换；单智能体: 100% 最新主策略推演)
-        let opp_count = if is_multi_agent && !opponent_pool.is_empty() && num_parallel_envs > 1 {
-            (num_parallel_envs / 4).max(1)
-        } else {
-            0
-        };
-
-        use rand::seq::IndexedRandom;
-        let mut rng = rand::rng();
-        let pool_vec: Vec<_> = opponent_pool.iter().cloned().collect();
-
-        for (worker_idx, tx) in cmd_senders.iter().enumerate() {
-            let (opp_policy, main_agent_idx) = if worker_idx < opp_count {
-                let opp = pool_vec.choose(&mut rng).cloned();
-                // 双角色轮换：偶数 Worker 主策略扮演 Fiora (0)，奇数 Worker 主策略扮演 Riven (1)
-                let role = if worker_idx % 2 == 0 { 0 } else { 1 };
-                (opp, role)
-            } else {
-                (None, 0)
-            };
-            let _ = tx.send(WorkerCommand::Rollout {
-                main_policy: cpu_policy.clone(),
-                opponent_policy: opp_policy,
-                main_agent_idx,
-            });
+        for s in outcome.ep_steps {
+            if recent_ep_steps.len() >= 50 {
+                recent_ep_steps.pop_front();
+            }
+            recent_ep_steps.push_back(s);
         }
-
-        let mut env_buffers = Vec::with_capacity(num_parallel_envs * 2);
-        let mut last_values = Vec::with_capacity(num_parallel_envs * 2);
-        let mut completed_ep_steps = Vec::new();
-        let mut iter_reward_breakdown: HashMap<String, f32> = HashMap::new();
-        let mut last_reward_variables = HashMap::new();
-        let mut sample_obs: Option<E::Obs> = None;
-
-        for rx in &resp_receivers {
-            let traj = match rx.recv() {
-                Ok(t) => t,
-                Err(_) => break,
-            };
-
-            for ret in traj.ep_returns {
-                if recent_ep_returns.len() >= 50 {
-                    recent_ep_returns.pop_front();
-                }
-                recent_ep_returns.push_back(ret);
-            }
-            for s in &traj.completed_steps {
-                if recent_ep_steps.len() >= 50 {
-                    recent_ep_steps.pop_front();
-                }
-                recent_ep_steps.push_back(*s);
-            }
-            completed_ep_steps.extend(traj.completed_steps);
-            for (k, v) in traj.reward_breakdown {
-                *iter_reward_breakdown.entry(k).or_insert(0.0) += v;
-            }
-            if !traj.last_reward_variables.is_empty() {
-                last_reward_variables = traj.last_reward_variables;
-            }
-            if sample_obs.is_none() {
-                sample_obs = traj.last_obs;
-            }
-
-            env_buffers.extend(traj.buffers);
-            last_values.extend(traj.last_values);
-        }
-
-        let num_samples: usize = env_buffers.iter().map(|b| b.len()).sum();
-        total_steps += num_samples;
-
-        // 3. GPU Mini-Batch PPO 更新
-        let stats =
-            match agent.update_multi_buffer(&env_buffers, &last_values, tuned.train_batch_size) {
-                Ok(s) => s,
-                Err(e) => {
-                    error!("PPO update_multi_buffer 失败: {e}");
-                    break;
-                }
-            };
-
-        let elapsed_sec = iter_start.elapsed().as_secs_f64();
-        let sps = (num_samples as f64) / elapsed_sec.max(0.0001);
 
         let ep_return = if !recent_ep_returns.is_empty() {
             recent_ep_returns.iter().sum::<f32>() / recent_ep_returns.len() as f32
@@ -1156,20 +799,14 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment + 'static>(
             (0, 0, 0.0)
         };
 
-        let real_reward_breakdown: Vec<RewardItem> = iter_reward_breakdown
+        let real_reward_breakdown: Vec<RewardItem> = outcome
+            .reward_breakdown
             .into_iter()
             .map(|(k, v)| RewardItem {
                 name: k,
                 value: v / (num_samples as f32).max(1.0),
             })
             .collect();
-
-        let val_sum: f32 = env_buffers
-            .iter()
-            .map(|b| b.values.iter().sum::<f32>())
-            .sum();
-        let val_cnt: usize = env_buffers.iter().map(|b| b.values.len()).sum();
-        let mean_value = val_sum / (val_cnt as f32).max(1.0);
 
         {
             let mut t = tasks.blocking_lock();
@@ -1210,7 +847,7 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment + 'static>(
 
         let _ = block_on_db(repo.insert_metric(&task_id, &metric_row));
 
-        let obs_payload = sample_obs.as_ref().and_then(|o| E::obs_to_payload(o));
+        let obs_payload = outcome.last_obs.as_ref().and_then(|o| E::obs_to_payload(o));
 
         let reward_formula = E::reward_formula_spec();
 
@@ -1234,7 +871,7 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment + 'static>(
             reward_breakdown: real_reward_breakdown,
             obs_feature: obs_payload,
             reward_formula,
-            reward_variables: Some(last_reward_variables),
+            reward_variables: Some(outcome.last_reward_variables),
         };
 
         let _ = event_tx.send(out_metrics);
@@ -1252,7 +889,7 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment + 'static>(
                     path,
                     ep_return,
                 },
-                &agent,
+                &session.agent,
                 &tasks,
                 &repo,
                 &event_tx,
@@ -1286,12 +923,7 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment + 'static>(
     }
 
     // 关闭 Worker 线程池
-    for tx in cmd_senders {
-        let _ = tx.send(WorkerCommand::Stop);
-    }
-    for h in thread_handles {
-        let _ = h.join();
-    }
+    session.stop();
 
     // 4. 训练收敛：自动保存最终模型
     let ckpt_id = format!("ckpt-{}", final_saved_step);
@@ -1305,7 +937,7 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment + 'static>(
             path,
             ep_return: final_saved_return,
         },
-        &agent,
+        &session.agent,
         &tasks,
         &repo,
         &event_tx,

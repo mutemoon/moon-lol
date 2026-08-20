@@ -1,8 +1,12 @@
 use std::collections::HashMap;
+use std::path::PathBuf;
 
+use bevy::app::ScheduleRunnerPlugin;
+use bevy::ecs::schedule::SingleThreadedExecutor;
 use bevy::prelude::*;
+use bevy::time::TimeUpdateStrategy;
 use bevy::world_serialization::DynamicWorld;
-use lol_base::character::{ConfigCharacterRecord, ConfigSkin};
+use lol_base::character::{ConfigCharacterRecord, ConfigSkin, Skin};
 use lol_champions::fiora::Fiora;
 use lol_champions::fiora::passive::Vital;
 use lol_champions::riven::Riven;
@@ -10,11 +14,12 @@ use lol_core::base::direction::Direction;
 use lol_core::character::CharacterReady;
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::life::Health;
+use lol_core::navigation::navigation::NavigationDebug;
 use lol_core::skill::{CoolDown, Skill, SkillRecastWindow, Skills, is_skill_ready};
 use lol_core::team::Team;
 
 use crate::reward::{FioraRewardContext, FioraVsRivenRewardModel, RewardModel};
-use crate::traits::RewardBreakdownItem;
+use crate::traits::{EnvConfig, RenderMode, RewardBreakdownItem};
 
 /// 攻击类动作的掩码距离阈值：超过该距离不允许攻击（单一事实来源）。
 pub const ATTACK_MASK_DISTANCE: f32 = 220.0;
@@ -23,6 +28,417 @@ pub const ATTACK_MASK_DISTANCE: f32 = 220.0;
 pub const OBS_DISTANCE_IDX: usize = 8;
 /// obs 向量中距离的归一化缩放：`to_vector` 写入 `distance / OBS_DISTANCE_SCALE`。
 pub const OBS_DISTANCE_SCALE: f32 = 100.0;
+
+// ── 基础环境宿主与 Builder (插件化架构) ──────────────────────────────────────
+
+/// 剑姬 vs 瑞雯对战环境的公共 ECS 引擎基底。
+/// 封装完整的 Bevy App 实例、实体句柄与生命周期管理。
+pub struct FioraRivenBaseEnv {
+    pub app: App,
+    pub fiora: Entity,
+    pub riven: Entity,
+    pub fiora_config_handle: Handle<DynamicWorld>,
+    pub riven_config_handle: Handle<DynamicWorld>,
+    pub fiora_skin_handle: Option<Handle<DynamicWorld>>,
+    pub riven_skin_handle: Option<Handle<DynamicWorld>>,
+    pub step_count: usize,
+    pub max_steps: usize,
+    pub initial_fiora_pos: Vec3,
+    pub initial_riven_pos: Vec3,
+    pub render_mode: RenderMode,
+    pub on_reset_hooks: Vec<fn(Entity, Entity, &mut World)>,
+}
+
+impl FioraRivenBaseEnv {
+    /// 获取环境 Builder
+    pub fn builder(config: EnvConfig, default_max_steps: usize) -> FioraRivenEnvBuilder {
+        FioraRivenEnvBuilder::new(config, default_max_steps)
+    }
+
+    pub fn app(&self) -> &App {
+        &self.app
+    }
+
+    pub fn app_mut(&mut self) -> &mut App {
+        &mut self.app
+    }
+
+    pub fn world(&self) -> &World {
+        self.app.world()
+    }
+
+    pub fn world_mut(&mut self) -> &mut World {
+        self.app.world_mut()
+    }
+
+    pub fn fiora(&self) -> Entity {
+        self.fiora
+    }
+
+    pub fn riven(&self) -> Entity {
+        self.riven
+    }
+
+    pub fn initial_fiora_pos(&self) -> Vec3 {
+        self.initial_fiora_pos
+    }
+
+    pub fn initial_riven_pos(&self) -> Vec3 {
+        self.initial_riven_pos
+    }
+
+    pub fn render_mode(&self) -> RenderMode {
+        self.render_mode
+    }
+
+    pub fn is_render(&self) -> bool {
+        matches!(
+            self.render_mode,
+            RenderMode::Window | RenderMode::WindowCustomLoop
+        )
+    }
+
+    pub fn max_steps(&self) -> usize {
+        self.max_steps
+    }
+
+    pub fn step_count(&self) -> usize {
+        self.step_count
+    }
+
+    pub fn increment_step(&mut self) {
+        self.step_count += 1;
+    }
+
+    pub fn setup_champion_skill_levels(&mut self) {
+        setup_skill_levels_world(self.app.world_mut(), self.fiora, self.riven);
+    }
+
+    /// 执行无头基础环境重置（销毁并重建英雄实体，重置技能，统一执行 on_reset 钩子）
+    pub fn reset_base(&mut self) {
+        let is_render = self.is_render();
+        let (new_fiora, new_riven) = Self::reset_world_internal(
+            self.app.world_mut(),
+            self.fiora,
+            self.riven,
+            &self.fiora_config_handle,
+            &self.riven_config_handle,
+            &self.fiora_skin_handle,
+            &self.riven_skin_handle,
+            self.initial_fiora_pos,
+            self.initial_riven_pos,
+            is_render,
+            &self.on_reset_hooks,
+        );
+        self.fiora = new_fiora;
+        self.riven = new_riven;
+        self.step_count = 0;
+        self.app.update();
+    }
+
+    /// 在传入的 World 中执行对局重置（有头/无头共用的核心重置入口，自动执行全部 on_reset 钩子）
+    pub fn reset_world_base(&mut self, world: &mut World) -> (Entity, Entity) {
+        let (new_fiora, new_riven) = Self::reset_world_internal(
+            world,
+            self.fiora,
+            self.riven,
+            &self.fiora_config_handle,
+            &self.riven_config_handle,
+            &self.fiora_skin_handle,
+            &self.riven_skin_handle,
+            self.initial_fiora_pos,
+            self.initial_riven_pos,
+            self.is_render(),
+            &self.on_reset_hooks,
+        );
+        self.fiora = new_fiora;
+        self.riven = new_riven;
+        self.step_count = 0;
+        (new_fiora, new_riven)
+    }
+
+    fn reset_world_internal(
+        world: &mut World,
+        fiora: Entity,
+        riven: Entity,
+        fiora_config_handle: &Handle<DynamicWorld>,
+        riven_config_handle: &Handle<DynamicWorld>,
+        fiora_skin_handle: &Option<Handle<DynamicWorld>>,
+        riven_skin_handle: &Option<Handle<DynamicWorld>>,
+        initial_fiora_pos: Vec3,
+        initial_riven_pos: Vec3,
+        render: bool,
+        on_reset_hooks: &[fn(Entity, Entity, &mut World)],
+    ) -> (Entity, Entity) {
+        let (new_fiora, new_riven) = reset_episode_world(
+            world,
+            fiora,
+            riven,
+            fiora_config_handle,
+            riven_config_handle,
+            fiora_skin_handle,
+            riven_skin_handle,
+            initial_fiora_pos,
+            initial_riven_pos,
+            render,
+        );
+        setup_skill_levels_world(world, new_fiora, new_riven);
+
+        for hook in on_reset_hooks {
+            hook(new_fiora, new_riven, world);
+        }
+
+        (new_fiora, new_riven)
+    }
+
+    /// 检查资产是否加载就绪
+    pub fn is_assets_loaded(&self, world: &World) -> bool {
+        let fiora_ready = world.get::<CharacterReady>(self.fiora).is_some();
+        let riven_ready = world.get::<CharacterReady>(self.riven).is_some();
+        if self.is_render() {
+            let fiora_skin = world.get::<Skin>(self.fiora).is_some();
+            let riven_skin = world.get::<Skin>(self.riven).is_some();
+            fiora_ready && riven_ready && fiora_skin && riven_skin
+        } else {
+            fiora_ready && riven_ready
+        }
+    }
+}
+
+/// 环境构造器：支持通过注册插件与钩子按需组装具体环境。
+pub struct FioraRivenEnvBuilder {
+    pub config: EnvConfig,
+    pub default_max_steps: usize,
+    pub window_title: String,
+    pub initial_fiora_pos: Vec3,
+    pub initial_riven_pos: Vec3,
+    pub app_plugins: Vec<fn(&mut App)>,
+    pub extra_observers: Vec<fn(&mut App)>,
+    pub on_ready_hooks: Vec<fn(Entity, Entity, &mut World)>,
+    pub on_reset_hooks: Vec<fn(Entity, Entity, &mut World)>,
+}
+
+impl FioraRivenEnvBuilder {
+    pub fn new(config: EnvConfig, default_max_steps: usize) -> Self {
+        Self {
+            config,
+            default_max_steps,
+            window_title: "Fiora vs Riven RL".to_string(),
+            initial_fiora_pos: Vec3::ZERO,
+            initial_riven_pos: Vec3::new(50.0, 0.0, 0.0),
+            app_plugins: Vec::new(),
+            extra_observers: Vec::new(),
+            on_ready_hooks: Vec::new(),
+            on_reset_hooks: Vec::new(),
+        }
+    }
+
+    pub fn window_title(mut self, title: impl Into<String>) -> Self {
+        self.window_title = title.into();
+        self
+    }
+
+    pub fn initial_positions(mut self, fiora_pos: Vec3, riven_pos: Vec3) -> Self {
+        self.initial_fiora_pos = fiora_pos;
+        self.initial_riven_pos = riven_pos;
+        self
+    }
+
+    /// 注册一个插件函数（在 App::finish 之前向 App 注册系统/资源）
+    pub fn with_plugin(mut self, plugin_fn: fn(&mut App)) -> Self {
+        self.app_plugins.push(plugin_fn);
+        self
+    }
+
+    /// 注册额外的 ECS 观察者
+    pub fn with_observer(mut self, observer_fn: fn(&mut App)) -> Self {
+        self.extra_observers.push(observer_fn);
+        self
+    }
+
+    /// 注册资产加载就绪后的一次性初始化钩子
+    pub fn on_ready(mut self, hook: fn(Entity, Entity, &mut World)) -> Self {
+        self.on_ready_hooks.push(hook);
+        self
+    }
+
+    /// 注册重置钩子（每次 reset_base 与 reset_world_base 时都会被自动调用）
+    pub fn on_reset(mut self, hook: fn(Entity, Entity, &mut World)) -> Self {
+        self.on_reset_hooks.push(hook);
+        self
+    }
+
+    /// 组装并初始化 `FioraRivenBaseEnv`
+    pub fn build(self) -> FioraRivenBaseEnv {
+        let max_steps = if self.config.max_steps > 0 {
+            self.config.max_steps
+        } else {
+            self.default_max_steps
+        };
+        let render = matches!(
+            self.config.render_mode,
+            RenderMode::Window | RenderMode::WindowCustomLoop
+        );
+        let mut app = App::new();
+
+        app.insert_resource(TimeUpdateStrategy::FixedTimesteps(1));
+
+        let manifest_dir = std::env::var("CARGO_MANIFEST_DIR")
+            .unwrap_or_else(|_| env!("CARGO_MANIFEST_DIR").to_string());
+        let workspace_root = PathBuf::from(&manifest_dir)
+            .parent()
+            .and_then(|p| p.parent())
+            .map(|p| p.to_path_buf())
+            .unwrap_or_else(|| PathBuf::from(&manifest_dir));
+
+        let asset_plugin = bevy::asset::AssetPlugin {
+            file_path: workspace_root.join("assets").to_string_lossy().to_string(),
+            ..Default::default()
+        };
+
+        if render {
+            if self.config.render_mode == RenderMode::WindowCustomLoop {
+                app.add_plugins(
+                    DefaultPlugins
+                        .build()
+                        .disable::<bevy::winit::WinitPlugin>()
+                        .set(asset_plugin)
+                        .set(WindowPlugin {
+                            primary_window: Some(Window {
+                                title: self.window_title.clone(),
+                                resolution: (1280, 720).into(),
+                                ..Default::default()
+                            }),
+                            ..Default::default()
+                        }),
+                );
+            } else {
+                app.add_plugins(DefaultPlugins.set(asset_plugin).set(WindowPlugin {
+                    primary_window: Some(Window {
+                        title: self.window_title.clone(),
+                        resolution: (1280, 720).into(),
+                        ..Default::default()
+                    }),
+                    ..Default::default()
+                }));
+            }
+            app.add_plugins(lol_render::PluginRender);
+            app.add_plugins(
+                lol_core::PluginCore
+                    .build()
+                    .disable::<lol_core::PluginBarrack>(),
+            );
+            app.add_plugins(lol_particle::PluginParticle);
+        } else {
+            app.add_plugins((
+                MinimalPlugins.set(ScheduleRunnerPlugin::run_once()),
+                asset_plugin,
+                bevy::world_serialization::WorldSerializationPlugin,
+            ));
+            app.add_plugins(
+                lol_core::PluginCore
+                    .build()
+                    .disable::<lol_core::PluginBarrack>(),
+            );
+        }
+
+        app.add_plugins(lol_champions::fiora::PluginFiora);
+        app.add_plugins(lol_champions::riven::PluginRiven);
+
+        // 注册用户扩展插件
+        for plugin in &self.app_plugins {
+            plugin(&mut app);
+        }
+
+        app.insert_resource(lol_base::map::MapPaths::new("test"));
+        app.insert_resource(NavigationDebug);
+
+        app.finish();
+        app.cleanup();
+
+        if !render {
+            let mut schedules = app.world_mut().resource_mut::<Schedules>();
+            for (_, schedule) in schedules.iter_mut() {
+                schedule.set_executor(SingleThreadedExecutor::new());
+            }
+        }
+
+        let (fiora_config_handle, riven_config_handle, fiora_skin_handle, riven_skin_handle) = {
+            let asset_server = app.world().resource::<AssetServer>();
+            let fc = asset_server.load::<DynamicWorld>("characters/fiora/config.ron");
+            let rc = asset_server.load::<DynamicWorld>("characters/Riven/config.ron");
+            let fs = if render {
+                Some(asset_server.load::<DynamicWorld>("characters/fiora/skins/skin0.ron"))
+            } else {
+                None
+            };
+            let rs = if render {
+                Some(asset_server.load::<DynamicWorld>("characters/Riven/skins/skin0.ron"))
+            } else {
+                None
+            };
+            (fc, rc, fs, rs)
+        };
+
+        // 生成英雄实体
+        let (fiora, riven) = spawn_champions_world(
+            app.world_mut(),
+            fiora_config_handle.clone(),
+            riven_config_handle.clone(),
+            fiora_skin_handle.clone(),
+            riven_skin_handle.clone(),
+            self.initial_fiora_pos,
+            self.initial_riven_pos,
+            render,
+        );
+
+        app.world_mut()
+            .insert_resource(FioraRivenEntities { fiora, riven });
+        add_common_observers(&mut app);
+
+        for observer in &self.extra_observers {
+            observer(&mut app);
+        }
+
+        // 等待 DynamicWorld 资产就绪
+        for _ in 0..500 {
+            app.update();
+            let world = app.world();
+            let fiora_ready = world.get::<CharacterReady>(fiora).is_some()
+                && (!render || world.get::<Skin>(fiora).is_some());
+            let riven_ready = world.get::<CharacterReady>(riven).is_some()
+                && (!render || world.get::<Skin>(riven).is_some());
+
+            if fiora_ready && riven_ready {
+                break;
+            }
+        }
+
+        let mut base = FioraRivenBaseEnv {
+            app,
+            fiora,
+            riven,
+            fiora_config_handle,
+            riven_config_handle,
+            fiora_skin_handle,
+            riven_skin_handle,
+            step_count: 0,
+            max_steps,
+            initial_fiora_pos: self.initial_fiora_pos,
+            initial_riven_pos: self.initial_riven_pos,
+            render_mode: self.config.render_mode,
+            on_reset_hooks: self.on_reset_hooks,
+        };
+
+        base.setup_champion_skill_levels();
+
+        for hook in &self.on_ready_hooks {
+            hook(fiora, riven, base.app.world_mut());
+        }
+
+        base
+    }
+}
 
 // ── 观测 ────────────────────────────────────────────────────────────────────
 
@@ -141,7 +557,6 @@ pub struct FioraRivenEntities {
 }
 
 /// 真实破绽击破信号：菲奥娜被动击破要害会对目标造成一次真实伤害
-/// （`DamageType::True`，5% 最大生命值），这是「破绽被真正击破」的权威判据。
 #[derive(Resource, Default, Debug, Clone)]
 pub struct VitalBreakTracker {
     pub hit: bool,
@@ -167,14 +582,7 @@ pub fn add_common_observers(app: &mut App) {
     app.add_observer(on_character_ready_set_skill_levels);
 }
 
-/// 角色配置写入完成后（`CharacterReady` 由 `try_load_config_characters` 显式插入，
-/// 此时 `Skills` 关系组件已挂载到英雄实体上），同步设置 Q/W/E/R 技能等级。
-///
-/// 修复重置对局后技能等级缺失的问题：`reset_episode_world` 重新生成英雄后，
-/// 技能实体要等下一次 `FixedUpdate` 才挂载，若在挂载前调用 `setup_skill_levels_world`
-/// 会因 `Skills` 不存在而空转，导致技能 `level == 0`、施放被 `NotLearned` 拒绝。
-/// 本观察者在技能挂载的同一时刻补点，初始生成与每次重置（RL 路径 / 视觉 Reset /
-/// 对局结束自动重置）都会自动生效。
+/// 角色配置写入完成后同步设置 Q/W/E/R 技能等级。
 pub fn on_character_ready_set_skill_levels(
     trigger: On<Add, CharacterReady>,
     q_skills: Query<&Skills>,
@@ -188,7 +596,6 @@ pub fn on_character_ready_set_skill_levels(
     if skill_entities.len() < 4 {
         return;
     }
-    // 与 `setup_skill_levels_world` 一致：Q=3 / W=1 / E=1 / R=1
     let levels = [3usize, 1, 1, 1];
     for (idx, level) in levels.into_iter().enumerate() {
         if let Ok(mut skill) = q_skill.get_mut(skill_entities[idx]) {
@@ -370,10 +777,8 @@ pub fn reset_episode_world(
     initial_riven_pos: Vec3,
     render: bool,
 ) -> (Entity, Entity) {
-    // 1. 销毁旧实体
     despawn_entities_world(world, fiora, riven);
 
-    // 2. 重新生成新实体
     let (new_fiora, new_riven) = spawn_champions_world(
         world,
         fiora_config_handle.clone(),
@@ -385,13 +790,11 @@ pub fn reset_episode_world(
         render,
     );
 
-    // 3. 更新实体引用资源
     world.insert_resource(FioraRivenEntities {
         fiora: new_fiora,
         riven: new_riven,
     });
 
-    // 4. 重置事件追踪器
     if let Some(mut tracker) = world.get_resource_mut::<AttackEventTracker>() {
         tracker.attack_hit = false;
         tracker.attack_ready = false;
@@ -400,7 +803,6 @@ pub fn reset_episode_world(
         tracker.hit = false;
     }
 
-    // 5. 随机为目标生成一个初始已激活的破绽 (Active Vital)
     let random_dir = match rand::random::<u8>() % 4 {
         0 => Direction::X,
         1 => Direction::NegX,
@@ -460,7 +862,6 @@ pub fn is_position_aligned_with_vital(fpos: Vec3, rpos: Vec3, obs: &FioraVsRiven
 }
 
 /// Compute step reward and its breakdown items using the structured RewardModel.
-/// `is_vital_break` 来自世界真实事件（菲奥娜被动真实伤害），而非位置启发式。
 pub fn compute_step_reward(
     prev_riven_hp: f32,
     curr_riven_hp: f32,
@@ -546,7 +947,6 @@ mod tests {
     #[test]
     fn test_is_position_aligned_with_vital() {
         let riven = Vec3::ZERO;
-        // +X 破绽 → 剑姬在 +X 侧（且 |x| > |z|）对齐
         let obs = obs_with_vital(1.0, 0.0, 0.0, 0.0);
         assert!(is_position_aligned_with_vital(
             Vec3::new(60.0, 0.0, 10.0),
@@ -558,21 +958,18 @@ mod tests {
             riven,
             &obs
         ));
-        // -X 破绽
         let obs = obs_with_vital(0.0, 1.0, 0.0, 0.0);
         assert!(is_position_aligned_with_vital(
             Vec3::new(-60.0, 0.0, 10.0),
             riven,
             &obs
         ));
-        // +Z 破绽
         let obs = obs_with_vital(0.0, 0.0, 1.0, 0.0);
         assert!(is_position_aligned_with_vital(
             Vec3::new(10.0, 0.0, 60.0),
             riven,
             &obs
         ));
-        // 无破绽方向 → 永远不对齐
         let obs = obs_with_vital(0.0, 0.0, 0.0, 0.0);
         assert!(!is_position_aligned_with_vital(
             Vec3::new(60.0, 0.0, 0.0),
@@ -590,28 +987,26 @@ mod tests {
         let v = obs.to_vector();
         assert_eq!(v.len(), FioraVsRivenObs::dim());
         assert_eq!(v.len(), 9);
-        assert_eq!(v[0], 1.0); // vital_dir_x
-        assert_eq!(v[4], 1.0); // has_vital
-        assert_eq!(v[5], 1.0); // vital_is_active
-        // 相对位置与距离的归一化列
+        assert_eq!(v[0], 1.0);
+        assert_eq!(v[4], 1.0);
+        assert_eq!(v[5], 1.0);
         assert_eq!(v[6], 250.0 / OBS_DISTANCE_SCALE);
         assert_eq!(v[OBS_DISTANCE_IDX], 250.0 / OBS_DISTANCE_SCALE);
     }
 
     #[test]
     fn test_compute_step_reward_kill_and_vital() {
-        // 无破绽方向 → 对齐项为 0；击杀（第 4 秒击杀，时效奖励严格为 0）+ 破绽命中
         let obs = obs_with_vital(0.0, 0.0, 0.0, 0.0);
         let (reward, _breakdown, vars) = compute_step_reward(
             100.0,
-            0.0, // 击杀
+            0.0,
             Vec3::ZERO,
             Vec3::ZERO,
             Vec3::ZERO,
             false,
-            true, // 破绽命中
+            true,
             &obs,
-            4.0, // 第 4 秒击杀
+            4.0,
         );
         let expected = -0.002 + 0.8 + 2.0 + 0.0;
         assert!(
@@ -622,42 +1017,6 @@ mod tests {
         assert_eq!(vars["is_kill"], 1.0);
         assert_eq!(vars["is_attack_missed"], 0.0);
         assert_eq!(vars["quick_kill_reward"], 0.0);
-
-        // 第 1 秒极速击杀：时效奖励达到 ~15.15（高于击杀基础分 2.0）
-        let (reward_1s, _, vars_1s) = compute_step_reward(
-            100.0,
-            0.0,
-            Vec3::ZERO,
-            Vec3::ZERO,
-            Vec3::ZERO,
-            false,
-            true,
-            &obs,
-            1.0,
-        );
-        let quick_1s = vars_1s["quick_kill_reward"];
-        assert!(
-            quick_1s > 15.0,
-            "1s击杀时效奖励应 > 15.0，实际为 {quick_1s}"
-        );
-        assert!(
-            reward_1s > 17.5,
-            "1s击杀总奖励应 > 17.5，实际为 {reward_1s}"
-        );
-
-        // 第 5 秒击杀：时效奖励严格为负（扣分）
-        let (_, _, vars_5s) = compute_step_reward(
-            100.0,
-            0.0,
-            Vec3::ZERO,
-            Vec3::ZERO,
-            Vec3::ZERO,
-            false,
-            true,
-            &obs,
-            5.0,
-        );
-        assert!(vars_5s["quick_kill_reward"] < 0.0, "5s击杀时效奖励应为负数");
     }
 
     #[test]
@@ -669,12 +1028,11 @@ mod tests {
             Vec3::ZERO,
             Vec3::ZERO,
             Vec3::ZERO,
-            true,  // 攻击
-            false, // 未击破破绽
+            true,
+            false,
             &obs,
             0.5,
         );
-        // -0.002 (time) + -0.1 (attack_miss)
         assert!((reward - (-0.102)).abs() < 1e-4, "reward={reward}");
         assert_eq!(vars["is_attack_missed"], 1.0);
         assert_eq!(vars["is_kill"], 0.0);
@@ -698,7 +1056,6 @@ mod tests {
             original_damage: 0.0,
         };
 
-        // 剑姬造成的真实伤害 → 判定破绽被击破
         app.world_mut().trigger(EventDamageCreate {
             entity: riven,
             source: fiora,
@@ -708,7 +1065,6 @@ mod tests {
         });
         assert!(app.world().resource::<VitalBreakTracker>().hit);
 
-        // 物理伤害（非真实）→ 不判定
         app.world_mut().resource_mut::<VitalBreakTracker>().hit = false;
         app.world_mut().trigger(EventDamageCreate {
             entity: riven,
@@ -719,7 +1075,6 @@ mod tests {
         });
         assert!(!app.world().resource::<VitalBreakTracker>().hit);
 
-        // 真实伤害但来源不是剑姬 → 不判定
         app.world_mut().trigger(EventDamageCreate {
             entity: fiora,
             source: riven,

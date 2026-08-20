@@ -219,6 +219,18 @@ pub trait VisualEnvironment: RlEnvironment {
     fn is_assets_loaded(&self, world: &World) -> bool;
     fn on_assets_loaded(&mut self, world: &mut World);
     fn reset_world(&mut self, world: &mut World) -> Vec<Self::Obs>;
+
+    /// 回合起点不变量对齐：每次「实体已重建、即将开始新对局」时统一调用，
+    /// 保证第一次构造与每次 reset 的初始状态语义完全一致（headless / visual 共用）。
+    ///
+    /// 默认实现不做任何对齐（实体生成时即为就绪态）；需要补技能等级、
+    /// 冷却复位、固定血量等回合起点状态的环境在此覆盖。
+    ///
+    /// **单一事实来源**：headless `RlEnvironment::reset`、无头构造路径与
+    /// `reset_world` 都应调用此方法，避免各 reset 配方各自手写导致漏项
+    /// （例如可视化 reset 重建实体后丢失 FlashCooldown 导致闪现永远无冷却）。
+    fn on_episode_ready(&mut self, _world: &mut World) {}
+
     fn get_current_obs_all(&self, world: &World) -> Vec<Self::Obs>;
     fn get_current_obs(&self, world: &World) -> Self::Obs {
         self.get_current_obs_all(world)

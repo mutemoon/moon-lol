@@ -64,6 +64,12 @@ fn start_visual_runner_for_env<E: VisualEnvironment>(
     println!(">>> 正在启动 {display_name} 可视化环境 (Port: {port})...");
 
     let device = select_device()?;
+    let device_desc = match &device {
+        candle_core::Device::Cpu => "CPU (单步微秒级低延迟模式)".to_string(),
+        candle_core::Device::Cuda(c) => format!("CUDA ({:?})", c.ordinal()),
+        candle_core::Device::Metal(_) => "Metal".to_string(),
+    };
+    println!(">>> 推理设备: {device_desc}");
     let config = PPOConfig::default();
     let state_dim = E::state_dim();
     let action_space = E::action_space();

@@ -6,6 +6,7 @@
 
 use std::sync::mpsc::{Receiver, Sender};
 use std::sync::{Arc, Mutex};
+use std::time::{Duration, Instant};
 
 use bevy::prelude::*;
 use bevy::window::{PrimaryWindow, RawHandleWrapper, WindowWrapper};
@@ -21,6 +22,10 @@ use crate::traits::{RewardBreakdownItem, VisualEnvironment};
 /// 可视化窗口逻辑分辨率（与 env 的 bevy Window resolution 一致，用于把物理鼠标坐标归一化为逻辑视口坐标）。
 const VIEWPORT_W: f32 = 1280.0;
 const VIEWPORT_H: f32 = 720.0;
+
+/// 可视化环境渲染目标帧率（锁定 60 FPS 供 OBS 稳定捕获并杜绝 CPU 100% 满载）
+const TARGET_FPS: u64 = 60;
+const FRAME_DURATION: Duration = Duration::from_nanos(1_000_000_000 / TARGET_FPS);
 
 // ── Public types (WS-agnostic) ──────────────────────────────────────────────
 
@@ -103,6 +108,7 @@ struct CustomVisualRunner<E: VisualEnvironment> {
     window_size: Option<Vec2>,
     cursor_pos: Option<Vec2>,
     pending_click: Option<Vec2>,
+    next_frame_time: Instant,
 }
 
 impl<E: VisualEnvironment> ApplicationHandler for CustomVisualRunner<E> {
@@ -167,9 +173,18 @@ impl<E: VisualEnvironment> ApplicationHandler for CustomVisualRunner<E> {
     }
 
     fn about_to_wait(&mut self, event_loop: &ActiveEventLoop) {
-        event_loop.set_control_flow(ControlFlow::Poll);
+        let now = Instant::now();
 
-        // 1. Process commands from external driver
+        // 1. 节拍控制：未到目标 60 FPS 时间点时通知操作系统休眠，彻底消除 CPU 100% 空转
+        if now < self.next_frame_time {
+            event_loop.set_control_flow(ControlFlow::WaitUntil(self.next_frame_time));
+            return;
+        }
+
+        // 2. 规划下一个 16.666ms 周期，防止时间累积漂移
+        self.next_frame_time = (self.next_frame_time + FRAME_DURATION).max(now + FRAME_DURATION);
+
+        // 3. Process commands from external driver
         while let Ok(cmd) = self.cmd_rx.try_recv() {
             match cmd {
                 VisualRunnerCmd::Pause => {
@@ -240,7 +255,7 @@ impl<E: VisualEnvironment> ApplicationHandler for CustomVisualRunner<E> {
             }
         }
 
-        // 2. Asset loading wait (with fallback timeout)
+        // 4. Asset loading wait (with fallback timeout)
         if !self.assets_loaded {
             self.load_wait_frames += 1;
             if self.env.is_assets_loaded(self.app.world()) || self.load_wait_frames >= 60 {
@@ -270,10 +285,11 @@ impl<E: VisualEnvironment> ApplicationHandler for CustomVisualRunner<E> {
             }
 
             self.app.update();
+            event_loop.set_control_flow(ControlFlow::WaitUntil(self.next_frame_time));
             return;
         }
 
-        // 2.5 鼠标点击 → 手动 step action（仅暂停时生效；点击在窗口插件内消费，不经过 Controller/on_click_map 移动管线）
+        // 5. 鼠标点击 → 手动 step action（仅暂停时生效；点击在窗口插件内消费，不经过 Controller/on_click_map 移动管线）
         if self.paused {
             if let Some(screen_pos) = self.pending_click.take() {
                 if let Some(action) = self
@@ -288,7 +304,7 @@ impl<E: VisualEnvironment> ApplicationHandler for CustomVisualRunner<E> {
             self.pending_click = None;
         }
 
-        // 3. Determine if an RL step should execute
+        // 6. Determine if an RL step should execute
         let should_step = if self.paused {
             if self.pending_step_once {
                 self.pending_step_once = false;
@@ -386,10 +402,13 @@ impl<E: VisualEnvironment> ApplicationHandler for CustomVisualRunner<E> {
             self.app.update();
         } else {
             // Paused: ensure Time<Virtual> is paused so FixedUpdate tick does 0 simulation
-            // progress, but app.update() still renders the frame
+            // progress, but app.update() still renders the frame (持续以 60 FPS 提交 SwapChain Present 供 OBS 后台捕获)
             pause_virtual_time(self.app.world_mut());
             self.app.update();
         }
+
+        // 7. 设置下一次 60 FPS 唤醒
+        event_loop.set_control_flow(ControlFlow::WaitUntil(self.next_frame_time));
     }
 }
 
@@ -432,6 +451,7 @@ pub fn run_visual_env<E, F>(
             window_size: None,
             cursor_pos: None,
             pending_click: None,
+            next_frame_time: Instant::now(),
         };
 
         let _ = event_loop.run_app(&mut runner);

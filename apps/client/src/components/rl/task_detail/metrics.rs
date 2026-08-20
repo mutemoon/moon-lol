@@ -126,8 +126,9 @@ fn sample_rows(rows: &[MetricsRow]) -> Vec<MetricsRow> {
     out
 }
 
-/// 带 EMA 平滑值的单点（alpha 越大越贴原始线）。
+/// 带 EMA 平滑值的单点（alpha 越大越贴原始线）；episode 为该迭代对应的轮次（1 起）。
 struct MetricPoint {
+    episode: usize,
     row: MetricsRow,
     ema: f64,
 }
@@ -140,7 +141,8 @@ fn to_metric_points(
     let mut ema = 0.0f64;
     let mut initialized = false;
     rows.iter()
-        .map(|r| {
+        .enumerate()
+        .map(|(i, r)| {
             let v = y(r);
             if initialized {
                 ema = alpha * v + (1.0 - alpha) * ema;
@@ -149,6 +151,7 @@ fn to_metric_points(
                 initialized = true;
             }
             MetricPoint {
+                episode: i + 1,
                 row: r.clone(),
                 ema,
             }
@@ -156,7 +159,24 @@ fn to_metric_points(
         .collect()
 }
 
-/// 单指标折线图卡片（x=step，y=指标值），原始线叠加 EMA 平滑线；hline 为 y 参考横线。
+/// x 轴数据点包装：episode 为轮次（1 起），row 为原始指标行。
+struct DataPoint<T> {
+    episode: usize,
+    row: T,
+}
+
+/// 把指标行序列包装成带轮次序号的点（每迭代一行 = 一局训练）。
+fn to_data_points<T: Clone>(rows: &[T]) -> Vec<DataPoint<T>> {
+    rows.iter()
+        .enumerate()
+        .map(|(i, r)| DataPoint {
+            episode: i + 1,
+            row: r.clone(),
+        })
+        .collect()
+}
+
+/// 单指标折线图卡片（x=轮次，y=指标值），原始线叠加 EMA 平滑线；hline 为 y 参考横线。
 fn metric_chart(
     title: impl IntoElement,
     chart_id: &'static str,
@@ -169,7 +189,7 @@ fn metric_chart(
     let pts = to_metric_points(rows, &y_fn, 0.2);
     let mut chart = MultiLineChart::new(pts)
         .id(chart_id)
-        .x(|p| p.row.step)
+        .x(|p| p.episode)
         .tick_margin((rows.len() / 8).max(1))
         .series("原始", stroke, move |p| y_fn(&p.row))
         .series("EMA", stroke.opacity(0.4), move |p| p.ema);
@@ -216,13 +236,13 @@ fn loss_breakdown_chart(rows: &[MetricsRow], cx: &Context<AppSidebar>) -> AnyEle
                 .border_color(cx.theme().border)
                 .p_2()
                 .child(
-                    MultiLineChart::new(rows.to_vec())
+                    MultiLineChart::new(to_data_points(rows))
                         .id("chart-loss-breakdown")
-                        .x(|r| r.step)
+                        .x(|p| p.episode)
                         .tick_margin((rows.len() / 8).max(1))
-                        .series("policy", color_policy, |r| r.policy_loss as f64)
-                        .series("value", color_value, |r| r.value_loss as f64)
-                        .series("total", color_total, |r| r.total_loss as f64),
+                        .series("policy", color_policy, |p| p.row.policy_loss as f64)
+                        .series("value", color_value, |p| p.row.value_loss as f64)
+                        .series("total", color_total, |p| p.row.total_loss as f64),
                 ),
         )
         .into_any_element()
@@ -248,14 +268,16 @@ fn reward_breakdown_chart(rows: &[MetricsRow], cx: &Context<AppSidebar>) -> AnyE
         hsla(340.0 / 360.0, 0.85, 0.6, 1.0),  // 洋红/粉红
         hsla(250.0 / 360.0, 0.85, 0.65, 1.0), // 靛蓝
     ];
-    let mut chart = MultiLineChart::new(rows.to_vec())
+    let mut chart = MultiLineChart::new(to_data_points(rows))
         .id("chart-reward-breakdown")
-        .x(|r| r.step)
+        .x(|p| p.episode)
         .tick_margin((rows.len() / 8).max(1));
     for (i, term) in terms.iter().enumerate() {
         let t = term.clone();
         let label = short_label(&t).to_string();
-        chart = chart.series(label, colors[i % colors.len()], move |r| term_value(r, &t));
+        chart = chart.series(label, colors[i % colors.len()], move |p| {
+            term_value(&p.row, &t)
+        });
     }
     v_flex()
         .gap_2()
@@ -323,13 +345,13 @@ fn ep_steps_chart(rows: &[MetricsRow], cx: &Context<AppSidebar>) -> AnyElement {
                 .border_color(cx.theme().border)
                 .p_2()
                 .child(
-                    MultiLineChart::new(rows.to_vec())
+                    MultiLineChart::new(to_data_points(rows))
                         .id("chart-ep-steps")
-                        .x(|r| r.step)
+                        .x(|p| p.episode)
                         .tick_margin((rows.len() / 8).max(1))
-                        .series("最大步数", color_max, |r| r.ep_steps_max as f64)
-                        .series("最小步数", color_min, |r| r.ep_steps_min as f64)
-                        .series("平均步数", color_avg, |r| r.ep_steps_avg as f64),
+                        .series("最大步数", color_max, |p| p.row.ep_steps_max as f64)
+                        .series("最小步数", color_min, |p| p.row.ep_steps_min as f64)
+                        .series("平均步数", color_avg, |p| p.row.ep_steps_avg as f64),
                 ),
         )
         .into_any_element()
@@ -359,11 +381,13 @@ fn perf_section(rows: &[MetricsRow], cx: &Context<AppSidebar>) -> AnyElement {
                 .border_color(cx.theme().border)
                 .p_2()
                 .child(
-                    MultiLineChart::new(rows.to_vec())
+                    MultiLineChart::new(to_data_points(rows))
                         .id("chart-fps")
-                        .x(|r| r.step)
+                        .x(|p| p.episode)
                         .tick_margin((rows.len() / 8).max(1))
-                        .series("SPS", hsla(185.0 / 360.0, 0.85, 0.5, 1.0), |r| r.fps as f64),
+                        .series("SPS", hsla(185.0 / 360.0, 0.85, 0.5, 1.0), |p| {
+                            p.row.fps as f64
+                        }),
                 ),
         )
         .into_any_element()
@@ -393,7 +417,7 @@ struct HLine {
     color: Hsla,
 }
 
-/// 多线折线图：单图叠加多条 y 线，共享数值 x 轴（step）与 y 量纲（从 0 起）。
+/// 多线折线图：单图叠加多条 y 线，共享数值 x 轴（训练轮次）与 y 量纲（从 0 起）。
 #[derive(IntoPlot)]
 struct MultiLineChart<T>
 where

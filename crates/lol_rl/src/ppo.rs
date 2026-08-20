@@ -236,6 +236,11 @@ impl PPOAgent {
         &self.device
     }
 
+    /// 当前学习率（用于训练循环中的退火调度）。
+    pub fn lr(&self) -> f64 {
+        self.config.lr
+    }
+
     pub fn set_entropy_coef(&mut self, c2: f32) {
         self.config.c2 = c2;
     }
@@ -751,8 +756,13 @@ impl PPOAgent {
             });
         }
 
-        let state_dim = buffers[0].states[0].len();
-        let enc_dim = buffers[0].actions[0].len();
+        // 取第一个非空 buffer 推断维度（首个 buffer 可能因 Worker 异常为空）
+        let first_non_empty = buffers
+            .iter()
+            .find(|b| !b.is_empty())
+            .expect("total_n>0 必有非空 buffer");
+        let state_dim = first_non_empty.states[0].len();
+        let enc_dim = first_non_empty.actions[0].len();
 
         let mask_dim = buffers
             .iter()

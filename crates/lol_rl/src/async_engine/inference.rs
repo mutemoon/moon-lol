@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::thread::{self, JoinHandle};
@@ -13,6 +14,8 @@ pub struct InferenceRequest {
     pub worker_id: usize,
     pub obs_vec: Vec<f32>,
     pub action_mask: Option<Vec<bool>>,
+    /// 策略槽位：0 = 当前训练权重，>=1 = 历史对手快照（由 opponents 表提供）。
+    pub policy_slot: usize,
     pub reply_tx: Sender<InferenceResponse>,
 }
 
@@ -25,7 +28,8 @@ pub struct InferenceResponse {
 
 pub struct InferenceServer {
     pub req_tx: Sender<InferenceRequest>,
-    pub model_tx: Sender<ActorCritic>,
+    /// 更新策略槽位：(slot, 新权重)。slot 0 为当前主策略，slot>0 为历史对手。
+    pub model_tx: Sender<(usize, ActorCritic)>,
     is_running: Arc<AtomicBool>,
     handle: Option<JoinHandle<()>>,
 }
@@ -39,12 +43,13 @@ impl InferenceServer {
         device: Device,
     ) -> Self {
         let (req_tx, req_rx) = unbounded::<InferenceRequest>();
-        let (model_tx, model_rx) = unbounded::<ActorCritic>();
+        let (model_tx, model_rx) = unbounded::<(usize, ActorCritic)>();
         let is_running = Arc::new(AtomicBool::new(true));
         let running_clone = is_running.clone();
 
         let handle = thread::spawn(move || {
             let mut current_ac = initial_ac;
+            let mut opponents: HashMap<usize, ActorCritic> = HashMap::new();
             let timeout = Duration::from_micros(timeout_us);
             let mut batch_reqs = Vec::with_capacity(max_batch_size);
 
@@ -54,10 +59,15 @@ impl InferenceServer {
             );
 
             while running_clone.load(Ordering::Relaxed) {
-                // 1. 检查是否有模型权重更新
-                while let Ok(new_ac) = model_rx.try_recv() {
-                    current_ac = new_ac;
-                    debug!("🔄 [InferenceServer] 已同步最新模型权重");
+                // 1. 检查是否有策略权重更新（slot 0 主策略 / slot>0 历史对手）
+                while let Ok((slot, new_ac)) = model_rx.try_recv() {
+                    if slot == 0 {
+                        current_ac = new_ac;
+                        debug!("🔄 [InferenceServer] 已同步最新模型权重 (slot 0)");
+                    } else {
+                        opponents.insert(slot, new_ac);
+                        debug!("🔄 [InferenceServer] 已注册历史对手 (slot {slot})");
+                    }
                 }
 
                 // 2. 阻塞等待第一个请求
@@ -91,45 +101,86 @@ impl InferenceServer {
                     continue;
                 }
 
-                // 4. 组装输入 Tensor (batch_len, state_dim) 与 Masks
-                let mut flat_states = Vec::with_capacity(batch_len * state_dim);
-                let mut masks = Vec::with_capacity(batch_len);
-                for req in &batch_reqs {
-                    flat_states.extend_from_slice(&req.obs_vec);
-                    masks.push(req.action_mask.clone());
+                // 4. 按策略槽位分组：同一槽位的一批请求用同一策略一次前向
+                //    slot 0 用当前主策略，slot>0 用对应的历史对手策略。
+                let mut by_slot: HashMap<usize, Vec<usize>> = HashMap::new();
+                for (i, req) in batch_reqs.iter().enumerate() {
+                    by_slot.entry(req.policy_slot).or_default().push(i);
                 }
 
-                let state_tensor =
-                    match Tensor::from_vec(flat_states, (batch_len, state_dim), &device) {
-                        Ok(t) => t,
-                        Err(e) => {
-                            error!("创建推理 Tensor 失败: {e}");
-                            continue;
+                // 取走请求（后面按 slot 回填结果）
+                let taken: Vec<_> = batch_reqs.drain(..).collect();
+
+                let mut results: Vec<Option<InferenceResponse>> = vec![None; taken.len()];
+                let mut any_error = false;
+
+                for (slot, idxs) in &by_slot {
+                    // 选定本组策略
+                    let policy = if *slot == 0 {
+                        &current_ac
+                    } else {
+                        match opponents.get(slot) {
+                            Some(p) => p,
+                            None => {
+                                // 对手槽位尚未注册：退化为当前主策略
+                                error!("策略槽位 {slot} 未注册，退化为当前主策略");
+                                &current_ac
+                            }
                         }
                     };
 
-                // 5. 批量前向推理
-                let has_any_mask = masks.iter().any(|m| m.is_some());
-                let masks_ref = if has_any_mask {
-                    Some(masks.as_slice())
-                } else {
-                    None
-                };
-                let sample_res = current_ac.sample_batch(&state_tensor, masks_ref);
-                match sample_res {
-                    Ok(results) => {
-                        for (i, req) in batch_reqs.drain(..).enumerate() {
-                            let (encoded_action, log_prob, value) = &results[i];
-                            let _ = req.reply_tx.send(InferenceResponse {
-                                encoded_action: encoded_action.clone(),
-                                log_prob: *log_prob,
-                                value: *value,
-                            });
+                    // 组装本组输入
+                    let mut flat_states = Vec::with_capacity(idxs.len() * state_dim);
+                    let mut masks = Vec::with_capacity(idxs.len());
+                    for &i in idxs {
+                        flat_states.extend_from_slice(&taken[i].obs_vec);
+                        masks.push(taken[i].action_mask.clone());
+                    }
+
+                    let state_tensor =
+                        match Tensor::from_vec(flat_states, (idxs.len(), state_dim), &device) {
+                            Ok(t) => t,
+                            Err(e) => {
+                                error!("创建推理 Tensor 失败: {e}");
+                                any_error = true;
+                                continue;
+                            }
+                        };
+
+                    let has_any_mask = masks.iter().any(|m| m.is_some());
+                    let masks_ref = if has_any_mask {
+                        Some(masks.as_slice())
+                    } else {
+                        None
+                    };
+
+                    match policy.sample_batch(&state_tensor, masks_ref) {
+                        Ok(samples) => {
+                            for (&i, (encoded_action, log_prob, value)) in
+                                idxs.iter().zip(samples.into_iter())
+                            {
+                                results[i] = Some(InferenceResponse {
+                                    encoded_action,
+                                    log_prob,
+                                    value,
+                                });
+                            }
+                        }
+                        Err(e) => {
+                            error!("批量推理失败: {e}");
+                            any_error = true;
                         }
                     }
-                    Err(e) => {
-                        error!("批量推理失败: {e}");
-                        batch_reqs.clear();
+                }
+
+                if any_error {
+                    continue;
+                }
+
+                // 5. 回填响应
+                for (req, res) in taken.into_iter().zip(results.into_iter()) {
+                    if let Some(res) = res {
+                        let _ = req.reply_tx.send(res);
                     }
                 }
             }
