@@ -20,7 +20,7 @@ fn main() -> anyhow::Result<()> {
         .with_env_filter(
             tracing_subscriber::EnvFilter::try_from_default_env().unwrap_or_else(|_| {
                 tracing_subscriber::EnvFilter::new(
-                    "warn,lol_rl=info,lol_rl_protocol=info,lol_rl_visual=info",
+                    "warn,lol_rl=info,lol_env=info,lol_rl_protocol=info,lol_rl_visual=info",
                 )
             }),
         )

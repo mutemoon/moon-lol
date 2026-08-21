@@ -89,6 +89,31 @@ pub fn unpause_virtual_time(world: &mut World) {
 
 // ── Custom winit runner ─────────────────────────────────────────────────────
 
+#[derive(Debug)]
+struct VisualRunnerMetrics {
+    last_log: Instant,
+    frame_count: u32,
+    step_count: u32,
+    total_update_duration: Duration,
+    max_update_duration: Duration,
+    total_step_duration: Duration,
+    max_step_duration: Duration,
+}
+
+impl Default for VisualRunnerMetrics {
+    fn default() -> Self {
+        Self {
+            last_log: Instant::now(),
+            frame_count: 0,
+            step_count: 0,
+            total_update_duration: Duration::ZERO,
+            max_update_duration: Duration::ZERO,
+            total_step_duration: Duration::ZERO,
+            max_step_duration: Duration::ZERO,
+        }
+    }
+}
+
 struct CustomVisualRunner<E: VisualEnvironment> {
     app: App,
     env: E,
@@ -109,6 +134,7 @@ struct CustomVisualRunner<E: VisualEnvironment> {
     cursor_pos: Option<Vec2>,
     pending_click: Option<Vec2>,
     next_frame_time: Instant,
+    metrics: VisualRunnerMetrics,
 }
 
 impl<E: VisualEnvironment> ApplicationHandler for CustomVisualRunner<E> {
@@ -332,7 +358,14 @@ impl<E: VisualEnvironment> ApplicationHandler for CustomVisualRunner<E> {
                 actions.push(chosen);
             }
 
+            let step_start = Instant::now();
             let step_results = self.env.step_world(&mut self.app, &actions);
+            let step_duration = step_start.elapsed();
+
+            self.metrics.step_count += 1;
+            self.metrics.total_step_duration += step_duration;
+            self.metrics.max_step_duration = self.metrics.max_step_duration.max(step_duration);
+
             let step_result = step_results
                 .into_iter()
                 .next()
@@ -399,15 +432,63 @@ impl<E: VisualEnvironment> ApplicationHandler for CustomVisualRunner<E> {
                 pause_virtual_time(self.app.world_mut());
             }
 
+            let update_start = Instant::now();
             self.app.update();
+            let update_duration = update_start.elapsed();
+
+            self.metrics.frame_count += 1;
+            self.metrics.total_update_duration += update_duration;
+            self.metrics.max_update_duration =
+                self.metrics.max_update_duration.max(update_duration);
         } else {
             // Paused: ensure Time<Virtual> is paused so FixedUpdate tick does 0 simulation
             // progress, but app.update() still renders the frame (持续以 60 FPS 提交 SwapChain Present 供 OBS 后台捕获)
             pause_virtual_time(self.app.world_mut());
+
+            let update_start = Instant::now();
             self.app.update();
+            let update_duration = update_start.elapsed();
+
+            self.metrics.frame_count += 1;
+            self.metrics.total_update_duration += update_duration;
+            self.metrics.max_update_duration =
+                self.metrics.max_update_duration.max(update_duration);
         }
 
-        // 7. 设置下一次 60 FPS 唤醒
+        // 7. 每秒输出 Visual Runner 性能指标 (FPS / update 耗时 / SPS / step 耗时)
+        if self.metrics.last_log.elapsed() >= Duration::from_secs(1) {
+            let elapsed_secs = self.metrics.last_log.elapsed().as_secs_f64();
+            let frames = self.metrics.frame_count.max(1) as f64;
+            let steps = self.metrics.step_count as f64;
+            let fps = frames / elapsed_secs;
+            let sps = steps / elapsed_secs;
+
+            let avg_update_ms =
+                (self.metrics.total_update_duration.as_secs_f64() * 1000.0) / frames;
+            let max_update_ms = self.metrics.max_update_duration.as_secs_f64() * 1000.0;
+
+            let avg_step_ms = if self.metrics.step_count > 0 {
+                (self.metrics.total_step_duration.as_secs_f64() * 1000.0) / steps
+            } else {
+                0.0
+            };
+            let max_step_ms = self.metrics.max_step_duration.as_secs_f64() * 1000.0;
+
+            info!(
+                "[VISUAL-RUNNER] FPS: {:.1} (update 均: {:.2}ms, 峰: {:.2}ms) | SPS: {:.1} (step 均: {:.2}ms, 峰: {:.2}ms)",
+                fps, avg_update_ms, max_update_ms, sps, avg_step_ms, max_step_ms
+            );
+
+            self.metrics.last_log = Instant::now();
+            self.metrics.frame_count = 0;
+            self.metrics.step_count = 0;
+            self.metrics.total_update_duration = Duration::ZERO;
+            self.metrics.max_update_duration = Duration::ZERO;
+            self.metrics.total_step_duration = Duration::ZERO;
+            self.metrics.max_step_duration = Duration::ZERO;
+        }
+
+        // 8. 设置下一次 60 FPS 唤醒
         event_loop.set_control_flow(ControlFlow::WaitUntil(self.next_frame_time));
     }
 }
@@ -452,6 +533,7 @@ pub fn run_visual_env<E, F>(
             cursor_pos: None,
             pending_click: None,
             next_frame_time: Instant::now(),
+            metrics: VisualRunnerMetrics::default(),
         };
 
         let _ = event_loop.run_app(&mut runner);

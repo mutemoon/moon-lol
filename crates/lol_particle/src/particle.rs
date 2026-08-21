@@ -30,7 +30,7 @@ pub struct ParticleState {
 
 pub fn update_particle(
     mut res_mesh: ResMut<Assets<Mesh>>,
-    mut res_particle_material_dynamic: ResMut<Assets<ParticleMaterialDynamic>>,
+    res_particle_material_dynamic: Res<Assets<ParticleMaterialDynamic>>,
     res_assets_vfx_system_definition_data: Res<Assets<ConfigVfxSystemDefinition>>,
     q_particle_state: Query<(
         Entity,
@@ -48,18 +48,8 @@ pub fn update_particle(
     q_global_transform: Query<&GlobalTransform>,
     q_mesh3d: Query<&Mesh3d>,
     q_camera_transform: Query<&Transform, With<CameraState>>,
-    q_camera: Query<(&Projection, &GlobalTransform), With<CameraState>>,
+    mut commands: Commands,
 ) {
-    // 取带 CameraState 的窗口主相机：PluginCamera 还会生成一个渲染到 512×512 贴图的
-    // 子相机（aspect=1），若任取第一个可能拿到它的投影矩阵，导致窗口里粒子 X 向被拉宽
-    let cam_data = (|| {
-        let (projection, gtransform) = q_camera.single().ok()?;
-        let clip_from_view: Mat4 = projection.get_clip_from_view();
-        let view_from_world = gtransform.to_matrix().inverse();
-        let clip_from_world = clip_from_view * view_from_world;
-        let cam_pos = gtransform.translation();
-        Some((clip_from_world, cam_pos))
-    })();
 
     for (particle_entity, transform, child_of, lifetime, particle, particle_id) in
         q_particle_state.iter()
@@ -81,65 +71,36 @@ pub fn update_particle(
         let vfx_emitter_definition_data =
             particle_id.get_def(&res_assets_vfx_system_definition_data);
 
-        // ── 动态材质统一逐帧更新：按几何族分支，全部走成员名查表写入 ──
+        // ── 动态材质逐帧更新：Mesh 粒子的动态 uniform 走 ECS 组件，供 Render World 原地 DMA 更新 ──
+        // 彻底免去调用 res_particle_material_dynamic.get_mut 触发 AssetEvent::Modified 导致的 GPU 重建
         if let Ok(material_handle) = q_particle_material_dynamic.get(particle_entity) {
-            if let Some(mut material) =
-                res_particle_material_dynamic.get_mut(material_handle.0.id())
-            {
-                // 相机参数全族统一写入（族布局无该成员时安全 no-op）
-                if let Some((clip_from_world, cam_pos)) = &cam_data {
-                    material.set_param("mProj", clip_from_world.transpose());
-                    material.set_param("vCamera", *cam_pos);
-                }
+            if let Some(material) = res_particle_material_dynamic.get(material_handle.0.id()) {
+                if material.kind == ParticleRenderKind::Mesh {
+                    let frame = particle.frame;
 
-                // 逐帧更新 Alpha Erosion 驱动值
-                material.update_alpha_erosion_params(life);
+                    let Vec2 {
+                        x: col_num,
+                        y: row_num,
+                    } = vfx_emitter_definition_data.tex_div.unwrap_or(Vec2::ONE);
 
-                match material.kind {
-                    ParticleRenderKind::Quad => {}
-                    ParticleRenderKind::Mesh => {
-                        // mWorld 位于 CharacterPerDrawVertexCB；row-major 存储需转置
-                        material.set_param("mWorld", world_matrix.transpose());
+                    let scale = vec2(1.0 / col_num, 1.0 / row_num);
 
-                        let frame = particle.frame;
+                    let current_col = frame % col_num;
+                    let current_row = (frame / col_num).floor();
 
-                        let Vec2 {
-                            x: col_num,
-                            y: row_num,
-                        } = vfx_emitter_definition_data.tex_div.unwrap_or(Vec2::ONE);
+                    let current_uv_offset: Vec2 = (particle.birth_uv_offset
+                        + particle.birth_uv_scroll_rate * lifetime.elapsed_secs())
+                        % 1.0;
 
-                        let scale = vec2(1.0 / col_num, 1.0 / row_num);
+                    let translate =
+                        current_uv_offset * scale + vec2(current_col, current_row) * scale;
 
-                        let current_col = frame % col_num;
-                        let current_row = (frame / col_num).floor();
-
-                        let current_uv_offset: Vec2 = (particle.birth_uv_offset
-                            + particle.birth_uv_scroll_rate * lifetime.elapsed_secs())
-                            % 1.0;
-
-                        let translate =
-                            current_uv_offset * scale + vec2(current_col, current_row) * scale;
-
-                        material
-                            .set_param("vParticleUVTransform", uv_transform_rows(scale, translate));
-                        material.set_param("kColorFactor", color);
-                        material.set_param("COLOR_LOOKUP_UV", vec2(life, life));
-                    }
-                    ParticleRenderKind::Distortion => {
-                        // TEXTURE_INFO / 扭曲强度等在发射器装配时一次性写入；
-                        // 逐帧只需重写世界坐标顶点属性（见下方按 kind 的 mesh 属性分支）
-                    }
-                    ParticleRenderKind::SkinnedMesh => {
-                        // UV/颜色在 update_particle_skinned_mesh_particle 中处理
-                        //（需要 SkinnedMesh 组件与关节全局变换）
-                    }
-                    ParticleRenderKind::UnlitDecal => {
-                        material.set_param(
-                            "DECAL_WORLD_TO_UV_MATRIX",
-                            (Mat4::from_translation(Vec3::splat(0.5)) * world_matrix.inverse())
-                                .transpose(),
-                        );
-                    }
+                    commands.entity(particle_entity).insert(ParticleDynamicUniforms {
+                        world_matrix_transpose: world_matrix.transpose(),
+                        uv_transform: uv_transform_rows(scale, translate),
+                        color_factor: color,
+                        color_lookup_uv: vec2(life, life),
+                    });
                 }
             }
         }
@@ -267,10 +228,22 @@ pub fn update_particle_transform(
     }
 }
 
+/// 针对 Mesh 与 SkinnedMesh 粒子的逐帧动态 Uniform 数据。
+/// 挂载在粒子实体上，由 Render World 逐帧通过 DMA write_buffer 原地写入 GPU Buffer，
+/// 彻底免除主线程调用 get_mut 触发 AssetEvent::Modified 导致的 GPU Buffer / BindGroup 全量重建。
+#[derive(Component, Clone, Copy, Default, Debug)]
+pub struct ParticleDynamicUniforms {
+    pub world_matrix_transpose: Mat4,
+    pub uv_transform: [[f32; 4]; 3],
+    pub color_factor: Vec4,
+    pub color_lookup_uv: Vec2,
+}
+
 pub fn update_particle_skinned_mesh_particle(
-    mut res_particle_material_dynamic: ResMut<Assets<ParticleMaterialDynamic>>,
+    mut commands: Commands,
     q_particle_state: Query<
         (
+            Entity,
             &ChildOf,
             &Lifetime,
             &ParticleState,
@@ -280,7 +253,7 @@ pub fn update_particle_skinned_mesh_particle(
     >,
     q_particle_emitter_state: Query<&ParticleEmitterState>,
 ) {
-    for (child_of, lifetime, particle, material_handle) in q_particle_state.iter() {
+    for (particle_entity, child_of, lifetime, particle, _material_handle) in q_particle_state.iter() {
         let parent = child_of.parent();
 
         let life = lifetime.progress();
@@ -289,27 +262,15 @@ pub fn update_particle_skinned_mesh_particle(
 
         let color = particle.birth_color * emitter.color.sample_clamped(life);
 
-        let Some(mut material) = res_particle_material_dynamic.get_mut(material_handle.0.id())
-        else {
-            continue;
-        };
-        if material.kind != ParticleRenderKind::SkinnedMesh {
-            continue;
-        }
-
         let current_uv_offset: Vec2 =
             particle.birth_uv_offset + particle.birth_uv_scroll_rate * lifetime.elapsed_secs();
 
-        material.set_param(
-            "vParticleUVTransform",
-            uv_transform_rows(Vec2::ONE, current_uv_offset),
-        );
-        material.set_param("COLOR_LOOKUP_UV", vec2(life, life));
-        material.set_param("kColorFactor", color);
-
-        // bones：map.ron 反射出的 SkinnedMeshParticleVs cbuffer（$Globals + PerFrameVertexCB）
-        // 不含骨骼矩阵成员，无法经 cbuffer 上传（按名写入即 no-op），
-        // 因此跳过逐骨骼矩阵计算；旧静态材质的 bones 槽位与该 SPIR-V 布局本就不匹配。
+        commands.entity(particle_entity).insert(ParticleDynamicUniforms {
+            world_matrix_transpose: Mat4::IDENTITY,
+            uv_transform: uv_transform_rows(Vec2::ONE, current_uv_offset),
+            color_factor: color,
+            color_lookup_uv: vec2(life, life),
+        });
     }
 }
 

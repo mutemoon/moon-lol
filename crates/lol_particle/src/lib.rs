@@ -1,5 +1,6 @@
 pub mod emitters;
 pub mod loaders;
+pub mod metrics;
 pub mod particle;
 pub mod utils;
 
@@ -90,6 +91,7 @@ impl Plugin for PluginParticle {
         app.add_systems(PostUpdate, inject_vfx_assets);
 
         app.add_plugins(PluginDynamicMaterial);
+        app.add_plugins(metrics::PluginParticleMetrics);
 
         app.init_resource::<ParticleMesh>();
         app.init_resource::<DebugShaderHandles>();

@@ -24,6 +24,8 @@ pub struct ParticleEmitterState {
     /// 始终朝向指定方向
     pub rotation_override: Option<Quat>,
     pub is_direction_oriented: bool,
+    /// 发射器级别共享材质句柄（Quad/Distortion/Decal 粒子共享复用）
+    pub cached_material: Option<Handle<crate::particle::dynamic::ParticleMaterialDynamic>>,
 }
 
 impl ParticleEmitterState {
@@ -50,6 +52,7 @@ impl ParticleEmitterState {
             global_transform,
             rotation_override,
             is_direction_oriented: def.is_direction_oriented.unwrap_or(false),
+            cached_material: None,
         }
     }
 }

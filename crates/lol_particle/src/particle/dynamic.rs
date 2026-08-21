@@ -28,9 +28,10 @@ use bevy::render::render_resource::{
     SamplerDescriptor, ShaderStages, SpecializedMeshPipelineError, TextureSampleType,
     TextureViewDimension, UnpreparedBindGroup,
 };
-use bevy::render::renderer::RenderDevice;
+use bevy::render::renderer::{RenderDevice, RenderQueue};
 use bevy::render::texture::{FallbackImage, GpuImage};
 use bevy::render::{Extract, ExtractSchedule, Render, RenderApp, RenderSystems};
+use lol_base_render::camera::CameraState;
 use lol_base_render::particle::ConfigVfxEmitterDefinition;
 use lol_base_render::shader::{LeagueShader, ShaderMap, SharedRenderData, SharedSamplerDef};
 use lol_base_render::shader_layout::{BindingTypeDesc, ShaderLayoutDescriptor};
@@ -115,12 +116,79 @@ pub struct ExtractedKeyEntry {
     pub frag_layout: Arc<ShaderLayoutDescriptor>,
 }
 
-/// as_bind_group 创建的 uniform Buffer 句柄缓存（key → uniform 名 → Buffer）。
-/// 后续每帧数据可走 RenderQueue::write_buffer 原地更新这些 Buffer，
-/// 免去改材质资产触发整套 bind group 重建。（骨架阶段仅存放，暂无写入系统）
+#[derive(Clone)]
+pub struct CameraUniformTarget {
+    pub buffer: Buffer,
+    pub mproj_offset: Option<usize>,
+    pub vcamera_offset: Option<usize>,
+}
+
+#[derive(Clone)]
+pub struct MeshUniformTarget {
+    pub buffer: Buffer,
+    pub mworld_offset: Option<usize>,
+    pub uv_transform_offset: Option<usize>,
+    pub color_factor_offset: Option<usize>,
+    pub color_lookup_uv_offset: Option<usize>,
+}
+
+/// as_bind_group 创建的 uniform Buffer 句柄缓存（材质 ID → 包含相机/模型参数的 GPU Buffer 列表）。
+/// 供 Render World 逐帧走 RenderQueue::write_buffer 原地更新，
+/// 免去修改材质资产触发整套 bind group 重建。
 #[derive(Resource, Default)]
 pub struct DynamicUniformBufferCache {
-    pub buffers: HashMap<PipelineLayoutKey, HashMap<String, Buffer>>,
+    pub camera_targets: HashMap<u64, Vec<CameraUniformTarget>>,
+    pub mesh_targets: HashMap<u64, Vec<MeshUniformTarget>>,
+}
+
+/// Render World 侧提取的 Mesh 粒子逐帧动态 uniform 数据
+#[derive(Resource, Default)]
+pub struct ExtractedParticleMeshUniforms {
+    pub items: Vec<(u64, crate::particle::ParticleDynamicUniforms)>,
+}
+
+fn extract_particle_mesh_uniforms(
+    query: Extract<
+        Query<(
+            &MeshMaterial3d<ParticleMaterialDynamic>,
+            &crate::particle::ParticleDynamicUniforms,
+        )>,
+    >,
+    material_assets: Extract<Res<Assets<ParticleMaterialDynamic>>>,
+    mut extracted: ResMut<ExtractedParticleMeshUniforms>,
+) {
+    extracted.items.clear();
+    for (mat_handle, dyn_uniforms) in query.iter() {
+        if let Some(mat) = material_assets.get(&mat_handle.0) {
+            extracted.items.push((mat.id, *dyn_uniforms));
+        }
+    }
+}
+
+/// Render World 侧的提取相机数据（由主相机的投影矩阵与世界位置组成）
+#[derive(Resource, Default, Clone, Copy)]
+pub struct ExtractedParticleCamera {
+    pub clip_from_world_transpose: Mat4,
+    pub cam_pos: Vec3,
+    pub valid: bool,
+}
+
+/// Extract：把主 World 的主相机投影矩阵与位置提取到 Render World
+fn extract_particle_camera(
+    q_camera: Extract<Query<(&Projection, &GlobalTransform), With<CameraState>>>,
+    mut extracted_camera: ResMut<ExtractedParticleCamera>,
+) {
+    if let Ok((projection, gtransform)) = q_camera.single() {
+        let clip_from_view: Mat4 = projection.get_clip_from_view();
+        let view_from_world = gtransform.to_matrix().inverse();
+        let clip_from_world = clip_from_view * view_from_world;
+        let cam_pos = gtransform.translation();
+        extracted_camera.clip_from_world_transpose = clip_from_world.transpose();
+        extracted_camera.cam_pos = cam_pos;
+        extracted_camera.valid = true;
+    } else {
+        extracted_camera.valid = false;
+    }
 }
 
 /// Render World 侧的共享采样器缓存：把 [`SharedRenderData`] 里的采样器定义
@@ -314,6 +382,8 @@ pub struct ParticleMaterialDynamic {
     /// 发射器定义：供后续从中读取参数填充 uniform / texture
     pub emitter_def: Arc<ConfigVfxEmitterDefinition>,
     pub blend_mode: u8,
+    /// 材质实例唯一 ID（用于 Render World 显存缓存索引与按需清理）
+    pub id: u64,
     /// CPU 端 uniform 字节 blob（binding_index → 字节），由 set_param 按成员名写入，
     /// as_bind_group 时作为对应 uniform buffer 的初始内容上传
     pub uniforms: BTreeMap<u32, Vec<u8>>,
@@ -456,6 +526,9 @@ impl ParticleMaterialDynamic {
             textures.insert("sAlphaErosionTexture_SharedTexture".to_string(), texture);
         }
 
+        static NEXT_ID: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(1);
+        let id = NEXT_ID.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+
         let mut material = Self {
             kind,
             vert_shader,
@@ -470,6 +543,7 @@ impl ParticleMaterialDynamic {
             shader_frag,
             emitter_def,
             blend_mode,
+            id,
             uniforms,
             textures,
         };
@@ -633,6 +707,7 @@ impl AsBindGroup for ParticleMaterialDynamic {
         SRes<RenderDynamicLayoutCache>,
         SResMut<DynamicUniformBufferCache>,
         SRes<SharedSamplerCache>,
+        Option<SRes<crate::metrics::ParticleMetricsShared>>,
     );
 
     fn label() -> &'static str {
@@ -656,7 +731,7 @@ impl AsBindGroup for ParticleMaterialDynamic {
         _layout_descriptor: &BindGroupLayoutDescriptor,
         render_device: &RenderDevice,
         _pipeline_cache: &PipelineCache,
-        (image_assets, fallback_image, layout_cache, buffer_cache, shared_sampler_cache): &mut SystemParamItem<
+        (image_assets, fallback_image, layout_cache, buffer_cache, shared_sampler_cache, metrics): &mut SystemParamItem<
             '_,
             '_,
             Self::Param,
@@ -700,15 +775,19 @@ impl AsBindGroup for ParticleMaterialDynamic {
                         created_buffers.push((binding_index, name.clone(), buffer));
                     }
                     BindingTypeDesc::Texture2d => {
-                        // 按 binding 名查贴图句柄 → GpuImage；未提供或尚未加载完成则回退 fallback。
-                        // 共享贴图 "<Name>_SharedTexture"（FOW_MAP 等帧缓冲/系统贴图）当前不在 self.textures
-                        // 内，同样落入 fallback 作为合理占位，待后续接入真实数据。
-                        let view = self
-                            .textures
-                            .get(name)
-                            .and_then(|handle| image_assets.get(handle))
-                            .map(|gpu_image| &gpu_image.texture_view)
-                            .unwrap_or(fallback_view);
+                        // 按 binding 名查贴图句柄 → GpuImage；
+                        // 若材质明确配置了该贴图但仍在异步加载中（image_assets 尚未就绪），
+                        // 返回 RetryNextUpdate 等待贴图加载完成，避免过早用 fallback_view 固化纯色白块。
+                        // 共享贴图 "<Name>_SharedTexture"（FOW_MAP 等）等未配置项安全回退到 fallback。
+                        let view = if let Some(handle) = self.textures.get(name) {
+                            if let Some(gpu_image) = image_assets.get(handle) {
+                                &gpu_image.texture_view
+                            } else {
+                                return Err(AsBindGroupError::RetryNextUpdate);
+                            }
+                        } else {
+                            fallback_view
+                        };
                         texture_entries.push((binding_index, BindingResource::TextureView(view)));
                     }
                     BindingTypeDesc::Sampler => {
@@ -746,15 +825,92 @@ impl AsBindGroup for ParticleMaterialDynamic {
             bind_group_entries.push(BindGroupEntry { binding, resource });
         }
 
-        // 缓存 uniform Buffer 句柄（Buffer 内部是 Arc，clone 只增引用计数），
-        // 供后续每帧 write_buffer 原地更新
-        let cached = buffer_cache.buffers.entry(key).or_default();
-        for (_binding, name, buffer) in &created_buffers {
-            cached.insert(name.clone(), buffer.clone());
+        // 缓存 uniform Buffer 句柄与相机/模型槽位偏移，供 Render World 逐帧 write_buffer 原地更新
+        let mut camera_targets = Vec::new();
+        let mut mesh_targets = Vec::new();
+        for (binding_index, _name, buffer) in &created_buffers {
+            let mut mproj_offset = None;
+            let mut vcamera_offset = None;
+            let mut mworld_offset = None;
+            let mut uv_transform_offset = None;
+            let mut color_factor_offset = None;
+            let mut color_lookup_uv_offset = None;
+            for desc in [
+                self.vert_variant_layout.as_ref(),
+                self.frag_variant_layout.as_ref(),
+            ] {
+                for binding in desc.bindings.values() {
+                    if binding.binding_index == *binding_index {
+                        if let BindingTypeDesc::UniformBuffer { members, .. } = &binding.type_desc {
+                            if let Some(m) = members.get("mProj") {
+                                mproj_offset = Some(m.offset);
+                            }
+                            if let Some(m) = members.get("vCamera") {
+                                vcamera_offset = Some(m.offset);
+                            }
+                            if let Some(m) = members.get("mWorld") {
+                                mworld_offset = Some(m.offset);
+                            }
+                            if let Some(m) = members.get("vParticleUVTransform") {
+                                uv_transform_offset = Some(m.offset);
+                            }
+                            if let Some(m) = members.get("kColorFactor") {
+                                color_factor_offset = Some(m.offset);
+                            }
+                            if let Some(m) = members.get("COLOR_LOOKUP_UV") {
+                                color_lookup_uv_offset = Some(m.offset);
+                            }
+                        }
+                    }
+                }
+            }
+            if mproj_offset.is_some() || vcamera_offset.is_some() {
+                camera_targets.push(CameraUniformTarget {
+                    buffer: buffer.clone(),
+                    mproj_offset,
+                    vcamera_offset,
+                });
+            }
+            if mworld_offset.is_some()
+                || uv_transform_offset.is_some()
+                || color_factor_offset.is_some()
+                || color_lookup_uv_offset.is_some()
+            {
+                mesh_targets.push(MeshUniformTarget {
+                    buffer: buffer.clone(),
+                    mworld_offset,
+                    uv_transform_offset,
+                    color_factor_offset,
+                    color_lookup_uv_offset,
+                });
+            }
+        }
+        if !camera_targets.is_empty() {
+            buffer_cache.camera_targets.insert(self.id, camera_targets);
+        }
+        if !mesh_targets.is_empty() {
+            buffer_cache.mesh_targets.insert(self.id, mesh_targets);
         }
 
         let bind_group =
             render_device.create_bind_group(Some(Self::label()), layout, &bind_group_entries);
+
+        // 性能指标测量统计
+        if let Some(metrics) = metrics {
+            use std::sync::atomic::Ordering;
+            metrics.as_bind_group_calls.fetch_add(1, Ordering::Relaxed);
+            metrics
+                .gpu_buffers_created
+                .fetch_add(created_buffers.len(), Ordering::Relaxed);
+            let total_bytes: usize = created_buffers
+                .iter()
+                .map(|(_, _, b)| b.size() as usize)
+                .sum();
+            metrics
+                .gpu_buffer_bytes
+                .fetch_add(total_bytes, Ordering::Relaxed);
+            metrics.bind_groups_created.fetch_add(1, Ordering::Relaxed);
+        }
 
         Ok(PreparedBindGroup {
             bindings: BindingResources(vec![]),
@@ -922,7 +1078,17 @@ fn extract_dynamic_material_keys(
     changed_materials: Extract<Query<(), Changed<MeshMaterial3d<ParticleMaterialDynamic>>>>,
     material_assets: Extract<Res<Assets<ParticleMaterialDynamic>>>,
     mut extracted: ResMut<ExtractedMaterialKeys>,
+    mut buffer_cache: ResMut<DynamicUniformBufferCache>,
 ) {
+    // 收集当前场景中存活的材质 ID，自动清理已消亡粒子的 GPU Buffer 缓存
+    let active_ids: std::collections::HashSet<u64> = material_query
+        .iter()
+        .filter_map(|mat_handle| material_assets.get(&mat_handle.0))
+        .map(|mat| mat.id)
+        .collect();
+    buffer_cache.camera_targets.retain(|id, _| active_ids.contains(id));
+    buffer_cache.mesh_targets.retain(|id, _| active_ids.contains(id));
+
     if !material_assets.is_changed() && changed_materials.is_empty() {
         return;
     }
@@ -964,6 +1130,117 @@ fn prepare_dynamic_bind_group_layouts(
     }
 }
 
+/// Prepare：每帧利用 DMA write_buffer 直接原地更新 GPU 上的 mProj 与 vCamera，实现零显存分配开销与实时相机跟随
+fn write_particle_camera_uniforms(
+    render_queue: Res<RenderQueue>,
+    camera: Res<ExtractedParticleCamera>,
+    cache: Res<DynamicUniformBufferCache>,
+    metrics: Option<Res<crate::metrics::ParticleMetricsShared>>,
+) {
+    if !camera.valid || cache.camera_targets.is_empty() {
+        return;
+    }
+
+    let mproj_bytes = unsafe {
+        std::slice::from_raw_parts(
+            &camera.clip_from_world_transpose as *const Mat4 as *const u8,
+            std::mem::size_of::<Mat4>(),
+        )
+    };
+    let vcamera_bytes = unsafe {
+        std::slice::from_raw_parts(
+            &camera.cam_pos as *const Vec3 as *const u8,
+            std::mem::size_of::<Vec3>(),
+        )
+    };
+
+    let mut write_count = 0;
+    for targets in cache.camera_targets.values() {
+        for target in targets {
+            if let Some(offset) = target.mproj_offset {
+                render_queue.write_buffer(&target.buffer, offset as u64, mproj_bytes);
+                write_count += 1;
+            }
+            if let Some(offset) = target.vcamera_offset {
+                render_queue.write_buffer(&target.buffer, offset as u64, vcamera_bytes);
+                write_count += 1;
+            }
+        }
+    }
+
+    if let Some(metrics) = metrics {
+        metrics
+            .dma_camera_writes
+            .fetch_add(write_count, std::sync::atomic::Ordering::Relaxed);
+    }
+}
+
+/// Prepare：每帧利用 DMA write_buffer 原地更新 3D 模型粒子的 mWorld / UV 动画 / 颜色，彻底消除每帧重建
+fn write_particle_mesh_uniforms(
+    render_queue: Res<RenderQueue>,
+    extracted: Res<ExtractedParticleMeshUniforms>,
+    cache: Res<DynamicUniformBufferCache>,
+    metrics: Option<Res<crate::metrics::ParticleMetricsShared>>,
+) {
+    if extracted.items.is_empty() || cache.mesh_targets.is_empty() {
+        return;
+    }
+
+    let mut write_count = 0;
+    for (mat_id, dyn_uniforms) in &extracted.items {
+        if let Some(targets) = cache.mesh_targets.get(mat_id) {
+            for target in targets {
+                if let Some(offset) = target.mworld_offset {
+                    let bytes = unsafe {
+                        std::slice::from_raw_parts(
+                            &dyn_uniforms.world_matrix_transpose as *const Mat4 as *const u8,
+                            std::mem::size_of::<Mat4>(),
+                        )
+                    };
+                    render_queue.write_buffer(&target.buffer, offset as u64, bytes);
+                    write_count += 1;
+                }
+                if let Some(offset) = target.uv_transform_offset {
+                    let bytes = unsafe {
+                        std::slice::from_raw_parts(
+                            &dyn_uniforms.uv_transform as *const [[f32; 4]; 3] as *const u8,
+                            std::mem::size_of::<[[f32; 4]; 3]>(),
+                        )
+                    };
+                    render_queue.write_buffer(&target.buffer, offset as u64, bytes);
+                    write_count += 1;
+                }
+                if let Some(offset) = target.color_factor_offset {
+                    let bytes = unsafe {
+                        std::slice::from_raw_parts(
+                            &dyn_uniforms.color_factor as *const Vec4 as *const u8,
+                            std::mem::size_of::<Vec4>(),
+                        )
+                    };
+                    render_queue.write_buffer(&target.buffer, offset as u64, bytes);
+                    write_count += 1;
+                }
+                if let Some(offset) = target.color_lookup_uv_offset {
+                    let bytes = unsafe {
+                        std::slice::from_raw_parts(
+                            &dyn_uniforms.color_lookup_uv as *const Vec2 as *const u8,
+                            std::mem::size_of::<Vec2>(),
+                        )
+                    };
+                    render_queue.write_buffer(&target.buffer, offset as u64, bytes);
+                    write_count += 1;
+                }
+            }
+        }
+    }
+
+    if let Some(metrics) = metrics {
+        metrics
+            .dma_camera_writes
+            .fetch_add(write_count, std::sync::atomic::Ordering::Relaxed);
+    }
+}
+
 // ---------------------------------------------------------------------------
 // 插件
 // ---------------------------------------------------------------------------
@@ -983,13 +1260,25 @@ impl Plugin for PluginDynamicMaterial {
             render_app.init_resource::<DynamicUniformBufferCache>();
             render_app.init_resource::<SharedSamplerCache>();
             render_app.init_resource::<RenderSharedRenderData>();
+            render_app.init_resource::<ExtractedParticleCamera>();
+            render_app.init_resource::<ExtractedParticleMeshUniforms>();
             render_app.add_systems(
                 ExtractSchedule,
-                (extract_dynamic_material_keys, extract_shared_render_data),
+                (
+                    extract_dynamic_material_keys,
+                    extract_shared_render_data,
+                    extract_particle_camera,
+                    extract_particle_mesh_uniforms,
+                ),
             );
             render_app.add_systems(
                 Render,
-                (prepare_dynamic_bind_group_layouts, prepare_shared_samplers)
+                (
+                    prepare_dynamic_bind_group_layouts,
+                    prepare_shared_samplers,
+                    write_particle_camera_uniforms,
+                    write_particle_mesh_uniforms,
+                )
                     .in_set(RenderSystems::Prepare),
             );
         }

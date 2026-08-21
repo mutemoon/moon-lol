@@ -49,12 +49,12 @@ pub fn startup_load_ui_data(
     let ron_paths = vec![
         ui_paths.player_frame_ron(),
         ui_paths.player_inventory_ron(),
-        ui_paths.player_augments_ron(),
-        ui_paths.player_mute_ron(),
-        ui_paths.player_perks_ron(),
-        ui_paths.player_report_ron(),
-        ui_paths.player_stats_ron(),
-        ui_paths.player_statstones_ron(),
+        // ui_paths.player_augments_ron(),
+        // ui_paths.player_mute_ron(),
+        // ui_paths.player_perks_ron(),
+        // ui_paths.player_report_ron(),
+        // ui_paths.player_stats_ron(),
+        // ui_paths.player_statstones_ron(),
         ui_paths.floating_info_bars_ron(),
         ui_paths.lol_game_header_ron(),
     ];
