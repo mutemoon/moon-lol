@@ -350,6 +350,33 @@ pub struct ObsFeaturePayload {
     pub attack_timer: f32,
 }
 
+pub const AGENT_PPO_MAMBA: &str = "PPO (Mamba)";
+pub const AGENT_PPO_MLP: &str = "PPO (MLP)";
+
+/// 策略网络的主干网络架构类型
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
+pub enum PolicyBackbone {
+    /// 经典多层感知机（无状态前馈网络，计算速度极快）
+    Mlp,
+    /// Selective State Space Model（带时序记忆与门控状态空间）
+    Mamba,
+}
+
+impl PolicyBackbone {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            Self::Mlp => "MLP",
+            Self::Mamba => "Mamba",
+        }
+    }
+}
+
+impl std::fmt::Display for PolicyBackbone {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.as_str())
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct TaskConfigPayload {
     pub name: String,
@@ -364,6 +391,8 @@ pub struct TaskConfigPayload {
     pub parallel_envs: usize,
     pub rollout_steps_per_env: usize,
     pub total_iterations: usize,
+    #[serde(default)]
+    pub backbone: Option<PolicyBackbone>,
 }
 
 pub const ENV_SOLO_V0: &str = "SoloV0";
@@ -405,7 +434,7 @@ pub const ENV_SOLO_V0_SPEC: EnvSpec = EnvSpec {
         gae_lambda: 0.95,
         clip_eps: 0.2,
         ppo_epochs: 8,
-        hidden_dim: 256,
+        hidden_dim: 64,
         rollout_steps_per_env: 160,
         total_iterations: 500,
     },
@@ -422,7 +451,7 @@ pub const ENV_FIORA_V2_SPEC: EnvSpec = EnvSpec {
         gae_lambda: 0.95,
         clip_eps: 0.2,
         ppo_epochs: 8,
-        hidden_dim: 256,
+        hidden_dim: 64,
         rollout_steps_per_env: 160,
         total_iterations: 300,
     },
@@ -484,7 +513,7 @@ impl TaskConfigPayload {
         let params = get_env_training_params(env_name);
         Self {
             name: "RL 对战训练任务".to_string(),
-            agent_type: "PPO".to_string(),
+            agent_type: AGENT_PPO_MAMBA.to_string(),
             env_name: env_name.to_string(),
             lr: params.lr,
             gamma: params.gamma,
@@ -495,6 +524,19 @@ impl TaskConfigPayload {
             parallel_envs: 0,
             rollout_steps_per_env: params.rollout_steps_per_env,
             total_iterations: params.total_iterations,
+            backbone: Some(PolicyBackbone::Mamba),
+        }
+    }
+
+    /// 解析当前任务的主干网络架构（优先使用 backbone 字段，其次解析 agent_type）
+    pub fn backbone(&self) -> PolicyBackbone {
+        if let Some(bb) = self.backbone {
+            return bb;
+        }
+        if self.agent_type.to_lowercase().contains("mlp") {
+            PolicyBackbone::Mlp
+        } else {
+            PolicyBackbone::Mamba
         }
     }
 }

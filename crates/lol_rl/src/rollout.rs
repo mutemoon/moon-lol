@@ -55,6 +55,7 @@ pub struct RolloutWorker<E: RlEnvironment> {
     current_obs: Vec<E::Obs>,
     cur_return: f32,
     cur_steps: usize,
+    agent_mamba_states: Vec<Option<crate::policy::MambaState>>,
 }
 
 impl<E: RlEnvironment> RolloutWorker<E> {
@@ -62,11 +63,13 @@ impl<E: RlEnvironment> RolloutWorker<E> {
     pub fn new() -> Self {
         let mut env = E::new();
         let current_obs = env.reset();
+        let num_agents = current_obs.len().max(1);
         Self {
             env,
             current_obs,
             cur_return: 0.0,
             cur_steps: 0,
+            agent_mamba_states: vec![None; num_agents],
         }
     }
 
@@ -90,6 +93,10 @@ impl<E: RlEnvironment> RolloutWorker<E> {
         let num_agents = self.current_obs.len().max(1);
         let train_agent_count = if has_opp_policy { 1 } else { num_agents };
 
+        if self.agent_mamba_states.len() < num_agents {
+            self.agent_mamba_states.resize_with(num_agents, || None);
+        }
+
         let mut buffers: Vec<RolloutBuffer> = (0..train_agent_count)
             .map(|_| RolloutBuffer::new())
             .collect();
@@ -98,12 +105,14 @@ impl<E: RlEnvironment> RolloutWorker<E> {
         let mut reward_breakdown = HashMap::new();
         let mut last_reward_variables = HashMap::new();
 
+        let is_mlp = main_policy.backbone().backbone_type() == lol_rl_protocol::PolicyBackbone::Mlp;
+
         for _ in 0..horizon {
             let mut actions = Vec::with_capacity(self.current_obs.len());
             let mut step_samples = Vec::with_capacity(self.current_obs.len());
 
-            if !has_opp_policy && self.current_obs.len() > 1 {
-                // 批量推理优化：双方使用同一策略时单次前向完成采样
+            if is_mlp && !has_opp_policy && self.current_obs.len() > 1 {
+                // MLP 批量推理优化：双方使用同一策略时单次前向完成采样
                 let mut batch_flat = Vec::with_capacity(self.current_obs.len() * state_dim);
                 let mut masks = Vec::with_capacity(self.current_obs.len());
                 let mut state_vecs = Vec::with_capacity(self.current_obs.len());
@@ -129,7 +138,7 @@ impl<E: RlEnvironment> RolloutWorker<E> {
                     step_samples.push((state_vec, encoded, log_prob, val, mask));
                 }
             } else {
-                // 逐 Agent 采样（支持主策略与历史对手策略分别推理，并根据 main_agent_idx 确定角色）
+                // 逐 Agent 采样（支持 Mamba 状态时序递推及主策略与历史对手分别推理）
                 for (agent_idx, obs) in self.current_obs.iter().enumerate() {
                     let state_vec = E::obs_to_vector(obs);
                     let action_mask = E::action_mask(obs);
@@ -142,8 +151,11 @@ impl<E: RlEnvironment> RolloutWorker<E> {
                         opp_policy
                     };
 
-                    let (encoded, log_prob, val) =
-                        active_policy.sample_action(&state_tensor, action_mask.as_deref())?;
+                    let (encoded, log_prob, val) = active_policy.step(
+                        &state_tensor,
+                        &mut self.agent_mamba_states[agent_idx],
+                        action_mask.as_deref(),
+                    )?;
 
                     let act = E::action_from_encoding(&encoded);
                     actions.push(act);
@@ -240,6 +252,9 @@ impl<E: RlEnvironment> RolloutWorker<E> {
 
             // 更新环境观测
             if done {
+                for s in &mut self.agent_mamba_states {
+                    *s = None;
+                }
                 ep_returns.push(self.cur_return);
                 completed_steps.push(self.cur_steps);
                 self.cur_return = 0.0;

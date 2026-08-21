@@ -1,5 +1,5 @@
-use candle_core::{D, DType, Result, Tensor};
-use candle_nn::{Embedding, Linear, Module, VarBuilder};
+use candle_core::{D, DType, IndexOp, Result, Tensor};
+use candle_nn::{Conv1d, Conv1dConfig, Embedding, Linear, Module, VarBuilder};
 use lol_rl_protocol::{ActionSpace, PolicyDisplay, PolicyItem};
 use rand::Rng;
 
@@ -86,21 +86,558 @@ impl Default for HeroEmbedConfig {
     }
 }
 
+/// Mamba 结构超参数配置
+#[derive(Clone, Debug, PartialEq)]
+pub struct MambaConfig {
+    pub d_model: usize,
+    pub d_state: usize,
+    pub d_conv: usize,
+    pub expand: usize,
+}
+
+impl MambaConfig {
+    pub fn new(d_model: usize) -> Self {
+        Self {
+            d_model,
+            d_state: 16,
+            d_conv: 4,
+            expand: 2,
+        }
+    }
+
+    pub fn with_state(d_model: usize, d_state: usize, expand: usize) -> Self {
+        Self {
+            d_model,
+            d_state,
+            d_conv: 4,
+            expand,
+        }
+    }
+
+    pub fn d_inner(&self) -> usize {
+        self.d_model * self.expand
+    }
+
+    pub fn dt_rank(&self) -> usize {
+        self.d_model.div_ceil(16)
+    }
+}
+
+impl Default for MambaConfig {
+    fn default() -> Self {
+        Self::new(64)
+    }
+}
+
+/// Mamba 单步推演隐状态（用于环境 Rollout 与实时推理）
+#[derive(Clone, Debug)]
+pub struct MambaState {
+    pub h: Tensor,           // (batch, d_inner, d_state)
+    pub prev_x: Vec<Tensor>, // d_conv 个 (batch, d_inner)
+    pub pos: usize,
+}
+
+impl MambaState {
+    pub fn new(batch_size: usize, cfg: &MambaConfig, device: &candle_core::Device) -> Result<Self> {
+        let d_inner = cfg.d_inner();
+        let h = Tensor::zeros((batch_size, d_inner, cfg.d_state), DType::F32, device)?;
+        let mut prev_x = Vec::with_capacity(cfg.d_conv);
+        for _ in 0..cfg.d_conv {
+            prev_x.push(Tensor::zeros((batch_size, d_inner), DType::F32, device)?);
+        }
+        Ok(Self { h, prev_x, pos: 0 })
+    }
+
+    pub fn reset(
+        &mut self,
+        batch_size: usize,
+        cfg: &MambaConfig,
+        device: &candle_core::Device,
+    ) -> Result<()> {
+        let d_inner = cfg.d_inner();
+        self.h = Tensor::zeros((batch_size, d_inner, cfg.d_state), DType::F32, device)?;
+        self.prev_x.clear();
+        for _ in 0..cfg.d_conv {
+            self.prev_x
+                .push(Tensor::zeros((batch_size, d_inner), DType::F32, device)?);
+        }
+        self.pos = 0;
+        Ok(())
+    }
+}
+
+/// 基于 RMSNorm 的均方根层归一化（为 Mamba 提供零均值与单位方差数值稳定性）
+#[derive(Clone)]
+pub struct RMSNorm {
+    pub scale: Tensor,
+    pub eps: f64,
+}
+
+impl RMSNorm {
+    pub fn new(dim: usize, eps: f64, vb: VarBuilder) -> Result<Self> {
+        let scale = vb.get_with_hints(dim, "scale", candle_nn::Init::Const(1.0))?;
+        Ok(Self { scale, eps })
+    }
+
+    pub fn forward(&self, x: &Tensor) -> Result<Tensor> {
+        let x_cont = if x.is_contiguous() {
+            x.clone()
+        } else {
+            x.contiguous()?
+        };
+        let x_dtype = x_cont.dtype();
+        let x_f32 = x_cont.to_dtype(DType::F32)?;
+        let variance = x_f32.powf(2.0)?.mean_keepdim(D::Minus1)?;
+        let rsqrt = (variance + self.eps)?.sqrt()?.recip()?;
+        let normed = x_f32.broadcast_mul(&rsqrt)?;
+        let out = normed.broadcast_mul(&self.scale.to_dtype(DType::F32)?)?;
+        out.to_dtype(x_dtype)
+    }
+
+    pub fn to_device(&self, device: &candle_core::Device) -> Result<Self> {
+        Ok(Self {
+            scale: self.scale.to_device(device)?,
+            eps: self.eps,
+        })
+    }
+}
+
+/// 基于 Candle 的 Mamba Selective SSM 核心模块（带残差连接与 RMSNorm）
+#[derive(Clone)]
+pub struct MambaBlock {
+    pub in_proj: Linear,
+    pub conv1d: Conv1d,
+    pub x_proj: Linear,
+    pub dt_proj: Linear,
+    pub a_log: Tensor,
+    pub d: Tensor,
+    pub out_proj: Linear,
+    pub norm: RMSNorm,
+    pub config: MambaConfig,
+}
+
+impl MambaBlock {
+    pub fn new(cfg: &MambaConfig, vb: VarBuilder) -> Result<Self> {
+        let d_inner = cfg.d_inner();
+        let dt_rank = cfg.dt_rank();
+        let d_conv = cfg.d_conv;
+        let d_state = cfg.d_state;
+
+        let in_proj = candle_nn::linear_no_bias(cfg.d_model, d_inner * 2, vb.pp("in_proj"))?;
+        let conv_cfg = Conv1dConfig {
+            groups: d_inner,
+            padding: 0,
+            ..Default::default()
+        };
+        let conv1d = candle_nn::conv1d(d_inner, d_inner, d_conv, conv_cfg, vb.pp("conv1d"))?;
+        let x_proj = candle_nn::linear_no_bias(d_inner, dt_rank + d_state * 2, vb.pp("x_proj"))?;
+        let dt_proj = candle_nn::linear(dt_rank, d_inner, vb.pp("dt_proj"))?;
+        let a_log = vb.get_with_hints((d_inner, d_state), "A_log", candle_nn::Init::Const(0.0))?;
+        let d = vb.get_with_hints(d_inner, "D", candle_nn::Init::Const(1.0))?;
+        let out_proj = candle_nn::linear_no_bias(d_inner, cfg.d_model, vb.pp("out_proj"))?;
+        let norm = RMSNorm::new(cfg.d_model, 1e-5, vb.pp("norm"))?;
+
+        Ok(Self {
+            in_proj,
+            conv1d,
+            x_proj,
+            dt_proj,
+            a_log,
+            d,
+            out_proj,
+            norm,
+            config: cfg.clone(),
+        })
+    }
+
+    pub fn to_device(&self, device: &candle_core::Device) -> Result<Self> {
+        let in_proj_w = self.in_proj.weight().to_device(device)?;
+        let in_proj = Linear::new(in_proj_w, None);
+
+        let conv_w = self.conv1d.weight().to_device(device)?;
+        let conv_b = self
+            .conv1d
+            .bias()
+            .map(|b| b.to_device(device))
+            .transpose()?;
+        let conv1d = Conv1d::new(conv_w, conv_b, *self.conv1d.config());
+
+        let x_proj_w = self.x_proj.weight().to_device(device)?;
+        let x_proj = Linear::new(x_proj_w, None);
+
+        let dt_proj_w = self.dt_proj.weight().to_device(device)?;
+        let dt_proj_b = self
+            .dt_proj
+            .bias()
+            .map(|b| b.to_device(device))
+            .transpose()?;
+        let dt_proj = Linear::new(dt_proj_w, dt_proj_b);
+
+        let a_log = self.a_log.to_device(device)?;
+        let d = self.d.to_device(device)?;
+
+        let out_proj_w = self.out_proj.weight().to_device(device)?;
+        let out_proj = Linear::new(out_proj_w, None);
+        let norm = self.norm.to_device(device)?;
+
+        Ok(Self {
+            in_proj,
+            conv1d,
+            x_proj,
+            dt_proj,
+            a_log,
+            d,
+            out_proj,
+            norm,
+            config: self.config.clone(),
+        })
+    }
+
+    /// 前向计算：支持 2D (batch, d_model) 或 3D (batch, seq_len, d_model)
+    pub fn forward(&self, xs: &Tensor) -> Result<Tensor> {
+        if xs.rank() == 2 {
+            let (b_sz, dim) = xs.dims2()?;
+            let xs_3d = xs.reshape((b_sz, 1, dim))?;
+            let out_3d = self.forward_seq(&xs_3d)?;
+            out_3d.reshape((b_sz, dim))
+        } else {
+            self.forward_seq(xs)
+        }
+    }
+
+    /// 序列前向计算 (batch, seq_len, d_model) -> (batch, seq_len, d_model)
+    pub fn forward_seq(&self, xs: &Tensor) -> Result<Tensor> {
+        let xs = if xs.is_contiguous() {
+            xs.clone()
+        } else {
+            xs.contiguous()?
+        };
+        let (_b_sz, _seq_len, _dim) = xs.dims3()?;
+        let xs_proj = self.in_proj.forward(&xs)?;
+        let chunks = xs_proj.chunk(2, D::Minus1)?;
+        let (u, res) = (&chunks[0], &chunks[1]);
+
+        // 因果 1D 深度卷积：左侧 pad d_conv - 1 个零，进行 padding=0 的因果卷积
+        let u_t = u.transpose(1, 2)?.contiguous()?;
+        let (b_sz, d_in, _l) = u_t.dims3()?;
+        let pad_len = self.config.d_conv.saturating_sub(1);
+        let u_conv = if pad_len > 0 {
+            let pad = Tensor::zeros((b_sz, d_in, pad_len), u_t.dtype(), u_t.device())?;
+            let u_padded = Tensor::cat(&[&pad, &u_t], 2)?.contiguous()?;
+            u_padded.apply(&self.conv1d)?
+        } else {
+            u_t.apply(&self.conv1d)?
+        };
+        let u_conv = u_conv.transpose(1, 2)?.contiguous()?;
+        let u_conv = candle_nn::ops::silu(&u_conv)?;
+
+        let ssm_out = self.ssm(&u_conv)?;
+        let ys = (&ssm_out * candle_nn::ops::silu(res))?;
+        let ys_cont = if ys.is_contiguous() {
+            ys
+        } else {
+            ys.contiguous()?
+        };
+        let out = self.out_proj.forward(&ys_cont)?;
+        let res = (&xs + &out)?;
+        self.norm.forward(&res)
+    }
+
+    /// Selective SSM 扫描计算
+    pub fn ssm(&self, xs: &Tensor) -> Result<Tensor> {
+        let xs_cont = if xs.is_contiguous() {
+            xs.clone()
+        } else {
+            xs.contiguous()?
+        };
+        let (_d_in, n) = self.a_log.dims2()?;
+        let a = self.a_log.to_dtype(DType::F32)?.exp()?.neg()?;
+        let d = self.d.to_dtype(DType::F32)?;
+        let x_dbl = self.x_proj.forward(&xs_cont)?;
+        let dt_rank = self.config.dt_rank();
+        let delta = x_dbl.narrow(D::Minus1, 0, dt_rank)?;
+        let b = x_dbl.narrow(D::Minus1, dt_rank, n)?;
+        let c = x_dbl.narrow(D::Minus1, dt_rank + n, n)?;
+        let delta = delta.contiguous()?;
+        let delta = self.dt_proj.forward(&delta)?;
+        // Softplus 激活步长: ln(1 + exp(delta))
+        let delta = (delta.exp()? + 1.0)?.log()?;
+        selective_scan(&xs_cont, &delta, &a, &b, &c, &d)
+    }
+
+    /// 单步状态化前向推理（用于环境采样循环）
+    pub fn step(&self, x: &Tensor, state: &mut MambaState) -> Result<Tensor> {
+        let (b_sz, _) = x.dims2()?;
+        let x_proj = self.in_proj.forward(x)?;
+        let mut chunks = x_proj.chunk(2, D::Minus1)?;
+        let proj_silu = chunks.remove(1);
+        let proj_conv = chunks.remove(0);
+
+        let d_conv = self.config.d_conv;
+        let d_inner = self.config.d_inner();
+        let d_state = self.config.d_state;
+        let dt_rank = self.config.dt_rank();
+
+        state.prev_x[state.pos % d_conv] = proj_conv.clone();
+
+        // 卷积权重累加
+        let conv_w = self.conv1d.weight();
+        let mut conv_out = match self.conv1d.bias() {
+            Some(bias) => bias.broadcast_as((b_sz, d_inner))?,
+            None => Tensor::zeros((b_sz, d_inner), DType::F32, x.device())?,
+        };
+        for c_idx in 0..d_conv {
+            let w_c = conv_w.i((.., 0, c_idx))?;
+            let prev = &state.prev_x[(c_idx + 1 + state.pos) % d_conv];
+            conv_out = (conv_out + prev.broadcast_mul(&w_c)?)?;
+        }
+        let conv_out = candle_nn::ops::silu(&conv_out)?;
+
+        let x_dbl = self.x_proj.forward(&conv_out)?;
+        let delta = x_dbl.narrow(D::Minus1, 0, dt_rank)?;
+        let b = x_dbl.narrow(D::Minus1, dt_rank, d_state)?;
+        let c = x_dbl.narrow(D::Minus1, dt_rank + d_state, d_state)?;
+        let delta = delta.contiguous()?;
+        let delta = self.dt_proj.forward(&delta)?;
+        let delta = (delta.exp()? + 1.0)?.log()?;
+
+        let a = self.a_log.to_dtype(DType::F32)?.exp()?.neg()?;
+        let d = self.d.to_dtype(DType::F32)?;
+
+        let delta_3d = delta
+            .unsqueeze(D::Minus1)?
+            .broadcast_as((b_sz, d_inner, d_state))?;
+        let a_3d = a.unsqueeze(0)?.broadcast_as((b_sz, d_inner, d_state))?;
+        let b_3d = b.unsqueeze(1)?.broadcast_as((b_sz, d_inner, d_state))?;
+        let conv_out_3d = conv_out
+            .unsqueeze(D::Minus1)?
+            .broadcast_as((b_sz, d_inner, d_state))?;
+
+        let da = (&delta_3d * &a_3d)?.exp()?;
+        let dbu = (&delta_3d * &b_3d * &conv_out_3d)?;
+        state.h = ((&state.h * &da)? + &dbu)?;
+
+        let c_3d = c.unsqueeze(2)?.contiguous()?;
+        let ss =
+            (state.h.contiguous()?.matmul(&c_3d)?.squeeze(2)? + conv_out.broadcast_mul(&d)?)?;
+        let y = (ss * candle_nn::ops::silu(&proj_silu))?;
+        state.pos += 1;
+        let out = self.out_proj.forward(&y)?;
+        let res = (x + &out)?;
+        self.norm.forward(&res)
+    }
+}
+
+/// 可微分 Selective Scan 算子（时序离散扫描）
+fn selective_scan(
+    u: &Tensor,
+    delta: &Tensor,
+    a: &Tensor,
+    b: &Tensor,
+    c: &Tensor,
+    d: &Tensor,
+) -> Result<Tensor> {
+    let (b_sz, l, d_in) = u.dims3()?;
+    let n = a.dim(1)?;
+
+    // L = 1 极速向量化路径（单帧批处理时无需循环、三维广播和张量堆叠）
+    if l == 1 {
+        let u_0 = u.squeeze(1)?;
+        let delta_0 = delta.squeeze(1)?;
+        let b_0 = b.squeeze(1)?;
+        let c_0 = c.squeeze(1)?;
+
+        let bc = (&b_0 * &c_0)?.sum_keepdim(D::Minus1)?;
+        let delta_bc = delta_0.broadcast_mul(&bc)?;
+        let scale = delta_bc.broadcast_add(d)?;
+        let y_0 = (&u_0 * &scale)?;
+        return y_0.unsqueeze(1);
+    }
+
+    let mut xs = Tensor::zeros((b_sz, d_in, n), DType::F32, u.device())?;
+    let mut ys = Vec::with_capacity(l);
+
+    let a_3d = a.unsqueeze(0)?;
+
+    for i in 0..l {
+        let u_i = u.narrow(1, i, 1)?.squeeze(1)?;
+        let delta_i = delta.narrow(1, i, 1)?.squeeze(1)?;
+        let b_i = b.narrow(1, i, 1)?.squeeze(1)?;
+        let c_i = c.narrow(1, i, 1)?.squeeze(1)?;
+
+        let delta_3d = delta_i.unsqueeze(2)?.broadcast_as((b_sz, d_in, n))?;
+        let a_bcast = a_3d.broadcast_as((b_sz, d_in, n))?;
+        let da = (&delta_3d * &a_bcast)?.exp()?;
+
+        let b_3d = b_i.unsqueeze(1)?.broadcast_as((b_sz, d_in, n))?;
+        let u_3d = u_i.unsqueeze(2)?.broadcast_as((b_sz, d_in, n))?;
+        let dbu = (&delta_3d * &b_3d * &u_3d)?;
+
+        xs = ((&xs * &da)? + &dbu)?;
+
+        let c_3d = c_i.unsqueeze(2)?.contiguous()?;
+        let xs_cont = if xs.is_contiguous() {
+            xs.clone()
+        } else {
+            xs.contiguous()?
+        };
+        let y = (xs_cont.matmul(&c_3d)?.squeeze(2)? + u_i.broadcast_mul(d)?)?;
+        ys.push(y);
+    }
+    Tensor::stack(&ys, 1)
+}
+
+/// Belief-State 信念状态估计头（输出真实环境状态估计的高斯分布参数）
+#[derive(Clone)]
+pub struct BeliefHead {
+    pub mu: Linear,
+    pub logvar: Linear,
+    pub belief_dim: usize,
+}
+
+impl BeliefHead {
+    pub fn new(d_model: usize, belief_dim: usize, vb: VarBuilder) -> Result<Self> {
+        let mu = candle_nn::linear(d_model, belief_dim, vb.pp("belief_mu"))?;
+        let logvar = candle_nn::linear(d_model, belief_dim, vb.pp("belief_logvar"))?;
+        Ok(Self {
+            mu,
+            logvar,
+            belief_dim,
+        })
+    }
+
+    pub fn to_device(&self, device: &candle_core::Device) -> Result<Self> {
+        let mu_w = self.mu.weight().to_device(device)?;
+        let mu_b = self.mu.bias().map(|b| b.to_device(device)).transpose()?;
+        let mu = Linear::new(mu_w, mu_b);
+
+        let logvar_w = self.logvar.weight().to_device(device)?;
+        let logvar_b = self
+            .logvar
+            .bias()
+            .map(|b| b.to_device(device))
+            .transpose()?;
+        let logvar = Linear::new(logvar_w, logvar_b);
+
+        Ok(Self {
+            mu,
+            logvar,
+            belief_dim: self.belief_dim,
+        })
+    }
+
+    /// 前向返回 (均值 mu, 标准差 std)
+    pub fn forward(&self, features: &Tensor) -> Result<(Tensor, Tensor)> {
+        let mu = self.mu.forward(features)?;
+        let logvar = self.logvar.forward(features)?;
+        let std = logvar.affine(0.5, 0.0)?.exp()?;
+        Ok((mu, std))
+    }
+}
+
+use lol_rl_protocol::PolicyBackbone;
+
+/// 策略网络的主干特征提取层（支持无状态 MLP 或 状态化 Mamba）
+#[derive(Clone)]
+pub enum Backbone {
+    Mlp {
+        fc1: Linear,
+        fc2: Linear,
+        hidden_dim: usize,
+    },
+    Mamba {
+        proj_in: Linear,
+        mamba: MambaBlock,
+        config: MambaConfig,
+    },
+}
+
+impl Backbone {
+    pub fn forward(&self, x: &Tensor) -> Result<Tensor> {
+        let x_cont = if x.is_contiguous() {
+            x.clone()
+        } else {
+            x.contiguous()?
+        };
+        match self {
+            Self::Mlp { fc1, fc2, .. } => {
+                let h = fc1.forward(&x_cont)?.tanh()?;
+                fc2.forward(&h)?.tanh()
+            }
+            Self::Mamba { proj_in, mamba, .. } => {
+                let x_proj = proj_in.forward(&x_cont)?;
+                mamba.forward(&x_proj)
+            }
+        }
+    }
+
+    pub fn to_device(&self, device: &candle_core::Device) -> Result<Self> {
+        match self {
+            Self::Mlp {
+                fc1,
+                fc2,
+                hidden_dim,
+            } => {
+                let fc1_w = fc1.weight().to_device(device)?;
+                let fc1_b = fc1.bias().map(|b| b.to_device(device)).transpose()?;
+                let fc2_w = fc2.weight().to_device(device)?;
+                let fc2_b = fc2.bias().map(|b| b.to_device(device)).transpose()?;
+                Ok(Self::Mlp {
+                    fc1: Linear::new(fc1_w, fc1_b),
+                    fc2: Linear::new(fc2_w, fc2_b),
+                    hidden_dim: *hidden_dim,
+                })
+            }
+            Self::Mamba {
+                proj_in,
+                mamba,
+                config,
+            } => {
+                let proj_in_w = proj_in.weight().to_device(device)?;
+                let proj_in_b = proj_in.bias().map(|b| b.to_device(device)).transpose()?;
+                let mamba = mamba.to_device(device)?;
+                Ok(Self::Mamba {
+                    proj_in: Linear::new(proj_in_w, proj_in_b),
+                    mamba,
+                    config: config.clone(),
+                })
+            }
+        }
+    }
+
+    pub fn output_dim(&self) -> usize {
+        match self {
+            Self::Mlp { hidden_dim, .. } => *hidden_dim,
+            Self::Mamba { config, .. } => config.d_model,
+        }
+    }
+
+    pub fn backbone_type(&self) -> PolicyBackbone {
+        match self {
+            Self::Mlp { .. } => PolicyBackbone::Mlp,
+            Self::Mamba { .. } => PolicyBackbone::Mamba,
+        }
+    }
+}
+
+/// ActorCritic 策略与价值网络（支持 MLP 与 Mamba 双主干）
 #[derive(Clone)]
 pub struct ActorCritic {
-    /// Hero-id embedding (OpenAI Five style).
-    /// obs[0] is treated as hero index → embedding, replacing the raw float.
+    /// Hero-id embedding (OpenAI Five 风格英雄条件输入).
     hero_embed: Embedding,
     hero_embed_config: HeroEmbedConfig,
-    fc1: Linear,
-    fc2: Linear,
-    /// 离散：分类 logits；连续/混合：连续维的均值头。
+    /// 核心特征提取主干（MLP 或 Mamba）
+    backbone: Backbone,
+    /// 动作输出头：离散分类 logits 或连续动作均值
     actor_head: Linear,
-    /// 连续/混合：可训练 log_std，形状 (continuous_dims,)。
+    /// 连续/混合动作：可训练 log_std
     log_std: Option<Tensor>,
-    /// 混合：离散分类头。
+    /// 混合动作：离散分类头
     attack_head: Option<Linear>,
+    /// 状态价值 Critic 估值头
     critic_head: Linear,
+    /// 可选：Belief-State 信念解码头
+    belief_head: Option<BeliefHead>,
     action_space: ActionSpace,
 }
 
@@ -111,7 +648,15 @@ impl ActorCritic {
         action_space: ActionSpace,
         vb: VarBuilder,
     ) -> Result<Self> {
-        Self::with_hero_embed(state_dim, hidden_dim, action_space, HeroEmbedConfig::default(), vb)
+        Self::with_hero_embed_and_backbone(
+            state_dim,
+            hidden_dim,
+            action_space,
+            HeroEmbedConfig::default(),
+            PolicyBackbone::Mamba,
+            None,
+            vb,
+        )
     }
 
     pub fn with_hero_embed(
@@ -121,15 +666,63 @@ impl ActorCritic {
         hero_embed_config: HeroEmbedConfig,
         vb: VarBuilder,
     ) -> Result<Self> {
+        Self::with_hero_embed_and_backbone(
+            state_dim,
+            hidden_dim,
+            action_space,
+            hero_embed_config,
+            PolicyBackbone::Mamba,
+            None,
+            vb,
+        )
+    }
+
+    pub fn with_hero_embed_and_backbone(
+        state_dim: usize,
+        hidden_dim: usize,
+        action_space: ActionSpace,
+        hero_embed_config: HeroEmbedConfig,
+        backbone_type: PolicyBackbone,
+        belief_dim: Option<usize>,
+        vb: VarBuilder,
+    ) -> Result<Self> {
         let emb = candle_nn::embedding(
             hero_embed_config.num_heroes,
             hero_embed_config.embed_dim,
             vb.pp("hero_embed"),
         )?;
-        let fc1_input_dim = hero_embed_config.embed_dim + state_dim - 1;
-        let fc1 = candle_nn::linear(fc1_input_dim, hidden_dim, vb.pp("fc1"))?;
-        let fc2 = candle_nn::linear(hidden_dim, hidden_dim, vb.pp("fc2"))?;
-        let critic_head = candle_nn::linear(hidden_dim, 1, vb.pp("critic_head"))?;
+        let in_dim = hero_embed_config.embed_dim + state_dim - 1;
+
+        let (backbone, feat_dim) = match backbone_type {
+            PolicyBackbone::Mlp => {
+                let fc1 = candle_nn::linear(in_dim, hidden_dim, vb.pp("fc1"))?;
+                let fc2 = candle_nn::linear(hidden_dim, hidden_dim, vb.pp("fc2"))?;
+                (
+                    Backbone::Mlp {
+                        fc1,
+                        fc2,
+                        hidden_dim,
+                    },
+                    hidden_dim,
+                )
+            }
+            PolicyBackbone::Mamba => {
+                let mamba_config = MambaConfig::new(hidden_dim);
+                let proj_in = candle_nn::linear(in_dim, mamba_config.d_model, vb.pp("proj_in"))?;
+                let mamba = MambaBlock::new(&mamba_config, vb.pp("mamba"))?;
+                let feat_dim = mamba_config.d_model;
+                (
+                    Backbone::Mamba {
+                        proj_in,
+                        mamba,
+                        config: mamba_config,
+                    },
+                    feat_dim,
+                )
+            }
+        };
+
+        let critic_head = candle_nn::linear(feat_dim, 1, vb.pp("critic_head"))?;
 
         let (actor_out_dim, log_std, attack_head) = match action_space {
             ActionSpace::Discrete(n) => (n, None, None),
@@ -149,36 +742,108 @@ impl ActorCritic {
                     candle_nn::Init::Const(0.0),
                 )?),
                 Some(candle_nn::linear(
-                    hidden_dim,
+                    feat_dim,
                     discrete_classes,
                     vb.pp("attack_head"),
                 )?),
             ),
         };
-        let actor_head = candle_nn::linear(hidden_dim, actor_out_dim, vb.pp("actor_head"))?;
+        let actor_head = candle_nn::linear(feat_dim, actor_out_dim, vb.pp("actor_head"))?;
+
+        let belief_head = match belief_dim {
+            Some(b_dim) => Some(BeliefHead::new(feat_dim, b_dim, vb.pp("belief_head"))?),
+            None => None,
+        };
 
         Ok(Self {
             hero_embed: emb,
             hero_embed_config,
-            fc1,
-            fc2,
+            backbone,
             actor_head,
             log_std,
             attack_head,
             critic_head,
+            belief_head,
+            action_space,
+        })
+    }
+
+    pub fn with_hero_embed_and_mamba(
+        state_dim: usize,
+        _hidden_dim: usize,
+        action_space: ActionSpace,
+        hero_embed_config: HeroEmbedConfig,
+        mamba_config: MambaConfig,
+        belief_dim: Option<usize>,
+        vb: VarBuilder,
+    ) -> Result<Self> {
+        let emb = candle_nn::embedding(
+            hero_embed_config.num_heroes,
+            hero_embed_config.embed_dim,
+            vb.pp("hero_embed"),
+        )?;
+        let in_dim = hero_embed_config.embed_dim + state_dim - 1;
+        let proj_in = candle_nn::linear(in_dim, mamba_config.d_model, vb.pp("proj_in"))?;
+        let mamba = MambaBlock::new(&mamba_config, vb.pp("mamba"))?;
+        let feat_dim = mamba_config.d_model;
+        let backbone = Backbone::Mamba {
+            proj_in,
+            mamba,
+            config: mamba_config,
+        };
+
+        let critic_head = candle_nn::linear(feat_dim, 1, vb.pp("critic_head"))?;
+
+        let (actor_out_dim, log_std, attack_head) = match action_space {
+            ActionSpace::Discrete(n) => (n, None, None),
+            ActionSpace::Continuous(d) => (
+                d,
+                Some(vb.get_with_hints((d,), "log_std", candle_nn::Init::Const(0.0))?),
+                None,
+            ),
+            ActionSpace::Hybrid {
+                continuous_dims,
+                discrete_classes,
+            } => (
+                continuous_dims,
+                Some(vb.get_with_hints(
+                    (continuous_dims,),
+                    "log_std",
+                    candle_nn::Init::Const(0.0),
+                )?),
+                Some(candle_nn::linear(
+                    feat_dim,
+                    discrete_classes,
+                    vb.pp("attack_head"),
+                )?),
+            ),
+        };
+        let actor_head = candle_nn::linear(feat_dim, actor_out_dim, vb.pp("actor_head"))?;
+
+        let belief_head = match belief_dim {
+            Some(b_dim) => Some(BeliefHead::new(feat_dim, b_dim, vb.pp("belief_head"))?),
+            None => None,
+        };
+
+        Ok(Self {
+            hero_embed: emb,
+            hero_embed_config,
+            backbone,
+            actor_head,
+            log_std,
+            attack_head,
+            critic_head,
+            belief_head,
             action_space,
         })
     }
 
     /// 将策略网络权重复制并迁移到指定计算设备（例如将 GPU 权重克隆至 CPU）
     pub fn to_device(&self, device: &candle_core::Device) -> Result<Self> {
-        let fc1_w = self.fc1.weight().to_device(device)?;
-        let fc1_b = self.fc1.bias().map(|b| b.to_device(device)).transpose()?;
-        let fc1 = Linear::new(fc1_w, fc1_b);
+        let hero_w = self.hero_embed.embeddings().to_device(device)?;
+        let hero_embed = Embedding::new(hero_w, self.hero_embed_config.embed_dim);
 
-        let fc2_w = self.fc2.weight().to_device(device)?;
-        let fc2_b = self.fc2.bias().map(|b| b.to_device(device)).transpose()?;
-        let fc2 = Linear::new(fc2_w, fc2_b);
+        let backbone = self.backbone.to_device(device)?;
 
         let actor_w = self.actor_head.weight().to_device(device)?;
         let actor_b = self
@@ -212,18 +877,21 @@ impl ActorCritic {
             })
             .transpose()?;
 
-        let w = self.hero_embed.embeddings().to_device(device)?;
-        let hero_embed = Embedding::new(w, self.hero_embed.hidden_size());
+        let belief_head = self
+            .belief_head
+            .as_ref()
+            .map(|b| b.to_device(device))
+            .transpose()?;
 
         Ok(Self {
             hero_embed,
             hero_embed_config: self.hero_embed_config.clone(),
-            fc1,
-            fc2,
+            backbone,
             actor_head,
             log_std,
             attack_head,
             critic_head,
+            belief_head,
             action_space: self.action_space.clone(),
         })
     }
@@ -236,40 +904,70 @@ impl ActorCritic {
         &self.hero_embed_config
     }
 
+    pub fn backbone(&self) -> &Backbone {
+        &self.backbone
+    }
+
+    pub fn mamba_config(&self) -> Option<&MambaConfig> {
+        match &self.backbone {
+            Backbone::Mamba { config, .. } => Some(config),
+            Backbone::Mlp { .. } => None,
+        }
+    }
+
+    pub fn belief_head(&self) -> Option<&BeliefHead> {
+        self.belief_head.as_ref()
+    }
+
     pub fn has_hero_embed(&self) -> bool {
         true
     }
 
     /// Prepare the input by replacing hero_id float with embedding.
     fn prepare_input(&self, state: &Tensor) -> Result<Tensor> {
-        // state shape: (batch, state_dim)
-        // obs[0] = hero_id (float 0.0 or 1.0) → cast to u32 index
-        let hero_ids = state.narrow(1, 0, 1)?.squeeze(1)?.to_dtype(DType::U32)?;
-        let hero_vecs = self.hero_embed.forward(&hero_ids)?; // (batch, embed_dim)
-        let rest = state.narrow(1, 1, state.dim(1)? - 1)?; // (batch, state_dim - 1)
-        Tensor::cat(&[&hero_vecs, &rest], 1) // (batch, embed_dim + state_dim - 1)
+        if state.rank() == 3 {
+            let (_b, _l, state_dim) = state.dims3()?;
+            let hero_ids = state.narrow(2, 0, 1)?.squeeze(2)?.to_dtype(DType::U32)?;
+            let hero_vecs = self.hero_embed.forward(&hero_ids)?;
+            let rest = state.narrow(2, 1, state_dim - 1)?;
+            Tensor::cat(&[&hero_vecs, &rest], 2)?.contiguous()
+        } else {
+            let hero_ids = state.narrow(1, 0, 1)?.squeeze(1)?.to_dtype(DType::U32)?;
+            let hero_vecs = self.hero_embed.forward(&hero_ids)?;
+            let rest = state.narrow(1, 1, state.dim(1)? - 1)?;
+            Tensor::cat(&[&hero_vecs, &rest], 1)?.contiguous()
+        }
     }
 
-    /// 共享隐藏层输出。
+    /// 特征提取输出（支持 MLP 与 Mamba）。
     fn hidden(&self, state: &Tensor) -> Result<Tensor> {
         let input = self.prepare_input(state)?;
-        let h1 = self.fc1.forward(&input)?.tanh()?;
-        self.fc2.forward(&h1)?.tanh()
+        self.backbone.forward(&input)
     }
 
     /// Forward pass 返回 (actor_head 原始输出, values)。
-    /// 离散：logits (batch, n)；连续/混合：连续均值 (batch, continuous_dims)。
     pub fn forward(&self, state: &Tensor) -> Result<(Tensor, Tensor)> {
-        let h2 = self.hidden(state)?;
-        let out = self.actor_head.forward(&h2)?;
-        let values = self.critic_head.forward(&h2)?;
+        let feat = self.hidden(state)?;
+        let out = self.actor_head.forward(&feat)?;
+        let values = self.critic_head.forward(&feat)?;
         Ok((out, values))
+    }
+
+    /// 信念估计前向返回 Option<(mu, std)>
+    pub fn forward_belief(&self, state: &Tensor) -> Result<Option<(Tensor, Tensor)>> {
+        if let Some(ref bh) = self.belief_head {
+            let feat = self.hidden(state)?;
+            let (mu, std) = bh.forward(&feat)?;
+            Ok(Some((mu, std)))
+        } else {
+            Ok(None)
+        }
     }
 
     /// 批量获取 Critic 状态价值估值
     pub fn get_values(&self, state: &Tensor) -> Result<Vec<f32>> {
-        let h2 = self.hidden(state)?;
-        let values = self.critic_head.forward(&h2)?;
+        let feat = self.hidden(state)?;
+        let values = self.critic_head.forward(&feat)?;
         values.squeeze(1)?.to_vec1()
     }
 
@@ -279,19 +977,19 @@ impl ActorCritic {
         state: &Tensor,
         mask: Option<&[bool]>,
     ) -> Result<(Vec<f32>, f32, f32)> {
-        let h2 = self.hidden(state)?;
-        let values = self.critic_head.forward(&h2)?;
+        let feat = self.hidden(state)?;
+        let values = self.critic_head.forward(&feat)?;
         let val_scalar: f32 = values.squeeze(0)?.squeeze(0)?.to_scalar()?;
 
         match self.action_space {
             ActionSpace::Discrete(_) => {
-                let logits: Vec<f32> = self.actor_head.forward(&h2)?.squeeze(0)?.to_vec1()?;
+                let logits: Vec<f32> = self.actor_head.forward(&feat)?.squeeze(0)?.to_vec1()?;
                 let masked = mask_logits_slice(&logits, mask);
                 let (idx, log_prob) = sample_categorical(&masked);
                 Ok((vec![idx as f32], log_prob, val_scalar))
             }
             ActionSpace::Continuous(d) => {
-                let means: Vec<f32> = self.actor_head.forward(&h2)?.squeeze(0)?.to_vec1()?;
+                let means: Vec<f32> = self.actor_head.forward(&feat)?.squeeze(0)?.to_vec1()?;
                 let log_std: Vec<f32> = self.log_std.as_ref().unwrap().to_vec1()?;
                 let mut rng = rand::rng();
                 let mut encoded = Vec::with_capacity(d);
@@ -307,7 +1005,7 @@ impl ActorCritic {
             ActionSpace::Hybrid {
                 continuous_dims, ..
             } => {
-                let means: Vec<f32> = self.actor_head.forward(&h2)?.squeeze(0)?.to_vec1()?;
+                let means: Vec<f32> = self.actor_head.forward(&feat)?.squeeze(0)?.to_vec1()?;
                 let log_std: Vec<f32> = self.log_std.as_ref().unwrap().to_vec1()?;
                 let mut rng = rand::rng();
                 let mut encoded = Vec::with_capacity(continuous_dims + 1);
@@ -322,7 +1020,7 @@ impl ActorCritic {
                     .attack_head
                     .as_ref()
                     .unwrap()
-                    .forward(&h2)?
+                    .forward(&feat)?
                     .squeeze(0)?
                     .to_vec1()?;
                 let masked = mask_logits_slice(&attack_logits, mask);
@@ -344,15 +1042,15 @@ impl ActorCritic {
         if b == 0 {
             return Ok(Vec::new());
         }
-        let h2 = self.hidden(states)?;
-        let values = self.critic_head.forward(&h2)?;
+        let feat = self.hidden(states)?;
+        let values = self.critic_head.forward(&feat)?;
         let val_vec: Vec<f32> = values.squeeze(1)?.to_vec1()?;
 
         let mut results = Vec::with_capacity(b);
 
         match self.action_space {
             ActionSpace::Discrete(_) => {
-                let logits = self.actor_head.forward(&h2)?;
+                let logits = self.actor_head.forward(&feat)?;
                 let logits_mat: Vec<Vec<f32>> = logits.to_vec2()?;
                 for i in 0..b {
                     let mask_i = masks.and_then(|ms| ms.get(i)).and_then(|m| m.as_deref());
@@ -362,7 +1060,7 @@ impl ActorCritic {
                 }
             }
             ActionSpace::Continuous(d) => {
-                let means_mat: Vec<Vec<f32>> = self.actor_head.forward(&h2)?.to_vec2()?;
+                let means_mat: Vec<Vec<f32>> = self.actor_head.forward(&feat)?.to_vec2()?;
                 let log_std: Vec<f32> = self.log_std.as_ref().unwrap().to_vec1()?;
                 let mut rng = rand::rng();
                 for i in 0..b {
@@ -381,10 +1079,14 @@ impl ActorCritic {
             ActionSpace::Hybrid {
                 continuous_dims, ..
             } => {
-                let means_mat: Vec<Vec<f32>> = self.actor_head.forward(&h2)?.to_vec2()?;
+                let means_mat: Vec<Vec<f32>> = self.actor_head.forward(&feat)?.to_vec2()?;
                 let log_std: Vec<f32> = self.log_std.as_ref().unwrap().to_vec1()?;
-                let attack_logits_mat: Vec<Vec<f32>> =
-                    self.attack_head.as_ref().unwrap().forward(&h2)?.to_vec2()?;
+                let attack_logits_mat: Vec<Vec<f32>> = self
+                    .attack_head
+                    .as_ref()
+                    .unwrap()
+                    .forward(&feat)?
+                    .to_vec2()?;
                 let mut rng = rand::rng();
 
                 for i in 0..b {
@@ -413,26 +1115,26 @@ impl ActorCritic {
 
     /// 确定性贪心动作（连续取均值、离散取 argmax），用于可视化与评估。
     pub fn select_greedy_action(&self, state: &Tensor, mask: Option<&[bool]>) -> Result<Vec<f32>> {
-        let h2 = self.hidden(state)?;
+        let feat = self.hidden(state)?;
         match self.action_space {
             ActionSpace::Discrete(_) => {
-                let logits: Vec<f32> = self.actor_head.forward(&h2)?.squeeze(0)?.to_vec1()?;
+                let logits: Vec<f32> = self.actor_head.forward(&feat)?.squeeze(0)?.to_vec1()?;
                 let masked = mask_logits_slice(&logits, mask);
                 Ok(vec![argmax(&masked) as f32])
             }
             ActionSpace::Continuous(d) => {
-                let means: Vec<f32> = self.actor_head.forward(&h2)?.squeeze(0)?.to_vec1()?;
+                let means: Vec<f32> = self.actor_head.forward(&feat)?.squeeze(0)?.to_vec1()?;
                 Ok(means[..d].to_vec())
             }
             ActionSpace::Hybrid {
                 continuous_dims, ..
             } => {
-                let means: Vec<f32> = self.actor_head.forward(&h2)?.squeeze(0)?.to_vec1()?;
+                let means: Vec<f32> = self.actor_head.forward(&feat)?.squeeze(0)?.to_vec1()?;
                 let attack_logits: Vec<f32> = self
                     .attack_head
                     .as_ref()
                     .unwrap()
-                    .forward(&h2)?
+                    .forward(&feat)?
                     .squeeze(0)?
                     .to_vec1()?;
                 let masked = mask_logits_slice(&attack_logits, mask);
@@ -450,10 +1152,10 @@ impl ActorCritic {
         mask: Option<&[bool]>,
         labels: &[&str],
     ) -> Result<PolicyDisplay> {
-        let h2 = self.hidden(state)?;
+        let feat = self.hidden(state)?;
         match self.action_space {
             ActionSpace::Discrete(_) => {
-                let logits: Vec<f32> = self.actor_head.forward(&h2)?.squeeze(0)?.to_vec1()?;
+                let logits: Vec<f32> = self.actor_head.forward(&feat)?.squeeze(0)?.to_vec1()?;
                 let raw_probs_vec = softmax_slice(&logits);
                 let masked = mask_logits_slice(&logits, mask);
                 let probs_vec = softmax_slice(&masked);
@@ -484,12 +1186,12 @@ impl ActorCritic {
                 continuous_dims,
                 discrete_classes,
             } => {
-                let means: Vec<f32> = self.actor_head.forward(&h2)?.squeeze(0)?.to_vec1()?;
+                let means: Vec<f32> = self.actor_head.forward(&feat)?.squeeze(0)?.to_vec1()?;
                 let attack_logits: Vec<f32> = self
                     .attack_head
                     .as_ref()
                     .unwrap()
-                    .forward(&h2)?
+                    .forward(&feat)?
                     .squeeze(0)?
                     .to_vec1()?;
                 let raw_discrete_probs_vec = softmax_slice(&attack_logits);
@@ -542,7 +1244,88 @@ impl ActorCritic {
         }
     }
 
+    /// 单步状态化采样（支持环境采样循环中的循环状态递推）
+    pub fn step(
+        &self,
+        state: &Tensor,
+        state_obj: &mut Option<MambaState>,
+        mask: Option<&[bool]>,
+    ) -> Result<(Vec<f32>, f32, f32)> {
+        match &self.backbone {
+            Backbone::Mlp { .. } => self.sample_action(state, mask),
+            Backbone::Mamba {
+                proj_in,
+                mamba,
+                config,
+            } => {
+                if state_obj.is_none() {
+                    *state_obj = Some(MambaState::new(1, config, state.device())?);
+                }
+                let s = state_obj.as_mut().unwrap();
+                let input = self.prepare_input(state)?;
+                let x_proj = proj_in.forward(&input)?;
+                let feat = mamba.step(&x_proj, s)?;
+                let values = self.critic_head.forward(&feat)?;
+                let val_scalar: f32 = values.squeeze(0)?.squeeze(0)?.to_scalar()?;
+
+                match self.action_space {
+                    ActionSpace::Discrete(_) => {
+                        let logits: Vec<f32> =
+                            self.actor_head.forward(&feat)?.squeeze(0)?.to_vec1()?;
+                        let masked = mask_logits_slice(&logits, mask);
+                        let (idx, log_prob) = sample_categorical(&masked);
+                        Ok((vec![idx as f32], log_prob, val_scalar))
+                    }
+                    ActionSpace::Continuous(d) => {
+                        let means: Vec<f32> =
+                            self.actor_head.forward(&feat)?.squeeze(0)?.to_vec1()?;
+                        let log_std: Vec<f32> = self.log_std.as_ref().unwrap().to_vec1()?;
+                        let mut rng = rand::rng();
+                        let mut encoded = Vec::with_capacity(d);
+                        let mut log_prob = 0.0;
+                        for i in 0..d {
+                            let std = log_std[i].exp();
+                            let a = means[i] + std * sample_gaussian(&mut rng);
+                            encoded.push(a);
+                            log_prob += gaussian_log_prob(means[i], std, a);
+                        }
+                        Ok((encoded, log_prob, val_scalar))
+                    }
+                    ActionSpace::Hybrid {
+                        continuous_dims, ..
+                    } => {
+                        let means: Vec<f32> =
+                            self.actor_head.forward(&feat)?.squeeze(0)?.to_vec1()?;
+                        let log_std: Vec<f32> = self.log_std.as_ref().unwrap().to_vec1()?;
+                        let attack_logits: Vec<f32> = self
+                            .attack_head
+                            .as_ref()
+                            .unwrap()
+                            .forward(&feat)?
+                            .squeeze(0)?
+                            .to_vec1()?;
+                        let mut rng = rand::rng();
+                        let mut encoded = Vec::with_capacity(continuous_dims + 1);
+                        let mut log_prob = 0.0;
+                        for i in 0..continuous_dims {
+                            let std = log_std[i].exp();
+                            let a = means[i] + std * sample_gaussian(&mut rng);
+                            encoded.push(a);
+                            log_prob += gaussian_log_prob(means[i], std, a);
+                        }
+                        let masked = mask_logits_slice(&attack_logits, mask);
+                        let (idx, cat_log_prob) = sample_categorical(&masked);
+                        encoded.push(idx as f32);
+                        log_prob += cat_log_prob;
+                        Ok((encoded, log_prob, val_scalar))
+                    }
+                }
+            }
+        }
+    }
+
     /// PPO update：给定 (state, actions, masks) 计算 (log_probs, values, entropy)。
+    /// state 支持 2D (n, state_dim) 或 3D (batch_chunks, seq_len, state_dim)。
     /// actions 形状 (n, encoding_dim)，Discrete=1 / Continuous=d / Hybrid=d+1。
     /// masks 形状 (n, num_classes)，用于屏蔽非法离散动作（1.0 = 有效，0.0 = 屏蔽）。
     pub fn evaluate_actions(
@@ -551,13 +1334,19 @@ impl ActorCritic {
         actions: &Tensor,
         masks: Option<&Tensor>,
     ) -> Result<(Tensor, Tensor, Tensor)> {
-        let n = state.dim(0)?;
-        let h2 = self.hidden(state)?;
-        let values = self.critic_head.forward(&h2)?;
+        let feat = if state.rank() == 3 {
+            let (b, t, _) = state.dims3()?;
+            let feat_3d = self.hidden(state)?;
+            feat_3d.reshape((b * t, self.backbone.output_dim()))?
+        } else {
+            self.hidden(state)?
+        };
+        let n = feat.dim(0)?;
+        let values = self.critic_head.forward(&feat)?;
 
         match self.action_space {
             ActionSpace::Discrete(_) => {
-                let logits = self.actor_head.forward(&h2)?;
+                let logits = self.actor_head.forward(&feat)?;
                 let masked_logits = mask_logits_tensor(&logits, masks)?;
                 let log_probs_all = candle_nn::ops::log_softmax(&masked_logits, D::Minus1)?;
                 let probs_all = candle_nn::ops::softmax(&masked_logits, D::Minus1)?;
@@ -570,7 +1359,7 @@ impl ActorCritic {
                 Ok((selected_log_probs, values.squeeze(1)?, entropy))
             }
             ActionSpace::Continuous(d) => {
-                let means = self.actor_head.forward(&h2)?;
+                let means = self.actor_head.forward(&feat)?;
                 let log_std = self.log_std.as_ref().unwrap();
                 let log_std_b = log_std.broadcast_as((n, d))?;
                 let std_b = log_std_b.exp()?;
@@ -594,7 +1383,7 @@ impl ActorCritic {
             ActionSpace::Hybrid {
                 continuous_dims, ..
             } => {
-                let means = self.actor_head.forward(&h2)?;
+                let means = self.actor_head.forward(&feat)?;
                 let log_std = self.log_std.as_ref().unwrap();
                 let log_std_b = log_std.broadcast_as((n, continuous_dims))?;
                 let std_b = log_std_b.exp()?;
@@ -614,7 +1403,7 @@ impl ActorCritic {
                     .affine(1.0, (0.5 + HALF_LN_2PI) as f64)?
                     .sum(D::Minus1)?;
 
-                let attack_logits = self.attack_head.as_ref().unwrap().forward(&h2)?;
+                let attack_logits = self.attack_head.as_ref().unwrap().forward(&feat)?;
                 let masked = mask_logits_tensor(&attack_logits, masks)?;
                 let log_probs_all = candle_nn::ops::log_softmax(&masked, D::Minus1)?;
                 let probs_all = candle_nn::ops::softmax(&masked, D::Minus1)?;

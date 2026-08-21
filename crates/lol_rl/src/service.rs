@@ -597,16 +597,24 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment + 'static>(
     let state_dim = E::state_dim();
     let action_space = E::action_space();
     let total_iterations = task_config.total_iterations.max(1);
-    let hidden_dim = task_config.hidden_dim.max(64);
+    let hidden_dim = task_config.hidden_dim.max(32);
     let device = crate::device::select_device().unwrap_or(candle_core::Device::Cpu);
+    let backbone = task_config.backbone();
 
     // 1. 自动吞吐探测与求解
-    let mut tuned = match AutoTuner::profile::<E>(state_dim, hidden_dim, &action_space, &device) {
+    let mut tuned = match AutoTuner::profile_with_backbone::<E>(
+        state_dim,
+        hidden_dim,
+        &action_space,
+        &device,
+        backbone,
+    ) {
         Ok(profile) => {
             let res = AutoTuner::solve(&profile, rollout_steps, task_config.ppo_epochs.max(1));
             info!(
-                "🎯 [AutoTuner] 为任务 {} 自动求解最优吞吐配置: 并发 Actors={}, 推理 Batch={}, 训练 MiniBatch={}, 预估 SPS: {:.1}",
+                "🎯 [AutoTuner] 为任务 {} (主干: {}) 自动求解最优吞吐配置: 并发 Actors={}, 推理 Batch={}, 训练 MiniBatch={}, 预估 SPS: {:.1}",
                 task_id,
+                backbone,
                 res.num_parallel_envs,
                 res.infer_batch_size,
                 res.train_batch_size,
@@ -641,7 +649,7 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment + 'static>(
     //     实测 SPS（与 UI 同口径）覆盖组件级预估
     let mut calib_config = tuned.clone();
     calib_config.num_parallel_envs = num_parallel_envs;
-    match AutoTuner::calibrate::<E>(
+    match AutoTuner::calibrate_with_backbone::<E>(
         state_dim,
         hidden_dim,
         &action_space,
@@ -649,6 +657,7 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment + 'static>(
         rollout_steps,
         task_config.ppo_epochs.max(1),
         &calib_config,
+        backbone,
     ) {
         Ok(measured) => {
             tuned.estimated_sps = measured;
@@ -684,12 +693,13 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment + 'static>(
         max_grad_norm: 0.5,
     };
 
-    let agent = match PPOAgent::create_for_env::<E>(
+    let agent = match PPOAgent::create_for_env_with_backbone::<E>(
         state_dim,
         hidden_dim,
         action_space.clone(),
         ppo_config,
         device.clone(),
+        backbone,
     ) {
         Ok(a) => a,
         Err(e) => {

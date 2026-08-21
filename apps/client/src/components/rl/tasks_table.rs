@@ -15,8 +15,11 @@ use rust_i18n::t;
 use crate::components::sidebar::AppSidebar;
 use crate::types::ActiveView;
 
-/// 可选算法模型（后端当前仅实现 PPO）。
-const AGENT_OPTIONS: &[&str] = &["PPO"];
+/// 可选算法模型（PPO + Mamba 状态空间模型 或 PPO + MLP 无状态感知机）。
+const AGENT_OPTIONS: &[&str] = &[
+    lol_rl_protocol::AGENT_PPO_MAMBA,
+    lol_rl_protocol::AGENT_PPO_MLP,
+];
 
 /// 任务概览表 delegate：驱动 `DataTable` 的列宽/单元格渲染，并反向通信到 `AppSidebar`。
 pub struct TaskTableDelegate {
@@ -33,7 +36,7 @@ impl TaskTableDelegate {
                 Column::new("task", t!("app.rl.col_task"))
                     .width(px(180.))
                     .min_width(px(120.)),
-                Column::new("agent", t!("app.rl.col_algorithm")).width(px(90.)),
+                Column::new("agent", t!("app.rl.col_algorithm")).width(px(110.)),
                 Column::new("env", t!("app.rl.col_env")).width(px(160.)),
                 Column::new("status", t!("app.rl.col_status"))
                     .width(px(90.))
@@ -196,7 +199,7 @@ impl TableDelegate for TaskTableDelegate {
 }
 
 fn agent_label(raw: &str) -> String {
-    raw.split_whitespace().next().unwrap_or(raw).to_string()
+    raw.to_string()
 }
 
 fn env_label(raw: &str) -> String {
@@ -883,10 +886,27 @@ impl Render for CreateTaskDialogView {
                                                                 menu = menu.item(
                                                                     PopupMenuItem::new(alg.clone())
                                                                         .checked(checked)
-                                                                        .on_click(move |_, _, cx| {
+                                                                        .on_click(move |_, window, cx| {
                                                                             if let Some(view) = weak.upgrade() {
                                                                                 let _ = view.update(cx, |this, cx| {
                                                                                     this.form.agent_type = alg_val.clone();
+                                                                                    let is_mlp = alg_val.contains("MLP");
+                                                                                    this.form.backbone = Some(if is_mlp {
+                                                                                        lol_rl_protocol::PolicyBackbone::Mlp
+                                                                                    } else {
+                                                                                        lol_rl_protocol::PolicyBackbone::Mamba
+                                                                                    });
+                                                                                    if is_mlp && this.form.hidden_dim == 64 {
+                                                                                        this.form.hidden_dim = 256;
+                                                                                        this.hidden_dim_input.update(cx, |i, cx| {
+                                                                                            i.set_value("256".to_string(), window, cx);
+                                                                                        });
+                                                                                    } else if !is_mlp && this.form.hidden_dim == 256 {
+                                                                                        this.form.hidden_dim = 64;
+                                                                                        this.hidden_dim_input.update(cx, |i, cx| {
+                                                                                            i.set_value("64".to_string(), window, cx);
+                                                                                        });
+                                                                                    }
                                                                                     cx.notify();
                                                                                 });
                                                                             }
@@ -1004,15 +1024,28 @@ impl Render for CreateTaskDialogView {
                                 cx,
                                 |this, val| this.form.ppo_epochs = val,
                             ))
-                            // 隐藏层维度
-                            .child(self.render_int_setting(
-                                "隐藏层维度 (Hidden Dim)",
-                                &self.hidden_dim_input,
-                                cfg.hidden_dim,
-                                vec![32, 64, 128, 256],
-                                cx,
-                                |this, val| this.form.hidden_dim = val,
-                            ))
+                            // 策略模型工作维度（动态判断 MLP 或 Mamba）
+                            .child({
+                                let is_mlp = cfg.agent_type.contains("MLP") || cfg.backbone == Some(lol_rl_protocol::PolicyBackbone::Mlp);
+                                let dim_label = if is_mlp {
+                                    "MLP 隐藏层 (Hidden Dim)"
+                                } else {
+                                    "Mamba 维度 (d_model)"
+                                };
+                                let dim_presets = if is_mlp {
+                                    vec![32, 64, 128, 256, 512]
+                                } else {
+                                    vec![32, 64, 96, 128, 256]
+                                };
+                                self.render_int_setting(
+                                    dim_label,
+                                    &self.hidden_dim_input,
+                                    cfg.hidden_dim,
+                                    dim_presets,
+                                    cx,
+                                    |this, val| this.form.hidden_dim = val,
+                                )
+                            })
                             // 总训练迭代轮次
                             .child(self.render_int_setting(
                                 "总迭代轮次 (Iterations)",

@@ -58,6 +58,22 @@ impl AutoTuner {
         action_space: &ActionSpace,
         device: &Device,
     ) -> Result<SystemProfile> {
+        Self::profile_with_backbone::<E>(
+            state_dim,
+            hidden_dim,
+            action_space,
+            device,
+            lol_rl_protocol::PolicyBackbone::Mamba,
+        )
+    }
+
+    pub fn profile_with_backbone<E: RlEnvironment + 'static>(
+        state_dim: usize,
+        hidden_dim: usize,
+        action_space: &ActionSpace,
+        device: &Device,
+        backbone_type: lol_rl_protocol::PolicyBackbone,
+    ) -> Result<SystemProfile> {
         let cpu_cores = num_cpus::get();
         let is_cuda = !device.is_cpu();
         let agents_per_env = E::num_agents().max(1);
@@ -71,7 +87,8 @@ impl AutoTuner {
         };
 
         info!(
-            "🔍 [AutoTuner] 开始硬件算力探测 (Device: {:?}, CPU逻辑核心: {}, 每环境智能体: {})...",
+            "🔍 [AutoTuner] 开始硬件算力探测 (Backbone: {:?}, Device: {:?}, CPU逻辑核心: {}, 每环境智能体: {})...",
+            backbone_type,
             if is_cuda { "CUDA / GPU" } else { "CPU" },
             cpu_cores,
             agents_per_env
@@ -94,12 +111,13 @@ impl AutoTuner {
             ppo_epochs: 1,
             ..Default::default()
         };
-        let mut agent = PPOAgent::create_for_env::<E>(
+        let mut agent = PPOAgent::create_for_env_with_backbone::<E>(
             state_dim,
             hidden_dim,
             action_space.clone(),
             ppo_config,
             device.clone(),
+            backbone_type,
         )?;
         let cpu_policy = Arc::new(agent.actor_critic.to_device(&candle_core::Device::Cpu)?);
 
@@ -354,6 +372,8 @@ impl AutoTuner {
     /// 真实校准：用候选配置复用真实 [`TrainingSession`]（机制 A）跑 K 轮完整迭代，
     /// 测出与 UI `fps` 完全同口径的真实 SPS（同步 CPU 推理 + PPO 反向更新）。
     ///
+    /// 真实校准：用实际生效配置复用真实 TrainingSession 跑 K 轮完整迭代，
+    /// 测量真实的完整迭代墙钟耗时与实测 SPS，覆盖组件级预估。
     /// 迭代轮数由 `MOON_LOL_CALIBRATE_ITERS` 控制（默认 2），设 0 或 `MOON_LOL_NO_CALIBRATE=1` 跳过。
     pub fn calibrate<E: RlEnvironment + 'static>(
         state_dim: usize,
@@ -364,13 +384,36 @@ impl AutoTuner {
         ppo_epochs: usize,
         tuned: &TunedConfig,
     ) -> Result<f64> {
+        Self::calibrate_with_backbone::<E>(
+            state_dim,
+            hidden_dim,
+            action_space,
+            device,
+            horizon,
+            ppo_epochs,
+            tuned,
+            lol_rl_protocol::PolicyBackbone::Mamba,
+        )
+    }
+
+    pub fn calibrate_with_backbone<E: RlEnvironment + 'static>(
+        state_dim: usize,
+        hidden_dim: usize,
+        action_space: &ActionSpace,
+        device: &Device,
+        horizon: usize,
+        ppo_epochs: usize,
+        tuned: &TunedConfig,
+        backbone_type: lol_rl_protocol::PolicyBackbone,
+    ) -> Result<f64> {
         let iters = calibrate_iters();
         if iters == 0 {
             return Ok(tuned.estimated_sps);
         }
 
         info!(
-            "🎯 [AutoTuner] 真实校准：{} 并发 Workers 跑 {iters} 轮完整真实迭代，测量实测 SPS...",
+            "🎯 [AutoTuner] 真实校准 (主干: {:?})：{} 并发 Workers 跑 {iters} 轮完整真实迭代，测量实测 SPS...",
+            backbone_type,
             tuned.num_parallel_envs
         );
         let ppo_config = PPOConfig {
@@ -384,12 +427,13 @@ impl AutoTuner {
             clip_vloss: true,
             max_grad_norm: 0.5,
         };
-        let agent = PPOAgent::create_for_env::<E>(
+        let agent = PPOAgent::create_for_env_with_backbone::<E>(
             state_dim,
             hidden_dim,
             action_space.clone(),
             ppo_config,
             device.clone(),
+            backbone_type,
         )?;
         let mut session = crate::training::TrainingSession::<E>::new(
             agent,

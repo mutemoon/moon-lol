@@ -192,8 +192,8 @@ app:
       zh-CN: "总轮次"
       en: "Total Iters"
     col_hidden_dim:
-      zh-CN: "隐藏神经元"
-      en: "Hidden Dim"
+      zh-CN: "Mamba 维度"
+      en: "Mamba Dim"
     col_parallel:
       zh-CN: "并行局数"
       en: "Parallel Envs"
