@@ -267,8 +267,8 @@ macro_rules! for_all_rl_environments {
     ($macro_name:ident) => {
         $macro_name!(
             (
-                $crate::fiora_riven_selfplay::FioraRivenSelfPlayEnv,
-                lol_rl_protocol::ENV_FIORA_RIVEN_SELFPLAY
+                $crate::solo_v0::SoloV0Env,
+                lol_rl_protocol::ENV_SOLO_V0
             ),
             ($crate::fiora_v2::FioraV2Env, lol_rl_protocol::ENV_FIORA_V2),
             (
@@ -285,7 +285,7 @@ macro_rules! for_all_rl_environments {
 
 pub fn list_available_envs() -> Vec<EnvMeta> {
     vec![
-        crate::fiora_riven_selfplay::FioraRivenSelfPlayEnv::meta(),
+        crate::solo_v0::SoloV0Env::meta(),
         crate::fiora_v2::FioraV2Env::meta(),
         crate::fiora_v1::FioraVsRivenRealEnv::meta(),
         crate::fiora_v0::FioraVsRivenEnv::meta(),

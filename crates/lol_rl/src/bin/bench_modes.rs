@@ -7,7 +7,7 @@ use std::sync::atomic::AtomicBool;
 
 use crossbeam_channel::unbounded;
 use lol_env::RlEnvironment;
-use lol_env::fiora_riven_selfplay::FioraRivenSelfPlayEnv;
+use lol_env::solo_v0::SoloV0Env;
 use lol_rl::async_engine::actor::SampleTransition;
 use lol_rl::async_engine::{ActorPool, AsyncLearner, InferenceServer};
 use lol_rl::device::select_device;
@@ -32,8 +32,8 @@ fn main() -> anyhow::Result<()> {
     };
 
     let device = select_device().unwrap_or(candle_core::Device::Cpu);
-    let state_dim = <FioraRivenSelfPlayEnv as RlEnvironment>::state_dim();
-    let action_space = FioraRivenSelfPlayEnv::action_space();
+    let state_dim = <SoloV0Env as RlEnvironment>::state_dim();
+    let action_space = SoloV0Env::action_space();
     let hidden_dim = 64;
     let horizon = 64;
 
@@ -72,7 +72,7 @@ fn main() -> anyhow::Result<()> {
                 200,
                 device.clone(),
             );
-            let mut actor_pool = ActorPool::spawn::<FioraRivenSelfPlayEnv>(
+            let mut actor_pool = ActorPool::spawn::<SoloV0Env>(
                 envs,
                 infer_server.req_tx.clone(),
                 sample_tx,

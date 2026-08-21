@@ -1,5 +1,4 @@
 pub mod fiora_riven_common;
-pub mod fiora_riven_selfplay;
 pub mod fiora_v0;
 pub mod fiora_v1;
 pub mod fiora_v2;
@@ -8,6 +7,7 @@ pub mod obs_plugins;
 pub mod parallel;
 pub mod raycast_plugin;
 pub mod reward;
+pub mod solo_v0;
 pub mod traits;
 pub mod visual_runner;
 
@@ -15,9 +15,10 @@ pub use fiora_riven_common::{
     ATTACK_MASK_DISTANCE, FioraRivenBaseEnv, FioraRivenEntities, FioraRivenEnvBuilder,
     OBS_DISTANCE_IDX, OBS_DISTANCE_SCALE,
 };
-pub use fiora_riven_selfplay::{
-    FioraRivenSelfPlayEnv, SELFPLAY_OBS_DIM, SELFPLAY_OBS_DISTANCE_SCALE, SELFPLAY_OFFSET_SCALE,
-    SelfPlayAction, SelfPlayDiscreteAction, SelfPlayObs,
+pub use solo_v0::{
+    SOLO_V0_CHAMPION_HP, SOLO_V0_OBS_DIM, SOLO_V0_OBS_DISTANCE_SCALE, SOLO_V0_OFFSET_SCALE,
+    SoloV0Action, SoloV0DiscreteAction, SoloV0Env, SoloV0Obs, setup_solo_v0_env_world,
+    setup_solo_v0_health_world, step_solo_v0_world,
 };
 pub use fiora_v0::{
     FioraVsRivenAction, FioraVsRivenEnv, FioraVsRivenObs, advance_action_simulation,
@@ -39,8 +40,8 @@ pub use obs_plugins::{
     extract_r_vital, extract_skill_cds,
 };
 pub use parallel::{
-    ParallelEnvs, ParallelFioraRivenSelfPlayEnvs, ParallelFioraV2Envs, ParallelFioraVsRivenEnvs,
-    ParallelFioraVsRivenRealEnvs,
+    ParallelEnvs, ParallelFioraV2Envs, ParallelFioraVsRivenEnvs, ParallelFioraVsRivenRealEnvs,
+    ParallelSoloV0Envs,
 };
 pub use raycast_plugin::raycast_ground_plane;
 pub use reward::{FioraRewardContext, FioraVsRivenRewardModel, RewardModel};

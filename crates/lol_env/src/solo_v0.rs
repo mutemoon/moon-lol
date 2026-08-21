@@ -22,18 +22,18 @@ use crate::traits::{EnvConfig, EnvMeta, RenderMode, RlEnvironment, StepResult, V
 
 // ── 常量定义 ─────────────────────────────────────────────────────────────────
 
-pub const SELFPLAY_OFFSET_SCALE: f32 = 100.0;
-pub const SELFPLAY_OBS_DIM: usize = 36;
-pub const SELFPLAY_OBS_DISTANCE_SCALE: f32 = 100.0;
-pub const SELFPLAY_CHAMPION_HP: f32 = 1000.0;
+pub const SOLO_V0_OFFSET_SCALE: f32 = 100.0;
+pub const SOLO_V0_OBS_DIM: usize = 36;
+pub const SOLO_V0_OBS_DISTANCE_SCALE: f32 = 100.0;
+pub const SOLO_V0_CHAMPION_HP: f32 = 1000.0;
 
 // ── 初始化与重置 ─────────────────────────────────────────────────────────────
 
-pub fn setup_selfplay_health_world(world: &mut World, fiora: Entity, riven: Entity) {
+pub fn setup_solo_v0_health_world(world: &mut World, fiora: Entity, riven: Entity) {
     for champion in [fiora, riven] {
         if let Some(mut hp) = world.get_mut::<Health>(champion) {
-            hp.value = SELFPLAY_CHAMPION_HP;
-            hp.max = SELFPLAY_CHAMPION_HP;
+            hp.value = SOLO_V0_CHAMPION_HP;
+            hp.max = SOLO_V0_CHAMPION_HP;
         }
         if let Some(mut flash) = world.get_mut::<FlashCooldown>(champion) {
             flash.reset();
@@ -49,7 +49,7 @@ pub fn setup_selfplay_health_world(world: &mut World, fiora: Entity, riven: Enti
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-pub enum SelfPlayDiscreteAction {
+pub enum SoloV0DiscreteAction {
     NoOp = 0,
     Move = 1,
     Attack = 2,
@@ -60,7 +60,7 @@ pub enum SelfPlayDiscreteAction {
     CastFlash = 7,
 }
 
-impl SelfPlayDiscreteAction {
+impl SoloV0DiscreteAction {
     pub fn from_u8(val: u8) -> Self {
         match val {
             0 => Self::NoOp,
@@ -81,14 +81,14 @@ impl SelfPlayDiscreteAction {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
-pub struct SelfPlayAction {
+pub struct SoloV0Action {
     pub offset_x: f32,
     pub offset_z: f32,
-    pub discrete: SelfPlayDiscreteAction,
+    pub discrete: SoloV0DiscreteAction,
 }
 
-impl SelfPlayAction {
-    pub const fn new(offset_x: f32, offset_z: f32, discrete: SelfPlayDiscreteAction) -> Self {
+impl SoloV0Action {
+    pub const fn new(offset_x: f32, offset_z: f32, discrete: SoloV0DiscreteAction) -> Self {
         Self {
             offset_x,
             offset_z,
@@ -103,7 +103,7 @@ impl SelfPlayAction {
         Self {
             offset_x,
             offset_z,
-            discrete: SelfPlayDiscreteAction::from_u8(discrete_idx),
+            discrete: SoloV0DiscreteAction::from_u8(discrete_idx),
         }
     }
 
@@ -113,41 +113,41 @@ impl SelfPlayAction {
 
     pub fn preset_from_index(index: usize) -> Self {
         match index {
-            0 => Self::new(0.0, 0.0, SelfPlayDiscreteAction::NoOp),
-            1 => Self::new(0.5, 0.0, SelfPlayDiscreteAction::Move),
-            2 => Self::new(0.0, 0.0, SelfPlayDiscreteAction::Attack),
-            3 => Self::new(0.5, 0.0, SelfPlayDiscreteAction::CastQ),
-            4 => Self::new(0.0, 0.0, SelfPlayDiscreteAction::CastW),
-            5 => Self::new(0.0, 0.0, SelfPlayDiscreteAction::CastE),
-            6 => Self::new(0.0, 0.0, SelfPlayDiscreteAction::CastR),
-            7 => Self::new(1.0, 0.0, SelfPlayDiscreteAction::CastFlash),
-            _ => Self::new(0.0, 0.0, SelfPlayDiscreteAction::NoOp),
+            0 => Self::new(0.0, 0.0, SoloV0DiscreteAction::NoOp),
+            1 => Self::new(0.5, 0.0, SoloV0DiscreteAction::Move),
+            2 => Self::new(0.0, 0.0, SoloV0DiscreteAction::Attack),
+            3 => Self::new(0.5, 0.0, SoloV0DiscreteAction::CastQ),
+            4 => Self::new(0.0, 0.0, SoloV0DiscreteAction::CastW),
+            5 => Self::new(0.0, 0.0, SoloV0DiscreteAction::CastE),
+            6 => Self::new(0.0, 0.0, SoloV0DiscreteAction::CastR),
+            7 => Self::new(1.0, 0.0, SoloV0DiscreteAction::CastFlash),
+            _ => Self::new(0.0, 0.0, SoloV0DiscreteAction::NoOp),
         }
     }
 
     pub fn preset_index(&self) -> usize {
         match self.discrete {
-            SelfPlayDiscreteAction::NoOp => 0,
-            SelfPlayDiscreteAction::Move => 1,
-            SelfPlayDiscreteAction::Attack => 2,
-            SelfPlayDiscreteAction::CastQ => 3,
-            SelfPlayDiscreteAction::CastW => 4,
-            SelfPlayDiscreteAction::CastE => 5,
-            SelfPlayDiscreteAction::CastR => 6,
-            SelfPlayDiscreteAction::CastFlash => 7,
+            SoloV0DiscreteAction::NoOp => 0,
+            SoloV0DiscreteAction::Move => 1,
+            SoloV0DiscreteAction::Attack => 2,
+            SoloV0DiscreteAction::CastQ => 3,
+            SoloV0DiscreteAction::CastW => 4,
+            SoloV0DiscreteAction::CastE => 5,
+            SoloV0DiscreteAction::CastR => 6,
+            SoloV0DiscreteAction::CastFlash => 7,
         }
     }
 
     pub fn desc(&self) -> &'static str {
         match self.discrete {
-            SelfPlayDiscreteAction::NoOp => "保持当前 (NoOp)",
-            SelfPlayDiscreteAction::Move => "移动",
-            SelfPlayDiscreteAction::Attack => "普通攻击",
-            SelfPlayDiscreteAction::CastQ => "施放 Q",
-            SelfPlayDiscreteAction::CastW => "施放 W",
-            SelfPlayDiscreteAction::CastE => "施放 E",
-            SelfPlayDiscreteAction::CastR => "施放 R",
-            SelfPlayDiscreteAction::CastFlash => "闪现",
+            SoloV0DiscreteAction::NoOp => "保持当前 (NoOp)",
+            SoloV0DiscreteAction::Move => "移动",
+            SoloV0DiscreteAction::Attack => "普通攻击",
+            SoloV0DiscreteAction::CastQ => "施放 Q",
+            SoloV0DiscreteAction::CastW => "施放 W",
+            SoloV0DiscreteAction::CastE => "施放 E",
+            SoloV0DiscreteAction::CastR => "施放 R",
+            SoloV0DiscreteAction::CastFlash => "闪现",
         }
     }
 }
@@ -155,7 +155,7 @@ impl SelfPlayAction {
 // ── 自我中心化观测数据结构 ─────────────────────────────────────────────────────
 
 #[derive(Debug, Clone)]
-pub struct SelfPlayObs {
+pub struct SoloV0Obs {
     pub role_id: f32,
 
     pub self_pos: Vec3,
@@ -202,7 +202,7 @@ pub struct SelfPlayObs {
     pub flash_cd_remaining: f32,
 }
 
-impl SelfPlayObs {
+impl SoloV0Obs {
     pub fn to_vector(&self) -> Vec<f32> {
         let rel_x = self.target_pos.x - self.self_pos.x;
         let rel_z = self.target_pos.z - self.self_pos.z;
@@ -226,9 +226,9 @@ impl SelfPlayObs {
             b2f(self.r_is_active),
             self.r_active_timer_remaining / 0.5,
             self.r_remove_timer_remaining / 8.0,
-            self.distance / SELFPLAY_OBS_DISTANCE_SCALE,
-            rel_x / SELFPLAY_OBS_DISTANCE_SCALE,
-            rel_z / SELFPLAY_OBS_DISTANCE_SCALE,
+            self.distance / SOLO_V0_OBS_DISTANCE_SCALE,
+            rel_x / SOLO_V0_OBS_DISTANCE_SCALE,
+            rel_z / SOLO_V0_OBS_DISTANCE_SCALE,
             b2f(self.attack_state == 0),
             b2f(self.attack_is_windup),
             b2f(self.attack_is_cooldown),
@@ -249,7 +249,7 @@ impl SelfPlayObs {
     }
 
     pub fn dim() -> usize {
-        SELFPLAY_OBS_DIM
+        SOLO_V0_OBS_DIM
     }
 
     pub fn to_payload(&self) -> ObsFeaturePayload {
@@ -326,28 +326,28 @@ impl SelfPlayObs {
 // ── 环境主体 ─────────────────────────────────────────────────────────────────
 
 /// 统一的有头/无头世界初始化与重置逻辑（双方 1000 血量与闪现重置）
-pub fn setup_selfplay_env_world(fiora: Entity, riven: Entity, world: &mut World) {
-    setup_selfplay_health_world(world, fiora, riven);
+pub fn setup_solo_v0_env_world(fiora: Entity, riven: Entity, world: &mut World) {
+    setup_solo_v0_health_world(world, fiora, riven);
 }
 
-pub struct FioraRivenSelfPlayEnv {
+pub struct SoloV0Env {
     pub base: FioraRivenBaseEnv,
 }
 
-impl std::ops::Deref for FioraRivenSelfPlayEnv {
+impl std::ops::Deref for SoloV0Env {
     type Target = FioraRivenBaseEnv;
     fn deref(&self) -> &Self::Target {
         &self.base
     }
 }
 
-impl std::ops::DerefMut for FioraRivenSelfPlayEnv {
+impl std::ops::DerefMut for SoloV0Env {
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.base
     }
 }
 
-impl FioraRivenSelfPlayEnv {
+impl SoloV0Env {
     pub const DEFAULT_MAX_STEPS: usize = 160;
 
     pub fn new() -> Self {
@@ -363,11 +363,11 @@ impl FioraRivenSelfPlayEnv {
 
     pub fn with_config(config: EnvConfig) -> Self {
         let base = FioraRivenBaseEnv::builder(config, Self::DEFAULT_MAX_STEPS)
-            .window_title("Fiora vs Riven (Self-Play RL Viewer)")
+            .window_title("Solo 1v1 V0 (Self-Play RL Viewer)")
             .initial_positions(Vec3::ZERO, Vec3::new(0.0, 0.0, 300.0))
             .with_plugin(register_flash_plugin)
-            .on_ready(setup_selfplay_env_world)
-            .on_reset(setup_selfplay_env_world)
+            .on_ready(setup_solo_v0_env_world)
+            .on_reset(setup_solo_v0_env_world)
             .build();
 
         Self { base }
@@ -415,7 +415,7 @@ impl FioraRivenSelfPlayEnv {
         self.base.step_count()
     }
 
-    pub fn reset_both(&mut self) -> Vec<SelfPlayObs> {
+    pub fn reset_both(&mut self) -> Vec<SoloV0Obs> {
         self.base.reset_base();
         vec![
             get_ego_obs_from_world(self.base.world(), self.base.fiora, self.base.riven, 0.0),
@@ -425,11 +425,11 @@ impl FioraRivenSelfPlayEnv {
 
     pub fn step_both(
         &mut self,
-        act_fiora: SelfPlayAction,
-        act_riven: SelfPlayAction,
-    ) -> (StepResult<SelfPlayObs>, StepResult<SelfPlayObs>) {
+        act_fiora: SoloV0Action,
+        act_riven: SoloV0Action,
+    ) -> (StepResult<SoloV0Obs>, StepResult<SoloV0Obs>) {
         self.base.increment_step();
-        step_selfplay_world(
+        step_solo_v0_world(
             &mut self.base.app,
             self.base.fiora,
             self.base.riven,
@@ -443,9 +443,9 @@ impl FioraRivenSelfPlayEnv {
 
 // ── RlEnvironment Trait 实现 ─────────────────────────────────────────────────
 
-impl RlEnvironment for FioraRivenSelfPlayEnv {
-    type Action = SelfPlayAction;
-    type Obs = SelfPlayObs;
+impl RlEnvironment for SoloV0Env {
+    type Action = SoloV0Action;
+    type Obs = SoloV0Obs;
 
     fn num_agents() -> usize {
         2
@@ -456,15 +456,15 @@ impl RlEnvironment for FioraRivenSelfPlayEnv {
     }
 
     fn env_name() -> &'static str {
-        "FioraRivenSelfplay"
+        "SoloV0"
     }
 
     fn display_name() -> &'static str {
-        "剑姬 vs 瑞雯 (自博弈全技能)"
+        "Solo 1v1 (自博弈 V0)"
     }
 
     fn description() -> &'static str {
-        "剑姬 vs 瑞雯 双智能体自博弈环境（对称竞技血量1000，全技能+闪现）"
+        "剑姬 vs 瑞雯 Solo 1v1 双智能体自博弈环境（对称竞技血量1000，全技能+闪现）"
     }
 
     fn action_space() -> ActionSpace {
@@ -479,7 +479,7 @@ impl RlEnvironment for FioraRivenSelfPlayEnv {
     }
 
     fn state_dim() -> usize {
-        SELFPLAY_OBS_DIM
+        SOLO_V0_OBS_DIM
     }
 
     fn action_labels() -> &'static [&'static str] {
@@ -537,7 +537,7 @@ impl RlEnvironment for FioraRivenSelfPlayEnv {
     }
 
     fn action_from_index(idx: usize) -> Self::Action {
-        SelfPlayAction::preset_from_index(idx)
+        SoloV0Action::preset_from_index(idx)
     }
 
     fn action_to_index(action: Self::Action) -> usize {
@@ -545,7 +545,7 @@ impl RlEnvironment for FioraRivenSelfPlayEnv {
     }
 
     fn action_from_encoding(encoded: &[f32]) -> Self::Action {
-        SelfPlayAction::from_encoding(encoded)
+        SoloV0Action::from_encoding(encoded)
     }
 
     fn action_to_encoding(action: Self::Action) -> Vec<f32> {
@@ -580,7 +580,7 @@ impl RlEnvironment for FioraRivenSelfPlayEnv {
         let fiora_action = actions
             .first()
             .copied()
-            .unwrap_or(SelfPlayAction::new(0.0, 0.0, SelfPlayDiscreteAction::NoOp));
+            .unwrap_or(SoloV0Action::new(0.0, 0.0, SoloV0DiscreteAction::NoOp));
         let riven_action = if actions.len() > 1 {
             actions[1]
         } else {
@@ -633,7 +633,7 @@ impl RlEnvironment for FioraRivenSelfPlayEnv {
     fn reward_formula_spec() -> Option<RewardFormulaSpec> {
         use lol_rl_protocol::RewardExpr;
         Some(RewardFormulaSpec {
-            name: "自博弈对决公式 (SelfPlay)".to_string(),
+            name: "Solo 1v1 对决公式 (SoloV0)".to_string(),
             terms: vec![
                 RewardTermSpec::new(
                     "damage_dealt",
@@ -674,13 +674,13 @@ impl RlEnvironment for FioraRivenSelfPlayEnv {
 
 // ── VisualEnvironment Trait 实现 ─────────────────────────────────────────────
 
-impl VisualEnvironment for FioraRivenSelfPlayEnv {
+impl VisualEnvironment for SoloV0Env {
     fn take_app(&mut self) -> App {
         std::mem::replace(&mut self.base.app, App::new())
     }
 
     fn window_title(&self) -> &'static str {
-        "Fiora vs Riven (Self-Play RL Viewer)"
+        "Solo 1v1 V0 (Self-Play RL Viewer)"
     }
 
     fn is_assets_loaded(&self, world: &World) -> bool {
@@ -689,7 +689,7 @@ impl VisualEnvironment for FioraRivenSelfPlayEnv {
 
     fn on_assets_loaded(&mut self, world: &mut World) {
         setup_skill_levels_world(world, self.base.fiora, self.base.riven);
-        setup_selfplay_env_world(self.base.fiora, self.base.riven, world);
+        setup_solo_v0_env_world(self.base.fiora, self.base.riven, world);
     }
 
     fn reset_world(&mut self, world: &mut World) -> Vec<Self::Obs> {
@@ -711,7 +711,7 @@ impl VisualEnvironment for FioraRivenSelfPlayEnv {
         &mut self,
         world: &mut World,
         screen_pos: Vec2,
-    ) -> Option<SelfPlayAction> {
+    ) -> Option<SoloV0Action> {
         let rpos = world.get::<Transform>(self.base.riven)?.translation;
         let hit = raycast_ground_plane(world, screen_pos, rpos.y)?;
 
@@ -720,18 +720,18 @@ impl VisualEnvironment for FioraRivenSelfPlayEnv {
         let dist = (dx * dx + dz * dz).sqrt();
 
         if dist < 60.0 {
-            Some(SelfPlayAction::new(
+            Some(SoloV0Action::new(
                 0.0,
                 0.0,
-                SelfPlayDiscreteAction::Attack,
+                SoloV0DiscreteAction::Attack,
             ))
         } else {
-            let nx = (dx / SELFPLAY_OFFSET_SCALE).clamp(-1.0, 1.0);
-            let nz = (dz / SELFPLAY_OFFSET_SCALE).clamp(-1.0, 1.0);
-            Some(SelfPlayAction::new(
+            let nx = (dx / SOLO_V0_OFFSET_SCALE).clamp(-1.0, 1.0);
+            let nz = (dz / SOLO_V0_OFFSET_SCALE).clamp(-1.0, 1.0);
+            Some(SoloV0Action::new(
                 nx,
                 nz,
-                SelfPlayDiscreteAction::Move,
+                SoloV0DiscreteAction::Move,
             ))
         }
     }
@@ -744,7 +744,7 @@ impl VisualEnvironment for FioraRivenSelfPlayEnv {
         let fiora_action = actions
             .first()
             .copied()
-            .unwrap_or(SelfPlayAction::new(0.0, 0.0, SelfPlayDiscreteAction::NoOp));
+            .unwrap_or(SoloV0Action::new(0.0, 0.0, SoloV0DiscreteAction::NoOp));
         let riven_action = if actions.len() > 1 {
             actions[1]
         } else {
@@ -752,7 +752,7 @@ impl VisualEnvironment for FioraRivenSelfPlayEnv {
         };
 
         self.base.increment_step();
-        let (f_res, r_res) = step_selfplay_world(
+        let (f_res, r_res) = step_solo_v0_world(
             app,
             self.base.fiora,
             self.base.riven,
@@ -771,7 +771,7 @@ pub fn get_default_riven_combat_action(
     world: &World,
     riven: Entity,
     fiora: Entity,
-) -> SelfPlayAction {
+) -> SoloV0Action {
     let r_base = extract_champion_base(world, riven);
     let f_base = extract_champion_base(world, fiora);
     let dist = r_base.pos.distance(f_base.pos);
@@ -779,7 +779,7 @@ pub fn get_default_riven_combat_action(
     let skills = extract_skill_cds(world, riven);
 
     if atk.is_windup {
-        return SelfPlayAction::new(0.0, 0.0, SelfPlayDiscreteAction::NoOp);
+        return SoloV0Action::new(0.0, 0.0, SoloV0DiscreteAction::NoOp);
     }
 
     let vital = extract_passive_vital(world, riven);
@@ -791,24 +791,24 @@ pub fn get_default_riven_combat_action(
 
     if dist <= ATTACK_MASK_DISTANCE {
         if skills[1].ready {
-            SelfPlayAction::new(0.0, 0.0, SelfPlayDiscreteAction::CastW)
+            SoloV0Action::new(0.0, 0.0, SoloV0DiscreteAction::CastW)
         } else if skills[0].ready {
-            SelfPlayAction::new(offset_x, offset_z, SelfPlayDiscreteAction::CastQ)
+            SoloV0Action::new(offset_x, offset_z, SoloV0DiscreteAction::CastQ)
         } else if !atk.is_cooldown {
-            SelfPlayAction::new(0.0, 0.0, SelfPlayDiscreteAction::Attack)
+            SoloV0Action::new(0.0, 0.0, SoloV0DiscreteAction::Attack)
         } else if skills[2].ready {
-            SelfPlayAction::new(offset_x, offset_z, SelfPlayDiscreteAction::CastE)
+            SoloV0Action::new(offset_x, offset_z, SoloV0DiscreteAction::CastE)
         } else if skills[3].ready {
-            SelfPlayAction::new(0.0, 0.0, SelfPlayDiscreteAction::CastR)
+            SoloV0Action::new(0.0, 0.0, SoloV0DiscreteAction::CastR)
         } else {
-            SelfPlayAction::new(offset_x, offset_z, SelfPlayDiscreteAction::Move)
+            SoloV0Action::new(offset_x, offset_z, SoloV0DiscreteAction::Move)
         }
     } else if skills[2].ready {
-        SelfPlayAction::new(0.0, 0.0, SelfPlayDiscreteAction::CastE)
+        SoloV0Action::new(0.0, 0.0, SoloV0DiscreteAction::CastE)
     } else if skills[0].ready {
-        SelfPlayAction::new(0.0, 0.0, SelfPlayDiscreteAction::CastQ)
+        SoloV0Action::new(0.0, 0.0, SoloV0DiscreteAction::CastQ)
     } else {
-        SelfPlayAction::new(0.0, 0.0, SelfPlayDiscreteAction::Move)
+        SoloV0Action::new(0.0, 0.0, SoloV0DiscreteAction::Move)
     }
 }
 
@@ -817,7 +817,7 @@ pub fn get_ego_obs_from_world(
     self_entity: Entity,
     target_entity: Entity,
     role_id: f32,
-) -> SelfPlayObs {
+) -> SoloV0Obs {
     let self_base = extract_champion_base(world, self_entity);
     let target_base = extract_champion_base(world, target_entity);
     let dist = self_base.pos.distance(target_base.pos);
@@ -836,7 +836,7 @@ pub fn get_ego_obs_from_world(
     let skills = extract_skill_cds(world, self_entity);
     let (flash_ready, flash_cd) = extract_flash_obs(world, self_entity);
 
-    SelfPlayObs {
+    SoloV0Obs {
         role_id,
         self_pos: self_base.pos,
         self_hp: self_base.hp,
@@ -882,7 +882,7 @@ pub fn dispatch_single_action(
     world: &mut World,
     self_entity: Entity,
     target_entity: Entity,
-    action: SelfPlayAction,
+    action: SoloV0Action,
 ) {
     let tpos = world
         .get::<Transform>(target_entity)
@@ -894,26 +894,26 @@ pub fn dispatch_single_action(
         .unwrap_or_default();
 
     let target_offset_pos = Vec3::new(
-        tpos.x + action.offset_x.clamp(-1.0, 1.0) * SELFPLAY_OFFSET_SCALE,
+        tpos.x + action.offset_x.clamp(-1.0, 1.0) * SOLO_V0_OFFSET_SCALE,
         tpos.y,
-        tpos.z + action.offset_z.clamp(-1.0, 1.0) * SELFPLAY_OFFSET_SCALE,
+        tpos.z + action.offset_z.clamp(-1.0, 1.0) * SOLO_V0_OFFSET_SCALE,
     );
 
     match action.discrete {
-        SelfPlayDiscreteAction::NoOp => {}
-        SelfPlayDiscreteAction::Move => {
+        SoloV0DiscreteAction::NoOp => {}
+        SoloV0DiscreteAction::Move => {
             world.trigger(CommandAction {
                 entity: self_entity,
                 action: Action::Move(Vec2::new(target_offset_pos.x, target_offset_pos.z)),
             });
         }
-        SelfPlayDiscreteAction::Attack => {
+        SoloV0DiscreteAction::Attack => {
             world.trigger(CommandAction {
                 entity: self_entity,
                 action: Action::Attack(target_entity),
             });
         }
-        SelfPlayDiscreteAction::CastQ => {
+        SoloV0DiscreteAction::CastQ => {
             world.trigger(CommandAction {
                 entity: self_entity,
                 action: Action::Skill {
@@ -922,7 +922,7 @@ pub fn dispatch_single_action(
                 },
             });
         }
-        SelfPlayDiscreteAction::CastW => {
+        SoloV0DiscreteAction::CastW => {
             world.trigger(CommandAction {
                 entity: self_entity,
                 action: Action::Skill {
@@ -931,7 +931,7 @@ pub fn dispatch_single_action(
                 },
             });
         }
-        SelfPlayDiscreteAction::CastE => {
+        SoloV0DiscreteAction::CastE => {
             world.trigger(CommandAction {
                 entity: self_entity,
                 action: Action::Skill {
@@ -940,7 +940,7 @@ pub fn dispatch_single_action(
                 },
             });
         }
-        SelfPlayDiscreteAction::CastR => {
+        SoloV0DiscreteAction::CastR => {
             world.trigger(CommandAction {
                 entity: self_entity,
                 action: Action::Skill {
@@ -949,7 +949,7 @@ pub fn dispatch_single_action(
                 },
             });
         }
-        SelfPlayDiscreteAction::CastFlash => {
+        SoloV0DiscreteAction::CastFlash => {
             let offset_dir = Vec3::new(action.offset_x, 0.0, action.offset_z);
             let dir = if offset_dir.length_squared() > 1e-4 {
                 offset_dir.normalize()
@@ -966,15 +966,15 @@ pub fn dispatch_single_action(
     }
 }
 
-pub fn step_selfplay_world(
+pub fn step_solo_v0_world(
     app: &mut App,
     fiora: Entity,
     riven: Entity,
-    act_fiora: SelfPlayAction,
-    act_riven: SelfPlayAction,
+    act_fiora: SoloV0Action,
+    act_riven: SoloV0Action,
     step_count: usize,
     max_steps: usize,
-) -> (StepResult<SelfPlayObs>, StepResult<SelfPlayObs>) {
+) -> (StepResult<SoloV0Obs>, StepResult<SoloV0Obs>) {
     let prev_f_obs = get_ego_obs_from_world(app.world(), fiora, riven, 0.0);
     let prev_r_obs = get_ego_obs_from_world(app.world(), riven, fiora, 1.0);
     let prev_f_hp = prev_f_obs.self_hp;

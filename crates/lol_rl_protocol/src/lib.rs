@@ -366,7 +366,7 @@ pub struct TaskConfigPayload {
     pub total_iterations: usize,
 }
 
-pub const ENV_FIORA_RIVEN_SELFPLAY: &str = "FioraRivenSelfPlay";
+pub const ENV_SOLO_V0: &str = "SoloV0";
 pub const ENV_FIORA_V2: &str = "FioraV2";
 pub const ENV_FIORA_V1: &str = "FioraV1";
 pub const ENV_FIORA_V0: &str = "FioraV0";
@@ -394,10 +394,10 @@ pub struct EnvSpec {
     pub default_params: EnvTrainingParams,
 }
 
-pub const ENV_FIORA_RIVEN_SELFPLAY_SPEC: EnvSpec = EnvSpec {
-    name: ENV_FIORA_RIVEN_SELFPLAY,
-    label: "剑姬 vs 瑞雯 (双Agent自博弈)",
-    tag: "SelfPlay",
+pub const ENV_SOLO_V0_SPEC: EnvSpec = EnvSpec {
+    name: ENV_SOLO_V0,
+    label: "剑姬 vs 瑞雯 (Solo 1v1 自博弈)",
+    tag: "SoloV0",
     description: "单神经网络通过 role_id (0:剑姬, 1:瑞雯) 自博弈对抗，对称零和奖励与自我中心化全技能对决",
     default_params: EnvTrainingParams {
         lr: 3e-4,
@@ -463,7 +463,7 @@ pub const ENV_FIORA_V0_SPEC: EnvSpec = EnvSpec {
 };
 
 pub const AVAILABLE_ENVS: &[EnvSpec] = &[
-    ENV_FIORA_RIVEN_SELFPLAY_SPEC,
+    ENV_SOLO_V0_SPEC,
     ENV_FIORA_V2_SPEC,
     ENV_FIORA_V1_SPEC,
     ENV_FIORA_V0_SPEC,

@@ -1,15 +1,13 @@
-use lol_env::fiora_riven_selfplay::{
-    FioraRivenSelfPlayEnv, SelfPlayAction, SelfPlayDiscreteAction,
-};
-use lol_env::parallel::ParallelFioraRivenSelfPlayEnvs;
+use lol_env::parallel::ParallelSoloV0Envs;
+use lol_env::solo_v0::{SoloV0Action, SoloV0DiscreteAction, SoloV0Env};
 use lol_env::traits::{EnvConfig, RenderMode, RlEnvironment};
 
 #[test]
 fn test_multi_agent_selfplay_signatures_and_throughput() {
-    assert_eq!(FioraRivenSelfPlayEnv::num_agents(), 2);
-    assert_eq!(FioraRivenSelfPlayEnv::agent_names(), &["Fiora", "Riven"]);
+    assert_eq!(SoloV0Env::num_agents(), 2);
+    assert_eq!(SoloV0Env::agent_names(), &["Fiora", "Riven"]);
 
-    let mut env = FioraRivenSelfPlayEnv::with_config(EnvConfig {
+    let mut env = SoloV0Env::with_config(EnvConfig {
         max_steps: 50,
         render_mode: RenderMode::Headless,
     });
@@ -19,8 +17,8 @@ fn test_multi_agent_selfplay_signatures_and_throughput() {
     assert_eq!(initial_obs[0].role_id, 0.0, "首个智能体应为剑姬 (0.0)");
     assert_eq!(initial_obs[1].role_id, 1.0, "次个智能体应为瑞雯 (1.0)");
 
-    let act_fiora = SelfPlayAction::new(0.5, 0.0, SelfPlayDiscreteAction::Move);
-    let act_riven = SelfPlayAction::new(-0.5, 0.0, SelfPlayDiscreteAction::Move);
+    let act_fiora = SoloV0Action::new(0.5, 0.0, SoloV0DiscreteAction::Move);
+    let act_riven = SoloV0Action::new(-0.5, 0.0, SoloV0DiscreteAction::Move);
 
     let step_res = env.step(&[act_fiora, act_riven]);
     assert_eq!(step_res.len(), 2, "应同时返回双方各自的 StepResult");
@@ -31,7 +29,7 @@ fn test_multi_agent_selfplay_signatures_and_throughput() {
 #[test]
 fn test_multi_agent_parallel_envs_batch_throughput() {
     let num_envs = 4;
-    let par_envs = ParallelFioraRivenSelfPlayEnvs::with_config(
+    let par_envs = ParallelSoloV0Envs::with_config(
         num_envs,
         EnvConfig {
             max_steps: 20,
@@ -53,7 +51,7 @@ fn test_multi_agent_parallel_envs_batch_throughput() {
     );
 
     let flat_actions =
-        vec![SelfPlayAction::new(0.0, 0.0, SelfPlayDiscreteAction::NoOp); num_envs * 2];
+        vec![SoloV0Action::new(0.0, 0.0, SoloV0DiscreteAction::NoOp); num_envs * 2];
     let flat_res = par_envs.step_all_flat(&flat_actions);
     assert_eq!(
         flat_res.len(),

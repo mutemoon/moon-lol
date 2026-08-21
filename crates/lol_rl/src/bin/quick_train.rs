@@ -1,6 +1,6 @@
-use lol_env::fiora_riven_selfplay::FioraRivenSelfPlayEnv;
+use lol_env::solo_v0::SoloV0Env;
 use lol_rl::service::{OutFrame, run_direct_training};
-use lol_rl_protocol::{ENV_FIORA_RIVEN_SELFPLAY, TaskConfigPayload};
+use lol_rl_protocol::{ENV_SOLO_V0, TaskConfigPayload};
 use tracing::{Level, info};
 use tracing_subscriber::EnvFilter;
 
@@ -13,8 +13,8 @@ fn main() -> anyhow::Result<()> {
 
     info!("🚀 [QuickTrain] 启动内部自博弈深度训练（目标突破 10 万步）...");
 
-    let mut config = TaskConfigPayload::default_for_env(ENV_FIORA_RIVEN_SELFPLAY);
-    config.name = "QuickTrain-SelfPlay-100k".to_string();
+    let mut config = TaskConfigPayload::default_for_env(ENV_SOLO_V0);
+    config.name = "QuickTrain-SoloV0-100k".to_string();
     config.total_iterations = 180; // 180 轮 (预估 120,000 ~ 180,000 步)
 
     info!(
@@ -27,7 +27,7 @@ fn main() -> anyhow::Result<()> {
         config.ppo_epochs
     );
 
-    let (mut rx, handle) = run_direct_training::<FioraRivenSelfPlayEnv>(config);
+    let (mut rx, handle) = run_direct_training::<SoloV0Env>(config);
 
     while let Ok(msg) = rx.blocking_recv() {
         match msg {
