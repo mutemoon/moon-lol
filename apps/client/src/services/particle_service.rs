@@ -8,7 +8,7 @@
 
 use std::collections::HashMap;
 use std::path::PathBuf;
-use std::sync::atomic::{AtomicU64, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
@@ -16,8 +16,11 @@ use lol_share::ConfigVfxSystemDefinition;
 use serde::{Deserialize, Serialize};
 use tokio::sync::{mpsc, oneshot};
 
-use super::ws_bridge::{run_frame_connection, SendOutcome};
+use super::runtime::tokio_runtime;
+use super::ws_bridge::{run_auto_reconnect_loop, SendOutcome};
+use crate::components::sidebar::AppSidebar;
 
+pub const DEFAULT_PARTICLE_SERVER_URL: &str = "ws://127.0.0.1:9002";
 const REQUEST_TIMEOUT: Duration = Duration::from_secs(8);
 
 // ── 公开类型 ──
@@ -40,11 +43,20 @@ pub enum ParticleWsEvent {
 #[derive(Clone)]
 pub struct ParticleWsHandle {
     cmd_tx: mpsc::UnboundedSender<WsCmd>,
+    is_connected: Arc<AtomicBool>,
 }
 
 impl ParticleWsHandle {
+    /// 是否当前已建立 WebSocket 连接。
+    pub fn is_connected(&self) -> bool {
+        self.is_connected.load(Ordering::SeqCst)
+    }
+
     /// 播放粒子：把 RON 定义发给 server。在 cx.spawn 内 await。
     pub async fn play_particle(&self, def_ron: &str) -> Result<(), String> {
+        if !self.is_connected() {
+            return Err("粒子渲染服务未连接 (ws://127.0.0.1:9002)".to_string());
+        }
         let cmd_tx = self.cmd_tx.clone();
         let def_ron = def_ron.to_string();
         // request_via 内部依赖 tokio::time::timeout，必须在全局 tokio runtime 内跑。
@@ -62,17 +74,15 @@ impl ParticleWsHandle {
 
     /// 停止粒子播放。在 cx.spawn 内 await。
     pub async fn stop_particle(&self) -> Result<(), String> {
+        if !self.is_connected() {
+            return Err("粒子渲染服务未连接 (ws://127.0.0.1:9002)".to_string());
+        }
         let cmd_tx = self.cmd_tx.clone();
         super::runtime::run_on_tokio(move || async move {
             request_via(&cmd_tx, "stop_particle", serde_json::json!({})).await?;
             Ok(())
         })
         .await
-    }
-
-    /// 主动断开 WS（发送 Disconnect 命令让后台任务退出）。
-    pub fn disconnect(&self) {
-        let _ = self.cmd_tx.send(WsCmd::Disconnect);
     }
 }
 
@@ -86,7 +96,6 @@ enum WsCmd {
         params: serde_json::Value,
         reply: oneshot::Sender<WrappedResult>,
     },
-    Disconnect,
 }
 
 #[derive(Serialize)]
@@ -108,24 +117,48 @@ struct WsResponse {
 
 // ── 公开 API ──
 
-/// 启动粒子 WS 连接。
-///
-/// 后台任务管理 WS 连接生命周期。
-/// 返回客户端句柄（发送 play/stop 命令）和事件接收器（Connected / Disconnected）。
-pub fn connect_to_particle_server(
-    url: &str,
-) -> (ParticleWsHandle, mpsc::UnboundedReceiver<ParticleWsEvent>) {
+/// 启动粒子 WS 后台长效自动重连服务，并绑定 UI 状态通知。
+pub fn spawn_particle_service(
+    entity_weak: gpui::WeakEntity<AppSidebar>,
+    cx: &mut gpui::Context<AppSidebar>,
+) -> ParticleWsHandle {
+    let (event_tx, mut event_rx) = mpsc::unbounded_channel::<ParticleWsEvent>();
     let (cmd_tx, mut cmd_rx) = mpsc::unbounded_channel::<WsCmd>();
-    let (event_tx, event_rx) = mpsc::unbounded_channel::<ParticleWsEvent>();
-    let url = url.to_string();
+    let is_connected = Arc::new(AtomicBool::new(false));
 
-    // 复用全局 tokio runtime 跑粒子 WS 后台任务（不阻塞 gpui 主线程）
-    super::runtime::tokio_runtime().spawn(async move {
+    // 1. GPUI 线程监听事件并驱动 AppSidebar 状态
+    let entity_weak_ui = entity_weak.clone();
+    cx.spawn(move |_, cx: &mut gpui::AsyncApp| {
+        let mut cx = cx.clone();
+        async move {
+            while let Some(event) = event_rx.recv().await {
+                let _ = entity_weak_ui.update(&mut cx, |sidebar, cx| {
+                    match event {
+                        ParticleWsEvent::Connected => {
+                            sidebar.particles.connected = true;
+                            sidebar.particles.error = None;
+                        }
+                        ParticleWsEvent::Disconnected { error } => {
+                            sidebar.particles.connected = false;
+                            if let Some(e) = error {
+                                sidebar.particles.error = Some(e);
+                            }
+                        }
+                    }
+                    cx.notify();
+                });
+            }
+        }
+    })
+    .detach();
+
+    // 2. Tokio 后台任务：无限自动重连
+    let is_connected_bg = is_connected.clone();
+    tokio_runtime().spawn(async move {
         let next_id = AtomicU64::new(1);
         let pending: Arc<Mutex<HashMap<u64, oneshot::Sender<WrappedResult>>>> =
             Arc::new(Mutex::new(HashMap::new()));
 
-        // 请求 → JSON 文本帧；Disconnect → 终止连接
         let encode = {
             let pending = pending.clone();
             move |cmd: WsCmd| match cmd {
@@ -143,11 +176,9 @@ pub fn connect_to_particle_server(
                         }
                     }
                 }
-                WsCmd::Disconnect => SendOutcome::Close,
             }
         };
 
-        // 响应 → 匹配 pending 表，同步回填 oneshot（RPC 语义，不产生 UI 事件）
         let decode = {
             let pending = pending.clone();
             move |bytes: &[u8]| {
@@ -170,42 +201,37 @@ pub fn connect_to_particle_server(
             }
         };
 
-        let connected = run_frame_connection(
-            &url,
+        let is_conn_1 = is_connected_bg.clone();
+        let is_conn_2 = is_connected_bg.clone();
+        let pending_disconn = pending.clone();
+        let ev_tx_conn = event_tx.clone();
+        let ev_tx_disconn = event_tx.clone();
+
+        run_auto_reconnect_loop(
+            || DEFAULT_PARTICLE_SERVER_URL.to_string(),
             &mut cmd_rx,
-            event_tx.clone(),
-            || {
-                let _ = event_tx.send(ParticleWsEvent::Connected);
+            event_tx,
+            Duration::from_secs(2),
+            move || {
+                is_conn_1.store(true, Ordering::SeqCst);
+                let _ = ev_tx_conn.send(ParticleWsEvent::Connected);
+            },
+            move || {
+                is_conn_2.store(false, Ordering::SeqCst);
+                for (_, reply) in pending_disconn.lock().unwrap().drain() {
+                    let _ = reply.send(Err("粒子服务连接断开".to_string()));
+                }
+                let _ = ev_tx_disconn.send(ParticleWsEvent::Disconnected { error: None });
             },
             encode,
             decode,
         )
         .await;
-
-        if !connected {
-            // 连接失败：清空命令队列，对所有命令回复错误
-            drain_commands(cmd_rx).await;
-            let _ = event_tx.send(ParticleWsEvent::Disconnected {
-                error: Some("无法连接到粒子渲染 server".to_string()),
-            });
-        } else {
-            // 清理未完成的请求
-            for (_, reply) in pending.lock().unwrap().drain() {
-                let _ = reply.send(Err("连接已关闭".to_string()));
-            }
-            let _ = event_tx.send(ParticleWsEvent::Disconnected { error: None });
-        }
     });
 
-    (ParticleWsHandle { cmd_tx }, event_rx)
-}
-
-/// 连接失败或关闭后清空命令队列，对所有命令回复错误。
-async fn drain_commands(mut cmd_rx: mpsc::UnboundedReceiver<WsCmd>) {
-    while let Some(cmd) = cmd_rx.recv().await {
-        if let WsCmd::Request { reply, .. } = cmd {
-            let _ = reply.send(Err("未连接".to_string()));
-        }
+    ParticleWsHandle {
+        cmd_tx,
+        is_connected,
     }
 }
 

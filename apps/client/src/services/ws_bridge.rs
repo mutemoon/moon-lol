@@ -5,8 +5,11 @@
 //! （connect → split → 读写双端 select → 断开）完全一致，统一收敛到这里，
 //! 各调用方只需提供编码/解码函数。
 
+use std::time::Duration;
+
 use futures_util::{SinkExt, StreamExt};
 use tokio::sync::mpsc;
+use tokio::time::sleep;
 use tokio_tungstenite::connect_async;
 use tokio_tungstenite::tungstenite::Message;
 
@@ -19,6 +22,7 @@ pub enum SendOutcome {
     /// 编码失败/无需发送，跳过该命令。
     Skip,
     /// 终止连接（如显式 Disconnect）。
+    #[allow(dead_code)]
     Close,
 }
 
@@ -32,7 +36,7 @@ pub async fn run_frame_connection<Cmd, Ev>(
     url: &str,
     cmd_rx: &mut mpsc::UnboundedReceiver<Cmd>,
     event_tx: mpsc::UnboundedSender<Ev>,
-    on_connected: impl Fn(),
+    mut on_connected: impl FnMut(),
     encode: impl Fn(Cmd) -> SendOutcome,
     decode: impl Fn(&[u8]) -> Option<Ev>,
 ) -> bool {
@@ -91,4 +95,47 @@ pub async fn run_frame_connection<Cmd, Ev>(
         _ = write_loop => {}
     }
     true
+}
+
+/// 自动重连长连接循环：在连接断开或建连失败后按设定间隔自动重试。
+///
+/// - `url_fn`: 动态获取目标 WS URL 的闭包或字符串提供者。
+/// - `cmd_rx`: 外部输入命令接收通道。
+/// - `event_tx`: 向 UI 发送事件的通道。
+/// - `retry_interval`: 重试间隔。
+/// - `on_connected`: 每次建连成功的回调（例如通知 UI 已连接、发送初始查询帧等）。
+/// - `on_disconnected`: 每次连接断开或建连失败时的回调（例如通知 UI 未连接、清理 pending RPC 等）。
+/// - `encode`: 将业务命令转换为 `SendOutcome`。
+/// - `decode`: 将接收到的字节转换为业务事件 `Ev`。
+pub async fn run_auto_reconnect_loop<Cmd, Ev, FUrl, FConn, FDisconn, FEnc, FDec>(
+    url_fn: FUrl,
+    cmd_rx: &mut mpsc::UnboundedReceiver<Cmd>,
+    event_tx: mpsc::UnboundedSender<Ev>,
+    retry_interval: Duration,
+    mut on_connected: FConn,
+    mut on_disconnected: FDisconn,
+    encode: FEnc,
+    decode: FDec,
+) where
+    FUrl: Fn() -> String,
+    FConn: FnMut(),
+    FDisconn: FnMut(),
+    FEnc: Fn(Cmd) -> SendOutcome,
+    FDec: Fn(&[u8]) -> Option<Ev>,
+{
+    loop {
+        let url = url_fn();
+        let _ = run_frame_connection(
+            &url,
+            cmd_rx,
+            event_tx.clone(),
+            &mut on_connected,
+            &encode,
+            &decode,
+        )
+        .await;
+
+        on_disconnected();
+        sleep(retry_interval).await;
+    }
 }

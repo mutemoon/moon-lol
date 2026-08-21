@@ -22,7 +22,6 @@ use self::state::{
     toggle_node_expansion,
 };
 use crate::components::sidebar::AppSidebar;
-use crate::services::particle_service::ParticleWsEvent;
 
 /// 粒子系统编辑器：Rayon 树状文件侧边栏 → 选中系统 → 发射器参数编辑 → 自动重播。
 pub fn render_particles(
@@ -108,9 +107,9 @@ pub fn render_particles(
         (Some(h), Some(n), Some(hh), Some(w)) => {
             render_system_detail(sidebar, window, cx, &h, &n, hh, &w)
         }
-        _ => div()
+        _ => h_flex()
             .flex_1()
-            .flex()
+            .overflow_hidden()
             .items_center()
             .justify_center()
             .child(
@@ -132,8 +131,10 @@ pub fn render_particles(
     let page_header_elem = render_page_header(sidebar, cx, &ws_url, connected, auto_play);
 
     h_flex()
+        .flex_1()
+        .overflow_hidden()
         .w_full()
-        .h_full()
+        .py_2()
         .gap_3()
         .child(
             // ── 左侧英雄粒子树侧边栏（完全对齐 wad_browser 结构与视觉风格） ──
@@ -143,8 +144,9 @@ pub fn render_particles(
                 .p_3()
                 .gap_2()
                 .bg(sidebar_bg)
-                .border_r_1()
+                .border_1()
                 .border_color(border_color)
+                .rounded_md()
                 .child(
                     h_flex()
                         .w_full()
@@ -334,23 +336,6 @@ pub fn render_particles(
                                                     .opacity(0.5)
                                                     .child(format!("({})", node.children_count)),
                                             )
-                                        })
-                                        .when_some(node.hash, |this, h| {
-                                            this.child(
-                                                div()
-                                                    .ml_auto()
-                                                    .mr_2()
-                                                    .px_1()
-                                                    .py_0p5()
-                                                    .rounded_sm()
-                                                    .bg(if is_selected {
-                                                        accent_fg.opacity(0.2)
-                                                    } else {
-                                                        accent_color.opacity(0.15)
-                                                    })
-                                                    .text_xs()
-                                                    .child(hash_hex(h)),
-                                            )
                                         }),
                                 )
                         })),
@@ -360,8 +345,8 @@ pub fn render_particles(
             // ── 右侧工作区 ──
             v_flex()
                 .flex_1()
+                .overflow_hidden()
                 .h_full()
-                .p_3()
                 .gap_2()
                 // 页头状态栏
                 .child(page_header_elem)
@@ -382,43 +367,14 @@ pub fn render_particles(
                 .child(
                     v_flex()
                         .flex_1()
+                        .overflow_hidden()
                         .w_full()
                         .bg(bg_color)
                         .border_1()
                         .border_color(border_color)
                         .rounded_md()
-                        .overflow_hidden()
                         .child(right_panel),
                 ),
         )
         .into_any_element()
-}
-
-// ── WS 事件处理 ──
-
-pub(super) fn process_ws_event(
-    weak: &gpui::WeakEntity<AppSidebar>,
-    cx: &mut gpui::AsyncApp,
-    event: ParticleWsEvent,
-) -> bool {
-    match event {
-        ParticleWsEvent::Connected => {
-            let _ = weak.update(cx, |this, cx| {
-                this.particles.connected = true;
-                cx.notify();
-            });
-            true
-        }
-        ParticleWsEvent::Disconnected { error } => {
-            let _ = weak.update(cx, |this, cx| {
-                this.particles.connected = false;
-                this.particles.ws_handle = None;
-                if let Some(e) = error {
-                    this.particles.error = Some(e);
-                }
-                cx.notify();
-            });
-            true
-        }
-    }
 }

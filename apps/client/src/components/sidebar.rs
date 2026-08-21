@@ -31,6 +31,7 @@ use crate::pages::{
     RoomsPageState, WadBrowserState,
 };
 use crate::services::cloud::CloudClient;
+use crate::services::particle_service::spawn_particle_service;
 use crate::services::provider;
 use crate::services::ws::spawn_ws_service;
 use crate::types::{ActiveView, LocalTaskDetail, RunningGameInfo, TaskDetailTab, UserInfo};
@@ -163,9 +164,10 @@ impl AppSidebar {
         let initial_details = HashMap::new();
         let initial_task_list = Vec::new();
 
-        // 后台启动 WebSocket 服务
+        // 后台启动 WebSocket 服务（RL 训练服务 + 粒子渲染服务）
         let entity_weak = cx.entity().downgrade();
-        spawn_ws_service(entity_weak, cx, rx);
+        spawn_ws_service(entity_weak.clone(), cx, rx);
+        let particle_handle = spawn_particle_service(entity_weak, cx);
 
         let mut this = Self {
             active_view: ActiveView::RlTraining,
@@ -253,7 +255,10 @@ impl AppSidebar {
             debug: DebugPageState::default(),
             room_detail: RoomDetailPageState::default(),
             rooms: RoomsPageState::default(),
-            particles: ParticlesPageState::default(),
+            particles: ParticlesPageState {
+                ws_handle: Some(particle_handle),
+                ..Default::default()
+            },
             extractor: ExtractorPageState::default(),
             wad_browser: WadBrowserState::default(),
             mock: MockPageState::default(),
@@ -442,23 +447,18 @@ impl Render for AppSidebar {
         };
 
         let content = v_flex()
-            .h_full()
             .flex_1()
-            .p_4()
-            .pt_0()
+            .overflow_hidden()
+            .h_full()
+            .px_4()
             .child(render_topbar(self, window, cx))
             .child(main_view_content);
 
-        let body = h_flex()
-            .flex_1()
-            .overflow_hidden()
-            .child(render_sidebar_menu(self, cx))
-            .child(content);
-
-        v_flex()
+        h_flex()
             .size_full()
+            .child(render_sidebar_menu(self, cx))
+            .child(content)
             .relative()
-            .child(body)
             .children(Root::render_dialog_layer(window, cx))
             .children(Root::render_sheet_layer(window, cx))
             .children(Root::render_notification_layer(window, cx))

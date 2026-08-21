@@ -2,13 +2,12 @@ use std::time::Duration;
 
 use lol_rl_protocol::{InFrame, OutFrame, VisualInFrame, VisualOutFrame, DEFAULT_RL_SERVER_ADDR};
 use tokio::sync::mpsc;
-use tokio::time::sleep;
 
 use crate::components::sidebar::{AppSidebar, VisualSession};
 use crate::services::runtime::{run_on_tokio, tokio_runtime};
 use crate::services::visual_process::spawn_visual_env;
 use crate::services::visual_ws::{spawn_visual_ws, VisualWsEvent};
-use crate::services::ws_bridge::{run_frame_connection, SendOutcome};
+use crate::services::ws_bridge::{run_auto_reconnect_loop, SendOutcome};
 use crate::types::LocalTaskDetail;
 
 enum WsEvent {
@@ -273,34 +272,33 @@ pub fn spawn_ws_service(
             }
         };
 
-        // 无限重连：连接失败/断开后 2 秒重试
-        let connection_loop = async move {
-            loop {
-                let _ = run_frame_connection(
-                    &ws_url,
-                    &mut cmd_rx,
-                    event_tx.clone(),
-                    || {
-                        // 通知 UI 已连接，并自动拉取任务列表
-                        let _ = event_tx.send(WsEvent::Connected(true));
-                        let _ = on_connected_cmd.send(InFrame::GetTaskList);
-                    },
-                    |cmd: InFrame| match bincode::serialize(&cmd) {
-                        Ok(bytes) => SendOutcome::Send(bytes),
-                        Err(_) => SendOutcome::Skip,
-                    },
-                    |bytes: &[u8]| {
-                        bincode::deserialize::<OutFrame>(bytes)
-                            .ok()
-                            .map(WsEvent::Frame)
-                    },
-                )
-                .await;
+        // 无限自动重连：连接失败/断开后 2 秒自动重试
+        let ev_tx_conn = event_tx.clone();
+        let ev_tx_disconn = event_tx.clone();
+        let connection_loop = run_auto_reconnect_loop(
+            move || ws_url.clone(),
+            &mut cmd_rx,
+            event_tx,
+            Duration::from_secs(2),
+            move || {
+                // 通知 UI 已连接，并自动拉取任务列表
+                let _ = ev_tx_conn.send(WsEvent::Connected(true));
+                let _ = on_connected_cmd.send(InFrame::GetTaskList);
+            },
+            move || {
                 // 通知 UI 断开连接
-                let _ = event_tx.send(WsEvent::Connected(false));
-                sleep(Duration::from_secs(2)).await;
-            }
-        };
+                let _ = ev_tx_disconn.send(WsEvent::Connected(false));
+            },
+            |cmd: InFrame| match bincode::serialize(&cmd) {
+                Ok(bytes) => SendOutcome::Send(bytes),
+                Err(_) => SendOutcome::Skip,
+            },
+            |bytes: &[u8]| {
+                bincode::deserialize::<OutFrame>(bytes)
+                    .ok()
+                    .map(WsEvent::Frame)
+            },
+        );
 
         futures_util::future::join(bridge_task, connection_loop).await;
     });

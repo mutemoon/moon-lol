@@ -11,10 +11,8 @@ use super::edit::primary_list_ref;
 use super::emitter::render_emitter_editor;
 use super::input::clear_all_input_buffers;
 use super::play::{play_working, reset_system, stop_playing};
-use super::process_ws_event;
 use super::state::hash_hex;
 use crate::components::sidebar::AppSidebar;
-use crate::services::particle_service;
 
 pub(super) fn render_system_detail(
     sidebar: &mut AppSidebar,
@@ -32,6 +30,7 @@ pub(super) fn render_system_detail(
 
     v_flex()
         .size_full()
+        .overflow_hidden()
         .child(
             // 面板顶栏
             h_flex()
@@ -214,75 +213,46 @@ pub(super) fn render_page_header(
                         cx.notify();
                     }))
                 })
-                .child(
-                    div()
-                        .px_2()
-                        .py_1()
-                        .rounded_md()
-                        .bg(theme.background)
-                        .text_xs()
-                        .text_color(theme.muted_foreground)
-                        .child(format!("Server: {}", ws_url)),
-                )
-                .when(!connected, |d| {
-                    d.child({
-                        let url = ws_url.to_string();
-                        Button::new("particle-connect-btn")
-                            .label("连接服务器")
-                            .on_click(cx.listener(move |this, _, _, cx| {
-                                let target_url = url.clone();
-                                this.particles.error = None;
-                                this.particles.ws_url = target_url.clone();
-                                cx.notify();
+                .child(particle_ws_status_badge(connected, ws_url, cx)),
+        )
+        .into_any_element()
+}
 
-                                let (handle, mut ev_rx) =
-                                    particle_service::connect_to_particle_server(&target_url);
-                                this.particles.ws_handle = Some(handle);
-
-                                let weak = cx.entity().downgrade();
-                                cx.spawn(
-                                    move |_: gpui::WeakEntity<AppSidebar>,
-                                          cx: &mut gpui::AsyncApp| {
-                                        let mut cx2 = cx.clone();
-                                        async move {
-                                            while let Some(event) = ev_rx.recv().await {
-                                                process_ws_event(&weak, &mut cx2, event);
-                                            }
-                                        }
-                                    },
-                                )
-                                .detach();
-                            }))
-                    })
+// 粒子 WebSocket 自动连接状态指示灯
+fn particle_ws_status_badge(
+    connected: bool,
+    ws_url: &str,
+    cx: &mut Context<AppSidebar>,
+) -> AnyElement {
+    let theme = cx.theme();
+    let (dot_color, label) = if connected {
+        (theme.accent, "已连接")
+    } else {
+        (theme.muted_foreground, "自动重连中...")
+    };
+    h_flex()
+        .gap_1p5()
+        .items_center()
+        .px_2()
+        .py_1()
+        .rounded_md()
+        .bg(theme.muted.opacity(0.3))
+        .text_xs()
+        .child(div().w_2().h_2().rounded_full().bg(dot_color))
+        .child(
+            div()
+                .text_color(if connected {
+                    theme.accent
+                } else {
+                    theme.muted_foreground
                 })
-                .when(connected, |d| {
-                    d.child(
-                        Button::new("particle-disconnect-btn")
-                            .icon(IconName::CircleX)
-                            .label("断开")
-                            .on_click(cx.listener(|this, _, _, cx| {
-                                if let Some(h) = &this.particles.ws_handle {
-                                    h.disconnect();
-                                }
-                                this.particles.ws_handle = None;
-                                this.particles.connected = false;
-                                cx.notify();
-                            })),
-                    )
-                })
-                .when(connected, |d| {
-                    d.child(
-                        div()
-                            .px_2()
-                            .py_0p5()
-                            .rounded_md()
-                            .bg(theme.accent.opacity(0.15))
-                            .text_color(theme.accent)
-                            .text_xs()
-                            .font_bold()
-                            .child("已连接"),
-                    )
-                }),
+                .font_bold()
+                .child(label),
+        )
+        .child(
+            div()
+                .text_color(theme.muted_foreground)
+                .child(format!("({ws_url})")),
         )
         .into_any_element()
 }

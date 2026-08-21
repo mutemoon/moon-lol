@@ -163,8 +163,8 @@ pub fn calculate_particle_transform(
     let rotation_quat = Quat::from_euler(
         EulerRot::XYZEx,
         birth_rotation0.x.to_radians(),
-        birth_rotation0.y.to_radians(),
-        birth_rotation0.z.to_radians(),
+        (birth_rotation0.y + birth_rotation0.z).to_radians(),
+        0.0,
     );
 
     if let ConfigVfxPrimitive::VfxPrimitivePlanarProjection { y_range } = primitive {
