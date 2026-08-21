@@ -415,7 +415,7 @@ pub const ENV_FIORA_V2_SPEC: EnvSpec = EnvSpec {
     name: ENV_FIORA_V2,
     label: "全技能实战 (V2)",
     tag: "V2",
-    description: "无缝融合 Q/W/E/R 全技能连招与真实移动走位，高维状态空间与复杂动作分支",
+    description: "基于 OpenAI Five 统一结构化 Modifier 槽位与通用表征架构的全技能微操环境",
     default_params: EnvTrainingParams {
         lr: 3e-4,
         gamma: 0.99,

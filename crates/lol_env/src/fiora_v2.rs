@@ -14,9 +14,9 @@ pub use crate::flash_plugin::{
     FLASH_COOLDOWN_SECS, FLASH_DISTANCE, FlashCooldown, dispatch_flash, extract_flash_obs,
     register_flash_plugin, tick_flash_cooldown,
 };
+use crate::modifier_obs::{ModifierNameId, ModifierSlotObs, extract_entity_modifiers};
 use crate::obs_plugins::{
-    extract_attack_state, extract_buff_e, extract_champion_base, extract_passive_vital,
-    extract_r_vital, extract_skill_cds,
+    extract_attack_state, extract_champion_base, extract_skill_cds,
 };
 use crate::raycast_plugin::raycast_ground_plane;
 use crate::reward::RewardModel;
@@ -25,11 +25,13 @@ use crate::traits::{EnvConfig, EnvMeta, RenderMode, RlEnvironment, StepResult, V
 /// 连续偏移缩放系数：[-1, 1] 映射到相对瑞雯 ±100 单位
 pub const OFFSET_SCALE: f32 = 100.0;
 /// obs 向量中相对距离归一化列下标
-pub const V2_OBS_DISTANCE_IDX: usize = 16;
+pub const V2_OBS_DISTANCE_IDX: usize = 3;
 /// 距离归一化分母
 pub const V2_OBS_DISTANCE_SCALE: f32 = 100.0;
 /// 靶子瑞雯在 V2 中的生命值上限
 pub const RIVEN_V2_HP: f32 = 10000.0;
+/// V2 观测总维度 (1 role_id + 3 空间 + 4 普攻 + 8 技能与闪现 + 2 血量 + 20 自身修饰符 + 20 目标修饰符 = 58)
+pub const V2_OBS_DIM: usize = 58;
 
 // ── 瑞雯血量设置与 Observer ─────────────────────────────────────────────────
 
@@ -180,6 +182,8 @@ impl FioraV2Action {
 
 #[derive(Debug, Clone)]
 pub struct FioraV2Obs {
+    pub role_id: f32,
+
     pub fiora_pos: Vec3,
     pub fiora_hp: f32,
     pub fiora_max_hp: f32,
@@ -188,35 +192,13 @@ pub struct FioraV2Obs {
     pub riven_max_hp: f32,
     pub distance: f32,
 
-    pub has_vital: bool,
-    pub vital_is_active: bool,
-    pub vital_active_timer_remaining: f32,
-    pub vital_remove_timer_remaining: f32,
-    pub vital_dir_x: f32,
-    pub vital_dir_neg_x: f32,
-    pub vital_dir_z: f32,
-    pub vital_dir_neg_z: f32,
-
-    pub has_r_vital: bool,
-    pub r_is_active: bool,
-    pub r_active_timer_remaining: f32,
-    pub r_remove_timer_remaining: f32,
-    pub r_vital_east: bool,
-    pub r_vital_west: bool,
-    pub r_vital_north: bool,
-    pub r_vital_south: bool,
-
     pub attack_state: u8,
     pub attack_is_windup: bool,
     pub attack_is_cooldown: bool,
     pub attack_timer_remaining: f32,
-    pub attack_windup_duration: f32,
-    pub attack_total_duration: f32,
 
     pub q_ready: bool,
     pub q_cd_remaining: f32,
-    pub w_ready: bool,
-    pub w_cd_remaining: f32,
     pub e_ready: bool,
     pub e_cd_remaining: f32,
     pub r_ready: bool,
@@ -225,8 +207,10 @@ pub struct FioraV2Obs {
     pub flash_ready: bool,
     pub flash_cd_remaining: f32,
 
-    pub has_buff_e: bool,
-    pub buff_e_left: i32,
+    /// 自身修饰符槽位 (4 槽位 × 5 = 20 维)
+    pub self_modifiers: Vec<ModifierSlotObs>,
+    /// 目标修饰符槽位 (4 槽位 × 5 = 20 维)
+    pub target_modifiers: Vec<ModifierSlotObs>,
 }
 
 impl FioraV2Obs {
@@ -235,56 +219,80 @@ impl FioraV2Obs {
         let rel_z = self.fiora_pos.z - self.riven_pos.z;
         let b2f = |b: bool| if b { 1.0 } else { 0.0 };
 
-        vec![
-            self.vital_dir_x,
-            self.vital_dir_neg_x,
-            self.vital_dir_z,
-            self.vital_dir_neg_z,
-            b2f(self.has_vital),
-            b2f(self.vital_is_active),
-            self.vital_active_timer_remaining / 1.7,
-            self.vital_remove_timer_remaining / 4.0,
-            b2f(self.r_vital_east),
-            b2f(self.r_vital_west),
-            b2f(self.r_vital_north),
-            b2f(self.r_vital_south),
-            b2f(self.has_r_vital),
-            b2f(self.r_is_active),
-            self.r_active_timer_remaining / 0.5,
-            self.r_remove_timer_remaining / 8.0,
-            self.distance / V2_OBS_DISTANCE_SCALE,
-            rel_x / V2_OBS_DISTANCE_SCALE,
-            rel_z / V2_OBS_DISTANCE_SCALE,
-            b2f(self.attack_state == 0),
-            b2f(self.attack_is_windup),
-            b2f(self.attack_is_cooldown),
-            self.attack_timer_remaining / 1.0,
-            b2f(self.q_ready),
-            self.q_cd_remaining / 10.0,
-            b2f(self.e_ready),
-            self.e_cd_remaining / 10.0,
-            b2f(self.r_ready),
-            self.r_cd_remaining / 60.0,
-            self.fiora_hp / self.fiora_max_hp.max(1.0),
-            self.riven_hp / self.riven_max_hp.max(1.0),
-            b2f(self.flash_ready),
-            self.flash_cd_remaining / 300.0,
-        ]
+        let mut v = Vec::with_capacity(V2_OBS_DIM);
+
+        // 1. 角色标识 (兼容 hero embedding，单体视角填 0.0)
+        v.push(self.role_id);
+
+        // 2. 空间相对特征 (3维)
+        v.push(rel_x / V2_OBS_DISTANCE_SCALE);
+        v.push(rel_z / V2_OBS_DISTANCE_SCALE);
+        v.push(self.distance / V2_OBS_DISTANCE_SCALE);
+
+        // 3. 普攻状态机 (4维)
+        v.push(b2f(self.attack_state == 0));
+        v.push(b2f(self.attack_is_windup));
+        v.push(b2f(self.attack_is_cooldown));
+        v.push(self.attack_timer_remaining / 1.0);
+
+        // 4. 技能与闪现冷却 (8维)
+        v.push(b2f(self.q_ready));
+        v.push(self.q_cd_remaining / 10.0);
+        v.push(b2f(self.e_ready));
+        v.push(self.e_cd_remaining / 10.0);
+        v.push(b2f(self.r_ready));
+        v.push(self.r_cd_remaining / 60.0);
+        v.push(b2f(self.flash_ready));
+        v.push(self.flash_cd_remaining / 300.0);
+
+        // 5. 双方血量百分比 (2维)
+        v.push(self.fiora_hp / self.fiora_max_hp.max(1.0));
+        v.push(self.riven_hp / self.riven_max_hp.max(1.0));
+
+        // 6. 自身修饰符 (4 槽位 × 5 = 20维)
+        for i in 0..4 {
+            if let Some(slot) = self.self_modifiers.get(i) {
+                v.extend_from_slice(&slot.to_vector());
+            } else {
+                v.extend_from_slice(&[0.0; 5]);
+            }
+        }
+
+        // 7. 目标修饰符 (4 槽位 × 5 = 20维)
+        for i in 0..4 {
+            if let Some(slot) = self.target_modifiers.get(i) {
+                v.extend_from_slice(&slot.to_vector());
+            } else {
+                v.extend_from_slice(&[0.0; 5]);
+            }
+        }
+
+        v
     }
 
     pub fn dim() -> usize {
-        33
+        V2_OBS_DIM
     }
 
     pub fn to_payload(&self) -> ObsFeaturePayload {
-        let vital_dir = if self.vital_dir_x > 0.5 {
-            "+X (东)".to_string()
-        } else if self.vital_dir_neg_x > 0.5 {
-            "-X (西)".to_string()
-        } else if self.vital_dir_z > 0.5 {
-            "+Z (北)".to_string()
-        } else if self.vital_dir_neg_z > 0.5 {
-            "-Z (南)".to_string()
+        let primary_vital = self
+            .target_modifiers
+            .iter()
+            .find(|m| m.name_id == ModifierNameId::FioraPassiveVital);
+        let has_vital = primary_vital.is_some();
+        let vital_is_active = primary_vital.map(|v| v.stack_count > 0.5).unwrap_or(false);
+        let vital_dir = if let Some(v) = primary_vital {
+            if v.param0 > 0.5 {
+                "+X (东)".to_string()
+            } else if v.param0 < -0.5 {
+                "-X (西)".to_string()
+            } else if v.param1 > 0.5 {
+                "+Z (北)".to_string()
+            } else if v.param1 < -0.5 {
+                "-Z (南)".to_string()
+            } else {
+                "无".to_string()
+            }
         } else {
             "无".to_string()
         };
@@ -302,11 +310,11 @@ impl FioraV2Obs {
             },
             distance: self.distance,
             q_ready: self.q_ready,
-            w_ready: self.w_ready,
+            w_ready: true,
             e_ready: self.e_ready,
             r_ready: self.r_ready,
-            has_vital: self.has_vital,
-            vital_is_active: self.vital_is_active,
+            has_vital,
+            vital_is_active,
             vital_direction: vital_dir,
             tags: HashMap::from([
                 ("q_cd".to_string(), format!("{:.1}s", self.q_cd_remaining)),
@@ -325,20 +333,19 @@ impl FioraV2Obs {
                         _ => "未知".to_string(),
                     },
                 ),
-                ("buff_e_left".to_string(), format!("{}", self.buff_e_left)),
                 (
-                    "has_r_vital".to_string(),
-                    if self.has_r_vital {
-                        format!(
-                            "东:{} 西:{} 北:{} 南:{}",
-                            self.r_vital_east as u8,
-                            self.r_vital_west as u8,
-                            self.r_vital_north as u8,
-                            self.r_vital_south as u8
-                        )
-                    } else {
-                        "无".to_string()
-                    },
+                    "modifiers_count".to_string(),
+                    format!(
+                        "Self:{}, Target:{}",
+                        self.self_modifiers
+                            .iter()
+                            .filter(|m| m.name_id != ModifierNameId::None)
+                            .count(),
+                        self.target_modifiers
+                            .iter()
+                            .filter(|m| m.name_id != ModifierNameId::None)
+                            .count(),
+                    ),
                 ),
             ]),
             ..Default::default()
@@ -602,25 +609,10 @@ impl RlEnvironment for FioraV2Env {
 
     fn obs_dim_labels() -> &'static [&'static str] {
         &[
-            "被动破绽(+X/东)",
-            "被动破绽(-X/西)",
-            "被动破绽(+Z/北)",
-            "被动破绽(-Z/南)",
-            "存在被动破绽",
-            "被动破绽已激活",
-            "被动破绽激活倒计时",
-            "被动破绽消失倒计时",
-            "R破绽(东)",
-            "R破绽(西)",
-            "R破绽(北)",
-            "R破绽(南)",
-            "存在R破绽",
-            "R破绽已激活",
-            "R破绽激活倒计时",
-            "R破绽消失倒计时",
+            "角色标识(0=Fiora)",
+            "目标相对X(归一化)",
+            "目标相对Z(归一化)",
             "相对距离(归一化)",
-            "相对位置X(归一化)",
-            "相对位置Z(归一化)",
             "普攻就绪(Ready)",
             "普攻前摇中(Windup)",
             "普攻后摇中(Cooldown)",
@@ -631,10 +623,50 @@ impl RlEnvironment for FioraV2Env {
             "E剩余CD",
             "R就绪",
             "R剩余CD",
-            "剑姬血量百分比",
-            "瑞雯血量百分比",
             "闪现就绪",
             "闪现剩余CD",
+            "自身血量百分比",
+            "目标血量百分比",
+            "自身修饰符1_类型ID",
+            "自身修饰符1_剩余时长",
+            "自身修饰符1_层数",
+            "自身修饰符1_参数0",
+            "自身修饰符1_参数1",
+            "自身修饰符2_类型ID",
+            "自身修饰符2_剩余时长",
+            "自身修饰符2_层数",
+            "自身修饰符2_参数0",
+            "自身修饰符2_参数1",
+            "自身修饰符3_类型ID",
+            "自身修饰符3_剩余时长",
+            "自身修饰符3_层数",
+            "自身修饰符3_参数0",
+            "自身修饰符3_参数1",
+            "自身修饰符4_类型ID",
+            "自身修饰符4_剩余时长",
+            "自身修饰符4_层数",
+            "自身修饰符4_参数0",
+            "自身修饰符4_参数1",
+            "目标修饰符1_类型ID",
+            "目标修饰符1_剩余时长",
+            "目标修饰符1_层数",
+            "目标修饰符1_参数0(X)",
+            "目标修饰符1_参数1(Z)",
+            "目标修饰符2_类型ID",
+            "目标修饰符2_剩余时长",
+            "目标修饰符2_层数",
+            "目标修饰符2_参数0(X)",
+            "目标修饰符2_参数1(Z)",
+            "目标修饰符3_类型ID",
+            "目标修饰符3_剩余时长",
+            "目标修饰符3_层数",
+            "目标修饰符3_参数0(X)",
+            "目标修饰符3_参数1(Z)",
+            "目标修饰符4_类型ID",
+            "目标修饰符4_剩余时长",
+            "目标修饰符4_层数",
+            "目标修饰符4_参数0(X)",
+            "目标修饰符4_参数1(Z)",
         ]
     }
 
@@ -812,59 +844,40 @@ impl VisualEnvironment for FioraV2Env {
 // ── 自由函数 ────────────────────────────────────────────────────────────────
 
 pub fn get_v2_obs_from_world(world: &World, fiora: Entity, riven: Entity) -> FioraV2Obs {
-    let fiora_base = extract_champion_base(world, fiora);
-    let riven_base = extract_champion_base(world, riven);
-    let dist = fiora_base.pos.distance(riven_base.pos);
+    let f_base = extract_champion_base(world, fiora);
+    let r_base = extract_champion_base(world, riven);
+    let dist = f_base.pos.distance(r_base.pos);
 
-    let vital = extract_passive_vital(world, riven);
-    let r_vital = extract_r_vital(world, riven);
     let atk = extract_attack_state(world, fiora);
     let skills = extract_skill_cds(world, fiora);
-    let buff_e = extract_buff_e(world, fiora);
     let (flash_ready, flash_cd) = extract_flash_obs(world, fiora);
 
+    let self_modifiers = extract_entity_modifiers(world, fiora, 4);
+    let target_modifiers = extract_entity_modifiers(world, riven, 4);
+
     FioraV2Obs {
-        fiora_pos: fiora_base.pos,
-        fiora_hp: fiora_base.hp,
-        fiora_max_hp: fiora_base.max_hp,
-        riven_pos: riven_base.pos,
-        riven_hp: riven_base.hp,
-        riven_max_hp: riven_base.max_hp,
+        role_id: 0.0,
+        fiora_pos: f_base.pos,
+        fiora_hp: f_base.hp,
+        fiora_max_hp: f_base.max_hp,
+        riven_pos: r_base.pos,
+        riven_hp: r_base.hp,
+        riven_max_hp: r_base.max_hp,
         distance: dist,
-        has_vital: vital.has_vital,
-        vital_is_active: vital.is_active,
-        vital_active_timer_remaining: vital.active_timer_remaining,
-        vital_remove_timer_remaining: vital.remove_timer_remaining,
-        vital_dir_x: vital.dir_x,
-        vital_dir_neg_x: vital.dir_neg_x,
-        vital_dir_z: vital.dir_z,
-        vital_dir_neg_z: vital.dir_neg_z,
-        has_r_vital: r_vital.has_r_vital,
-        r_is_active: r_vital.is_active,
-        r_active_timer_remaining: r_vital.active_timer_remaining,
-        r_remove_timer_remaining: r_vital.remove_timer_remaining,
-        r_vital_east: r_vital.vital_east,
-        r_vital_west: r_vital.vital_west,
-        r_vital_north: r_vital.vital_north,
-        r_vital_south: r_vital.vital_south,
         attack_state: atk.state_code,
         attack_is_windup: atk.is_windup,
         attack_is_cooldown: atk.is_cooldown,
         attack_timer_remaining: atk.timer_remaining,
-        attack_windup_duration: atk.windup_duration,
-        attack_total_duration: atk.total_duration,
         q_ready: skills[0].ready,
         q_cd_remaining: skills[0].cd_remaining,
-        w_ready: skills[1].ready,
-        w_cd_remaining: skills[1].cd_remaining,
         e_ready: skills[2].ready,
         e_cd_remaining: skills[2].cd_remaining,
         r_ready: skills[3].ready,
         r_cd_remaining: skills[3].cd_remaining,
         flash_ready,
         flash_cd_remaining: flash_cd,
-        has_buff_e: buff_e.has_buff,
-        buff_e_left: buff_e.left,
+        self_modifiers,
+        target_modifiers,
     }
 }
 
@@ -990,14 +1003,23 @@ pub fn is_v2_aligned_with_vital(fpos: Vec3, rpos: Vec3, obs: &FioraV2Obs) -> boo
     let abs_delta_x = delta_x.abs();
     let abs_delta_z = delta_z.abs();
 
-    if obs.vital_dir_x > 0.5 {
-        delta_x > 0.0 && abs_delta_x > abs_delta_z
-    } else if obs.vital_dir_neg_x > 0.5 {
-        delta_x < 0.0 && abs_delta_x > abs_delta_z
-    } else if obs.vital_dir_z > 0.5 {
-        delta_z > 0.0 && abs_delta_z > abs_delta_x
-    } else if obs.vital_dir_neg_z > 0.5 {
-        delta_z < 0.0 && abs_delta_z > abs_delta_x
+    let primary_vital = obs
+        .target_modifiers
+        .iter()
+        .find(|m| m.name_id == ModifierNameId::FioraPassiveVital);
+
+    if let Some(v) = primary_vital {
+        if v.param0 > 0.5 {
+            delta_x > 0.0 && abs_delta_x > abs_delta_z
+        } else if v.param0 < -0.5 {
+            delta_x < 0.0 && abs_delta_x > abs_delta_z
+        } else if v.param1 > 0.5 {
+            delta_z > 0.0 && abs_delta_z > abs_delta_x
+        } else if v.param1 < -0.5 {
+            delta_z < 0.0 && abs_delta_z > abs_delta_x
+        } else {
+            false
+        }
     } else {
         false
     }
@@ -1031,12 +1053,19 @@ pub fn step_v2_world(
     let curr_fpos = obs.fiora_pos;
 
     let tracker_hit = app.world().resource::<VitalBreakTracker>().hit;
-    let is_vital_break = tracker_hit && prev_obs.has_vital && prev_obs.vital_is_active;
+    let had_active_vital = prev_obs.target_modifiers.iter().any(|m| {
+        m.name_id == ModifierNameId::FioraPassiveVital && m.stack_count > 0.5
+    });
+    let is_vital_break = tracker_hit && had_active_vital;
 
-    let prev_aligned = prev_obs.has_vital
-        && is_v2_aligned_with_vital(prev_fpos, prev_obs.riven_pos, &prev_obs);
+    let has_vital = prev_obs
+        .target_modifiers
+        .iter()
+        .any(|m| m.name_id == ModifierNameId::FioraPassiveVital);
+    let prev_aligned =
+        has_vital && is_v2_aligned_with_vital(prev_fpos, prev_obs.riven_pos, &prev_obs);
     let curr_aligned =
-        prev_obs.has_vital && is_v2_aligned_with_vital(curr_fpos, prev_obs.riven_pos, &prev_obs);
+        has_vital && is_v2_aligned_with_vital(curr_fpos, prev_obs.riven_pos, &prev_obs);
 
     let ctx = FioraV2RewardContext {
         prev_aligned,

@@ -1,5 +1,5 @@
 use candle_core::{D, DType, Result, Tensor};
-use candle_nn::{Linear, Module, VarBuilder};
+use candle_nn::{Embedding, Linear, Module, VarBuilder};
 use lol_rl_protocol::{ActionSpace, PolicyDisplay, PolicyItem};
 use rand::Rng;
 
@@ -68,8 +68,30 @@ pub fn orthogonal_weight(out_dim: usize, in_dim: usize, gain: f32) -> Vec<f32> {
     result
 }
 
+/// Configuration for hero-id embedding (OpenAI Five style conditional input).
+/// The first element of the state vector (obs[0]) is treated as an integer hero index,
+/// looked up in an embedding table, and concatenated with the remaining state features.
+#[derive(Clone, Debug, PartialEq)]
+pub struct HeroEmbedConfig {
+    pub num_heroes: usize,
+    pub embed_dim: usize,
+}
+
+impl Default for HeroEmbedConfig {
+    fn default() -> Self {
+        Self {
+            num_heroes: 4, // 默认支持最多 4 个英雄 (0: Fiora, 1: Riven, 2..3 扩展)
+            embed_dim: 16,
+        }
+    }
+}
+
 #[derive(Clone)]
 pub struct ActorCritic {
+    /// Hero-id embedding (OpenAI Five style).
+    /// obs[0] is treated as hero index → embedding, replacing the raw float.
+    hero_embed: Embedding,
+    hero_embed_config: HeroEmbedConfig,
     fc1: Linear,
     fc2: Linear,
     /// 离散：分类 logits；连续/混合：连续维的均值头。
@@ -89,7 +111,23 @@ impl ActorCritic {
         action_space: ActionSpace,
         vb: VarBuilder,
     ) -> Result<Self> {
-        let fc1 = candle_nn::linear(state_dim, hidden_dim, vb.pp("fc1"))?;
+        Self::with_hero_embed(state_dim, hidden_dim, action_space, HeroEmbedConfig::default(), vb)
+    }
+
+    pub fn with_hero_embed(
+        state_dim: usize,
+        hidden_dim: usize,
+        action_space: ActionSpace,
+        hero_embed_config: HeroEmbedConfig,
+        vb: VarBuilder,
+    ) -> Result<Self> {
+        let emb = candle_nn::embedding(
+            hero_embed_config.num_heroes,
+            hero_embed_config.embed_dim,
+            vb.pp("hero_embed"),
+        )?;
+        let fc1_input_dim = hero_embed_config.embed_dim + state_dim - 1;
+        let fc1 = candle_nn::linear(fc1_input_dim, hidden_dim, vb.pp("fc1"))?;
         let fc2 = candle_nn::linear(hidden_dim, hidden_dim, vb.pp("fc2"))?;
         let critic_head = candle_nn::linear(hidden_dim, 1, vb.pp("critic_head"))?;
 
@@ -120,6 +158,8 @@ impl ActorCritic {
         let actor_head = candle_nn::linear(hidden_dim, actor_out_dim, vb.pp("actor_head"))?;
 
         Ok(Self {
+            hero_embed: emb,
+            hero_embed_config,
             fc1,
             fc2,
             actor_head,
@@ -172,7 +212,12 @@ impl ActorCritic {
             })
             .transpose()?;
 
+        let w = self.hero_embed.embeddings().to_device(device)?;
+        let hero_embed = Embedding::new(w, self.hero_embed.hidden_size());
+
         Ok(Self {
+            hero_embed,
+            hero_embed_config: self.hero_embed_config.clone(),
             fc1,
             fc2,
             actor_head,
@@ -187,9 +232,28 @@ impl ActorCritic {
         &self.action_space
     }
 
+    pub fn hero_embed_config(&self) -> &HeroEmbedConfig {
+        &self.hero_embed_config
+    }
+
+    pub fn has_hero_embed(&self) -> bool {
+        true
+    }
+
+    /// Prepare the input by replacing hero_id float with embedding.
+    fn prepare_input(&self, state: &Tensor) -> Result<Tensor> {
+        // state shape: (batch, state_dim)
+        // obs[0] = hero_id (float 0.0 or 1.0) → cast to u32 index
+        let hero_ids = state.narrow(1, 0, 1)?.squeeze(1)?.to_dtype(DType::U32)?;
+        let hero_vecs = self.hero_embed.forward(&hero_ids)?; // (batch, embed_dim)
+        let rest = state.narrow(1, 1, state.dim(1)? - 1)?; // (batch, state_dim - 1)
+        Tensor::cat(&[&hero_vecs, &rest], 1) // (batch, embed_dim + state_dim - 1)
+    }
+
     /// 共享隐藏层输出。
     fn hidden(&self, state: &Tensor) -> Result<Tensor> {
-        let h1 = self.fc1.forward(state)?.tanh()?;
+        let input = self.prepare_input(state)?;
+        let h1 = self.fc1.forward(&input)?.tanh()?;
         self.fc2.forward(&h1)?.tanh()
     }
 

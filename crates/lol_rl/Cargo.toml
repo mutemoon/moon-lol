@@ -36,7 +36,7 @@ ctrlc = "3.4"
 bevy.workspace = true
 
 [features]
-default = ["cuda", "bevy/dynamic_linking"]
+default = ["cuda"]
 cuda = ["candle-core/cuda", "candle-nn/cuda"]
 
 [[bin]]

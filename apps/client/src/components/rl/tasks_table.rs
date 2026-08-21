@@ -337,12 +337,20 @@ pub fn render_tasks_table(
                             Button::new("new-task-btn")
                                 .primary()
                                 .icon(IconName::Plus)
-                                .label(t!("app.rl.new_task"))
                                 .on_click(cx.listener(|this, _, window, cx| {
                                     let task_count = this.task_list.len() + 1;
                                     let tx = this.tx.clone();
+                                    let last_env = this.last_chosen_env.clone();
+                                    let weak_sidebar = cx.entity().downgrade();
                                     let dialog_view = cx.new(|cx| {
-                                        CreateTaskDialogView::new(task_count, tx, window, cx)
+                                        CreateTaskDialogView::new(
+                                            task_count,
+                                            tx,
+                                            last_env,
+                                            Some(weak_sidebar),
+                                            window,
+                                            cx,
+                                        )
                                     });
                                     window.open_dialog(cx, move |dialog, _window, _cx| {
                                         let dialog_view = dialog_view.clone();
@@ -444,6 +452,7 @@ pub struct CreateTaskDialogView {
     pub form: TaskConfigPayload,
     pub default_name: String,
     pub tx: Option<tokio::sync::mpsc::UnboundedSender<InFrame>>,
+    pub sidebar: Option<gpui::WeakEntity<AppSidebar>>,
     pub name_input: Entity<InputState>,
     pub lr_input: Entity<InputState>,
     pub gamma_input: Entity<InputState>,
@@ -475,11 +484,14 @@ impl CreateTaskDialogView {
     pub fn new(
         task_count: usize,
         tx: Option<tokio::sync::mpsc::UnboundedSender<InFrame>>,
+        last_env: Option<String>,
+        sidebar: Option<gpui::WeakEntity<AppSidebar>>,
         window: &mut Window,
         cx: &mut Context<Self>,
     ) -> Self {
+        let env_to_use = last_env.unwrap_or_else(|| lol_rl_protocol::ENV_FIORA_V2.to_string());
         let default_name = format!("RL 对战训练任务 #{}", task_count);
-        let mut form = TaskConfigPayload::default();
+        let mut form = TaskConfigPayload::default_for_env(&env_to_use);
         form.name = default_name.clone();
         form.parallel_envs = 0; // 自适应吞吐探测
 
@@ -509,6 +521,7 @@ impl CreateTaskDialogView {
             form,
             default_name,
             tx,
+            sidebar,
             name_input,
             lr_input,
             gamma_input,
@@ -527,6 +540,12 @@ impl CreateTaskDialogView {
         window: &mut Window,
         cx: &mut Context<Self>,
     ) {
+        if let Some(weak_sidebar) = &self.sidebar {
+            let env_str = env_name.to_string();
+            let _ = weak_sidebar.update(cx, |s, _| {
+                s.last_chosen_env = Some(env_str);
+            });
+        }
         let params = lol_rl_protocol::get_env_training_params(env_name);
         self.form.env_name = env_name.to_string();
         self.form.lr = params.lr;
@@ -743,7 +762,7 @@ impl Render for CreateTaskDialogView {
                                             .child(Input::new(&self.name_input)),
                                     ),
                             )
-                            // 2. 选择环境
+                            // 2. 选择环境 (下拉框)
                             .child(
                                 h_flex()
                                     .w_full()
@@ -759,29 +778,45 @@ impl Render for CreateTaskDialogView {
                                             .child("训练环境 (Env)"),
                                     )
                                     .child(
-                                        h_flex()
+                                        div()
                                             .flex_1()
-                                            .gap_1()
-                                            .children(lol_rl_protocol::AVAILABLE_ENVS.iter().map(|spec| {
-                                                let is_active = cfg.env_name == spec.name;
-                                                let env_name = spec.name;
-                                                let btn = if is_active {
-                                                    Button::new(format!("env-btn-{}", spec.name))
-                                                        .primary()
-                                                        .compact()
-                                                        .flex_1()
-                                                        .label(spec.label)
-                                                } else {
-                                                    Button::new(format!("env-btn-{}", spec.name))
-                                                        .outline()
-                                                        .compact()
-                                                        .flex_1()
-                                                        .label(spec.label)
-                                                };
-                                                btn.on_click(cx.listener(move |this, _, window, cx| {
-                                                    this.apply_env_params(env_name, window, cx);
-                                                }))
-                                            })),
+                                            .child(
+                                                Button::new("env-dropdown")
+                                                    .label(
+                                                        current_env_spec
+                                                            .map(|s| s.label.to_string())
+                                                            .unwrap_or_else(|| cfg.env_name.clone()),
+                                                    )
+                                                    .dropdown_caret(true)
+                                                    .outline()
+                                                    .w_full()
+                                                    .dropdown_menu({
+                                                        let current_env_name = cfg.env_name.clone();
+                                                        let weak = cx.entity().downgrade();
+                                                        move |menu, _window, _cx| {
+                                                            let mut menu = menu;
+                                                            for spec in lol_rl_protocol::AVAILABLE_ENVS {
+                                                                let checked = spec.name == current_env_name;
+                                                                let env_name = spec.name;
+                                                                let label = spec.label.to_string();
+                                                                let weak = weak.clone();
+                                                                menu = menu.item(
+                                                                    PopupMenuItem::new(label)
+                                                                        .checked(checked)
+                                                                        .on_click(move |_, window, cx| {
+                                                                            if let Some(view) = weak.upgrade() {
+                                                                                let _ = view.update(cx, |this, cx| {
+                                                                                    this.apply_env_params(env_name, window, cx);
+                                                                                    cx.notify();
+                                                                                });
+                                                                            }
+                                                                        }),
+                                                                );
+                                                            }
+                                                            menu
+                                                        }
+                                                    }),
+                                            ),
                                     ),
                             )
                             // 环境特性与自带参数摘要说明

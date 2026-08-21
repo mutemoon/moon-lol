@@ -11,8 +11,8 @@ fn test_fiora_v2_env_basic_step_and_obs() {
     });
 
     let obs = env.reset();
-    assert_eq!(FioraV2Obs::dim(), 33);
-    assert_eq!(obs.to_vector().len(), 33);
+    assert_eq!(FioraV2Obs::dim(), 58);
+    assert_eq!(obs.to_vector().len(), 58);
     assert!(obs.fiora_hp > 0.0);
     assert_eq!(obs.riven_hp, 10000.0, "Riven 初始血量应为 10000.0");
     assert_eq!(obs.riven_max_hp, 10000.0, "Riven 最大血量应为 10000.0");
@@ -21,7 +21,7 @@ fn test_fiora_v2_env_basic_step_and_obs() {
     let noop_act = FioraV2Action::new(0.0, 0.0, FioraV2DiscreteAction::NoOp);
     let res_noop = env.step(noop_act);
     assert_eq!(res_noop.step, 1);
-    assert_eq!(res_noop.obs.to_vector().len(), 33);
+    assert_eq!(res_noop.obs.to_vector().len(), 58);
 
     // 2. 测试 Move 动作（复用 offset）
     let move_act = FioraV2Action::new(0.5, -0.5, FioraV2DiscreteAction::Move);
@@ -300,4 +300,22 @@ fn test_fiora_v2_riven_moves() {
         }
     }
     assert!(moved, "Riven 在 V2 环境中应随时间步自主移动");
+}
+
+#[test]
+fn test_fiora_v2_modifier_slot_structure() {
+    use lol_env::modifier_obs::ModifierNameId;
+    let mut env = FioraV2Env::with_config(EnvConfig {
+        max_steps: 10,
+        render_mode: RenderMode::Headless,
+    });
+
+    let obs = env.reset();
+
+    // 验证目标修饰符槽位中存在被动破绽
+    let has_passive = obs
+        .target_modifiers
+        .iter()
+        .any(|m| m.name_id == ModifierNameId::FioraPassiveVital);
+    assert!(has_passive, "重置后目标瑞雯身上应具有被动破绽 Modifier");
 }

@@ -1,4 +1,6 @@
 pub mod fiora_riven_common;
+pub mod modifier_obs;
+pub use modifier_obs::*;
 pub mod fiora_v0;
 pub mod fiora_v1;
 pub mod fiora_v2;
@@ -28,20 +30,19 @@ pub use fiora_v0::{
 pub use fiora_v1::{FioraVsRivenRealAction, FioraVsRivenRealEnv, FioraVsRivenRealObs};
 pub use fiora_v2::{
     FioraV2Action, FioraV2DiscreteAction, FioraV2Env, FioraV2Obs, FioraV2RewardContext,
-    FioraV2RewardModel, V2_OBS_DISTANCE_IDX, V2_OBS_DISTANCE_SCALE,
+    FioraV2RewardModel, V2_OBS_DIM, V2_OBS_DISTANCE_IDX, V2_OBS_DISTANCE_SCALE,
 };
 pub use flash_plugin::{
     FLASH_COOLDOWN_SECS, FLASH_DISTANCE, FlashCooldown, dispatch_flash, extract_flash_obs,
     register_flash_plugin, tick_flash_cooldown,
 };
 pub use obs_plugins::{
-    AttackStateObs, BuffEObs, ChampionBaseObs, PassiveVitalObs, RVitalObs, SkillCdObs,
-    extract_attack_state, extract_buff_e, extract_champion_base, extract_passive_vital,
-    extract_r_vital, extract_skill_cds,
+    AttackStateObs, ChampionBaseObs, SkillCdObs, extract_attack_state, extract_champion_base,
+    extract_skill_cds,
 };
 pub use parallel::{
-    ParallelEnvs, ParallelFioraV2Envs, ParallelFioraVsRivenEnvs, ParallelFioraVsRivenRealEnvs,
-    ParallelSoloV0Envs,
+    ParallelEnvs, ParallelFioraV2Envs, ParallelFioraVsRivenEnvs,
+    ParallelFioraVsRivenRealEnvs, ParallelSoloV0Envs,
 };
 pub use raycast_plugin::raycast_ground_plane;
 pub use reward::{FioraRewardContext, FioraVsRivenRewardModel, RewardModel};

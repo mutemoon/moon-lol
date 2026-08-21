@@ -571,7 +571,7 @@ fn run_training_loop_for_task(
                 )*
                 unknown => {
                     tracing::warn!("未知环境名称 {unknown}，降级使用默认环境");
-                    run_generic_training_loop::<lol_env::FioraVsRivenRealEnv>(
+                    run_generic_training_loop::<lol_env::FioraV2Env>(
                         event_tx,
                         tasks,
                         repo,
@@ -684,7 +684,7 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment + 'static>(
         max_grad_norm: 0.5,
     };
 
-    let agent = match PPOAgent::new(
+    let agent = match PPOAgent::create_for_env::<E>(
         state_dim,
         hidden_dim,
         action_space.clone(),

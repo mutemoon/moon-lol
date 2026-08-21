@@ -76,6 +76,8 @@ pub struct AppSidebar {
     pub visual_task_id: Option<String>,
     /// 当前可视化子进程的 env 名（用于决定是否显示离散手动 action 按钮）
     pub visual_env_name: Option<String>,
+    /// 最近一次创建任务时选择的环境名
+    pub last_chosen_env: Option<String>,
     /// 任务概览 DataTable 状态（惰性创建）
     pub table_state: Option<Entity<TableState<TaskTableDelegate>>>,
 
@@ -190,6 +192,7 @@ impl AppSidebar {
             visual_error: None,
             visual_task_id: None,
             visual_env_name: None,
+            last_chosen_env: None,
             table_state: None,
             // Auth
             auth_token: None,

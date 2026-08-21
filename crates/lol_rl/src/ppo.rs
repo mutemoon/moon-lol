@@ -5,6 +5,7 @@ use candle_nn::{AdamW, Optimizer, ParamsAdamW, VarBuilder, VarMap};
 use lol_rl_protocol::ActionSpace;
 
 use crate::policy::ActorCritic;
+use crate::policy::HeroEmbedConfig;
 
 pub struct RolloutBuffer {
     pub states: Vec<Vec<f32>>,
@@ -170,6 +171,7 @@ pub struct PPOAgent {
     optimizer: AdamW,
     config: PPOConfig,
     device: Device,
+    hero_embed_config: HeroEmbedConfig,
 }
 
 impl PPOAgent {
@@ -180,16 +182,44 @@ impl PPOAgent {
         config: PPOConfig,
         device: Device,
     ) -> Result<Self> {
+        Self::with_hero_embed(
+            state_dim,
+            hidden_dim,
+            action_space,
+            config,
+            device,
+            HeroEmbedConfig::default(),
+        )
+    }
+
+    /// Create a PPOAgent with custom hero-id embedding config.
+    pub fn with_hero_embed(
+        state_dim: usize,
+        hidden_dim: usize,
+        action_space: ActionSpace,
+        config: PPOConfig,
+        device: Device,
+        hero_embed_config: HeroEmbedConfig,
+    ) -> Result<Self> {
         let mut varmap = VarMap::new();
         let vb = VarBuilder::from_varmap(&varmap, DType::F32, &device);
 
-        let actor_critic = ActorCritic::new(state_dim, hidden_dim, action_space, vb)?;
+        let actor_critic = ActorCritic::with_hero_embed(
+            state_dim,
+            hidden_dim,
+            action_space,
+            hero_embed_config.clone(),
+            vb,
+        )?;
 
-        // 对网络权重应用工业级正交初始化（正交矩阵 + 分层增益 Gain）
+        // fc1 input dim: embed_dim + (state_dim - 1)
+        let fc1_input_dim = hero_embed_config.embed_dim + state_dim - 1;
+
+        // Apply orthogonal initialization
         let hidden_gain = std::f32::consts::SQRT_2;
         let fc1_w = Tensor::from_vec(
-            crate::policy::orthogonal_weight(hidden_dim, state_dim, hidden_gain),
-            (hidden_dim, state_dim),
+            crate::policy::orthogonal_weight(hidden_dim, fc1_input_dim, hidden_gain),
+            (hidden_dim, fc1_input_dim),
             &device,
         )?;
         let fc2_w = Tensor::from_vec(
@@ -229,7 +259,23 @@ impl PPOAgent {
             optimizer,
             config,
             device,
+            hero_embed_config,
         })
+    }
+
+    /// 统一为环境创建 PPOAgent，始终包含 Hero Embedding（OpenAI Five 架构）
+    pub fn create_for_env<E: lol_env::RlEnvironment>(
+        state_dim: usize,
+        hidden_dim: usize,
+        action_space: ActionSpace,
+        config: PPOConfig,
+        device: Device,
+    ) -> Result<Self> {
+        Self::new(state_dim, hidden_dim, action_space, config, device)
+    }
+
+    pub fn hero_embed_config(&self) -> &HeroEmbedConfig {
+        &self.hero_embed_config
     }
 
     pub fn device(&self) -> &Device {
@@ -329,7 +375,24 @@ impl PPOAgent {
 
         let mut varmap = VarMap::new();
         let vb = VarBuilder::from_varmap(&varmap, DType::F32, &device);
-        let actor_critic = ActorCritic::new(state_dim, hidden_dim, action_space, vb)?;
+        // Detect hero embedding from checkpoint: if "hero_embed.weight" tensor exists, use its dims
+        let hero_embed_config = tensors
+            .get("hero_embed.weight")
+            .map(|t| {
+                let dims = t.shape().dims();
+                HeroEmbedConfig {
+                    num_heroes: dims.first().copied().unwrap_or(4),
+                    embed_dim: dims.get(1).copied().unwrap_or(16),
+                }
+            })
+            .unwrap_or_default();
+        let actor_critic = ActorCritic::with_hero_embed(
+            state_dim,
+            hidden_dim,
+            action_space,
+            hero_embed_config.clone(),
+            vb,
+        )?;
         varmap.load(path)?;
         let params = ParamsAdamW {
             lr: config.lr,
@@ -342,6 +405,7 @@ impl PPOAgent {
             optimizer,
             config,
             device,
+            hero_embed_config,
         })
     }
 
@@ -1207,7 +1271,7 @@ mod tests {
 
     #[test]
     fn hybrid_ppo_fiora_v2_smoke() -> Result<()> {
-        let state_dim = 33;
+        let state_dim = 58;
         let hidden_dim = 64;
         let action_space = ActionSpace::Hybrid {
             continuous_dims: 2,
@@ -1293,7 +1357,7 @@ mod tests {
 
     #[test]
     fn selfplay_single_policy_smoke() -> Result<()> {
-        let state_dim = 36; // 包含 role_id
+        let state_dim = 60; // 包含 role_id 与 40 维修饰符槽位
         let hidden_dim = 64;
         let action_space = ActionSpace::Hybrid {
             continuous_dims: 2,
@@ -1466,4 +1530,86 @@ mod tests {
 
         Ok(())
     }
+
+    #[test]
+    fn test_hero_id_embedding_selfplay_and_checkpoint() -> Result<()> {
+        let state_dim = 36;
+        let hidden_dim = 64;
+        let action_space = ActionSpace::Hybrid {
+            continuous_dims: 2,
+            discrete_classes: 8,
+        };
+        let config = PPOConfig::default();
+        let device = Device::Cpu;
+
+        let hero_cfg = HeroEmbedConfig {
+            num_heroes: 2,
+            embed_dim: 16,
+        };
+
+        let mut agent = PPOAgent::with_hero_embed(
+            state_dim,
+            hidden_dim,
+            action_space.clone(),
+            config.clone(),
+            device.clone(),
+            hero_cfg,
+        )?;
+        assert!(agent.actor_critic.has_hero_embed());
+
+        // 验证两种角色的前向推理与采样
+        let mut buffer_f = RolloutBuffer::new();
+        let mut buffer_r = RolloutBuffer::new();
+
+        for _ in 0..10 {
+            // Fiora 视角 (role_id = 0.0)
+            let mut obs_f = vec![0.0f32; state_dim];
+            obs_f[0] = 0.0;
+            obs_f[17] = 1.0;
+            let state_f = Tensor::from_vec(obs_f.clone(), (1, state_dim), &device)?;
+            let (act_f, log_prob_f, val_f) = agent.actor_critic.sample_action(&state_f, None)?;
+            assert_eq!(act_f.len(), 3);
+            buffer_f.push_unmasked(obs_f, act_f, log_prob_f, 1.0, val_f, false);
+
+            // Riven 视角 (role_id = 1.0)
+            let mut obs_r = vec![0.0f32; state_dim];
+            obs_r[0] = 1.0;
+            obs_r[17] = 1.0;
+            let state_r = Tensor::from_vec(obs_r.clone(), (1, state_dim), &device)?;
+            let (act_r, log_prob_r, val_r) = agent.actor_critic.sample_action(&state_r, None)?;
+            assert_eq!(act_r.len(), 3);
+            buffer_r.push_unmasked(obs_r, act_r, log_prob_r, -1.0, val_r, false);
+        }
+
+        // PPO 联合更新
+        let stats = agent.update_multi_buffer(&[buffer_f, buffer_r], &[0.0, 0.0], 8)?;
+        assert!(stats.policy_loss.is_finite());
+        assert!(stats.value_loss.is_finite());
+
+        // 保存并恢复 checkpoint
+        let tmp_dir = std::env::temp_dir();
+        let ckpt_path = tmp_dir.join("test_hero_embed_model.safetensors");
+        agent.save(&ckpt_path)?;
+
+        let loaded_agent = PPOAgent::load(
+            state_dim,
+            hidden_dim,
+            action_space,
+            config,
+            device.clone(),
+            &ckpt_path,
+        )?;
+        assert!(loaded_agent.actor_critic.has_hero_embed());
+
+        // 验证加载后的模型与原模型输出一致
+        let test_obs = vec![1.0f32; state_dim];
+        let test_t = Tensor::from_vec(test_obs, (1, state_dim), &device)?;
+        let orig_v = agent.actor_critic.get_values(&test_t)?;
+        let loaded_v = loaded_agent.actor_critic.get_values(&test_t)?;
+        assert!((orig_v[0] - loaded_v[0]).abs() < 1e-5);
+
+        let _ = std::fs::remove_file(&ckpt_path);
+        Ok(())
+    }
 }
+

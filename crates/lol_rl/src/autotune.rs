@@ -94,7 +94,7 @@ impl AutoTuner {
             ppo_epochs: 1,
             ..Default::default()
         };
-        let mut agent = PPOAgent::new(
+        let mut agent = PPOAgent::create_for_env::<E>(
             state_dim,
             hidden_dim,
             action_space.clone(),
@@ -384,7 +384,7 @@ impl AutoTuner {
             clip_vloss: true,
             max_grad_norm: 0.5,
         };
-        let agent = PPOAgent::new(
+        let agent = PPOAgent::create_for_env::<E>(
             state_dim,
             hidden_dim,
             action_space.clone(),

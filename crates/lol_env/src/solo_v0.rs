@@ -13,9 +13,9 @@ pub use crate::flash_plugin::{
     FLASH_COOLDOWN_SECS, FLASH_DISTANCE, FlashCooldown, dispatch_flash, extract_flash_obs,
     register_flash_plugin, tick_flash_cooldown,
 };
+use crate::modifier_obs::{ModifierNameId, ModifierSlotObs, extract_entity_modifiers};
 use crate::obs_plugins::{
-    extract_attack_state, extract_champion_base, extract_passive_vital, extract_r_vital,
-    extract_skill_cds,
+    extract_attack_state, extract_champion_base, extract_skill_cds,
 };
 use crate::raycast_plugin::raycast_ground_plane;
 use crate::traits::{EnvConfig, EnvMeta, RenderMode, RlEnvironment, StepResult, VisualEnvironment};
@@ -23,7 +23,7 @@ use crate::traits::{EnvConfig, EnvMeta, RenderMode, RlEnvironment, StepResult, V
 // ── 常量定义 ─────────────────────────────────────────────────────────────────
 
 pub const SOLO_V0_OFFSET_SCALE: f32 = 100.0;
-pub const SOLO_V0_OBS_DIM: usize = 36;
+pub const SOLO_V0_OBS_DIM: usize = 60;
 pub const SOLO_V0_OBS_DISTANCE_SCALE: f32 = 100.0;
 pub const SOLO_V0_CHAMPION_HP: f32 = 1000.0;
 
@@ -166,24 +166,6 @@ pub struct SoloV0Obs {
     pub target_max_hp: f32,
     pub distance: f32,
 
-    pub has_vital: bool,
-    pub vital_is_active: bool,
-    pub vital_active_timer_remaining: f32,
-    pub vital_remove_timer_remaining: f32,
-    pub vital_dir_x: f32,
-    pub vital_dir_neg_x: f32,
-    pub vital_dir_z: f32,
-    pub vital_dir_neg_z: f32,
-
-    pub has_r_vital: bool,
-    pub r_is_active: bool,
-    pub r_active_timer_remaining: f32,
-    pub r_remove_timer_remaining: f32,
-    pub r_vital_east: bool,
-    pub r_vital_west: bool,
-    pub r_vital_north: bool,
-    pub r_vital_south: bool,
-
     pub attack_state: u8,
     pub attack_is_windup: bool,
     pub attack_is_cooldown: bool,
@@ -200,52 +182,68 @@ pub struct SoloV0Obs {
 
     pub flash_ready: bool,
     pub flash_cd_remaining: f32,
+
+    pub self_modifiers: Vec<ModifierSlotObs>,
+    pub target_modifiers: Vec<ModifierSlotObs>,
 }
 
 impl SoloV0Obs {
     pub fn to_vector(&self) -> Vec<f32> {
-        let rel_x = self.target_pos.x - self.self_pos.x;
-        let rel_z = self.target_pos.z - self.self_pos.z;
+        let rel_x = self.self_pos.x - self.target_pos.x;
+        let rel_z = self.self_pos.z - self.target_pos.z;
         let b2f = |b: bool| if b { 1.0 } else { 0.0 };
 
-        vec![
-            self.role_id,
-            self.vital_dir_x,
-            self.vital_dir_neg_x,
-            self.vital_dir_z,
-            self.vital_dir_neg_z,
-            b2f(self.has_vital),
-            b2f(self.vital_is_active),
-            self.vital_active_timer_remaining / 1.7,
-            self.vital_remove_timer_remaining / 4.0,
-            b2f(self.r_vital_east),
-            b2f(self.r_vital_west),
-            b2f(self.r_vital_north),
-            b2f(self.r_vital_south),
-            b2f(self.has_r_vital),
-            b2f(self.r_is_active),
-            self.r_active_timer_remaining / 0.5,
-            self.r_remove_timer_remaining / 8.0,
-            self.distance / SOLO_V0_OBS_DISTANCE_SCALE,
-            rel_x / SOLO_V0_OBS_DISTANCE_SCALE,
-            rel_z / SOLO_V0_OBS_DISTANCE_SCALE,
-            b2f(self.attack_state == 0),
-            b2f(self.attack_is_windup),
-            b2f(self.attack_is_cooldown),
-            self.attack_timer_remaining / 1.0,
-            b2f(self.q_ready),
-            self.q_cd_remaining / 10.0,
-            b2f(self.w_ready),
-            self.w_cd_remaining / 10.0,
-            b2f(self.e_ready),
-            self.e_cd_remaining / 10.0,
-            b2f(self.r_ready),
-            self.r_cd_remaining / 60.0,
-            self.self_hp / self.self_max_hp.max(1.0),
-            self.target_hp / self.target_max_hp.max(1.0),
-            b2f(self.flash_ready),
-            self.flash_cd_remaining / 300.0,
-        ]
+        let mut v = Vec::with_capacity(SOLO_V0_OBS_DIM);
+
+        // 1. 角色标识 (兼容 hero embedding)
+        v.push(self.role_id);
+
+        // 2. 空间相对特征 (3维)
+        v.push(rel_x / SOLO_V0_OBS_DISTANCE_SCALE);
+        v.push(rel_z / SOLO_V0_OBS_DISTANCE_SCALE);
+        v.push(self.distance / SOLO_V0_OBS_DISTANCE_SCALE);
+
+        // 3. 普攻状态机 (4维)
+        v.push(b2f(self.attack_state == 0));
+        v.push(b2f(self.attack_is_windup));
+        v.push(b2f(self.attack_is_cooldown));
+        v.push(self.attack_timer_remaining / 1.0);
+
+        // 4. 技能与闪现冷却 (10维: Q, W, E, R, Flash)
+        v.push(b2f(self.q_ready));
+        v.push(self.q_cd_remaining / 10.0);
+        v.push(b2f(self.w_ready));
+        v.push(self.w_cd_remaining / 15.0);
+        v.push(b2f(self.e_ready));
+        v.push(self.e_cd_remaining / 10.0);
+        v.push(b2f(self.r_ready));
+        v.push(self.r_cd_remaining / 60.0);
+        v.push(b2f(self.flash_ready));
+        v.push(self.flash_cd_remaining / 300.0);
+
+        // 5. 双方血量百分比 (2维)
+        v.push(self.self_hp / self.self_max_hp.max(1.0));
+        v.push(self.target_hp / self.target_max_hp.max(1.0));
+
+        // 6. 自身修饰符 (4 槽位 × 5 = 20维)
+        for i in 0..4 {
+            if let Some(slot) = self.self_modifiers.get(i) {
+                v.extend_from_slice(&slot.to_vector());
+            } else {
+                v.extend_from_slice(&[0.0; 5]);
+            }
+        }
+
+        // 7. 目标修饰符 (4 槽位 × 5 = 20维)
+        for i in 0..4 {
+            if let Some(slot) = self.target_modifiers.get(i) {
+                v.extend_from_slice(&slot.to_vector());
+            } else {
+                v.extend_from_slice(&[0.0; 5]);
+            }
+        }
+
+        v
     }
 
     pub fn dim() -> usize {
@@ -269,14 +267,25 @@ impl SoloV0Obs {
             )
         };
 
-        let vital_dir = if self.vital_dir_x > 0.5 {
-            "+X (东)".to_string()
-        } else if self.vital_dir_neg_x > 0.5 {
-            "-X (西)".to_string()
-        } else if self.vital_dir_z > 0.5 {
-            "+Z (北)".to_string()
-        } else if self.vital_dir_neg_z > 0.5 {
-            "-Z (南)".to_string()
+        let primary_vital = self
+            .target_modifiers
+            .iter()
+            .chain(self.self_modifiers.iter())
+            .find(|m| m.name_id == ModifierNameId::FioraPassiveVital);
+        let has_vital = primary_vital.is_some();
+        let vital_is_active = primary_vital.map(|v| v.stack_count > 0.5).unwrap_or(false);
+        let vital_dir = if let Some(v) = primary_vital {
+            if v.param0 > 0.5 {
+                "+X (东)".to_string()
+            } else if v.param0 < -0.5 {
+                "-X (西)".to_string()
+            } else if v.param1 > 0.5 {
+                "+Z (北)".to_string()
+            } else if v.param1 < -0.5 {
+                "-Z (南)".to_string()
+            } else {
+                "无".to_string()
+            }
         } else {
             "无".to_string()
         };
@@ -297,8 +306,8 @@ impl SoloV0Obs {
             w_ready: self.w_ready,
             e_ready: self.e_ready,
             r_ready: self.r_ready,
-            has_vital: self.has_vital,
-            vital_is_active: self.vital_is_active,
+            has_vital,
+            vital_is_active,
             vital_direction: vital_dir,
             tags: HashMap::from([
                 (
@@ -316,6 +325,29 @@ impl SoloV0Obs {
                 (
                     "flash_cd".to_string(),
                     format!("{:.1}s", self.flash_cd_remaining),
+                ),
+                (
+                    "atk_state".to_string(),
+                    match self.attack_state {
+                        0 => "Ready".to_string(),
+                        1 => format!("前摇中({:.2}s)", self.attack_timer_remaining),
+                        2 => format!("后摇中({:.2}s)", self.attack_timer_remaining),
+                        _ => "未知".to_string(),
+                    },
+                ),
+                (
+                    "modifiers_count".to_string(),
+                    format!(
+                        "Self:{}, Target:{}",
+                        self.self_modifiers
+                            .iter()
+                            .filter(|m| m.name_id != ModifierNameId::None)
+                            .count(),
+                        self.target_modifiers
+                            .iter()
+                            .filter(|m| m.name_id != ModifierNameId::None)
+                            .count(),
+                    ),
                 ),
             ]),
             ..Default::default()
@@ -498,25 +530,9 @@ impl RlEnvironment for SoloV0Env {
     fn obs_dim_labels() -> &'static [&'static str] {
         &[
             "角色标识(0=Fiora,1=Riven)",
-            "被动破绽(+X/东)",
-            "被动破绽(-X/西)",
-            "被动破绽(+Z/北)",
-            "被动破绽(-Z/南)",
-            "存在被动破绽",
-            "被动破绽已激活",
-            "被动破绽激活倒计时",
-            "被动破绽消失倒计时",
-            "R破绽(东)",
-            "R破绽(西)",
-            "R破绽(北)",
-            "R破绽(南)",
-            "存在R破绽",
-            "R破绽已激活",
-            "R破绽激活倒计时",
-            "R破绽消失倒计时",
-            "相对距离(归一化)",
             "目标相对X(归一化)",
             "目标相对Z(归一化)",
+            "相对距离(归一化)",
             "普攻就绪(Ready)",
             "普攻前摇中(Windup)",
             "普攻后摇中(Cooldown)",
@@ -529,10 +545,50 @@ impl RlEnvironment for SoloV0Env {
             "E剩余CD",
             "R就绪",
             "R剩余CD",
-            "自身血量百分比",
-            "目标血量百分比",
             "闪现就绪",
             "闪现剩余CD",
+            "自身血量百分比",
+            "目标血量百分比",
+            "自身修饰符1_类型ID",
+            "自身修饰符1_剩余时长",
+            "自身修饰符1_层数",
+            "自身修饰符1_参数0",
+            "自身修饰符1_参数1",
+            "自身修饰符2_类型ID",
+            "自身修饰符2_剩余时长",
+            "自身修饰符2_层数",
+            "自身修饰符2_参数0",
+            "自身修饰符2_参数1",
+            "自身修饰符3_类型ID",
+            "自身修饰符3_剩余时长",
+            "自身修饰符3_层数",
+            "自身修饰符3_参数0",
+            "自身修饰符3_参数1",
+            "自身修饰符4_类型ID",
+            "自身修饰符4_剩余时长",
+            "自身修饰符4_层数",
+            "自身修饰符4_参数0",
+            "自身修饰符4_参数1",
+            "目标修饰符1_类型ID",
+            "目标修饰符1_剩余时长",
+            "目标修饰符1_层数",
+            "目标修饰符1_参数0(X)",
+            "目标修饰符1_参数1(Z)",
+            "目标修饰符2_类型ID",
+            "目标修饰符2_剩余时长",
+            "目标修饰符2_层数",
+            "目标修饰符2_参数0(X)",
+            "目标修饰符2_参数1(Z)",
+            "目标修饰符3_类型ID",
+            "目标修饰符3_剩余时长",
+            "目标修饰符3_层数",
+            "目标修饰符3_参数0(X)",
+            "目标修饰符3_参数1(Z)",
+            "目标修饰符4_类型ID",
+            "目标修饰符4_剩余时长",
+            "目标修饰符4_层数",
+            "目标修饰符4_参数0(X)",
+            "目标修饰符4_参数1(Z)",
         ]
     }
 
@@ -782,9 +838,16 @@ pub fn get_default_riven_combat_action(
         return SoloV0Action::new(0.0, 0.0, SoloV0DiscreteAction::NoOp);
     }
 
-    let vital = extract_passive_vital(world, riven);
-    let (offset_x, offset_z) = if vital.has_vital && vital.is_active {
-        (-vital.dir_x * 0.5, -vital.dir_z * 0.5)
+    let target_modifiers = extract_entity_modifiers(world, riven, 4);
+    let primary_vital = target_modifiers
+        .iter()
+        .find(|m| m.name_id == ModifierNameId::FioraPassiveVital);
+    let (offset_x, offset_z) = if let Some(v) = primary_vital {
+        if v.stack_count > 0.5 {
+            (-v.param0 * 0.5, -v.param1 * 0.5)
+        } else {
+            (0.0, 0.0)
+        }
     } else {
         (0.0, 0.0)
     };
@@ -822,16 +885,6 @@ pub fn get_ego_obs_from_world(
     let target_base = extract_champion_base(world, target_entity);
     let dist = self_base.pos.distance(target_base.pos);
 
-    // 被动破绽挂在承伤者（瑞雯）身上：
-    // 若 role_id < 0.5 (Fiora视角)，破绽在 target_entity；反之破绽在 self_entity
-    let vital_holder = if role_id < 0.5 {
-        target_entity
-    } else {
-        self_entity
-    };
-    let vital = extract_passive_vital(world, vital_holder);
-    let r_vital = extract_r_vital(world, vital_holder);
-
     let atk = extract_attack_state(world, self_entity);
     let skills = extract_skill_cds(world, self_entity);
     let (flash_ready, flash_cd) = extract_flash_obs(world, self_entity);
@@ -845,22 +898,6 @@ pub fn get_ego_obs_from_world(
         target_hp: target_base.hp,
         target_max_hp: target_base.max_hp,
         distance: dist,
-        has_vital: vital.has_vital,
-        vital_is_active: vital.is_active,
-        vital_active_timer_remaining: vital.active_timer_remaining,
-        vital_remove_timer_remaining: vital.remove_timer_remaining,
-        vital_dir_x: vital.dir_x,
-        vital_dir_neg_x: vital.dir_neg_x,
-        vital_dir_z: vital.dir_z,
-        vital_dir_neg_z: vital.dir_neg_z,
-        has_r_vital: r_vital.has_r_vital,
-        r_is_active: r_vital.is_active,
-        r_active_timer_remaining: r_vital.active_timer_remaining,
-        r_remove_timer_remaining: r_vital.remove_timer_remaining,
-        r_vital_east: r_vital.vital_east,
-        r_vital_west: r_vital.vital_west,
-        r_vital_north: r_vital.vital_north,
-        r_vital_south: r_vital.vital_south,
         attack_state: atk.state_code,
         attack_is_windup: atk.is_windup,
         attack_is_cooldown: atk.is_cooldown,
@@ -875,6 +912,8 @@ pub fn get_ego_obs_from_world(
         r_cd_remaining: skills[3].cd_remaining,
         flash_ready,
         flash_cd_remaining: flash_cd,
+        self_modifiers: extract_entity_modifiers(world, self_entity, 4),
+        target_modifiers: extract_entity_modifiers(world, target_entity, 4),
     }
 }
 
@@ -1001,7 +1040,10 @@ pub fn step_solo_v0_world(
     let riven_dmg_dealt = (prev_f_hp - curr_f_hp).max(0.0) / 1000.0;
 
     let tracker_hit = app.world().resource::<VitalBreakTracker>().hit;
-    let is_vital_break = tracker_hit && prev_f_obs.has_vital && prev_f_obs.vital_is_active;
+    let had_active_vital = prev_f_obs.target_modifiers.iter().any(|m| {
+        m.name_id == ModifierNameId::FioraPassiveVital && m.stack_count > 0.5
+    });
+    let is_vital_break = tracker_hit && had_active_vital;
     let vital_bonus = if is_vital_break { 1.5 } else { 0.0 };
 
     let fiora_killed = curr_r_hp <= 0.0 && prev_r_hp > 0.0;

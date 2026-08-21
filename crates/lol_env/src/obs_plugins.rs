@@ -1,10 +1,5 @@
 use bevy::prelude::*;
-use lol_champions::fiora::e::BuffFioraE;
-use lol_champions::fiora::r::BuffFioraR;
-use lol_champions::fiora::passive::Vital;
 use lol_core::attack::{Attack, AttackState, AttackStatus};
-use lol_core::base::buff::Buffs;
-use lol_core::base::direction::Direction;
 use lol_core::life::Health;
 use lol_core::skill::{CoolDown, SkillRecastWindow, Skills, is_skill_ready};
 
@@ -28,96 +23,6 @@ pub fn extract_champion_base(world: &World, entity: Entity) -> ChampionBaseObs {
         hp: hp.map(|h| h.value).unwrap_or(0.0),
         max_hp: hp.map(|h| h.max).unwrap_or(500.0),
     }
-}
-
-/// 被动要害破绽状态
-#[derive(Debug, Clone, Default)]
-pub struct PassiveVitalObs {
-    pub has_vital: bool,
-    pub is_active: bool,
-    pub active_timer_remaining: f32,
-    pub remove_timer_remaining: f32,
-    pub dir_x: f32,
-    pub dir_neg_x: f32,
-    pub dir_z: f32,
-    pub dir_neg_z: f32,
-}
-
-/// 从目标实体提取菲奥娜被动破绽信息
-pub fn extract_passive_vital(world: &World, target: Entity) -> PassiveVitalObs {
-    let vital = world.get::<Vital>(target);
-    match vital {
-        Some(v) => {
-            let (vx, vnx, vz, vnz) = match v.direction {
-                Direction::X => (1.0, 0.0, 0.0, 0.0),
-                Direction::NegX => (0.0, 1.0, 0.0, 0.0),
-                Direction::Z => (0.0, 0.0, 1.0, 0.0),
-                Direction::NegZ => (0.0, 0.0, 0.0, 1.0),
-            };
-            let active_rem = if v.is_active() {
-                0.0
-            } else {
-                v.active_timer.remaining_secs()
-            };
-            let remove_rem = v.remove_timer.remaining_secs();
-            PassiveVitalObs {
-                has_vital: true,
-                is_active: v.is_active(),
-                active_timer_remaining: active_rem,
-                remove_timer_remaining: remove_rem,
-                dir_x: vx,
-                dir_neg_x: vnx,
-                dir_z: vz,
-                dir_neg_z: vnz,
-            }
-        }
-        None => PassiveVitalObs::default(),
-    }
-}
-
-/// 大招四破绽状态 (BuffFioraR)
-#[derive(Debug, Clone, Default)]
-pub struct RVitalObs {
-    pub has_r_vital: bool,
-    pub is_active: bool,
-    pub active_timer_remaining: f32,
-    pub remove_timer_remaining: f32,
-    pub vital_east: bool,
-    pub vital_west: bool,
-    pub vital_north: bool,
-    pub vital_south: bool,
-}
-
-/// 从目标实体的 Buff 列表中提取大招四破绽状态
-pub fn extract_r_vital(world: &World, target: Entity) -> RVitalObs {
-    if let Some(buffs) = world.get::<Buffs>(target) {
-        for buff_entity in buffs.iter() {
-            if let Some(buff_r) = world.get::<BuffFioraR>(buff_entity) {
-                let is_active = buff_r.is_active();
-                let active_rem = if is_active {
-                    0.0
-                } else {
-                    buff_r.active_timer.remaining_secs()
-                };
-                let remove_rem = buff_r.remove_timer.remaining_secs();
-                let has_e = buff_r.vitals.contains(&Direction::X);
-                let has_w = buff_r.vitals.contains(&Direction::NegX);
-                let has_n = buff_r.vitals.contains(&Direction::Z);
-                let has_s = buff_r.vitals.contains(&Direction::NegZ);
-                return RVitalObs {
-                    has_r_vital: true,
-                    is_active,
-                    active_timer_remaining: active_rem,
-                    remove_timer_remaining: remove_rem,
-                    vital_east: has_e,
-                    vital_west: has_w,
-                    vital_north: has_n,
-                    vital_south: has_s,
-                };
-            }
-        }
-    }
-    RVitalObs::default()
 }
 
 /// 普攻状态机状态
@@ -237,26 +142,4 @@ pub fn extract_skill_cds(world: &World, entity: Entity) -> [SkillCdObs; 4] {
     }
 
     result
-}
-
-/// 剑姬 E 技能 Buff 状态
-#[derive(Debug, Clone, Default)]
-pub struct BuffEObs {
-    pub has_buff: bool,
-    pub left: i32,
-}
-
-/// 从实体提取剑姬 E 技能的 Buff 强化状态
-pub fn extract_buff_e(world: &World, entity: Entity) -> BuffEObs {
-    if let Some(buffs) = world.get::<Buffs>(entity) {
-        for buff_entity in buffs.iter() {
-            if let Some(buff_e) = world.get::<BuffFioraE>(buff_entity) {
-                return BuffEObs {
-                    has_buff: true,
-                    left: buff_e.left,
-                };
-            }
-        }
-    }
-    BuffEObs::default()
 }

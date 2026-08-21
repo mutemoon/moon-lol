@@ -36,7 +36,7 @@ fn main() -> anyhow::Result<()> {
         .unwrap_or(64);
     let env_name = parse_arg("--env")
         .or_else(|| parse_arg("--env_name"))
-        .unwrap_or_else(|| lol_rl_protocol::ENV_FIORA_V1.to_string());
+        .unwrap_or_else(|| lol_rl_protocol::ENV_FIORA_V2.to_string());
 
     macro_rules! dispatch_visual_env {
         ($(($env_ty:ty, $name:expr)),*) => {
@@ -46,7 +46,7 @@ fn main() -> anyhow::Result<()> {
                 )*
                 unknown => {
                     tracing::warn!("未知环境名称 {unknown}，使用默认环境");
-                    start_visual_runner_for_env::<lol_env::FioraVsRivenRealEnv>(port, ckpt_path, hidden_dim)
+                    start_visual_runner_for_env::<lol_env::FioraV2Env>(port, ckpt_path, hidden_dim)
                 }
             }
         };
@@ -66,7 +66,7 @@ fn start_visual_runner_for_env<E: VisualEnvironment>(
     let device = select_device()?;
     let device_desc = match &device {
         candle_core::Device::Cpu => "CPU (单步微秒级低延迟模式)".to_string(),
-        candle_core::Device::Cuda(c) => format!("CUDA ({:?})", c.ordinal()),
+        candle_core::Device::Cuda(_) => "CUDA (GPU 加速模式)".to_string(),
         candle_core::Device::Metal(_) => "Metal".to_string(),
     };
     println!(">>> 推理设备: {device_desc}");
