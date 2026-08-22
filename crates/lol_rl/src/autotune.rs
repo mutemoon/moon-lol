@@ -413,8 +413,7 @@ impl AutoTuner {
 
         info!(
             "🎯 [AutoTuner] 真实校准 (主干: {:?})：{} 并发 Workers 跑 {iters} 轮完整真实迭代，测量实测 SPS...",
-            backbone_type,
-            tuned.num_parallel_envs
+            backbone_type, tuned.num_parallel_envs
         );
         let ppo_config = PPOConfig {
             lr: 3e-4,

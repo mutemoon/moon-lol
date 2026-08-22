@@ -266,10 +266,7 @@ pub struct EnvMeta {
 macro_rules! for_all_rl_environments {
     ($macro_name:ident) => {
         $macro_name!(
-            (
-                $crate::solo_v0::SoloV0Env,
-                lol_rl_protocol::ENV_SOLO_V0
-            ),
+            ($crate::solo_v0::SoloV0Env, lol_rl_protocol::ENV_SOLO_V0),
             ($crate::fiora_v2::FioraV2Env, lol_rl_protocol::ENV_FIORA_V2),
             (
                 $crate::fiora_v1::FioraVsRivenRealEnv,

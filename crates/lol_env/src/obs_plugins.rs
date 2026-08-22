@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use lol_core::attack::{Attack, AttackState, AttackStatus};
 use lol_core::life::Health;
-use lol_core::skill::{CoolDown, SkillRecastWindow, Skills, is_skill_ready};
+use lol_core::skill::{CoolDown, Skill, SkillRecastWindow, Skills, is_skill_ready};
 
 /// 基础英雄属性与空间状态
 #[derive(Debug, Clone, Default)]
@@ -120,9 +120,15 @@ pub fn extract_skill_cds(world: &World, entity: Entity) -> [SkillCdObs; 4] {
         for (i, &s_entity) in skill_entities.iter().enumerate().take(4) {
             let cd = world.get::<CoolDown>(s_entity);
             let recast = world.get::<SkillRecastWindow>(s_entity);
-            let ready = match cd {
-                Some(c) => is_skill_ready(c, recast),
-                None => true,
+            let skill = world.get::<Skill>(s_entity);
+            let is_learned = skill.map_or(true, |s| s.level > 0);
+            let ready = if !is_learned {
+                false
+            } else {
+                match cd {
+                    Some(c) => is_skill_ready(c, recast),
+                    None => true,
+                }
             };
             let rem = cd
                 .and_then(|c| c.timer.as_ref())

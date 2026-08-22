@@ -15,9 +15,7 @@ pub use crate::flash_plugin::{
     register_flash_plugin, tick_flash_cooldown,
 };
 use crate::modifier_obs::{ModifierNameId, ModifierSlotObs, extract_entity_modifiers};
-use crate::obs_plugins::{
-    extract_attack_state, extract_champion_base, extract_skill_cds,
-};
+use crate::obs_plugins::{extract_attack_state, extract_champion_base, extract_skill_cds};
 use crate::raycast_plugin::raycast_ground_plane;
 use crate::reward::RewardModel;
 use crate::traits::{EnvConfig, EnvMeta, RenderMode, RlEnvironment, StepResult, VisualEnvironment};
@@ -376,11 +374,7 @@ impl RewardModel for FioraV2RewardModel {
         RewardFormulaSpec {
             name: "全技能实战公式 (V2)".to_string(),
             terms: vec![
-                RewardTermSpec::new(
-                    "time_penalty",
-                    "每步时间惩罚",
-                    RewardExpr::Constant(-0.001),
-                ),
+                RewardTermSpec::new("time_penalty", "每步时间惩罚", RewardExpr::Constant(-0.001)),
                 RewardTermSpec::new(
                     "damage_dealt",
                     "造成伤害比例奖励",
@@ -537,12 +531,7 @@ impl FioraV2Env {
     pub fn dispatch_action(&mut self, action: FioraV2Action) {
         let fiora = self.base.fiora;
         let riven = self.base.riven;
-        dispatch_action_world(
-            self.base.world_mut(),
-            fiora,
-            riven,
-            action,
-        );
+        dispatch_action_world(self.base.world_mut(), fiora, riven, action);
     }
 
     pub fn step(&mut self, action: FioraV2Action) -> StepResult<FioraV2Obs> {
@@ -711,10 +700,11 @@ impl RlEnvironment for FioraV2Env {
     }
 
     fn step(&mut self, actions: &[Self::Action]) -> Vec<StepResult<Self::Obs>> {
-        let action = actions
-            .first()
-            .copied()
-            .unwrap_or(FioraV2Action::new(0.0, 0.0, FioraV2DiscreteAction::NoOp));
+        let action = actions.first().copied().unwrap_or(FioraV2Action::new(
+            0.0,
+            0.0,
+            FioraV2DiscreteAction::NoOp,
+        ));
         vec![self.step(action)]
     }
 
@@ -808,11 +798,7 @@ impl VisualEnvironment for FioraV2Env {
         let dist = (dx * dx + dz * dz).sqrt();
 
         if dist < 60.0 {
-            Some(FioraV2Action::new(
-                0.0,
-                0.0,
-                FioraV2DiscreteAction::Attack,
-            ))
+            Some(FioraV2Action::new(0.0, 0.0, FioraV2DiscreteAction::Attack))
         } else {
             let nx = (dx / OFFSET_SCALE).clamp(-1.0, 1.0);
             let nz = (dz / OFFSET_SCALE).clamp(-1.0, 1.0);
@@ -826,10 +812,11 @@ impl VisualEnvironment for FioraV2Env {
         actions: &[Self::Action],
     ) -> Vec<StepResult<Self::Obs>> {
         self.base.increment_step();
-        let action = actions
-            .first()
-            .copied()
-            .unwrap_or(FioraV2Action::new(0.0, 0.0, FioraV2DiscreteAction::NoOp));
+        let action = actions.first().copied().unwrap_or(FioraV2Action::new(
+            0.0,
+            0.0,
+            FioraV2DiscreteAction::NoOp,
+        ));
         vec![step_v2_world(
             app,
             self.base.fiora,
@@ -1053,9 +1040,10 @@ pub fn step_v2_world(
     let curr_fpos = obs.fiora_pos;
 
     let tracker_hit = app.world().resource::<VitalBreakTracker>().hit;
-    let had_active_vital = prev_obs.target_modifiers.iter().any(|m| {
-        m.name_id == ModifierNameId::FioraPassiveVital && m.stack_count > 0.5
-    });
+    let had_active_vital = prev_obs
+        .target_modifiers
+        .iter()
+        .any(|m| m.name_id == ModifierNameId::FioraPassiveVital && m.stack_count > 0.5);
     let is_vital_break = tracker_hit && had_active_vital;
 
     let has_vital = prev_obs

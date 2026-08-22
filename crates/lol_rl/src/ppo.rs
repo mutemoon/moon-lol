@@ -4,8 +4,7 @@ use candle_core::{DType, Device, Result, Tensor};
 use candle_nn::{AdamW, Optimizer, ParamsAdamW, VarBuilder, VarMap};
 use lol_rl_protocol::{ActionSpace, PolicyBackbone};
 
-use crate::policy::ActorCritic;
-use crate::policy::HeroEmbedConfig;
+use crate::policy::{ActorCritic, HeroEmbedConfig};
 
 pub struct RolloutBuffer {
     pub states: Vec<Vec<f32>>,
@@ -781,36 +780,18 @@ impl PPOAgent {
                         }
                     }
 
-                    let mb_states_3d = Tensor::from_vec(
-                        mb_states_vec,
-                        (m, chunk_len, state_dim),
-                        &self.device,
-                    )?;
-                    let mb_actions = Tensor::from_vec(
-                        mb_actions_vec,
-                        (total_steps_mb, enc_dim),
-                        &self.device,
-                    )?;
-                    let mb_old_log_probs = Tensor::from_vec(
-                        mb_old_log_probs_vec,
-                        (total_steps_mb,),
-                        &self.device,
-                    )?;
-                    let mb_old_values = Tensor::from_vec(
-                        mb_old_values_vec,
-                        (total_steps_mb,),
-                        &self.device,
-                    )?;
-                    let mb_returns = Tensor::from_vec(
-                        mb_returns_vec,
-                        (total_steps_mb,),
-                        &self.device,
-                    )?;
-                    let mb_advantages = Tensor::from_vec(
-                        mb_advantages_vec,
-                        (total_steps_mb,),
-                        &self.device,
-                    )?;
+                    let mb_states_3d =
+                        Tensor::from_vec(mb_states_vec, (m, chunk_len, state_dim), &self.device)?;
+                    let mb_actions =
+                        Tensor::from_vec(mb_actions_vec, (total_steps_mb, enc_dim), &self.device)?;
+                    let mb_old_log_probs =
+                        Tensor::from_vec(mb_old_log_probs_vec, (total_steps_mb,), &self.device)?;
+                    let mb_old_values =
+                        Tensor::from_vec(mb_old_values_vec, (total_steps_mb,), &self.device)?;
+                    let mb_returns =
+                        Tensor::from_vec(mb_returns_vec, (total_steps_mb,), &self.device)?;
+                    let mb_advantages =
+                        Tensor::from_vec(mb_advantages_vec, (total_steps_mb,), &self.device)?;
                     let mb_masks = if let Some(mbm) = mb_masks_vec {
                         Some(Tensor::from_vec(
                             mbm,
@@ -866,9 +847,10 @@ impl PPOAgent {
                     let entropy_loss = entropy.neg()?.mean_all()?;
 
                     let kl = (&ratio - 1.0 - &log_ratio)?.mean_all()?;
-                    let clip_frac = (ratio.lt(1.0 - self.config.clip_eps)?.to_dtype(DType::F32)?
-                        + ratio.gt(1.0 + self.config.clip_eps)?.to_dtype(DType::F32)?)?
-                    .mean_all()?;
+                    let clip_frac =
+                        (ratio.lt(1.0 - self.config.clip_eps)?.to_dtype(DType::F32)?
+                            + ratio.gt(1.0 + self.config.clip_eps)?.to_dtype(DType::F32)?)?
+                        .mean_all()?;
 
                     let p_loss_val: f32 = policy_loss.to_scalar()?;
                     let v_loss_val: f32 = value_loss.to_scalar()?;
@@ -1116,8 +1098,6 @@ impl PPOAgent {
         Ok(last_stats)
     }
 }
-
-
 
 #[cfg(test)]
 mod tests {
@@ -1802,7 +1782,10 @@ mod tests {
                 let step_val = ys_step_vec[t][d];
                 let diff = (seq_val - step_val).abs();
                 println!("t={t}, d={d}: seq={seq_val:.6}, step={step_val:.6}, diff={diff:.6}");
-                assert!(diff < 1e-4, "t={t}, d={d}: seq={seq_val} vs step={step_val}, diff={diff}");
+                assert!(
+                    diff < 1e-4,
+                    "t={t}, d={d}: seq={seq_val} vs step={step_val}, diff={diff}"
+                );
             }
         }
 
@@ -1918,4 +1901,3 @@ mod tests {
         Ok(())
     }
 }
-

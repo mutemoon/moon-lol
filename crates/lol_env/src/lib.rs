@@ -14,13 +14,9 @@ pub mod traits;
 pub mod visual_runner;
 
 pub use fiora_riven_common::{
-    ATTACK_MASK_DISTANCE, FioraRivenBaseEnv, FioraRivenEntities, FioraRivenEnvBuilder,
-    OBS_DISTANCE_IDX, OBS_DISTANCE_SCALE,
-};
-pub use solo_v0::{
-    SOLO_V0_CHAMPION_HP, SOLO_V0_OBS_DIM, SOLO_V0_OBS_DISTANCE_SCALE, SOLO_V0_OFFSET_SCALE,
-    SoloV0Action, SoloV0DiscreteAction, SoloV0Env, SoloV0Obs, setup_solo_v0_env_world,
-    setup_solo_v0_health_world, step_solo_v0_world,
+    ATTACK_MASK_DISTANCE, ChampionInitialSkillLevels, FioraRivenBaseEnv, FioraRivenEntities,
+    FioraRivenEnvBuilder, OBS_DISTANCE_IDX, OBS_DISTANCE_SCALE, clear_minions_world,
+    reset_barracks_world, setup_custom_skill_levels_world,
 };
 pub use fiora_v0::{
     FioraVsRivenAction, FioraVsRivenEnv, FioraVsRivenObs, advance_action_simulation,
@@ -41,11 +37,16 @@ pub use obs_plugins::{
     extract_skill_cds,
 };
 pub use parallel::{
-    ParallelEnvs, ParallelFioraV2Envs, ParallelFioraVsRivenEnvs,
-    ParallelFioraVsRivenRealEnvs, ParallelSoloV0Envs,
+    ParallelEnvs, ParallelFioraV2Envs, ParallelFioraVsRivenEnvs, ParallelFioraVsRivenRealEnvs,
+    ParallelSoloV0Envs,
 };
 pub use raycast_plugin::raycast_ground_plane;
 pub use reward::{FioraRewardContext, FioraVsRivenRewardModel, RewardModel};
+pub use solo_v0::{
+    SOLO_V0_CHAMPION_HP, SOLO_V0_OBS_DIM, SOLO_V0_OBS_DISTANCE_SCALE, SOLO_V0_OFFSET_SCALE,
+    SoloV0Action, SoloV0DiscreteAction, SoloV0Env, SoloV0Obs, setup_solo_v0_env_world,
+    setup_solo_v0_health_world, step_solo_v0_world,
+};
 pub use traits::{
     EnvConfig, EnvMeta, RenderMode, RewardBreakdownItem, RlEnvironment, StepResult,
     VisualEnvironment, get_env_meta, list_available_envs,

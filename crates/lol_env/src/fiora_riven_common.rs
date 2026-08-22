@@ -31,6 +31,16 @@ pub const OBS_DISTANCE_SCALE: f32 = 100.0;
 
 // ── 基础环境宿主与 Builder (插件化架构) ──────────────────────────────────────
 
+/// 英雄初始技能等级配置（Q, W, E, R）
+#[derive(Resource, Debug, Clone, Copy, PartialEq, Eq)]
+pub struct ChampionInitialSkillLevels(pub [usize; 4]);
+
+impl Default for ChampionInitialSkillLevels {
+    fn default() -> Self {
+        Self([3, 1, 1, 1])
+    }
+}
+
 /// 剑姬 vs 瑞雯对战环境的公共 ECS 引擎基底。
 /// 封装完整的 Bevy App 实例、实体句柄与生命周期管理。
 pub struct FioraRivenBaseEnv {
@@ -45,6 +55,10 @@ pub struct FioraRivenBaseEnv {
     pub max_steps: usize,
     pub initial_fiora_pos: Vec3,
     pub initial_riven_pos: Vec3,
+    pub map_name: String,
+    pub enable_barrack: bool,
+    pub initial_skill_levels: [usize; 4],
+    pub warmup_secs: f32,
     pub render_mode: RenderMode,
     pub on_reset_hooks: Vec<fn(Entity, Entity, &mut World)>,
 }
@@ -114,10 +128,15 @@ impl FioraRivenBaseEnv {
         setup_skill_levels_world(self.app.world_mut(), self.fiora, self.riven);
     }
 
-    /// 执行无头基础环境重置（销毁并重建英雄实体，重置技能，统一执行 on_reset 钩子）
+    /// 执行无头基础环境重置（销毁并重建英雄实体，重置技能与小兵兵线，统一执行 on_reset 钩子与预热）
     pub fn reset_base(&mut self) {
         let is_render = self.is_render();
-        let (new_fiora, new_riven) = Self::reset_world_internal(
+        if self.enable_barrack {
+            clear_minions_world(self.app.world_mut());
+            reset_barracks_world(self.app.world_mut());
+        }
+
+        let (new_fiora, new_riven) = reset_episode_world(
             self.app.world_mut(),
             self.fiora,
             self.riven,
@@ -128,17 +147,48 @@ impl FioraRivenBaseEnv {
             self.initial_fiora_pos,
             self.initial_riven_pos,
             is_render,
-            &self.on_reset_hooks,
         );
         self.fiora = new_fiora;
         self.riven = new_riven;
         self.step_count = 0;
-        self.app.update();
+
+        // 等待 DynamicWorld 资产就绪
+        for _ in 0..500 {
+            self.app.update();
+            let world = self.app.world();
+            let fiora_ready = world.get::<CharacterReady>(new_fiora).is_some()
+                && (!is_render || world.get::<Skin>(new_fiora).is_some());
+            let riven_ready = world.get::<CharacterReady>(new_riven).is_some()
+                && (!is_render || world.get::<Skin>(new_riven).is_some());
+
+            if fiora_ready && riven_ready {
+                break;
+            }
+        }
+
+        setup_skill_levels_world(self.app.world_mut(), new_fiora, new_riven);
+
+        for hook in &self.on_reset_hooks {
+            hook(new_fiora, new_riven, self.app.world_mut());
+        }
+
+        if self.warmup_secs > 0.0 {
+            let warmup_ticks = (self.warmup_secs * 64.0).round() as usize;
+            for _ in 0..warmup_ticks {
+                self.app.update();
+            }
+        }
     }
 
     /// 在传入的 World 中执行对局重置（有头/无头共用的核心重置入口，自动执行全部 on_reset 钩子）
     pub fn reset_world_base(&mut self, world: &mut World) -> (Entity, Entity) {
-        let (new_fiora, new_riven) = Self::reset_world_internal(
+        let is_render = self.is_render();
+        if self.enable_barrack {
+            clear_minions_world(world);
+            reset_barracks_world(world);
+        }
+
+        let (new_fiora, new_riven) = reset_episode_world(
             world,
             self.fiora,
             self.riven,
@@ -148,46 +198,17 @@ impl FioraRivenBaseEnv {
             &self.riven_skin_handle,
             self.initial_fiora_pos,
             self.initial_riven_pos,
-            self.is_render(),
-            &self.on_reset_hooks,
-        );
-        self.fiora = new_fiora;
-        self.riven = new_riven;
-        self.step_count = 0;
-        (new_fiora, new_riven)
-    }
-
-    fn reset_world_internal(
-        world: &mut World,
-        fiora: Entity,
-        riven: Entity,
-        fiora_config_handle: &Handle<DynamicWorld>,
-        riven_config_handle: &Handle<DynamicWorld>,
-        fiora_skin_handle: &Option<Handle<DynamicWorld>>,
-        riven_skin_handle: &Option<Handle<DynamicWorld>>,
-        initial_fiora_pos: Vec3,
-        initial_riven_pos: Vec3,
-        render: bool,
-        on_reset_hooks: &[fn(Entity, Entity, &mut World)],
-    ) -> (Entity, Entity) {
-        let (new_fiora, new_riven) = reset_episode_world(
-            world,
-            fiora,
-            riven,
-            fiora_config_handle,
-            riven_config_handle,
-            fiora_skin_handle,
-            riven_skin_handle,
-            initial_fiora_pos,
-            initial_riven_pos,
-            render,
+            is_render,
         );
         setup_skill_levels_world(world, new_fiora, new_riven);
 
-        for hook in on_reset_hooks {
+        for hook in &self.on_reset_hooks {
             hook(new_fiora, new_riven, world);
         }
 
+        self.fiora = new_fiora;
+        self.riven = new_riven;
+        self.step_count = 0;
         (new_fiora, new_riven)
     }
 
@@ -205,11 +226,41 @@ impl FioraRivenBaseEnv {
     }
 }
 
+/// 清理世界中所有小兵实体
+pub fn clear_minions_world(world: &mut World) {
+    let mut to_despawn = Vec::new();
+    let mut q_minions = world.query_filtered::<Entity, With<lol_core::entities::minion::Minion>>();
+    for e in q_minions.iter(world) {
+        to_despawn.push(e);
+    }
+    for e in to_despawn {
+        if let Ok(entity_mut) = world.get_entity_mut(e) {
+            entity_mut.despawn();
+        }
+    }
+}
+
+/// 重置世界中所有兵营的生成状态与计时器
+pub fn reset_barracks_world(world: &mut World) {
+    let mut q_barracks = world.query::<&mut lol_core::entities::barrack::BarrackState>();
+    for mut state in q_barracks.iter_mut(world) {
+        state.wave_timer = Timer::from_seconds(10.0, TimerMode::Repeating);
+        state.spawn_queue.clear();
+        state.wave_count = 0;
+        state.upgrade_count = 0;
+        state.move_speed_upgrade_count = 0;
+    }
+}
+
 /// 环境构造器：支持通过注册插件与钩子按需组装具体环境。
 pub struct FioraRivenEnvBuilder {
     pub config: EnvConfig,
     pub default_max_steps: usize,
     pub window_title: String,
+    pub map_name: String,
+    pub enable_barrack: bool,
+    pub initial_skill_levels: [usize; 4],
+    pub warmup_secs: f32,
     pub initial_fiora_pos: Vec3,
     pub initial_riven_pos: Vec3,
     pub app_plugins: Vec<fn(&mut App)>,
@@ -224,6 +275,10 @@ impl FioraRivenEnvBuilder {
             config,
             default_max_steps,
             window_title: "Fiora vs Riven RL".to_string(),
+            map_name: "test".to_string(),
+            enable_barrack: false,
+            initial_skill_levels: [3, 1, 1, 1],
+            warmup_secs: 0.0,
             initial_fiora_pos: Vec3::ZERO,
             initial_riven_pos: Vec3::new(50.0, 0.0, 0.0),
             app_plugins: Vec::new(),
@@ -235,6 +290,26 @@ impl FioraRivenEnvBuilder {
 
     pub fn window_title(mut self, title: impl Into<String>) -> Self {
         self.window_title = title.into();
+        self
+    }
+
+    pub fn map_name(mut self, map_name: impl Into<String>) -> Self {
+        self.map_name = map_name.into();
+        self
+    }
+
+    pub fn enable_barrack(mut self, enable: bool) -> Self {
+        self.enable_barrack = enable;
+        self
+    }
+
+    pub fn initial_skill_levels(mut self, levels: [usize; 4]) -> Self {
+        self.initial_skill_levels = levels;
+        self
+    }
+
+    pub fn warmup_secs(mut self, secs: f32) -> Self {
+        self.warmup_secs = secs;
         self
     }
 
@@ -323,11 +398,15 @@ impl FioraRivenEnvBuilder {
                 }));
             }
             app.add_plugins(lol_render::PluginRender);
-            app.add_plugins(
-                lol_core::PluginCore
-                    .build()
-                    .disable::<lol_core::PluginBarrack>(),
-            );
+            if self.enable_barrack {
+                app.add_plugins(lol_core::PluginCore);
+            } else {
+                app.add_plugins(
+                    lol_core::PluginCore
+                        .build()
+                        .disable::<lol_core::PluginBarrack>(),
+                );
+            }
             app.add_plugins(lol_particle::PluginParticle);
         } else {
             app.add_plugins((
@@ -335,11 +414,15 @@ impl FioraRivenEnvBuilder {
                 asset_plugin,
                 bevy::world_serialization::WorldSerializationPlugin,
             ));
-            app.add_plugins(
-                lol_core::PluginCore
-                    .build()
-                    .disable::<lol_core::PluginBarrack>(),
-            );
+            if self.enable_barrack {
+                app.add_plugins(lol_core::PluginCore);
+            } else {
+                app.add_plugins(
+                    lol_core::PluginCore
+                        .build()
+                        .disable::<lol_core::PluginBarrack>(),
+                );
+            }
         }
 
         app.add_plugins(lol_champions::fiora::PluginFiora);
@@ -350,8 +433,9 @@ impl FioraRivenEnvBuilder {
             plugin(&mut app);
         }
 
-        app.insert_resource(lol_base::map::MapPaths::new("test"));
+        app.insert_resource(lol_base::map::MapPaths::new(&self.map_name));
         app.insert_resource(NavigationDebug);
+        app.insert_resource(ChampionInitialSkillLevels(self.initial_skill_levels));
 
         app.finish();
         app.cleanup();
@@ -426,6 +510,10 @@ impl FioraRivenEnvBuilder {
             max_steps,
             initial_fiora_pos: self.initial_fiora_pos,
             initial_riven_pos: self.initial_riven_pos,
+            map_name: self.map_name,
+            enable_barrack: self.enable_barrack,
+            initial_skill_levels: self.initial_skill_levels,
+            warmup_secs: self.warmup_secs,
             render_mode: self.config.render_mode,
             on_reset_hooks: self.on_reset_hooks,
         };
@@ -434,6 +522,13 @@ impl FioraRivenEnvBuilder {
 
         for hook in &self.on_ready_hooks {
             hook(fiora, riven, base.app.world_mut());
+        }
+
+        if self.warmup_secs > 0.0 {
+            let warmup_ticks = (self.warmup_secs * 64.0).round() as usize;
+            for _ in 0..warmup_ticks {
+                base.app.update();
+            }
         }
 
         base
@@ -587,6 +682,7 @@ pub fn on_character_ready_set_skill_levels(
     trigger: On<Add, CharacterReady>,
     q_skills: Query<&Skills>,
     mut q_skill: Query<&mut Skill>,
+    levels_res: Option<Res<ChampionInitialSkillLevels>>,
 ) {
     let entity = trigger.entity;
     let Ok(skills) = q_skills.get(entity) else {
@@ -596,7 +692,7 @@ pub fn on_character_ready_set_skill_levels(
     if skill_entities.len() < 4 {
         return;
     }
-    let levels = [3usize, 1, 1, 1];
+    let levels = levels_res.map(|r| r.0).unwrap_or([3, 1, 1, 1]);
     for (idx, level) in levels.into_iter().enumerate() {
         if let Ok(mut skill) = q_skill.get_mut(skill_entities[idx]) {
             skill.level = level;
@@ -820,21 +916,28 @@ pub fn reset_episode_world(
 
 /// Set skill levels for Fiora and Riven in the Bevy ECS world.
 pub fn setup_skill_levels_world(world: &mut World, fiora: Entity, riven: Entity) {
+    let levels = world
+        .get_resource::<ChampionInitialSkillLevels>()
+        .map(|r| r.0)
+        .unwrap_or([3, 1, 1, 1]);
+    setup_custom_skill_levels_world(world, fiora, riven, levels);
+}
+
+/// 使用指定技能等级数组设置 Fiora 与 Riven 的技能等级
+pub fn setup_custom_skill_levels_world(
+    world: &mut World,
+    fiora: Entity,
+    riven: Entity,
+    levels: [usize; 4],
+) {
     for champion in [fiora, riven] {
         if let Some(skills) = world.get::<Skills>(champion) {
             let skill_entities = skills.to_vec();
-            if skill_entities.len() >= 4 {
-                if let Some(mut q) = world.get_mut::<Skill>(skill_entities[0]) {
-                    q.level = 3;
-                }
-                if let Some(mut w) = world.get_mut::<Skill>(skill_entities[1]) {
-                    w.level = 1;
-                }
-                if let Some(mut e) = world.get_mut::<Skill>(skill_entities[2]) {
-                    e.level = 1;
-                }
-                if let Some(mut r) = world.get_mut::<Skill>(skill_entities[3]) {
-                    r.level = 1;
+            for (idx, &level) in levels.iter().enumerate() {
+                if idx < skill_entities.len() {
+                    if let Some(mut s) = world.get_mut::<Skill>(skill_entities[idx]) {
+                        s.level = level;
+                    }
                 }
             }
         }

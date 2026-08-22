@@ -83,23 +83,33 @@ impl RLService {
             .await
             .map_err(|e| anyhow::anyhow!("RL schema 初始化失败: {e}"))?;
         let repo = Arc::new(PgRlRepo { pool });
-        let interrupted = repo.mark_all_running_interrupted().await?;
-        info!("连接 Postgres…恢复 {} 个中断任务", interrupted);
+        Self::new_with_repo(repo, event_capacity).await
+    }
 
-        let db_tasks = repo.list_tasks().await?;
+    pub async fn new_with_repo(
+        repo: Arc<dyn RlRepo>,
+        event_capacity: usize,
+    ) -> anyhow::Result<(Self, broadcast::Receiver<OutFrame>)> {
+        let interrupted = repo.mark_all_running_interrupted().await.unwrap_or(0);
+        if interrupted > 0 {
+            info!("连接数据库…恢复 {} 个中断任务", interrupted);
+        }
+
+        let db_tasks = repo.list_tasks().await.unwrap_or_default();
         let mut initial_tasks = HashMap::new();
         for t in &db_tasks {
             let mut state = TaskState::from_row(t);
-            let cps = repo.list_checkpoints(&state.id).await?;
-            for cp in &cps {
-                state.checkpoints.push(CheckpointItem {
-                    // 统一用展示 id "ckpt-{step}"，与运行中保存的一致
-                    id: format!("ckpt-{}", cp.step),
-                    step: cp.step as usize,
-                    path: cp.path.clone(),
-                    ep_return: cp.ep_return,
-                    created_at: cp.created_at.to_rfc3339(),
-                });
+            if let Ok(cps) = repo.list_checkpoints(&state.id).await {
+                for cp in &cps {
+                    state.checkpoints.push(CheckpointItem {
+                        // 统一用展示 id "ckpt-{step}"，与运行中保存的一致
+                        id: format!("ckpt-{}", cp.step),
+                        step: cp.step as usize,
+                        path: cp.path.clone(),
+                        ep_return: cp.ep_return,
+                        created_at: cp.created_at.to_rfc3339(),
+                    });
+                }
             }
             if let Ok(metrics) = repo.list_metrics(&state.id).await {
                 state.metrics_history = metrics;
@@ -109,7 +119,9 @@ impl RLService {
             }
             initial_tasks.insert(state.id.clone(), state);
         }
-        info!("从数据库载入 {} 个任务", initial_tasks.len());
+        if !initial_tasks.is_empty() {
+            info!("从数据库载入 {} 个任务", initial_tasks.len());
+        }
 
         let (event_tx, rx) = broadcast::channel(event_capacity);
         let worker_pool = Arc::new(TrainingWorkerPool::new(
@@ -124,6 +136,12 @@ impl RLService {
             },
             rx,
         ))
+    }
+
+    pub async fn new_in_memory(event_capacity: usize) -> (Self, broadcast::Receiver<OutFrame>) {
+        Self::new_with_repo(Arc::new(crate::db::NoopRlRepo), event_capacity)
+            .await
+            .expect("In-memory RLService creation should never fail")
     }
 
     pub fn subscribe(&self) -> broadcast::Receiver<OutFrame> {

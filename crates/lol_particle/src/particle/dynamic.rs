@@ -1086,8 +1086,12 @@ fn extract_dynamic_material_keys(
         .filter_map(|mat_handle| material_assets.get(&mat_handle.0))
         .map(|mat| mat.id)
         .collect();
-    buffer_cache.camera_targets.retain(|id, _| active_ids.contains(id));
-    buffer_cache.mesh_targets.retain(|id, _| active_ids.contains(id));
+    buffer_cache
+        .camera_targets
+        .retain(|id, _| active_ids.contains(id));
+    buffer_cache
+        .mesh_targets
+        .retain(|id, _| active_ids.contains(id));
 
     if !material_assets.is_changed() && changed_materials.is_empty() {
         return;

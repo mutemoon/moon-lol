@@ -197,12 +197,7 @@ impl FioraVsRivenRealEnv {
     pub fn dispatch_action(&mut self, action: FioraVsRivenRealAction) {
         let fiora = self.base.fiora;
         let riven = self.base.riven;
-        dispatch_action_world(
-            self.base.world_mut(),
-            fiora,
-            riven,
-            action,
-        );
+        dispatch_action_world(self.base.world_mut(), fiora, riven, action);
     }
 
     pub fn step(&mut self, action: FioraVsRivenRealAction) -> StepResult<FioraVsRivenRealObs> {
@@ -374,11 +369,7 @@ impl VisualEnvironment for FioraVsRivenRealEnv {
     }
 
     fn get_current_obs_all(&self, world: &World) -> Vec<Self::Obs> {
-        vec![get_obs_from_world(
-            world,
-            self.base.fiora,
-            self.base.riven,
-        )]
+        vec![get_obs_from_world(world, self.base.fiora, self.base.riven)]
     }
 
     fn action_from_screen_click(
@@ -535,8 +526,7 @@ pub fn step_world(
 
     let is_attack = action.attack;
     let tracker_hit = app.world().resource::<VitalBreakTracker>().hit;
-    let is_vital_break =
-        tracker_hit && prev_obs.has_vital && prev_obs.vital_is_active;
+    let is_vital_break = tracker_hit && prev_obs.has_vital && prev_obs.vital_is_active;
 
     let reward_obs = attack_obs.as_ref().unwrap_or(&prev_obs);
     let (reward, reward_breakdown, reward_vars) = compute_step_reward(

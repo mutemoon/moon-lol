@@ -21,12 +21,34 @@ pub async fn start_rl_server(addr_str: &str) -> anyhow::Result<()> {
     );
 
     let db_url = std::env::var("DATABASE_URL").unwrap_or_else(|_| DEFAULT_DATABASE_URL.to_string());
-    let pool = PgPoolOptions::new()
+    let pool_res = PgPoolOptions::new()
         .max_connections(10)
+        .acquire_timeout(std::time::Duration::from_secs(2))
         .connect(&db_url)
-        .await?;
+        .await;
 
-    let (rl_service, _) = RLService::new(pool, 100).await?;
+    let (rl_service, _) = match pool_res {
+        Ok(pool) => {
+            info!("✅ [lol_rl] 成功连接至 PostgreSQL: {}", db_url);
+            match RLService::new(pool, 100).await {
+                Ok(srv) => srv,
+                Err(e) => {
+                    warn!(
+                        "⚠️ [lol_rl] 初始化 PostgreSQL 架构失败 ({e})，降级为内存模式 (NoopRlRepo)"
+                    );
+                    RLService::new_in_memory(100).await
+                }
+            }
+        }
+        Err(e) => {
+            warn!(
+                "⚠️ [lol_rl] 无法连接到 PostgreSQL 数据库 ({e})。\n\
+                 💡 当前已自动降级为【纯内存模式 (NoopRlRepo)】继续运行服务。\n\
+                 💡 如需持久化保存训练任务、检查点与指标，请启动 PostgreSQL 并在环境变量中配置 DATABASE_URL。"
+            );
+            RLService::new_in_memory(100).await
+        }
+    };
     let service = Arc::new(rl_service);
 
     while let Ok((stream, peer)) = listener.accept().await {

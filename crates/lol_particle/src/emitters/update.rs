@@ -503,10 +503,9 @@ pub fn attach_quad_visuals(
         color: birth_color,
         is_distortion: false,
     }));
-    commands.entity(particle_entity).insert((
-        Mesh3d(mesh),
-        MeshMaterial3d(material_handle),
-    ));
+    commands
+        .entity(particle_entity)
+        .insert((Mesh3d(mesh), MeshMaterial3d(material_handle)));
 }
 
 pub fn attach_mesh_visuals(
@@ -562,10 +561,9 @@ pub fn attach_unlit_decal_visuals(
     particle_entity: Entity,
     material_handle: Handle<ParticleMaterialDynamic>,
 ) {
-    commands.entity(particle_entity).insert((
-        ParticleDecal::default(),
-        MeshMaterial3d(material_handle),
-    ));
+    commands
+        .entity(particle_entity)
+        .insert((ParticleDecal::default(), MeshMaterial3d(material_handle)));
 }
 
 pub fn attach_distortion_visuals(

@@ -160,12 +160,7 @@ impl FioraVsRivenEnv {
     pub fn dispatch_action(&mut self, action: FioraVsRivenAction) {
         let fiora = self.base.fiora;
         let riven = self.base.riven;
-        dispatch_action_world(
-            self.base.world_mut(),
-            fiora,
-            riven,
-            action,
-        );
+        dispatch_action_world(self.base.world_mut(), fiora, riven, action);
     }
 
     pub fn step(&mut self, action: FioraVsRivenAction) -> StepResult<FioraVsRivenObs> {
@@ -212,13 +207,7 @@ impl RlEnvironment for FioraVsRivenEnv {
     }
 
     fn action_labels() -> &'static [&'static str] {
-        &[
-            "东移 50u",
-            "西移 50u",
-            "北移 50u",
-            "南移 50u",
-            "攻击瑞雯",
-        ]
+        &["东移 50u", "西移 50u", "北移 50u", "南移 50u", "攻击瑞雯"]
     }
 
     fn obs_dim_labels() -> &'static [&'static str] {
@@ -277,7 +266,10 @@ impl RlEnvironment for FioraVsRivenEnv {
     }
 
     fn step(&mut self, actions: &[Self::Action]) -> Vec<StepResult<Self::Obs>> {
-        let action = actions.first().copied().unwrap_or(FioraVsRivenAction::AttackRiven);
+        let action = actions
+            .first()
+            .copied()
+            .unwrap_or(FioraVsRivenAction::AttackRiven);
         vec![self.step(action)]
     }
 
@@ -331,11 +323,7 @@ impl VisualEnvironment for FioraVsRivenEnv {
     }
 
     fn get_current_obs_all(&self, world: &World) -> Vec<Self::Obs> {
-        vec![get_obs_from_world(
-            world,
-            self.base.fiora,
-            self.base.riven,
-        )]
+        vec![get_obs_from_world(world, self.base.fiora, self.base.riven)]
     }
 
     fn action_from_screen_click(
@@ -352,7 +340,10 @@ impl VisualEnvironment for FioraVsRivenEnv {
         actions: &[Self::Action],
     ) -> Vec<StepResult<Self::Obs>> {
         self.base.increment_step();
-        let action = actions.first().copied().unwrap_or(FioraVsRivenAction::AttackRiven);
+        let action = actions
+            .first()
+            .copied()
+            .unwrap_or(FioraVsRivenAction::AttackRiven);
         vec![step_world(
             app,
             self.base.fiora,
@@ -472,8 +463,7 @@ pub fn step_world(
 
     let is_attack = action == FioraVsRivenAction::AttackRiven;
     let tracker_hit = app.world().resource::<VitalBreakTracker>().hit;
-    let is_vital_break =
-        tracker_hit && prev_obs.has_vital && prev_obs.vital_is_active;
+    let is_vital_break = tracker_hit && prev_obs.has_vital && prev_obs.vital_is_active;
 
     let reward_obs = attack_obs.as_ref().unwrap_or(&prev_obs);
     let (reward, reward_breakdown, reward_vars) = compute_step_reward(

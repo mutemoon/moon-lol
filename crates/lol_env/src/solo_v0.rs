@@ -14,9 +14,7 @@ pub use crate::flash_plugin::{
     register_flash_plugin, tick_flash_cooldown,
 };
 use crate::modifier_obs::{ModifierNameId, ModifierSlotObs, extract_entity_modifiers};
-use crate::obs_plugins::{
-    extract_attack_state, extract_champion_base, extract_skill_cds,
-};
+use crate::obs_plugins::{extract_attack_state, extract_champion_base, extract_skill_cds};
 use crate::raycast_plugin::raycast_ground_plane;
 use crate::traits::{EnvConfig, EnvMeta, RenderMode, RlEnvironment, StepResult, VisualEnvironment};
 
@@ -38,9 +36,7 @@ pub fn setup_solo_v0_health_world(world: &mut World, fiora: Entity, riven: Entit
         if let Some(mut flash) = world.get_mut::<FlashCooldown>(champion) {
             flash.reset();
         } else {
-            world
-                .entity_mut(champion)
-                .insert(FlashCooldown::default());
+            world.entity_mut(champion).insert(FlashCooldown::default());
         }
     }
 }
@@ -291,16 +287,8 @@ impl SoloV0Obs {
         };
 
         ObsFeaturePayload {
-            fiora_hp_pct: if f_max > 0.0 {
-                fiora_hp / f_max
-            } else {
-                1.0
-            },
-            riven_hp_pct: if r_max > 0.0 {
-                riven_hp / r_max
-            } else {
-                1.0
-            },
+            fiora_hp_pct: if f_max > 0.0 { fiora_hp / f_max } else { 1.0 },
+            riven_hp_pct: if r_max > 0.0 { riven_hp / r_max } else { 1.0 },
             distance: self.distance,
             q_ready: self.q_ready,
             w_ready: self.w_ready,
@@ -396,7 +384,14 @@ impl SoloV0Env {
     pub fn with_config(config: EnvConfig) -> Self {
         let base = FioraRivenBaseEnv::builder(config, Self::DEFAULT_MAX_STEPS)
             .window_title("Solo 1v1 V0 (Self-Play RL Viewer)")
-            .initial_positions(Vec3::ZERO, Vec3::new(0.0, 0.0, 300.0))
+            .map_name("sr_seasonal_map")
+            .enable_barrack(true)
+            .initial_positions(
+                Vec3::new(2200.0, 0.0, 12650.0),
+                Vec3::new(2500.0, 0.0, 12910.0),
+            )
+            .initial_skill_levels([1, 0, 0, 0])
+            .warmup_secs(40.0)
             .with_plugin(register_flash_plugin)
             .on_ready(setup_solo_v0_env_world)
             .on_reset(setup_solo_v0_env_world)
@@ -496,7 +491,7 @@ impl RlEnvironment for SoloV0Env {
     }
 
     fn description() -> &'static str {
-        "剑姬 vs 瑞雯 Solo 1v1 双智能体自博弈环境（对称竞技血量1000，全技能+闪现）"
+        "剑姬 vs 瑞雯 Solo 1v1 双智能体自博弈环境（真实地图召唤师峡谷上路对线，1级Q技能+闪现，40s兵线交汇起手）"
     }
 
     fn action_space() -> ActionSpace {
@@ -633,10 +628,11 @@ impl RlEnvironment for SoloV0Env {
     }
 
     fn step(&mut self, actions: &[Self::Action]) -> Vec<StepResult<Self::Obs>> {
-        let fiora_action = actions
-            .first()
-            .copied()
-            .unwrap_or(SoloV0Action::new(0.0, 0.0, SoloV0DiscreteAction::NoOp));
+        let fiora_action = actions.first().copied().unwrap_or(SoloV0Action::new(
+            0.0,
+            0.0,
+            SoloV0DiscreteAction::NoOp,
+        ));
         let riven_action = if actions.len() > 1 {
             actions[1]
         } else {
@@ -776,19 +772,11 @@ impl VisualEnvironment for SoloV0Env {
         let dist = (dx * dx + dz * dz).sqrt();
 
         if dist < 60.0 {
-            Some(SoloV0Action::new(
-                0.0,
-                0.0,
-                SoloV0DiscreteAction::Attack,
-            ))
+            Some(SoloV0Action::new(0.0, 0.0, SoloV0DiscreteAction::Attack))
         } else {
             let nx = (dx / SOLO_V0_OFFSET_SCALE).clamp(-1.0, 1.0);
             let nz = (dz / SOLO_V0_OFFSET_SCALE).clamp(-1.0, 1.0);
-            Some(SoloV0Action::new(
-                nx,
-                nz,
-                SoloV0DiscreteAction::Move,
-            ))
+            Some(SoloV0Action::new(nx, nz, SoloV0DiscreteAction::Move))
         }
     }
 
@@ -797,10 +785,11 @@ impl VisualEnvironment for SoloV0Env {
         app: &mut App,
         actions: &[Self::Action],
     ) -> Vec<StepResult<Self::Obs>> {
-        let fiora_action = actions
-            .first()
-            .copied()
-            .unwrap_or(SoloV0Action::new(0.0, 0.0, SoloV0DiscreteAction::NoOp));
+        let fiora_action = actions.first().copied().unwrap_or(SoloV0Action::new(
+            0.0,
+            0.0,
+            SoloV0DiscreteAction::NoOp,
+        ));
         let riven_action = if actions.len() > 1 {
             actions[1]
         } else {
@@ -1040,9 +1029,10 @@ pub fn step_solo_v0_world(
     let riven_dmg_dealt = (prev_f_hp - curr_f_hp).max(0.0) / 1000.0;
 
     let tracker_hit = app.world().resource::<VitalBreakTracker>().hit;
-    let had_active_vital = prev_f_obs.target_modifiers.iter().any(|m| {
-        m.name_id == ModifierNameId::FioraPassiveVital && m.stack_count > 0.5
-    });
+    let had_active_vital = prev_f_obs
+        .target_modifiers
+        .iter()
+        .any(|m| m.name_id == ModifierNameId::FioraPassiveVital && m.stack_count > 0.5);
     let is_vital_break = tracker_hit && had_active_vital;
     let vital_bonus = if is_vital_break { 1.5 } else { 0.0 };
 

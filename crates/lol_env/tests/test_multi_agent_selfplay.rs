@@ -54,8 +54,7 @@ fn test_multi_agent_parallel_envs_batch_throughput() {
         "展平观测应包含 8 个智能体样本"
     );
 
-    let flat_actions =
-        vec![SoloV0Action::new(0.0, 0.0, SoloV0DiscreteAction::NoOp); num_envs * 2];
+    let flat_actions = vec![SoloV0Action::new(0.0, 0.0, SoloV0DiscreteAction::NoOp); num_envs * 2];
     let flat_res = par_envs.step_all_flat(&flat_actions);
     assert_eq!(
         flat_res.len(),

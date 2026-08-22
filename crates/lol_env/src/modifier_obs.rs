@@ -185,9 +185,7 @@ mod tests {
     #[test]
     fn test_modifier_passive_vital_extraction() {
         let mut world = World::new();
-        let entity = world
-            .spawn(Vital::new(Direction::X, 4.0, 1.7))
-            .id();
+        let entity = world.spawn(Vital::new(Direction::X, 4.0, 1.7)).id();
 
         let slots = extract_entity_modifiers(&world, entity, 4);
         assert_eq!(slots.len(), 4);
@@ -201,4 +199,3 @@ mod tests {
         }
     }
 }
-

@@ -71,12 +71,7 @@ pub fn extract_flash_obs(world: &World, entity: Entity) -> (bool, f32) {
 
 /// 派发闪现物理位移并启动冷却。
 /// 如果实体没有 FlashCooldown 组件，则自动插入并启动。
-pub fn dispatch_flash(
-    world: &mut World,
-    entity: Entity,
-    direction: Vec3,
-    distance: f32,
-) -> bool {
+pub fn dispatch_flash(world: &mut World, entity: Entity, direction: Vec3, distance: f32) -> bool {
     let is_ready = world
         .get::<FlashCooldown>(entity)
         .map(|f| f.is_ready())

@@ -50,7 +50,6 @@ pub fn update_particle(
     q_camera_transform: Query<&Transform, With<CameraState>>,
     mut commands: Commands,
 ) {
-
     for (particle_entity, transform, child_of, lifetime, particle, particle_id) in
         q_particle_state.iter()
     {
@@ -95,12 +94,14 @@ pub fn update_particle(
                     let translate =
                         current_uv_offset * scale + vec2(current_col, current_row) * scale;
 
-                    commands.entity(particle_entity).insert(ParticleDynamicUniforms {
-                        world_matrix_transpose: world_matrix.transpose(),
-                        uv_transform: uv_transform_rows(scale, translate),
-                        color_factor: color,
-                        color_lookup_uv: vec2(life, life),
-                    });
+                    commands
+                        .entity(particle_entity)
+                        .insert(ParticleDynamicUniforms {
+                            world_matrix_transpose: world_matrix.transpose(),
+                            uv_transform: uv_transform_rows(scale, translate),
+                            color_factor: color,
+                            color_lookup_uv: vec2(life, life),
+                        });
                 }
             }
         }
@@ -253,7 +254,8 @@ pub fn update_particle_skinned_mesh_particle(
     >,
     q_particle_emitter_state: Query<&ParticleEmitterState>,
 ) {
-    for (particle_entity, child_of, lifetime, particle, _material_handle) in q_particle_state.iter() {
+    for (particle_entity, child_of, lifetime, particle, _material_handle) in q_particle_state.iter()
+    {
         let parent = child_of.parent();
 
         let life = lifetime.progress();
@@ -265,12 +267,14 @@ pub fn update_particle_skinned_mesh_particle(
         let current_uv_offset: Vec2 =
             particle.birth_uv_offset + particle.birth_uv_scroll_rate * lifetime.elapsed_secs();
 
-        commands.entity(particle_entity).insert(ParticleDynamicUniforms {
-            world_matrix_transpose: Mat4::IDENTITY,
-            uv_transform: uv_transform_rows(Vec2::ONE, current_uv_offset),
-            color_factor: color,
-            color_lookup_uv: vec2(life, life),
-        });
+        commands
+            .entity(particle_entity)
+            .insert(ParticleDynamicUniforms {
+                world_matrix_transpose: Mat4::IDENTITY,
+                uv_transform: uv_transform_rows(Vec2::ONE, current_uv_offset),
+                color_factor: color,
+                color_lookup_uv: vec2(life, life),
+            });
     }
 }
 
