@@ -375,3 +375,44 @@ fn on_command_log(event: On<CommandLog>, q_name: Query<Option<&Name>>) {
         log_event.info
     );
 }
+
+#[cfg(test)]
+mod tests {
+    use sqlx::Row;
+
+    use super::*;
+
+    #[tokio::test]
+    async fn dump_recent_logs() {
+        let base = std::env::var("USERPROFILE")
+            .or_else(|_| std::env::var("HOME"))
+            .unwrap_or_else(|_| ".".to_string());
+        let db_path = PathBuf::from(base).join(".moon-lol").join("logs").join("debug.db");
+        if !db_path.exists() {
+            println!("No debug.db found at {:?}", db_path);
+            return;
+        }
+
+        let opts = SqliteConnectOptions::new().filename(&db_path).read_only(true);
+        let pool = SqlitePoolOptions::new().connect_with(opts).await.unwrap();
+
+        let rows = sqlx::query(
+            "SELECT id, timestamp, level, category, entity_id, message FROM logs 
+             WHERE category IN ('movement', 'run', 'attack') OR level IN ('warn', 'error') OR message LIKE '%复活%' OR message LIKE '%死%'
+             ORDER BY id DESC LIMIT 100"
+        )
+        .fetch_all(&pool)
+        .await
+        .unwrap();
+
+        println!("=== FILTERED LOGS (total: {}) ===", rows.len());
+        for row in rows.into_iter().rev() {
+            let id: i64 = row.get("id");
+            let level: String = row.get("level");
+            let category: Option<String> = row.get("category");
+            let entity_id: Option<i64> = row.get("entity_id");
+            let msg: String = row.get("message");
+            println!("[#{id}] [{level}] [{:?}] entity={:?}: {msg}", category, entity_id);
+        }
+    }
+}

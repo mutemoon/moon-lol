@@ -253,8 +253,7 @@ fn linear_missile_collision(
         if linear.sticky {
             if let (Some(res_grid), Some(assets_grid)) = (res_grid.as_ref(), assets_grid.as_ref()) {
                 if let Some(grid) = assets_grid.get(&res_grid.0) {
-                    let cell = grid.get_cell_xy_by_position(&transform.translation.xz());
-                    if !grid.is_walkable_by_xy(cell) {
+                    if !grid.is_walkable_by_position(&transform.translation.xz()) {
                         let hit_point = transform.translation;
                         commands.entity(missile_entity).despawn();
                         commands.spawn((

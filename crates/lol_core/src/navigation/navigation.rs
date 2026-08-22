@@ -101,7 +101,9 @@ pub fn get_nav_path_with_debug(
 ) -> Option<Vec<Vec2>> {
     // let start = Instant::now();
 
-    let start_grid_pos = grid.get_cell_xy_by_position(start_pos);
+    let start_grid_pos = grid
+        .get_cell_xy_by_position(start_pos)
+        .unwrap_or_else(|| grid.clamp_position_to_grid_xy(start_pos));
     let adjusted_start_pos = if !grid.is_walkable_by_xy(start_grid_pos) {
         // let start_time = Instant::now();
         if let Some(new_start_grid_pos) = find_nearest_walkable_cell(grid, start_grid_pos) {
@@ -122,8 +124,10 @@ pub fn get_nav_path_with_debug(
         *start_pos
     };
 
-    // 检查终点是否可行走，如果不可行，找到最近的可达格子
-    let end_grid_pos = grid.get_cell_xy_by_position(end_pos);
+    // 检查终点是否可行走，如果不可行，找到最近的可达格子（若点击在地图外则投影到最近边缘）
+    let end_grid_pos = grid
+        .get_cell_xy_by_position(end_pos)
+        .unwrap_or_else(|| grid.clamp_position_to_grid_xy(end_pos));
     let adjusted_end_pos = if !grid.is_walkable_by_xy(end_grid_pos) {
         // let start_time = Instant::now();
         if let Some(new_end_grid_pos) = find_nearest_walkable_cell(grid, end_grid_pos) {
@@ -184,7 +188,11 @@ pub fn get_nav_path_with_debug(
                 nav_debug.unoptimized_path = find_result.unoptimized_path;
                 nav_debug.optimized_path = find_result.path.clone();
             }
-            Some(find_result.path)
+            if find_result.path.is_empty() {
+                None
+            } else {
+                Some(find_result.path)
+            }
         }
         None => None,
     }
@@ -290,12 +298,27 @@ fn optimize_path(grid: &ConfigNavigationGrid, path: &Vec<Vec2>) -> Vec<Vec2> {
 
 /// 检测给定路径上是否有障碍物阻挡
 /// 从当前位置开始，检测路径的剩余部分是否仍然可通行
-pub fn is_path_blocked(grid: &ConfigNavigationGrid, path: &[Vec3], current_index: usize) -> bool {
+pub fn is_path_blocked(
+    grid: &ConfigNavigationGrid,
+    path: &[Vec3],
+    current_index: usize,
+    current_pos: Option<Vec2>,
+) -> bool {
     if path.is_empty() || current_index >= path.len() {
         return false;
     }
 
-    // 检测从当前点到路径终点的每一段是否被阻挡
+    // 首先检测从实体当前物理位置到目标路点的视线
+    if let Some(curr) = current_pos {
+        let target = path[current_index].xz();
+        let curr_grid = (curr - grid.min_position) / grid.cell_size;
+        let target_grid = (target - grid.min_position) / grid.cell_size;
+        if !has_line_of_sight(grid, curr_grid, target_grid) {
+            return true;
+        }
+    }
+
+    // 检测从当前路点到后续路点的每一段是否被阻挡
     for i in current_index..path.len().saturating_sub(1) {
         let start = path[i].xz();
         let end = path[i + 1].xz();
@@ -390,9 +413,7 @@ pub fn has_line_of_sight(grid: &ConfigNavigationGrid, start: Vec2, end: Vec2) ->
 
 /// 将世界坐标转换为网格坐标的辅助函数
 pub fn world_pos_to_grid_xy(grid: &ConfigNavigationGrid, world_pos: Vec2) -> (usize, usize) {
-    let x = ((world_pos.x - grid.min_position.x) / grid.cell_size).floor() as usize;
-    let y = ((world_pos.y - grid.min_position.y) / grid.cell_size).floor() as usize;
-    (x, y)
+    grid.clamp_position_to_grid_xy(&world_pos)
 }
 
 /// 找到最近的可达格子

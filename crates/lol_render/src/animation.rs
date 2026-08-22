@@ -169,10 +169,18 @@ pub fn on_animation_state_change(
             "[动画] 骨骼实体 {:?} 播放动画 {}（weight=1.0）",
             bone_entity, current_hash
         );
-        animation.play(&mut player, &current_hash, 1.0, &mut state);
+        animation.play(
+            &mut player,
+            &current_hash,
+            1.0,
+            state.bypass_change_detection(),
+        );
         if should_repeat {
             animation.repeat(&mut player, &current_hash, &state);
         }
+
+        // 同步 last，防止下一帧因 change detection 重复判定为状态变更
+        state.bypass_change_detection().last = Some(current_hash);
     }
 }
 

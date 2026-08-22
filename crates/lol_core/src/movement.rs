@@ -35,6 +35,7 @@ impl Plugin for PluginMovement {
                     apply_final_movement_decision.run_if(resource_exists::<ResourceGrid>),
                     update_path_movement,
                 )
+                    .chain()
                     .in_set(MovementPipeline::Apply),
             ),
         );
@@ -374,6 +375,8 @@ fn reduce_movement_by_priority(
     }
 }
 
+const REPLAN_COOLDOWN_SECS: f32 = 0.25;
+
 fn apply_final_movement_decision(
     mut commands: Commands,
     mut query: Query<(
@@ -404,8 +407,6 @@ fn apply_final_movement_decision(
 
         match way {
             MovementWay::Pathfind(target) => {
-                // let start = Instant::now();
-
                 if let Some(bounding) = bounding {
                     calculate_and_set_exclude_cells(
                         &mut grid,
@@ -414,41 +415,45 @@ fn apply_final_movement_decision(
                     );
                 };
 
-                // stats.exclude_time += start.elapsed();
                 stats.exclude_count += 1;
+                let now = time.elapsed_secs();
 
                 // 检查是否需要重新规划路径
-                let need_replan = if let Some((last_target, _)) = movement_state.pathfind {
-                    // let start = Instant::now();
+                let need_replan = if let Some((last_target, last_replan_time)) = movement_state.pathfind {
+                    let target_teleported = (target - last_target).xz().length() > 150.0;
+                    let cooldown_elapsed = (now - last_replan_time) >= REPLAN_COOLDOWN_SECS;
 
-                    // 目标位置发生变化
-                    let target_changed = (target - last_target).xz().length() > f32::EPSILON;
-                    // 路径上有障碍物阻挡
-                    let path_blocked = is_path_blocked(
-                        &grid,
-                        &movement_state.path,
-                        movement_state.current_target_index,
-                    );
-
-                    if target_changed {
+                    if target_teleported {
                         commands.trigger(CommandLog {
                             entity,
-                            info: format!("目标位置发生变化: {}", target_changed),
+                            info: format!("目标位置发生突变: {}", target_teleported),
                             category: EnumLogCategory::Movement,
                         });
+                        true
+                    } else if cooldown_elapsed {
+                        let target_moved = (target - last_target).xz().length() > 20.0;
+                        let path_blocked = is_path_blocked(
+                            &grid,
+                            &movement_state.path,
+                            movement_state.current_target_index,
+                            Some(transform.translation.xz()),
+                        );
+                        if target_moved || path_blocked {
+                            commands.trigger(CommandLog {
+                                entity,
+                                info: format!(
+                                    "目标移动或路径受阻: moved={}, blocked={}",
+                                    target_moved, path_blocked
+                                ),
+                                category: EnumLogCategory::Movement,
+                            });
+                            true
+                        } else {
+                            false
+                        }
+                    } else {
+                        false
                     }
-                    if path_blocked {
-                        commands.trigger(CommandLog {
-                            entity,
-                            info: format!("路径上有障碍物阻挡: {}", path_blocked),
-                            category: EnumLogCategory::Movement,
-                        });
-                    }
-
-                    stats.check_path_count += 1;
-                    // stats.check_path_time += start.elapsed();
-
-                    target_changed || path_blocked
                 } else {
                     // 第一次规划
                     commands.trigger(CommandLog {
@@ -460,12 +465,6 @@ fn apply_final_movement_decision(
                 };
 
                 if !need_replan {
-                    // debug!(
-                    //     category = "movement",
-                    //     entity_id = entity.index_u32(),
-                    //     entity_name = name,
-                    //     "不需要重新规划",
-                    // );
                     continue;
                 }
 
@@ -484,25 +483,42 @@ fn apply_final_movement_decision(
                     &mut stats,
                     debug_ref,
                 ) {
-                    let start_y = transform.translation.y;
-                    let total = path.len() as f32;
-                    let path_3d = path
-                        .into_iter()
-                        .enumerate()
-                        .map(|(i, p)| {
-                            let t = (i as f32 + 1.0) / total;
-                            let y = start_y + (target.y - start_y) * t;
-                            Vec3::new(p.x, y, p.y)
-                        })
-                        .collect();
-                    movement_state
-                        .reset_path(&path_3d, source.clone())
-                        .with_pathfind((*target, time.elapsed_secs()));
+                    if !path.is_empty() {
+                        let start_y = transform.translation.y;
+                        let total = path.len() as f32;
+                        let path_3d = path
+                            .into_iter()
+                            .enumerate()
+                            .map(|(i, p)| {
+                                let t = (i as f32 + 1.0) / total;
+                                let y = start_y + (target.y - start_y) * t;
+                                Vec3::new(p.x, y, p.y)
+                            })
+                            .collect();
+                        movement_state
+                            .reset_path(&path_3d, source.clone())
+                            .with_pathfind((*target, now));
+                    } else {
+                        movement_state.pathfind = Some((*target, now));
+                        movement_state.clear_path();
+                        movement_state.completed = true;
+                        commands.trigger(EventMovementEnd {
+                            entity,
+                            source: source.clone(),
+                        });
+                    }
                 } else {
                     commands.trigger(CommandLog {
                         entity,
                         info: "寻路失败".to_string(),
                         category: EnumLogCategory::Movement,
+                    });
+                    movement_state.pathfind = Some((*target, now));
+                    movement_state.clear_path();
+                    movement_state.completed = true;
+                    commands.trigger(EventMovementEnd {
+                        entity,
+                        source: source.clone(),
                     });
                 }
             }
@@ -533,4 +549,110 @@ fn on_event_movement_end(trigger: On<EventMovementEnd>, mut commands: Commands) 
     commands
         .entity(trigger.event_target())
         .try_remove::<LastDecision<CommandMovement>>();
+}
+
+#[cfg(test)]
+mod tests {
+    use std::time::Duration;
+
+    use bevy::ecs::system::RunSystemOnce;
+    use lol_base::grid::{ConfigNavigationGridCell, GridFlagsVisionPathing};
+
+    use super::*;
+
+    fn make_test_grid() -> ConfigNavigationGrid {
+        let cell = ConfigNavigationGridCell {
+            heuristic: 1.0,
+            vision_pathing_flags: GridFlagsVisionPathing::Walkable,
+            ..default()
+        };
+
+        ConfigNavigationGrid {
+            min_position: Vec2::ZERO,
+            cell_size: 50.0,
+            x_len: 100,
+            y_len: 100,
+            cells: vec![vec![cell; 100]; 100],
+            height_x_len: 100,
+            height_y_len: 100,
+            height_samples: vec![vec![0.0; 100]; 100],
+            occupied_cells: Default::default(),
+            exclude_cells: Default::default(),
+        }
+    }
+
+    #[test]
+    fn test_replan_cooldown_throttles_high_frequency_pathfind() {
+        let mut app = App::new();
+        app.add_plugins(MinimalPlugins);
+
+        let mut assets_grid = Assets::<ConfigNavigationGrid>::default();
+        let grid_handle = assets_grid.add(make_test_grid());
+        app.insert_resource(assets_grid);
+        app.insert_resource(ResourceGrid(grid_handle));
+        app.insert_resource(NavigationStats::default());
+
+        let entity = app
+            .world_mut()
+            .spawn((
+                Transform::from_xyz(100.0, 0.0, 100.0),
+                Movement { speed: 300.0 },
+                MovementState::default(),
+                FinalDecision(CommandMovement {
+                    entity: Entity::PLACEHOLDER,
+                    priority: 0,
+                    action: MovementAction::Start {
+                        way: MovementWay::Pathfind(Vec3::new(4000.0, 0.0, 4000.0)),
+                        speed: None,
+                        source: MovementSource::Run,
+                    },
+                }),
+            ))
+            .id();
+
+        // 第一次执行，进行首次寻路
+        let _ = app.world_mut().run_system_once(apply_final_movement_decision);
+        let stats_1 = app.world().resource::<NavigationStats>().get_nav_path_count;
+        assert_eq!(stats_1, 1, "首次规划应执行 1 次寻路");
+
+        // 立即在同一帧/短时间内（16ms 后）再次执行相同目标的决策
+        {
+            let mut time = app.world_mut().resource_mut::<Time>();
+            time.advance_by(Duration::from_millis(16));
+        }
+
+        // 重新插入决策（模拟 run.rs 每帧发送）
+        app.world_mut()
+            .entity_mut(entity)
+            .insert(FinalDecision(CommandMovement {
+                entity,
+                priority: 0,
+                action: MovementAction::Start {
+                    way: MovementWay::Pathfind(Vec3::new(4000.0, 0.0, 4000.0)),
+                    speed: None,
+                    source: MovementSource::Run,
+                },
+            }));
+
+        let _ = app.world_mut().run_system_once(apply_final_movement_decision);
+        let stats_2 = app.world().resource::<NavigationStats>().get_nav_path_count;
+        assert_eq!(stats_2, 1, "冷却时间内相同目标不应重复寻路");
+
+        // 玩家改变目标位置
+        app.world_mut()
+            .entity_mut(entity)
+            .insert(FinalDecision(CommandMovement {
+                entity,
+                priority: 0,
+                action: MovementAction::Start {
+                    way: MovementWay::Pathfind(Vec3::new(2000.0, 0.0, 2000.0)),
+                    speed: None,
+                    source: MovementSource::Run,
+                },
+            }));
+
+        let _ = app.world_mut().run_system_once(apply_final_movement_decision);
+        let stats_3 = app.world().resource::<NavigationStats>().get_nav_path_count;
+        assert_eq!(stats_3, 2, "目标改变应立即触发新寻路");
+    }
 }

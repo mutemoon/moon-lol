@@ -3,8 +3,11 @@ use serde::{Deserialize, Serialize};
 
 use crate::base::ability_resource::AbilityResource;
 use crate::base::level::Level;
+use crate::base::state::State;
 use crate::damage::EventDamageCreate;
 use crate::entities::champion::Champion;
+use crate::movement::MovementState;
+use crate::run::Run;
 use crate::team::Team;
 
 #[derive(Default)]
@@ -154,6 +157,8 @@ fn on_event_damage_create(
     q_health: Query<&Health>,
     q_champion: Query<&Champion>,
     q_level: Query<&Level>,
+    mut q_movement_state: Query<&mut MovementState>,
+    mut q_state: Query<&mut State>,
 ) {
     let entity = trigger.event_target();
 
@@ -170,6 +175,13 @@ fn on_event_damage_create(
 
         if q_champion.get(entity).is_ok() {
             commands.entity(entity).insert(Death);
+            commands.entity(entity).remove::<Run>();
+            if let Ok(mut ms) = q_movement_state.get_mut(entity) {
+                ms.clear_path();
+            }
+            if let Ok(mut s) = q_state.get_mut(entity) {
+                *s = State::Idle;
+            }
 
             let level = q_level.get(entity).map(|l| l.value).unwrap_or(1);
             let duration = 5.0 + level as f32 * 2.0;
@@ -192,17 +204,21 @@ pub fn update_respawn(
         Option<&mut AbilityResource>,
         &Team,
         &mut Transform,
+        Option<&mut MovementState>,
+        Option<&mut State>,
     )>,
     time: Res<Time<Fixed>>,
 ) {
-    for (entity, mut timer, mut health, ar, team, mut transform) in q_respawn.iter_mut() {
+    for (entity, mut timer, mut health, ar, team, mut transform, ms, state) in
+        q_respawn.iter_mut()
+    {
         timer.0.tick(time.delta());
 
         if timer.0.just_finished() {
-            // 复活位置
+            // 复活位置（地面高度对齐真实地图）
             let spawn_pos = match team {
-                Team::Order => Vec3::new(1000.0, 0.0, 1000.0),
-                Team::Chaos => Vec3::new(14000.0, 0.0, 14000.0),
+                Team::Order => Vec3::new(1000.0, 146.97, 1000.0),
+                Team::Chaos => Vec3::new(14000.0, 159.54, 14000.0),
                 Team::Neutral => transform.translation, // 应该不会发生
             };
 
@@ -214,6 +230,14 @@ pub fn update_respawn(
 
             commands.entity(entity).remove::<Death>();
             commands.entity(entity).remove::<RespawnTimer>();
+            commands.entity(entity).remove::<Run>();
+
+            if let Some(mut ms) = ms {
+                ms.clear_path();
+            }
+            if let Some(mut s) = state {
+                *s = State::Idle;
+            }
 
             debug!("{:?} 已在 {:?} 泉水复活", entity, team);
             commands.trigger(EventSpawn { entity });
@@ -313,7 +337,7 @@ mod tests {
         assert_eq!(ar.value, 100.0, "复活后蓝量应回满");
 
         let transform = app.world().get::<Transform>(hero).unwrap();
-        assert_eq!(transform.translation, Vec3::new(1000.0, 0.0, 1000.0));
+        assert_eq!(transform.translation, Vec3::new(1000.0, 146.97, 1000.0));
     }
 
     /// 推进固定时间并执行一次 `regen` 系统。

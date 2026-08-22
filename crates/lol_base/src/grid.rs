@@ -344,27 +344,33 @@ impl ConfigNavigationGrid {
         )
     }
 
-    pub fn get_cell_xy_by_position(&self, position: &Vec2) -> (usize, usize) {
+    /// 内部辅助：将世界坐标转换为未越界检查的浮点网格坐标
+    fn to_grid_float_xy(&self, position: &Vec2) -> Option<(f32, f32)> {
         if self.cell_size <= 0.0 || self.x_len == 0 || self.y_len == 0 {
-            return (0, 0);
+            return None;
         }
-        let max_x = self.x_len.saturating_sub(1);
-        let max_y = self.y_len.saturating_sub(1);
-
         let fx = ((position.x - self.min_position.x) / self.cell_size).floor();
         let fy = ((position.y - self.min_position.y) / self.cell_size).floor();
+        Some((fx, fy))
+    }
 
-        let x = if fx < 0.0 {
-            0
-        } else {
-            (fx as usize).min(max_x)
+    /// 将世界坐标精确转换为网格索引；若超出地图范围返回 `None`
+    pub fn get_cell_xy_by_position(&self, position: &Vec2) -> Option<(usize, usize)> {
+        let (fx, fy) = self.to_grid_float_xy(position)?;
+        if fx < 0.0 || fy < 0.0 || fx >= self.x_len as f32 || fy >= self.y_len as f32 {
+            return None;
+        }
+        Some((fx as usize, fy as usize))
+    }
+
+    /// 将世界坐标显式截断并投影到最近的地图边界格子索引（用于玩家点击边缘容错）
+    pub fn clamp_position_to_grid_xy(&self, position: &Vec2) -> (usize, usize) {
+        let Some((fx, fy)) = self.to_grid_float_xy(position) else {
+            return (0, 0);
         };
-        let y = if fy < 0.0 {
-            0
-        } else {
-            (fy as usize).min(max_y)
-        };
-        (x, y)
+        let max_x = self.x_len.saturating_sub(1) as f32;
+        let max_y = self.y_len.saturating_sub(1) as f32;
+        (fx.clamp(0.0, max_x) as usize, fy.clamp(0.0, max_y) as usize)
     }
 
     pub fn get_cell_by_xy(&self, (x, y): (usize, usize)) -> &ConfigNavigationGridCell {
@@ -373,8 +379,9 @@ impl ConfigNavigationGrid {
         &self.cells[y][x]
     }
 
-    pub fn get_cell_by_position(&self, pos: &Vec2) -> &ConfigNavigationGridCell {
-        self.get_cell_by_xy(self.get_cell_xy_by_position(pos))
+    pub fn get_cell_by_position(&self, pos: &Vec2) -> Option<&ConfigNavigationGridCell> {
+        self.get_cell_xy_by_position(pos)
+            .map(|xy| self.get_cell_by_xy(xy))
     }
 
     pub fn get_world_position_by_position(&self, position: &Vec2) -> Vec3 {
@@ -405,6 +412,12 @@ impl ConfigNavigationGrid {
         }
 
         self.occupied_cells.get(&pos).copied().unwrap_or(0.0)
+    }
+
+    /// 判断世界坐标是否在网格内且可通行（超出地图边界安全返回不可通行）
+    pub fn is_walkable_by_position(&self, position: &Vec2) -> bool {
+        self.get_cell_xy_by_position(position)
+            .is_some_and(|xy| self.is_walkable_by_xy(xy))
     }
 
     /// 判断格子是否可通行（静态墙体 + 动态障碍物成本检查）
@@ -461,5 +474,66 @@ impl Default for ConfigNavigationGridCell {
             ring_flags: GridFlagsRing::BlueSpawnToNexus,
             srx_flags: GridFlagsSRX::Walkable,
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn make_test_grid() -> ConfigNavigationGrid {
+        ConfigNavigationGrid {
+            min_position: Vec2::ZERO,
+            cell_size: 100.0,
+            x_len: 10,
+            y_len: 10,
+            cells: vec![vec![ConfigNavigationGridCell::default(); 10]; 10],
+            height_x_len: 10,
+            height_y_len: 10,
+            height_samples: vec![vec![0.0; 10]; 10],
+            occupied_cells: Default::default(),
+            exclude_cells: Default::default(),
+        }
+    }
+
+    #[test]
+    fn test_get_cell_xy_by_position_in_bounds() {
+        let grid = make_test_grid();
+        assert_eq!(grid.get_cell_xy_by_position(&Vec2::new(0.0, 0.0)), Some((0, 0)));
+        assert_eq!(grid.get_cell_xy_by_position(&Vec2::new(50.0, 50.0)), Some((0, 0)));
+        assert_eq!(grid.get_cell_xy_by_position(&Vec2::new(150.0, 250.0)), Some((1, 2)));
+        assert_eq!(grid.get_cell_xy_by_position(&Vec2::new(999.0, 999.0)), Some((9, 9)));
+    }
+
+    #[test]
+    fn test_get_cell_xy_by_position_out_of_bounds() {
+        let grid = make_test_grid();
+        // 负数坐标越界
+        assert_eq!(grid.get_cell_xy_by_position(&Vec2::new(-0.1, 50.0)), None);
+        assert_eq!(grid.get_cell_xy_by_position(&Vec2::new(50.0, -10.0)), None);
+        // 超出最大尺寸 (10 * 100 = 1000)
+        assert_eq!(grid.get_cell_xy_by_position(&Vec2::new(1000.0, 50.0)), None);
+        assert_eq!(grid.get_cell_xy_by_position(&Vec2::new(50.0, 1050.0)), None);
+    }
+
+    #[test]
+    fn test_clamp_position_to_grid_xy() {
+        let grid = make_test_grid();
+        assert_eq!(grid.clamp_position_to_grid_xy(&Vec2::new(-500.0, -500.0)), (0, 0));
+        assert_eq!(grid.clamp_position_to_grid_xy(&Vec2::new(2000.0, 2000.0)), (9, 9));
+        assert_eq!(grid.clamp_position_to_grid_xy(&Vec2::new(150.0, 250.0)), (1, 2));
+    }
+
+    #[test]
+    fn test_is_walkable_by_position() {
+        let mut grid = make_test_grid();
+        assert!(grid.is_walkable_by_position(&Vec2::new(50.0, 50.0)));
+        // 越界坐标不可通行
+        assert!(!grid.is_walkable_by_position(&Vec2::new(-10.0, 50.0)));
+        assert!(!grid.is_walkable_by_position(&Vec2::new(1200.0, 50.0)));
+
+        // 将 (1, 1) 设置为墙体
+        grid.cells[1][1].vision_pathing_flags = GridFlagsVisionPathing::Wall;
+        assert!(!grid.is_walkable_by_position(&Vec2::new(150.0, 150.0)));
     }
 }

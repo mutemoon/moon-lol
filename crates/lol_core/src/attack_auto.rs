@@ -2,9 +2,12 @@ use bevy::prelude::*;
 
 use crate::attack::{Attack, AttackState, AttackStatus, CommandAttackStart, CommandAttackStop};
 use crate::base::bounding::Bounding;
-use crate::life::Death;
+use crate::life::{Death, EventDead};
 use crate::log::{CommandLog, EnumLogCategory};
 use crate::run::{CommandRunStart, CommandRunStop, RunTarget};
+
+/// 自动攻击最大追逐距离（超过此距离放弃追击并脱战）
+pub const MAX_ATTACK_AUTO_CHASE_DISTANCE: f32 = 1500.0;
 
 #[derive(Default)]
 pub struct PluginAttackAuto;
@@ -13,6 +16,7 @@ impl Plugin for PluginAttackAuto {
     fn build(&self, app: &mut App) {
         app.add_observer(on_command_attack_auto_start);
         app.add_observer(on_command_attack_auto_stop);
+        app.add_observer(on_event_dead);
 
         app.add_systems(FixedPreUpdate, update_attack_auto);
     }
@@ -37,7 +41,7 @@ pub struct CommandAttackAutoStop {
 fn on_command_attack_auto_start(
     trigger: On<CommandAttackAutoStart>,
     mut commands: Commands,
-    q: Query<(&Transform, &Bounding, Option<&Attack>)>,
+    q: Query<(&Transform, &Bounding, Option<&Attack>), Without<Death>>,
 ) {
     let entity = trigger.event_target();
     let target = trigger.target;
@@ -82,7 +86,23 @@ fn on_command_attack_auto_stop(trigger: On<CommandAttackAutoStop>, mut commands:
         category: EnumLogCategory::AttackAuto,
     });
     commands.entity(entity).remove::<AttackAuto>();
+    commands.trigger(CommandRunStop { entity });
     commands.trigger(CommandAttackStop { entity });
+}
+
+fn on_event_dead(
+    trigger: On<EventDead>,
+    mut commands: Commands,
+    q_attack_auto: Query<(Entity, &AttackAuto)>,
+) {
+    let dead_entity = trigger.event_target();
+    for (entity, attack_auto) in q_attack_auto.iter() {
+        if attack_auto.target == dead_entity {
+            commands.entity(entity).remove::<AttackAuto>();
+            commands.trigger(CommandRunStop { entity });
+            commands.trigger(CommandAttackStop { entity });
+        }
+    }
 }
 
 fn update_attack_auto(
@@ -98,7 +118,7 @@ fn update_attack_auto(
         ),
         (Without<Death>, Changed<Transform>),
     >,
-    q_target: Query<(&Transform, &Bounding)>,
+    q_target: Query<(&Transform, &Bounding), Without<Death>>,
 ) {
     for (entity, attack_auto, attack, attack_state, transform, bounding) in q_attacker.iter() {
         if let Some(AttackState {
@@ -112,6 +132,10 @@ fn update_attack_auto(
         let target = attack_auto.target;
 
         let Ok((target_transform, target_bounding)) = q_target.get(target) else {
+            // 目标不存在或已死亡，停止追逐
+            commands.entity(entity).remove::<AttackAuto>();
+            commands.trigger(CommandRunStop { entity });
+            commands.trigger(CommandAttackStop { entity });
             continue;
         };
 
@@ -139,8 +163,17 @@ fn process_attack_logic(
     target_radius: f32,
     range: f32,
 ) {
-    // 优化：使用平方距离避免 sqrt 开方运算
     let dist_sq = pos.distance_squared(target_pos);
+    let max_chase_sq = MAX_ATTACK_AUTO_CHASE_DISTANCE * MAX_ATTACK_AUTO_CHASE_DISTANCE;
+
+    // 超出最大追逐距离，放弃追击脱战
+    if dist_sq > max_chase_sq {
+        commands.entity(entity).remove::<AttackAuto>();
+        commands.trigger(CommandRunStop { entity });
+        commands.trigger(CommandAttackStop { entity });
+        return;
+    }
+
     let required_range = range + radius + target_radius;
     let required_range_sq = required_range * required_range;
 
@@ -152,7 +185,7 @@ fn process_attack_logic(
 
         commands.trigger(CommandLog {
             entity,
-            info: "离开攻击范围，停止攻击".to_string(),
+            info: "离开攻击范围，停止攻击并开始追逐".to_string(),
             category: EnumLogCategory::AttackAuto,
         });
         commands.trigger(CommandAttackStop { entity });
