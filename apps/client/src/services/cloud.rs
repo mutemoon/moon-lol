@@ -66,17 +66,8 @@ struct UpdateVisibilityBody {
 
 // ── Token 持久化 ──
 
-const TOKEN_FILENAME: &str = "auth_token";
-
-fn moon_lol_dir() -> PathBuf {
-    let home = env::var("USERPROFILE")
-        .or_else(|_| env::var("HOME"))
-        .unwrap_or_else(|_| ".".into());
-    PathBuf::from(home).join(".moon-lol")
-}
-
 fn token_path() -> PathBuf {
-    moon_lol_dir().join(TOKEN_FILENAME)
+    lol_share::paths::auth_token_path()
 }
 
 fn load_token() -> Option<String> {
@@ -85,9 +76,11 @@ fn load_token() -> Option<String> {
 }
 
 fn save_token(token: &str) {
-    let dir = moon_lol_dir();
-    let _ = fs::create_dir_all(&dir);
-    let _ = fs::write(token_path(), token);
+    let path = token_path();
+    if let Some(parent) = path.parent() {
+        let _ = fs::create_dir_all(parent);
+    }
+    let _ = fs::write(path, token);
 }
 
 fn clear_token_file() {

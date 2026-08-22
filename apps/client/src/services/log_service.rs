@@ -13,22 +13,10 @@ use super::types::{LogCategory, LogEntity, LogQueryParams, LogRow, QueryLogsResu
 
 // ── 路径解析 ──
 
-/// 桌面端 HOME 目录。
-fn home_dir() -> Result<PathBuf, String> {
-    let home = std::env::var("HOME")
-        .or_else(|_| std::env::var("USERPROFILE"))
-        .map_err(|e| format!("无法获取 HOME 目录: {e}"))?;
-    Ok(PathBuf::from(home))
-}
-
 /// 按对局 id 取出该局的日志 DB 路径（`~/.moon-lol/logs/{game_id}.db`）。
 /// 文件不存在返回 None（对局可能尚未写入或已停止）。
 fn log_db_path(game_id: &str) -> Option<PathBuf> {
-    let home = home_dir().ok()?;
-    let path = home
-        .join(".moon-lol")
-        .join("logs")
-        .join(format!("{game_id}.db"));
+    let path = lol_share::paths::log_db_path(game_id);
     path.exists().then_some(path)
 }
 

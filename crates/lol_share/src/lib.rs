@@ -5,6 +5,8 @@
 //! lol_base_render 有自己独立的运行时定义（带 Handle/curve/Asset），
 //! 字段名一致即 RON 往返无损。
 
+pub mod paths;
+
 use std::collections::BTreeMap;
 
 use glam::{Vec2, Vec3, Vec4};

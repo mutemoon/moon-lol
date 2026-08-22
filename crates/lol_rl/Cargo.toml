@@ -16,6 +16,7 @@ tokio-tungstenite = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
 lol_rl_protocol.workspace = true
+lol_share.workspace = true
 bincode.workspace = true
 tracing-subscriber.workspace = true
 futures-util = { workspace = true }

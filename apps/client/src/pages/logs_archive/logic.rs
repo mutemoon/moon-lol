@@ -22,13 +22,9 @@ pub(super) fn api_base_url() -> String {
         .to_string()
 }
 
-/// 下载目录：%APPDATA%/moon-lol/matches/，无 APPDATA 时回退 .moon-lol/matches。
+/// 下载目录：`~/.moon-lol/matches/`。
 pub(super) fn matches_dir() -> PathBuf {
-    if let Ok(appdata) = std::env::var("APPDATA") {
-        PathBuf::from(appdata).join("moon-lol").join("matches")
-    } else {
-        PathBuf::from(".moon-lol").join("matches")
-    }
+    lol_share::paths::matches_dir()
 }
 
 pub(super) fn status_label(s: &MatchStatus) -> &str {

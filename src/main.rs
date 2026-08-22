@@ -49,10 +49,7 @@ fn main() {
     let mut app = App::new();
 
     // Register user_games custom asset source for absolute home dir loading
-    let home = std::env::var("USERPROFILE")
-        .or_else(|_| std::env::var("HOME"))
-        .unwrap_or_else(|_| ".".to_string());
-    let user_games_path = std::path::Path::new(&home).join(".moon-lol").join("games");
+    let user_games_path = lol_share::paths::games_dir();
     let _ = std::fs::create_dir_all(&user_games_path);
     app.register_asset_source(
         "user_games",

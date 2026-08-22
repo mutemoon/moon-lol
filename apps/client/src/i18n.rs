@@ -1,13 +1,9 @@
 use std::fs;
 use std::path::PathBuf;
 
-/// 持久化语言文件路径：Windows 用 %APPDATA%/moon-lol/locale，否则当前目录 .moon-lol/locale
+/// 持久化语言文件路径：`~/.moon-lol/locale`
 fn locale_file() -> PathBuf {
-    if let Ok(appdata) = std::env::var("APPDATA") {
-        PathBuf::from(appdata).join("moon-lol").join("locale")
-    } else {
-        PathBuf::from(".moon-lol").join("locale")
-    }
+    lol_share::paths::locale_file()
 }
 
 pub const DEFAULT_LOCALE: &str = "zh-CN";

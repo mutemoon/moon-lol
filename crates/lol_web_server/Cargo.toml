@@ -50,6 +50,7 @@ lol_web_protocol = { workspace = true, features = ["axum"] }
 lol_core = { path = "../lol_core" }
 lol_server = { path = "../lol_server" }
 lol_client = { workspace = true }
+lol_share = { workspace = true }
 lol_agent_runtime = { workspace = true }
 lol_game_process_manager = { workspace = true }
 

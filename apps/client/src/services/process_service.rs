@@ -21,16 +21,6 @@ use super::types::LocalGameState;
 
 // ── 辅助函数 ──
 
-/// 桌面端配置目录：`~/.moon-lol/`，不存在时自动创建。
-fn config_dir() -> Result<std::path::PathBuf, String> {
-    let home = std::env::var("HOME")
-        .or_else(|_| std::env::var("USERPROFILE"))
-        .map_err(|e| format!("无法获取 HOME 目录: {e}"))?;
-    let dir = std::path::PathBuf::from(home).join(".moon-lol");
-    std::fs::create_dir_all(&dir).map_err(|e| format!("创建配置目录失败: {e}"))?;
-    Ok(dir)
-}
-
 /// 把 `GameConfig` 转成 `BevyGameConfig`（非 headless，带场景）。
 fn bevy_game_config(config: &GameConfig) -> lol_client::launch::BevyGameConfig {
     lol_client::launch::BevyGameConfig {
@@ -43,7 +33,7 @@ fn bevy_game_config(config: &GameConfig) -> lol_client::launch::BevyGameConfig {
 
 /// 写入 Bevy 动态场景 RON 文件到 `~/.moon-lol/games/{scene_name}.ron`。
 pub fn write_scene_ron(scene_name: &str, agents: &[FrontAgentConfig]) -> Result<(), String> {
-    let dir = config_dir()?.join("games");
+    let dir = lol_share::paths::games_dir();
     std::fs::create_dir_all(&dir).map_err(|e| format!("创建 games 目录失败: {e}"))?;
 
     let ron_path = dir.join(format!("{}.ron", scene_name));
@@ -127,9 +117,11 @@ pub fn write_scene_ron(scene_name: &str, agents: &[FrontAgentConfig]) -> Result<
 
 /// 每局日志 SQLite 路径：`~/.moon-lol/logs/{id}.db`，确保父目录存在。
 fn log_db_path_for(id: Uuid) -> Result<std::path::PathBuf, String> {
-    let dir = config_dir()?.join("logs");
-    std::fs::create_dir_all(&dir).map_err(|e| format!("创建 logs 目录失败: {e}"))?;
-    Ok(dir.join(format!("{id}.db")))
+    let path = lol_share::paths::log_db_path(&id.to_string());
+    if let Some(parent) = path.parent() {
+        std::fs::create_dir_all(parent).map_err(|e| format!("创建 logs 目录失败: {e}"))?;
+    }
+    Ok(path)
 }
 
 /// 默认 RUST_LOG（dev/release 共用）。

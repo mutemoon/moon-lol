@@ -174,15 +174,7 @@ impl<S: tracing::Subscriber, L: Layer<S>> Layer<S> for FilteredLayer<L> {
 /// writer 线程在自己的 current_thread tokio runtime 上跑，避免和 Bevy 主线程
 /// 的 runtime 冲突。channel sender 存入 OnceLock 供 Layer 回调使用。
 pub fn create_log_plugin(log_db: Option<PathBuf>) -> bevy::log::LogPlugin {
-    let db_path = match log_db {
-        Some(p) => p,
-        None => {
-            let base = std::env::var("HOME")
-                .map(PathBuf::from)
-                .unwrap_or_else(|_| std::env::current_dir().unwrap_or_default());
-            base.join(".moon-lol").join("logs").join("debug.db")
-        }
-    };
+    let db_path = log_db.unwrap_or_else(lol_share::paths::default_log_db_path);
 
     // 确保目录存在
     if let Some(parent) = db_path.parent() {
@@ -384,10 +376,7 @@ mod tests {
 
     #[tokio::test]
     async fn dump_recent_logs() {
-        let base = std::env::var("USERPROFILE")
-            .or_else(|_| std::env::var("HOME"))
-            .unwrap_or_else(|_| ".".to_string());
-        let db_path = PathBuf::from(base).join(".moon-lol").join("logs").join("debug.db");
+        let db_path = lol_share::paths::default_log_db_path();
         if !db_path.exists() {
             println!("No debug.db found at {:?}", db_path);
             return;
