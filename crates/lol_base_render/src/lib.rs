@@ -10,5 +10,6 @@ pub mod mesh_shadow;
 pub mod particle;
 pub mod shader;
 pub mod shader_layout;
+pub mod spirv_strip;
 pub mod ui;
 pub mod ui_components;

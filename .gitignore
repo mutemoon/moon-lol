@@ -5,14 +5,11 @@ node_modules
 
 assets/*
 !assets/games
-!assets/characters
 !assets/tools
 !assets/maps
-!assets/ui
+assets/maps/*
+!assets/maps/test
 !assets/CommunityDragon-Data
-*_vfx.ron
-
-*.glb
 
 .vs
 
@@ -37,4 +34,3 @@ __pycache__
 .zcode
 
 .playwright-cli
-*.ogg

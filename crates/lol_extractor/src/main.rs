@@ -120,13 +120,47 @@ fn run(args: &Args, assets_dir: &Path) -> Result<(), String> {
     }
 
     if args.extract_shaders {
-        status(STEP_SHADER, "正在提取并反编译 ShaderCache...");
-        log(
-            STEP_SHADER,
-            "[SHADER] 占位：Shader 编译需 HLSLDecompiler 与 dxc.exe，尚未接入 worker",
-        );
+        extract_shaders_step(args, assets_dir)?;
     }
 
+    Ok(())
+}
+
+/// 3. ShaderCache 提取与转译
+fn extract_shaders_step(args: &Args, assets_dir: &Path) -> Result<(), String> {
+    status(STEP_SHADER, "正在提取并反编译 ShaderCache...");
+    log(STEP_SHADER, "[SHADER] 开始探测 dxbc-compiler 工具...");
+
+    let dxbc_compiler = league_to_lol::extract::find_dxbc_compiler(assets_dir).ok_or_else(|| {
+        format!(
+            "未找到 dxbc-compiler 工具，请确保在 {}/tools/ 或 assets/tools/ 目录下存在 dxbc-compiler.exe",
+            assets_dir.display()
+        )
+    })?;
+
+    log(
+        STEP_SHADER,
+        format!("[SHADER] 找到编译器: {}", dxbc_compiler.display()),
+    );
+
+    let shaders_out_dir = assets_dir.join("shaders");
+    let options = league_to_lol::extract::ExtractShaderOptions {
+        game_path: Path::new(&args.game_path).to_path_buf(),
+        out_dir: shaders_out_dir,
+        dxbc_compiler_path: dxbc_compiler,
+        toc_paths: Vec::new(),
+        skip_existing: false,
+        save_dxbc: false,
+    };
+
+    league_to_lol::extract::extract_shaders_pipeline(
+        &options,
+        Some(&|msg: &str| {
+            log(STEP_SHADER, msg);
+        }),
+    )?;
+
+    log(STEP_SHADER, "[SHADER] ShaderCache 提取与转译已全部完成！");
     Ok(())
 }
 

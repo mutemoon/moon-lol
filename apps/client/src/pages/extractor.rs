@@ -173,8 +173,8 @@ pub fn render_extractor(
         },
         StepInfo {
             title: "4. 着色器反编译 (ShaderCache)".to_string(),
-            description: "提取 DXBC 字节码，用 HLSLDecompiler 转 HLSL 再由 DXC 编译 SPIR-V"
-                .to_string(),
+            description:
+                "提取 DXBC 字节码，用 dxbc-compiler 转译 SPIR-V 并生成 ShaderMap 布局索引".to_string(),
         },
         StepInfo {
             title: "5. 全量完成 (Complete)".to_string(),
@@ -185,9 +185,9 @@ pub fn render_extractor(
     let total_steps = steps.len();
 
     v_flex()
-        .w_full()
-        .h_full()
-        .p_4()
+        .id("extractor_page")
+        .flex_1()
+        .overflow_y_scroll()
         .gap_4()
         .child(
             // 顶部标题栏卡片

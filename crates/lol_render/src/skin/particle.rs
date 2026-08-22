@@ -87,7 +87,7 @@ pub fn on_event_attack_end_spawn_hit_particle(
             }
         }
     }
-    info!(
+    debug!(
         "{attacker} 普攻命中 {target}，在 {anchor}（骨骼={hit_bone_name:?}）播放受击粒子 {key}（vfx_hash={vfx_hash:08x}）"
     );
 
