@@ -202,7 +202,15 @@ pub fn spawn_ws_service(
                                         .iter()
                                         .find(|t| t.id == task_id)
                                         .map(|t| t.env_name.clone())
-                                        .unwrap_or_else(|| "fiora_v0".to_string());
+                                        .or_else(|| {
+                                            let meta_p = std::path::Path::new(&checkpoint.path).with_extension("meta.json");
+                                            std::fs::read_to_string(&meta_p).ok().and_then(|s| {
+                                                serde_json::from_str::<serde_json::Value>(&s).ok()
+                                                    .and_then(|v| v.get("env_name").and_then(|e| e.as_str().map(|s| s.to_string())))
+                                            })
+                                        })
+                                        .or_else(|| sidebar.last_chosen_env.clone())
+                                        .unwrap_or_else(|| lol_rl_protocol::ENV_SOLO_V0.to_string());
                                     let weak = entity_weak_ui.clone();
                                     cx.spawn(move |_: gpui::WeakEntity<AppSidebar>, cx: &mut gpui::AsyncApp| {
                                         let mut cx = cx.clone();

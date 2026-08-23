@@ -384,7 +384,7 @@ impl SoloV0Env {
     pub fn with_config(config: EnvConfig) -> Self {
         let base = FioraRivenBaseEnv::builder(config, Self::DEFAULT_MAX_STEPS)
             .window_title("Solo 1v1 V0 (Self-Play RL Viewer)")
-            .map_name("sr_seasonal_map")
+            .map_name("solo")
             .enable_barrack(true)
             .initial_positions(
                 Vec3::new(2200.0, 0.0, 12650.0),

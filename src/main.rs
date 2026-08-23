@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 use clap::Parser;
 use lol_agent::PluginAgentObserver;
+use lol_base::map::MapPaths;
 use lol_champions::PluginChampions;
 use lol_core::PluginCore;
 use lol_core::game::GameScenes;
@@ -24,6 +25,9 @@ struct Args {
 
     #[arg(long, default_value = "Riven")]
     champion: String,
+
+    #[arg(long)]
+    map: Option<String>,
 
     #[arg(long)]
     scene: Option<String>,
@@ -99,6 +103,10 @@ fn main() {
     let scene_path = args
         .scene
         .unwrap_or_else(|| "games/classic.ron".to_string());
+
+    if let Some(map) = args.map {
+        app.insert_resource(MapPaths::new(&map));
+    }
 
     app.insert_resource(lol_core::skill::GodMode(args.god));
     app.insert_resource(lol_core::skill::NoCooldown(args.no_cooldown || args.god));

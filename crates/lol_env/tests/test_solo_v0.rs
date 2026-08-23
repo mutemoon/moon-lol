@@ -16,8 +16,8 @@ fn test_solo_v0_real_map_and_level_one_laning() {
     {
         let map_paths = env.world().resource::<MapPaths>();
         assert_eq!(
-            map_paths.name, "sr_seasonal_map",
-            "SoloV0 应使用召唤师峡谷真实地图"
+            map_paths.name, "solo",
+            "SoloV0 应使用 solo 地图"
         );
     }
 

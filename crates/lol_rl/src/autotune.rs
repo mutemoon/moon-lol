@@ -271,29 +271,39 @@ impl AutoTuner {
         })
     }
 
-    /// 数学规划求解最优参数配置。
+    /// 数学规划求解最优参数配置（默认自动寻找最优并发数）。
     ///
     /// 样本口径与 UI 完全一致：`total_samples = N × horizon × agents_per_env`；
     /// Rollout 耗时直接用并发实测每步值（已含 CPU 推理），训练耗时用真实反向更新实测值，
     /// 并计入每迭代固定开销（GPU→CPU 克隆等）。
     pub fn solve(profile: &SystemProfile, horizon: usize, ppo_epochs: usize) -> TunedConfig {
+        Self::solve_with_forced_n(profile, horizon, ppo_epochs, None)
+    }
+
+    /// 数学规划求解参数配置（支持指定强制固定并行环境数 `forced_n`，或为 `None` 自动求解）。
+    pub fn solve_with_forced_n(
+        profile: &SystemProfile,
+        horizon: usize,
+        ppo_epochs: usize,
+        forced_n: Option<usize>,
+    ) -> TunedConfig {
         let mut best_sps = 0.0;
-        let mut best_n = 4;
+        let mut best_n = forced_n.unwrap_or(4).max(1);
         let mut best_train_b = 64;
-        let mut best_infer_b = 4;
+        let mut best_infer_b = best_n.next_power_of_two().min(128);
 
-        // 根据 CPU 核心数和设备情况确定搜索范围
-        let max_n = if profile.is_cuda {
-            // CUDA 模式下，GPU 批量吞吐高，可充分压榨 CPU 核心 (例如 1.5x ~ 2x 核心数)
-            (profile.cpu_cores * 2).clamp(4, 64)
-        } else {
-            // CPU 模式下，留出 2 个核心给训练与推理
-            profile.cpu_cores.saturating_sub(2).max(2)
-        };
-
-        let candidate_n_list: Vec<usize> = if !profile.parallel_env_us.is_empty() {
+        // 如果用户指定了强制并行环境数，则仅针对该特定 N 求解最优批处理参数
+        let candidate_n_list: Vec<usize> = if let Some(fn_val) = forced_n.filter(|&n| n > 0) {
+            vec![fn_val]
+        } else if !profile.parallel_env_us.is_empty() {
             profile.parallel_env_us.iter().map(|&(n, _)| n).collect()
         } else {
+            // 根据 CPU 核心数和设备情况确定搜索范围
+            let max_n = if profile.is_cuda {
+                (profile.cpu_cores * 2).clamp(4, 64)
+            } else {
+                profile.cpu_cores.saturating_sub(2).max(2)
+            };
             (2..=max_n)
                 .filter(|&n| n % 2 == 0 || n == profile.cpu_cores)
                 .collect()
@@ -324,24 +334,33 @@ impl AutoTuner {
             let total_samples = (n as f64) * (horizon as f64) * samples_per_step;
 
             for &(b_train, train_us) in &profile.train_step_us {
-                // 训练约束：单个 batch 不能超过总样本数的 1/2，且至少能做 2 个 mini-batch
-                if (b_train as f64) > total_samples / 2.0 {
+                // 训练约束：单个 batch 优先不超过总样本数的 1/2，且至少能做 2 个 mini-batch
+                if (b_train as f64) > total_samples / 2.0 && total_samples > (b_train as f64) {
                     continue;
                 }
 
-                let num_batches = (total_samples / (b_train as f64)).ceil();
+                let num_batches = (total_samples / (b_train as f64)).max(1.0).ceil();
                 let train_total_us = (ppo_epochs as f64) * num_batches * train_us;
 
                 let iter_total_us = rollout_time_us + train_total_us + profile.fixed_overhead_us;
                 let iter_sec = iter_total_us / 1_000_000.0;
                 let sps = total_samples / iter_sec.max(0.0001);
 
-                if sps > best_sps {
+                if sps > best_sps || best_sps == 0.0 {
                     best_sps = sps;
                     best_n = n;
-                    best_train_b = b_train;
+                    best_train_b = b_train.min(total_samples as usize).max(16);
                     best_infer_b = n.next_power_of_two().min(128);
                 }
+            }
+
+            // 保底 fallback（在样本总数极小导致所有预设 batch 均过大时生效）
+            if best_sps == 0.0 {
+                best_n = n;
+                best_train_b = (total_samples as usize / 2).clamp(16, 64);
+                best_infer_b = n.next_power_of_two().min(128);
+                best_sps = total_samples
+                    / ((rollout_time_us + profile.fixed_overhead_us) / 1_000_000.0).max(0.0001);
             }
         }
 
@@ -356,7 +375,11 @@ impl AutoTuner {
             estimated_sps: best_sps,
         };
 
-        info!("🎯 [AutoTuner] 自适应配置求解完成:");
+        if forced_n.is_some() {
+            info!("🎯 [AutoTuner] 固定自定义并行环境数 ({best_n}) 求解完成:");
+        } else {
+            info!("🎯 [AutoTuner] 自适应配置求解完成:");
+        }
         info!("  ├─ 并行环境数 (Actors N): {}", tuned.num_parallel_envs);
         info!("  ├─ 推理 Batch 大小: {}", tuned.infer_batch_size);
         info!("  ├─ 训练 Mini-Batch: {}", tuned.train_batch_size);
@@ -546,5 +569,15 @@ mod tests {
         assert!(tuned.num_parallel_envs >= 2);
         assert!(tuned.train_batch_size >= 32);
         assert!(tuned.estimated_sps > 0.0);
+
+        // 测试指定强制固定并发数
+        let forced_tuned = AutoTuner::solve_with_forced_n(&profile, 64, 4, Some(8));
+        assert_eq!(forced_tuned.num_parallel_envs, 8);
+        assert!(forced_tuned.train_batch_size >= 32);
+        assert!(forced_tuned.estimated_sps > 0.0);
+
+        let small_forced = AutoTuner::solve_with_forced_n(&profile, 64, 4, Some(1));
+        assert_eq!(small_forced.num_parallel_envs, 1);
+        assert!(small_forced.train_batch_size >= 16);
     }
 }

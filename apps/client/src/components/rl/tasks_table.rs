@@ -406,8 +406,7 @@ pub fn render_tasks_table(
                                                                         let dialog_view = dialog_view.clone();
                                                                         move |_, window, cx| {
                                                                             dialog_view.update(cx, |this, _cx| {
-                                                                                let mut config = this.form.clone();
-                                                                                config.parallel_envs = 0;
+                                                                                let config = this.form.clone();
                                                                                 if let Some(tx) = &this.tx {
                                                                                     let _ = tx.send(InFrame::CreateTask { config });
                                                                                 }
@@ -464,6 +463,7 @@ pub struct CreateTaskDialogView {
     pub ppo_epochs_input: Entity<InputState>,
     pub hidden_dim_input: Entity<InputState>,
     pub total_iterations_input: Entity<InputState>,
+    pub parallel_envs_input: Entity<InputState>,
 }
 
 macro_rules! bind_num_input {
@@ -496,7 +496,7 @@ impl CreateTaskDialogView {
         let default_name = format!("RL 对战训练任务 #{}", task_count);
         let mut form = TaskConfigPayload::default_for_env(&env_to_use);
         form.name = default_name.clone();
-        form.parallel_envs = 0; // 自适应吞吐探测
+        form.parallel_envs = 0; // 0 表示自适应吞吐探测
 
         let name_input = cx.new(|cx| {
             InputState::new(window, cx)
@@ -519,6 +519,7 @@ impl CreateTaskDialogView {
         let ppo_epochs_input = bind_num_input!(cx, window, form, ppo_epochs, usize);
         let hidden_dim_input = bind_num_input!(cx, window, form, hidden_dim, usize);
         let total_iterations_input = bind_num_input!(cx, window, form, total_iterations, usize);
+        let parallel_envs_input = bind_num_input!(cx, window, form, parallel_envs, usize);
 
         Self {
             form,
@@ -533,6 +534,7 @@ impl CreateTaskDialogView {
             ppo_epochs_input,
             hidden_dim_input,
             total_iterations_input,
+            parallel_envs_input,
         }
     }
 
@@ -559,6 +561,7 @@ impl CreateTaskDialogView {
         self.form.hidden_dim = params.hidden_dim;
         self.form.rollout_steps_per_env = params.rollout_steps_per_env;
         self.form.total_iterations = params.total_iterations;
+        self.form.parallel_envs = 0;
 
         // 同步刷新所有输入框的文本
         self.lr_input
@@ -581,7 +584,119 @@ impl CreateTaskDialogView {
         self.total_iterations_input.update(cx, |i, cx| {
             i.set_value(params.total_iterations.to_string(), window, cx)
         });
+        self.parallel_envs_input.update(cx, |i, cx| {
+            i.set_value("0".to_string(), window, cx)
+        });
         cx.notify();
+    }
+
+    fn render_parallel_envs_setting(&self, cx: &mut Context<Self>) -> AnyElement {
+        let weak_input = self.parallel_envs_input.downgrade();
+        let current_val = self.form.parallel_envs;
+        let is_auto = current_val == 0;
+
+        let presets: Vec<(&'static str, usize)> = vec![
+            ("自动 (Auto)", 0),
+            ("2", 2),
+            ("4", 4),
+            ("8", 8),
+            ("16", 16),
+            ("32", 32),
+        ];
+
+        h_flex()
+            .w_full()
+            .items_start()
+            .gap_3()
+            .child(
+                div()
+                    .w(px(140.))
+                    .flex_shrink_0()
+                    .pt_1p5()
+                    .text_xs()
+                    .font_medium()
+                    .text_color(cx.theme().muted_foreground)
+                    .child("并行对局数 (Parallel)"),
+            )
+            .child(
+                v_flex()
+                    .flex_1()
+                    .gap_1()
+                    .child(
+                        h_flex()
+                            .w_full()
+                            .gap_2()
+                            .items_center()
+                            .child(
+                                div()
+                                    .flex_1()
+                                    .child(NumberInput::new(&self.parallel_envs_input)),
+                            )
+                            .child(
+                                div()
+                                    .px_2()
+                                    .py_1()
+                                    .rounded_md()
+                                    .text_xs()
+                                    .font_semibold()
+                                    .when(is_auto, |d| {
+                                        d.bg(cx.theme().accent.opacity(0.15))
+                                            .text_color(cx.theme().accent)
+                                            .child("自动调整")
+                                    })
+                                    .when(!is_auto, |d| {
+                                        d.bg(cx.theme().muted.opacity(0.4))
+                                            .text_color(cx.theme().foreground)
+                                            .child(format!("固定 {} 局", current_val))
+                                    }),
+                            ),
+                    )
+                    .child(
+                        h_flex()
+                            .w_full()
+                            .gap_1()
+                            .children(presets.into_iter().map(|(label, val)| {
+                                let is_selected = val == current_val;
+                                let btn = if is_selected {
+                                    Button::new(format!("preset-parallel-{val}"))
+                                        .primary()
+                                        .xsmall()
+                                        .compact()
+                                        .flex_1()
+                                        .label(label)
+                                } else {
+                                    Button::new(format!("preset-parallel-{val}"))
+                                        .outline()
+                                        .xsmall()
+                                        .compact()
+                                        .flex_1()
+                                        .label(label)
+                                };
+                                let weak_input = weak_input.clone();
+                                btn.on_click(cx.listener(move |this, _, window, cx| {
+                                    this.form.parallel_envs = val;
+                                    if let Some(input) = weak_input.upgrade() {
+                                        input.update(cx, |i, cx| {
+                                            i.set_value(val.to_string(), window, cx);
+                                        });
+                                    }
+                                    cx.notify();
+                                }))
+                            })),
+                    )
+                    .child(
+                        div()
+                            .pt_0p5()
+                            .text_xs()
+                            .text_color(cx.theme().muted_foreground)
+                            .child(if is_auto {
+                                "💡 填 0 为自动调整：启动时通过 AutoTuner 探测硬件算力求解最优吞吐。".to_string()
+                            } else {
+                                format!("⚙️ 自定义固定并行：将启动 {} 个并发环境，并在此并发下自动优化 GPU 批处理。", current_val)
+                            }),
+                    ),
+            )
+            .into_any_element()
     }
 
     fn render_num_setting<F>(
@@ -1046,6 +1161,8 @@ impl Render for CreateTaskDialogView {
                                     |this, val| this.form.hidden_dim = val,
                                 )
                             })
+                            // 并行对局数 (支持 0 自动调整或指定自定义并发对局数)
+                            .child(self.render_parallel_envs_setting(cx))
                             // 总训练迭代轮次
                             .child(self.render_int_setting(
                                 "总迭代轮次 (Iterations)",
@@ -1067,7 +1184,11 @@ impl Render for CreateTaskDialogView {
                                         div()
                                             .text_xs()
                                             .text_color(cx.theme().muted_foreground)
-                                            .child("⚡ 并行对局数与 GPU 推理/训练批大小将由 AutoTuner 在任务启动时自动探测硬件算力并求解最优吞吐。"),
+                                            .child(if cfg.parallel_envs == 0 {
+                                                "⚡ 当前已启用自动调整：AutoTuner 将在任务启动时全面探测硬件算力并求解最优并行对局数与批处理大小。"
+                                            } else {
+                                                "⚡ 当前已指定自定义并行对局数：AutoTuner 将在此并发环境下求解最优 GPU 推理与训练 Mini-Batch 大小。"
+                                            }),
                                     ),
                             ),
                     )

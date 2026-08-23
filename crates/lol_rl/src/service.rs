@@ -384,6 +384,24 @@ impl RLService {
     }
 
     async fn handle_apply_checkpoint(&self, task_id: &str, ckpt_id: &str) {
+        // 1. 优先从内存任务状态中查询（支持纯内存模式与正在运行的任务）
+        let in_memory_ckpt = {
+            let tasks = self.tasks.lock().await;
+            tasks
+                .get(task_id)
+                .and_then(|t| t.checkpoints.iter().find(|c| c.id == ckpt_id).cloned())
+        };
+
+        if let Some(item) = in_memory_ckpt {
+            info!("从内存状态加载 Checkpoint {} (任务 {})", ckpt_id, task_id);
+            let _ = self.event_tx.send(OutFrame::CheckpointLoaded {
+                task_id: task_id.to_string(),
+                checkpoint: item,
+            });
+            return;
+        }
+
+        // 2. 从数据库中查询历史 checkpoint
         match self.repo.get_checkpoint(task_id, ckpt_id).await {
             Ok(Some(cp)) => {
                 let item = CheckpointItem {
@@ -618,77 +636,95 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment + 'static>(
     let hidden_dim = task_config.hidden_dim.max(32);
     let device = crate::device::select_device().unwrap_or(candle_core::Device::Cpu);
     let backbone = task_config.backbone();
-
-    // 1. 自动吞吐探测与求解
-    let mut tuned = match AutoTuner::profile_with_backbone::<E>(
-        state_dim,
-        hidden_dim,
-        &action_space,
-        &device,
-        backbone,
-    ) {
-        Ok(profile) => {
-            let res = AutoTuner::solve(&profile, rollout_steps, task_config.ppo_epochs.max(1));
-            info!(
-                "🎯 [AutoTuner] 为任务 {} (主干: {}) 自动求解最优吞吐配置: 并发 Actors={}, 推理 Batch={}, 训练 MiniBatch={}, 预估 SPS: {:.1}",
-                task_id,
-                backbone,
-                res.num_parallel_envs,
-                res.infer_batch_size,
-                res.train_batch_size,
-                res.estimated_sps
-            );
-            res
-        }
-        Err(e) => {
-            let fallback_actors = if task_config.parallel_envs > 0 {
-                task_config.parallel_envs
-            } else {
-                num_cpus::get().clamp(2, 16)
-            };
-            tracing::warn!("AutoTuner 探测失败 ({e}), 降级使用默认配置: {fallback_actors}");
+    let (mut tuned, is_custom) = if task_config.parallel_envs > 0 {
+        let n = task_config.parallel_envs;
+        let total_samples = n * rollout_steps * E::num_agents().max(1);
+        let train_batch_size = (total_samples / 4).clamp(16, 256);
+        let infer_batch_size = n.next_power_of_two().min(128);
+        info!(
+            "🎯 为任务 {} (主干: {}) 应用自定义并发: 并发 Actors={}, 训练 MiniBatch={}, 推理 Batch={} (跳过 AutoTuner 探测，极速启动)",
+            task_id, backbone, n, train_batch_size, infer_batch_size
+        );
+        (
             crate::autotune::TunedConfig {
-                num_parallel_envs: fallback_actors,
-                infer_batch_size: fallback_actors.min(32),
-                train_batch_size: (fallback_actors * 16).clamp(32, 256),
+                num_parallel_envs: n,
+                infer_batch_size,
+                train_batch_size,
                 dynamic_batch_timeout_us: 200,
-                estimated_sps: 2000.0,
-            }
-        }
-    };
-
-    let num_parallel_envs = if task_config.parallel_envs > 0 {
-        task_config.parallel_envs
+                estimated_sps: 0.0,
+            },
+            true,
+        )
     } else {
-        tuned.num_parallel_envs
+        // 1. 自动调整模式：运行 AutoTuner 全面硬件算力探测与最优配置求解
+        let tuned = match AutoTuner::profile_with_backbone::<E>(
+            state_dim,
+            hidden_dim,
+            &action_space,
+            &device,
+            backbone,
+        ) {
+            Ok(profile) => {
+                let res = AutoTuner::solve(
+                    &profile,
+                    rollout_steps,
+                    task_config.ppo_epochs.max(1),
+                );
+                info!(
+                    "🎯 [AutoTuner] 为任务 {} (主干: {}) 自动求解最优配置: 并发 Actors={}, 推理 Batch={}, 训练 MiniBatch={}, 预估 SPS: {:.1}",
+                    task_id,
+                    backbone,
+                    res.num_parallel_envs,
+                    res.infer_batch_size,
+                    res.train_batch_size,
+                    res.estimated_sps
+                );
+                res
+            }
+            Err(e) => {
+                let fallback_actors = num_cpus::get().clamp(2, 16);
+                tracing::warn!("AutoTuner 探测失败 ({e}), 降级使用配置: {fallback_actors}");
+                crate::autotune::TunedConfig {
+                    num_parallel_envs: fallback_actors,
+                    infer_batch_size: fallback_actors.min(32),
+                    train_batch_size: (fallback_actors * 16).clamp(32, 256),
+                    dynamic_batch_timeout_us: 200,
+                    estimated_sps: 2000.0,
+                }
+            }
+        };
+        (tuned, false)
     };
 
-    // 1b. 真实校准：用实际生效配置复用真实 AsyncTrainingSession 跑 K 轮迭代，
-    //     实测 SPS（与 UI 同口径）覆盖组件级预估
-    let mut calib_config = tuned.clone();
-    calib_config.num_parallel_envs = num_parallel_envs;
-    match AutoTuner::calibrate_with_backbone::<E>(
-        state_dim,
-        hidden_dim,
-        &action_space,
-        &device,
-        rollout_steps,
-        task_config.ppo_epochs.max(1),
-        &calib_config,
-        backbone,
-    ) {
-        Ok(measured) => {
-            tuned.estimated_sps = measured;
-            info!(
-                "🎯 [AutoTuner] 为任务 {} 真实校准完成，实测 SPS: {:.1}",
-                task_id, measured
-            );
-        }
-        Err(e) => {
-            tracing::warn!(
-                "AutoTuner 校准失败 ({e})，沿用组件级预估 SPS: {:.1}",
-                tuned.estimated_sps
-            );
+    let num_parallel_envs = tuned.num_parallel_envs;
+
+    // 1b. 真实校准（仅在自动调优模式下执行）：用实际生效配置跑 K 轮迭代实测 SPS
+    if !is_custom {
+        let mut calib_config = tuned.clone();
+        calib_config.num_parallel_envs = num_parallel_envs;
+        match AutoTuner::calibrate_with_backbone::<E>(
+            state_dim,
+            hidden_dim,
+            &action_space,
+            &device,
+            rollout_steps,
+            task_config.ppo_epochs.max(1),
+            &calib_config,
+            backbone,
+        ) {
+            Ok(measured) => {
+                tuned.estimated_sps = measured;
+                info!(
+                    "🎯 [AutoTuner] 为任务 {} 真实校准完成，实测 SPS: {:.1}",
+                    task_id, measured
+                );
+            }
+            Err(e) => {
+                tracing::warn!(
+                    "AutoTuner 校准失败 ({e})，沿用组件级预估 SPS: {:.1}",
+                    tuned.estimated_sps
+                );
+            }
         }
     }
 
