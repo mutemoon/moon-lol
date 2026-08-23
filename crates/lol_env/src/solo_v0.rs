@@ -23,15 +23,13 @@ use crate::traits::{EnvConfig, EnvMeta, RenderMode, RlEnvironment, StepResult, V
 pub const SOLO_V0_OFFSET_SCALE: f32 = 100.0;
 pub const SOLO_V0_OBS_DIM: usize = 60;
 pub const SOLO_V0_OBS_DISTANCE_SCALE: f32 = 100.0;
-pub const SOLO_V0_CHAMPION_HP: f32 = 1000.0;
 
 // ── 初始化与重置 ─────────────────────────────────────────────────────────────
 
 pub fn setup_solo_v0_health_world(world: &mut World, fiora: Entity, riven: Entity) {
     for champion in [fiora, riven] {
         if let Some(mut hp) = world.get_mut::<Health>(champion) {
-            hp.value = SOLO_V0_CHAMPION_HP;
-            hp.max = SOLO_V0_CHAMPION_HP;
+            hp.value = hp.max;
         }
         if let Some(mut flash) = world.get_mut::<FlashCooldown>(champion) {
             flash.reset();
@@ -345,7 +343,7 @@ impl SoloV0Obs {
 
 // ── 环境主体 ─────────────────────────────────────────────────────────────────
 
-/// 统一的有头/无头世界初始化与重置逻辑（双方 1000 血量与闪现重置）
+/// 统一的有头/无头世界初始化与重置逻辑（双方满血与闪现重置）
 pub fn setup_solo_v0_env_world(fiora: Entity, riven: Entity, world: &mut World) {
     setup_solo_v0_health_world(world, fiora, riven);
 }

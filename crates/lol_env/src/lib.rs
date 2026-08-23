@@ -43,8 +43,8 @@ pub use parallel::{
 pub use raycast_plugin::raycast_ground_plane;
 pub use reward::{FioraRewardContext, FioraVsRivenRewardModel, RewardModel};
 pub use solo_v0::{
-    SOLO_V0_CHAMPION_HP, SOLO_V0_OBS_DIM, SOLO_V0_OBS_DISTANCE_SCALE, SOLO_V0_OFFSET_SCALE,
-    SoloV0Action, SoloV0DiscreteAction, SoloV0Env, SoloV0Obs, setup_solo_v0_env_world,
+    SOLO_V0_OBS_DIM, SOLO_V0_OBS_DISTANCE_SCALE, SOLO_V0_OFFSET_SCALE, SoloV0Action,
+    SoloV0DiscreteAction, SoloV0Env, SoloV0Obs, setup_solo_v0_env_world,
     setup_solo_v0_health_world, step_solo_v0_world,
 };
 pub use traits::{
