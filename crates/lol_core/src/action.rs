@@ -70,11 +70,6 @@ fn on_command_action(trigger: On<CommandAction>, mut commands: Commands) {
                 entity,
                 target: RunTarget::Position(target),
             });
-            // commands.entity(entity).trigger(CommandAnimationPlay {
-            //     hash: hash_bin("Run"),
-            //     repeat: true,
-            //     ..default()
-            // });
         }
         Action::Skill { index, point } => {
             commands.trigger(CommandSkillBeforeStart {

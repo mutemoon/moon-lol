@@ -234,9 +234,7 @@ mod tests {
         app.add_plugins(MinimalPlugins);
         app.add_plugins(PluginAggro);
         // 手动控制时间更新，使得 app.update() 能运行一次 FixedUpdate
-        app.insert_resource(TimeUpdateStrategy::ManualDuration(Duration::from_micros(
-            15625,
-        )));
+        app.insert_resource(TimeUpdateStrategy::FixedTimesteps(1));
         app.init_resource::<LastTarget>();
 
         // 注册观察者：当 Aggro 系统发出“找到目标”事件时，记录到 Resource 中

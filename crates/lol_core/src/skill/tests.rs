@@ -109,9 +109,7 @@ impl ActionSkillHarness {
         app.add_plugins(PluginActionObserverSkill);
         app.init_asset::<Spell>();
         app.insert_resource(Time::<Fixed>::from_hz(TEST_FPS as f64));
-        app.insert_resource(TimeUpdateStrategy::ManualDuration(Duration::from_secs_f64(
-            1.0 / TEST_FPS as f64,
-        )));
+        app.insert_resource(TimeUpdateStrategy::FixedTimesteps(1));
 
         let caster = app
             .world_mut()

@@ -77,9 +77,6 @@ impl TraceResource {
 fn main() {
     let mut app = App::new();
 
-    let fixed_update_timestep = Time::<Fixed>::default().timestep();
-    let time_step = fixed_update_timestep * 2 + Duration::from_millis(1); // Run 2 FixedUpdates per frame
-
     let start_inst = Instant::now();
     app.add_plugins(MinimalPlugins)
         .insert_resource(TraceResource {
@@ -87,7 +84,7 @@ fn main() {
             start_time: Some(start_inst),
         })
         .init_resource::<FixedFrameCount>()
-        .insert_resource(TimeUpdateStrategy::ManualDuration(time_step))
+        .insert_resource(TimeUpdateStrategy::FixedTimesteps(2))
         // Schedules
         .add_systems(PreUpdate, pre_update)
         // Parallel systems in FixedUpdate
