@@ -126,7 +126,7 @@ pub struct BuffFioraRHeal {
 pub fn fixed_update(
     mut commands: Commands,
     mut q_buff_fiora_r: Query<(Entity, &BuffOf, &mut BuffFioraR)>,
-    time: Res<Time<Fixed>>,
+    time: Res<Time>,
 ) {
     for (entity, buff_of, mut buff) in q_buff_fiora_r.iter_mut() {
         let target = buff_of.0;
@@ -190,7 +190,7 @@ pub fn update_fiora_r_heal(
     mut commands: Commands,
     mut q_heal: Query<(Entity, &BuffOf, &mut BuffFioraRHeal)>,
     mut q_allies: Query<(Entity, &Transform, &Team, &mut Health), Without<Death>>,
-    time: Res<Time<Fixed>>,
+    time: Res<Time>,
 ) {
     for (buff_entity, buff_of, mut heal) in q_heal.iter_mut() {
         heal.timer.tick(time.delta());

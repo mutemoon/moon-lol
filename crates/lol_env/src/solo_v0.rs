@@ -2,12 +2,15 @@ use std::collections::HashMap;
 
 use bevy::prelude::*;
 use lol_core::action::{Action, CommandAction};
+use lol_core::base::stats::ChampionStats;
+use lol_core::entities::minion::Minion;
 use lol_core::life::Health;
+use lol_core::team::Team;
 use lol_rl_protocol::{ActionSpace, ObsFeaturePayload, RewardFormulaSpec, RewardTermSpec};
 
 pub use crate::fiora_riven_common::{
     ATTACK_MASK_DISTANCE, AttackEventTracker, FioraRivenBaseEnv, FioraRivenEntities,
-    VitalBreakTracker, reset_episode_world, setup_skill_levels_world, unpause_virtual_time,
+    reset_episode_world, setup_skill_levels_world, unpause_virtual_time,
 };
 pub use crate::flash_plugin::{
     FLASH_COOLDOWN_SECS, FLASH_DISTANCE, FlashCooldown, dispatch_flash, extract_flash_obs,
@@ -35,6 +38,12 @@ pub fn setup_solo_v0_health_world(world: &mut World, fiora: Entity, riven: Entit
             flash.reset();
         } else {
             world.entity_mut(champion).insert(FlashCooldown::default());
+        }
+        if let Some(mut stats) = world.get_mut::<ChampionStats>(champion) {
+            stats.kills = 0;
+            stats.deaths = 0;
+            stats.assists = 0;
+            stats.minion_kills = 0;
         }
     }
 }
@@ -683,30 +692,70 @@ impl RlEnvironment for SoloV0Env {
     fn reward_formula_spec() -> Option<RewardFormulaSpec> {
         use lol_rl_protocol::RewardExpr;
         Some(RewardFormulaSpec {
-            name: "Solo 1v1 对决公式 (SoloV0)".to_string(),
+            name: "Solo 1v1 对决与补兵公式 (SoloV0)".to_string(),
             terms: vec![
                 RewardTermSpec::new(
                     "damage_dealt",
-                    "造成伤害收益",
+                    "造成伤害收益(低)",
                     RewardExpr::Mul(
-                        Box::new(RewardExpr::Constant(3.0 / 1000.0)),
+                        Box::new(RewardExpr::Constant(0.5 / 1000.0)),
                         Box::new(RewardExpr::Variable("self_dmg".to_string())),
                     ),
                 ),
                 RewardTermSpec::new(
                     "damage_taken",
-                    "承受伤害惩罚",
+                    "承受伤害惩罚(低)",
                     RewardExpr::Mul(
-                        Box::new(RewardExpr::Constant(-3.0 / 1000.0)),
+                        Box::new(RewardExpr::Constant(-0.5 / 1000.0)),
                         Box::new(RewardExpr::Variable("target_dmg".to_string())),
                     ),
                 ),
                 RewardTermSpec::new(
-                    "vital_break",
-                    "破绽击破奖励",
+                    "last_hit",
+                    "补兵成功奖励(高)",
                     RewardExpr::Mul(
-                        Box::new(RewardExpr::Constant(1.5)),
-                        Box::new(RewardExpr::Variable("is_vital_break".to_string())),
+                        Box::new(RewardExpr::Constant(5.0)),
+                        Box::new(RewardExpr::Variable("self_cs".to_string())),
+                    ),
+                ),
+                RewardTermSpec::new(
+                    "enemy_last_hit",
+                    "敌方补兵惩罚(高)",
+                    RewardExpr::Mul(
+                        Box::new(RewardExpr::Constant(-5.0)),
+                        Box::new(RewardExpr::Variable("target_cs".to_string())),
+                    ),
+                ),
+                RewardTermSpec::new(
+                    "minion_damage_shaping",
+                    "小兵伤害诱导",
+                    RewardExpr::Mul(
+                        Box::new(RewardExpr::Constant(0.5 / 1000.0)),
+                        Box::new(RewardExpr::Variable("self_minion_dmg".to_string())),
+                    ),
+                ),
+                RewardTermSpec::new(
+                    "enemy_minion_damage_shaping",
+                    "敌方小兵伤害抵消",
+                    RewardExpr::Mul(
+                        Box::new(RewardExpr::Constant(-0.5 / 1000.0)),
+                        Box::new(RewardExpr::Variable("target_minion_dmg".to_string())),
+                    ),
+                ),
+                RewardTermSpec::new(
+                    "last_hit_window",
+                    "残血斩杀窗口诱导",
+                    RewardExpr::Mul(
+                        Box::new(RewardExpr::Constant(0.2)),
+                        Box::new(RewardExpr::Variable("self_cs_window".to_string())),
+                    ),
+                ),
+                RewardTermSpec::new(
+                    "enemy_last_hit_window",
+                    "敌方斩杀窗口抵消",
+                    RewardExpr::Mul(
+                        Box::new(RewardExpr::Constant(-0.2)),
+                        Box::new(RewardExpr::Variable("target_cs_window".to_string())),
                     ),
                 ),
                 RewardTermSpec::new(
@@ -740,6 +789,13 @@ impl VisualEnvironment for SoloV0Env {
     fn on_assets_loaded(&mut self, world: &mut World) {
         setup_skill_levels_world(world, self.base.fiora, self.base.riven);
         setup_solo_v0_env_world(self.base.fiora, self.base.riven, world);
+
+        if self.base.warmup_secs > 0.0 {
+            let warmup_ticks = (self.base.warmup_secs * 64.0).round() as usize;
+            for _ in 0..warmup_ticks {
+                world.run_schedule(FixedUpdate);
+            }
+        }
     }
 
     fn reset_world(&mut self, world: &mut World) -> Vec<Self::Obs> {
@@ -1005,9 +1061,25 @@ pub fn step_solo_v0_world(
     let prev_r_obs = get_ego_obs_from_world(app.world(), riven, fiora, 1.0);
     let prev_f_hp = prev_f_obs.self_hp;
     let prev_r_hp = prev_r_obs.self_hp;
+    let prev_f_cs = app
+        .world()
+        .get::<ChampionStats>(fiora)
+        .map(|s| s.minion_kills)
+        .unwrap_or(0);
+    let prev_r_cs = app
+        .world()
+        .get::<ChampionStats>(riven)
+        .map(|s| s.minion_kills)
+        .unwrap_or(0);
 
-    if let Some(mut tracker) = app.world_mut().get_resource_mut::<VitalBreakTracker>() {
-        tracker.hit = false;
+    // 记录更新前的小兵血量与队伍
+    let mut prev_minion_hps: HashMap<Entity, (Team, f32)> = HashMap::new();
+    {
+        let mut q_minions =
+            app.world_mut().query_filtered::<(Entity, &Team, &Health), With<Minion>>();
+        for (e, team, hp) in q_minions.iter(app.world()) {
+            prev_minion_hps.insert(e, (*team, hp.value));
+        }
     }
 
     dispatch_single_action(app.world_mut(), fiora, riven, act_fiora);
@@ -1022,17 +1094,76 @@ pub fn step_solo_v0_world(
     let curr_r_obs = get_ego_obs_from_world(app.world(), riven, fiora, 1.0);
     let curr_f_hp = curr_f_obs.self_hp;
     let curr_r_hp = curr_r_obs.self_hp;
+    let curr_f_cs = app
+        .world()
+        .get::<ChampionStats>(fiora)
+        .map(|s| s.minion_kills)
+        .unwrap_or(0);
+    let curr_r_cs = app
+        .world()
+        .get::<ChampionStats>(riven)
+        .map(|s| s.minion_kills)
+        .unwrap_or(0);
 
+    let fiora_cs_diff = curr_f_cs.saturating_sub(prev_f_cs) as f32;
+    let riven_cs_diff = curr_r_cs.saturating_sub(prev_r_cs) as f32;
+
+    // 统计小兵血量变化与残血斩杀窗口诱导
+    let mut fiora_minion_dmg = 0.0f32;
+    let mut riven_minion_dmg = 0.0f32;
+    let mut fiora_near_low_hp_minion = false;
+    let mut riven_near_low_hp_minion = false;
+
+    let f_pos = curr_f_obs.self_pos;
+    let r_pos = curr_r_obs.self_pos;
+
+    {
+        let mut q_minions = app
+            .world_mut()
+            .query_filtered::<(Entity, &Team, &Health, &Transform), With<Minion>>();
+        for (e, team, hp, tf) in q_minions.iter(app.world()) {
+            let m_pos = tf.translation;
+            if let Some(&(prev_team, prev_hp)) = prev_minion_hps.get(&e) {
+                let dmg = (prev_hp - hp.value).max(0.0);
+                match prev_team {
+                    Team::Chaos => fiora_minion_dmg += dmg,
+                    Team::Order => riven_minion_dmg += dmg,
+                    _ => {}
+                }
+            }
+
+            // 斩杀窗口诱导：敌方小兵残血(<=120且存活)且在斩杀距离(<=450)内
+            if hp.value > 0.0 && hp.value <= 120.0 {
+                match team {
+                    Team::Chaos => {
+                        if f_pos.distance(m_pos) <= 450.0 {
+                            fiora_near_low_hp_minion = true;
+                        }
+                    }
+                    Team::Order => {
+                        if r_pos.distance(m_pos) <= 450.0 {
+                            riven_near_low_hp_minion = true;
+                        }
+                    }
+                    _ => {}
+                }
+            }
+        }
+    }
+
+    // 1. 英雄伤害收益（调低至 0.5 / 1000.0）
     let fiora_dmg_dealt = (prev_r_hp - curr_r_hp).max(0.0) / 1000.0;
     let riven_dmg_dealt = (prev_f_hp - curr_f_hp).max(0.0) / 1000.0;
+    let r_hero_dmg = (fiora_dmg_dealt - riven_dmg_dealt) * 0.5;
 
-    let tracker_hit = app.world().resource::<VitalBreakTracker>().hit;
-    let had_active_vital = prev_f_obs
-        .target_modifiers
-        .iter()
-        .any(|m| m.name_id == ModifierNameId::FioraPassiveVital && m.stack_count > 0.5);
-    let is_vital_break = tracker_hit && had_active_vital;
-    let vital_bonus = if is_vital_break { 1.5 } else { 0.0 };
+    // 2. 补兵成功奖励（提很高：5.0 / 刀）
+    let r_cs = (fiora_cs_diff - riven_cs_diff) * 5.0;
+
+    // 3. 补兵诱导奖励（小兵伤害诱导 0.5/1000 + 残血斩杀窗口 0.2）
+    let r_minion_dmg = ((fiora_minion_dmg - riven_minion_dmg) / 1000.0) * 0.5;
+    let f_cs_window = if fiora_near_low_hp_minion { 1.0 } else { 0.0 };
+    let r_cs_window = if riven_near_low_hp_minion { 1.0 } else { 0.0 };
+    let r_cs_window_diff = (f_cs_window - r_cs_window) * 0.2;
 
     let fiora_killed = curr_r_hp <= 0.0 && prev_r_hp > 0.0;
     let riven_killed = curr_f_hp <= 0.0 && prev_f_hp > 0.0;
@@ -1044,7 +1175,7 @@ pub fn step_solo_v0_world(
         0.0
     };
 
-    let r_fiora = (fiora_dmg_dealt - riven_dmg_dealt) * 3.0 + vital_bonus + kill_bonus_fiora;
+    let r_fiora = r_hero_dmg + r_cs + r_minion_dmg + r_cs_window_diff + kill_bonus_fiora;
     let r_riven = -r_fiora;
 
     let terminated = curr_f_hp <= 0.0 || curr_r_hp <= 0.0;
@@ -1053,10 +1184,12 @@ pub fn step_solo_v0_world(
     let f_vars = HashMap::from([
         ("self_dmg".to_string(), fiora_dmg_dealt * 1000.0),
         ("target_dmg".to_string(), riven_dmg_dealt * 1000.0),
-        (
-            "is_vital_break".to_string(),
-            if is_vital_break { 1.0 } else { 0.0 },
-        ),
+        ("self_cs".to_string(), fiora_cs_diff),
+        ("target_cs".to_string(), riven_cs_diff),
+        ("self_minion_dmg".to_string(), fiora_minion_dmg),
+        ("target_minion_dmg".to_string(), riven_minion_dmg),
+        ("self_cs_window".to_string(), f_cs_window),
+        ("target_cs_window".to_string(), r_cs_window),
         (
             "is_kill_win".to_string(),
             if fiora_killed { 1.0 } else { 0.0 },
@@ -1066,7 +1199,12 @@ pub fn step_solo_v0_world(
     let r_vars = HashMap::from([
         ("self_dmg".to_string(), riven_dmg_dealt * 1000.0),
         ("target_dmg".to_string(), fiora_dmg_dealt * 1000.0),
-        ("is_vital_break".to_string(), 0.0),
+        ("self_cs".to_string(), riven_cs_diff),
+        ("target_cs".to_string(), fiora_cs_diff),
+        ("self_minion_dmg".to_string(), riven_minion_dmg),
+        ("target_minion_dmg".to_string(), fiora_minion_dmg),
+        ("self_cs_window".to_string(), r_cs_window),
+        ("target_cs_window".to_string(), f_cs_window),
         (
             "is_kill_win".to_string(),
             if riven_killed { 1.0 } else { 0.0 },

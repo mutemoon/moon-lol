@@ -200,7 +200,7 @@ pub fn on_irelia_damage_hit(
 /// FixedUpdate：tick 被动计时器，到期后移除攻速 buff 与层数 buff。
 pub fn update_irelia_fervor(
     mut commands: Commands,
-    time: Res<Time<Fixed>>,
+    time: Res<Time>,
     mut q_fervor: Query<(Entity, &mut BuffIreliaFervor, &BuffOf)>,
 ) {
     let mut expired = Vec::new();

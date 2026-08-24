@@ -38,3 +38,7 @@
 
 - 榨干 CPU 性能的配置：`SingleThreadedExecutor` + `TimeUpdateStrategy::FixedTimesteps(1)` + `app.update()` + 多线程
 - 原因：bevy 本身是多线程的，但是改为单线程后，结合多线程的 bevy 实例，来减少 bevy 内多线程上下文切换的性能损耗，从而榨干 CPU
+
+## 资源加载
+
+通过 asset_server.load(path) 加载的 Handle，只要 Handle 还被某个实体的 Component 或者 Resource 引用时，就会被缓存，下次 asset_server.load 时会直接返回此 Handle 而不是重新加载

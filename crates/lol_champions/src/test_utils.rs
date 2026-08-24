@@ -224,6 +224,11 @@ impl ChampionTestHarness {
         );
         assert!(grid_loaded, "ResourceGrid asset failed to load");
 
+        // 多更新几帧，确保 DynamicWorld 实例化、技能实体挂载以及角色属性初始化完成
+        for _ in 0..5 {
+            app.update();
+        }
+
         // Automatically level up all skills to level 1 for testing
         if let Some(skills) = app.world().get::<Skills>(champion) {
             let skill_entities = skills.to_vec();
@@ -235,6 +240,7 @@ impl ChampionTestHarness {
                 }
             }
         }
+        app.update();
 
         Self {
             app,

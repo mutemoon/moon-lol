@@ -220,7 +220,7 @@ pub fn update_riven_buffs(
     mut commands: Commands,
     mut q_champion: Query<(Entity, &Buffs, &mut Damage, &mut Attack), With<Riven>>,
     mut q_buff_r: Query<(Entity, &mut BuffRivenR)>,
-    time: Res<Time<Fixed>>,
+    time: Res<Time>,
 ) {
     // 收集到期的 buff 及其存储的加成值，避免二次借用
     let mut expired: Vec<(Entity, f32, f32)> = Vec::new();

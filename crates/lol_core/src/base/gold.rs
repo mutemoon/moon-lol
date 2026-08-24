@@ -67,7 +67,7 @@ impl Plugin for PluginGold {
 }
 
 /// 每秒给存活英雄增加 2.04 金币
-pub fn update_passive_gold(mut q_gold: Query<&mut Gold, Without<Death>>, time: Res<Time<Fixed>>) {
+pub fn update_passive_gold(mut q_gold: Query<&mut Gold, Without<Death>>, time: Res<Time>) {
     let gold_per_sec = 2.04;
     let amount = gold_per_sec * time.delta_secs();
     for mut gold in q_gold.iter_mut() {

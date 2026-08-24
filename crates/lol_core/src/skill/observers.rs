@@ -235,7 +235,7 @@ pub fn on_level_up(
 }
 
 pub fn update_skill_recast_windows(
-    time: Res<Time<Fixed>>,
+    time: Res<Time>,
     mut commands: Commands,
     mut q_skill_window: Query<(Entity, &mut super::SkillRecastWindow)>,
 ) {

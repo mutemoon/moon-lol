@@ -2,12 +2,13 @@ use std::collections::VecDeque;
 use std::time::Duration;
 
 use bevy::prelude::*;
-use bevy::world_serialization::WorldInstanceReady;
+use bevy::world_serialization::{DynamicWorld, WorldInstanceReady};
 use lol_base::barrack::{
     ConfigBarracks, ConstantWaveBehavior, EnumWaveBehavior, InhibitorWaveBehavior,
     RotatingWaveBehavior, TimedVariableWaveBehavior,
 };
 
+use crate::game::{GameSet, GameTime};
 use crate::lane::Lane;
 use crate::loaders::barrack::ConfigBarracksLoader;
 use crate::team::Team;
@@ -21,7 +22,7 @@ impl Plugin for PluginBarrack {
         app.init_asset_loader::<ConfigBarracksLoader>();
         app.init_resource::<InhibitorState>();
         app.add_systems(FixedUpdate, init_barrack_state_system);
-        app.add_systems(FixedUpdate, barracks_spawning_system);
+        app.add_systems(FixedUpdate, barracks_spawning_system.in_set(GameSet));
     }
 }
 
@@ -59,6 +60,8 @@ pub struct BarrackState {
     pub move_speed_upgrade_count: i32,
     /// 已生成的波数
     pub wave_count: u32,
+    /// 预加载的小兵模板句柄（只保存不使用）
+    pub minion_templates: Vec<Handle<DynamicWorld>>,
 }
 
 /// 系统：为拥有 BarrackConfigHandler 但没有 BarrackState 的实体添加 BarrackState
@@ -74,9 +77,11 @@ fn init_barrack_state_system(
             continue;
         };
 
-        config.units.iter().for_each(|unit| {
-            let _ = asset_server.load::<DynamicWorld>(&unit.minion_template);
-        });
+        let minion_templates = config
+            .units
+            .iter()
+            .map(|unit| asset_server.load::<DynamicWorld>(&unit.minion_template))
+            .collect();
 
         commands.entity(entity).insert(BarrackState {
             // 第一波兵有初始延迟
@@ -96,6 +101,7 @@ fn init_barrack_state_system(
                 config.minion_spawn_interval_secs,
                 TimerMode::Repeating,
             ),
+            minion_templates,
             ..Default::default()
         });
     }
@@ -108,7 +114,6 @@ pub struct InhibitorState {
 
 /// 核心系统：处理兵营的计时、升级和生成逻辑
 fn barracks_spawning_system(
-    game_time: Res<Time<Virtual>>,
     inhibitor_state: Res<InhibitorState>,
     mut commands: Commands,
     mut query: Query<(
@@ -120,6 +125,7 @@ fn barracks_spawning_system(
     )>,
     res_barracks_config: Res<Assets<ConfigBarracks>>,
     time: Res<Time>,
+    game_time: Res<GameTime>,
     asset_server: Res<AssetServer>,
 ) {
     for (transform, config_handler, mut barrack_state, _team, lane) in query.iter_mut() {

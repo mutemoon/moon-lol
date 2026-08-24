@@ -102,7 +102,7 @@ pub fn update_camille_passive(
     mut q_timer: Query<(Entity, &BuffOf, &mut BuffCamillePassiveTimer)>,
     q_buffof: Query<(Entity, &BuffOf)>,
     q_shield: Query<&BuffShieldWhite>,
-    time: Res<Time<Fixed>>,
+    time: Res<Time>,
 ) {
     for (timer_entity, buffof, mut timer) in q_timer.iter_mut() {
         timer.timer.tick(time.delta());

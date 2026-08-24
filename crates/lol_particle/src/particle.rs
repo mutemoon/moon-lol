@@ -199,9 +199,9 @@ pub fn update_particle(
 pub fn update_particle_transform(
     mut q_particle_state: Query<(&mut Transform, &ChildOf, &Lifetime, &mut ParticleState)>,
     q_particle_emitter_state: Query<&ParticleEmitterState>,
-    res_time: Res<Time>,
+    time: Res<Time>,
 ) {
-    let dt = res_time.delta_secs();
+    let dt = time.delta_secs();
 
     for (mut transform, child_of, lifetime, mut particle) in q_particle_state.iter_mut() {
         particle.velocity = particle.velocity + particle.acceleration * dt;

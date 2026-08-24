@@ -118,7 +118,7 @@ pub fn on_darius_damage_hit(
 /// 出血 DoT：每周期造成 0.3*AD*层数 物理伤害，持续 5 秒后清除。
 pub fn update_darius_bleed(
     mut commands: Commands,
-    time: Res<Time<Fixed>>,
+    time: Res<Time>,
     mut q_bleed: Query<(Entity, &mut BuffDariusBleed, &BuffOf)>,
     q_damage: Query<&Damage>,
 ) {
@@ -157,7 +157,7 @@ pub fn update_darius_bleed(
 /// 诺克萨斯之力到期：移除 buff 并恢复 AD。
 pub fn update_darius_might(
     mut commands: Commands,
-    time: Res<Time<Fixed>>,
+    time: Res<Time>,
     mut q_might: Query<(Entity, &mut BuffDariusMight, &BuffOf)>,
     mut q_damage: Query<&mut Damage>,
 ) {

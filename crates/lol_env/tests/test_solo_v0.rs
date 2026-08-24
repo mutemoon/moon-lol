@@ -97,3 +97,54 @@ fn test_solo_v0_real_map_and_level_one_laning() {
     assert!(reset_obs[0].q_ready);
     assert!(!reset_obs[0].w_ready);
 }
+
+#[test]
+fn test_solo_v0_last_hit_and_minion_shaping_reward() {
+    use lol_core::base::stats::ChampionStats;
+
+    let mut env = SoloV0Env::with_config(EnvConfig {
+        max_steps: 10,
+        render_mode: RenderMode::Headless,
+    });
+    env.reset();
+
+    let fiora_entity = env.fiora();
+    // 注册临时测试系统，在 step 循环内触发一次补刀
+    env.app_mut()
+        .add_systems(Update, move |mut q: Query<&mut ChampionStats>| {
+            if let Ok(mut stats) = q.get_mut(fiora_entity) {
+                if stats.minion_kills == 0 {
+                    stats.minion_kills += 1;
+                }
+            }
+        });
+
+    let step_res = env.step(&[
+        SoloV0Action::new(0.0, 0.0, SoloV0DiscreteAction::NoOp),
+        SoloV0Action::new(0.0, 0.0, SoloV0DiscreteAction::NoOp),
+    ]);
+
+    let fiora_res = &step_res[0];
+    let riven_res = &step_res[1];
+
+    // 验证补刀收益（补一刀 +5.0）
+    assert_eq!(
+        fiora_res.reward_variables.get("self_cs"),
+        Some(&1.0),
+        "剑姬 reward_variables 应当记录 self_cs = 1.0"
+    );
+    assert_eq!(
+        riven_res.reward_variables.get("target_cs"),
+        Some(&1.0),
+        "锐雯 reward_variables 应当记录 target_cs = 1.0"
+    );
+    assert!(
+        fiora_res.reward >= 5.0,
+        "剑姬完成补刀时单步奖励应包含至少 +5.0 的补刀奖励，实际: {}",
+        fiora_res.reward
+    );
+    assert_eq!(
+        fiora_res.reward, -riven_res.reward,
+        "双方奖励应严格满足零和对称性"
+    );
+}

@@ -229,7 +229,7 @@ fn on_remove_olaf_r(
 /// BuffOlafR 计时，过期销毁（触发 `On<Remove, BuffOlafR>` -> 移除 ImmuneToCC）。
 fn update_olaf_r_timer(
     mut commands: Commands,
-    time: Res<Time<Fixed>>,
+    time: Res<Time>,
     mut q: Query<(Entity, &mut BuffOlafR)>,
 ) {
     let delta = time.delta();

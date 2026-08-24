@@ -18,8 +18,7 @@ use self::detail::{render_page_header, render_system_detail};
 use self::input::{clear_all_input_buffers, clear_input_buffer, render_search_input};
 use self::play::spawn_play_ron;
 use self::state::{
-    collect_flat_visible_nodes, hash_hex, scan_particles_rayon, start_async_rescan,
-    toggle_node_expansion,
+    collect_flat_visible_nodes, scan_particles_rayon, start_async_rescan, toggle_node_expansion,
 };
 use crate::components::sidebar::AppSidebar;
 

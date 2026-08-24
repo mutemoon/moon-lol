@@ -192,7 +192,7 @@ pub fn on_event_attack_end(
 pub fn update_fiora_e_buff(
     mut commands: Commands,
     mut q_buff: Query<(Entity, &BuffOf, &mut BuffFioraE)>,
-    time: Res<Time<Fixed>>,
+    time: Res<Time>,
 ) {
     for (buff_entity, buff_of, mut buff) in q_buff.iter_mut() {
         buff.timer.tick(time.delta());

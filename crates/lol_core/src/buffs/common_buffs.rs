@@ -93,7 +93,7 @@ pub fn update_move_speed_buff(
     mut commands: Commands,
     mut q_buff: Query<(Entity, &BuffOf, &mut BuffMoveSpeed)>,
     mut q_movement: Query<&mut Movement>,
-    time: Res<Time<Fixed>>,
+    time: Res<Time>,
 ) {
     for (buff_entity, buff_of, mut buff) in q_buff.iter_mut() {
         let holder = buff_of.0;

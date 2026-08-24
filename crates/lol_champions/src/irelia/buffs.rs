@@ -28,7 +28,7 @@ impl DebuffIreliaUnsteady {
 /// FixedUpdate：tick 不稳标记计时器，到期销毁并撤除标记粒子。
 pub fn update_irelia_unsteady(
     mut commands: Commands,
-    time: Res<Time<Fixed>>,
+    time: Res<Time>,
     mut q_unsteady: Query<(Entity, &BuffOf, &mut DebuffIreliaUnsteady)>,
 ) {
     let mut expired = Vec::new();

@@ -3,6 +3,7 @@ use std::f32;
 
 use bevy::math::bounding::Aabb3d;
 use bevy::prelude::*;
+use bevy::world_serialization::WorldInstanceReady;
 use lol_base::map::MapPaths;
 
 use crate::lane::Lane;
@@ -42,7 +43,9 @@ fn startup_load_map_geometry(
     res_map_paths: Res<MapPaths>,
     res_asset_server: Res<AssetServer>,
 ) {
-    commands.spawn(DynamicWorldRoot(
-        res_asset_server.load(res_map_paths.scene_ron()),
-    ));
+    commands
+        .spawn(DynamicWorldRoot(
+            res_asset_server.load(res_map_paths.scene_ron()),
+        ))
+        .observe(|trigger: On<WorldInstanceReady>| info!("地图加载完成"));
 }

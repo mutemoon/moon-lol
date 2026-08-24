@@ -157,7 +157,7 @@ pub fn on_damage_create_trigger_bonus(
 /// FixedUpdate：tick 被动计时器，到期后移除整个 buff（层数清空）。
 pub fn update_riven_passive_timer(
     mut commands: Commands,
-    time: Res<Time<Fixed>>,
+    time: Res<Time>,
     mut q_passive: Query<(Entity, &BuffOf, &mut BuffRivenPassive)>,
 ) {
     let mut expired = Vec::new();

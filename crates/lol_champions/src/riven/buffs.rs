@@ -38,7 +38,7 @@ const SHIELD_ORBIT_SPEED: f32 = 2.0; // rad/s
 pub fn update_shield_visuals(
     mut q: Query<&mut ShieldVisual>,
     mut q_transform: Query<&mut Transform>,
-    time: Res<Time<Fixed>>,
+    time: Res<Time>,
 ) {
     for mut visual in q.iter_mut() {
         visual.angle += time.delta_secs() * SHIELD_ORBIT_SPEED;

@@ -3,6 +3,7 @@ use lol_champions::fiora::passive::Vital;
 use lol_core::action::CommandAction;
 use lol_core::entities::champion::Champion;
 use lol_core::entities::minion::Minion;
+use lol_core::game::GameTime;
 use lol_core::lane::Lane;
 use lol_core::life::{Death, Health};
 use lol_core::skill::{CoolDown, Skill};
@@ -18,7 +19,7 @@ use crate::driver::{AgentDriver, DEFAULT_TICK_BUDGET, ScriptAgent, ScriptDriver,
 /// - 已不再携带 `ScriptAgent` 的实体（如已销毁）会被清理出运行时表。
 pub fn drive_script_agents(
     mut commands: Commands,
-    time: Res<Time>,
+    game_time: Res<GameTime>,
     mut runtimes: NonSendMut<ScriptRuntimes>,
     script_q: Query<(Entity, Ref<ScriptAgent>)>,
     player_q: PlayerQ,
@@ -59,7 +60,7 @@ pub fn drive_script_agents(
             &minions_q,
             &champion_q,
             &transforms_q,
-            time.elapsed_secs(),
+            game_time.elapsed_secs(),
         ) else {
             continue;
         };

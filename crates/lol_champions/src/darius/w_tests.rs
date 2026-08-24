@@ -41,7 +41,6 @@ fn darius_w_refunds_mana_on_kill() {
     });
     h.advance(0.1);
 
-    let mana_before = h.mana();
     h.cast_skill(1, Vec2::new(100.0, 0.0)); // W
     h.advance(0.1);
 

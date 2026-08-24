@@ -213,7 +213,7 @@ fn update_path_movement(
         (Without<MovementBlock>, Without<Death>),
     >,
     mut q_transform: Query<&mut Transform>,
-    time: Res<Time<Fixed>>,
+    time: Res<Time>,
 ) {
     let dt = time.delta_secs();
 
@@ -419,50 +419,51 @@ fn apply_final_movement_decision(
                 let now = time.elapsed_secs();
 
                 // 检查是否需要重新规划路径
-                let need_replan = if let Some((last_target, last_replan_time)) = movement_state.pathfind {
-                    let target_teleported = (target - last_target).xz().length() > 150.0;
-                    let cooldown_elapsed = (now - last_replan_time) >= REPLAN_COOLDOWN_SECS;
+                let need_replan =
+                    if let Some((last_target, last_replan_time)) = movement_state.pathfind {
+                        let target_teleported = (target - last_target).xz().length() > 150.0;
+                        let cooldown_elapsed = (now - last_replan_time) >= REPLAN_COOLDOWN_SECS;
 
-                    if target_teleported {
-                        commands.trigger(CommandLog {
-                            entity,
-                            info: format!("目标位置发生突变: {}", target_teleported),
-                            category: EnumLogCategory::Movement,
-                        });
-                        true
-                    } else if cooldown_elapsed {
-                        let target_moved = (target - last_target).xz().length() > 20.0;
-                        let path_blocked = is_path_blocked(
-                            &grid,
-                            &movement_state.path,
-                            movement_state.current_target_index,
-                            Some(transform.translation.xz()),
-                        );
-                        if target_moved || path_blocked {
+                        if target_teleported {
                             commands.trigger(CommandLog {
                                 entity,
-                                info: format!(
-                                    "目标移动或路径受阻: moved={}, blocked={}",
-                                    target_moved, path_blocked
-                                ),
+                                info: format!("目标位置发生突变: {}", target_teleported),
                                 category: EnumLogCategory::Movement,
                             });
                             true
+                        } else if cooldown_elapsed {
+                            let target_moved = (target - last_target).xz().length() > 20.0;
+                            let path_blocked = is_path_blocked(
+                                &grid,
+                                &movement_state.path,
+                                movement_state.current_target_index,
+                                Some(transform.translation.xz()),
+                            );
+                            if target_moved || path_blocked {
+                                commands.trigger(CommandLog {
+                                    entity,
+                                    info: format!(
+                                        "目标移动或路径受阻: moved={}, blocked={}",
+                                        target_moved, path_blocked
+                                    ),
+                                    category: EnumLogCategory::Movement,
+                                });
+                                true
+                            } else {
+                                false
+                            }
                         } else {
                             false
                         }
                     } else {
-                        false
-                    }
-                } else {
-                    // 第一次规划
-                    commands.trigger(CommandLog {
-                        entity,
-                        info: "第一次规划".to_string(),
-                        category: EnumLogCategory::Movement,
-                    });
-                    true
-                };
+                        // 第一次规划
+                        commands.trigger(CommandLog {
+                            entity,
+                            info: "第一次规划".to_string(),
+                            category: EnumLogCategory::Movement,
+                        });
+                        true
+                    };
 
                 if !need_replan {
                     continue;
@@ -611,7 +612,9 @@ mod tests {
             .id();
 
         // 第一次执行，进行首次寻路
-        let _ = app.world_mut().run_system_once(apply_final_movement_decision);
+        let _ = app
+            .world_mut()
+            .run_system_once(apply_final_movement_decision);
         let stats_1 = app.world().resource::<NavigationStats>().get_nav_path_count;
         assert_eq!(stats_1, 1, "首次规划应执行 1 次寻路");
 
@@ -634,7 +637,9 @@ mod tests {
                 },
             }));
 
-        let _ = app.world_mut().run_system_once(apply_final_movement_decision);
+        let _ = app
+            .world_mut()
+            .run_system_once(apply_final_movement_decision);
         let stats_2 = app.world().resource::<NavigationStats>().get_nav_path_count;
         assert_eq!(stats_2, 1, "冷却时间内相同目标不应重复寻路");
 
@@ -651,7 +656,9 @@ mod tests {
                 },
             }));
 
-        let _ = app.world_mut().run_system_once(apply_final_movement_decision);
+        let _ = app
+            .world_mut()
+            .run_system_once(apply_final_movement_decision);
         let stats_3 = app.world().resource::<NavigationStats>().get_nav_path_count;
         assert_eq!(stats_3, 2, "目标改变应立即触发新寻路");
     }

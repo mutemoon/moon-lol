@@ -215,7 +215,7 @@ pub fn update_remove_vital(
     >,
     q_skill_of_with_ability: Query<&PassiveSkillOf, With<AbilityFioraPassive>>,
     q_transform_team: Query<(&Transform, &Team)>,
-    time: Res<Time<Fixed>>,
+    time: Res<Time>,
 ) {
     for skill_of in q_skill_of_with_ability.iter() {
         let entity = skill_of.0;

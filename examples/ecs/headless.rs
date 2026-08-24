@@ -14,7 +14,7 @@ fn setup(mut virtual_time: ResMut<Time<Virtual>>) {
     virtual_time.set_relative_speed(10000.0);
 }
 
-fn update_fixed(mut times: Local<u64>, fixed: Res<Time<Fixed>>, real: Res<Time<Real>>) {
+fn update_fixed(mut times: Local<u64>, fixed: Res<Time>, real: Res<Time<Real>>) {
     *times += 1;
     if *times % 10000 == 0 {
         println!(

@@ -287,7 +287,7 @@ pub fn on_camille_r_attack_end(
 pub fn update_camille_r_mark(
     mut commands: Commands,
     mut q: Query<(Entity, &BuffOf, &mut BuffCamilleRMark)>,
-    time: Res<Time<Fixed>>,
+    time: Res<Time>,
 ) {
     for (e, buffof, mut mark) in q.iter_mut() {
         mark.timer.tick(time.delta());

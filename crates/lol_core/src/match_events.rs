@@ -140,7 +140,7 @@ struct TimeProgressAccumulator(f32);
 
 /// 周期性上报对局时间，供 supervisor 判 15 分钟超时。
 fn report_time_progress(
-    time: Res<Time<Fixed>>,
+    time: Res<Time>,
     mut acc: ResMut<TimeProgressAccumulator>,
     channel: Option<Res<MatchEventChannel>>,
 ) {

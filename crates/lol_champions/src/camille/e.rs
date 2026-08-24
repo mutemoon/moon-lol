@@ -364,7 +364,7 @@ pub fn on_camille_e_dash_end(
 pub fn update_camille_e(
     mut commands: Commands,
     mut q: Query<(Entity, &BuffOf, &mut BuffCamilleE)>,
-    time: Res<Time<Fixed>>,
+    time: Res<Time>,
 ) {
     for (e, bo, mut buff) in q.iter_mut() {
         buff.timer.tick(time.delta());

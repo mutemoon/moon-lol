@@ -145,7 +145,7 @@ pub fn update_on_hit_buff_timers(
     q_target_max_hp: Query<Entity, With<BuffOnHitTargetMaxHp>>,
     q_slow: Query<Entity, With<BuffOnHitSlow>>,
     q_stun: Query<Entity, With<BuffOnHitStun>>,
-    time: Res<Time<Fixed>>,
+    time: Res<Time>,
 ) {
     for (counter_entity, buff_of, mut counter) in q_counters.iter_mut() {
         counter.timer.tick(time.delta());

@@ -152,17 +152,17 @@ impl FioraRivenBaseEnv {
         self.riven = new_riven;
         self.step_count = 0;
 
-        // 等待 DynamicWorld 资产就绪
-        for _ in 0..500 {
-            self.app.update();
-            let world = self.app.world();
-            let fiora_ready = world.get::<CharacterReady>(new_fiora).is_some()
-                && (!is_render || world.get::<Skin>(new_fiora).is_some());
-            let riven_ready = world.get::<CharacterReady>(new_riven).is_some()
-                && (!is_render || world.get::<Skin>(new_riven).is_some());
+        // 等待 DynamicWorld 资产就绪（仅无头模式同步等待；渲染模式由 visual_runner 事件循环处理）
+        if !is_render {
+            for _ in 0..500 {
+                self.app.update();
+                let world = self.app.world();
+                let fiora_ready = world.get::<CharacterReady>(new_fiora).is_some();
+                let riven_ready = world.get::<CharacterReady>(new_riven).is_some();
 
-            if fiora_ready && riven_ready {
-                break;
+                if fiora_ready && riven_ready {
+                    break;
+                }
             }
         }
 
@@ -172,7 +172,7 @@ impl FioraRivenBaseEnv {
             hook(new_fiora, new_riven, self.app.world_mut());
         }
 
-        if self.warmup_secs > 0.0 {
+        if !is_render && self.warmup_secs > 0.0 {
             let warmup_ticks = (self.warmup_secs * 64.0).round() as usize;
             for _ in 0..warmup_ticks {
                 self.app.update();
@@ -204,6 +204,13 @@ impl FioraRivenBaseEnv {
 
         for hook in &self.on_reset_hooks {
             hook(new_fiora, new_riven, world);
+        }
+
+        if self.warmup_secs > 0.0 {
+            let warmup_ticks = (self.warmup_secs * 64.0).round() as usize;
+            for _ in 0..warmup_ticks {
+                world.run_schedule(FixedUpdate);
+            }
         }
 
         self.fiora = new_fiora;
@@ -484,17 +491,17 @@ impl FioraRivenEnvBuilder {
             observer(&mut app);
         }
 
-        // 等待 DynamicWorld 资产就绪
-        for _ in 0..500 {
-            app.update();
-            let world = app.world();
-            let fiora_ready = world.get::<CharacterReady>(fiora).is_some()
-                && (!render || world.get::<Skin>(fiora).is_some());
-            let riven_ready = world.get::<CharacterReady>(riven).is_some()
-                && (!render || world.get::<Skin>(riven).is_some());
+        // 等待 DynamicWorld 资产就绪（仅无头模式在 build 中同步自旋等待；渲染模式由 visual_runner 事件循环异步等待，避免阻塞主线程窗口创建）
+        if !render {
+            for _ in 0..500 {
+                app.update();
+                let world = app.world();
+                let fiora_ready = world.get::<CharacterReady>(fiora).is_some();
+                let riven_ready = world.get::<CharacterReady>(riven).is_some();
 
-            if fiora_ready && riven_ready {
-                break;
+                if fiora_ready && riven_ready {
+                    break;
+                }
             }
         }
 
@@ -524,7 +531,8 @@ impl FioraRivenEnvBuilder {
             hook(fiora, riven, base.app.world_mut());
         }
 
-        if self.warmup_secs > 0.0 {
+        // 仅在无头模式下执行构造预热（有头模式下由 on_assets_loaded 钩子在窗口就绪后以纯物理调度瞬时完成预热）
+        if !render && self.warmup_secs > 0.0 {
             let warmup_ticks = (self.warmup_secs * 64.0).round() as usize;
             for _ in 0..warmup_ticks {
                 base.app.update();

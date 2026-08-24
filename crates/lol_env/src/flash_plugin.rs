@@ -45,7 +45,7 @@ impl FlashCooldown {
 }
 
 /// FixedUpdate 中推进所有实体的闪现冷却计时器。
-pub fn tick_flash_cooldown(time: Res<Time<Fixed>>, mut q: Query<&mut FlashCooldown>) {
+pub fn tick_flash_cooldown(time: Res<Time>, mut q: Query<&mut FlashCooldown>) {
     for mut flash in q.iter_mut() {
         if let Some(timer) = flash.0.as_mut() {
             timer.tick(time.delta());

@@ -150,7 +150,7 @@ pub fn update_fiora_w(
     q_transform: Query<&Transform>,
     q_team: Query<&Team>,
     q_targets: Query<(Entity, &Transform, &Team), (With<Champion>, Without<Death>)>,
-    time: Res<Time<Fixed>>,
+    time: Res<Time>,
 ) {
     for (buff_entity, buff_of, mut buff) in q_buff.iter_mut() {
         buff.parry_timer.tick(time.delta());

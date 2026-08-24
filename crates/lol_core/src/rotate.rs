@@ -72,7 +72,7 @@ impl PipelineStages for RotatePipeline {
 
 fn fixed_update(
     mut query: Query<(&mut Rotate, &mut Transform), Without<Death>>,
-    time: Res<Time<Fixed>>,
+    time: Res<Time>,
 ) {
     for (mut rotate, mut transform) in query.iter_mut() {
         let delta_time = time.delta_secs();

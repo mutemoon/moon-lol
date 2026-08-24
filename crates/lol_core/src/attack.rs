@@ -235,7 +235,7 @@ fn on_command_attack_start(
     q_buff_attack: Query<&BuffAttack>,
     q_buffs: Query<&Buffs>,
     q_death: Query<&Death>,
-    time: Res<Time<Fixed>>,
+    time: Res<Time>,
 ) {
     let entity = trigger.event_target();
     let target = trigger.target;
@@ -399,7 +399,7 @@ fn fixed_update(
     mut query: Query<(Entity, &mut AttackState, &Attack, Option<&Damage>), Without<Death>>,
     mut commands: Commands,
     res_assets_spell_object: Option<Res<Assets<Spell>>>,
-    time: Res<Time<Fixed>>,
+    time: Res<Time>,
 ) {
     let now = time.elapsed_secs();
 

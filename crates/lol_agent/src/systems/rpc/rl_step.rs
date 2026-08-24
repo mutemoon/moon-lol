@@ -2,6 +2,7 @@ use bevy::prelude::*;
 use lol_champions::fiora::passive::Vital;
 use lol_core::entities::champion::Champion;
 use lol_core::entities::minion::Minion;
+use lol_core::game::GameTime;
 use lol_core::lane::Lane;
 use lol_core::life::{Death, Health};
 use lol_core::skill::{CoolDown, Skill};
@@ -23,7 +24,7 @@ pub fn on_rl_step(
     >,
     champion_q: Query<(Entity, &Transform, &Health, &Team), (With<Champion>, Without<Death>)>,
     transforms_q: Query<&Transform>,
-    time_res: Res<Time>,
+    game_time: Res<GameTime>,
     mut rl_envs: ResMut<RlEnvs>,
 ) {
     let params = &event.params;
@@ -41,7 +42,7 @@ pub fn on_rl_step(
             &minions_q,
             &champion_q,
             &transforms_q,
-            time_res.elapsed_secs(),
+            game_time.elapsed_secs(),
         )
         .ok_or_else(|| "无法获取当前游戏局势观测数据".to_string())?;
 

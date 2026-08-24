@@ -177,7 +177,7 @@ pub fn on_irelia_w(
 
 pub fn update_irelia_w(
     mut commands: Commands,
-    time: Res<Time<Fixed>>,
+    time: Res<Time>,
     mut q_w: Query<(Entity, &mut BuffIreliaW, &BuffOf)>,
     q_buffs: Query<&Buffs>,
     q_dr: Query<&BuffDamageReduction>,

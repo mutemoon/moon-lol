@@ -93,7 +93,7 @@ pub fn spawn_event(mut commands: Commands, q_alive: Query<Entity, Added<Health>>
 /// 持续回复生命与蓝量：每秒回复 `base_static_regen + regen_per_level * (level - 1)`，
 /// 按 FixedUpdate 的 delta 累加并夹取到 `[0, max]`；死亡中的实体不回复。
 pub fn regen(
-    time: Res<Time<Fixed>>,
+    time: Res<Time>,
     mut q: Query<
         (
             Option<&mut Health>,
@@ -207,10 +207,9 @@ pub fn update_respawn(
         Option<&mut MovementState>,
         Option<&mut State>,
     )>,
-    time: Res<Time<Fixed>>,
+    time: Res<Time>,
 ) {
-    for (entity, mut timer, mut health, ar, team, mut transform, ms, state) in
-        q_respawn.iter_mut()
+    for (entity, mut timer, mut health, ar, team, mut transform, ms, state) in q_respawn.iter_mut()
     {
         timer.0.tick(time.delta());
 

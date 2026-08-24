@@ -243,7 +243,7 @@ pub fn update_delayed_damage(
     >,
     q_damage: Query<&Damage>,
     q_ap: Query<&AbilityPower>,
-    time: Res<Time<Fixed>>,
+    time: Res<Time>,
 ) {
     for (entity, mut inst, mut transform, mut visual) in q_inst.iter_mut() {
         match inst.phase {

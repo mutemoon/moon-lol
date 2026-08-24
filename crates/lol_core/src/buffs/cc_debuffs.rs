@@ -330,7 +330,7 @@ fn on_command_cleanse(
 /// （销毁触发 `On<Remove, ControlTag>` -> 标记自动重算）。
 fn update_cc_buff_timers(
     mut commands: Commands,
-    time: Res<Time<Fixed>>,
+    time: Res<Time>,
     mut q_stun: Query<(Entity, &mut DebuffStun)>,
     mut q_slow: Query<(Entity, &mut DebuffSlow)>,
     mut q_silence: Query<(Entity, &mut DebuffSilence)>,

@@ -225,7 +225,7 @@ fn linear_missile_collision(
     q_source_team: Query<&Team>,
     res_grid: Option<Res<ResourceGrid>>,
     assets_grid: Option<Res<Assets<ConfigNavigationGrid>>>,
-    time: Res<Time<Fixed>>,
+    time: Res<Time>,
 ) {
     let dt = time.delta_secs();
 
@@ -338,7 +338,7 @@ fn linear_missile_collision(
 fn update_wall_anchors(
     mut commands: Commands,
     mut q: Query<(Entity, &mut WallAnchor)>,
-    time: Res<Time<Fixed>>,
+    time: Res<Time>,
 ) {
     for (entity, mut anchor) in q.iter_mut() {
         anchor.timer.tick(time.delta());
@@ -613,7 +613,7 @@ fn update_attached_fields(
     q_parent_transform: Query<&Transform, Without<AttachedField>>,
     q_enemies: Query<(Entity, &Team, &Transform), (Without<AttachedField>, Without<Death>)>,
     q_parent_team: Query<&Team, Without<AttachedField>>,
-    time: Res<Time<Fixed>>,
+    time: Res<Time>,
 ) {
     for (field_entity, mut field, child_of, mut transform) in q_fields.iter_mut() {
         field.timer.tick(time.delta());

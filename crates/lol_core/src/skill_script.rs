@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
 use crate::action::{Action, CommandAction};
-use crate::game::FixedFrameCount;
+use crate::game::GameTime;
 use crate::life::Death;
 use crate::skill::SkillPoints;
 
@@ -69,7 +69,7 @@ impl Plugin for PluginSkillScript {
 
 pub fn run_skill_script_steps(
     mut commands: Commands,
-    frame: Option<Res<FixedFrameCount>>,
+    game_time: Res<GameTime>,
     q_steps: Query<
         (
             Entity,
@@ -81,12 +81,8 @@ pub fn run_skill_script_steps(
     >,
     mut q_actor: Query<Option<&mut SkillPoints>, Without<Death>>,
 ) {
-    let Some(frame) = frame else {
-        return;
-    };
-
     for (step_entity, step, source, target) in q_steps.iter() {
-        if step.frame > frame.0 {
+        if step.frame > game_time.frame {
             continue;
         }
         commands.entity(step_entity).insert(SkillScriptStepExecuted);
@@ -94,7 +90,7 @@ pub fn run_skill_script_steps(
         let actor = source.0;
         info!(
             "[SkillScriptStep] frame={} actor={:?} step={:?} target={:?}",
-            frame.0, actor, step, target
+            game_time.frame, actor, step, target
         );
 
         let Ok(mut skill_points) = q_actor.get_mut(actor) else {
