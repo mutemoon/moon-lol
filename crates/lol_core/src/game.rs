@@ -30,13 +30,10 @@ pub enum GameState {
 #[derive(Resource, Default)]
 pub struct GameScenes(pub Vec<String>);
 
-/// 游戏核心逻辑时钟（记录逻辑帧数与流逝的逻辑秒数）
 #[derive(Resource, Debug, Default, Clone, Copy, Reflect)]
 #[reflect(Resource)]
 pub struct GameTime {
-    /// 当前逻辑帧数（第几 Tick）
     pub frame: u32,
-    /// 经过的逻辑时间（秒）
     pub elapsed_secs: f32,
 }
 

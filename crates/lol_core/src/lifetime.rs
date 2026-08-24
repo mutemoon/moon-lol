@@ -62,7 +62,7 @@ impl Lifetime {
     pub fn progress(&self) -> f32 {
         self.timer.as_ref().map_or(0.0, |t| {
             // 构造函数保证了 duration > 0.0
-            (t.elapsed_secs() / t.duration().as_secs_f32()).clamp(0.0, 1.0)
+            t.fraction().clamp(0.0, 1.0)
         })
     }
 

@@ -26,7 +26,6 @@ pub mod rotate;
 pub mod run;
 pub mod skill;
 pub mod skill_script;
-pub mod skin;
 pub mod team;
 pub mod utils;
 
