@@ -22,7 +22,8 @@ pub enum Minion {
     Super,
 }
 
-#[derive(Component, PartialEq, Debug, Default)]
+#[derive(Component, Reflect, PartialEq, Debug, Default)]
+#[reflect(Component)]
 pub enum MinionState {
     #[default]
     MovingOnPath,
@@ -46,6 +47,8 @@ pub struct PluginMinion;
 
 impl Plugin for PluginMinion {
     fn build(&self, app: &mut bevy::prelude::App) {
+        app.register_type::<Minion>();
+        app.register_type::<MinionState>();
         app.add_systems(FixedUpdate, fixed_update);
 
         app.add_observer(on_event_aggro_target_found);
@@ -91,13 +94,13 @@ pub fn fixed_update(
 
         let target_pos = *path.get(closest_index).unwrap();
 
-        // if let Some(run) = run {
-        //     if let RunTarget::Position(pos) = run.target {
-        //         if pos == target_pos {
-        //             continue;
-        //         }
-        //     }
-        // }
+        if let Some(run) = _run {
+            if let RunTarget::Position(pos) = run.target {
+                if pos == target_pos {
+                    continue;
+                }
+            }
+        }
 
         commands.trigger(CommandLog {
             entity,

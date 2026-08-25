@@ -71,6 +71,7 @@ pub struct FioraRivenBaseEnv {
     pub initial_skill_levels: [usize; 4],
     pub warmup_secs: f32,
     pub render_mode: RenderMode,
+    pub on_ready_hooks: Vec<fn(Entity, Entity, &mut World)>,
     pub on_reset_hooks: Vec<fn(Entity, Entity, &mut World)>,
 }
 
@@ -139,35 +140,41 @@ impl FioraRivenBaseEnv {
         setup_skill_levels_world(self.app.world_mut(), self.fiora, self.riven);
     }
 
-    /// 执行基础环境重置（通过 Action::Reset 进行就地状态重置，执行 on_reset 钩子）
-    pub fn reset_base(&mut self) {
-        let fiora = self.fiora;
-        let riven = self.riven;
-        let hooks = self.on_reset_hooks.clone();
-        reset_world_internal(self.app.world_mut(), fiora, riven, &hooks);
-        self.step_count = 0;
-
-        if self.warmup_secs > 0.0 {
-            let warmup_ticks = (self.warmup_secs * 64.0).round() as usize;
-            for _ in 0..warmup_ticks {
-                self.app.update();
-            }
+    /// 资产加载完成后的统一初次就绪流程（设置技能等级、执行 on_ready 钩子并进行预热）
+    /// 无头模式在 build 结束时调用，有头模式在 VisualEnvironment::on_assets_loaded 中调用。
+    pub fn on_assets_ready(&mut self, app: &mut App) {
+        setup_skill_levels_world(app.world_mut(), self.fiora, self.riven);
+        for hook in &self.on_ready_hooks {
+            hook(self.fiora, self.riven, app.world_mut());
         }
+        run_warmup_on_app(
+            app,
+            self.fiora,
+            self.riven,
+            self.warmup_secs,
+            &self.on_ready_hooks,
+        );
     }
 
-    /// 在传入的 World 中执行对局重置（通过 Action::Reset 就地重置所有组件，保留 Entity ID 与已加载资源）
-    pub fn reset_world_base(&mut self, world: &mut World) -> (Entity, Entity) {
+    /// 执行基础环境重置（通过 Action::Reset 进行就地状态重置，执行 on_reset 钩子与物理预热）
+    pub fn reset_base(&mut self) {
+        let mut app = std::mem::replace(&mut self.app, App::new());
+        self.reset_app(&mut app);
+        self.app = app;
+    }
+
+    /// 在传入的 App 中执行对局重置（通过 Action::Reset 就地重置所有组件，保留 Entity ID 与已加载资源）
+    pub fn reset_app(&mut self, app: &mut App) -> (Entity, Entity) {
         let fiora = self.fiora;
         let riven = self.riven;
-        reset_world_internal(world, fiora, riven, &self.on_reset_hooks);
+        reset_app_internal(
+            app,
+            fiora,
+            riven,
+            self.warmup_secs,
+            &self.on_reset_hooks,
+        );
         self.step_count = 0;
-
-        if self.warmup_secs > 0.0 {
-            let warmup_ticks = (self.warmup_secs * 64.0).round() as usize;
-            for _ in 0..warmup_ticks {
-                world.run_schedule(FixedUpdate);
-            }
-        }
         (fiora, riven)
     }
 
@@ -179,28 +186,52 @@ impl FioraRivenBaseEnv {
     }
 }
 
-/// 在 World 中执行就地重置的核心逻辑（不销毁实体）
-fn reset_world_internal(
-    world: &mut World,
+/// 执行统一预热（推进指定秒数的 App update，并重新执行状态钩子，无头与有头完全共用）
+pub fn run_warmup_on_app(
+    app: &mut App,
     fiora: Entity,
     riven: Entity,
+    warmup_secs: f32,
+    hooks: &[fn(Entity, Entity, &mut World)],
+) {
+    if warmup_secs <= 0.0 {
+        return;
+    }
+    let warmup_ticks = (warmup_secs * 64.0).round() as usize;
+    for _ in 0..warmup_ticks {
+        app.update();
+    }
+    for hook in hooks {
+        hook(fiora, riven, app.world_mut());
+    }
+}
+
+/// 在 App 中执行就地重置的核心逻辑（不销毁实体）
+fn reset_app_internal(
+    app: &mut App,
+    fiora: Entity,
+    riven: Entity,
+    warmup_secs: f32,
     on_reset_hooks: &[fn(Entity, Entity, &mut World)],
 ) {
+    // 确保虚拟时间恢复，避免预热期间因暂停导致 delta 为 0 无法生成小兵与推进物理
+    crate::visual_runner::unpause_virtual_time(app.world_mut());
+
     // 1. 触发核心 Action::Reset -> 全局 EventReset
-    world.trigger(CommandAction {
+    app.world_mut().trigger(CommandAction {
         entity: fiora,
         action: Action::Reset,
     });
 
-    // 2. 推进一帧 schedule 使所有系统响应 EventReset
-    world.run_schedule(FixedUpdate);
+    // 2. 推进一帧 schedule 使所有系统响应 EventReset 并清理缓冲区
+    app.update();
 
     // 3. 重置环境专用 Tracker
-    if let Some(mut tracker) = world.get_resource_mut::<AttackEventTracker>() {
+    if let Some(mut tracker) = app.world_mut().get_resource_mut::<AttackEventTracker>() {
         tracker.attack_hit = false;
         tracker.attack_ready = false;
     }
-    if let Some(mut tracker) = world.get_resource_mut::<VitalBreakTracker>() {
+    if let Some(mut tracker) = app.world_mut().get_resource_mut::<VitalBreakTracker>() {
         tracker.hit = false;
     }
 
@@ -213,14 +244,17 @@ fn reset_world_internal(
     };
     let mut initial_vital = Vital::new(random_dir, 0.0, 10.0);
     initial_vital.active_timer.tick(Duration::from_millis(1));
-    world.entity_mut(riven).insert(initial_vital);
+    app.world_mut().entity_mut(riven).insert(initial_vital);
 
     // 5. 设置技能等级与执行重置钩子
-    setup_skill_levels_world(world, fiora, riven);
+    setup_skill_levels_world(app.world_mut(), fiora, riven);
 
     for hook in on_reset_hooks {
-        hook(fiora, riven, world);
+        hook(fiora, riven, app.world_mut());
     }
+
+    // 6. 统一执行物理预热（无头与有头完全共用）
+    run_warmup_on_app(app, fiora, riven, warmup_secs, on_reset_hooks);
 }
 
 /// 环境构造器：支持通过注册插件与钩子按需组装具体环境。
@@ -384,7 +418,23 @@ impl FioraRivenEnvBuilder {
                 MinimalPlugins.set(ScheduleRunnerPlugin::run_once()),
                 asset_plugin,
                 bevy::world_serialization::WorldSerializationPlugin,
+                bevy::mesh::MeshPlugin,
+                bevy::image::ImagePlugin::default(),
+                bevy::animation::AnimationPlugin,
+                bevy::audio::AudioPlugin::default(),
+                bevy::scene::ScenePlugin,
             ));
+            league_core::register::init_league_asset(&mut app);
+            app.init_asset::<StandardMaterial>();
+            app.init_asset::<Shader>();
+            app.init_asset::<lol_base_render::animation::LOLAnimationGraph>();
+            app.init_asset::<lol_base_render::particle::ConfigVfx>();
+            app.init_asset::<bevy::prelude::WorldAsset>();
+            app.init_asset::<lol_base::audio::ConfigAudio>();
+            app.init_asset::<lol_base::spell::Spell>();
+            app.init_asset::<lol_base::grid::ConfigNavigationGrid>();
+            app.init_asset::<lol_base::item::ConfigItem>();
+
             if self.enable_barrack {
                 app.add_plugins(lol_core::PluginCore);
             } else {
@@ -487,21 +537,15 @@ impl FioraRivenEnvBuilder {
             initial_skill_levels: self.initial_skill_levels,
             warmup_secs: self.warmup_secs,
             render_mode: self.config.render_mode,
+            on_ready_hooks: self.on_ready_hooks,
             on_reset_hooks: self.on_reset_hooks,
         };
 
-        base.setup_champion_skill_levels();
-
-        for hook in &self.on_ready_hooks {
-            hook(fiora, riven, base.app.world_mut());
-        }
-
-        // 仅在无头模式下执行构造预热（有头模式下由 on_assets_loaded 钩子在窗口就绪后以纯物理调度瞬时完成预热）
-        if !render && self.warmup_secs > 0.0 {
-            let warmup_ticks = (self.warmup_secs * 64.0).round() as usize;
-            for _ in 0..warmup_ticks {
-                base.app.update();
-            }
+        // 仅在无头模式下由 build 执行初次就绪与物理预热
+        if !render {
+            let mut app = std::mem::replace(&mut base.app, App::new());
+            base.on_assets_ready(&mut app);
+            base.app = app;
         }
 
         base

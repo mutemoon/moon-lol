@@ -401,7 +401,7 @@ impl SoloV0Env {
                 Vec3::new(2500.0, 0.0, 12910.0),
             )
             .initial_skill_levels([1, 0, 0, 0])
-            .warmup_secs(40.0)
+            .warmup_secs(30.0)
             .with_plugin(register_flash_plugin)
             .on_ready(setup_solo_v0_env_world)
             .on_reset(setup_solo_v0_env_world)
@@ -807,23 +807,15 @@ impl VisualEnvironment for SoloV0Env {
         self.base.is_assets_loaded(world)
     }
 
-    fn on_assets_loaded(&mut self, world: &mut World) {
-        setup_skill_levels_world(world, self.base.fiora, self.base.riven);
-        setup_solo_v0_env_world(self.base.fiora, self.base.riven, world);
-
-        if self.base.warmup_secs > 0.0 {
-            let warmup_ticks = (self.base.warmup_secs * 64.0).round() as usize;
-            for _ in 0..warmup_ticks {
-                world.run_schedule(FixedUpdate);
-            }
-        }
+    fn on_assets_loaded(&mut self, app: &mut App) {
+        self.base.on_assets_ready(app);
     }
 
-    fn reset_world(&mut self, world: &mut World) -> Vec<Self::Obs> {
-        let (fiora, riven) = self.base.reset_world_base(world);
+    fn reset_world(&mut self, app: &mut App) -> Vec<Self::Obs> {
+        let (fiora, riven) = self.base.reset_app(app);
         vec![
-            get_ego_obs_from_world(world, fiora, riven, 0.0),
-            get_ego_obs_from_world(world, riven, fiora, 1.0),
+            get_ego_obs_from_world(app.world(), fiora, riven, 0.0),
+            get_ego_obs_from_world(app.world(), riven, fiora, 1.0),
         ]
     }
 

@@ -131,8 +131,7 @@ pub struct LoadingTracker {
 
 impl LoadingTracker {
     pub fn is_all_ready(&self) -> bool {
-        self.has_started_loading
-            && self.pending_scenes == 0
+        self.pending_scenes == 0
             && self.pending_assets == 0
             && self.pending_characters == 0
             && self.pending_tasks == 0
@@ -219,9 +218,10 @@ fn update_loading_progress_and_check_ready(
     let mut pending_assets = 0;
     for (entity, mut wait_assets) in q_wait_assets.iter_mut() {
         wait_assets.0.retain(|handle| {
+            let state = asset_server.get_recursive_dependency_load_state(handle);
             !matches!(
-                asset_server.get_recursive_dependency_load_state(handle),
-                Some(RecursiveDependencyLoadState::Loaded)
+                state,
+                Some(RecursiveDependencyLoadState::Loaded | RecursiveDependencyLoadState::Failed(_))
             )
         });
 
@@ -243,7 +243,6 @@ fn update_loading_progress_and_check_ready(
     }
 
     let pending_tasks = q_tasks.iter().count();
-
     let total_pending = pending_scenes + pending_assets + pending_characters + pending_tasks;
 
     if total_pending > 0 {

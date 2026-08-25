@@ -9650,6 +9650,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "bevy",
+ "league_core",
  "lol_agent",
  "lol_base",
  "lol_base_render",

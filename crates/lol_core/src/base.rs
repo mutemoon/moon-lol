@@ -15,6 +15,8 @@ pub struct PluginBase;
 
 impl Plugin for PluginBase {
     fn build(&self, app: &mut App) {
+        app.register_type::<crate::team::Team>();
+        app.register_type::<crate::lane::Lane>();
         app.add_plugins(gold::PluginGold);
         app.add_plugins(stats::PluginChampionStats);
         app.add_plugins(level::PluginLevel);

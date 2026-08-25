@@ -253,9 +253,12 @@ impl<E: VisualEnvironment> ApplicationHandler for CustomVisualRunner<E> {
                     unpause_virtual_time(self.app.world_mut());
                 }
                 VisualRunnerCmd::Reset => {
+                    self.paused = false;
+                    self.pending_step_once = false;
                     self.current_ep_steps = 0;
                     self.episode_reward = 0.0;
-                    self.env.reset_world(self.app.world_mut());
+                    self.env.reset_world(&mut self.app);
+                    unpause_virtual_time(self.app.world_mut());
                     let obs = self.env.get_current_obs(self.app.world());
                     let (_, policy_items) = (self.policy_arc.lock().unwrap())(&obs);
                     let (obs_vector, obs_labels, obs_tree) = obs_vector_with_labels::<E>(&obs);
@@ -296,7 +299,7 @@ impl<E: VisualEnvironment> ApplicationHandler for CustomVisualRunner<E> {
             self.load_wait_frames += 1;
             if self.env.is_assets_loaded(self.app.world()) || self.load_wait_frames >= 60 {
                 self.assets_loaded = true;
-                self.env.on_assets_loaded(self.app.world_mut());
+                self.env.on_assets_loaded(&mut self.app);
 
                 // Send initial first frame to front-end
                 let obs = self.env.get_current_obs(self.app.world());
@@ -412,13 +415,14 @@ impl<E: VisualEnvironment> ApplicationHandler for CustomVisualRunner<E> {
             let _ = self.step_tx.send(output);
 
             if terminated || truncated {
-                if self.auto_pause_on_done {
+                let will_pause = self.auto_pause_on_done;
+                self.current_ep_steps = 0;
+                self.env.reset_world(&mut self.app);
+                self.episode_reward = 0.0;
+                if will_pause {
                     self.paused = true;
                     pause_virtual_time(self.app.world_mut());
                 }
-                self.current_ep_steps = 0;
-                self.env.reset_world(self.app.world_mut());
-                self.episode_reward = 0.0;
 
                 // Send newly reset start frame
                 let next_obs = self.env.get_current_obs(self.app.world());

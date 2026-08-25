@@ -319,13 +319,13 @@ impl VisualEnvironment for FioraVsRivenEnv {
         self.base.is_assets_loaded(world)
     }
 
-    fn on_assets_loaded(&mut self, world: &mut World) {
-        setup_skill_levels_world(world, self.base.fiora, self.base.riven);
+    fn on_assets_loaded(&mut self, app: &mut App) {
+        self.base.on_assets_ready(app);
     }
 
-    fn reset_world(&mut self, world: &mut World) -> Vec<Self::Obs> {
-        let (new_fiora, new_riven) = self.base.reset_world_base(world);
-        vec![get_obs_from_world(world, new_fiora, new_riven)]
+    fn reset_world(&mut self, app: &mut App) -> Vec<Self::Obs> {
+        let (new_fiora, new_riven) = self.base.reset_app(app);
+        vec![get_obs_from_world(app.world(), new_fiora, new_riven)]
     }
 
     fn get_current_obs_all(&self, world: &World) -> Vec<Self::Obs> {

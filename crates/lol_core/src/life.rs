@@ -343,7 +343,7 @@ mod tests {
         for _ in 0..8 {
             let delta = Duration::from_secs(1);
             {
-                let mut time = app.world_mut().resource_mut::<Time<Fixed>>();
+                let mut time = app.world_mut().resource_mut::<Time>();
                 time.advance_by(delta);
             }
 
@@ -368,7 +368,7 @@ mod tests {
     /// 推进固定时间并执行一次 `regen` 系统。
     fn advance_and_regen(app: &mut App, delta: Duration) {
         {
-            let mut time = app.world_mut().resource_mut::<Time<Fixed>>();
+            let mut time = app.world_mut().resource_mut::<Time>();
             time.advance_by(delta);
         }
         let _ = app.world_mut().run_system_once(regen);

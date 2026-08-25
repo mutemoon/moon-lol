@@ -12,6 +12,7 @@ lol_agent.workspace = true
 lol_base_render.workspace = true
 lol_render.workspace = true
 lol_particle.workspace = true
+league_core.workspace = true
 serde.workspace = true
 
 serde_json.workspace = true

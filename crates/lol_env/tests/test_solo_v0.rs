@@ -1,7 +1,9 @@
 use bevy::prelude::*;
 use lol_base::map::MapPaths;
 use lol_core::entities::minion::Minion;
+use lol_core::life::Health;
 use lol_core::skill::{Skill, Skills};
+use lol_core::team::Team;
 use lol_env::solo_v0::{SoloV0Action, SoloV0DiscreteAction, SoloV0Env};
 use lol_env::traits::{EnvConfig, RenderMode, RlEnvironment};
 
@@ -74,11 +76,15 @@ fn test_solo_v0_real_map_and_level_one_laning() {
     assert!(!riven_obs.e_ready, "瑞雯 0 级 E 技能应不可施放");
     assert!(!riven_obs.r_ready, "瑞雯 0 级 R 技能应不可施放");
 
-    // 5. 验证 40s 预热后世界中小兵查询正常
+    // 5. 验证 30s 预热后世界中小兵查询正常且已生成
     {
         let mut q_minions = env.world_mut().query::<(&Transform, &Minion)>();
         let minion_count = q_minions.iter(env.world()).count();
-        let _ = minion_count;
+        assert!(
+            minion_count > 0,
+            "30s 预热后线上应已有生成的小兵，实际数量: {}",
+            minion_count
+        );
     }
 
     // 6. 验证环境步进与多回合 reset 稳定性
@@ -88,11 +94,21 @@ fn test_solo_v0_real_map_and_level_one_laning() {
     ]);
     assert_eq!(step_res.len(), 2);
 
-    // 再次重置
+    // 再次重置并验证小兵重新生成
     let reset_obs = env.reset();
     assert_eq!(reset_obs.len(), 2);
     assert!(reset_obs[0].q_ready);
     assert!(!reset_obs[0].w_ready);
+
+    {
+        let mut q_minions = env.world_mut().query::<(Entity, &Transform, &Team, &Health)>();
+        let minion_count = q_minions.iter(env.world()).count();
+        assert!(
+            minion_count > 0,
+            "重置后 30s 预热线上应重新生成小兵，实际数量: {}",
+            minion_count
+        );
+    }
 }
 
 #[test]

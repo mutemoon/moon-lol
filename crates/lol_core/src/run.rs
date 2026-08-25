@@ -54,23 +54,27 @@ pub enum RunTarget {
 fn on_command_run_start(trigger: On<CommandRunStart>, mut commands: Commands) {
     let entity = trigger.event_target();
 
-    commands.entity(entity).insert(Run {
-        target: trigger.target.clone(),
-    });
+    if let Ok(mut entity_cmds) = commands.get_entity(entity) {
+        entity_cmds.insert(Run {
+            target: trigger.target.clone(),
+        });
 
-    commands.trigger(EventRunStart { entity });
+        commands.trigger(EventRunStart { entity });
+    }
 }
 
 fn on_command_run_stop(trigger: On<CommandRunStop>, mut commands: Commands) {
     let entity = trigger.event_target();
 
-    commands.entity(entity).remove::<Run>();
+    if let Ok(mut entity_cmds) = commands.get_entity(entity) {
+        entity_cmds.remove::<Run>();
 
-    commands.trigger(CommandMovement {
-        entity,
-        priority: 0,
-        action: MovementAction::Stop,
-    });
+        commands.trigger(CommandMovement {
+            entity,
+            priority: 0,
+            action: MovementAction::Stop,
+        });
+    }
 }
 
 fn fixed_update(

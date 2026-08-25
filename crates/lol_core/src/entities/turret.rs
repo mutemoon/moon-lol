@@ -11,6 +11,8 @@ pub struct PluginTurret;
 
 impl Plugin for PluginTurret {
     fn build(&self, app: &mut App) {
+        app.register_type::<Turret>();
+        app.register_type::<TurretHeat>();
         app.add_observer(on_event_aggro_target_found);
         app.add_observer(on_command_attack_auto_stop);
         app.add_observer(on_event_damage_create);

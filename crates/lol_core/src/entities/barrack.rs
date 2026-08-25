@@ -18,6 +18,8 @@ pub struct PluginBarrack;
 
 impl Plugin for PluginBarrack {
     fn build(&self, app: &mut App) {
+        app.register_type::<BarrackConfigHandler>();
+        app.register_type::<BarrackState>();
         app.init_asset::<ConfigBarracks>();
         app.init_asset_loader::<ConfigBarracksLoader>();
         app.init_resource::<InhibitorState>();

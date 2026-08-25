@@ -216,8 +216,8 @@ pub trait VisualEnvironment: RlEnvironment {
     fn take_app(&mut self) -> App;
     fn window_title(&self) -> &'static str;
     fn is_assets_loaded(&self, world: &World) -> bool;
-    fn on_assets_loaded(&mut self, world: &mut World);
-    fn reset_world(&mut self, world: &mut World) -> Vec<Self::Obs>;
+    fn on_assets_loaded(&mut self, app: &mut App);
+    fn reset_world(&mut self, app: &mut App) -> Vec<Self::Obs>;
 
     /// 回合起点不变量对齐：每次「实体已重建、即将开始新对局」时统一调用，
     /// 保证第一次构造与每次 reset 的初始状态语义完全一致（headless / visual 共用）。

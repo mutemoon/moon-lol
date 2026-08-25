@@ -239,10 +239,14 @@ impl SkillHarness {
 
     fn advance_time(&mut self, seconds: f32) -> &mut Self {
         let ticks = (seconds * TEST_FPS).ceil() as u32;
+        let delta = Duration::from_secs_f64(1.0 / TEST_FPS as f64);
         for _ in 0..ticks {
-            let mut time = self.app.world_mut().resource_mut::<Time<Fixed>>();
-            time.advance_by(Duration::from_secs_f64(1.0 / TEST_FPS as f64));
+            let mut time = self.app.world_mut().resource_mut::<Time>();
+            time.advance_by(delta);
             drop(time);
+            let mut time_fixed = self.app.world_mut().resource_mut::<Time<Fixed>>();
+            time_fixed.advance_by(delta);
+            drop(time_fixed);
             self.app.world_mut().run_schedule(FixedUpdate);
         }
         self
