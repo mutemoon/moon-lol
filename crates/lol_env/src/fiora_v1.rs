@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use lol_core::action::{Action, CommandAction};
-use lol_rl_protocol::{ActionSpace, ObsFeaturePayload, RewardFormulaSpec};
+use lol_rl_protocol::{ActionSpace, ObsFeaturePayload, ObsNode, ObsSchema, RewardFormulaSpec};
 
 pub use crate::fiora_riven_common::{
     ATTACK_MASK_DISTANCE, AttackEventTracker, FioraRivenBaseEnv, FioraVsRivenObs,
@@ -257,18 +257,24 @@ impl RlEnvironment for FioraVsRivenRealEnv {
         ]
     }
 
-    fn obs_dim_labels() -> &'static [&'static str] {
-        &[
-            "破绽方向(+X/东)",
-            "破绽方向(-X/西)",
-            "破绽方向(+Z/北)",
-            "破绽方向(-Z/南)",
-            "存在破绽",
-            "破绽已激活",
-            "相对位置X(归一化)",
-            "相对位置Z(归一化)",
-            "相对距离(归一化)",
-        ]
+    fn obs_schema() -> Option<ObsSchema> {
+        Some(ObsSchema::new(vec![
+            ObsNode::structure(
+                "vital",
+                vec![
+                    ObsNode::vector("direction", 4),
+                    ObsNode::scalar("has_vital", 0.0, 1.0),
+                    ObsNode::scalar("is_active", 0.0, 1.0),
+                ],
+            ),
+            ObsNode::structure(
+                "spatial",
+                vec![
+                    ObsNode::vector("relative_pos", 2),
+                    ObsNode::scalar("distance", 0.0, 1.0),
+                ],
+            ),
+        ]))
     }
 
     fn action_from_index(idx: usize) -> Self::Action {

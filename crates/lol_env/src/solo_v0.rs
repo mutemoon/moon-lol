@@ -6,7 +6,10 @@ use lol_core::base::stats::ChampionStats;
 use lol_core::entities::minion::Minion;
 use lol_core::life::Health;
 use lol_core::team::Team;
-use lol_rl_protocol::{ActionSpace, ObsFeaturePayload, RewardFormulaSpec, RewardTermSpec};
+use lol_rl_protocol::{
+    ActionSpace, EntityEncoderSpec, ObsFeaturePayload, ObsNode, ObsSchema, RewardFormulaSpec,
+    RewardTermSpec,
+};
 
 pub use crate::fiora_riven_common::{
     ATTACK_MASK_DISTANCE, AttackEventTracker, FioraRivenBaseEnv, FioraRivenEntities,
@@ -529,69 +532,87 @@ impl RlEnvironment for SoloV0Env {
         ]
     }
 
-    fn obs_dim_labels() -> &'static [&'static str] {
-        &[
-            "角色标识(0=Fiora,1=Riven)",
-            "目标相对X(归一化)",
-            "目标相对Z(归一化)",
-            "相对距离(归一化)",
-            "普攻就绪(Ready)",
-            "普攻前摇中(Windup)",
-            "普攻后摇中(Cooldown)",
-            "普攻状态倒计时",
-            "Q就绪",
-            "Q剩余CD",
-            "W就绪",
-            "W剩余CD",
-            "E就绪",
-            "E剩余CD",
-            "R就绪",
-            "R剩余CD",
-            "闪现就绪",
-            "闪现剩余CD",
-            "自身血量百分比",
-            "目标血量百分比",
-            "自身修饰符1_类型ID",
-            "自身修饰符1_剩余时长",
-            "自身修饰符1_层数",
-            "自身修饰符1_参数0",
-            "自身修饰符1_参数1",
-            "自身修饰符2_类型ID",
-            "自身修饰符2_剩余时长",
-            "自身修饰符2_层数",
-            "自身修饰符2_参数0",
-            "自身修饰符2_参数1",
-            "自身修饰符3_类型ID",
-            "自身修饰符3_剩余时长",
-            "自身修饰符3_层数",
-            "自身修饰符3_参数0",
-            "自身修饰符3_参数1",
-            "自身修饰符4_类型ID",
-            "自身修饰符4_剩余时长",
-            "自身修饰符4_层数",
-            "自身修饰符4_参数0",
-            "自身修饰符4_参数1",
-            "目标修饰符1_类型ID",
-            "目标修饰符1_剩余时长",
-            "目标修饰符1_层数",
-            "目标修饰符1_参数0(X)",
-            "目标修饰符1_参数1(Z)",
-            "目标修饰符2_类型ID",
-            "目标修饰符2_剩余时长",
-            "目标修饰符2_层数",
-            "目标修饰符2_参数0(X)",
-            "目标修饰符2_参数1(Z)",
-            "目标修饰符3_类型ID",
-            "目标修饰符3_剩余时长",
-            "目标修饰符3_层数",
-            "目标修饰符3_参数0(X)",
-            "目标修饰符3_参数1(Z)",
-            "目标修饰符4_类型ID",
-            "目标修饰符4_剩余时长",
-            "目标修饰符4_层数",
-            "目标修饰符4_参数0(X)",
-            "目标修饰符4_参数1(Z)",
-        ]
+    fn obs_schema() -> Option<ObsSchema> {
+        Some(ObsSchema::new(vec![
+            // 1. 角色标识 (离散类别: 0=Fiora, 1=Riven, 预留4类 -> 12维 Embedding)
+            ObsNode::categorical("role", 4, 12),
+            // 2. 空间相对特征 (3维: 相对X, 相对Z, 相对距离)
+            ObsNode::structure(
+                "spatial",
+                vec![
+                    ObsNode::vector("target_rel_pos", 2),
+                    ObsNode::scalar("distance", 0.0, 1.0),
+                ],
+            ),
+            // 3. 普攻状态机 (4维: 就绪, 前摇中, 后摇中, 剩余倒计时)
+            ObsNode::structure(
+                "attack",
+                vec![
+                    ObsNode::scalar("is_ready", 0.0, 1.0),
+                    ObsNode::scalar("is_windup", 0.0, 1.0),
+                    ObsNode::scalar("is_cooldown", 0.0, 1.0),
+                    ObsNode::scalar("timer_remaining", 0.0, 1.0),
+                ],
+            ),
+            // 4. 技能与闪现冷却 (10维: Q, W, E, R, Flash 及其剩余CD)
+            ObsNode::structure(
+                "cooldowns",
+                vec![
+                    ObsNode::scalar("q_ready", 0.0, 1.0),
+                    ObsNode::scalar("q_cd", 0.0, 1.0),
+                    ObsNode::scalar("w_ready", 0.0, 1.0),
+                    ObsNode::scalar("w_cd", 0.0, 1.0),
+                    ObsNode::scalar("e_ready", 0.0, 1.0),
+                    ObsNode::scalar("e_cd", 0.0, 1.0),
+                    ObsNode::scalar("r_ready", 0.0, 1.0),
+                    ObsNode::scalar("r_cd", 0.0, 1.0),
+                    ObsNode::scalar("flash_ready", 0.0, 1.0),
+                    ObsNode::scalar("flash_cd", 0.0, 1.0),
+                ],
+            ),
+            // 5. 双方血量百分比 (2维)
+            ObsNode::structure(
+                "health",
+                vec![
+                    ObsNode::scalar("self_hp_pct", 0.0, 1.0),
+                    ObsNode::scalar("target_hp_pct", 0.0, 1.0),
+                ],
+            ),
+            // 6. 自身修饰符 (4 槽位 × 5维 -> 经 Shared MLP(16) 编码)
+            ObsNode::repeated(
+                "self_modifiers",
+                4,
+                ObsNode::structure(
+                    "slot",
+                    vec![
+                        ObsNode::categorical("name", ModifierNameId::COUNT + 1, 8),
+                        ObsNode::scalar("remaining_duration", 0.0, 1.0),
+                        ObsNode::scalar("stack_count", 0.0, 1.0),
+                        ObsNode::vector("params", 2),
+                    ],
+                ),
+                EntityEncoderSpec::SharedMlpFlatten {
+                    hidden_dims: vec![16],
+                },
+            ),
+            // 7. 目标修饰符 (4 槽位 × 5维 -> 经 Shared MLP(16) 编码)
+            ObsNode::repeated(
+                "target_modifiers",
+                4,
+                ObsNode::structure(
+                    "slot",
+                    vec![
+                        ObsNode::categorical("name", ModifierNameId::COUNT + 1, 8),
+                        ObsNode::scalar("remaining_duration", 0.0, 1.0),
+                        ObsNode::scalar("stack_count", 0.0, 1.0),
+                        ObsNode::vector("params", 2),
+                    ],
+                ),
+                EntityEncoderSpec::SharedMlpFlatten {
+                    hidden_dims: vec![16],
+                },
+            ),
+        ]))
     }
 
     fn action_from_index(idx: usize) -> Self::Action {
@@ -1075,8 +1096,9 @@ pub fn step_solo_v0_world(
     // 记录更新前的小兵血量与队伍
     let mut prev_minion_hps: HashMap<Entity, (Team, f32)> = HashMap::new();
     {
-        let mut q_minions =
-            app.world_mut().query_filtered::<(Entity, &Team, &Health), With<Minion>>();
+        let mut q_minions = app
+            .world_mut()
+            .query_filtered::<(Entity, &Team, &Health), With<Minion>>();
         for (e, team, hp) in q_minions.iter(app.world()) {
             prev_minion_hps.insert(e, (*team, hp.value));
         }

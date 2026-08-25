@@ -78,7 +78,7 @@ fn start_visual_runner_for_env<E: VisualEnvironment>(
     let agent = if let Some(ref path) = ckpt_path {
         if path.exists() {
             println!(">>> 加载 Checkpoint: {}", path.display());
-            Arc::new(PPOAgent::load(
+            Arc::new(PPOAgent::load_for_env::<E>(
                 state_dim,
                 hidden_dim,
                 action_space,
@@ -91,7 +91,7 @@ fn start_visual_runner_for_env<E: VisualEnvironment>(
                 ">>> 指定的 Checkpoint 不存在 ({})，使用初始策略启动",
                 path.display()
             );
-            Arc::new(PPOAgent::new(
+            Arc::new(PPOAgent::create_for_env::<E>(
                 state_dim,
                 hidden_dim,
                 action_space,
@@ -101,7 +101,7 @@ fn start_visual_runner_for_env<E: VisualEnvironment>(
         }
     } else {
         println!(">>> 未指定 --checkpoint，使用初始随机策略启动");
-        Arc::new(PPOAgent::new(
+        Arc::new(PPOAgent::create_for_env::<E>(
             state_dim,
             hidden_dim,
             action_space,
@@ -115,6 +115,7 @@ fn start_visual_runner_for_env<E: VisualEnvironment>(
         render_mode: RenderMode::WindowCustomLoop,
     });
     let env_max_steps = env.max_steps();
+    let obs_schema = E::obs_schema();
 
     let (cmd_tx, cmd_rx) = mpsc::channel::<VisualRunnerCmd>();
     let (step_tx, step_rx) = mpsc::channel::<VisualStepOutput>();
@@ -135,6 +136,7 @@ fn start_visual_runner_for_env<E: VisualEnvironment>(
             env_name_clone,
             env_max_steps,
             action_labels_clone,
+            obs_schema,
             cmd_tx_clone,
         ));
     });
@@ -195,6 +197,7 @@ async fn ws_server(
     env_name: String,
     env_max_steps: usize,
     action_labels: Vec<String>,
+    obs_schema: Option<lol_rl_protocol::ObsSchema>,
     cmd_tx: mpsc::Sender<VisualRunnerCmd>,
 ) {
     let listener = match TcpListener::bind(format!("127.0.0.1:{port}")) {
@@ -231,6 +234,7 @@ async fn ws_server(
         let latest_frame_sub = latest_frame.clone();
         let env_name_sub = env_name.clone();
         let action_labels_sub = action_labels.clone();
+        let schema_sub = obs_schema.clone();
 
         tokio::spawn(async move {
             if let Err(e) = handle_ws_client(
@@ -241,6 +245,7 @@ async fn ws_server(
                 env_name_sub,
                 env_max_steps,
                 action_labels_sub,
+                schema_sub,
                 cmd,
             )
             .await
@@ -259,17 +264,19 @@ async fn handle_ws_client(
     env_name: String,
     env_max_steps: usize,
     action_labels: Vec<String>,
+    obs_schema: Option<lol_rl_protocol::ObsSchema>,
     cmd_tx: mpsc::Sender<VisualRunnerCmd>,
 ) -> anyhow::Result<()> {
     let ws_stream = tokio_tungstenite::accept_async(stream).await?;
     let (mut ws_writer, mut ws_reader) = ws_stream.split();
 
-    // 1. 发送包含环境与动作元数据的 Ready 帧
+    // 1. 发送包含环境、动作及 AST 观测结构元数据的 Ready 帧
     let ready = VisualOutFrame::Ready {
         checkpoint_path: ckpt_path.to_string_lossy().to_string(),
         env_name,
         env_max_steps,
         action_labels,
+        obs_schema,
     };
     let bytes = bincode::serialize(&ready)?;
     ws_writer.send(Message::Binary(bytes.into())).await?;
@@ -284,8 +291,13 @@ async fn handle_ws_client(
     };
     if let Some(frame) = initial_frame {
         let frame_msg = VisualOutFrame::Frame(frame);
-        if let Ok(data) = bincode::serialize(&frame_msg) {
-            let _ = ws_writer.send(Message::Binary(data.into())).await;
+        match bincode::serialize(&frame_msg) {
+            Ok(data) => {
+                let _ = ws_writer.send(Message::Binary(data.into())).await;
+            }
+            Err(e) => {
+                tracing::error!("序列化 initial_frame 失败: {e}");
+            }
         }
     }
 
@@ -293,9 +305,14 @@ async fn handle_ws_client(
     let write_handle = tokio::spawn(async move {
         while let Ok(frame) = frame_rx.recv().await {
             let frame_msg = VisualOutFrame::Frame(frame);
-            if let Ok(data) = bincode::serialize(&frame_msg) {
-                if ws_writer.send(Message::Binary(data.into())).await.is_err() {
-                    break;
+            match bincode::serialize(&frame_msg) {
+                Ok(data) => {
+                    if ws_writer.send(Message::Binary(data.into())).await.is_err() {
+                        break;
+                    }
+                }
+                Err(e) => {
+                    tracing::error!("序列化广播帧失败: {e}");
                 }
             }
         }
@@ -368,6 +385,7 @@ fn step_output_to_frame_data(output: &VisualStepOutput) -> VisualObsFrame {
         reward_variables: Some(output.reward_variables.clone()),
         obs_vector: output.obs_vector.clone(),
         obs_labels: output.obs_labels.clone(),
+        obs_tree: output.obs_tree.clone(),
         is_paused: output.is_paused,
     }
 }

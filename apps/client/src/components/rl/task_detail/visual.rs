@@ -2,8 +2,10 @@ use gpui::*;
 use gpui_component::button::{Button, ButtonVariants};
 use gpui_component::scroll::ScrollableElement;
 use gpui_component::switch::Switch;
-use gpui_component::{h_flex, v_flex, ActiveTheme, IconName, StyledExt};
-use lol_rl_protocol::{PolicyDisplay, PolicyItem, VisualInFrame, VisualObsFrame, ENV_FIORA_V0};
+use gpui_component::{h_flex, v_flex, ActiveTheme, IconName, Sizable, StyledExt};
+use lol_rl_protocol::{
+    ObsValueNode, PolicyDisplay, PolicyItem, VisualInFrame, VisualObsFrame, ENV_FIORA_V0,
+};
 use rust_i18n::t;
 
 use crate::components::rl::task_detail::math::render_math;
@@ -221,9 +223,9 @@ fn render_visual_telemetry(sidebar: &AppSidebar, cx: &mut Context<AppSidebar>) -
     }
 
     let right_card = div()
-        .w(px(290.0))
+        .w(px(320.0))
         .flex_shrink_0()
-        .child(render_telemetry_obs_card(f, cx));
+        .child(render_telemetry_obs_card(sidebar, f, cx));
 
     h_flex()
         .items_start()
@@ -234,23 +236,257 @@ fn render_visual_telemetry(sidebar: &AppSidebar, cx: &mut Context<AppSidebar>) -
         .into_any_element()
 }
 
-fn render_telemetry_obs_card(f: &VisualObsFrame, cx: &Context<AppSidebar>) -> AnyElement {
-    let rows: Vec<(String, f32)> = f
-        .obs_vector
-        .iter()
-        .enumerate()
-        .map(|(i, v)| {
-            let label = f
-                .obs_labels
-                .get(i)
-                .cloned()
-                .unwrap_or_else(|| format!("dim {i}"));
-            (label, *v)
-        })
-        .collect();
+enum FlatObsItem<'a> {
+    Scalar {
+        depth: usize,
+        name: &'a str,
+        value: f32,
+    },
+    Vector {
+        depth: usize,
+        name: &'a str,
+        values: &'a [f32],
+    },
+    Categorical {
+        depth: usize,
+        name: &'a str,
+        class_id: usize,
+    },
+    GroupHeader {
+        depth: usize,
+        name: &'a str,
+        path: String,
+        count_label: String,
+        is_collapsed: bool,
+        is_repeated: bool,
+    },
+}
+
+fn flatten_obs_nodes<'a>(
+    nodes: &'a [ObsValueNode],
+    path_prefix: &str,
+    depth: usize,
+    collapsed: &std::collections::HashSet<String>,
+    out: &mut Vec<FlatObsItem<'a>>,
+) {
+    if depth > 10 {
+        return;
+    }
+    for (i, node) in nodes.iter().enumerate() {
+        let node_path = format!("{path_prefix}.{}_{}", node.name(), i);
+        match node {
+            ObsValueNode::Scalar { name, value } => {
+                out.push(FlatObsItem::Scalar {
+                    depth,
+                    name,
+                    value: *value,
+                });
+            }
+            ObsValueNode::Vector { name, values } => {
+                out.push(FlatObsItem::Vector {
+                    depth,
+                    name,
+                    values,
+                });
+            }
+            ObsValueNode::Categorical {
+                name, class_id, ..
+            } => {
+                out.push(FlatObsItem::Categorical {
+                    depth,
+                    name,
+                    class_id: *class_id,
+                });
+            }
+            ObsValueNode::Struct { name, fields } => {
+                let is_collapsed = collapsed.contains(&node_path);
+                out.push(FlatObsItem::GroupHeader {
+                    depth,
+                    name,
+                    path: node_path.clone(),
+                    count_label: format!("{} 项", fields.len()),
+                    is_collapsed,
+                    is_repeated: false,
+                });
+                if !is_collapsed {
+                    flatten_obs_nodes(fields, &node_path, depth + 1, collapsed, out);
+                }
+            }
+            ObsValueNode::Repeated { name, items } => {
+                let is_collapsed = collapsed.contains(&node_path);
+                out.push(FlatObsItem::GroupHeader {
+                    depth,
+                    name,
+                    path: node_path.clone(),
+                    count_label: format!("{} 实体", items.len()),
+                    is_collapsed,
+                    is_repeated: true,
+                });
+                if !is_collapsed {
+                    flatten_obs_nodes(items, &node_path, depth + 1, collapsed, out);
+                }
+            }
+        }
+    }
+}
+
+fn render_flat_obs_item(item: FlatObsItem<'_>, cx: &Context<AppSidebar>) -> AnyElement {
+    match item {
+        FlatObsItem::Scalar { depth, name, value } => {
+            let val_str = if value.fract() == 0.0 {
+                format!("{:.0}", value)
+            } else {
+                format!("{:.3}", value)
+            };
+            h_flex()
+                .justify_between()
+                .items_center()
+                .text_xs()
+                .pl(px(depth as f32 * 10.0))
+                .py_0p5()
+                .child(
+                    div()
+                        .text_color(cx.theme().foreground.opacity(0.85))
+                        .child(name.to_string()),
+                )
+                .child(
+                    div()
+                        .font_bold()
+                        .text_color(cx.theme().foreground)
+                        .child(val_str),
+                )
+                .into_any_element()
+        }
+        FlatObsItem::Vector {
+            depth,
+            name,
+            values,
+        } => {
+            let vals_str = values
+                .iter()
+                .map(|v| format!("{v:.2}"))
+                .collect::<Vec<_>>()
+                .join(", ");
+            h_flex()
+                .justify_between()
+                .items_center()
+                .text_xs()
+                .pl(px(depth as f32 * 10.0))
+                .py_0p5()
+                .child(
+                    div()
+                        .text_color(cx.theme().foreground.opacity(0.85))
+                        .child(name.to_string()),
+                )
+                .child(
+                    div()
+                        .font_bold()
+                        .text_color(cx.theme().primary)
+                        .child(format!("[{vals_str}]")),
+                )
+                .into_any_element()
+        }
+        FlatObsItem::Categorical {
+            depth,
+            name,
+            class_id,
+        } => h_flex()
+            .justify_between()
+            .items_center()
+            .text_xs()
+            .pl(px(depth as f32 * 10.0))
+            .py_0p5()
+            .child(
+                div()
+                    .text_color(cx.theme().foreground.opacity(0.85))
+                    .child(name.to_string()),
+            )
+            .child(
+                div()
+                    .px_1p5()
+                    .py_0p5()
+                    .rounded_sm()
+                    .bg(cx.theme().accent.opacity(0.2))
+                    .text_color(cx.theme().accent)
+                    .font_bold()
+                    .child(format!("ID: {class_id}")),
+            )
+            .into_any_element(),
+        FlatObsItem::GroupHeader {
+            depth,
+            name,
+            path,
+            count_label,
+            is_collapsed,
+            is_repeated,
+        } => {
+            let path_for_click = path.clone();
+            h_flex()
+                .items_center()
+                .justify_between()
+                .w_full()
+                .pl(px(depth as f32 * 10.0))
+                .py_0p5()
+                .child(
+                    h_flex()
+                        .items_center()
+                        .gap_1()
+                        .child(
+                            Button::new(format!("toggle-group-{}", path))
+                                .icon(if is_collapsed {
+                                    IconName::ChevronRight
+                                } else {
+                                    IconName::ChevronDown
+                                })
+                                .xsmall()
+                                .ghost()
+                                .on_click(cx.listener(move |this, _, _, cx| {
+                                    if this.visual_obs_collapsed.contains(&path_for_click) {
+                                        this.visual_obs_collapsed.remove(&path_for_click);
+                                    } else {
+                                        this.visual_obs_collapsed.insert(path_for_click.clone());
+                                    }
+                                    cx.notify();
+                                })),
+                        )
+                        .child(
+                            div()
+                                .text_xs()
+                                .font_semibold()
+                                .text_color(if is_repeated {
+                                    cx.theme().primary
+                                } else {
+                                    cx.theme().foreground
+                                })
+                                .child(name.to_string()),
+                        ),
+                )
+                .child(
+                    div()
+                        .text_xs()
+                        .text_color(cx.theme().muted_foreground)
+                        .child(count_label),
+                )
+                .into_any_element()
+        }
+    }
+}
+
+fn render_telemetry_obs_card(
+    sidebar: &AppSidebar,
+    f: &VisualObsFrame,
+    cx: &Context<AppSidebar>,
+) -> AnyElement {
+    let tree = f.obs_tree.clone().or_else(|| {
+        sidebar
+            .visual_obs_schema
+            .as_ref()
+            .map(|s| s.decode_tree(&f.obs_vector))
+    });
 
     div()
         .w_full()
+        .max_h(px(520.0))
         .p_3()
         .rounded_md()
         .border_1()
@@ -262,16 +498,48 @@ fn render_telemetry_obs_card(f: &VisualObsFrame, cx: &Context<AppSidebar>) -> An
                 .child(
                     h_flex()
                         .justify_between()
-                        .child(div().font_bold().text_sm().child("实时观测向量 (Raw Obs)"))
+                        .child(
+                            div()
+                                .font_bold()
+                                .text_sm()
+                                .child("结构化观测 AST (Obs Tree)"),
+                        )
                         .child(
                             div()
                                 .text_xs()
                                 .font_bold()
                                 .text_color(cx.theme().primary)
-                                .child(format!("{} 维", rows.len())),
+                                .child(format!("{} 维", f.obs_vector.len())),
                         ),
                 )
-                .child(if rows.is_empty() {
+                .child(if let Some(nodes) = tree {
+                    if nodes.is_empty() {
+                        div()
+                            .text_xs()
+                            .text_color(cx.theme().foreground.opacity(0.75))
+                            .child("暂无观测数据")
+                            .into_any_element()
+                    } else {
+                        let mut flat_items = Vec::with_capacity(32);
+                        flatten_obs_nodes(
+                            &nodes,
+                            "root",
+                            0,
+                            &sidebar.visual_obs_collapsed,
+                            &mut flat_items,
+                        );
+
+                        v_flex()
+                            .gap_1()
+                            .overflow_y_scrollbar()
+                            .children(
+                                flat_items
+                                    .into_iter()
+                                    .map(|item| render_flat_obs_item(item, cx)),
+                            )
+                            .into_any_element()
+                    }
+                } else if f.obs_vector.is_empty() {
                     div()
                         .text_xs()
                         .text_color(cx.theme().foreground.opacity(0.75))
@@ -280,14 +548,20 @@ fn render_telemetry_obs_card(f: &VisualObsFrame, cx: &Context<AppSidebar>) -> An
                 } else {
                     v_flex()
                         .gap_1()
-                        .children(rows.iter().map(|(label, value)| {
+                        .overflow_y_scrollbar()
+                        .children(f.obs_vector.iter().enumerate().map(|(i, value)| {
+                            let label = f
+                                .obs_labels
+                                .get(i)
+                                .cloned()
+                                .unwrap_or_else(|| format!("dim {i}"));
                             h_flex()
                                 .justify_between()
                                 .text_xs()
                                 .child(
                                     div()
                                         .text_color(cx.theme().foreground.opacity(0.85))
-                                        .child(label.clone()),
+                                        .child(label),
                                 )
                                 .child(div().font_semibold().child(format!("{value:.3}")))
                         }))

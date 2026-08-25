@@ -41,9 +41,13 @@ pub fn spawn_visual_ws(
                     Err(_) => SendOutcome::Skip,
                 },
                 |bytes: &[u8]| {
-                    bincode::deserialize::<VisualOutFrame>(bytes)
-                        .ok()
-                        .map(VisualWsEvent::Frame)
+                    match bincode::deserialize::<VisualOutFrame>(bytes) {
+                        Ok(f) => Some(VisualWsEvent::Frame(f)),
+                        Err(e) => {
+                            eprintln!(">>> [Visual WS] 反序列化 VisualOutFrame 失败: {e}");
+                            None
+                        }
+                    }
                 },
             )
             .await;

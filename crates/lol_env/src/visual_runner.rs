@@ -10,7 +10,7 @@ use std::time::{Duration, Instant};
 
 use bevy::prelude::*;
 use bevy::window::{PrimaryWindow, RawHandleWrapper, WindowWrapper};
-use lol_rl_protocol::{ObsFeaturePayload, PolicyDisplay, RewardFormulaSpec};
+use lol_rl_protocol::{ObsFeaturePayload, ObsValueNode, PolicyDisplay, RewardFormulaSpec};
 use winit::application::ApplicationHandler;
 use winit::dpi::LogicalSize;
 use winit::event::{ElementState, MouseButton, WindowEvent};
@@ -58,6 +58,8 @@ pub struct VisualStepOutput {
     pub obs_vector: Vec<f32>,
     /// 观测向量每一维的简要说明。
     pub obs_labels: Vec<String>,
+    /// 结构化 AST 观测树。
+    pub obs_tree: Option<Vec<ObsValueNode>>,
     pub reward_formula: Option<RewardFormulaSpec>,
 }
 
@@ -67,12 +69,18 @@ type PolicyFn<E> = dyn FnMut(
     + Send
     + 'static;
 
-/// 从观测生成「原始向量 + 每维说明」，供可视化 UI 逐维展示真实计算值。
-fn obs_vector_with_labels<E: VisualEnvironment>(obs: &E::Obs) -> (Vec<f32>, Vec<String>) {
-    (
-        E::obs_to_vector(obs),
-        E::obs_dim_labels().iter().map(|s| s.to_string()).collect(),
-    )
+/// 从观测生成「原始向量 + 每维说明 + AST 观测树」，供可视化 UI 逐维展示真实计算值与树状渲染。
+fn obs_vector_with_labels<E: VisualEnvironment>(
+    obs: &E::Obs,
+) -> (Vec<f32>, Vec<String>, Option<Vec<ObsValueNode>>) {
+    let vec = E::obs_to_vector(obs);
+    if let Some(schema) = E::obs_schema() {
+        let labels = schema.to_dim_labels();
+        let tree = schema.decode_tree(&vec);
+        (vec, labels, Some(tree))
+    } else {
+        (vec, vec![], None)
+    }
 }
 
 pub fn pause_virtual_time(world: &mut World) {
@@ -220,7 +228,7 @@ impl<E: VisualEnvironment> ApplicationHandler for CustomVisualRunner<E> {
 
                     let obs = self.env.get_current_obs(self.app.world());
                     let (_, policy_items) = (self.policy_arc.lock().unwrap())(&obs);
-                    let (obs_vector, obs_labels) = obs_vector_with_labels::<E>(&obs);
+                    let (obs_vector, obs_labels, obs_tree) = obs_vector_with_labels::<E>(&obs);
                     let pause_output = VisualStepOutput {
                         step: self.step_count,
                         reward: 0.0,
@@ -234,6 +242,7 @@ impl<E: VisualEnvironment> ApplicationHandler for CustomVisualRunner<E> {
                         obs_payload: E::obs_to_payload(&obs),
                         obs_vector,
                         obs_labels,
+                        obs_tree,
                         reward_formula: self.env.reward_formula(),
                     };
                     let _ = self.step_tx.send(pause_output);
@@ -249,7 +258,7 @@ impl<E: VisualEnvironment> ApplicationHandler for CustomVisualRunner<E> {
                     self.env.reset_world(self.app.world_mut());
                     let obs = self.env.get_current_obs(self.app.world());
                     let (_, policy_items) = (self.policy_arc.lock().unwrap())(&obs);
-                    let (obs_vector, obs_labels) = obs_vector_with_labels::<E>(&obs);
+                    let (obs_vector, obs_labels, obs_tree) = obs_vector_with_labels::<E>(&obs);
                     let initial_output = VisualStepOutput {
                         step: 0,
                         reward: 0.0,
@@ -263,6 +272,7 @@ impl<E: VisualEnvironment> ApplicationHandler for CustomVisualRunner<E> {
                         obs_payload: E::obs_to_payload(&obs),
                         obs_vector,
                         obs_labels,
+                        obs_tree,
                         reward_formula: self.env.reward_formula(),
                     };
                     let _ = self.step_tx.send(initial_output);
@@ -291,7 +301,7 @@ impl<E: VisualEnvironment> ApplicationHandler for CustomVisualRunner<E> {
                 // Send initial first frame to front-end
                 let obs = self.env.get_current_obs(self.app.world());
                 let (_, policy_items) = (self.policy_arc.lock().unwrap())(&obs);
-                let (obs_vector, obs_labels) = obs_vector_with_labels::<E>(&obs);
+                let (obs_vector, obs_labels, obs_tree) = obs_vector_with_labels::<E>(&obs);
                 let initial_output = VisualStepOutput {
                     step: 0,
                     reward: 0.0,
@@ -305,6 +315,7 @@ impl<E: VisualEnvironment> ApplicationHandler for CustomVisualRunner<E> {
                     obs_payload: E::obs_to_payload(&obs),
                     obs_vector,
                     obs_labels,
+                    obs_tree,
                     reward_formula: self.env.reward_formula(),
                 };
                 let _ = self.step_tx.send(initial_output);
@@ -379,7 +390,7 @@ impl<E: VisualEnvironment> ApplicationHandler for CustomVisualRunner<E> {
 
             // 展示「下一步」预测：基于 step 后观测重新计算，而非本步执行前的策略。
             let (_, next_policy) = (self.policy_arc.lock().unwrap())(&step_result.obs);
-            let (obs_vector, obs_labels) = obs_vector_with_labels::<E>(&step_result.obs);
+            let (obs_vector, obs_labels, obs_tree) = obs_vector_with_labels::<E>(&step_result.obs);
 
             let will_pause = (terminated || truncated) && self.auto_pause_on_done;
             let output = VisualStepOutput {
@@ -395,6 +406,7 @@ impl<E: VisualEnvironment> ApplicationHandler for CustomVisualRunner<E> {
                 obs_payload: E::obs_to_payload(&step_result.obs),
                 obs_vector,
                 obs_labels,
+                obs_tree,
                 reward_formula: self.env.reward_formula(),
             };
             let _ = self.step_tx.send(output);
@@ -411,7 +423,7 @@ impl<E: VisualEnvironment> ApplicationHandler for CustomVisualRunner<E> {
                 // Send newly reset start frame
                 let next_obs = self.env.get_current_obs(self.app.world());
                 let (_, next_policy_items) = (self.policy_arc.lock().unwrap())(&next_obs);
-                let (obs_vector, obs_labels) = obs_vector_with_labels::<E>(&next_obs);
+                let (obs_vector, obs_labels, obs_tree) = obs_vector_with_labels::<E>(&next_obs);
                 let reset_output = VisualStepOutput {
                     step: self.step_count,
                     reward: 0.0,
@@ -425,6 +437,7 @@ impl<E: VisualEnvironment> ApplicationHandler for CustomVisualRunner<E> {
                     obs_payload: E::obs_to_payload(&next_obs),
                     obs_vector,
                     obs_labels,
+                    obs_tree,
                     reward_formula: self.env.reward_formula(),
                 };
                 let _ = self.step_tx.send(reset_output);

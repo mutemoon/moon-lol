@@ -2,7 +2,7 @@ use std::path::Path;
 
 use candle_core::{DType, Device, Result, Tensor};
 use candle_nn::{AdamW, Optimizer, ParamsAdamW, VarBuilder, VarMap};
-use lol_rl_protocol::{ActionSpace, PolicyBackbone};
+use lol_rl_protocol::{ActionSpace, ObsSchema, PolicyBackbone};
 
 use crate::policy::{ActorCritic, HeroEmbedConfig};
 
@@ -319,6 +319,78 @@ impl PPOAgent {
         })
     }
 
+    /// 基于 ObsSchema 结构规范自动推导特征提取网络和主干架构的 PPOAgent
+    pub fn from_obs_schema(
+        schema: ObsSchema,
+        hidden_dim: usize,
+        action_space: ActionSpace,
+        config: PPOConfig,
+        device: Device,
+        backbone_type: PolicyBackbone,
+    ) -> Result<Self> {
+        let mut varmap = VarMap::new();
+        let vb = VarBuilder::from_varmap(&varmap, DType::F32, &device);
+
+        let actor_critic = ActorCritic::from_schema_and_backbone(
+            schema.clone(),
+            hidden_dim,
+            action_space,
+            backbone_type,
+            None,
+            vb,
+        )?;
+
+        let in_dim = schema.encoded_dim();
+        let hidden_gain = std::f32::consts::SQRT_2;
+
+        match backbone_type {
+            PolicyBackbone::Mlp => {
+                let fc1_w = Tensor::from_vec(
+                    crate::policy::orthogonal_weight(hidden_dim, in_dim, hidden_gain),
+                    (hidden_dim, in_dim),
+                    &device,
+                )?;
+                let fc2_w = Tensor::from_vec(
+                    crate::policy::orthogonal_weight(hidden_dim, hidden_dim, hidden_gain),
+                    (hidden_dim, hidden_dim),
+                    &device,
+                )?;
+                let _ = varmap.set_one("fc1.weight", fc1_w);
+                let _ = varmap.set_one("fc2.weight", fc2_w);
+            }
+            PolicyBackbone::Mamba => {
+                let proj_w = Tensor::from_vec(
+                    crate::policy::orthogonal_weight(hidden_dim, in_dim, hidden_gain),
+                    (hidden_dim, in_dim),
+                    &device,
+                )?;
+                let _ = varmap.set_one("proj_in.weight", proj_w);
+            }
+        }
+
+        let critic_w = Tensor::from_vec(
+            crate::policy::orthogonal_weight(1, hidden_dim, 1.0),
+            (1, hidden_dim),
+            &device,
+        )?;
+        let _ = varmap.set_one("critic_head.weight", critic_w);
+
+        let params = ParamsAdamW {
+            lr: config.lr,
+            ..Default::default()
+        };
+        let optimizer = AdamW::new(varmap.all_vars(), params)?;
+
+        Ok(Self {
+            actor_critic,
+            varmap,
+            optimizer,
+            config,
+            device,
+            hero_embed_config: HeroEmbedConfig::default(),
+        })
+    }
+
     /// 统一为环境创建 PPOAgent，默认使用 Mamba 主干
     pub fn create_for_env<E: lol_env::RlEnvironment>(
         state_dim: usize,
@@ -337,7 +409,8 @@ impl PPOAgent {
         )
     }
 
-    /// 统一为环境创建 PPOAgent，支持指定 PolicyBackbone (MLP 或 Mamba)
+    /// 统一为环境创建 PPOAgent，支持指定 PolicyBackbone (MLP 或 Mamba)，
+    /// 若环境定义了 ObsSchema，则自动使用 AST 驱动的特征提取与网络拓扑。
     pub fn create_for_env_with_backbone<E: lol_env::RlEnvironment>(
         state_dim: usize,
         hidden_dim: usize,
@@ -346,15 +419,26 @@ impl PPOAgent {
         device: Device,
         backbone_type: PolicyBackbone,
     ) -> Result<Self> {
-        Self::with_hero_embed_and_backbone(
-            state_dim,
-            hidden_dim,
-            action_space,
-            config,
-            device,
-            HeroEmbedConfig::default(),
-            backbone_type,
-        )
+        if let Some(schema) = E::obs_schema() {
+            Self::from_obs_schema(
+                schema,
+                hidden_dim,
+                action_space,
+                config,
+                device,
+                backbone_type,
+            )
+        } else {
+            Self::with_hero_embed_and_backbone(
+                state_dim,
+                hidden_dim,
+                action_space,
+                config,
+                device,
+                HeroEmbedConfig::default(),
+                backbone_type,
+            )
+        }
     }
 
     pub fn hero_embed_config(&self) -> &HeroEmbedConfig {
@@ -420,6 +504,78 @@ impl PPOAgent {
             }
         }
         self.varmap.save(path)
+    }
+
+    pub fn load_for_env<E: lol_env::RlEnvironment>(
+        state_dim: usize,
+        hidden_dim: usize,
+        action_space: ActionSpace,
+        config: PPOConfig,
+        device: Device,
+        path: &Path,
+    ) -> Result<Self> {
+        if let Some(schema) = E::obs_schema() {
+            Self::load_from_schema(schema, hidden_dim, action_space, config, device, path)
+        } else {
+            Self::load(state_dim, hidden_dim, action_space, config, device, path)
+        }
+    }
+
+    pub fn load_from_schema(
+        schema: ObsSchema,
+        hidden_dim: usize,
+        action_space: ActionSpace,
+        config: PPOConfig,
+        device: Device,
+        path: &Path,
+    ) -> Result<Self> {
+        let meta = std::fs::metadata(path)
+            .map_err(|e| candle_core::Error::Msg(format!("checkpoint 文件不存在: {e}")))?;
+        if meta.len() == 0 {
+            return Err(candle_core::Error::Msg("checkpoint 文件为空".to_string()));
+        }
+        let tensors = candle_core::safetensors::load(path, &device)?;
+
+        let is_mlp = tensors.contains_key("fc1.weight") || tensors.contains_key("fc1.bias");
+        let backbone_type = if is_mlp {
+            PolicyBackbone::Mlp
+        } else {
+            PolicyBackbone::Mamba
+        };
+
+        let hidden_dim = tensors
+            .get("fc2.bias")
+            .or_else(|| tensors.get("fc1.bias"))
+            .or_else(|| tensors.get("proj_in.bias"))
+            .or_else(|| tensors.get("proj_in.weight"))
+            .and_then(|t| t.shape().dims().first().copied())
+            .unwrap_or(hidden_dim);
+
+        let mut varmap = VarMap::new();
+        let vb = VarBuilder::from_varmap(&varmap, DType::F32, &device);
+        let actor_critic = ActorCritic::from_schema_and_backbone(
+            schema,
+            hidden_dim,
+            action_space,
+            backbone_type,
+            None,
+            vb,
+        )?;
+        varmap.load(path)?;
+        let params = ParamsAdamW {
+            lr: config.lr,
+            ..Default::default()
+        };
+        let optimizer = AdamW::new(varmap.all_vars(), params)?;
+
+        Ok(Self {
+            actor_critic,
+            varmap,
+            optimizer,
+            config,
+            device,
+            hero_embed_config: HeroEmbedConfig::default(),
+        })
     }
 
     pub fn load(
@@ -1794,7 +1950,7 @@ mod tests {
 
     #[test]
     fn test_dual_backbone_mlp_and_mamba_roundtrip() -> Result<()> {
-        let state_dim = 16;
+        let state_dim = <lol_env::FioraV2Env as lol_env::RlEnvironment>::state_dim();
         let hidden_dim = 64;
         let action_space = ActionSpace::Discrete(4);
         let config = PPOConfig::default();
@@ -1818,7 +1974,7 @@ mod tests {
         let mlp_ckpt = tmp_dir.join("test_mlp_ckpt.safetensors");
         mlp_agent.save(&mlp_ckpt)?;
 
-        let loaded_mlp = PPOAgent::load(
+        let loaded_mlp = PPOAgent::load_for_env::<lol_env::FioraV2Env>(
             state_dim,
             hidden_dim,
             action_space,
@@ -1849,7 +2005,7 @@ mod tests {
         let mamba_ckpt = tmp_dir.join("test_mamba_ckpt.safetensors");
         mamba_agent.save(&mamba_ckpt)?;
 
-        let loaded_mamba = PPOAgent::load(
+        let loaded_mamba = PPOAgent::load_for_env::<lol_env::FioraV2Env>(
             state_dim,
             hidden_dim,
             action_space,
@@ -1868,7 +2024,7 @@ mod tests {
 
     #[test]
     fn test_mamba_chunk_sequence_ppo_update() -> Result<()> {
-        let state_dim = 16;
+        let state_dim = <lol_env::FioraV2Env as lol_env::RlEnvironment>::state_dim();
         let hidden_dim = 32;
         let action_space = ActionSpace::Discrete(4);
         let config = PPOConfig::default();

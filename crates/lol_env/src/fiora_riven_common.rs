@@ -146,6 +146,13 @@ impl FioraRivenBaseEnv {
         let hooks = self.on_reset_hooks.clone();
         reset_world_internal(self.app.world_mut(), fiora, riven, &hooks);
         self.step_count = 0;
+
+        if self.warmup_secs > 0.0 {
+            let warmup_ticks = (self.warmup_secs * 64.0).round() as usize;
+            for _ in 0..warmup_ticks {
+                self.app.update();
+            }
+        }
     }
 
     /// 在传入的 World 中执行对局重置（通过 Action::Reset 就地重置所有组件，保留 Entity ID 与已加载资源）
@@ -154,6 +161,13 @@ impl FioraRivenBaseEnv {
         let riven = self.riven;
         reset_world_internal(world, fiora, riven, &self.on_reset_hooks);
         self.step_count = 0;
+
+        if self.warmup_secs > 0.0 {
+            let warmup_ticks = (self.warmup_secs * 64.0).round() as usize;
+            for _ in 0..warmup_ticks {
+                world.run_schedule(FixedUpdate);
+            }
+        }
         (fiora, riven)
     }
 

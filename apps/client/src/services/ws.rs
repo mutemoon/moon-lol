@@ -386,7 +386,9 @@ async fn spawn_visual_session(
                 VisualWsEvent::Frame(VisualOutFrame::Paused(paused)) => {
                     sidebar.visual_paused = paused;
                 }
-                VisualWsEvent::Frame(VisualOutFrame::Ready { .. }) => {}
+                VisualWsEvent::Frame(VisualOutFrame::Ready { obs_schema, .. }) => {
+                    sidebar.visual_obs_schema = obs_schema;
+                }
                 VisualWsEvent::Frame(VisualOutFrame::Log { .. }) => {}
                 VisualWsEvent::Frame(VisualOutFrame::Exited { code }) => {
                     sidebar.visual_ws_connected = false;

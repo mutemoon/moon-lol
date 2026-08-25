@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use bevy::app::App;
 use bevy::ecs::world::World;
 use bevy::math::Vec2;
-use lol_rl_protocol::{ActionSpace, ObsFeaturePayload, RewardFormulaSpec};
+use lol_rl_protocol::{ActionSpace, ObsFeaturePayload, ObsSchema, RewardFormulaSpec};
 
 /// Controls whether the Env runs headless (for training) or with a window (for visualization).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -105,13 +105,12 @@ pub trait RlEnvironment: 'static {
     where
         Self: Sized;
 
-    /// 观测向量每一维的简要说明（与 `obs_to_vector` 的布局一一对应），
-    /// 供可视化 UI 逐维展示真实计算出的观测值。默认空（UI 退化为仅显示下标）。
-    fn obs_dim_labels() -> &'static [&'static str]
+    /// 结构化观测空间规范 AST（供策略网络自动推导 Embedding/EntityMLP 架构与前端结构化动态展示）。
+    fn obs_schema() -> Option<ObsSchema>
     where
         Self: Sized,
     {
-        &[]
+        None
     }
 
     fn action_from_index(idx: usize) -> Self::Action
