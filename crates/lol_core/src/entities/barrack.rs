@@ -8,7 +8,7 @@ use lol_base::barrack::{
     RotatingWaveBehavior, TimedVariableWaveBehavior,
 };
 
-use crate::game::{GameSet, GameTime};
+use crate::game::{GameSet, GameTime, WaitAssets};
 use crate::lane::Lane;
 use crate::loaders::barrack::ConfigBarracksLoader;
 use crate::team::Team;
@@ -77,15 +77,19 @@ fn init_barrack_state_system(
             continue;
         };
 
-        let minion_templates = config
+        let minion_templates: Vec<Handle<DynamicWorld>> = config
             .units
             .iter()
             .map(|unit| asset_server.load::<DynamicWorld>(&unit.minion_template))
             .collect();
 
+        commands
+            .entity(entity)
+            .insert(WaitAssets::from_handles(&minion_templates));
+
         commands.entity(entity).insert(BarrackState {
             // 第一波兵有初始延迟
-            wave_timer: Timer::from_seconds(10.0, TimerMode::Repeating),
+            wave_timer: Timer::from_seconds(0.0, TimerMode::Repeating),
             // 属性升级从第一波兵生成后开始计算
             upgrade_timer: Timer::new(
                 Duration::from_secs_f32(config.upgrade_interval_secs),

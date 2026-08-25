@@ -126,6 +126,8 @@ pub fn update_element_layout(
     let anchor = match anchors {
         Some(anchors) => match anchors {
             LOLEnumAnchor::AnchorSingle(anchor) => anchor.anchor,
+            LOLEnumAnchor::Unk0xf090d2e7 => Vec2::ZERO,
+
             _ => {
                 warn!("{name:?} 渲染器暂不支持的锚点类型: {anchors:?}",);
                 Vec2::ZERO

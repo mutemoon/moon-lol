@@ -52,7 +52,7 @@ impl Plugin for PluginParticleMetrics {
             render_app.insert_resource(metrics);
         }
 
-        app.add_systems(PostUpdate, log_particle_metrics_system);
+        app.add_systems(PostUpdate, log_particle_metrics_system.run_if(run_once));
     }
 }
 

@@ -275,11 +275,6 @@ fn inject_vfx_assets(
         let Some(config_vfx) = res_assets_vfx.get(*id) else {
             continue;
         };
-        info!(
-            "注入 {} 个 system 和 {} 个 resolver",
-            config_vfx.systems.len(),
-            config_vfx.resolvers.len(),
-        );
         for (&hash, system_def) in &config_vfx.systems {
             res_assets_vfx_system.add_hash(hash, system_def.clone());
         }

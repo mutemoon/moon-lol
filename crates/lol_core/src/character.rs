@@ -83,7 +83,6 @@ fn on_event_dead(
 fn try_load_config_characters(
     mut commands: Commands,
     character_record_query: Query<(Entity, &ConfigCharacterRecord)>,
-    _dynamic_worlds: Res<Assets<DynamicWorld>>,
     asset_server: Res<AssetServer>,
 ) {
     let char_len = character_record_query.iter().len();
@@ -99,9 +98,9 @@ fn try_load_config_characters(
             asset_server.get_recursive_dependency_load_state(&config.character_record),
             Some(RecursiveDependencyLoadState::Loaded)
         ) {
-            // info!("Character config loaded: {:?}", config.character_record);
+            debug!("Character config loaded: {:?}", config.character_record);
         } else {
-            // info!("Character config not loaded: {:?}", config.character_record);
+            debug!("Character config not loaded: {:?}", config.character_record);
             continue;
         }
 
@@ -146,7 +145,7 @@ fn try_load_config_characters(
 
     if loaded_count > 0 {
         if char_len - loaded_count > 0 {
-            info!(
+            debug!(
                 "加载 {} 个角色，还剩 {} 个角色",
                 loaded_count,
                 char_len - loaded_count

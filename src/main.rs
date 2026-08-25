@@ -1,4 +1,7 @@
+use bevy::asset::io::AssetSourceBuilder;
 use bevy::prelude::*;
+use bevy::time::TimeUpdateStrategy;
+use bevy::world_serialization::WorldSerializationPlugin;
 use clap::Parser;
 use lol_agent::PluginAgentObserver;
 use lol_base::map::MapPaths;
@@ -6,12 +9,14 @@ use lol_champions::PluginChampions;
 use lol_core::PluginCore;
 use lol_core::game::GameScenes;
 use lol_core::log::create_log_plugin;
+use lol_core::skill::{GodMode, NoCooldown};
 use lol_debug::PluginDebug;
 use lol_particle::PluginParticle;
 use lol_render::PluginRender;
 use lol_server::PluginServer;
 
 mod player_champion;
+use lol_share::paths::games_dir;
 use player_champion::{PlayerChampion, PluginPlayerChampion};
 
 #[derive(Parser)]
@@ -53,22 +58,19 @@ fn main() {
     let mut app = App::new();
 
     // Register user_games custom asset source for absolute home dir loading
-    let user_games_path = lol_share::paths::games_dir();
+    let user_games_path = games_dir();
     let _ = std::fs::create_dir_all(&user_games_path);
     app.register_asset_source(
         "user_games",
-        bevy::asset::io::AssetSourceBuilder::platform_default(
-            &user_games_path.to_string_lossy(),
-            None,
-        ),
+        AssetSourceBuilder::platform_default(&user_games_path.to_string_lossy(), None),
     );
 
     if args.headless {
-        app.insert_resource(bevy::time::TimeUpdateStrategy::FixedTimesteps(1));
+        app.insert_resource(TimeUpdateStrategy::FixedTimesteps(1));
         app.add_plugins((
             MinimalPlugins,
             AssetPlugin::default(),
-            bevy::world_serialization::WorldSerializationPlugin,
+            WorldSerializationPlugin,
             log_plugin,
             PluginCore,
             PluginChampions,
@@ -108,64 +110,11 @@ fn main() {
         app.insert_resource(MapPaths::new(&map));
     }
 
-    app.insert_resource(lol_core::skill::GodMode(args.god));
-    app.insert_resource(lol_core::skill::NoCooldown(args.no_cooldown || args.god));
+    app.insert_resource(GodMode(args.god));
+    app.insert_resource(NoCooldown(args.no_cooldown || args.god));
     app.insert_resource(PlayerChampion(args.champion.to_lowercase()));
     app.add_plugins(PluginPlayerChampion);
     app.insert_resource(GameScenes::new(vec![scene_path]));
-
-    if args.headless {
-        app.set_runner(|mut app| {
-            app.update(); // First update to run startup systems and start WS server
-
-            let cmd_rx = app
-                .world()
-                .get_resource::<lol_server::server::DebugWsChannel>()
-                .map(|ch| ch.cmd_rx.clone());
-            if let Some(cmd_rx) = cmd_rx {
-                loop {
-                    match cmd_rx.recv_blocking() {
-                        Ok(cmd_packet) => {
-                            let is_rl_step = cmd_packet.1 == "rl_step";
-                            let frames = if is_rl_step {
-                                cmd_packet
-                                    .2
-                                    .get("frames")
-                                    .and_then(|f| f.as_u64())
-                                    .unwrap_or(6) as usize
-                            } else {
-                                1
-                            };
-
-                            // Advance the game simulation by frames - 1
-                            if is_rl_step && frames > 1 {
-                                for _ in 0..(frames - 1) {
-                                    app.update();
-                                }
-                            }
-
-                            // Now insert the packet and run the final update which dispatches the command
-                            app.world_mut()
-                                .init_resource::<lol_server::server::PendingCommands>();
-                            app.world_mut()
-                                .resource_mut::<lol_server::server::PendingCommands>()
-                                .0
-                                .push(cmd_packet);
-                            app.update();
-                        }
-                        Err(_) => {
-                            break;
-                        }
-                    }
-                }
-            } else {
-                loop {
-                    app.update();
-                }
-            }
-            bevy::app::AppExit::Success
-        });
-    }
 
     app.run();
 }

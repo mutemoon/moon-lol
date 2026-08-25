@@ -23,6 +23,7 @@
     "watch": "cargo watch -w src -w crates -w examples -- cargo run --example",
     "watch:client": "cargo watch -w apps/client -- cargo run -p client",
     "watch:particle": "cargo watch -w src -w crates -- cargo run -p lol_particle",
+    "clean:core": "cargo clean -p lol_core",
     "watch:rl": "cargo watch -w src -w crates -- cargo run -p lol_rl",
     "watch:run": "cargo watch -w src -w crates -- cargo run --"
   },

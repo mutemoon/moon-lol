@@ -105,7 +105,7 @@ pub fn on_command_character_particle_spawn(
     res_assets_resolver: Res<Assets<ConfigResourceResolver>>,
 ) {
     let entity = trigger.event_target();
-    info!(
+    debug!(
         "{entity} 收到皮肤粒子创建命令，trigger_key={}",
         trigger.hash
     );
@@ -114,16 +114,16 @@ pub fn on_command_character_particle_spawn(
     // 攻击者的 resolver 解析，再挂到目标实体上
     let resolver_entity = trigger.resolver_entity.unwrap_or(entity);
     let Ok(skin) = q_skin.get(resolver_entity) else {
-        info!("{resolver_entity} 找不到 Skin 组件，跳过粒子创建");
+        debug!("{resolver_entity} 找不到 Skin 组件，跳过粒子创建");
         return;
     };
-    info!(
+    debug!(
         "{resolver_entity} Skin 组件 resolver_key={:08x}",
         skin.resolver_key
     );
 
     let Some(resolver) = res_assets_resolver.load_hash(skin.resolver_key) else {
-        info!(
+        debug!(
             "{resolver_entity} 找不到 ConfigResourceResolver(key={:08x})，跳过粒子创建；可能 vfx 场景 skin{{N}}_vfx.ron 未提取或未加载（缺 ConfigVfx Resource）",
             skin.resolver_key
         );
@@ -131,14 +131,14 @@ pub fn on_command_character_particle_spawn(
     };
 
     let Some(&vfx_hash) = resolver.resource_map.get(&trigger.hash) else {
-        info!(
+        debug!(
             "{resolver_entity} trigger_key={} 在 resolver 中找不到对应 vfx_hash，可用的 trigger_key 列表：{:?}",
             trigger.hash,
             resolver.resource_map.keys().collect::<Vec<_>>()
         );
         return;
     };
-    info!("{entity} 解析到 vfx_hash={:08x}，触发粒子创建", vfx_hash);
+    debug!("{entity} 解析到 vfx_hash={:08x}，触发粒子创建", vfx_hash);
 
     commands.trigger(CommandParticleSpawn {
         entity,
@@ -154,7 +154,7 @@ pub fn on_command_character_particle_despawn(
     res_assets_resolver: Res<Assets<ConfigResourceResolver>>,
 ) {
     let entity = trigger.event_target();
-    info!(
+    debug!(
         "{entity} 收到皮肤粒子销毁命令，trigger_key={}",
         trigger.hash
     );
@@ -162,12 +162,12 @@ pub fn on_command_character_particle_despawn(
     // 与 spawn 同样支持查表实体分离，否则用攻击者 resolver 挂出的粒子无法撤销
     let resolver_entity = trigger.resolver_entity.unwrap_or(entity);
     let Ok(skin) = q_skin.get(resolver_entity) else {
-        info!("{resolver_entity} 找不到 Skin 组件，跳过粒子销毁");
+        debug!("{resolver_entity} 找不到 Skin 组件，跳过粒子销毁");
         return;
     };
 
     let Some(resolver) = res_assets_resolver.load_hash(skin.resolver_key) else {
-        info!(
+        debug!(
             "{resolver_entity} 找不到 ConfigResourceResolver(key={:08x})，跳过粒子销毁",
             skin.resolver_key
         );
@@ -175,13 +175,13 @@ pub fn on_command_character_particle_despawn(
     };
 
     let Some(&vfx_hash) = resolver.resource_map.get(&trigger.hash) else {
-        info!(
+        debug!(
             "{resolver_entity} trigger_key={} 在 resolver 中找不到对应 vfx_hash",
             trigger.hash
         );
         return;
     };
-    info!("{entity} 解析到 vfx_hash={:08x}，触发粒子销毁", vfx_hash);
+    debug!("{entity} 解析到 vfx_hash={:08x}，触发粒子销毁", vfx_hash);
 
     commands.trigger(CommandParticleDespawn {
         entity,

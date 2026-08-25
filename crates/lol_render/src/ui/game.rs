@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 use lol_base_render::ui::{LOLEnumUiMetric, LOLLolGameStateViewController, LOLUiElementTextData};
 use lol_core::base::stats::ChampionStats;
+use lol_core::game::GameTime;
 use lol_core::team::Team;
 
 use crate::controller::SelfPlayer;
@@ -23,22 +24,23 @@ fn update_game_metrics(
     res_game_state: Res<LOLLolGameStateViewController>,
     res_ui_element_entity: Res<UIElementEntity>,
     time: Res<Time>,
+    game_time: Res<GameTime>,
     q_stats: Query<(&ChampionStats, Option<&Team>)>,
     q_player_stats: Query<&ChampionStats, With<SelfPlayer>>,
     mut q_ui_text_state: Query<&mut UiTextState>,
 ) {
     // 格式化游戏时间 (分:秒)
-    let elapsed = time.elapsed_secs() as u32;
+    let elapsed = game_time.elapsed_secs() as u32;
     let time_str = format!("{:02}:{:02}", elapsed / 60, elapsed % 60);
 
-    // 模拟或计算实时 FPS，限制在合理的心跳帧区间 [60, 240]
+    // 模拟或计算实时 FPS
     let delta = time.delta_secs();
     let raw_fps = if delta > 0.0 {
         (1.0 / delta) as u32
     } else {
         144
     };
-    let fps_str = format!("{}", raw_fps.clamp(60, 240));
+    let fps_str = format!("{}", raw_fps);
 
     // 模拟略带微小抖动的网络延迟 (以 28ms 为基准波动)
     let latency_str = format!("{}", 28 + (elapsed % 3));

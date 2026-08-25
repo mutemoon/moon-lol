@@ -382,7 +382,9 @@ mod tests {
             return;
         }
 
-        let opts = SqliteConnectOptions::new().filename(&db_path).read_only(true);
+        let opts = SqliteConnectOptions::new()
+            .filename(&db_path)
+            .read_only(true);
         let pool = SqlitePoolOptions::new().connect_with(opts).await.unwrap();
 
         let rows = sqlx::query(
@@ -401,7 +403,10 @@ mod tests {
             let category: Option<String> = row.get("category");
             let entity_id: Option<i64> = row.get("entity_id");
             let msg: String = row.get("message");
-            println!("[#{id}] [{level}] [{:?}] entity={:?}: {msg}", category, entity_id);
+            println!(
+                "[#{id}] [{level}] [{:?}] entity={:?}: {msg}",
+                category, entity_id
+            );
         }
     }
 }

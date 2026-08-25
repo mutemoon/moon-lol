@@ -31,9 +31,9 @@ pub fn try_load_config_skin_characters(
             asset_server.get_recursive_dependency_load_state(&config.skin),
             Some(RecursiveDependencyLoadState::Loaded)
         ) {
-            // info!("Character config loaded: {:?}", config.character_record);
+            debug!("Character config loaded: {:?}", config.skin);
         } else {
-            // info!("Character config not loaded: {:?}", config.character_record);
+            debug!("Character config not loaded: {:?}", config.skin);
             continue;
         }
 
@@ -64,7 +64,7 @@ pub fn try_load_config_skin_characters(
 
     if loaded_count > 0 {
         if skin_len - loaded_count > 0 {
-            info!(
+            debug!(
                 "加载 {} 个皮肤，还剩 {} 个皮肤",
                 loaded_count,
                 skin_len - loaded_count
