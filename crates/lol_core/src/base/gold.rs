@@ -63,6 +63,13 @@ impl Plugin for PluginGold {
         app.register_type::<GoldDrop>();
         app.add_systems(FixedUpdate, update_passive_gold);
         app.add_observer(on_event_dead);
+        app.add_observer(on_reset_gold);
+    }
+}
+
+pub fn on_reset_gold(_trigger: On<crate::action::EventReset>, mut q_gold: Query<&mut Gold>) {
+    for mut gold in q_gold.iter_mut() {
+        *gold = Gold::default();
     }
 }
 

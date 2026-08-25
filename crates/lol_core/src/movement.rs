@@ -24,6 +24,7 @@ pub struct PluginMovement;
 impl Plugin for PluginMovement {
     fn build(&self, app: &mut App) {
         app.add_observer(on_event_movement_end);
+        app.add_observer(on_reset_movement);
 
         app.add_plugins(ArbitrationPipelinePlugin::<CommandMovement, MovementPipeline>::default());
 
@@ -39,6 +40,39 @@ impl Plugin for PluginMovement {
                     .in_set(MovementPipeline::Apply),
             ),
         );
+    }
+}
+
+pub fn on_reset_movement(
+    _trigger: On<crate::action::EventReset>,
+    mut commands: Commands,
+    mut q_movement: Query<&mut MovementState>,
+    q_run: Query<Entity, With<crate::run::Run>>,
+    q_movement_block: Query<Entity, With<MovementBlock>>,
+    q_cast_block: Query<Entity, With<CastBlock>>,
+    q_slow: Query<Entity, With<MovementSlow>>,
+) {
+    for mut state in q_movement.iter_mut() {
+        state.path.clear();
+        state.speed = None;
+        state.direction = Vec2::ZERO;
+        state.velocity = Vec2::ZERO;
+        state.current_target_index = 0;
+        state.completed = true;
+        state.pathfind = None;
+        state.source = MovementSource::Run;
+    }
+    for entity in q_run.iter() {
+        commands.entity(entity).remove::<crate::run::Run>();
+    }
+    for entity in q_movement_block.iter() {
+        commands.entity(entity).remove::<MovementBlock>();
+    }
+    for entity in q_cast_block.iter() {
+        commands.entity(entity).remove::<CastBlock>();
+    }
+    for entity in q_slow.iter() {
+        commands.entity(entity).remove::<MovementSlow>();
     }
 }
 

@@ -23,6 +23,19 @@ impl Plugin for PluginBarrack {
         app.init_resource::<InhibitorState>();
         app.add_systems(FixedUpdate, init_barrack_state_system);
         app.add_systems(FixedUpdate, barracks_spawning_system.in_set(GameSet));
+        app.add_observer(on_reset_barracks);
+    }
+}
+
+pub fn on_reset_barracks(
+    _trigger: On<crate::action::EventReset>,
+    mut commands: Commands,
+    q_barracks: Query<Entity, With<BarrackState>>,
+    mut inhibitor_state: ResMut<InhibitorState>,
+) {
+    inhibitor_state.inhibitors_down = 0;
+    for entity in q_barracks.iter() {
+        commands.entity(entity).remove::<BarrackState>();
     }
 }
 

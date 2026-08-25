@@ -14,6 +14,17 @@ impl Plugin for PluginTurret {
         app.add_observer(on_event_aggro_target_found);
         app.add_observer(on_command_attack_auto_stop);
         app.add_observer(on_event_damage_create);
+        app.add_observer(on_reset_turret);
+    }
+}
+
+pub fn on_reset_turret(
+    _trigger: On<crate::action::EventReset>,
+    mut q_turret: Query<&mut TurretHeat, With<Turret>>,
+) {
+    for mut heat in q_turret.iter_mut() {
+        heat.last_target = None;
+        heat.heat_level = 0;
     }
 }
 

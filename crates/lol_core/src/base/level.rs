@@ -52,6 +52,23 @@ pub struct EventExperienceGain {
     pub amount: u32,
 }
 
+#[derive(Default)]
+pub struct PluginLevel;
+
+impl Plugin for PluginLevel {
+    fn build(&self, app: &mut App) {
+        app.register_type::<Level>();
+        app.register_type::<ExperienceDrop>();
+        app.add_observer(on_reset_level);
+    }
+}
+
+pub fn on_reset_level(_trigger: On<crate::action::EventReset>, mut q_level: Query<&mut Level>) {
+    for mut level in q_level.iter_mut() {
+        *level = Level::default();
+    }
+}
+
 impl Level {
     pub fn add_experience(&mut self, experience: u32) -> u32 {
         self.experience += experience;

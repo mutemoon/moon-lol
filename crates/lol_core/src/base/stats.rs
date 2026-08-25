@@ -27,6 +27,16 @@ impl Plugin for PluginChampionStats {
     fn build(&self, app: &mut App) {
         app.register_type::<ChampionStats>();
         app.add_observer(on_event_dead);
+        app.add_observer(on_reset_champion_stats);
+    }
+}
+
+pub fn on_reset_champion_stats(
+    _trigger: On<crate::action::EventReset>,
+    mut q_stats: Query<&mut ChampionStats>,
+) {
+    for mut stats in q_stats.iter_mut() {
+        *stats = ChampionStats::default();
     }
 }
 

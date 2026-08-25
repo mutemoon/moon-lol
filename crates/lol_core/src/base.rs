@@ -17,5 +17,7 @@ impl Plugin for PluginBase {
     fn build(&self, app: &mut App) {
         app.add_plugins(gold::PluginGold);
         app.add_plugins(stats::PluginChampionStats);
+        app.add_plugins(level::PluginLevel);
+        app.add_plugins(buff::PluginBuff);
     }
 }

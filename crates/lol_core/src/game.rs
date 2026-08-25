@@ -19,12 +19,6 @@ impl Plugin for PluginGame {
         app.init_resource::<GameScenes>();
         app.init_resource::<LoadingTracker>();
 
-        app.register_type::<WaitSceneReady>();
-        app.register_type::<WaitAsset>();
-        app.register_type::<WaitAssets>();
-        app.register_type::<WaitCharacterReady>();
-        app.register_type::<WaitTask>();
-
         app.configure_sets(FixedFirst, GameSet.run_if(in_state(GameState::Playing)));
         app.configure_sets(FixedUpdate, GameSet.run_if(in_state(GameState::Playing)));
 
@@ -34,7 +28,16 @@ impl Plugin for PluginGame {
             update_loading_progress_and_check_ready.run_if(in_state(GameState::Loading)),
         );
         app.add_systems(FixedFirst, fixed_update_game_time.in_set(GameSet));
+        app.add_observer(on_reset_game_time);
     }
+}
+
+pub fn on_reset_game_time(
+    _trigger: On<crate::action::EventReset>,
+    mut game_time: ResMut<GameTime>,
+) {
+    info!("收到 EventReset，重置 GameTime");
+    game_time.reset();
 }
 
 /// 顶层系统集合
@@ -53,25 +56,24 @@ pub enum GameState {
 #[reflect(Component)]
 pub struct WaitSceneReady;
 
-/// 等待单个 Asset（及其递归依赖）加载完成
-#[derive(Component, Reflect, Debug, Clone)]
-#[reflect(Component)]
-pub struct WaitAsset(pub UntypedHandle);
-
-impl WaitAsset {
-    pub fn new<T: Asset>(handle: &Handle<T>) -> Self {
-        Self(handle.clone().untyped())
-    }
-}
-
-/// 等待多个 Asset（及其递归依赖）全部加载完成
+/// 等待单个或多个 Asset（及其递归依赖）全部加载完成
 #[derive(Component, Reflect, Default, Debug, Clone)]
 #[reflect(Component)]
 pub struct WaitAssets(pub Vec<UntypedHandle>);
 
+pub type WaitAsset = WaitAssets;
+
 impl WaitAssets {
     pub fn new(handles: Vec<UntypedHandle>) -> Self {
         Self(handles)
+    }
+
+    pub fn from_handle<T: Asset>(handle: &Handle<T>) -> Self {
+        Self(vec![handle.clone().untyped()])
+    }
+
+    pub fn from_untyped(handle: UntypedHandle) -> Self {
+        Self(vec![handle])
     }
 
     pub fn from_handles<T: Asset>(handles: &[Handle<T>]) -> Self {
@@ -83,10 +85,34 @@ impl WaitAssets {
     }
 }
 
-/// 等待目标实体拥有 CharacterReady 组件
-#[derive(Component, Reflect, Debug, Clone)]
+impl<T: Asset> From<Handle<T>> for WaitAssets {
+    fn from(handle: Handle<T>) -> Self {
+        Self(vec![handle.untyped()])
+    }
+}
+
+impl<T: Asset> From<&Handle<T>> for WaitAssets {
+    fn from(handle: &Handle<T>) -> Self {
+        Self(vec![handle.clone().untyped()])
+    }
+}
+
+impl From<UntypedHandle> for WaitAssets {
+    fn from(handle: UntypedHandle) -> Self {
+        Self(vec![handle])
+    }
+}
+
+impl From<Vec<UntypedHandle>> for WaitAssets {
+    fn from(handles: Vec<UntypedHandle>) -> Self {
+        Self(handles)
+    }
+}
+
+/// 等待当前角色实体拥有 CharacterReady 组件
+#[derive(Component, Reflect, Default, Debug, Clone, Copy)]
 #[reflect(Component)]
-pub struct WaitCharacterReady(pub Entity);
+pub struct WaitCharacterReady;
 
 /// 通用自定义等待任务标记（只要存在该组件就阻止进入 GameState::Playing，完成后 remove 或 despawn）
 #[derive(Component, Reflect, Default, Debug, Clone)]
@@ -182,29 +208,15 @@ fn update_loading_progress_and_check_ready(
     asset_server: Res<AssetServer>,
     mut tracker: ResMut<LoadingTracker>,
     q_scenes: Query<Entity, With<WaitSceneReady>>,
-    q_wait_asset: Query<(Entity, &WaitAsset)>,
     mut q_wait_assets: Query<(Entity, &mut WaitAssets)>,
-    q_wait_characters: Query<(Entity, &WaitCharacterReady)>,
+    q_wait_characters: Query<Entity, With<WaitCharacterReady>>,
     q_character_ready: Query<&CharacterReady>,
     q_tasks: Query<Entity, With<WaitTask>>,
 ) {
     let pending_scenes = q_scenes.iter().count();
 
-    // 检查单个 Asset
-    let mut pending_single_assets = 0;
-    for (entity, wait_asset) in q_wait_asset.iter() {
-        if matches!(
-            asset_server.get_recursive_dependency_load_state(&wait_asset.0),
-            Some(RecursiveDependencyLoadState::Loaded)
-        ) {
-            commands.entity(entity).remove::<WaitAsset>();
-        } else {
-            pending_single_assets += 1;
-        }
-    }
-
-    // 检查多个 Assets
-    let mut pending_multi_assets = 0;
+    // 检查 Assets 加载状态
+    let mut pending_assets = 0;
     for (entity, mut wait_assets) in q_wait_assets.iter_mut() {
         wait_assets.0.retain(|handle| {
             !matches!(
@@ -216,14 +228,14 @@ fn update_loading_progress_and_check_ready(
         if wait_assets.0.is_empty() {
             commands.entity(entity).remove::<WaitAssets>();
         } else {
-            pending_multi_assets += wait_assets.0.len();
+            pending_assets += wait_assets.0.len();
         }
     }
 
     // 检查角色实体就绪状态
     let mut pending_characters = 0;
-    for (entity, wait_char) in q_wait_characters.iter() {
-        if q_character_ready.get(wait_char.0).is_ok() {
+    for entity in q_wait_characters.iter() {
+        if q_character_ready.get(entity).is_ok() {
             commands.entity(entity).remove::<WaitCharacterReady>();
         } else {
             pending_characters += 1;
@@ -231,7 +243,6 @@ fn update_loading_progress_and_check_ready(
     }
 
     let pending_tasks = q_tasks.iter().count();
-    let pending_assets = pending_single_assets + pending_multi_assets;
 
     let total_pending = pending_scenes + pending_assets + pending_characters + pending_tasks;
 

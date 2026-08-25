@@ -19,6 +19,16 @@ impl Plugin for PluginAggro {
         app.add_systems(FixedPostUpdate, aggro_scan);
         app.add_observer(on_team_get_damage);
         app.add_observer(on_target_dead);
+        app.add_observer(on_reset_aggro);
+    }
+}
+
+pub fn on_reset_aggro(
+    _trigger: On<crate::action::EventReset>,
+    mut q_aggro_state: Query<&mut AggroState>,
+) {
+    for mut state in q_aggro_state.iter_mut() {
+        state.aggros.clear();
     }
 }
 

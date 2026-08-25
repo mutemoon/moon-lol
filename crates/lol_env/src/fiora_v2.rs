@@ -8,7 +8,7 @@ use lol_rl_protocol::{ActionSpace, ObsFeaturePayload, RewardFormulaSpec, RewardT
 
 pub use crate::fiora_riven_common::{
     ATTACK_MASK_DISTANCE, AttackEventTracker, FioraRivenBaseEnv, FioraRivenEntities,
-    VitalBreakTracker, reset_episode_world, setup_skill_levels_world, unpause_virtual_time,
+    VitalBreakTracker, setup_skill_levels_world, unpause_virtual_time,
 };
 pub use crate::flash_plugin::{
     FLASH_COOLDOWN_SECS, FLASH_DISTANCE, FlashCooldown, dispatch_flash, extract_flash_obs,

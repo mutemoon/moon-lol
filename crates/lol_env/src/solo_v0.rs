@@ -10,7 +10,7 @@ use lol_rl_protocol::{ActionSpace, ObsFeaturePayload, RewardFormulaSpec, RewardT
 
 pub use crate::fiora_riven_common::{
     ATTACK_MASK_DISTANCE, AttackEventTracker, FioraRivenBaseEnv, FioraRivenEntities,
-    reset_episode_world, setup_skill_levels_world, unpause_virtual_time,
+    setup_skill_levels_world, unpause_virtual_time,
 };
 pub use crate::flash_plugin::{
     FLASH_COOLDOWN_SECS, FLASH_DISTANCE, FlashCooldown, dispatch_flash, extract_flash_obs,
@@ -799,10 +799,10 @@ impl VisualEnvironment for SoloV0Env {
     }
 
     fn reset_world(&mut self, world: &mut World) -> Vec<Self::Obs> {
-        let (new_fiora, new_riven) = self.base.reset_world_base(world);
+        let (fiora, riven) = self.base.reset_world_base(world);
         vec![
-            get_ego_obs_from_world(world, new_fiora, new_riven, 0.0),
-            get_ego_obs_from_world(world, new_riven, new_fiora, 1.0),
+            get_ego_obs_from_world(world, fiora, riven, 0.0),
+            get_ego_obs_from_world(world, riven, fiora, 1.0),
         ]
     }
 

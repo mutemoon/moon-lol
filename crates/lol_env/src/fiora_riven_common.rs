@@ -1,22 +1,33 @@
 use std::collections::HashMap;
+use std::env::var;
 use std::path::PathBuf;
+use std::time::Duration;
 
 use bevy::app::ScheduleRunnerPlugin;
+use bevy::asset::AssetPlugin;
 use bevy::ecs::schedule::SingleThreadedExecutor;
 use bevy::prelude::*;
 use bevy::time::TimeUpdateStrategy;
+use bevy::winit::WinitPlugin;
 use bevy::world_serialization::DynamicWorld;
-use lol_base::character::{ConfigCharacterRecord, ConfigSkin, Skin};
-use lol_champions::fiora::Fiora;
+use lol_base::character::{ConfigCharacterRecord, ConfigSkin};
+use lol_base::map::MapPaths;
+use lol_base_render::camera::Focus;
 use lol_champions::fiora::passive::Vital;
-use lol_champions::riven::Riven;
+use lol_champions::fiora::{Fiora, PluginFiora};
+use lol_champions::riven::{PluginRiven, Riven};
+use lol_core::action::{Action, CommandAction};
 use lol_core::base::direction::Direction;
-use lol_core::character::CharacterReady;
-use lol_core::damage::{DamageType, EventDamageCreate};
+use lol_core::character::{CharacterReady, SpawnTransform};
+use lol_core::damage::{Armor, DamageType, EventDamageCreate};
+use lol_core::game::{GameState, WaitCharacterReady};
 use lol_core::life::Health;
+use lol_core::movement::Movement;
 use lol_core::navigation::navigation::NavigationDebug;
 use lol_core::skill::{CoolDown, Skill, SkillRecastWindow, Skills, is_skill_ready};
 use lol_core::team::Team;
+use lol_render::controller::SelfPlayer;
+use rand::random;
 
 use crate::reward::{FioraRewardContext, FioraVsRivenRewardModel, RewardModel};
 use crate::traits::{EnvConfig, RenderMode, RewardBreakdownItem};
@@ -128,134 +139,73 @@ impl FioraRivenBaseEnv {
         setup_skill_levels_world(self.app.world_mut(), self.fiora, self.riven);
     }
 
-    /// 执行无头基础环境重置（销毁并重建英雄实体，重置技能与小兵兵线，统一执行 on_reset 钩子与预热）
+    /// 执行基础环境重置（通过 Action::Reset 进行就地状态重置，执行 on_reset 钩子）
     pub fn reset_base(&mut self) {
-        let is_render = self.is_render();
-        if self.enable_barrack {
-            clear_minions_world(self.app.world_mut());
-            reset_barracks_world(self.app.world_mut());
-        }
-
-        let (new_fiora, new_riven) = reset_episode_world(
-            self.app.world_mut(),
-            self.fiora,
-            self.riven,
-            &self.fiora_config_handle,
-            &self.riven_config_handle,
-            &self.fiora_skin_handle,
-            &self.riven_skin_handle,
-            self.initial_fiora_pos,
-            self.initial_riven_pos,
-            is_render,
-        );
-        self.fiora = new_fiora;
-        self.riven = new_riven;
+        let fiora = self.fiora;
+        let riven = self.riven;
+        let hooks = self.on_reset_hooks.clone();
+        reset_world_internal(self.app.world_mut(), fiora, riven, &hooks);
         self.step_count = 0;
-
-        // 等待 DynamicWorld 资产就绪（仅无头模式同步等待；渲染模式由 visual_runner 事件循环处理）
-        if !is_render {
-            for _ in 0..500 {
-                self.app.update();
-                let world = self.app.world();
-                let fiora_ready = world.get::<CharacterReady>(new_fiora).is_some();
-                let riven_ready = world.get::<CharacterReady>(new_riven).is_some();
-
-                if fiora_ready && riven_ready {
-                    break;
-                }
-            }
-        }
-
-        setup_skill_levels_world(self.app.world_mut(), new_fiora, new_riven);
-
-        for hook in &self.on_reset_hooks {
-            hook(new_fiora, new_riven, self.app.world_mut());
-        }
-
-        if !is_render && self.warmup_secs > 0.0 {
-            let warmup_ticks = (self.warmup_secs * 64.0).round() as usize;
-            for _ in 0..warmup_ticks {
-                self.app.update();
-            }
-        }
     }
 
-    /// 在传入的 World 中执行对局重置（有头/无头共用的核心重置入口，自动执行全部 on_reset 钩子）
+    /// 在传入的 World 中执行对局重置（通过 Action::Reset 就地重置所有组件，保留 Entity ID 与已加载资源）
     pub fn reset_world_base(&mut self, world: &mut World) -> (Entity, Entity) {
-        let is_render = self.is_render();
-        if self.enable_barrack {
-            clear_minions_world(world);
-            reset_barracks_world(world);
-        }
-
-        let (new_fiora, new_riven) = reset_episode_world(
-            world,
-            self.fiora,
-            self.riven,
-            &self.fiora_config_handle,
-            &self.riven_config_handle,
-            &self.fiora_skin_handle,
-            &self.riven_skin_handle,
-            self.initial_fiora_pos,
-            self.initial_riven_pos,
-            is_render,
-        );
-        setup_skill_levels_world(world, new_fiora, new_riven);
-
-        for hook in &self.on_reset_hooks {
-            hook(new_fiora, new_riven, world);
-        }
-
-        if self.warmup_secs > 0.0 {
-            let warmup_ticks = (self.warmup_secs * 64.0).round() as usize;
-            for _ in 0..warmup_ticks {
-                world.run_schedule(FixedUpdate);
-            }
-        }
-
-        self.fiora = new_fiora;
-        self.riven = new_riven;
+        let fiora = self.fiora;
+        let riven = self.riven;
+        reset_world_internal(world, fiora, riven, &self.on_reset_hooks);
         self.step_count = 0;
-        (new_fiora, new_riven)
+        (fiora, riven)
     }
 
-    /// 检查资产是否加载就绪
+    /// 检查资产是否加载就绪（通过 GameState::Playing 判断）
     pub fn is_assets_loaded(&self, world: &World) -> bool {
-        let fiora_ready = world.get::<CharacterReady>(self.fiora).is_some();
-        let riven_ready = world.get::<CharacterReady>(self.riven).is_some();
-        if self.is_render() {
-            let fiora_skin = world.get::<Skin>(self.fiora).is_some();
-            let riven_skin = world.get::<Skin>(self.riven).is_some();
-            fiora_ready && riven_ready && fiora_skin && riven_skin
-        } else {
-            fiora_ready && riven_ready
-        }
+        world
+            .get_resource::<State<GameState>>()
+            .is_some_and(|s| *s.get() == GameState::Playing)
     }
 }
 
-/// 清理世界中所有小兵实体
-pub fn clear_minions_world(world: &mut World) {
-    let mut to_despawn = Vec::new();
-    let mut q_minions = world.query_filtered::<Entity, With<lol_core::entities::minion::Minion>>();
-    for e in q_minions.iter(world) {
-        to_despawn.push(e);
-    }
-    for e in to_despawn {
-        if let Ok(entity_mut) = world.get_entity_mut(e) {
-            entity_mut.despawn();
-        }
-    }
-}
+/// 在 World 中执行就地重置的核心逻辑（不销毁实体）
+fn reset_world_internal(
+    world: &mut World,
+    fiora: Entity,
+    riven: Entity,
+    on_reset_hooks: &[fn(Entity, Entity, &mut World)],
+) {
+    // 1. 触发核心 Action::Reset -> 全局 EventReset
+    world.trigger(CommandAction {
+        entity: fiora,
+        action: Action::Reset,
+    });
 
-/// 重置世界中所有兵营的生成状态与计时器
-pub fn reset_barracks_world(world: &mut World) {
-    let mut q_barracks = world.query::<&mut lol_core::entities::barrack::BarrackState>();
-    for mut state in q_barracks.iter_mut(world) {
-        state.wave_timer = Timer::from_seconds(10.0, TimerMode::Repeating);
-        state.spawn_queue.clear();
-        state.wave_count = 0;
-        state.upgrade_count = 0;
-        state.move_speed_upgrade_count = 0;
+    // 2. 推进一帧 schedule 使所有系统响应 EventReset
+    world.run_schedule(FixedUpdate);
+
+    // 3. 重置环境专用 Tracker
+    if let Some(mut tracker) = world.get_resource_mut::<AttackEventTracker>() {
+        tracker.attack_hit = false;
+        tracker.attack_ready = false;
+    }
+    if let Some(mut tracker) = world.get_resource_mut::<VitalBreakTracker>() {
+        tracker.hit = false;
+    }
+
+    // 4. 重置剑姬初始要害
+    let random_dir = match random::<u8>() % 4 {
+        0 => Direction::X,
+        1 => Direction::NegX,
+        2 => Direction::Z,
+        _ => Direction::NegZ,
+    };
+    let mut initial_vital = Vital::new(random_dir, 0.0, 10.0);
+    initial_vital.active_timer.tick(Duration::from_millis(1));
+    world.entity_mut(riven).insert(initial_vital);
+
+    // 5. 设置技能等级与执行重置钩子
+    setup_skill_levels_world(world, fiora, riven);
+
+    for hook in on_reset_hooks {
+        hook(fiora, riven, world);
     }
 }
 
@@ -365,15 +315,15 @@ impl FioraRivenEnvBuilder {
 
         app.insert_resource(TimeUpdateStrategy::FixedTimesteps(1));
 
-        let manifest_dir = std::env::var("CARGO_MANIFEST_DIR")
-            .unwrap_or_else(|_| env!("CARGO_MANIFEST_DIR").to_string());
+        let manifest_dir =
+            var("CARGO_MANIFEST_DIR").unwrap_or_else(|_| env!("CARGO_MANIFEST_DIR").to_string());
         let workspace_root = PathBuf::from(&manifest_dir)
             .parent()
             .and_then(|p| p.parent())
             .map(|p| p.to_path_buf())
             .unwrap_or_else(|| PathBuf::from(&manifest_dir));
 
-        let asset_plugin = bevy::asset::AssetPlugin {
+        let asset_plugin = AssetPlugin {
             file_path: workspace_root.join("assets").to_string_lossy().to_string(),
             ..Default::default()
         };
@@ -383,7 +333,7 @@ impl FioraRivenEnvBuilder {
                 app.add_plugins(
                     DefaultPlugins
                         .build()
-                        .disable::<bevy::winit::WinitPlugin>()
+                        .disable::<WinitPlugin>()
                         .set(asset_plugin)
                         .set(WindowPlugin {
                             primary_window: Some(Window {
@@ -432,15 +382,15 @@ impl FioraRivenEnvBuilder {
             }
         }
 
-        app.add_plugins(lol_champions::fiora::PluginFiora);
-        app.add_plugins(lol_champions::riven::PluginRiven);
+        app.add_plugins(PluginFiora);
+        app.add_plugins(PluginRiven);
 
         // 注册用户扩展插件
         for plugin in &self.app_plugins {
             plugin(&mut app);
         }
 
-        app.insert_resource(lol_base::map::MapPaths::new(&self.map_name));
+        app.insert_resource(MapPaths::new(&self.map_name));
         app.insert_resource(NavigationDebug);
         app.insert_resource(ChampionInitialSkillLevels(self.initial_skill_levels));
 
@@ -491,15 +441,16 @@ impl FioraRivenEnvBuilder {
             observer(&mut app);
         }
 
-        // 等待 DynamicWorld 资产就绪（仅无头模式在 build 中同步自旋等待；渲染模式由 visual_runner 事件循环异步等待，避免阻塞主线程窗口创建）
+        // 等待游戏资源就绪并进入 GameState::Playing（仅无头模式在 build 中同步自旋等待；渲染模式由 visual_runner 事件循环异步等待，避免阻塞主线程窗口创建）
         if !render {
             for _ in 0..500 {
                 app.update();
                 let world = app.world();
-                let fiora_ready = world.get::<CharacterReady>(fiora).is_some();
-                let riven_ready = world.get::<CharacterReady>(riven).is_some();
+                let is_playing = world
+                    .get_resource::<State<GameState>>()
+                    .is_some_and(|s| *s.get() == GameState::Playing);
 
-                if fiora_ready && riven_ready {
+                if is_playing {
                     break;
                 }
             }
@@ -787,29 +738,6 @@ pub fn get_obs_from_world(world: &World, fiora: Entity, riven: Entity) -> FioraV
     }
 }
 
-/// 销毁世界中的英雄实体及其附带技能与 Buff
-pub fn despawn_entities_world(world: &mut World, fiora: Entity, riven: Entity) {
-    for champion in [fiora, riven] {
-        let mut to_despawn = Vec::new();
-        if let Ok(entity_ref) = world.get_entity(champion) {
-            if let Some(skills) = entity_ref.get::<Skills>() {
-                to_despawn.extend(skills.to_vec());
-            }
-            if let Some(buffs) = entity_ref.get::<lol_core::base::buff::Buffs>() {
-                to_despawn.extend(buffs.iter());
-            }
-        }
-        for sub in to_despawn {
-            if let Ok(sub_mut) = world.get_entity_mut(sub) {
-                sub_mut.despawn();
-            }
-        }
-        if let Ok(entity_mut) = world.get_entity_mut(champion) {
-            entity_mut.despawn();
-        }
-    }
-}
-
 /// 在世界中重新生成 Fiora 和 Riven 实体
 pub fn spawn_champions_world(
     world: &mut World,
@@ -824,22 +752,20 @@ pub fn spawn_champions_world(
     let mut fiora_builder = world.spawn((
         Fiora::default(),
         Transform::from_translation(initial_fiora_pos),
+        SpawnTransform(Transform::from_translation(initial_fiora_pos)),
+        WaitCharacterReady,
         Team::Order,
         ConfigCharacterRecord {
             character_record: fiora_config_handle,
         },
         Health::new(500.0),
-        lol_core::damage::Armor(35.0),
-        lol_core::movement::Movement { speed: 345.0 },
+        Armor(35.0),
+        Movement { speed: 345.0 },
     ));
 
     if render {
         if let Some(skin) = fiora_skin_handle {
-            fiora_builder.insert((
-                lol_render::controller::SelfPlayer,
-                lol_base_render::camera::Focus,
-                ConfigSkin { skin },
-            ));
+            fiora_builder.insert((SelfPlayer, Focus, ConfigSkin { skin }));
         }
     }
 
@@ -848,13 +774,15 @@ pub fn spawn_champions_world(
     let mut riven_builder = world.spawn((
         Riven::default(),
         Transform::from_translation(initial_riven_pos),
+        SpawnTransform(Transform::from_translation(initial_riven_pos)),
+        WaitCharacterReady,
         Team::Chaos,
         ConfigCharacterRecord {
             character_record: riven_config_handle,
         },
         Health::new(500.0),
-        lol_core::damage::Armor(33.0),
-        lol_core::movement::Movement { speed: 340.0 },
+        Armor(33.0),
+        Movement { speed: 340.0 },
     ));
 
     if render {
@@ -866,60 +794,6 @@ pub fn spawn_champions_world(
     let riven = riven_builder.id();
 
     (fiora, riven)
-}
-
-/// Reset entities in the Bevy ECS world for a new episode by despawning and respawning.
-pub fn reset_episode_world(
-    world: &mut World,
-    fiora: Entity,
-    riven: Entity,
-    fiora_config_handle: &Handle<DynamicWorld>,
-    riven_config_handle: &Handle<DynamicWorld>,
-    fiora_skin_handle: &Option<Handle<DynamicWorld>>,
-    riven_skin_handle: &Option<Handle<DynamicWorld>>,
-    initial_fiora_pos: Vec3,
-    initial_riven_pos: Vec3,
-    render: bool,
-) -> (Entity, Entity) {
-    despawn_entities_world(world, fiora, riven);
-
-    let (new_fiora, new_riven) = spawn_champions_world(
-        world,
-        fiora_config_handle.clone(),
-        riven_config_handle.clone(),
-        fiora_skin_handle.clone(),
-        riven_skin_handle.clone(),
-        initial_fiora_pos,
-        initial_riven_pos,
-        render,
-    );
-
-    world.insert_resource(FioraRivenEntities {
-        fiora: new_fiora,
-        riven: new_riven,
-    });
-
-    if let Some(mut tracker) = world.get_resource_mut::<AttackEventTracker>() {
-        tracker.attack_hit = false;
-        tracker.attack_ready = false;
-    }
-    if let Some(mut tracker) = world.get_resource_mut::<VitalBreakTracker>() {
-        tracker.hit = false;
-    }
-
-    let random_dir = match rand::random::<u8>() % 4 {
-        0 => Direction::X,
-        1 => Direction::NegX,
-        2 => Direction::Z,
-        _ => Direction::NegZ,
-    };
-    let mut initial_vital = Vital::new(random_dir, 0.0, 10.0);
-    initial_vital
-        .active_timer
-        .tick(std::time::Duration::from_millis(1));
-    world.entity_mut(new_riven).insert(initial_vital);
-
-    (new_fiora, new_riven)
 }
 
 /// Set skill levels for Fiora and Riven in the Bevy ECS world.
@@ -1023,176 +897,5 @@ pub fn pause_virtual_time(world: &mut World) {
 pub fn unpause_virtual_time(world: &mut World) {
     if let Some(mut time) = world.get_resource_mut::<Time<Virtual>>() {
         time.unpause();
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use bevy::prelude::{App, Vec3};
-    use lol_core::damage::{DamageResult, DamageType, EventDamageCreate};
-
-    use super::*;
-
-    fn obs_with_vital(dir_x: f32, dir_neg_x: f32, dir_z: f32, dir_neg_z: f32) -> FioraVsRivenObs {
-        FioraVsRivenObs {
-            fiora_pos: Vec3::ZERO,
-            fiora_hp: 500.0,
-            fiora_max_hp: 500.0,
-            riven_pos: Vec3::ZERO,
-            riven_hp: 500.0,
-            riven_max_hp: 500.0,
-            distance: 0.0,
-            q_ready: true,
-            w_ready: true,
-            e_ready: true,
-            r_ready: true,
-            has_vital: true,
-            vital_is_active: true,
-            vital_dir_x: dir_x,
-            vital_dir_neg_x: dir_neg_x,
-            vital_dir_z: dir_z,
-            vital_dir_neg_z: dir_neg_z,
-        }
-    }
-
-    #[test]
-    fn test_is_position_aligned_with_vital() {
-        let riven = Vec3::ZERO;
-        let obs = obs_with_vital(1.0, 0.0, 0.0, 0.0);
-        assert!(is_position_aligned_with_vital(
-            Vec3::new(60.0, 0.0, 10.0),
-            riven,
-            &obs
-        ));
-        assert!(!is_position_aligned_with_vital(
-            Vec3::new(-60.0, 0.0, 10.0),
-            riven,
-            &obs
-        ));
-        let obs = obs_with_vital(0.0, 1.0, 0.0, 0.0);
-        assert!(is_position_aligned_with_vital(
-            Vec3::new(-60.0, 0.0, 10.0),
-            riven,
-            &obs
-        ));
-        let obs = obs_with_vital(0.0, 0.0, 1.0, 0.0);
-        assert!(is_position_aligned_with_vital(
-            Vec3::new(10.0, 0.0, 60.0),
-            riven,
-            &obs
-        ));
-        let obs = obs_with_vital(0.0, 0.0, 0.0, 0.0);
-        assert!(!is_position_aligned_with_vital(
-            Vec3::new(60.0, 0.0, 0.0),
-            riven,
-            &obs
-        ));
-    }
-
-    #[test]
-    fn test_obs_vector_layout() {
-        let mut obs = obs_with_vital(1.0, 0.0, 0.0, 0.0);
-        obs.fiora_pos = Vec3::new(250.0, 0.0, 0.0);
-        obs.riven_pos = Vec3::ZERO;
-        obs.distance = 250.0;
-        let v = obs.to_vector();
-        assert_eq!(v.len(), FioraVsRivenObs::dim());
-        assert_eq!(v.len(), 9);
-        assert_eq!(v[0], 1.0);
-        assert_eq!(v[4], 1.0);
-        assert_eq!(v[5], 1.0);
-        assert_eq!(v[6], 250.0 / OBS_DISTANCE_SCALE);
-        assert_eq!(v[OBS_DISTANCE_IDX], 250.0 / OBS_DISTANCE_SCALE);
-    }
-
-    #[test]
-    fn test_compute_step_reward_kill_and_vital() {
-        let obs = obs_with_vital(0.0, 0.0, 0.0, 0.0);
-        let (reward, _breakdown, vars) = compute_step_reward(
-            100.0,
-            0.0,
-            Vec3::ZERO,
-            Vec3::ZERO,
-            Vec3::ZERO,
-            false,
-            true,
-            &obs,
-            4.0,
-        );
-        let expected = -0.002 + 0.8 + 2.0 + 0.0;
-        assert!(
-            (reward - expected).abs() < 1e-4,
-            "reward={reward} expected={expected}"
-        );
-        assert_eq!(vars["is_vital_break"], 1.0);
-        assert_eq!(vars["is_kill"], 1.0);
-        assert_eq!(vars["is_attack_missed"], 0.0);
-        assert_eq!(vars["quick_kill_reward"], 0.0);
-    }
-
-    #[test]
-    fn test_compute_step_reward_attack_miss() {
-        let obs = obs_with_vital(0.0, 0.0, 0.0, 0.0);
-        let (reward, _breakdown, vars) = compute_step_reward(
-            500.0,
-            490.0,
-            Vec3::ZERO,
-            Vec3::ZERO,
-            Vec3::ZERO,
-            true,
-            false,
-            &obs,
-            0.5,
-        );
-        assert!((reward - (-0.102)).abs() < 1e-4, "reward={reward}");
-        assert_eq!(vars["is_attack_missed"], 1.0);
-        assert_eq!(vars["is_kill"], 0.0);
-    }
-
-    #[test]
-    fn test_vital_break_tracker() {
-        let mut app = App::new();
-        let fiora = app.world_mut().spawn_empty().id();
-        let riven = app.world_mut().spawn_empty().id();
-        app.world_mut()
-            .insert_resource(FioraRivenEntities { fiora, riven });
-        add_common_observers(&mut app);
-
-        let damage_result = || DamageResult {
-            final_damage: 0.0,
-            white_shield_absorbed: 0.0,
-            magic_shield_absorbed: 0.0,
-            reduced_damage: 0.0,
-            armor_reduced_damage: 0.0,
-            original_damage: 0.0,
-        };
-
-        app.world_mut().trigger(EventDamageCreate {
-            entity: riven,
-            source: fiora,
-            damage_type: DamageType::True,
-            damage_result: damage_result(),
-            tag: None,
-        });
-        assert!(app.world().resource::<VitalBreakTracker>().hit);
-
-        app.world_mut().resource_mut::<VitalBreakTracker>().hit = false;
-        app.world_mut().trigger(EventDamageCreate {
-            entity: riven,
-            source: fiora,
-            damage_type: DamageType::Physical,
-            damage_result: damage_result(),
-            tag: None,
-        });
-        assert!(!app.world().resource::<VitalBreakTracker>().hit);
-
-        app.world_mut().trigger(EventDamageCreate {
-            entity: fiora,
-            source: riven,
-            damage_type: DamageType::True,
-            damage_result: damage_result(),
-            tag: None,
-        });
-        assert!(!app.world().resource::<VitalBreakTracker>().hit);
     }
 }

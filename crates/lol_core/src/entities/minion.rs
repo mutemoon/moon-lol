@@ -50,6 +50,17 @@ impl Plugin for PluginMinion {
 
         app.add_observer(on_event_aggro_target_found);
         app.add_observer(on_event_dead);
+        app.add_observer(on_reset_minions);
+    }
+}
+
+pub fn on_reset_minions(
+    _trigger: On<crate::action::EventReset>,
+    mut commands: Commands,
+    q_minions: Query<Entity, With<Minion>>,
+) {
+    for entity in q_minions.iter() {
+        commands.entity(entity).despawn();
     }
 }
 

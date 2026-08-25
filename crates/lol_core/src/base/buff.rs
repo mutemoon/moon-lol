@@ -20,3 +20,22 @@ impl std::ops::Deref for Buffs {
         &self.0
     }
 }
+
+#[derive(Default)]
+pub struct PluginBuff;
+
+impl Plugin for PluginBuff {
+    fn build(&self, app: &mut App) {
+        app.add_observer(on_reset_buffs);
+    }
+}
+
+pub fn on_reset_buffs(
+    _trigger: On<crate::action::EventReset>,
+    mut commands: Commands,
+    q_buffs: Query<Entity, With<BuffOf>>,
+) {
+    for entity in q_buffs.iter() {
+        commands.entity(entity).despawn();
+    }
+}

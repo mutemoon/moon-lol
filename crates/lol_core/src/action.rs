@@ -34,6 +34,7 @@ impl Plugin for PluginAction {
         app.add_observer(on_command_knockback);
 
         app.add_observer(on_command_action);
+        app.register_type::<EventReset>();
 
         app.add_systems(FixedUpdate, update_dash_damage);
         app.add_systems(FixedUpdate, update_tracking_dash);
@@ -42,19 +43,24 @@ impl Plugin for PluginAction {
     }
 }
 
+/// 全局重置事件
+#[derive(Event, Debug, Clone, Copy, Default, Reflect)]
+pub struct EventReset;
+
 #[derive(EntityEvent)]
 pub struct CommandAction {
     pub entity: Entity,
     pub action: Action,
 }
 
-#[derive(Clone, Serialize, Deserialize, Reflect, Debug)]
+#[derive(Clone, Serialize, Deserialize, Reflect, Debug, PartialEq)]
 pub enum Action {
     Attack(Entity),
     Move(Vec2),
     Stop,
     Skill { index: usize, point: Vec2 },
     SkillLevelUp(usize),
+    Reset,
 }
 
 fn on_command_action(trigger: On<CommandAction>, mut commands: Commands) {
@@ -93,6 +99,9 @@ fn on_command_action(trigger: On<CommandAction>, mut commands: Commands) {
                 priority: 0,
                 action: MovementAction::Stop,
             });
+        }
+        Action::Reset => {
+            commands.trigger(EventReset);
         }
     }
 }

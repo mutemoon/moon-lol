@@ -1,6 +1,6 @@
 use bevy::ecs::event::EntityEvent;
 use bevy::prelude::{
-    Assets, Commands, Entity, Fixed, On, Query, Res, ResMut, Time, Timer, TimerMode, With,
+    Assets, Commands, Entity, On, Query, Res, ResMut, Time, Timer, TimerMode, With,
 };
 use lol_base::spell::Spell;
 
@@ -244,5 +244,27 @@ pub fn update_skill_recast_windows(
         if window.timer.is_finished() {
             commands.entity(entity).remove::<super::SkillRecastWindow>();
         }
+    }
+}
+
+pub fn on_reset_skills(
+    _trigger: On<crate::action::EventReset>,
+    mut commands: Commands,
+    mut q_skill_points: Query<&mut SkillPoints>,
+    mut q_skills: Query<&mut super::Skill>,
+    mut q_cooldowns: Query<&mut super::CoolDown>,
+    q_recast: Query<Entity, With<super::SkillRecastWindow>>,
+) {
+    for mut sp in q_skill_points.iter_mut() {
+        *sp = SkillPoints::default();
+    }
+    for mut skill in q_skills.iter_mut() {
+        skill.level = 0;
+    }
+    for mut cd in q_cooldowns.iter_mut() {
+        cd.timer = None;
+    }
+    for entity in q_recast.iter() {
+        commands.entity(entity).remove::<super::SkillRecastWindow>();
     }
 }

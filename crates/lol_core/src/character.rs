@@ -4,6 +4,7 @@ use bevy::prelude::*;
 use bevy::world_serialization::WorldInstanceSpawnError;
 use lol_base::character::ConfigCharacterRecord;
 
+use crate::action::EventReset;
 use crate::base::level::{EventExperienceGain, EventLevelUp, ExperienceDrop, Level};
 use crate::life::{Death, EventDead};
 use crate::team::Team;
@@ -13,8 +14,15 @@ pub struct PluginCharacter;
 
 impl Plugin for PluginCharacter {
     fn build(&self, app: &mut App) {
+        app.register_type::<Character>();
+        app.register_type::<CharacterReady>();
+        app.register_type::<SpawnTransform>();
         app.add_observer(on_event_dead);
-        app.add_systems(FixedUpdate, try_load_config_characters);
+        app.add_observer(on_reset_character_transform);
+        app.add_systems(
+            FixedUpdate,
+            (try_load_config_characters, record_spawn_transform),
+        );
     }
 }
 
@@ -26,10 +34,33 @@ pub struct Character;
 #[reflect(Component)]
 pub struct CharacterReady;
 
+/// 记录实体初始生成时的 Transform，用于重置时复原坐标与旋转
+#[derive(Component, Reflect, Clone, Copy, Debug, Default)]
+#[reflect(Component)]
+pub struct SpawnTransform(pub Transform);
+
 /// 角色配置 (DynamicWorld) 完全加载并写入实体后触发的事件
 #[derive(Event, Debug, Clone, Copy, Reflect)]
 pub struct EventCharacterReady {
     pub entity: Entity,
+}
+
+fn record_spawn_transform(
+    mut commands: Commands,
+    q: Query<(Entity, &Transform), (With<Character>, Without<SpawnTransform>)>,
+) {
+    for (entity, transform) in q.iter() {
+        commands.entity(entity).insert(SpawnTransform(*transform));
+    }
+}
+
+pub fn on_reset_character_transform(
+    _trigger: On<EventReset>,
+    mut q: Query<(&mut Transform, &SpawnTransform)>,
+) {
+    for (mut transform, spawn_transform) in q.iter_mut() {
+        *transform = spawn_transform.0;
+    }
 }
 
 fn on_event_dead(

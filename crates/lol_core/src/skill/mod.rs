@@ -47,6 +47,7 @@ impl Plugin for PluginSkill {
         app.add_observer(on_skill_cast);
         app.add_observer(on_skill_level_up);
         app.add_observer(on_level_up);
+        app.add_observer(on_reset_skills);
         app.add_systems(FixedUpdate, update_skill_recast_windows);
         app.add_systems(Update, apply_no_cooldown);
     }

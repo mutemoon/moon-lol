@@ -20,8 +20,19 @@ impl Plugin for PluginAttack {
         app.add_observer(on_command_attack_reset);
         app.add_observer(on_command_attack_stop);
         app.add_observer(on_event_dead);
+        app.add_observer(on_reset_attack);
 
         app.add_systems(FixedUpdate, fixed_update);
+    }
+}
+
+pub fn on_reset_attack(
+    _trigger: On<crate::action::EventReset>,
+    mut commands: Commands,
+    q_attack_state: Query<Entity, With<AttackState>>,
+) {
+    for entity in q_attack_state.iter() {
+        commands.entity(entity).try_remove::<AttackState>();
     }
 }
 

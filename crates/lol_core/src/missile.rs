@@ -25,11 +25,30 @@ impl Plugin for PluginMissile {
         app.add_observer(on_command_missile_create);
         app.add_observer(on_event_movement_end);
         app.add_observer(on_command_attached_field_create);
+        app.add_observer(on_reset_missiles);
 
         app.add_systems(FixedUpdate, fixed_update);
         app.add_systems(FixedUpdate, linear_missile_collision);
         app.add_systems(FixedUpdate, update_attached_fields);
         app.add_systems(FixedUpdate, update_wall_anchors);
+    }
+}
+
+pub fn on_reset_missiles(
+    _trigger: On<crate::action::EventReset>,
+    mut commands: Commands,
+    q_missiles: Query<Entity, With<Missile>>,
+    q_attached: Query<Entity, With<AttachedField>>,
+    q_anchors: Query<Entity, With<WallAnchor>>,
+) {
+    for entity in q_missiles.iter() {
+        commands.entity(entity).despawn();
+    }
+    for entity in q_attached.iter() {
+        commands.entity(entity).despawn();
+    }
+    for entity in q_anchors.iter() {
+        commands.entity(entity).despawn();
     }
 }
 

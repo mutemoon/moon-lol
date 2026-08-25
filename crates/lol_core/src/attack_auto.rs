@@ -17,8 +17,19 @@ impl Plugin for PluginAttackAuto {
         app.add_observer(on_command_attack_auto_start);
         app.add_observer(on_command_attack_auto_stop);
         app.add_observer(on_event_dead);
+        app.add_observer(on_reset_attack_auto);
 
         app.add_systems(FixedPreUpdate, update_attack_auto);
+    }
+}
+
+pub fn on_reset_attack_auto(
+    _trigger: On<crate::action::EventReset>,
+    mut commands: Commands,
+    q_attack_auto: Query<Entity, With<AttackAuto>>,
+) {
+    for entity in q_attack_auto.iter() {
+        commands.entity(entity).remove::<AttackAuto>();
     }
 }
 

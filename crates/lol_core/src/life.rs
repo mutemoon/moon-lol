@@ -25,6 +25,32 @@ impl Plugin for PluginLife {
         app.add_systems(Update, apply_god_mode);
         app.add_observer(on_event_damage_create);
         app.add_observer(on_command_heal);
+        app.add_observer(on_reset_life);
+    }
+}
+
+pub fn on_reset_life(
+    _trigger: On<crate::action::EventReset>,
+    mut commands: Commands,
+    mut q_health: Query<(
+        Entity,
+        &mut Health,
+        Option<&Death>,
+        Option<&mut AbilityResource>,
+    )>,
+    q_respawn: Query<Entity, With<RespawnTimer>>,
+) {
+    for (entity, mut health, death, ability_res) in q_health.iter_mut() {
+        health.value = health.max;
+        if death.is_some() {
+            commands.entity(entity).remove::<Death>();
+        }
+        if let Some(mut ar) = ability_res {
+            ar.value = ar.max;
+        }
+    }
+    for entity in q_respawn.iter() {
+        commands.entity(entity).remove::<RespawnTimer>();
     }
 }
 

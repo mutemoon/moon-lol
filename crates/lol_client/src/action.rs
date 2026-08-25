@@ -9,7 +9,8 @@ use serde::{Deserialize, Serialize};
 /// - `Stop`                    → `"Stop"`
 /// - `Skill{index,point}`      → `{"Skill":{"index":..,"point":[x,y]}}`
 /// - `SkillLevelUp(index)`     → `{"SkillLevelUp":index}`
-#[derive(Serialize, Deserialize, Clone, Debug, JsonSchema)]
+/// - `Reset`                   → `"Reset"`
+#[derive(Serialize, Deserialize, Clone, Debug, JsonSchema, PartialEq)]
 pub enum Action {
     /// 移动到坐标 [x, y]
     Move([f32; 2]),
@@ -21,4 +22,6 @@ pub enum Action {
     Skill { index: usize, point: [f32; 2] },
     /// 升级指定索引的技能
     SkillLevelUp(usize),
+    /// 重置游戏状态
+    Reset,
 }

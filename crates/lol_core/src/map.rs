@@ -74,7 +74,7 @@ fn startup_load_map_geometry(
                                 "儿子实体 {:?} 的 character_record handle: {:?}",
                                 child, record.character_record
                             );
-                            commands.entity(child).insert(WaitCharacterReady(child));
+                            commands.entity(child).insert(WaitCharacterReady);
                         }
                     }
                 }
