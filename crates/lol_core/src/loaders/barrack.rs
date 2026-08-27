@@ -43,7 +43,10 @@ mod tests {
     #[test]
     fn test_barrack_loader() {
         use lol_base::barrack::*;
-        let content = std::fs::read_to_string("d:/Users/admin/workspace/moon-lol/assets/maps/sr_seasonal_map/barracks/147211fb.ron").unwrap();
+        let content = std::fs::read_to_string(
+            "d:/Users/admin/workspace/moon-lol/assets/maps/sr_seasonal_map/barracks/147211fb.ron",
+        )
+        .unwrap();
         let trimmed = content.trim_start_matches('\u{feff}');
         let res: Result<ConfigBarracks, _> = ron::from_str(trimmed);
         assert!(res.is_ok());

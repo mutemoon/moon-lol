@@ -4,8 +4,8 @@ use lol_rl_protocol::{ActionSpace, ObsFeaturePayload, ObsNode, ObsSchema, Reward
 
 pub use crate::fiora_riven_common::{
     ATTACK_MASK_DISTANCE, AttackEventTracker, FioraRivenBaseEnv, FioraVsRivenObs,
-    VitalBreakTracker, compute_step_reward, get_obs_from_world,
-    setup_skill_levels_world, unpause_virtual_time,
+    VitalBreakTracker, compute_step_reward, get_obs_from_world, setup_skill_levels_world,
+    unpause_virtual_time,
 };
 use crate::reward::{FioraVsRivenRewardModel, RewardModel};
 use crate::traits::{EnvConfig, EnvMeta, RenderMode, RlEnvironment, StepResult, VisualEnvironment};

@@ -17,10 +17,7 @@ fn test_solo_v0_real_map_and_level_one_laning() {
     // 1. 验证真实地图配置
     {
         let map_paths = env.world().resource::<MapPaths>();
-        assert_eq!(
-            map_paths.name, "solo",
-            "SoloV0 应使用 solo 地图"
-        );
+        assert_eq!(map_paths.name, "solo", "SoloV0 应使用 solo 地图");
     }
 
     // 2. 初始重置与观测验证
@@ -101,7 +98,9 @@ fn test_solo_v0_real_map_and_level_one_laning() {
     assert!(!reset_obs[0].w_ready);
 
     {
-        let mut q_minions = env.world_mut().query::<(Entity, &Transform, &Team, &Health)>();
+        let mut q_minions = env
+            .world_mut()
+            .query::<(Entity, &Transform, &Team, &Health)>();
         let minion_count = q_minions.iter(env.world()).count();
         assert!(
             minion_count > 0,

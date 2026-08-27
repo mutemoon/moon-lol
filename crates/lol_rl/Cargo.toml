@@ -10,6 +10,7 @@ candle-nn = "0.8.2"
 rand.workspace = true
 tracing.workspace = true
 lol_env.workspace = true
+lol_core.workspace = true
 anyhow = "1"
 tokio.workspace = true
 tokio-tungstenite = { workspace = true }

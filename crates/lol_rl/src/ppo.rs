@@ -2,9 +2,9 @@ use std::path::Path;
 
 use candle_core::{DType, Device, Result, Tensor};
 use candle_nn::{AdamW, Optimizer, ParamsAdamW, VarBuilder, VarMap};
-use lol_rl_protocol::{ActionSpace, ObsSchema, PolicyBackbone};
+use lol_rl_protocol::{ActionSchema, ActionSpace, ObsSchema, PolicyBackbone};
 
-use crate::policy::{ActorCritic, HeroEmbedConfig};
+use crate::policy::{ActorCritic, HeroEmbedConfig, ModelParamSummary};
 
 pub struct RolloutBuffer {
     pub states: Vec<Vec<f32>>,
@@ -391,6 +391,78 @@ impl PPOAgent {
         })
     }
 
+    /// 基于 ObsSchema + ActionSchema 双 AST 结构规范自动推导特征提取网络和多头 Actor 架构的 PPOAgent
+    pub fn from_schemas(
+        obs_schema: ObsSchema,
+        action_schema: ActionSchema,
+        hidden_dim: usize,
+        config: PPOConfig,
+        device: Device,
+        backbone_type: PolicyBackbone,
+    ) -> Result<Self> {
+        let mut varmap = VarMap::new();
+        let vb = VarBuilder::from_varmap(&varmap, DType::F32, &device);
+
+        let actor_critic = ActorCritic::from_schemas(
+            obs_schema.clone(),
+            action_schema,
+            hidden_dim,
+            backbone_type,
+            None,
+            vb,
+        )?;
+
+        let in_dim = obs_schema.encoded_dim();
+        let hidden_gain = std::f32::consts::SQRT_2;
+
+        match backbone_type {
+            PolicyBackbone::Mlp => {
+                let fc1_w = Tensor::from_vec(
+                    crate::policy::orthogonal_weight(hidden_dim, in_dim, hidden_gain),
+                    (hidden_dim, in_dim),
+                    &device,
+                )?;
+                let fc2_w = Tensor::from_vec(
+                    crate::policy::orthogonal_weight(hidden_dim, hidden_dim, hidden_gain),
+                    (hidden_dim, hidden_dim),
+                    &device,
+                )?;
+                let _ = varmap.set_one("fc1.weight", fc1_w);
+                let _ = varmap.set_one("fc2.weight", fc2_w);
+            }
+            PolicyBackbone::Mamba => {
+                let proj_w = Tensor::from_vec(
+                    crate::policy::orthogonal_weight(hidden_dim, in_dim, hidden_gain),
+                    (hidden_dim, in_dim),
+                    &device,
+                )?;
+                let _ = varmap.set_one("proj_in.weight", proj_w);
+            }
+        }
+
+        let critic_w = Tensor::from_vec(
+            crate::policy::orthogonal_weight(1, hidden_dim, 1.0),
+            (1, hidden_dim),
+            &device,
+        )?;
+        let _ = varmap.set_one("critic_head.weight", critic_w);
+
+        let params = ParamsAdamW {
+            lr: config.lr,
+            ..Default::default()
+        };
+        let optimizer = AdamW::new(varmap.all_vars(), params)?;
+
+        Ok(Self {
+            actor_critic,
+            varmap,
+            optimizer,
+            config,
+            device,
+            hero_embed_config: HeroEmbedConfig::default(),
+        })
+    }
+
     /// 统一为环境创建 PPOAgent，默认使用 Mamba 主干
     pub fn create_for_env<E: lol_env::RlEnvironment>(
         state_dim: usize,
@@ -410,7 +482,7 @@ impl PPOAgent {
     }
 
     /// 统一为环境创建 PPOAgent，支持指定 PolicyBackbone (MLP 或 Mamba)，
-    /// 若环境定义了 ObsSchema，则自动使用 AST 驱动的特征提取与网络拓扑。
+    /// 若环境定义了 ObsSchema + ActionSchema，则自动使用双 AST 驱动的特征提取与网络拓扑。
     pub fn create_for_env_with_backbone<E: lol_env::RlEnvironment>(
         state_dim: usize,
         hidden_dim: usize,
@@ -419,7 +491,16 @@ impl PPOAgent {
         device: Device,
         backbone_type: PolicyBackbone,
     ) -> Result<Self> {
-        if let Some(schema) = E::obs_schema() {
+        if let (Some(obs_schema), Some(action_schema)) = (E::obs_schema(), E::action_schema()) {
+            Self::from_schemas(
+                obs_schema,
+                action_schema,
+                hidden_dim,
+                config,
+                device,
+                backbone_type,
+            )
+        } else if let Some(schema) = E::obs_schema() {
             Self::from_obs_schema(
                 schema,
                 hidden_dim,
@@ -447,6 +528,16 @@ impl PPOAgent {
 
     pub fn device(&self) -> &Device {
         &self.device
+    }
+
+    /// 提取策略与价值网络的所有层级参数量明细
+    pub fn parameter_summary(&self) -> ModelParamSummary {
+        self.actor_critic.parameter_summary()
+    }
+
+    /// 在控制台与日志中格式化输出网络结构与参数量明细（以 K / M 为单位）
+    pub fn print_parameter_summary(&self) {
+        self.actor_critic.parameter_summary().print_summary();
     }
 
     /// 当前学习率（用于训练循环中的退火调度）。
@@ -514,11 +605,70 @@ impl PPOAgent {
         device: Device,
         path: &Path,
     ) -> Result<Self> {
-        if let Some(schema) = E::obs_schema() {
+        if let (Some(obs_schema), Some(action_schema)) = (E::obs_schema(), E::action_schema()) {
+            Self::load_from_schemas(obs_schema, action_schema, hidden_dim, config, device, path)
+        } else if let Some(schema) = E::obs_schema() {
             Self::load_from_schema(schema, hidden_dim, action_space, config, device, path)
         } else {
             Self::load(state_dim, hidden_dim, action_space, config, device, path)
         }
+    }
+
+    pub fn load_from_schemas(
+        obs_schema: ObsSchema,
+        action_schema: ActionSchema,
+        hidden_dim: usize,
+        config: PPOConfig,
+        device: Device,
+        path: &Path,
+    ) -> Result<Self> {
+        let meta = std::fs::metadata(path)
+            .map_err(|e| candle_core::Error::Msg(format!("checkpoint 文件不存在: {e}")))?;
+        if meta.len() == 0 {
+            return Err(candle_core::Error::Msg("checkpoint 文件为空".to_string()));
+        }
+        let tensors = candle_core::safetensors::load(path, &device)?;
+
+        let is_mlp = tensors.contains_key("fc1.weight") || tensors.contains_key("fc1.bias");
+        let backbone_type = if is_mlp {
+            PolicyBackbone::Mlp
+        } else {
+            PolicyBackbone::Mamba
+        };
+
+        let hidden_dim = tensors
+            .get("fc2.bias")
+            .or_else(|| tensors.get("fc1.bias"))
+            .or_else(|| tensors.get("proj_in.bias"))
+            .or_else(|| tensors.get("proj_in.weight"))
+            .and_then(|t| t.shape().dims().first().copied())
+            .unwrap_or(hidden_dim);
+
+        let mut varmap = VarMap::new();
+        let vb = VarBuilder::from_varmap(&varmap, DType::F32, &device);
+        let actor_critic = ActorCritic::from_schemas(
+            obs_schema,
+            action_schema,
+            hidden_dim,
+            backbone_type,
+            None,
+            vb,
+        )?;
+        varmap.load(path)?;
+        let params = ParamsAdamW {
+            lr: config.lr,
+            ..Default::default()
+        };
+        let optimizer = AdamW::new(varmap.all_vars(), params)?;
+
+        Ok(Self {
+            actor_critic,
+            varmap,
+            optimizer,
+            config,
+            device,
+            hero_embed_config: HeroEmbedConfig::default(),
+        })
     }
 
     pub fn load_from_schema(

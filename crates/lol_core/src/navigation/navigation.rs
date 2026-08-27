@@ -1,4 +1,4 @@
-use std::collections::{HashMap, HashSet, VecDeque};
+use std::collections::{HashSet, VecDeque};
 use std::time::Duration;
 
 use bevy::prelude::*;
@@ -7,7 +7,8 @@ use lol_base::grid::{CELL_COST_IMPASSABLE, ConfigNavigationGrid};
 use crate::base::bounding::Bounding;
 use crate::character::Character;
 use crate::loaders::navgrid::NavGridLoader;
-use crate::navigation::astar::find_grid_path_with_result;
+pub use crate::navigation::astar::AStarCache;
+use crate::navigation::astar::find_grid_path_with_result_cache;
 use crate::navigation::grid::ResourceGrid;
 
 #[derive(Default)]
@@ -20,6 +21,7 @@ impl Plugin for PluginNavigaton {
 
         app.init_resource::<NavigationStats>();
         app.init_resource::<NavigationDebugState>();
+        app.init_resource::<AStarCache>();
 
         app.add_systems(First, |mut res_stats: ResMut<NavigationStats>| {
             *res_stats = Default::default();
@@ -29,10 +31,6 @@ impl Plugin for PluginNavigaton {
                 info!("{:#?}", res_stats);
             }
         });
-        app.add_systems(
-            PreUpdate,
-            pre_update_global_occupied_cells.run_if(resource_exists::<ResourceGrid>),
-        );
         app.add_systems(Update, update_y.run_if(resource_exists::<ResourceGrid>));
     }
 }
@@ -89,7 +87,7 @@ pub fn get_nav_path(
     grid: &ConfigNavigationGrid,
     stats: &mut NavigationStats,
 ) -> Option<Vec<Vec2>> {
-    get_nav_path_with_debug(start_pos, end_pos, grid, stats, None)
+    get_nav_path_with_debug(start_pos, end_pos, grid, stats, None, None)
 }
 
 pub fn get_nav_path_with_debug(
@@ -98,6 +96,7 @@ pub fn get_nav_path_with_debug(
     grid: &ConfigNavigationGrid,
     stats: &mut NavigationStats,
     mut debug: Option<&mut NavigationDebugState>,
+    mut cache: Option<&mut AStarCache>,
 ) -> Option<Vec<Vec2>> {
     // let start = Instant::now();
 
@@ -171,7 +170,11 @@ pub fn get_nav_path_with_debug(
     }
 
     // 如果不可直达，则使用A*算法规划路径（包含 debug 信息）
-    let result = find_path_with_result(&grid, &adjusted_start_pos, &adjusted_end_pos);
+    let result = if let Some(ref mut c) = cache {
+        find_path_with_result_cache(&grid, &adjusted_start_pos, &adjusted_end_pos, c)
+    } else {
+        find_path_with_result(&grid, &adjusted_start_pos, &adjusted_end_pos)
+    };
 
     // debug!("A* 路径找到，耗时 {:.6}ms", start.elapsed().as_millis());
 
@@ -217,7 +220,18 @@ pub fn find_path_with_result(
     start: &Vec2,
     end: &Vec2,
 ) -> Option<FindPathResult> {
-    let astar_result = find_grid_path_with_result(grid, start, end)?;
+    let mut cache = AStarCache::default();
+    find_path_with_result_cache(grid, start, end, &mut cache)
+}
+
+/// 主要的寻路函数（带 AStarCache 复用）
+pub fn find_path_with_result_cache(
+    grid: &ConfigNavigationGrid,
+    start: &Vec2,
+    end: &Vec2,
+    cache: &mut AStarCache,
+) -> Option<FindPathResult> {
+    let astar_result = find_grid_path_with_result_cache(grid, start, end, cache)?;
 
     let unoptimized_path = astar_result
         .path
@@ -473,24 +487,40 @@ pub fn find_nearest_walkable_cell(
     None
 }
 
-fn pre_update_global_occupied_cells(
-    res_grid: Res<ResourceGrid>,
-    mut assets_grid: ResMut<Assets<ConfigNavigationGrid>>,
-    entities_with_bounding: Query<(Entity, &GlobalTransform, &Bounding)>,
-    mut stats: ResMut<NavigationStats>,
+pub fn update_occupied_cells_flat(
+    grid: &mut ConfigNavigationGrid,
+    entities_with_bounding: &Query<(Entity, &GlobalTransform, &Bounding)>,
+    stats: &mut NavigationStats,
 ) {
-    let Some(mut grid) = assets_grid.get_mut(&res_grid.0) else {
-        return;
-    };
-    // let start = Instant::now();
+    let total = grid.x_len * grid.y_len;
+    if grid.occupied_cells.len() != total {
+        grid.occupied_cells = vec![0.0; total];
+    } else {
+        grid.occupied_cells.fill(0.0);
+    }
 
-    // 计算所有实体的 occupied_cells（不排除任何实体）
-    let occupied_cells = calculate_occupied_grid_cells(&grid, &entities_with_bounding, &[]);
-    grid.occupied_cells = occupied_cells;
+    let mut occupied_count = 0u32;
+    let x_len = grid.x_len;
+    let y_len = grid.y_len;
+    let cell_size = grid.cell_size;
 
-    // stats.calculate_occupied_grid_cells_time += start.elapsed();
+    for (_entity, transform, bounding) in entities_with_bounding.iter() {
+        let entity_pos = transform.translation().xz();
+        let entity_grid_pos = world_pos_to_grid_xy(grid, entity_pos);
+        let radius_in_cells = (bounding.radius / cell_size).ceil() as i32;
+
+        process_entity_cells_flat(
+            &mut grid.occupied_cells,
+            x_len,
+            y_len,
+            entity_grid_pos,
+            radius_in_cells,
+            &mut occupied_count,
+        );
+    }
+
     stats.calculate_occupied_grid_cells_count += 1;
-    stats.occupied_grid_cells_num = grid.occupied_cells.len() as u32;
+    stats.occupied_grid_cells_num = occupied_count;
 }
 
 /// 根据所有带Bounding组件的实体，计算被占据的网格格子及其通行成本
@@ -501,14 +531,16 @@ fn pre_update_global_occupied_cells(
 /// - `exclude_entities`: 要排除的实体ID列表（不将其作为障碍物），例如当前移动的实体自身
 ///
 /// # 返回值
-/// - 格子坐标到通行成本的映射，成本越高表示通行代价越大
+/// - 扁平列表（索引为 y * x_len + x），值为通行成本
 pub fn calculate_occupied_grid_cells(
     grid: &ConfigNavigationGrid,
     entities_with_bounding: &Query<(Entity, &GlobalTransform, &Bounding)>,
     exclude_entities: &[Entity],
-) -> HashMap<(usize, usize), f32> {
-    let mut occupied_cells: HashMap<(usize, usize), f32> = HashMap::new();
+) -> Vec<f32> {
+    let total = grid.x_len * grid.y_len;
+    let mut occupied_cells = vec![0.0; total];
     let exclude_set: HashSet<Entity> = exclude_entities.iter().copied().collect();
+    let mut count = 0u32;
 
     for (entity, transform, bounding) in entities_with_bounding.iter() {
         if exclude_set.contains(&entity) {
@@ -519,17 +551,26 @@ pub fn calculate_occupied_grid_cells(
         let entity_grid_pos = world_pos_to_grid_xy(grid, entity_pos);
         let radius_in_cells = (bounding.radius / grid.cell_size).ceil() as i32;
 
-        process_entity_cells(&mut occupied_cells, grid, entity_grid_pos, radius_in_cells);
+        process_entity_cells_flat(
+            &mut occupied_cells,
+            grid.x_len,
+            grid.y_len,
+            entity_grid_pos,
+            radius_in_cells,
+            &mut count,
+        );
     }
 
     occupied_cells
 }
 
-fn process_entity_cells(
-    occupied_cells: &mut HashMap<(usize, usize), f32>,
-    grid: &ConfigNavigationGrid,
+fn process_entity_cells_flat(
+    occupied_cells: &mut [f32],
+    x_len: usize,
+    y_len: usize,
     entity_grid_pos: (usize, usize),
     radius_in_cells: i32,
+    occupied_count: &mut u32,
 ) {
     for dx in -radius_in_cells..=radius_in_cells {
         for dy in -radius_in_cells..=radius_in_cells {
@@ -540,18 +581,22 @@ fn process_entity_cells(
                 continue;
             }
 
-            let new_pos = (new_x as usize, new_y as usize);
-            if new_pos.0 >= grid.x_len || new_pos.1 >= grid.y_len {
+            let nx = new_x as usize;
+            let ny = new_y as usize;
+            if nx >= x_len || ny >= y_len {
                 continue;
             }
 
             let distance = ((dx * dx + dy * dy) as f32).sqrt();
             let cost = calculate_cell_cost(distance, radius_in_cells);
 
-            occupied_cells
-                .entry(new_pos)
-                .and_modify(|c| *c = c.max(cost))
-                .or_insert(cost);
+            let idx = ny * x_len + nx;
+            if occupied_cells[idx] == 0.0 && cost > 0.0 {
+                *occupied_count += 1;
+            }
+            if cost > occupied_cells[idx] {
+                occupied_cells[idx] = cost;
+            }
         }
     }
 }

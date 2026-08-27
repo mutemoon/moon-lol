@@ -61,6 +61,8 @@ impl<E: RlEnvironment + 'static> TrainingSession<E> {
         horizon: usize,
         sampler_device: Device,
     ) -> Self {
+        agent.print_parameter_summary();
+
         info!(
             "🎮 [TrainingSession] 启动 {} 个并行无头环境 Rollout Worker (horizon={}, 采样设备 {:?})...",
             num_parallel_envs, horizon, sampler_device
@@ -257,5 +259,59 @@ impl<E: RlEnvironment + 'static> TrainingSession<E> {
 impl<E: RlEnvironment + 'static> Drop for TrainingSession<E> {
     fn drop(&mut self) {
         self.stop();
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use lol_env::solo_v0::SoloV0Env;
+    use lol_rl_protocol::PolicyBackbone;
+
+    use super::*;
+
+    #[test]
+    fn test_solo_v0_mlp_training_2_envs() -> Result<()> {
+        let device = Device::Cpu;
+        let ppo_config = crate::ppo::PPOConfig {
+            lr: 3e-4,
+            gamma: 0.99,
+            gae_lambda: 0.95,
+            clip_eps: 0.2,
+            c1: 0.5,
+            c2: 0.05,
+            ppo_epochs: 2,
+            clip_vloss: true,
+            max_grad_norm: 0.5,
+        };
+
+        let state_dim = SoloV0Env::state_dim();
+        let hidden_dim = 64;
+        let action_space = SoloV0Env::action_space();
+
+        let agent = PPOAgent::create_for_env_with_backbone::<SoloV0Env>(
+            state_dim,
+            hidden_dim,
+            action_space,
+            ppo_config,
+            device.clone(),
+            PolicyBackbone::Mlp,
+        )?;
+
+        // 2 个并行环境，horizon = 30 步快速测试
+        let mut session = TrainingSession::<SoloV0Env>::new(agent, 2, state_dim, 30, device);
+
+        let outcome = session.step_once(1, 3e-4, 0.05, 32)?;
+        assert!(outcome.num_samples > 0);
+        // 验证 reward_breakdown 不为空
+        assert!(
+            !outcome.reward_breakdown.is_empty(),
+            "reward_breakdown 应该包含统计项"
+        );
+        assert!(
+            outcome.reward_breakdown.contains_key("对敌伤害")
+                || outcome.reward_breakdown.contains_key("小兵伤害")
+        );
+
+        Ok(())
     }
 }

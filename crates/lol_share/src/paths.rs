@@ -115,7 +115,10 @@ mod tests {
         assert_eq!(games_dir(), base.join("games"));
         assert_eq!(logs_dir(), base.join("logs"));
         assert_eq!(default_log_db_path(), base.join("logs").join("debug.db"));
-        assert_eq!(log_db_path("game_123"), base.join("logs").join("game_123.db"));
+        assert_eq!(
+            log_db_path("game_123"),
+            base.join("logs").join("game_123.db")
+        );
         assert_eq!(checkpoints_dir(), base.join("checkpoints"));
         assert_eq!(
             checkpoint_task_dir("fiora_v1"),

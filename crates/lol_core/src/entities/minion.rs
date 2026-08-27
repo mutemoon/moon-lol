@@ -9,7 +9,7 @@ use crate::lane::Lane;
 use crate::life::{Death, EventDead};
 use crate::log::{CommandLog, EnumLogCategory};
 use crate::map::MinionPath;
-use crate::run::{CommandRunStart, Run, RunTarget};
+use crate::movement::{CommandMovement, MovementAction, MovementSource, MovementState, MovementWay};
 use crate::team::Team;
 
 #[derive(Component, Debug, Clone, Copy, PartialEq, Serialize, Deserialize, Reflect)]
@@ -70,17 +70,26 @@ pub fn on_reset_minions(
 pub fn fixed_update(
     mut commands: Commands,
     q_minion: Query<
-        (Entity, &Transform, &Team, &Lane, &MinionState, Option<&Run>),
+        (Entity, &Transform, &Team, &Lane, &MinionState, Option<&MovementState>),
         (With<Minion>, Without<Death>),
     >,
     res_minion_path: Res<MinionPath>,
 ) {
-    for (entity, transform, team, lane, minion_state, _run) in q_minion.iter() {
+    for (entity, transform, team, lane, minion_state, movement_state) in q_minion.iter() {
         if *minion_state != MinionState::MovingOnPath {
             continue;
         }
 
-        let minion_path = res_minion_path.0.get(lane).unwrap();
+        // 如果小兵已有正在移动的路径且未完成，直接继续前行
+        if let Some(state) = movement_state {
+            if !state.completed && !state.path.is_empty() {
+                continue;
+            }
+        }
+
+        let Some(minion_path) = res_minion_path.0.get(lane) else {
+            continue;
+        };
 
         let mut path = minion_path.clone();
 
@@ -88,28 +97,34 @@ pub fn fixed_update(
             path.reverse();
         }
 
-        let Some(closest_index) = find_next_point_index(&path, transform.translation.xz()) else {
+        let Some(next_index) = find_next_point_index(&path, transform.translation.xz()) else {
             continue;
         };
 
-        let target_pos = *path.get(closest_index).unwrap();
+        let current_y = transform.translation.y;
+        let remaining_path_3d: Vec<Vec3> = path[next_index..]
+            .iter()
+            .map(|p| Vec3::new(p.x, current_y, p.y))
+            .collect();
 
-        if let Some(run) = _run {
-            if let RunTarget::Position(pos) = run.target {
-                if pos == target_pos {
-                    continue;
-                }
-            }
+        if remaining_path_3d.is_empty() {
+            continue;
         }
 
         commands.trigger(CommandLog {
             entity,
-            info: format!("寻路到 {:?}", target_pos),
+            info: format!("沿兵线直接移动，剩余路点: {}", remaining_path_3d.len()),
             category: EnumLogCategory::Minion,
         });
-        commands.trigger(CommandRunStart {
+
+        commands.trigger(CommandMovement {
             entity,
-            target: RunTarget::Position(target_pos),
+            priority: 0,
+            action: MovementAction::Start {
+                way: MovementWay::Path(remaining_path_3d),
+                speed: None,
+                source: MovementSource::Run,
+            },
         });
     }
 }

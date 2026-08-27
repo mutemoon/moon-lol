@@ -1,5 +1,5 @@
 use lol_env::parallel::ParallelSoloV0Envs;
-use lol_env::solo_v0::{SoloV0Action, SoloV0DiscreteAction, SoloV0Env};
+use lol_env::solo_v0::{SOLO_V0_OBS_DIM, SoloV0Action, SoloV0DiscreteAction, SoloV0Env};
 use lol_env::traits::{EnvConfig, RenderMode, RlEnvironment};
 
 #[test]
@@ -16,8 +16,8 @@ fn test_multi_agent_selfplay_signatures_and_throughput() {
     assert_eq!(initial_obs.len(), 2, "自博弈环境应同时产出双方初始观测");
     assert_eq!(initial_obs[0].role_id, 0.0, "首个智能体应为剑姬 (0.0)");
     assert_eq!(initial_obs[1].role_id, 1.0, "次个智能体应为瑞雯 (1.0)");
-    assert_eq!(initial_obs[0].to_vector().len(), 60);
-    assert_eq!(initial_obs[1].to_vector().len(), 60);
+    assert_eq!(initial_obs[0].to_vector().len(), SOLO_V0_OBS_DIM);
+    assert_eq!(initial_obs[1].to_vector().len(), SOLO_V0_OBS_DIM);
 
     let act_fiora = SoloV0Action::new(0.5, 0.0, SoloV0DiscreteAction::Move);
     let act_riven = SoloV0Action::new(-0.5, 0.0, SoloV0DiscreteAction::Move);
@@ -26,8 +26,8 @@ fn test_multi_agent_selfplay_signatures_and_throughput() {
     assert_eq!(step_res.len(), 2, "应同时返回双方各自的 StepResult");
     assert_eq!(step_res[0].obs.role_id, 0.0);
     assert_eq!(step_res[1].obs.role_id, 1.0);
-    assert_eq!(step_res[0].obs.to_vector().len(), 60);
-    assert_eq!(step_res[1].obs.to_vector().len(), 60);
+    assert_eq!(step_res[0].obs.to_vector().len(), SOLO_V0_OBS_DIM);
+    assert_eq!(step_res[1].obs.to_vector().len(), SOLO_V0_OBS_DIM);
 }
 
 #[test]

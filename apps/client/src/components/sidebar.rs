@@ -72,6 +72,8 @@ pub struct AppSidebar {
     pub latest_visual_frame: Option<VisualObsFrame>,
     pub visual_obs_schema: Option<lol_rl_protocol::ObsSchema>,
     pub visual_obs_collapsed: std::collections::HashSet<String>,
+    pub visual_action_schema: Option<lol_rl_protocol::ActionSchema>,
+    pub visual_action_collapsed: std::collections::HashSet<String>,
     pub visual_in_tx: Option<mpsc::UnboundedSender<VisualInFrame>>,
     pub visual_error: Option<String>,
     /// 当前可视化子进程所属的任务 id（用于删除任务时联动关闭）
@@ -192,6 +194,8 @@ impl AppSidebar {
             latest_visual_frame: None,
             visual_obs_schema: None,
             visual_obs_collapsed: std::collections::HashSet::new(),
+            visual_action_schema: None,
+            visual_action_collapsed: std::collections::HashSet::new(),
             visual_in_tx: None,
             visual_error: None,
             visual_task_id: None,

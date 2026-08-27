@@ -13,8 +13,8 @@ use crate::life::Death;
 use crate::log::{CommandLog, EnumLogCategory};
 use crate::navigation::grid::ResourceGrid;
 use crate::navigation::navigation::{
-    NavigationDebugState, NavigationStats, get_nav_path_with_debug, is_path_blocked,
-    world_pos_to_grid_xy,
+    AStarCache, NavigationDebugState, NavigationStats, get_nav_path_with_debug, is_path_blocked,
+    update_occupied_cells_flat, world_pos_to_grid_xy,
 };
 use crate::rotate::CommandRotate;
 
@@ -420,15 +420,24 @@ fn apply_final_movement_decision(
         &mut MovementState,
         Option<&Bounding>,
     )>,
+    entities_with_bounding: Query<(Entity, &GlobalTransform, &Bounding)>,
     res_grid: Res<ResourceGrid>,
     mut assets_grid: ResMut<Assets<ConfigNavigationGrid>>,
-    mut stats: ResMut<NavigationStats>,
+    mut stats: Option<ResMut<NavigationStats>>,
     mut nav_debug: Option<ResMut<NavigationDebugState>>,
+    mut astar_cache: Option<ResMut<AStarCache>>,
     time: Res<Time>,
 ) {
     let Some(mut grid) = assets_grid.get_mut(&res_grid.0) else {
         return;
     };
+    let mut default_stats = NavigationStats::default();
+    let stats_ref = match stats.as_mut() {
+        Some(s) => &mut **s,
+        None => &mut default_stats,
+    };
+    let mut cache_ref = astar_cache.as_deref_mut();
+    let mut occupied_grid_updated = false;
     for (entity, transform, decision, mut movement_state, bounding) in query.iter_mut() {
         if matches!(&decision.0.action, MovementAction::Stop) {
             movement_state.clear_path();
@@ -441,6 +450,11 @@ fn apply_final_movement_decision(
 
         match way {
             MovementWay::Pathfind(target) => {
+                if !occupied_grid_updated {
+                    update_occupied_cells_flat(&mut grid, &entities_with_bounding, stats_ref);
+                    occupied_grid_updated = true;
+                }
+
                 if let Some(bounding) = bounding {
                     calculate_and_set_exclude_cells(
                         &mut grid,
@@ -449,7 +463,7 @@ fn apply_final_movement_decision(
                     );
                 };
 
-                stats.exclude_count += 1;
+                stats_ref.exclude_count += 1;
                 let now = time.elapsed_secs();
 
                 // 检查是否需要重新规划路径
@@ -515,8 +529,9 @@ fn apply_final_movement_decision(
                     &transform.translation.xz(),
                     &target.xz(),
                     &grid,
-                    &mut stats,
+                    stats_ref,
                     debug_ref,
+                    cache_ref.as_deref_mut(),
                 ) {
                     if !path.is_empty() {
                         let start_y = transform.translation.y;

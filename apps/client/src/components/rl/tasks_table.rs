@@ -492,7 +492,7 @@ impl CreateTaskDialogView {
         window: &mut Window,
         cx: &mut Context<Self>,
     ) -> Self {
-        let env_to_use = last_env.unwrap_or_else(|| lol_rl_protocol::ENV_FIORA_V2.to_string());
+        let env_to_use = last_env.unwrap_or_else(|| lol_rl_protocol::ENV_SOLO_V0.to_string());
         let default_name = format!("RL 对战训练任务 #{}", task_count);
         let mut form = TaskConfigPayload::default_for_env(&env_to_use);
         form.name = default_name.clone();
@@ -584,9 +584,8 @@ impl CreateTaskDialogView {
         self.total_iterations_input.update(cx, |i, cx| {
             i.set_value(params.total_iterations.to_string(), window, cx)
         });
-        self.parallel_envs_input.update(cx, |i, cx| {
-            i.set_value("0".to_string(), window, cx)
-        });
+        self.parallel_envs_input
+            .update(cx, |i, cx| i.set_value("0".to_string(), window, cx));
         cx.notify();
     }
 

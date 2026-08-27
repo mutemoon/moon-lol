@@ -7,8 +7,8 @@ use lol_core::entities::minion::Minion;
 use lol_core::life::Health;
 use lol_core::team::Team;
 use lol_rl_protocol::{
-    ActionSpace, EntityEncoderSpec, ObsFeaturePayload, ObsNode, ObsSchema, RewardFormulaSpec,
-    RewardTermSpec,
+    ActionNode, ActionSchema, ActionSpace, EntityEncoderSpec, ObsFeaturePayload, ObsNode,
+    ObsSchema, PoolType, RewardFormulaSpec, RewardTermSpec,
 };
 
 pub use crate::fiora_riven_common::{
@@ -22,13 +22,55 @@ pub use crate::flash_plugin::{
 use crate::modifier_obs::{ModifierNameId, ModifierSlotObs, extract_entity_modifiers};
 use crate::obs_plugins::{extract_attack_state, extract_champion_base, extract_skill_cds};
 use crate::raycast_plugin::raycast_ground_plane;
-use crate::traits::{EnvConfig, EnvMeta, RenderMode, RlEnvironment, StepResult, VisualEnvironment};
+use crate::traits::{
+    EnvConfig, EnvMeta, RenderMode, RewardBreakdownItem, RlEnvironment, StepResult,
+    VisualEnvironment,
+};
 
 // ── 常量定义 ─────────────────────────────────────────────────────────────────
 
 pub const SOLO_V0_OFFSET_SCALE: f32 = 100.0;
-pub const SOLO_V0_OBS_DIM: usize = 60;
+pub const SOLO_V0_BASE_OBS_DIM: usize = 60;
+pub const SOLO_V0_MAX_VISIBLE_UNITS: usize = 7;
+pub const SOLO_V0_UNIT_FEAT_DIM: usize = 5;
+pub const SOLO_V0_OBS_DIM: usize =
+    SOLO_V0_BASE_OBS_DIM + SOLO_V0_MAX_VISIBLE_UNITS * SOLO_V0_UNIT_FEAT_DIM; // 60 + 35 = 95
 pub const SOLO_V0_OBS_DISTANCE_SCALE: f32 = 100.0;
+
+/// 可见单位特征槽位 (1 敌方英雄 + 6 小兵)
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct UnitSlotObs {
+    /// 单位类别: 0=None, 1=Champion, 2=MeleeMinion, 3=RangedMinion, 4=SiegeMinion, 5=SuperMinion
+    pub unit_type: f32,
+    pub rel_x: f32,
+    pub rel_z: f32,
+    pub hp_pct: f32,
+    pub is_enemy: f32,
+}
+
+impl Default for UnitSlotObs {
+    fn default() -> Self {
+        Self {
+            unit_type: 0.0,
+            rel_x: 0.0,
+            rel_z: 0.0,
+            hp_pct: 0.0,
+            is_enemy: 0.0,
+        }
+    }
+}
+
+impl UnitSlotObs {
+    pub fn to_vector(&self) -> [f32; SOLO_V0_UNIT_FEAT_DIM] {
+        [
+            self.unit_type,
+            self.rel_x,
+            self.rel_z,
+            self.hp_pct,
+            self.is_enemy,
+        ]
+    }
+}
 
 // ── 初始化与重置 ─────────────────────────────────────────────────────────────
 
@@ -90,6 +132,7 @@ impl SoloV0DiscreteAction {
 pub struct SoloV0Action {
     pub offset_x: f32,
     pub offset_z: f32,
+    pub target_idx: u8,
     pub discrete: SoloV0DiscreteAction,
 }
 
@@ -98,6 +141,21 @@ impl SoloV0Action {
         Self {
             offset_x,
             offset_z,
+            target_idx: 0,
+            discrete,
+        }
+    }
+
+    pub const fn with_target(
+        offset_x: f32,
+        offset_z: f32,
+        target_idx: u8,
+        discrete: SoloV0DiscreteAction,
+    ) -> Self {
+        Self {
+            offset_x,
+            offset_z,
+            target_idx,
             discrete,
         }
     }
@@ -105,16 +163,33 @@ impl SoloV0Action {
     pub fn from_encoding(encoded: &[f32]) -> Self {
         let offset_x = encoded.first().copied().unwrap_or(0.0);
         let offset_z = encoded.get(1).copied().unwrap_or(0.0);
-        let discrete_idx = encoded.get(2).copied().unwrap_or(0.0) as u8;
-        Self {
-            offset_x,
-            offset_z,
-            discrete: SoloV0DiscreteAction::from_u8(discrete_idx),
+        if encoded.len() >= 4 {
+            let target_idx = encoded.get(2).copied().unwrap_or(0.0) as u8;
+            let discrete_idx = encoded.get(3).copied().unwrap_or(0.0) as u8;
+            Self {
+                offset_x,
+                offset_z,
+                target_idx,
+                discrete: SoloV0DiscreteAction::from_u8(discrete_idx),
+            }
+        } else {
+            let discrete_idx = encoded.get(2).copied().unwrap_or(0.0) as u8;
+            Self {
+                offset_x,
+                offset_z,
+                target_idx: 0,
+                discrete: SoloV0DiscreteAction::from_u8(discrete_idx),
+            }
         }
     }
 
     pub fn to_encoding(&self) -> Vec<f32> {
-        vec![self.offset_x, self.offset_z, self.discrete.to_u8() as f32]
+        vec![
+            self.offset_x,
+            self.offset_z,
+            self.target_idx as f32,
+            self.discrete.to_u8() as f32,
+        ]
     }
 
     pub fn preset_from_index(index: usize) -> Self {
@@ -191,6 +266,9 @@ pub struct SoloV0Obs {
 
     pub self_modifiers: Vec<ModifierSlotObs>,
     pub target_modifiers: Vec<ModifierSlotObs>,
+
+    pub visible_units: Vec<UnitSlotObs>,
+    pub visible_unit_entities: Vec<Option<Entity>>,
 }
 
 impl SoloV0Obs {
@@ -246,6 +324,15 @@ impl SoloV0Obs {
                 v.extend_from_slice(&slot.to_vector());
             } else {
                 v.extend_from_slice(&[0.0; 5]);
+            }
+        }
+
+        // 8. 可见单位列表 (7 槽位 × 5 = 35维)
+        for i in 0..SOLO_V0_MAX_VISIBLE_UNITS {
+            if let Some(slot) = self.visible_units.get(i) {
+                v.extend_from_slice(&slot.to_vector());
+            } else {
+                v.extend_from_slice(&[0.0; SOLO_V0_UNIT_FEAT_DIM]);
             }
         }
 
@@ -612,6 +699,44 @@ impl RlEnvironment for SoloV0Env {
                     hidden_dims: vec![16],
                 },
             ),
+            // 8. 可见单位列表 (7 槽位: 1 敌方英雄 + 6 小兵 -> 经 Shared MLP(16) 编码保留嵌入供 UnitSelection)
+            ObsNode::repeated(
+                "visible_units",
+                SOLO_V0_MAX_VISIBLE_UNITS,
+                ObsNode::structure(
+                    "unit",
+                    vec![
+                        ObsNode::categorical("unit_type", 6, 8),
+                        ObsNode::vector("rel_pos", 2),
+                        ObsNode::scalar("hp_pct", 0.0, 1.0),
+                        ObsNode::scalar("is_enemy", 0.0, 1.0),
+                    ],
+                ),
+                EntityEncoderSpec::SharedMlpPool {
+                    hidden_dims: vec![32, 16],
+                    pool_type: PoolType::Max,
+                },
+            ),
+        ]))
+    }
+
+    fn action_schema() -> Option<ActionSchema> {
+        Some(ActionSchema::new(vec![
+            ActionNode::continuous("offset", 2),
+            ActionNode::unit_selection("target", SOLO_V0_MAX_VISIBLE_UNITS, 16, "visible_units"),
+            ActionNode::categorical(
+                "action_type",
+                vec![
+                    "保持当前 (NoOp)".into(),
+                    "移动 (Move)".into(),
+                    "普通攻击 (Attack)".into(),
+                    "施放 Q".into(),
+                    "施放 W".into(),
+                    "施放 E".into(),
+                    "施放 R".into(),
+                    "闪现".into(),
+                ],
+            ),
         ]))
     }
 
@@ -931,6 +1056,93 @@ pub fn get_default_riven_combat_action(
     }
 }
 
+pub fn extract_visible_units_from_world(
+    world: &World,
+    _self_entity: Entity,
+    target_entity: Entity,
+    self_pos: Vec3,
+    self_team: Team,
+    target_pos: Vec3,
+    target_hp: f32,
+    target_max_hp: f32,
+) -> (Vec<UnitSlotObs>, Vec<Option<Entity>>) {
+    let mut slots = Vec::with_capacity(SOLO_V0_MAX_VISIBLE_UNITS);
+    let mut entities = Vec::with_capacity(SOLO_V0_MAX_VISIBLE_UNITS);
+
+    // Slot 0: 对手英雄
+    slots.push(UnitSlotObs {
+        unit_type: 1.0, // Champion
+        rel_x: (target_pos.x - self_pos.x) / SOLO_V0_OBS_DISTANCE_SCALE,
+        rel_z: (target_pos.z - self_pos.z) / SOLO_V0_OBS_DISTANCE_SCALE,
+        hp_pct: if target_max_hp > 0.0 {
+            (target_hp / target_max_hp).clamp(0.0, 1.0)
+        } else {
+            0.0
+        },
+        is_enemy: 1.0,
+    });
+    entities.push(Some(target_entity));
+
+    // Slots 1..=6: 最近的小兵
+    let mut minion_candidates: Vec<(Entity, f32, Vec3, Team, f32, f32, Minion)> = Vec::new();
+    for entity_ref in world.iter_entities() {
+        if let Some(minion) = entity_ref.get::<Minion>() {
+            if let (Some(hp), Some(tf), Some(team)) = (
+                entity_ref.get::<Health>(),
+                entity_ref.get::<Transform>(),
+                entity_ref.get::<Team>(),
+            ) {
+                if hp.value > 0.0 {
+                    let m_pos = tf.translation;
+                    let dist = self_pos.distance(m_pos);
+                    minion_candidates.push((
+                        entity_ref.id(),
+                        dist,
+                        m_pos,
+                        *team,
+                        hp.value,
+                        hp.max,
+                        *minion,
+                    ));
+                }
+            }
+        }
+    }
+
+    minion_candidates.sort_by(|a, b| a.1.partial_cmp(&b.1).unwrap_or(std::cmp::Ordering::Equal));
+
+    for (e, _dist, m_pos, team, hp_val, hp_max, m_type) in minion_candidates
+        .into_iter()
+        .take(SOLO_V0_MAX_VISIBLE_UNITS - 1)
+    {
+        let type_code = match m_type {
+            Minion::Melee => 2.0,
+            Minion::Ranged => 3.0,
+            Minion::Siege => 4.0,
+            Minion::Super => 5.0,
+        };
+        slots.push(UnitSlotObs {
+            unit_type: type_code,
+            rel_x: (m_pos.x - self_pos.x) / SOLO_V0_OBS_DISTANCE_SCALE,
+            rel_z: (m_pos.z - self_pos.z) / SOLO_V0_OBS_DISTANCE_SCALE,
+            hp_pct: if hp_max > 0.0 {
+                (hp_val / hp_max).clamp(0.0, 1.0)
+            } else {
+                0.0
+            },
+            is_enemy: if team != self_team { 1.0 } else { 0.0 },
+        });
+        entities.push(Some(e));
+    }
+
+    while slots.len() < SOLO_V0_MAX_VISIBLE_UNITS {
+        slots.push(UnitSlotObs::default());
+        entities.push(None);
+    }
+
+    (slots, entities)
+}
+
 pub fn get_ego_obs_from_world(
     world: &World,
     self_entity: Entity,
@@ -940,10 +1152,25 @@ pub fn get_ego_obs_from_world(
     let self_base = extract_champion_base(world, self_entity);
     let target_base = extract_champion_base(world, target_entity);
     let dist = self_base.pos.distance(target_base.pos);
+    let self_team = world
+        .get::<Team>(self_entity)
+        .copied()
+        .unwrap_or(Team::Order);
 
     let atk = extract_attack_state(world, self_entity);
     let skills = extract_skill_cds(world, self_entity);
     let (flash_ready, flash_cd) = extract_flash_obs(world, self_entity);
+
+    let (visible_units, visible_unit_entities) = extract_visible_units_from_world(
+        world,
+        self_entity,
+        target_entity,
+        self_base.pos,
+        self_team,
+        target_base.pos,
+        target_base.hp,
+        target_base.max_hp,
+    );
 
     SoloV0Obs {
         role_id,
@@ -970,6 +1197,8 @@ pub fn get_ego_obs_from_world(
         flash_cd_remaining: flash_cd,
         self_modifiers: extract_entity_modifiers(world, self_entity, 4),
         target_modifiers: extract_entity_modifiers(world, target_entity, 4),
+        visible_units,
+        visible_unit_entities,
     }
 }
 
@@ -988,10 +1217,41 @@ pub fn dispatch_single_action(
         .map(|t| t.translation)
         .unwrap_or_default();
 
+    // 解析目标：0 为敌方英雄，1..=6 为按距离排序的小兵
+    let chosen_target = if action.target_idx == 0 {
+        target_entity
+    } else {
+        let mut minion_candidates = Vec::new();
+        for entity_ref in world.iter_entities() {
+            if entity_ref.contains::<Minion>() {
+                if let (Some(hp), Some(tf)) =
+                    (entity_ref.get::<Health>(), entity_ref.get::<Transform>())
+                {
+                    if hp.value > 0.0 {
+                        let dist = spos.distance(tf.translation);
+                        minion_candidates.push((entity_ref.id(), dist));
+                    }
+                }
+            }
+        }
+        minion_candidates
+            .sort_by(|a, b| a.1.partial_cmp(&b.1).unwrap_or(std::cmp::Ordering::Equal));
+        let minion_idx = (action.target_idx as usize) - 1;
+        minion_candidates
+            .get(minion_idx)
+            .map(|(e, _)| *e)
+            .unwrap_or(target_entity)
+    };
+
+    let chosen_target_pos = world
+        .get::<Transform>(chosen_target)
+        .map(|t| t.translation)
+        .unwrap_or(tpos);
+
     let target_offset_pos = Vec3::new(
-        tpos.x + action.offset_x.clamp(-1.0, 1.0) * SOLO_V0_OFFSET_SCALE,
-        tpos.y,
-        tpos.z + action.offset_z.clamp(-1.0, 1.0) * SOLO_V0_OFFSET_SCALE,
+        chosen_target_pos.x + action.offset_x.clamp(-1.0, 1.0) * SOLO_V0_OFFSET_SCALE,
+        chosen_target_pos.y,
+        chosen_target_pos.z + action.offset_z.clamp(-1.0, 1.0) * SOLO_V0_OFFSET_SCALE,
     );
 
     match action.discrete {
@@ -1005,7 +1265,7 @@ pub fn dispatch_single_action(
         SoloV0DiscreteAction::Attack => {
             world.trigger(CommandAction {
                 entity: self_entity,
-                action: Action::Attack(target_entity),
+                action: Action::Attack(chosen_target),
             });
         }
         SoloV0DiscreteAction::CastQ => {
@@ -1040,7 +1300,7 @@ pub fn dispatch_single_action(
                 entity: self_entity,
                 action: Action::Skill {
                     index: 3,
-                    point: Vec2::new(tpos.x, tpos.z),
+                    point: Vec2::new(chosen_target_pos.x, chosen_target_pos.z),
                 },
             });
         }
@@ -1049,7 +1309,7 @@ pub fn dispatch_single_action(
             let dir = if offset_dir.length_squared() > 1e-4 {
                 offset_dir.normalize()
             } else {
-                let to_target = tpos - spos;
+                let to_target = chosen_target_pos - spos;
                 if to_target.length_squared() > 1e-4 {
                     to_target.normalize()
                 } else {
@@ -1225,6 +1485,52 @@ pub fn step_solo_v0_world(
         ),
     ]);
 
+    let f_breakdown = vec![
+        RewardBreakdownItem {
+            name: "对敌伤害".to_string(),
+            value: r_hero_dmg,
+        },
+        RewardBreakdownItem {
+            name: "补兵奖励".to_string(),
+            value: r_cs,
+        },
+        RewardBreakdownItem {
+            name: "小兵伤害".to_string(),
+            value: r_minion_dmg,
+        },
+        RewardBreakdownItem {
+            name: "残血斩杀诱导".to_string(),
+            value: r_cs_window_diff,
+        },
+        RewardBreakdownItem {
+            name: "击杀获胜".to_string(),
+            value: kill_bonus_fiora,
+        },
+    ];
+
+    let r_breakdown = vec![
+        RewardBreakdownItem {
+            name: "对敌伤害".to_string(),
+            value: -r_hero_dmg,
+        },
+        RewardBreakdownItem {
+            name: "补兵奖励".to_string(),
+            value: -r_cs,
+        },
+        RewardBreakdownItem {
+            name: "小兵伤害".to_string(),
+            value: -r_minion_dmg,
+        },
+        RewardBreakdownItem {
+            name: "残血斩杀诱导".to_string(),
+            value: -r_cs_window_diff,
+        },
+        RewardBreakdownItem {
+            name: "击杀获胜".to_string(),
+            value: -kill_bonus_fiora,
+        },
+    ];
+
     (
         StepResult {
             obs: curr_f_obs,
@@ -1232,7 +1538,7 @@ pub fn step_solo_v0_world(
             terminated,
             truncated,
             step: step_count,
-            reward_breakdown: Vec::new(),
+            reward_breakdown: f_breakdown,
             reward_variables: f_vars,
         },
         StepResult {
@@ -1241,8 +1547,56 @@ pub fn step_solo_v0_world(
             terminated,
             truncated,
             step: step_count,
-            reward_breakdown: Vec::new(),
+            reward_breakdown: r_breakdown,
             reward_variables: r_vars,
         },
     )
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_solo_v0_obs_schema_and_dim() {
+        let schema = SoloV0Env::obs_schema().expect("SoloV0 obs schema");
+        assert_eq!(schema.raw_dim(), SOLO_V0_OBS_DIM);
+        assert_eq!(SOLO_V0_OBS_DIM, 95);
+        let labels = schema.to_dim_labels();
+        assert_eq!(labels.len(), 95);
+    }
+
+    #[test]
+    fn test_solo_v0_action_schema() {
+        let schema = SoloV0Env::action_schema().expect("SoloV0 action schema");
+        assert_eq!(schema.encoding_dim(), 4); // 2 continuous + 1 unit selection + 1 categorical
+        assert_eq!(schema.num_branches(), 3);
+        let labels = schema.to_encoding_labels();
+        assert_eq!(labels.len(), 4);
+    }
+
+    #[test]
+    fn test_solo_v0_action_encoding_roundtrip() {
+        let act = SoloV0Action::with_target(0.5, -0.5, 3, SoloV0DiscreteAction::Attack);
+        let encoded = act.to_encoding();
+        assert_eq!(encoded.len(), 4);
+        assert_eq!(encoded[0], 0.5);
+        assert_eq!(encoded[1], -0.5);
+        assert_eq!(encoded[2], 3.0);
+        assert_eq!(encoded[3], 2.0);
+
+        let decoded = SoloV0Action::from_encoding(&encoded);
+        assert_eq!(decoded.offset_x, 0.5);
+        assert_eq!(decoded.offset_z, -0.5);
+        assert_eq!(decoded.target_idx, 3);
+        assert_eq!(decoded.discrete, SoloV0DiscreteAction::Attack);
+
+        // 兼容旧 3 维编码
+        let legacy = vec![0.2, 0.4, 1.0];
+        let decoded_legacy = SoloV0Action::from_encoding(&legacy);
+        assert_eq!(decoded_legacy.offset_x, 0.2);
+        assert_eq!(decoded_legacy.offset_z, 0.4);
+        assert_eq!(decoded_legacy.target_idx, 0);
+        assert_eq!(decoded_legacy.discrete, SoloV0DiscreteAction::Move);
+    }
 }

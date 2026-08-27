@@ -665,11 +665,7 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment + 'static>(
             backbone,
         ) {
             Ok(profile) => {
-                let res = AutoTuner::solve(
-                    &profile,
-                    rollout_steps,
-                    task_config.ppo_epochs.max(1),
-                );
+                let res = AutoTuner::solve(&profile, rollout_steps, task_config.ppo_epochs.max(1));
                 info!(
                     "🎯 [AutoTuner] 为任务 {} (主干: {}) 自动求解最优配置: 并发 Actors={}, 推理 Batch={}, 训练 MiniBatch={}, 预估 SPS: {:.1}",
                     task_id,
@@ -761,6 +757,18 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment + 'static>(
             return;
         }
     };
+
+    let summary = agent.parameter_summary();
+    let _ = event_tx.send(OutFrame::Log {
+        task_id: task_id.clone(),
+        level: "info".into(),
+        message: format!(
+            "🧠 [模型网络结构] 主干: {:?}, 总可训练参数量: {} ({})",
+            backbone,
+            summary.total_params,
+            crate::policy::format_param_k_m(summary.total_params)
+        ),
+    });
 
     // 2. 启动 TrainingSession（机制 A：同步 Rollout Worker 池 + PPOAgent，CPU 推理）
     let mut session = TrainingSession::<E>::new(

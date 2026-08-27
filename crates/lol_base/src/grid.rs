@@ -1,4 +1,4 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::HashSet;
 
 use bevy::asset::Asset;
 use bevy::math::{Vec2, Vec3, vec2, vec3};
@@ -275,9 +275,9 @@ pub struct ConfigNavigationGrid {
     pub height_x_len: usize,
     pub height_y_len: usize,
     pub height_samples: Vec<Vec<f32>>,
-    /// 动态障碍物的通行成本，值越大表示通行代价越高，CELL_COST_IMPASSABLE 表示不可通行
+    /// 动态障碍物的通行成本（扁平数组，索引为 y * x_len + x），值越大表示通行代价越高，CELL_COST_IMPASSABLE 表示不可通行
     #[serde(skip)]
-    pub occupied_cells: HashMap<(usize, usize), f32>,
+    pub occupied_cells: Vec<f32>,
     #[serde(skip)]
     pub exclude_cells: HashSet<(usize, usize)>,
 }
@@ -411,7 +411,8 @@ impl ConfigNavigationGrid {
             return 0.0;
         }
 
-        self.occupied_cells.get(&pos).copied().unwrap_or(0.0)
+        let idx = pos.1 * self.x_len + pos.0;
+        self.occupied_cells.get(idx).copied().unwrap_or(0.0)
     }
 
     /// 判断世界坐标是否在网格内且可通行（超出地图边界安全返回不可通行）
@@ -499,10 +500,22 @@ mod tests {
     #[test]
     fn test_get_cell_xy_by_position_in_bounds() {
         let grid = make_test_grid();
-        assert_eq!(grid.get_cell_xy_by_position(&Vec2::new(0.0, 0.0)), Some((0, 0)));
-        assert_eq!(grid.get_cell_xy_by_position(&Vec2::new(50.0, 50.0)), Some((0, 0)));
-        assert_eq!(grid.get_cell_xy_by_position(&Vec2::new(150.0, 250.0)), Some((1, 2)));
-        assert_eq!(grid.get_cell_xy_by_position(&Vec2::new(999.0, 999.0)), Some((9, 9)));
+        assert_eq!(
+            grid.get_cell_xy_by_position(&Vec2::new(0.0, 0.0)),
+            Some((0, 0))
+        );
+        assert_eq!(
+            grid.get_cell_xy_by_position(&Vec2::new(50.0, 50.0)),
+            Some((0, 0))
+        );
+        assert_eq!(
+            grid.get_cell_xy_by_position(&Vec2::new(150.0, 250.0)),
+            Some((1, 2))
+        );
+        assert_eq!(
+            grid.get_cell_xy_by_position(&Vec2::new(999.0, 999.0)),
+            Some((9, 9))
+        );
     }
 
     #[test]
@@ -519,9 +532,18 @@ mod tests {
     #[test]
     fn test_clamp_position_to_grid_xy() {
         let grid = make_test_grid();
-        assert_eq!(grid.clamp_position_to_grid_xy(&Vec2::new(-500.0, -500.0)), (0, 0));
-        assert_eq!(grid.clamp_position_to_grid_xy(&Vec2::new(2000.0, 2000.0)), (9, 9));
-        assert_eq!(grid.clamp_position_to_grid_xy(&Vec2::new(150.0, 250.0)), (1, 2));
+        assert_eq!(
+            grid.clamp_position_to_grid_xy(&Vec2::new(-500.0, -500.0)),
+            (0, 0)
+        );
+        assert_eq!(
+            grid.clamp_position_to_grid_xy(&Vec2::new(2000.0, 2000.0)),
+            (9, 9)
+        );
+        assert_eq!(
+            grid.clamp_position_to_grid_xy(&Vec2::new(150.0, 250.0)),
+            (1, 2)
+        );
     }
 
     #[test]

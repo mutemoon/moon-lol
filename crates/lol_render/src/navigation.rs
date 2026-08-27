@@ -336,10 +336,15 @@ fn update_visualization_astar(
         }));
     }
 
-    for (&(x, y), cost) in grid.occupied_cells.iter() {
+    for (idx, &cost) in grid.occupied_cells.iter().enumerate() {
+        if cost <= 0.0 {
+            continue;
+        }
+        let x = idx % grid.x_len;
+        let y = idx / grid.x_len;
         commands.spawn((
             Mesh3d(mesh.clone()),
-            MeshMaterial3d(if *cost == CELL_COST_IMPASSABLE {
+            MeshMaterial3d(if cost == CELL_COST_IMPASSABLE {
                 red_material.clone()
             } else {
                 blue_materials[(cost / 100.0 * 10.0).floor() as usize].clone()

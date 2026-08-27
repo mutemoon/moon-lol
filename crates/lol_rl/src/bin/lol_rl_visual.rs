@@ -116,6 +116,7 @@ fn start_visual_runner_for_env<E: VisualEnvironment>(
     });
     let env_max_steps = env.max_steps();
     let obs_schema = E::obs_schema();
+    let action_schema = E::action_schema();
 
     let (cmd_tx, cmd_rx) = mpsc::channel::<VisualRunnerCmd>();
     let (step_tx, step_rx) = mpsc::channel::<VisualStepOutput>();
@@ -137,6 +138,7 @@ fn start_visual_runner_for_env<E: VisualEnvironment>(
             env_max_steps,
             action_labels_clone,
             obs_schema,
+            action_schema,
             cmd_tx_clone,
         ));
     });
@@ -198,6 +200,7 @@ async fn ws_server(
     env_max_steps: usize,
     action_labels: Vec<String>,
     obs_schema: Option<lol_rl_protocol::ObsSchema>,
+    action_schema: Option<lol_rl_protocol::ActionSchema>,
     cmd_tx: mpsc::Sender<VisualRunnerCmd>,
 ) {
     let listener = match TcpListener::bind(format!("127.0.0.1:{port}")) {
@@ -235,6 +238,7 @@ async fn ws_server(
         let env_name_sub = env_name.clone();
         let action_labels_sub = action_labels.clone();
         let schema_sub = obs_schema.clone();
+        let action_schema_sub = action_schema.clone();
 
         tokio::spawn(async move {
             if let Err(e) = handle_ws_client(
@@ -246,6 +250,7 @@ async fn ws_server(
                 env_max_steps,
                 action_labels_sub,
                 schema_sub,
+                action_schema_sub,
                 cmd,
             )
             .await
@@ -265,18 +270,20 @@ async fn handle_ws_client(
     env_max_steps: usize,
     action_labels: Vec<String>,
     obs_schema: Option<lol_rl_protocol::ObsSchema>,
+    action_schema: Option<lol_rl_protocol::ActionSchema>,
     cmd_tx: mpsc::Sender<VisualRunnerCmd>,
 ) -> anyhow::Result<()> {
     let ws_stream = tokio_tungstenite::accept_async(stream).await?;
     let (mut ws_writer, mut ws_reader) = ws_stream.split();
 
-    // 1. 发送包含环境、动作及 AST 观测结构元数据的 Ready 帧
+    // 1. 发送包含环境、动作及 AST 结构元数据的 Ready 帧
     let ready = VisualOutFrame::Ready {
         checkpoint_path: ckpt_path.to_string_lossy().to_string(),
         env_name,
         env_max_steps,
         action_labels,
         obs_schema,
+        action_schema,
     };
     let bytes = bincode::serialize(&ready)?;
     ws_writer.send(Message::Binary(bytes.into())).await?;

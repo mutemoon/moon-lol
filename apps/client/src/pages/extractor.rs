@@ -173,8 +173,8 @@ pub fn render_extractor(
         },
         StepInfo {
             title: "4. 着色器反编译 (ShaderCache)".to_string(),
-            description:
-                "提取 DXBC 字节码，用 dxbc-compiler 转译 SPIR-V 并生成 ShaderMap 布局索引".to_string(),
+            description: "提取 DXBC 字节码，用 dxbc-compiler 转译 SPIR-V 并生成 ShaderMap 布局索引"
+                .to_string(),
         },
         StepInfo {
             title: "5. 全量完成 (Complete)".to_string(),

@@ -5,7 +5,7 @@ use bevy::prelude::*;
 use lol_base::grid::ConfigNavigationGrid;
 
 #[derive(Debug, Clone)]
-struct AStarNode {
+pub struct AStarNode {
     idx: usize,
     pos: (usize, usize),
     g_cost: f32,
@@ -47,6 +47,44 @@ pub struct AStarResult {
     pub visited_cells: Vec<(usize, usize)>,
 }
 
+#[derive(Resource, Default, Debug)]
+pub struct AStarCache {
+    pub open_fwd: BinaryHeap<AStarNode>,
+    pub open_bwd: BinaryHeap<AStarNode>,
+    pub g_fwd: Vec<f32>,
+    pub g_bwd: Vec<f32>,
+    pub came_from_fwd: Vec<u32>,
+    pub came_from_bwd: Vec<u32>,
+    pub visited_cells: Vec<(usize, usize)>,
+    pub touched_indices: Vec<usize>,
+}
+
+impl AStarCache {
+    pub fn ensure_capacity(&mut self, total_cells: usize) {
+        if self.g_fwd.len() < total_cells {
+            self.g_fwd.resize(total_cells, f32::INFINITY);
+            self.g_bwd.resize(total_cells, f32::INFINITY);
+            self.came_from_fwd.resize(total_cells, u32::MAX);
+            self.came_from_bwd.resize(total_cells, u32::MAX);
+        }
+    }
+
+    pub fn reset(&mut self) {
+        self.open_fwd.clear();
+        self.open_bwd.clear();
+        self.visited_cells.clear();
+        for &idx in &self.touched_indices {
+            if idx < self.g_fwd.len() {
+                self.g_fwd[idx] = f32::INFINITY;
+                self.g_bwd[idx] = f32::INFINITY;
+                self.came_from_fwd[idx] = u32::MAX;
+                self.came_from_bwd[idx] = u32::MAX;
+            }
+        }
+        self.touched_indices.clear();
+    }
+}
+
 pub fn find_grid_path(
     grid: &ConfigNavigationGrid,
     start: &Vec2,
@@ -69,6 +107,16 @@ pub fn find_grid_path_with_result(
     grid: &ConfigNavigationGrid,
     start: &Vec2,
     end: &Vec2,
+) -> Option<AStarResult> {
+    let mut cache = AStarCache::default();
+    find_grid_path_with_result_cache(grid, start, end, &mut cache)
+}
+
+pub fn find_grid_path_with_result_cache(
+    grid: &ConfigNavigationGrid,
+    start: &Vec2,
+    end: &Vec2,
+    cache: &mut AStarCache,
 ) -> Option<AStarResult> {
     let Some(start_pos) = grid.get_cell_xy_by_position(start) else {
         warn!("双向 A* 起点超出地图边界: {:?}", start);
@@ -98,23 +146,16 @@ pub fn find_grid_path_with_result(
         return None;
     }
 
+    cache.ensure_capacity(total_cells);
+    cache.reset();
+
     let start_idx = pos_to_idx(start_pos, x_len);
     let end_idx = pos_to_idx(end_pos, x_len);
 
-    let mut open_fwd = BinaryHeap::new();
-    let mut open_bwd = BinaryHeap::new();
-
-    let mut g_fwd = vec![f32::INFINITY; total_cells];
-    let mut g_bwd = vec![f32::INFINITY; total_cells];
-
-    let mut came_from_fwd = vec![u32::MAX; total_cells];
-    let mut came_from_bwd = vec![u32::MAX; total_cells];
-
-    let mut visited_cells = Vec::new();
-
     // 初始化正向搜索
-    g_fwd[start_idx] = 0.0;
-    open_fwd.push(AStarNode {
+    cache.g_fwd[start_idx] = 0.0;
+    cache.touched_indices.push(start_idx);
+    cache.open_fwd.push(AStarNode {
         idx: start_idx,
         pos: start_pos,
         g_cost: 0.0,
@@ -122,8 +163,9 @@ pub fn find_grid_path_with_result(
     });
 
     // 初始化反向搜索
-    g_bwd[end_idx] = 0.0;
-    open_bwd.push(AStarNode {
+    cache.g_bwd[end_idx] = 0.0;
+    cache.touched_indices.push(end_idx);
+    cache.open_bwd.push(AStarNode {
         idx: end_idx,
         pos: end_pos,
         g_cost: 0.0,
@@ -134,7 +176,7 @@ pub fn find_grid_path_with_result(
     let mut best_connection = None;
     let mut iterations = 0;
 
-    while !open_fwd.is_empty() && !open_bwd.is_empty() {
+    while !cache.open_fwd.is_empty() && !cache.open_bwd.is_empty() {
         iterations += 1;
         if iterations > 10000 {
             warn!("双向 A* 超过迭代次数限制");
@@ -142,31 +184,31 @@ pub fn find_grid_path_with_result(
         }
 
         // 优化验证：如果两端最小的 f_cost 之和已经超过了已知的最佳路径，则不可能找到更优解
-        if let (Some(f), Some(b)) = (open_fwd.peek(), open_bwd.peek()) {
+        if let (Some(f), Some(b)) = (cache.open_fwd.peek(), cache.open_bwd.peek()) {
             if f.f_cost() + b.f_cost() >= best_path_cost && best_connection.is_some() {
                 break;
             }
         }
 
         // 平衡扩展：选择节点较少的一端进行扩展
-        let expand_forward = open_fwd.len() <= open_bwd.len();
+        let expand_forward = cache.open_fwd.len() <= cache.open_bwd.len();
 
         let current_node = if expand_forward {
-            open_fwd.pop().unwrap()
+            cache.open_fwd.pop().unwrap()
         } else {
-            open_bwd.pop().unwrap()
+            cache.open_bwd.pop().unwrap()
         };
 
-        visited_cells.push(current_node.pos);
+        cache.visited_cells.push(current_node.pos);
 
         if expand_forward {
             // 惰性删除检查
-            if current_node.g_cost > g_fwd[current_node.idx] {
+            if current_node.g_cost > cache.g_fwd[current_node.idx] {
                 continue;
             }
 
             // 检查是否在当前节点与另一端相遇
-            let other_g = g_bwd[current_node.idx];
+            let other_g = cache.g_bwd[current_node.idx];
             if other_g < f32::INFINITY {
                 let total_cost = current_node.g_cost + other_g;
                 if total_cost < best_path_cost {
@@ -180,21 +222,25 @@ pub fn find_grid_path_with_result(
                 let tentative_g =
                     current_node.g_cost + movement_cost(grid, current_node.pos, neighbor_pos);
 
-                if tentative_g >= g_fwd[neighbor_idx] {
+                if tentative_g >= cache.g_fwd[neighbor_idx] {
                     continue;
                 }
 
-                came_from_fwd[neighbor_idx] = current_node.idx as u32;
-                g_fwd[neighbor_idx] = tentative_g;
+                if cache.g_fwd[neighbor_idx] == f32::INFINITY && cache.g_bwd[neighbor_idx] == f32::INFINITY {
+                    cache.touched_indices.push(neighbor_idx);
+                }
 
-                open_fwd.push(AStarNode {
+                cache.came_from_fwd[neighbor_idx] = current_node.idx as u32;
+                cache.g_fwd[neighbor_idx] = tentative_g;
+
+                cache.open_fwd.push(AStarNode {
                     idx: neighbor_idx,
                     pos: neighbor_pos,
                     g_cost: tentative_g,
                     h_cost: heuristic_cost(grid.cell_size, neighbor_pos, end_pos),
                 });
 
-                let other_g = g_bwd[neighbor_idx];
+                let other_g = cache.g_bwd[neighbor_idx];
                 if other_g < f32::INFINITY {
                     let total_cost = tentative_g + other_g;
                     if total_cost < best_path_cost {
@@ -205,12 +251,12 @@ pub fn find_grid_path_with_result(
             }
         } else {
             // 惰性删除检查
-            if current_node.g_cost > g_bwd[current_node.idx] {
+            if current_node.g_cost > cache.g_bwd[current_node.idx] {
                 continue;
             }
 
             // 检查是否在当前节点与另一端相遇
-            let other_g = g_fwd[current_node.idx];
+            let other_g = cache.g_fwd[current_node.idx];
             if other_g < f32::INFINITY {
                 let total_cost = current_node.g_cost + other_g;
                 if total_cost < best_path_cost {
@@ -224,21 +270,25 @@ pub fn find_grid_path_with_result(
                 let tentative_g =
                     current_node.g_cost + movement_cost(grid, current_node.pos, neighbor_pos);
 
-                if tentative_g >= g_bwd[neighbor_idx] {
+                if tentative_g >= cache.g_bwd[neighbor_idx] {
                     continue;
                 }
 
-                came_from_bwd[neighbor_idx] = current_node.idx as u32;
-                g_bwd[neighbor_idx] = tentative_g;
+                if cache.g_fwd[neighbor_idx] == f32::INFINITY && cache.g_bwd[neighbor_idx] == f32::INFINITY {
+                    cache.touched_indices.push(neighbor_idx);
+                }
 
-                open_bwd.push(AStarNode {
+                cache.came_from_bwd[neighbor_idx] = current_node.idx as u32;
+                cache.g_bwd[neighbor_idx] = tentative_g;
+
+                cache.open_bwd.push(AStarNode {
                     idx: neighbor_idx,
                     pos: neighbor_pos,
                     g_cost: tentative_g,
                     h_cost: heuristic_cost(grid.cell_size, neighbor_pos, start_pos),
                 });
 
-                let other_g = g_fwd[neighbor_idx];
+                let other_g = cache.g_fwd[neighbor_idx];
                 if other_g < f32::INFINITY {
                     let total_cost = tentative_g + other_g;
                     if total_cost < best_path_cost {
@@ -252,11 +302,11 @@ pub fn find_grid_path_with_result(
 
     if let Some(meet_idx) = best_connection {
         debug!("双向 A* 找到路径 迭代次数 {}", iterations);
-        let path = reconstruct_bidirectional_path(meet_idx, &came_from_fwd, &came_from_bwd, x_len);
+        let path = reconstruct_bidirectional_path(meet_idx, &cache.came_from_fwd, &cache.came_from_bwd, x_len);
         if !path.is_empty() {
             return Some(AStarResult {
                 path,
-                visited_cells,
+                visited_cells: cache.visited_cells.clone(),
             });
         }
     }
@@ -413,12 +463,7 @@ mod tests {
         let path = result.unwrap();
         // 验证路径绕过了墙体
         for &(x, y) in &path {
-            assert!(
-                x != 5 || y >= 10,
-                "路径不应穿过墙体: ({}, {})",
-                x,
-                y
-            );
+            assert!(x != 5 || y >= 10, "路径不应穿过墙体: ({}, {})", x, y);
         }
     }
 
@@ -486,8 +531,7 @@ mod tests {
         let long_path = find_grid_path(&grid, &order_spawn, &chaos_spawn);
         let elapsed_long = t2.elapsed();
 
-        println!(
-            "------------------------------------------------------------------");
+        println!("------------------------------------------------------------------");
         println!(
             "真实地图测试 (网格 {}x{}，CellSize {}):",
             grid.x_len, grid.y_len, grid.cell_size
@@ -510,7 +554,6 @@ mod tests {
             long_path.as_ref().map(|p| p.len()).unwrap_or(0),
             elapsed_long
         );
-        println!(
-            "------------------------------------------------------------------");
+        println!("------------------------------------------------------------------");
     }
 }

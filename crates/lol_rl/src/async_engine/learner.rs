@@ -45,6 +45,7 @@ impl AsyncLearner {
         sample_rx: Receiver<SampleTransition>,
         model_update_tx: Sender<(usize, ActorCritic)>,
     ) -> Self {
+        agent.print_parameter_summary();
         Self {
             agent,
             train_batch_size,

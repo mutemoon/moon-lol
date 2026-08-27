@@ -167,13 +167,7 @@ impl FioraRivenBaseEnv {
     pub fn reset_app(&mut self, app: &mut App) -> (Entity, Entity) {
         let fiora = self.fiora;
         let riven = self.riven;
-        reset_app_internal(
-            app,
-            fiora,
-            riven,
-            self.warmup_secs,
-            &self.on_reset_hooks,
-        );
+        reset_app_internal(app, fiora, riven, self.warmup_secs, &self.on_reset_hooks);
         self.step_count = 0;
         (fiora, riven)
     }
@@ -186,7 +180,13 @@ impl FioraRivenBaseEnv {
     }
 }
 
+/// 预热时每次 update 批量推进的固定步长数。模拟系统全在 FixedUpdate，
+/// 合并步进不改变模拟结果，只让有头模式的预热少渲染十几倍的帧。
+const WARMUP_TICKS_PER_UPDATE: u32 = 16;
+
 /// 执行统一预热（推进指定秒数的 App update，并重新执行状态钩子，无头与有头完全共用）
+/// 有头模式每次 update 都伴随一次 vsync 渲染，故按 WARMUP_TICKS_PER_UPDATE 批量推进固定步长，
+/// 避免 30s 预热退化成 30s 真实等待。
 pub fn run_warmup_on_app(
     app: &mut App,
     fiora: Entity,
@@ -197,10 +197,16 @@ pub fn run_warmup_on_app(
     if warmup_secs <= 0.0 {
         return;
     }
-    let warmup_ticks = (warmup_secs * 64.0).round() as usize;
-    for _ in 0..warmup_ticks {
+    let mut remaining = (warmup_secs * 64.0).round() as u32;
+    while remaining > 0 {
+        let ticks = remaining.min(WARMUP_TICKS_PER_UPDATE);
+        remaining -= ticks;
+        app.world_mut()
+            .insert_resource(TimeUpdateStrategy::FixedTimesteps(ticks));
         app.update();
     }
+    app.world_mut()
+        .insert_resource(TimeUpdateStrategy::FixedTimesteps(1));
     for hook in hooks {
         hook(fiora, riven, app.world_mut());
     }
@@ -264,6 +270,9 @@ pub struct FioraRivenEnvBuilder {
     pub window_title: String,
     pub map_name: String,
     pub enable_barrack: bool,
+    pub enable_log: bool,
+    pub enable_navigation: bool,
+    pub enable_bevy_animation: bool,
     pub initial_skill_levels: [usize; 4],
     pub warmup_secs: f32,
     pub initial_fiora_pos: Vec3,
@@ -282,6 +291,9 @@ impl FioraRivenEnvBuilder {
             window_title: "Fiora vs Riven RL".to_string(),
             map_name: "test".to_string(),
             enable_barrack: false,
+            enable_log: true,
+            enable_navigation: true,
+            enable_bevy_animation: true,
             initial_skill_levels: [3, 1, 1, 1],
             warmup_secs: 0.0,
             initial_fiora_pos: Vec3::ZERO,
@@ -305,6 +317,21 @@ impl FioraRivenEnvBuilder {
 
     pub fn enable_barrack(mut self, enable: bool) -> Self {
         self.enable_barrack = enable;
+        self
+    }
+
+    pub fn enable_log(mut self, enable: bool) -> Self {
+        self.enable_log = enable;
+        self
+    }
+
+    pub fn enable_navigation(mut self, enable: bool) -> Self {
+        self.enable_navigation = enable;
+        self
+    }
+
+    pub fn enable_bevy_animation(mut self, enable: bool) -> Self {
+        self.enable_bevy_animation = enable;
         self
     }
 
@@ -403,15 +430,17 @@ impl FioraRivenEnvBuilder {
                 }));
             }
             app.add_plugins(lol_render::PluginRender);
-            if self.enable_barrack {
-                app.add_plugins(lol_core::PluginCore);
-            } else {
-                app.add_plugins(
-                    lol_core::PluginCore
-                        .build()
-                        .disable::<lol_core::PluginBarrack>(),
-                );
+            let mut core_plugins = lol_core::PluginCore.build();
+            if !self.enable_barrack {
+                core_plugins = core_plugins.disable::<lol_core::PluginBarrack>();
             }
+            if !self.enable_log {
+                core_plugins = core_plugins.disable::<lol_core::log::PluginLog>();
+            }
+            if !self.enable_navigation {
+                core_plugins = core_plugins.disable::<lol_core::navigation::navigation::PluginNavigaton>();
+            }
+            app.add_plugins(core_plugins);
             app.add_plugins(lol_particle::PluginParticle);
         } else {
             app.add_plugins((
@@ -420,13 +449,13 @@ impl FioraRivenEnvBuilder {
                 bevy::world_serialization::WorldSerializationPlugin,
                 bevy::mesh::MeshPlugin,
                 bevy::image::ImagePlugin::default(),
-                bevy::animation::AnimationPlugin,
-                bevy::audio::AudioPlugin::default(),
                 bevy::scene::ScenePlugin,
             ));
             league_core::register::init_league_asset(&mut app);
             app.init_asset::<StandardMaterial>();
             app.init_asset::<Shader>();
+            app.init_asset::<bevy::animation::AnimationClip>();
+            app.init_asset::<bevy::animation::graph::AnimationGraph>();
             app.init_asset::<lol_base_render::animation::LOLAnimationGraph>();
             app.init_asset::<lol_base_render::particle::ConfigVfx>();
             app.init_asset::<bevy::prelude::WorldAsset>();
@@ -435,15 +464,17 @@ impl FioraRivenEnvBuilder {
             app.init_asset::<lol_base::grid::ConfigNavigationGrid>();
             app.init_asset::<lol_base::item::ConfigItem>();
 
-            if self.enable_barrack {
-                app.add_plugins(lol_core::PluginCore);
-            } else {
-                app.add_plugins(
-                    lol_core::PluginCore
-                        .build()
-                        .disable::<lol_core::PluginBarrack>(),
-                );
+            let mut core_plugins = lol_core::PluginCore.build();
+            if !self.enable_barrack {
+                core_plugins = core_plugins.disable::<lol_core::PluginBarrack>();
             }
+            if !self.enable_log {
+                core_plugins = core_plugins.disable::<lol_core::log::PluginLog>();
+            }
+            if !self.enable_navigation {
+                core_plugins = core_plugins.disable::<lol_core::navigation::navigation::PluginNavigaton>();
+            }
+            app.add_plugins(core_plugins);
         }
 
         app.add_plugins(PluginFiora);

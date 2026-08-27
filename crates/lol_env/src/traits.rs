@@ -198,6 +198,21 @@ pub trait RlEnvironment: 'static {
         None
     }
 
+    /// 结构化动作空间规范 AST（供策略网络自动推导多头 Actor 架构）。
+    /// 返回 None 时降级为旧的 action_space() + action_mask() 路径。
+    fn action_schema() -> Option<lol_rl_protocol::ActionSchema>
+    where
+        Self: Sized,
+    {
+        None
+    }
+
+    /// 因式分解的动作掩码（每个动作分支独立的有效性过滤）。
+    /// 返回 None 时降级为旧的 action_mask() 路径。
+    fn action_masks(_obs: &Self::Obs) -> Option<lol_rl_protocol::ActionMasks> {
+        None
+    }
+
     /// 关联/静态获取环境奖励公式规范（用于 UI 符号展示、参数解析及遥测指标）。
     fn reward_formula_spec() -> Option<RewardFormulaSpec>
     where

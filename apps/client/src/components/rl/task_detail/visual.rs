@@ -4,7 +4,8 @@ use gpui_component::scroll::ScrollableElement;
 use gpui_component::switch::Switch;
 use gpui_component::{h_flex, v_flex, ActiveTheme, IconName, Sizable, StyledExt};
 use lol_rl_protocol::{
-    ObsValueNode, PolicyDisplay, PolicyItem, VisualInFrame, VisualObsFrame, ENV_FIORA_V0,
+    ActionBranchDisplay, ActionNode, ObsValueNode, PolicyDisplay, PolicyItem, VisualInFrame,
+    VisualObsFrame, ENV_FIORA_V0,
 };
 use rust_i18n::t;
 
@@ -222,10 +223,12 @@ fn render_visual_telemetry(sidebar: &AppSidebar, cx: &mut Context<AppSidebar>) -
         left_cards = left_cards.child(render_manual_action_panel(sidebar, cx));
     }
 
-    let right_card = div()
-        .w(px(320.0))
+    let right_card = v_flex()
+        .w(px(330.0))
         .flex_shrink_0()
-        .child(render_telemetry_obs_card(sidebar, f, cx));
+        .gap_3()
+        .child(render_telemetry_obs_card(sidebar, f, cx))
+        .child(render_telemetry_action_schema_card(sidebar, cx));
 
     h_flex()
         .items_start()
@@ -289,9 +292,7 @@ fn flatten_obs_nodes<'a>(
                     values,
                 });
             }
-            ObsValueNode::Categorical {
-                name, class_id, ..
-            } => {
+            ObsValueNode::Categorical { name, class_id, .. } => {
                 out.push(FlatObsItem::Categorical {
                     depth,
                     name,
@@ -571,6 +572,349 @@ fn render_telemetry_obs_card(
         .into_any_element()
 }
 
+enum FlatActionItem<'a> {
+    Categorical {
+        depth: usize,
+        name: &'a str,
+        num_classes: usize,
+        labels: &'a [String],
+    },
+    Continuous {
+        depth: usize,
+        name: &'a str,
+        dim: usize,
+    },
+    UnitSelection {
+        depth: usize,
+        name: &'a str,
+        max_units: usize,
+        obs_entity_name: &'a str,
+    },
+    GroupHeader {
+        depth: usize,
+        name: &'a str,
+        path: String,
+        count_label: String,
+        is_collapsed: bool,
+    },
+}
+
+fn flatten_action_nodes<'a>(
+    nodes: &'a [ActionNode],
+    path_prefix: &str,
+    depth: usize,
+    collapsed: &std::collections::HashSet<String>,
+    out: &mut Vec<FlatActionItem<'a>>,
+) {
+    if depth > 10 {
+        return;
+    }
+    for (i, node) in nodes.iter().enumerate() {
+        let node_path = format!("{path_prefix}.{}_{}", node.name(), i);
+        match node {
+            ActionNode::Categorical {
+                name,
+                num_classes,
+                labels,
+            } => {
+                out.push(FlatActionItem::Categorical {
+                    depth,
+                    name,
+                    num_classes: *num_classes,
+                    labels,
+                });
+            }
+            ActionNode::Continuous { name, dim } => {
+                out.push(FlatActionItem::Continuous {
+                    depth,
+                    name,
+                    dim: *dim,
+                });
+            }
+            ActionNode::UnitSelection {
+                name,
+                max_units,
+                obs_entity_name,
+                ..
+            } => {
+                out.push(FlatActionItem::UnitSelection {
+                    depth,
+                    name,
+                    max_units: *max_units,
+                    obs_entity_name,
+                });
+            }
+            ActionNode::Struct { name, fields } => {
+                let is_collapsed = collapsed.contains(&node_path);
+                out.push(FlatActionItem::GroupHeader {
+                    depth,
+                    name,
+                    path: node_path.clone(),
+                    count_label: format!("{} 字段", fields.len()),
+                    is_collapsed,
+                });
+                if !is_collapsed {
+                    flatten_action_nodes(fields, &node_path, depth + 1, collapsed, out);
+                }
+            }
+        }
+    }
+}
+
+fn render_flat_action_item(item: FlatActionItem<'_>, cx: &Context<AppSidebar>) -> AnyElement {
+    match item {
+        FlatActionItem::Categorical {
+            depth,
+            name,
+            num_classes,
+            labels,
+        } => {
+            let label_preview = if labels.len() <= 3 {
+                labels.join(", ")
+            } else {
+                format!(
+                    "{}, ...共{}类",
+                    labels[..2.min(labels.len())].join(", "),
+                    num_classes
+                )
+            };
+            h_flex()
+                .justify_between()
+                .items_center()
+                .text_xs()
+                .pl(px(depth as f32 * 10.0))
+                .py_0p5()
+                .child(
+                    h_flex()
+                        .gap_1p5()
+                        .items_center()
+                        .child(
+                            div()
+                                .px_1()
+                                .py_0p5()
+                                .rounded_sm()
+                                .bg(cx.theme().accent.opacity(0.15))
+                                .text_color(cx.theme().accent)
+                                .font_bold()
+                                .text_xs()
+                                .child("离散"),
+                        )
+                        .child(
+                            div()
+                                .text_color(cx.theme().foreground.opacity(0.85))
+                                .child(name.to_string()),
+                        ),
+                )
+                .child(
+                    div()
+                        .text_color(cx.theme().muted_foreground)
+                        .child(format!("{num_classes}类 ({label_preview})")),
+                )
+                .into_any_element()
+        }
+        FlatActionItem::Continuous { depth, name, dim } => h_flex()
+            .justify_between()
+            .items_center()
+            .text_xs()
+            .pl(px(depth as f32 * 10.0))
+            .py_0p5()
+            .child(
+                h_flex()
+                    .gap_1p5()
+                    .items_center()
+                    .child(
+                        div()
+                            .px_1()
+                            .py_0p5()
+                            .rounded_sm()
+                            .bg(hsla(140.0 / 360.0, 0.75, 0.45, 0.15))
+                            .text_color(cx.theme().success)
+                            .font_bold()
+                            .text_xs()
+                            .child("连续"),
+                    )
+                    .child(
+                        div()
+                            .text_color(cx.theme().foreground.opacity(0.85))
+                            .child(name.to_string()),
+                    ),
+            )
+            .child(
+                div()
+                    .font_bold()
+                    .text_color(cx.theme().success)
+                    .child(format!("{dim} 维高斯")),
+            )
+            .into_any_element(),
+        FlatActionItem::UnitSelection {
+            depth,
+            name,
+            max_units,
+            obs_entity_name,
+        } => h_flex()
+            .justify_between()
+            .items_center()
+            .text_xs()
+            .pl(px(depth as f32 * 10.0))
+            .py_0p5()
+            .child(
+                h_flex()
+                    .gap_1p5()
+                    .items_center()
+                    .child(
+                        div()
+                            .px_1()
+                            .py_0p5()
+                            .rounded_sm()
+                            .bg(hsla(215.0 / 360.0, 0.85, 0.58, 0.15))
+                            .text_color(hsla(215.0 / 360.0, 0.85, 0.58, 1.0))
+                            .font_bold()
+                            .text_xs()
+                            .child("目标选择"),
+                    )
+                    .child(
+                        div()
+                            .text_color(cx.theme().foreground.opacity(0.85))
+                            .child(name.to_string()),
+                    ),
+            )
+            .child(
+                div()
+                    .text_color(cx.theme().primary)
+                    .child(format!("{max_units} 槽位 ➔ {obs_entity_name}")),
+            )
+            .into_any_element(),
+        FlatActionItem::GroupHeader {
+            depth,
+            name,
+            path,
+            count_label,
+            is_collapsed,
+        } => {
+            let path_for_click = path.clone();
+            h_flex()
+                .items_center()
+                .justify_between()
+                .w_full()
+                .pl(px(depth as f32 * 10.0))
+                .py_0p5()
+                .child(
+                    h_flex()
+                        .items_center()
+                        .gap_1()
+                        .child(
+                            Button::new(format!("toggle-act-group-{}", path))
+                                .icon(if is_collapsed {
+                                    IconName::ChevronRight
+                                } else {
+                                    IconName::ChevronDown
+                                })
+                                .xsmall()
+                                .ghost()
+                                .on_click(cx.listener(move |this, _, _, cx| {
+                                    if this.visual_action_collapsed.contains(&path_for_click) {
+                                        this.visual_action_collapsed.remove(&path_for_click);
+                                    } else {
+                                        this.visual_action_collapsed.insert(path_for_click.clone());
+                                    }
+                                    cx.notify();
+                                })),
+                        )
+                        .child(
+                            div()
+                                .px_1()
+                                .py_0p5()
+                                .rounded_sm()
+                                .bg(cx.theme().secondary)
+                                .text_color(cx.theme().foreground)
+                                .font_bold()
+                                .text_xs()
+                                .child("结构体"),
+                        )
+                        .child(
+                            div()
+                                .text_xs()
+                                .font_semibold()
+                                .text_color(cx.theme().foreground)
+                                .child(name.to_string()),
+                        ),
+                )
+                .child(
+                    div()
+                        .text_xs()
+                        .text_color(cx.theme().muted_foreground)
+                        .child(count_label),
+                )
+                .into_any_element()
+        }
+    }
+}
+
+fn render_telemetry_action_schema_card(
+    sidebar: &AppSidebar,
+    cx: &Context<AppSidebar>,
+) -> AnyElement {
+    let schema = sidebar.visual_action_schema.as_ref();
+    let enc_dim = schema.map(|s| s.encoding_dim()).unwrap_or(0);
+    let num_branches = schema.map(|s| s.num_branches()).unwrap_or(0);
+
+    div()
+        .w_full()
+        .max_h(px(400.0))
+        .p_3()
+        .rounded_md()
+        .border_1()
+        .border_color(cx.theme().border)
+        .bg(cx.theme().background)
+        .child(
+            v_flex()
+                .gap_2()
+                .child(
+                    h_flex()
+                        .justify_between()
+                        .child(
+                            div()
+                                .font_bold()
+                                .text_sm()
+                                .child("结构化动作空间 AST (Action Schema)"),
+                        )
+                        .child(
+                            div()
+                                .text_xs()
+                                .font_bold()
+                                .text_color(cx.theme().primary)
+                                .child(format!("{enc_dim} 维编码 · {num_branches} 分支")),
+                        ),
+                )
+                .child(if let Some(s) = schema {
+                    let mut flat_items = Vec::with_capacity(16);
+                    flatten_action_nodes(
+                        &s.nodes,
+                        "action_root",
+                        0,
+                        &sidebar.visual_action_collapsed,
+                        &mut flat_items,
+                    );
+                    v_flex()
+                        .gap_1()
+                        .overflow_y_scrollbar()
+                        .children(
+                            flat_items
+                                .into_iter()
+                                .map(|item| render_flat_action_item(item, cx)),
+                        )
+                        .into_any_element()
+                } else {
+                    div()
+                        .text_xs()
+                        .text_color(cx.theme().foreground.opacity(0.75))
+                        .child("暂无动作空间 Schema 元数据")
+                        .into_any_element()
+                }),
+        )
+        .into_any_element()
+}
+
 fn render_telemetry_status_card(f: &VisualObsFrame, cx: &Context<AppSidebar>) -> AnyElement {
     div()
         .w_full()
@@ -725,6 +1069,101 @@ fn render_policy_display(policy: &PolicyDisplay, cx: &Context<AppSidebar>) -> An
                 .child(render_policy_items_table(discrete_probs, cx))
                 .into_any_element()
         }
+        PolicyDisplay::Structured(branches) => {
+            if branches.is_empty() {
+                div()
+                    .text_xs()
+                    .text_color(cx.theme().foreground.opacity(0.75))
+                    .child("无结构化动作分布数据")
+                    .into_any_element()
+            } else {
+                v_flex()
+                    .gap_3()
+                    .children(branches.iter().map(|b| render_action_branch_display(b, cx)))
+                    .into_any_element()
+            }
+        }
+    }
+}
+
+fn render_action_branch_display(
+    branch: &ActionBranchDisplay,
+    cx: &Context<AppSidebar>,
+) -> AnyElement {
+    match branch {
+        ActionBranchDisplay::Continuous {
+            name,
+            means,
+            labels,
+        } => v_flex()
+            .gap_1p5()
+            .child(
+                div()
+                    .text_xs()
+                    .font_semibold()
+                    .text_color(cx.theme().success)
+                    .child(format!("连续控制分布 [{name}] (高斯均值)")),
+            )
+            .children(
+                labels
+                    .iter()
+                    .zip(means.iter())
+                    .map(|(lbl, &val)| policy_value_row(lbl, val)),
+            )
+            .into_any_element(),
+        ActionBranchDisplay::Categorical { name, items } => v_flex()
+            .gap_1p5()
+            .child(
+                div()
+                    .text_xs()
+                    .font_semibold()
+                    .text_color(cx.theme().accent)
+                    .child(format!("离散决策分布 [{name}]")),
+            )
+            .child(render_policy_items_table(items, cx))
+            .into_any_element(),
+        ActionBranchDisplay::UnitSelection {
+            name,
+            obs_entity_name,
+            items,
+        } => v_flex()
+            .gap_1p5()
+            .child(
+                h_flex()
+                    .justify_between()
+                    .items_center()
+                    .child(
+                        div()
+                            .text_xs()
+                            .font_semibold()
+                            .text_color(hsla(215.0 / 360.0, 0.85, 0.58, 1.0))
+                            .child(format!("目标注意力选择 [{name}]")),
+                    )
+                    .child(
+                        div()
+                            .text_xs()
+                            .text_color(cx.theme().muted_foreground)
+                            .child(format!("源: {obs_entity_name}")),
+                    ),
+            )
+            .child(render_policy_items_table(items, cx))
+            .into_any_element(),
+        ActionBranchDisplay::Struct { name, fields } => v_flex()
+            .gap_2()
+            .p_2()
+            .rounded_md()
+            .border_1()
+            .border_color(cx.theme().border)
+            .bg(cx.theme().secondary.opacity(0.2))
+            .child(
+                div()
+                    .text_xs()
+                    .font_bold()
+                    .text_color(cx.theme().foreground)
+                    .child(format!("复合动作域: {name}")),
+            )
+            .children(fields.iter().map(|f| render_action_branch_display(f, cx)))
+            .into_any_element(),
     }
 }
 

@@ -1,8 +1,8 @@
 use candle_core::{D, DType, IndexOp, Result, Tensor};
 use candle_nn::{Conv1d, Conv1dConfig, Embedding, Linear, Module, VarBuilder};
 use lol_rl_protocol::{
-    ActionSpace, EntityEncoderSpec, ObsNode, ObsSchema, PolicyBackbone, PolicyDisplay, PolicyItem,
-    PoolType,
+    ActionBranchDisplay, ActionSpace, EntityEncoderSpec, ObsNode, ObsSchema, PolicyBackbone,
+    PolicyDisplay, PolicyItem, PoolType,
 };
 use rand::Rng;
 
@@ -619,6 +619,105 @@ impl Backbone {
             Self::Mamba { .. } => PolicyBackbone::Mamba,
         }
     }
+
+    pub fn collect_params(&self, out: &mut Vec<LayerParamInfo>) {
+        match self {
+            Self::Mlp { fc1, fc2, .. } => {
+                out.push(LayerParamInfo::new(
+                    "Backbone (MLP)",
+                    "fc1.weight",
+                    fc1.weight().dims(),
+                ));
+                if let Some(b) = fc1.bias() {
+                    out.push(LayerParamInfo::new(
+                        "Backbone (MLP)",
+                        "fc1.bias",
+                        b.dims(),
+                    ));
+                }
+                out.push(LayerParamInfo::new(
+                    "Backbone (MLP)",
+                    "fc2.weight",
+                    fc2.weight().dims(),
+                ));
+                if let Some(b) = fc2.bias() {
+                    out.push(LayerParamInfo::new(
+                        "Backbone (MLP)",
+                        "fc2.bias",
+                        b.dims(),
+                    ));
+                }
+            }
+            Self::Mamba { proj_in, mamba, .. } => {
+                out.push(LayerParamInfo::new(
+                    "Backbone (Mamba)",
+                    "proj_in.weight",
+                    proj_in.weight().dims(),
+                ));
+                if let Some(b) = proj_in.bias() {
+                    out.push(LayerParamInfo::new(
+                        "Backbone (Mamba)",
+                        "proj_in.bias",
+                        b.dims(),
+                    ));
+                }
+                out.push(LayerParamInfo::new(
+                    "Backbone (Mamba)",
+                    "mamba.in_proj.weight",
+                    mamba.in_proj.weight().dims(),
+                ));
+                out.push(LayerParamInfo::new(
+                    "Backbone (Mamba)",
+                    "mamba.conv1d.weight",
+                    mamba.conv1d.weight().dims(),
+                ));
+                if let Some(b) = mamba.conv1d.bias() {
+                    out.push(LayerParamInfo::new(
+                        "Backbone (Mamba)",
+                        "mamba.conv1d.bias",
+                        b.dims(),
+                    ));
+                }
+                out.push(LayerParamInfo::new(
+                    "Backbone (Mamba)",
+                    "mamba.x_proj.weight",
+                    mamba.x_proj.weight().dims(),
+                ));
+                out.push(LayerParamInfo::new(
+                    "Backbone (Mamba)",
+                    "mamba.dt_proj.weight",
+                    mamba.dt_proj.weight().dims(),
+                ));
+                if let Some(b) = mamba.dt_proj.bias() {
+                    out.push(LayerParamInfo::new(
+                        "Backbone (Mamba)",
+                        "mamba.dt_proj.bias",
+                        b.dims(),
+                    ));
+                }
+                out.push(LayerParamInfo::new(
+                    "Backbone (Mamba)",
+                    "mamba.A_log",
+                    mamba.a_log.dims(),
+                ));
+                out.push(LayerParamInfo::new(
+                    "Backbone (Mamba)",
+                    "mamba.D",
+                    mamba.d.dims(),
+                ));
+                out.push(LayerParamInfo::new(
+                    "Backbone (Mamba)",
+                    "mamba.out_proj.weight",
+                    mamba.out_proj.weight().dims(),
+                ));
+                out.push(LayerParamInfo::new(
+                    "Backbone (Mamba)",
+                    "mamba.norm.scale",
+                    mamba.norm.scale.dims(),
+                ));
+            }
+        }
+    }
 }
 
 // ── AST 声明式观测特征提取模块 (Obs Feature Extractor) ──────────────────────
@@ -638,12 +737,22 @@ pub enum NodeExtractor {
         field_raw_dims: Vec<usize>,
     },
     Repeated {
+        name: String,
         max_count: usize,
         item_raw_dim: usize,
         item_extractor: Box<NodeExtractor>,
         mlp_layers: Vec<Linear>,
         encoder_spec: EntityEncoderSpec,
     },
+}
+
+/// 观测特征提取结果（主干聚合特征 + 可选的命名实体嵌入）
+pub struct ExtractedFeatures {
+    /// 聚合后的主干输入特征 (batch, encoded_dim) 或 (batch, seq, encoded_dim)
+    pub aggregated: Tensor,
+    /// 池化前的命名实体嵌入，key 为 Repeated 节点名
+    /// 值 shape: (batch, max_count, item_embed_dim)
+    pub entity_embeds: std::collections::HashMap<String, Tensor>,
 }
 
 impl NodeExtractor {
@@ -706,6 +815,7 @@ impl NodeExtractor {
                 }
 
                 Ok(Self::Repeated {
+                    name: name.clone(),
                     max_count: *max_count,
                     item_raw_dim,
                     item_extractor,
@@ -716,12 +826,15 @@ impl NodeExtractor {
         }
     }
 
-    pub fn forward_2d(&self, x: &Tensor) -> Result<Tensor> {
+    pub fn forward_2d_with_entities(
+        &self,
+        x: &Tensor,
+    ) -> Result<(Tensor, std::collections::HashMap<String, Tensor>)> {
         match self {
-            Self::PassThrough { .. } => Ok(x.clone()),
+            Self::PassThrough { .. } => Ok((x.clone(), std::collections::HashMap::new())),
             Self::Categorical { embed, .. } => {
                 let ids = x.squeeze(1)?.to_dtype(DType::U32)?;
-                embed.forward(&ids)
+                Ok((embed.forward(&ids)?, std::collections::HashMap::new()))
             }
             Self::Struct {
                 field_extractors,
@@ -729,18 +842,23 @@ impl NodeExtractor {
             } => {
                 let mut offset = 0;
                 let mut parts = Vec::with_capacity(field_extractors.len());
+                let mut all_embeds = std::collections::HashMap::new();
                 for (ext, &r_dim) in field_extractors.iter().zip(field_raw_dims.iter()) {
                     let slice = x.narrow(1, offset, r_dim)?;
-                    parts.push(ext.forward_2d(&slice)?);
+                    let (part_feat, part_embeds) = ext.forward_2d_with_entities(&slice)?;
+                    parts.push(part_feat);
+                    all_embeds.extend(part_embeds);
                     offset += r_dim;
                 }
-                if parts.len() == 1 {
-                    Ok(parts.remove(0))
+                let agg = if parts.len() == 1 {
+                    parts.remove(0)
                 } else {
-                    Tensor::cat(&parts, 1)
-                }
+                    Tensor::cat(&parts, 1)?
+                };
+                Ok((agg, all_embeds))
             }
             Self::Repeated {
+                name,
                 max_count,
                 item_raw_dim,
                 item_extractor,
@@ -749,7 +867,8 @@ impl NodeExtractor {
             } => {
                 let (b, _total_raw) = x.dims2()?;
                 let item_input = x.reshape((b * max_count, *item_raw_dim))?;
-                let mut feat = item_extractor.forward_2d(&item_input)?;
+                let (mut feat, mut embeds) =
+                    item_extractor.forward_2d_with_entities(&item_input)?;
 
                 for layer in mlp_layers {
                     feat = layer.forward(&feat)?.tanh()?;
@@ -758,16 +877,19 @@ impl NodeExtractor {
                 let item_feat_dim = feat.dim(1)?;
                 let feat_3d = feat.reshape((b, *max_count, item_feat_dim))?;
 
-                match encoder_spec {
+                embeds.insert(name.clone(), feat_3d.clone());
+
+                let agg = match encoder_spec {
                     EntityEncoderSpec::SharedMlpFlatten { .. } | EntityEncoderSpec::PassThrough => {
-                        feat_3d.reshape((b, max_count * item_feat_dim))
+                        feat_3d.reshape((b, max_count * item_feat_dim))?
                     }
                     EntityEncoderSpec::SharedMlpPool { pool_type, .. } => match pool_type {
-                        PoolType::Max => feat_3d.max(1),
-                        PoolType::Mean => feat_3d.mean(1),
-                        PoolType::Sum => feat_3d.sum(1),
+                        PoolType::Max => feat_3d.max(1)?,
+                        PoolType::Mean => feat_3d.mean(1)?,
+                        PoolType::Sum => feat_3d.sum(1)?,
                     },
-                }
+                };
+                Ok((agg, embeds))
             }
         }
     }
@@ -796,6 +918,7 @@ impl NodeExtractor {
                 })
             }
             Self::Repeated {
+                name,
                 max_count,
                 item_raw_dim,
                 item_extractor,
@@ -810,12 +933,60 @@ impl NodeExtractor {
                     moved_layers.push(Linear::new(w, b));
                 }
                 Ok(Self::Repeated {
+                    name: name.clone(),
                     max_count: *max_count,
                     item_raw_dim: *item_raw_dim,
                     item_extractor: moved_item,
                     mlp_layers: moved_layers,
                     encoder_spec: encoder_spec.clone(),
                 })
+            }
+        }
+    }
+
+    pub fn collect_params(&self, prefix: &str, out: &mut Vec<LayerParamInfo>) {
+        match self {
+            Self::PassThrough { .. } => {}
+            Self::Categorical { embed, .. } => {
+                out.push(LayerParamInfo::new(
+                    "Obs 特征提取",
+                    format!("{prefix}.embed"),
+                    embed.embeddings().dims(),
+                ));
+            }
+            Self::Struct {
+                field_extractors, ..
+            } => {
+                for (idx, ext) in field_extractors.iter().enumerate() {
+                    ext.collect_params(&format!("{prefix}.field_{idx}"), out);
+                }
+            }
+            Self::Repeated {
+                name,
+                item_extractor,
+                mlp_layers,
+                ..
+            } => {
+                let pfx = if prefix.is_empty() || prefix == name {
+                    name.as_str()
+                } else {
+                    prefix
+                };
+                item_extractor.collect_params(&format!("{pfx}.item"), out);
+                for (idx, layer) in mlp_layers.iter().enumerate() {
+                    out.push(LayerParamInfo::new(
+                        "Obs 特征提取",
+                        format!("{pfx}.mlp_{idx}.weight"),
+                        layer.weight().dims(),
+                    ));
+                    if let Some(b) = layer.bias() {
+                        out.push(LayerParamInfo::new(
+                            "Obs 特征提取",
+                            format!("{pfx}.mlp_{idx}.bias"),
+                            b.dims(),
+                        ));
+                    }
+                }
             }
         }
     }
@@ -848,31 +1019,45 @@ impl ObsFeatureExtractor {
         &self.schema
     }
 
-    pub fn forward(&self, state: &Tensor) -> Result<Tensor> {
-        if state.rank() == 3 {
+    pub fn forward_with_entities(&self, state: &Tensor) -> Result<ExtractedFeatures> {
+        let is_3d = state.rank() == 3;
+        let (state_2d, b, l) = if is_3d {
             let (b, l, raw_dim) = state.dims3()?;
-            let state_2d = state.reshape((b * l, raw_dim))?;
-            let feat_2d = self.forward_2d(&state_2d)?;
-            let feat_dim = feat_2d.dim(1)?;
-            feat_2d.reshape((b, l, feat_dim))?.contiguous()
+            (state.reshape((b * l, raw_dim))?, b, l)
         } else {
-            self.forward_2d(state)
-        }
-    }
+            (state.clone(), 0, 0)
+        };
 
-    fn forward_2d(&self, state: &Tensor) -> Result<Tensor> {
         let mut offset = 0;
         let mut parts = Vec::with_capacity(self.node_extractors.len());
+        let mut all_embeds = std::collections::HashMap::new();
         for (ext, &r_dim) in self.node_extractors.iter().zip(self.node_raw_dims.iter()) {
-            let slice = state.narrow(1, offset, r_dim)?;
-            parts.push(ext.forward_2d(&slice)?);
+            let slice = state_2d.narrow(1, offset, r_dim)?;
+            let (part_feat, part_embeds) = ext.forward_2d_with_entities(&slice)?;
+            parts.push(part_feat);
+            all_embeds.extend(part_embeds);
             offset += r_dim;
         }
-        if parts.len() == 1 {
-            Ok(parts.remove(0))
+
+        let mut aggregated = if parts.len() == 1 {
+            parts.remove(0)
         } else {
-            Tensor::cat(&parts, 1)?.contiguous()
+            Tensor::cat(&parts, 1)?.contiguous()?
+        };
+
+        if is_3d {
+            let feat_dim = aggregated.dim(1)?;
+            aggregated = aggregated.reshape((b, l, feat_dim))?.contiguous()?;
         }
+
+        Ok(ExtractedFeatures {
+            aggregated,
+            entity_embeds: all_embeds,
+        })
+    }
+
+    pub fn forward(&self, state: &Tensor) -> Result<Tensor> {
+        self.forward_with_entities(state).map(|f| f.aggregated)
     }
 
     pub fn to_device(&self, device: &candle_core::Device) -> Result<Self> {
@@ -886,11 +1071,19 @@ impl ObsFeatureExtractor {
             node_raw_dims: self.node_raw_dims.clone(),
         })
     }
+
+    pub fn collect_params(&self, out: &mut Vec<LayerParamInfo>) {
+        for (node, ext) in self.schema.nodes.iter().zip(self.node_extractors.iter()) {
+            ext.collect_params(node.name(), out);
+        }
+    }
 }
 
 /// ActorCritic 策略与价值网络（支持 MLP 与 Mamba 双主干，原生基于 AST ObsSchema）
 #[derive(Clone)]
 pub struct ActorCritic {
+    /// 可选的结构化多头 Actor（当环境提供 ActionSchema 时使用）
+    pub structured_action_head: Option<StructuredActionHead>,
     /// AST 声明式特征提取器
     feature_extractor: ObsFeatureExtractor,
     /// 核心特征提取主干（MLP 或 Mamba）
@@ -1001,6 +1194,7 @@ impl ActorCritic {
         };
 
         Ok(Self {
+            structured_action_head: None,
             feature_extractor: extractor,
             backbone,
             actor_head,
@@ -1136,7 +1330,14 @@ impl ActorCritic {
             .map(|b| b.to_device(device))
             .transpose()?;
 
+        let structured_action_head = self
+            .structured_action_head
+            .as_ref()
+            .map(|h| h.to_device(device))
+            .transpose()?;
+
         Ok(Self {
+            structured_action_head,
             feature_extractor,
             backbone,
             actor_head,
@@ -1145,6 +1346,73 @@ impl ActorCritic {
             critic_head,
             belief_head,
             action_space: self.action_space.clone(),
+        })
+    }
+
+    /// 基于 ObsSchema + ActionSchema 自动推导完整的 Actor-Critic 网络
+    pub fn from_schemas(
+        obs_schema: ObsSchema,
+        action_schema: ActionSchema,
+        hidden_dim: usize,
+        backbone_type: PolicyBackbone,
+        belief_dim: Option<usize>,
+        vb: VarBuilder,
+    ) -> Result<Self> {
+        let extractor = ObsFeatureExtractor::new(obs_schema, vb.clone())?;
+        let in_dim = extractor.schema().encoded_dim();
+
+        let (backbone, feat_dim) = match backbone_type {
+            PolicyBackbone::Mlp => {
+                let fc1 = candle_nn::linear(in_dim, hidden_dim, vb.pp("fc1"))?;
+                let fc2 = candle_nn::linear(hidden_dim, hidden_dim, vb.pp("fc2"))?;
+                (
+                    Backbone::Mlp {
+                        fc1,
+                        fc2,
+                        hidden_dim,
+                    },
+                    hidden_dim,
+                )
+            }
+            PolicyBackbone::Mamba => {
+                let mamba_config = MambaConfig::new(hidden_dim);
+                let proj_in = candle_nn::linear(in_dim, mamba_config.d_model, vb.pp("proj_in"))?;
+                let mamba = MambaBlock::new(&mamba_config, vb.pp("mamba"))?;
+                let feat_dim = mamba_config.d_model;
+                (
+                    Backbone::Mamba {
+                        proj_in,
+                        mamba,
+                        config: mamba_config,
+                    },
+                    feat_dim,
+                )
+            }
+        };
+
+        let critic_head = candle_nn::linear(feat_dim, 1, vb.pp("critic_head"))?;
+        let belief_head = match belief_dim {
+            Some(b_dim) => Some(BeliefHead::new(feat_dim, b_dim, vb.pp("belief_head"))?),
+            None => None,
+        };
+
+        let structured_action_head =
+            StructuredActionHead::new(action_schema, feat_dim, vb.pp("structured_actor"))?;
+
+        // 构造虚拟的 action_space
+        let action_space = ActionSpace::Discrete(1);
+        let actor_head = candle_nn::linear(feat_dim, 1, vb.pp("dummy_actor_head"))?;
+
+        Ok(Self {
+            structured_action_head: Some(structured_action_head),
+            feature_extractor: extractor,
+            backbone,
+            actor_head,
+            log_std: None,
+            attack_head: None,
+            critic_head,
+            belief_head,
+            action_space,
         })
     }
 
@@ -1177,6 +1445,89 @@ impl ActorCritic {
 
     pub fn has_hero_embed(&self) -> bool {
         true
+    }
+
+    /// 提取模型所有可训练参数的层级明细与参数量统计（单位 K / M）
+    pub fn parameter_summary(&self) -> ModelParamSummary {
+        let mut out = Vec::new();
+        self.feature_extractor.collect_params(&mut out);
+        self.backbone.collect_params(&mut out);
+        if let Some(ref structured_head) = self.structured_action_head {
+            structured_head.collect_params(&mut out);
+        } else {
+            out.push(LayerParamInfo::new(
+                "Actor 策略头",
+                "actor_head.weight",
+                self.actor_head.weight().dims(),
+            ));
+            if let Some(b) = self.actor_head.bias() {
+                out.push(LayerParamInfo::new(
+                    "Actor 策略头",
+                    "actor_head.bias",
+                    b.dims(),
+                ));
+            }
+            if let Some(ref log_std) = self.log_std {
+                out.push(LayerParamInfo::new(
+                    "Actor 策略头",
+                    "log_std",
+                    log_std.dims(),
+                ));
+            }
+            if let Some(ref attack_head) = self.attack_head {
+                out.push(LayerParamInfo::new(
+                    "Actor 策略头",
+                    "attack_head.weight",
+                    attack_head.weight().dims(),
+                ));
+                if let Some(b) = attack_head.bias() {
+                    out.push(LayerParamInfo::new(
+                        "Actor 策略头",
+                        "attack_head.bias",
+                        b.dims(),
+                    ));
+                }
+            }
+        }
+        out.push(LayerParamInfo::new(
+            "Critic 价值头",
+            "critic_head.weight",
+            self.critic_head.weight().dims(),
+        ));
+        if let Some(b) = self.critic_head.bias() {
+            out.push(LayerParamInfo::new(
+                "Critic 价值头",
+                "critic_head.bias",
+                b.dims(),
+            ));
+        }
+        if let Some(ref belief_head) = self.belief_head {
+            out.push(LayerParamInfo::new(
+                "Belief 信念头",
+                "belief_mu.weight",
+                belief_head.mu.weight().dims(),
+            ));
+            if let Some(b) = belief_head.mu.bias() {
+                out.push(LayerParamInfo::new(
+                    "Belief 信念头",
+                    "belief_mu.bias",
+                    b.dims(),
+                ));
+            }
+            out.push(LayerParamInfo::new(
+                "Belief 信念头",
+                "belief_logvar.weight",
+                belief_head.logvar.weight().dims(),
+            ));
+            if let Some(b) = belief_head.logvar.bias() {
+                out.push(LayerParamInfo::new(
+                    "Belief 信念头",
+                    "belief_logvar.bias",
+                    b.dims(),
+                ));
+            }
+        }
+        ModelParamSummary::new(out)
     }
 
     /// Prepare the input by replacing categorical/entity features with embeddings/MLP.
@@ -1222,6 +1573,15 @@ impl ActorCritic {
         state: &Tensor,
         mask: Option<&[bool]>,
     ) -> Result<(Vec<f32>, f32, f32)> {
+        if let Some(ref structured_head) = self.structured_action_head {
+            let ext = self.feature_extractor.forward_with_entities(state)?;
+            let feat = self.backbone.forward(&ext.aggregated)?;
+            let values = self.critic_head.forward(&feat)?;
+            let val_scalar: f32 = values.squeeze(0)?.squeeze(0)?.to_scalar()?;
+            let (encoded, log_prob) = structured_head.sample(&feat, None, &ext.entity_embeds)?;
+            return Ok((encoded, log_prob, val_scalar));
+        }
+
         let feat = self.hidden(state)?;
         let values = self.critic_head.forward(&feat)?;
         let val_scalar: f32 = values.squeeze(0)?.squeeze(0)?.to_scalar()?;
@@ -1287,6 +1647,25 @@ impl ActorCritic {
         if b == 0 {
             return Ok(Vec::new());
         }
+
+        if let Some(ref structured_head) = self.structured_action_head {
+            let ext = self.feature_extractor.forward_with_entities(states)?;
+            let feat = self.backbone.forward(&ext.aggregated)?;
+            let values = self.critic_head.forward(&feat)?;
+            let val_vec: Vec<f32> = values.squeeze(1)?.to_vec1()?;
+            let mut results = Vec::with_capacity(b);
+            for i in 0..b {
+                let feat_i = feat.narrow(0, i, 1)?;
+                let mut embeds_i = HashMap::new();
+                for (k, v) in &ext.entity_embeds {
+                    embeds_i.insert(k.clone(), v.narrow(0, i, 1)?);
+                }
+                let (encoded, log_prob) = structured_head.sample(&feat_i, None, &embeds_i)?;
+                results.push((encoded, log_prob, val_vec[i]));
+            }
+            return Ok(results);
+        }
+
         let feat = self.hidden(states)?;
         let values = self.critic_head.forward(&feat)?;
         let val_vec: Vec<f32> = values.squeeze(1)?.to_vec1()?;
@@ -1360,6 +1739,13 @@ impl ActorCritic {
 
     /// 确定性贪心动作（连续取均值、离散取 argmax），用于可视化与评估。
     pub fn select_greedy_action(&self, state: &Tensor, mask: Option<&[bool]>) -> Result<Vec<f32>> {
+        if let Some(ref structured_head) = self.structured_action_head {
+            let ext = self.feature_extractor.forward_with_entities(state)?;
+            let feat = self.backbone.forward(&ext.aggregated)?;
+            let (encoded, _lp) = structured_head.sample(&feat, None, &ext.entity_embeds)?;
+            return Ok(encoded);
+        }
+
         let feat = self.hidden(state)?;
         match self.action_space {
             ActionSpace::Discrete(_) => {
@@ -1397,6 +1783,13 @@ impl ActorCritic {
         mask: Option<&[bool]>,
         labels: &[&str],
     ) -> Result<PolicyDisplay> {
+        if let Some(ref structured_head) = self.structured_action_head {
+            let ext = self.feature_extractor.forward_with_entities(state)?;
+            let feat = self.backbone.forward(&ext.aggregated)?;
+            let displays = structured_head.policy_display(&feat, &ext.entity_embeds, None)?;
+            return Ok(PolicyDisplay::Structured(displays));
+        }
+
         let feat = self.hidden(state)?;
         match self.action_space {
             ActionSpace::Discrete(_) => {
@@ -1496,6 +1889,30 @@ impl ActorCritic {
         state_obj: &mut Option<MambaState>,
         mask: Option<&[bool]>,
     ) -> Result<(Vec<f32>, f32, f32)> {
+        if let Some(ref structured_head) = self.structured_action_head {
+            match &self.backbone {
+                Backbone::Mlp { .. } => return self.sample_action(state, mask),
+                Backbone::Mamba {
+                    proj_in,
+                    mamba,
+                    config,
+                } => {
+                    if state_obj.is_none() {
+                        *state_obj = Some(MambaState::new(1, config, state.device())?);
+                    }
+                    let s = state_obj.as_mut().unwrap();
+                    let ext = self.feature_extractor.forward_with_entities(state)?;
+                    let x_proj = proj_in.forward(&ext.aggregated)?;
+                    let feat = mamba.step(&x_proj, s)?;
+                    let values = self.critic_head.forward(&feat)?;
+                    let val_scalar: f32 = values.squeeze(0)?.squeeze(0)?.to_scalar()?;
+                    let (encoded, log_prob) =
+                        structured_head.sample(&feat, None, &ext.entity_embeds)?;
+                    return Ok((encoded, log_prob, val_scalar));
+                }
+            }
+        }
+
         match &self.backbone {
             Backbone::Mlp { .. } => self.sample_action(state, mask),
             Backbone::Mamba {
@@ -1579,6 +1996,29 @@ impl ActorCritic {
         actions: &Tensor,
         masks: Option<&Tensor>,
     ) -> Result<(Tensor, Tensor, Tensor)> {
+        if let Some(ref structured_head) = self.structured_action_head {
+            let (feat, entity_embeds) = if state.rank() == 3 {
+                let (b, t, _) = state.dims3()?;
+                let ext = self.feature_extractor.forward_with_entities(state)?;
+                let feat_3d = self.backbone.forward(&ext.aggregated)?;
+                let feat_2d = feat_3d.reshape((b * t, self.backbone.output_dim()))?;
+                let mut flat_embeds = HashMap::new();
+                for (k, v) in ext.entity_embeds {
+                    let (_, max_u, d) = v.dims3()?;
+                    flat_embeds.insert(k, v.reshape((b * t, max_u, d))?);
+                }
+                (feat_2d, flat_embeds)
+            } else {
+                let ext = self.feature_extractor.forward_with_entities(state)?;
+                let feat = self.backbone.forward(&ext.aggregated)?;
+                (feat, ext.entity_embeds)
+            };
+            let values = self.critic_head.forward(&feat)?;
+            let (log_prob, entropy) =
+                structured_head.evaluate(&feat, actions, None, &entity_embeds, masks)?;
+            return Ok((log_prob, values.squeeze(1)?, entropy));
+        }
+
         let feat = if state.rank() == 3 {
             let (b, t, _) = state.dims3()?;
             let feat_3d = self.hidden(state)?;
@@ -1759,10 +2199,669 @@ fn gaussian_log_prob(mean: f32, std: f32, action: f32) -> f32 {
     -0.5 * z * z - std.ln() - HALF_LN_2PI
 }
 
+use std::collections::HashMap;
+
+use lol_rl_protocol::{ActionMasks, ActionNode, ActionSchema};
+
+/// 单个动作分支的输出头
+#[derive(Clone)]
+pub enum ActionBranchHead {
+    Categorical {
+        head: Linear,
+        num_classes: usize,
+        name: String,
+    },
+    Continuous {
+        head: Linear,
+        log_std: Tensor,
+        dim: usize,
+        name: String,
+    },
+    UnitSelection {
+        query_proj: Linear,
+        max_units: usize,
+        unit_embed_dim: usize,
+        name: String,
+        obs_entity_name: String,
+    },
+}
+
+impl ActionBranchHead {
+    pub fn to_device(&self, device: &candle_core::Device) -> Result<Self> {
+        match self {
+            Self::Categorical {
+                head,
+                num_classes,
+                name,
+            } => {
+                let w = head.weight().to_device(device)?;
+                let b = head.bias().map(|b| b.to_device(device)).transpose()?;
+                Ok(Self::Categorical {
+                    head: Linear::new(w, b),
+                    num_classes: *num_classes,
+                    name: name.clone(),
+                })
+            }
+            Self::Continuous {
+                head,
+                log_std,
+                dim,
+                name,
+            } => {
+                let w = head.weight().to_device(device)?;
+                let b = head.bias().map(|b| b.to_device(device)).transpose()?;
+                let l_std = log_std.to_device(device)?;
+                Ok(Self::Continuous {
+                    head: Linear::new(w, b),
+                    log_std: l_std,
+                    dim: *dim,
+                    name: name.clone(),
+                })
+            }
+            Self::UnitSelection {
+                query_proj,
+                max_units,
+                unit_embed_dim,
+                name,
+                obs_entity_name,
+            } => {
+                let w = query_proj.weight().to_device(device)?;
+                let b = query_proj.bias().map(|b| b.to_device(device)).transpose()?;
+                Ok(Self::UnitSelection {
+                    query_proj: Linear::new(w, b),
+                    max_units: *max_units,
+                    unit_embed_dim: *unit_embed_dim,
+                    name: name.clone(),
+                    obs_entity_name: obs_entity_name.clone(),
+                })
+            }
+        }
+    }
+}
+
+/// 基于 ActionSchema 的因式分解多头 Actor
+#[derive(Clone)]
+pub struct StructuredActionHead {
+    branches: Vec<ActionBranchHead>,
+    schema: ActionSchema,
+}
+
+impl StructuredActionHead {
+    pub fn new(schema: ActionSchema, feat_dim: usize, vb: VarBuilder) -> Result<Self> {
+        let flat = schema.flat_branches();
+        let mut branches = Vec::new();
+        for node in flat.iter() {
+            let branch_vb = vb.pp(format!("action_{}", node.name()));
+            match node {
+                ActionNode::Categorical {
+                    num_classes, name, ..
+                } => {
+                    let head = candle_nn::linear(feat_dim, *num_classes, branch_vb)?;
+                    branches.push(ActionBranchHead::Categorical {
+                        head,
+                        num_classes: *num_classes,
+                        name: name.clone(),
+                    });
+                }
+                ActionNode::Continuous { dim, name, .. } => {
+                    let head = candle_nn::linear(feat_dim, *dim, branch_vb.pp("mean"))?;
+                    let log_std = branch_vb.get_with_hints(
+                        (*dim,),
+                        "log_std",
+                        candle_nn::Init::Const(0.0),
+                    )?;
+                    branches.push(ActionBranchHead::Continuous {
+                        head,
+                        log_std,
+                        dim: *dim,
+                        name: name.clone(),
+                    });
+                }
+                ActionNode::UnitSelection {
+                    max_units,
+                    unit_embed_dim,
+                    name,
+                    obs_entity_name,
+                    ..
+                } => {
+                    let query_proj = candle_nn::linear(feat_dim, *unit_embed_dim, branch_vb)?;
+                    branches.push(ActionBranchHead::UnitSelection {
+                        query_proj,
+                        max_units: *max_units,
+                        unit_embed_dim: *unit_embed_dim,
+                        name: name.clone(),
+                        obs_entity_name: obs_entity_name.clone(),
+                    });
+                }
+                ActionNode::Struct { .. } => {
+                    unreachable!("Struct should be flattened")
+                }
+            }
+        }
+        Ok(Self { branches, schema })
+    }
+
+    pub fn schema(&self) -> &ActionSchema {
+        &self.schema
+    }
+
+    pub fn sample(
+        &self,
+        feat: &Tensor,
+        masks: Option<&ActionMasks>,
+        entity_embeds: &HashMap<String, Tensor>,
+    ) -> Result<(Vec<f32>, f32)> {
+        let mut encoded = Vec::new();
+        let mut total_log_prob = 0.0f32;
+        let mut rng = rand::rng();
+
+        for (i, branch) in self.branches.iter().enumerate() {
+            let mask_i = masks
+                .and_then(|m| m.branch_masks.get(i))
+                .and_then(|m| m.as_deref());
+            match branch {
+                ActionBranchHead::Categorical { head, .. } => {
+                    let logits: Vec<f32> = head.forward(feat)?.squeeze(0)?.to_vec1()?;
+                    let masked = mask_logits_slice(&logits, mask_i);
+                    let (idx, lp) = sample_categorical(&masked);
+                    encoded.push(idx as f32);
+                    total_log_prob += lp;
+                }
+                ActionBranchHead::Continuous {
+                    head, log_std, dim, ..
+                } => {
+                    let means: Vec<f32> = head.forward(feat)?.squeeze(0)?.to_vec1()?;
+                    let lstd: Vec<f32> = log_std.to_vec1()?;
+                    for j in 0..*dim {
+                        let std = lstd[j].exp();
+                        let a = means[j] + std * sample_gaussian(&mut rng);
+                        encoded.push(a);
+                        total_log_prob += gaussian_log_prob(means[j], std, a);
+                    }
+                }
+                ActionBranchHead::UnitSelection {
+                    query_proj,
+                    obs_entity_name,
+                    ..
+                } => {
+                    let query = query_proj.forward(feat)?;
+                    let embeds = entity_embeds.get(obs_entity_name).ok_or_else(|| {
+                        candle_core::Error::Msg(format!(
+                            "Missing entity embeds for '{}'",
+                            obs_entity_name
+                        ))
+                    })?;
+                    let logits_t = embeds
+                        .squeeze(0)?
+                        .matmul(&query.squeeze(0)?.unsqueeze(1)?)?;
+                    let logits: Vec<f32> = logits_t.squeeze(1)?.to_vec1()?;
+                    let masked = mask_logits_slice(&logits, mask_i);
+                    let (idx, lp) = sample_categorical(&masked);
+                    encoded.push(idx as f32);
+                    total_log_prob += lp;
+                }
+            }
+        }
+        Ok((encoded, total_log_prob))
+    }
+
+    pub fn evaluate(
+        &self,
+        feat: &Tensor,
+        actions: &Tensor,
+        _masks: Option<&ActionMasks>,
+        entity_embeds: &HashMap<String, Tensor>,
+        _batch_masks: Option<&Tensor>,
+    ) -> Result<(Tensor, Tensor)> {
+        let n = feat.dim(0)?;
+        let mut all_log_probs: Vec<Tensor> = Vec::new();
+        let mut all_entropies: Vec<Tensor> = Vec::new();
+        let mut action_offset = 0usize;
+
+        for (_i, branch) in self.branches.iter().enumerate() {
+            match branch {
+                ActionBranchHead::Categorical { head, .. } => {
+                    let logits = head.forward(feat)?;
+                    let log_probs_all = candle_nn::ops::log_softmax(&logits, D::Minus1)?;
+                    let probs_all = candle_nn::ops::softmax(&logits, D::Minus1)?;
+                    let act = actions
+                        .narrow(1, action_offset, 1)?
+                        .squeeze(1)?
+                        .to_dtype(DType::U32)?;
+                    let sel_lp = log_probs_all.gather(&act.unsqueeze(1)?, 1)?.squeeze(1)?;
+                    let ent = (probs_all * log_probs_all)?
+                        .neg()?
+                        .sum_keepdim(D::Minus1)?
+                        .squeeze(1)?;
+                    all_log_probs.push(sel_lp);
+                    all_entropies.push(ent);
+                    action_offset += 1;
+                }
+                ActionBranchHead::Continuous {
+                    head, log_std, dim, ..
+                } => {
+                    let means = head.forward(feat)?;
+                    let log_std_b = log_std.broadcast_as((n, *dim))?;
+                    let std_b = log_std_b.exp()?;
+                    let cont = actions.narrow(1, action_offset, *dim)?;
+                    let z = ((&cont - &means)? / &std_b)?;
+                    let lp = z
+                        .powf(2.0)?
+                        .neg()?
+                        .affine(0.5, 0.0)?
+                        .sub(&log_std_b)?
+                        .affine(1.0, -HALF_LN_2PI as f64)?
+                        .sum(D::Minus1)?;
+                    let ent = log_std_b
+                        .affine(1.0, (0.5 + HALF_LN_2PI) as f64)?
+                        .sum(D::Minus1)?;
+                    all_log_probs.push(lp);
+                    all_entropies.push(ent);
+                    action_offset += *dim;
+                }
+                ActionBranchHead::UnitSelection {
+                    query_proj,
+                    obs_entity_name,
+                    ..
+                } => {
+                    let query = query_proj.forward(feat)?;
+                    let embeds = entity_embeds.get(obs_entity_name).ok_or_else(|| {
+                        candle_core::Error::Msg(format!(
+                            "Missing entity embeds for '{}'",
+                            obs_entity_name
+                        ))
+                    })?;
+                    let query_3d = query.unsqueeze(2)?;
+                    let logits = embeds.matmul(&query_3d)?.squeeze(2)?;
+                    let log_probs_all = candle_nn::ops::log_softmax(&logits, D::Minus1)?;
+                    let probs_all = candle_nn::ops::softmax(&logits, D::Minus1)?;
+                    let act = actions
+                        .narrow(1, action_offset, 1)?
+                        .squeeze(1)?
+                        .to_dtype(DType::U32)?;
+                    let sel_lp = log_probs_all.gather(&act.unsqueeze(1)?, 1)?.squeeze(1)?;
+                    let ent = (probs_all * log_probs_all)?
+                        .neg()?
+                        .sum_keepdim(D::Minus1)?
+                        .squeeze(1)?;
+                    all_log_probs.push(sel_lp);
+                    all_entropies.push(ent);
+                    action_offset += 1;
+                }
+            }
+        }
+
+        let total_lp = sum_tensors(&all_log_probs)?;
+        let total_ent = sum_tensors(&all_entropies)?;
+        Ok((total_lp, total_ent))
+    }
+
+    /// 提取多头因式分解动作分布的展示结构（用于可视化调试）
+    pub fn policy_display(
+        &self,
+        feat: &Tensor,
+        entity_embeds: &HashMap<String, Tensor>,
+        masks: Option<&ActionMasks>,
+    ) -> Result<Vec<ActionBranchDisplay>> {
+        let flat = self.schema.flat_branches();
+        let mut displays = Vec::with_capacity(self.branches.len());
+
+        for (i, branch) in self.branches.iter().enumerate() {
+            let mask_i = masks
+                .and_then(|m| m.branch_masks.get(i))
+                .and_then(|m| m.as_deref());
+            let node = flat.get(i);
+            match branch {
+                ActionBranchHead::Categorical {
+                    head,
+                    num_classes,
+                    name,
+                } => {
+                    let logits: Vec<f32> = head.forward(feat)?.squeeze(0)?.to_vec1()?;
+                    let raw_probs = softmax_slice(&logits);
+                    let masked = mask_logits_slice(&logits, mask_i);
+                    let probs = softmax_slice(&masked);
+                    let labels = if let Some(ActionNode::Categorical { labels, .. }) = node {
+                        labels.clone()
+                    } else {
+                        (0..*num_classes).map(|c| format!("Class {c}")).collect()
+                    };
+                    let items = (0..*num_classes)
+                        .map(|c| {
+                            let label = labels
+                                .get(c)
+                                .cloned()
+                                .unwrap_or_else(|| format!("Class {c}"));
+                            let is_masked = mask_i
+                                .map(|m| !m.get(c).copied().unwrap_or(true))
+                                .unwrap_or(false);
+                            PolicyItem {
+                                action_id: c,
+                                action: label,
+                                prob: probs.get(c).copied().unwrap_or(0.0),
+                                raw_prob: raw_probs.get(c).copied().unwrap_or(0.0),
+                                is_masked,
+                            }
+                        })
+                        .collect();
+                    displays.push(ActionBranchDisplay::Categorical {
+                        name: name.clone(),
+                        items,
+                    });
+                }
+                ActionBranchHead::Continuous {
+                    head, dim, name, ..
+                } => {
+                    let means: Vec<f32> = head.forward(feat)?.squeeze(0)?.to_vec1()?;
+                    let labels = (0..*dim).map(|j| format!("{}[{}]", name, j)).collect();
+                    displays.push(ActionBranchDisplay::Continuous {
+                        name: name.clone(),
+                        means,
+                        labels,
+                    });
+                }
+                ActionBranchHead::UnitSelection {
+                    query_proj,
+                    max_units,
+                    name,
+                    obs_entity_name,
+                    ..
+                } => {
+                    let items = if let Some(embeds) = entity_embeds.get(obs_entity_name) {
+                        let query = query_proj.forward(feat)?;
+                        let logits_t = embeds
+                            .squeeze(0)?
+                            .matmul(&query.squeeze(0)?.unsqueeze(1)?)?;
+                        let logits: Vec<f32> = logits_t.squeeze(1)?.to_vec1()?;
+                        let raw_probs = softmax_slice(&logits);
+                        let masked = mask_logits_slice(&logits, mask_i);
+                        let probs = softmax_slice(&masked);
+                        (0..*max_units)
+                            .map(|j| {
+                                let label = if j == 0 {
+                                    format!("Slot {j} (目标英雄)")
+                                } else {
+                                    format!("Slot {j} (小兵/单位)")
+                                };
+                                let is_masked = mask_i
+                                    .map(|m| !m.get(j).copied().unwrap_or(true))
+                                    .unwrap_or(false);
+                                PolicyItem {
+                                    action_id: j,
+                                    action: label,
+                                    prob: probs.get(j).copied().unwrap_or(0.0),
+                                    raw_prob: raw_probs.get(j).copied().unwrap_or(0.0),
+                                    is_masked,
+                                }
+                            })
+                            .collect()
+                    } else {
+                        Vec::new()
+                    };
+                    displays.push(ActionBranchDisplay::UnitSelection {
+                        name: name.clone(),
+                        obs_entity_name: obs_entity_name.clone(),
+                        items,
+                    });
+                }
+            }
+        }
+
+        Ok(displays)
+    }
+
+    pub fn to_device(&self, device: &candle_core::Device) -> Result<Self> {
+        let mut moved_branches = Vec::with_capacity(self.branches.len());
+        for branch in &self.branches {
+            moved_branches.push(branch.to_device(device)?);
+        }
+        Ok(Self {
+            branches: moved_branches,
+            schema: self.schema.clone(),
+        })
+    }
+
+    pub fn collect_params(&self, out: &mut Vec<LayerParamInfo>) {
+        for branch in &self.branches {
+            match branch {
+                ActionBranchHead::Categorical { head, name, .. } => {
+                    out.push(LayerParamInfo::new(
+                        "Actor 策略头",
+                        format!("action_{}.weight", name),
+                        head.weight().dims(),
+                    ));
+                    if let Some(b) = head.bias() {
+                        out.push(LayerParamInfo::new(
+                            "Actor 策略头",
+                            format!("action_{}.bias", name),
+                            b.dims(),
+                        ));
+                    }
+                }
+                ActionBranchHead::Continuous {
+                    head, log_std, name, ..
+                } => {
+                    out.push(LayerParamInfo::new(
+                        "Actor 策略头",
+                        format!("action_{}.mean.weight", name),
+                        head.weight().dims(),
+                    ));
+                    if let Some(b) = head.bias() {
+                        out.push(LayerParamInfo::new(
+                            "Actor 策略头",
+                            format!("action_{}.mean.bias", name),
+                            b.dims(),
+                        ));
+                    }
+                    out.push(LayerParamInfo::new(
+                        "Actor 策略头",
+                        format!("action_{}.log_std", name),
+                        log_std.dims(),
+                    ));
+                }
+                ActionBranchHead::UnitSelection {
+                    query_proj, name, ..
+                } => {
+                    out.push(LayerParamInfo::new(
+                        "Actor 策略头",
+                        format!("action_{}.query_proj.weight", name),
+                        query_proj.weight().dims(),
+                    ));
+                    if let Some(b) = query_proj.bias() {
+                        out.push(LayerParamInfo::new(
+                            "Actor 策略头",
+                            format!("action_{}.query_proj.bias", name),
+                            b.dims(),
+                        ));
+                    }
+                }
+            }
+        }
+    }
+}
+
+// ── 参数量明细统计与格式化 (K / M 单位) ──────────────────────────────────────
+
+/// 单个参数张量的元信息
+#[derive(Debug, Clone)]
+pub struct LayerParamInfo {
+    /// 模块类别：如 "Obs 特征提取", "Backbone (Mamba)", "Actor 策略头", "Critic 价值头", "Belief 信念头"
+    pub category: &'static str,
+    /// 参数/层名称：如 "proj_in.weight", "fc1.weight", "critic_head.bias"
+    pub name: String,
+    /// 张量维度：如 [64, 115]
+    pub shape: Vec<usize>,
+    /// 参数量数值
+    pub count: usize,
+}
+
+impl LayerParamInfo {
+    pub fn new(category: &'static str, name: impl Into<String>, shape: &[usize]) -> Self {
+        let shape_vec = shape.to_vec();
+        let count = shape_vec.iter().product();
+        Self {
+            category,
+            name: name.into(),
+            shape: shape_vec,
+            count,
+        }
+    }
+}
+
+/// 格式化参数量，以 K 或 M 为单位
+pub fn format_param_k_m(count: usize) -> String {
+    if count >= 1_000_000 {
+        format!("{:.3} M", count as f64 / 1_000_000.0)
+    } else if count >= 1_000 {
+        format!("{:.2} K", count as f64 / 1_000.0)
+    } else {
+        format!("{:.2} K", count as f64 / 1_000.0)
+    }
+}
+
+/// 网络模型参数量统计汇总
+#[derive(Debug, Clone)]
+pub struct ModelParamSummary {
+    pub layers: Vec<LayerParamInfo>,
+    pub total_params: usize,
+}
+
+impl ModelParamSummary {
+    pub fn new(layers: Vec<LayerParamInfo>) -> Self {
+        let total_params = layers.iter().map(|l| l.count).sum();
+        Self {
+            layers,
+            total_params,
+        }
+    }
+
+    /// 按分类汇总
+    pub fn category_totals(&self) -> Vec<(&'static str, usize)> {
+        let mut map: std::collections::BTreeMap<&'static str, usize> =
+            std::collections::BTreeMap::new();
+        let mut ordered_cats = Vec::new();
+        for layer in &self.layers {
+            if !map.contains_key(layer.category) {
+                ordered_cats.push(layer.category);
+            }
+            *map.entry(layer.category).or_insert(0) += layer.count;
+        }
+        ordered_cats.into_iter().map(|cat| (cat, map[cat])).collect()
+    }
+
+    /// 格式化为美观的表格字符串
+    pub fn format_table(&self) -> String {
+        let mut s = String::new();
+        s.push_str("\n========================================================================================\n");
+        s.push_str("🧠 [RL 策略与价值网络参数量明细 (Model Parameter Breakdown)]\n");
+        s.push_str("----------------------------------------------------------------------------------------\n");
+        s.push_str(&format!(
+            "{:<18} {:<34} {:<18} {:>10} {:>10}\n",
+            "模块分类", "参数层名称", "形状 (Shape)", "参数量", "规格 (K/M)"
+        ));
+        s.push_str("----------------------------------------------------------------------------------------\n");
+
+        for layer in &self.layers {
+            let shape_str = format!("{:?}", layer.shape);
+            s.push_str(&format!(
+                "{:<18} {:<34} {:<18} {:>10} {:>10}\n",
+                layer.category,
+                layer.name,
+                shape_str,
+                layer.count,
+                format_param_k_m(layer.count)
+            ));
+        }
+
+        s.push_str("----------------------------------------------------------------------------------------\n");
+        s.push_str("📊 [模块分类汇总]:\n");
+        for (cat, count) in self.category_totals() {
+            s.push_str(&format!(
+                "  ├─ {:<18}: {:>8} 参数 ({:>8})\n",
+                cat,
+                count,
+                format_param_k_m(count)
+            ));
+        }
+        s.push_str(&format!(
+            "  └─ 👉 总可训练参数量 : {:>8} 参数 ({:>8} / {:.4} M)\n",
+            self.total_params,
+            format_param_k_m(self.total_params),
+            self.total_params as f64 / 1_000_000.0
+        ));
+        s.push_str("========================================================================================\n");
+        s
+    }
+
+    pub fn print_summary(&self) {
+        println!("{}", self.format_table());
+        tracing::info!("{}", self.format_table());
+    }
+}
+
+fn sum_tensors(tensors: &[Tensor]) -> Result<Tensor> {
+    let mut result = tensors[0].clone();
+    for t in &tensors[1..] {
+        result = (&result + t)?;
+    }
+    Ok(result)
+}
+
 #[cfg(test)]
 mod tests {
-    use super::*;
     use candle_nn::VarMap;
+
+    use super::*;
+
+    #[test]
+    fn test_structured_action_head_sample() -> Result<()> {
+        let device = candle_core::Device::Cpu;
+        let schema = ActionSchema::new(vec![
+            ActionNode::continuous("offset", 2),
+            ActionNode::categorical(
+                "action_type",
+                vec!["NoOp", "Move", "Attack", "CastQ"]
+                    .into_iter()
+                    .map(String::from)
+                    .collect(),
+            ),
+        ]);
+        let varmap = VarMap::new();
+        let vb = VarBuilder::from_varmap(&varmap, DType::F32, &device);
+        let head = StructuredActionHead::new(schema, 64, vb)?;
+        let feat = Tensor::zeros((1, 64), DType::F32, &device)?;
+        let (encoded, _lp) = head.sample(&feat, None, &HashMap::new())?;
+        assert_eq!(encoded.len(), 3);
+        Ok(())
+    }
+
+    #[test]
+    fn test_structured_action_head_with_unit_selection() -> Result<()> {
+        let device = candle_core::Device::Cpu;
+        let schema = ActionSchema::new(vec![
+            ActionNode::categorical(
+                "action_type",
+                vec!["Attack", "Move"]
+                    .into_iter()
+                    .map(String::from)
+                    .collect(),
+            ),
+            ActionNode::unit_selection("target", 8, 16, "visible_units"),
+        ]);
+        let varmap = VarMap::new();
+        let vb = VarBuilder::from_varmap(&varmap, DType::F32, &device);
+        let head = StructuredActionHead::new(schema, 32, vb)?;
+        let feat = Tensor::zeros((1, 32), DType::F32, &device)?;
+        let mut entity_embeds = HashMap::new();
+        entity_embeds.insert(
+            "visible_units".to_string(),
+            Tensor::randn(0.0f32, 1.0, (1, 8, 16), &device)?,
+        );
+        let (encoded, _lp) = head.sample(&feat, None, &entity_embeds)?;
+        assert_eq!(encoded.len(), 2);
+        assert!(encoded[1] >= 0.0 && encoded[1] < 8.0);
+        Ok(())
+    }
 
     #[test]
     fn test_obs_schema_feature_extractor_2d_and_3d() -> Result<()> {
@@ -1808,12 +2907,7 @@ mod tests {
         assert_eq!(out_3d.dims(), &[2, 5, 43]);
 
         // ActorCritic integration
-        let ac = ActorCritic::from_schema(
-            schema,
-            64,
-            ActionSpace::Discrete(8),
-            vb.pp("test_ac"),
-        )?;
+        let ac = ActorCritic::from_schema(schema, 64, ActionSpace::Discrete(8), vb.pp("test_ac"))?;
         let (logits_2d, vals_2d) = ac.forward(&raw_2d)?;
         assert_eq!(logits_2d.dims(), &[3, 8]);
         assert_eq!(vals_2d.dims(), &[3, 1]);
@@ -1821,6 +2915,61 @@ mod tests {
         let (logits_3d, vals_3d) = ac.forward(&raw_3d)?;
         assert_eq!(logits_3d.dims(), &[2, 5, 8]);
         assert_eq!(vals_3d.dims(), &[2, 5, 1]);
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_parameter_summary_output() -> Result<()> {
+        let device = candle_core::Device::Cpu;
+        let varmap = VarMap::new();
+        let vb = VarBuilder::from_varmap(&varmap, DType::F32, &device);
+
+        let obs_schema = ObsSchema::new(vec![
+            ObsNode::categorical("hero", 4, 12),
+            ObsNode::vector("spatial", 3),
+            ObsNode::repeated(
+                "visible_units",
+                7,
+                ObsNode::structure(
+                    "unit",
+                    vec![
+                        ObsNode::categorical("unit_type", 6, 8),
+                        ObsNode::vector("rel_pos", 2),
+                        ObsNode::scalar("hp_pct", 0.0, 1.0),
+                    ],
+                ),
+                EntityEncoderSpec::SharedMlpPool {
+                    hidden_dims: vec![32, 16],
+                    pool_type: PoolType::Max,
+                },
+            ),
+        ]);
+
+        let action_schema = ActionSchema::new(vec![
+            ActionNode::continuous("offset", 2),
+            ActionNode::unit_selection("target", 7, 16, "visible_units"),
+            ActionNode::categorical(
+                "action_type",
+                vec!["NoOp", "Move", "Attack", "CastQ"]
+                    .into_iter()
+                    .map(String::from)
+                    .collect(),
+            ),
+        ]);
+
+        let ac = ActorCritic::from_schemas(
+            obs_schema,
+            action_schema,
+            64,
+            PolicyBackbone::Mamba,
+            None,
+            vb,
+        )?;
+
+        let summary = ac.parameter_summary();
+        assert!(summary.total_params > 0);
+        summary.print_summary();
 
         Ok(())
     }

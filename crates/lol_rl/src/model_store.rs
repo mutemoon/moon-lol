@@ -11,4 +11,3 @@ pub fn checkpoint_dir(task_id: &str) -> PathBuf {
 pub fn new_checkpoint_path(task_id: &str, ckpt_id: &str) -> PathBuf {
     lol_share::paths::checkpoint_path(task_id, ckpt_id)
 }
-

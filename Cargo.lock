@@ -9757,6 +9757,7 @@ dependencies = [
  "crossbeam-channel",
  "ctrlc",
  "futures-util",
+ "lol_core",
  "lol_env",
  "lol_rl_protocol",
  "lol_share",

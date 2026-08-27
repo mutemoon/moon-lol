@@ -221,7 +221,9 @@ fn update_loading_progress_and_check_ready(
             let state = asset_server.get_recursive_dependency_load_state(handle);
             !matches!(
                 state,
-                Some(RecursiveDependencyLoadState::Loaded | RecursiveDependencyLoadState::Failed(_))
+                Some(
+                    RecursiveDependencyLoadState::Loaded | RecursiveDependencyLoadState::Failed(_)
+                )
             )
         });
 
