@@ -83,6 +83,19 @@ fn main() -> anyhow::Result<()> {
                             traj.unwrap_or_else(|_| lol_rl::rollout::WorkerTrajectory::empty()),
                         );
                     }
+                    WorkerCommand::UpdateCurriculum {
+                        hp_scale,
+                        cs_reward,
+                        attack_no_cs_penalty,
+                        harass_coef,
+                    } => {
+                        worker.update_curriculum(
+                            hp_scale,
+                            cs_reward,
+                            attack_no_cs_penalty,
+                            harass_coef,
+                        );
+                    }
                     WorkerCommand::Stop => break,
                 }
             }

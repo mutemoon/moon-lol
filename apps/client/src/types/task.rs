@@ -1,7 +1,8 @@
 use std::collections::HashMap;
 
 use lol_rl_protocol::{
-    CheckpointItem, MetricsRow, ObsFeaturePayload, RewardFormulaSpec, RewardItem,
+    CheckpointItem, CurriculumTelemetry, MetricsRow, ObsFeaturePayload, RewardFormulaSpec,
+    RewardItem,
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -53,6 +54,7 @@ pub struct LocalTaskDetail {
     pub latest_obs: Option<ObsFeaturePayload>,
     pub reward_formula: Option<RewardFormulaSpec>,
     pub latest_reward_variables: Option<HashMap<String, f32>>,
+    pub latest_curriculum: Option<CurriculumTelemetry>,
     /// PPO clip 界，用于 KL 图参考线
     pub latest_clip_eps: f32,
     pub logs: Vec<String>,

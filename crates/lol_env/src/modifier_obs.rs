@@ -53,6 +53,15 @@ pub struct ModifierSlotObs {
 impl ModifierSlotObs {
     pub const DIM: usize = 5;
 
+    pub fn to_context(&self) -> lol_rl_protocol::ObsContext {
+        lol_rl_protocol::ObsContext::new()
+            .with_var("name", self.name_id.to_f32())
+            .with_var("remaining_duration", self.remaining_duration)
+            .with_var("stack_count", self.stack_count)
+            .with_var("params[0]", self.param0)
+            .with_var("params[1]", self.param1)
+    }
+
     pub fn to_vector(&self) -> [f32; 5] {
         [
             self.name_id.to_f32(),

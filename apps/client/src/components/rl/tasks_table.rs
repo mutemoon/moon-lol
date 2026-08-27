@@ -342,13 +342,11 @@ pub fn render_tasks_table(
                                 .icon(IconName::Plus)
                                 .on_click(cx.listener(|this, _, window, cx| {
                                     let task_count = this.task_list.len() + 1;
-                                    let tx = this.tx.clone();
                                     let last_env = this.last_chosen_env.clone();
                                     let weak_sidebar = cx.entity().downgrade();
                                     let dialog_view = cx.new(|cx| {
                                         CreateTaskDialogView::new(
                                             task_count,
-                                            tx,
                                             last_env,
                                             Some(weak_sidebar),
                                             window,
@@ -407,9 +405,36 @@ pub fn render_tasks_table(
                                                                         move |_, window, cx| {
                                                                             dialog_view.update(cx, |this, _cx| {
                                                                                 let config = this.form.clone();
-                                                                                if let Some(tx) = &this.tx {
-                                                                                    let _ = tx.send(InFrame::CreateTask { config });
-                                                                                }
+                                                                                let cmd_str = config.to_cargo_run_command();
+
+                                                                                println!("\n================================================================================");
+                                                                                println!("🚀 [Client GUI] 通过 lol_rl_cli 启动强化学习训练任务");
+                                                                                println!("📋 启动命令（可直接复制给实验 Agent 运行/调试）：");
+                                                                                println!("{cmd_str}");
+                                                                                println!("================================================================================\n");
+                                                                                tracing::info!("🚀 [Client GUI] 训练启动命令: {}", cmd_str);
+
+                                                                                let (program, prefix_args) = lol_client::launch::resolve_executable("lol_rl", "lol_rl_cli");
+                                                                                let cli_args = config.to_cli_args();
+                                                                                let full_args: Vec<String> = prefix_args.into_iter().chain(cli_args.into_iter()).collect();
+
+                                                                                crate::services::runtime::tokio_runtime().spawn(async move {
+                                                                                    let mut cmd = tokio::process::Command::new(&program);
+                                                                                    cmd.args(&full_args)
+                                                                                        .stdout(std::process::Stdio::inherit())
+                                                                                        .stderr(std::process::Stdio::inherit());
+                                                                                    if let Some(root) = lol_client::launch::install_root() {
+                                                                                        cmd.current_dir(root);
+                                                                                    }
+                                                                                    match cmd.spawn() {
+                                                                                        Ok(mut child) => {
+                                                                                            let _ = child.wait().await;
+                                                                                        }
+                                                                                        Err(e) => {
+                                                                                            eprintln!("❌ 启动 lol_rl_cli 子进程失败: {e}");
+                                                                                        }
+                                                                                    }
+                                                                                });
                                                                             });
                                                                             window.close_dialog(cx);
                                                                         }
@@ -453,7 +478,6 @@ pub fn render_tasks_table(
 pub struct CreateTaskDialogView {
     pub form: TaskConfigPayload,
     pub default_name: String,
-    pub tx: Option<tokio::sync::mpsc::UnboundedSender<InFrame>>,
     pub sidebar: Option<gpui::WeakEntity<AppSidebar>>,
     pub name_input: Entity<InputState>,
     pub lr_input: Entity<InputState>,
@@ -464,6 +488,7 @@ pub struct CreateTaskDialogView {
     pub hidden_dim_input: Entity<InputState>,
     pub total_iterations_input: Entity<InputState>,
     pub parallel_envs_input: Entity<InputState>,
+    pub copied: bool,
 }
 
 macro_rules! bind_num_input {
@@ -475,6 +500,7 @@ macro_rules! bind_num_input {
             if matches!(event, InputEvent::Change) {
                 if let Ok(val) = state.read(cx).value().parse::<$type>() {
                     this.form.$field = val;
+                    this.copied = false;
                 }
             }
         })
@@ -486,7 +512,6 @@ macro_rules! bind_num_input {
 impl CreateTaskDialogView {
     pub fn new(
         task_count: usize,
-        tx: Option<tokio::sync::mpsc::UnboundedSender<InFrame>>,
         last_env: Option<String>,
         sidebar: Option<gpui::WeakEntity<AppSidebar>>,
         window: &mut Window,
@@ -508,6 +533,7 @@ impl CreateTaskDialogView {
         cx.subscribe(&sub_entity, |this, state, event: &InputEvent, cx| {
             if matches!(event, InputEvent::Change) {
                 this.form.name = state.read(cx).value().to_string();
+                this.copied = false;
             }
         })
         .detach();
@@ -524,7 +550,6 @@ impl CreateTaskDialogView {
         Self {
             form,
             default_name,
-            tx,
             sidebar,
             name_input,
             lr_input,
@@ -535,6 +560,7 @@ impl CreateTaskDialogView {
             hidden_dim_input,
             total_iterations_input,
             parallel_envs_input,
+            copied: false,
         }
     }
 
@@ -562,6 +588,12 @@ impl CreateTaskDialogView {
         self.form.rollout_steps_per_env = params.rollout_steps_per_env;
         self.form.total_iterations = params.total_iterations;
         self.form.parallel_envs = 0;
+        let is_mlp = self.form.agent_type.to_lowercase().contains("mlp");
+        self.form.backbone = Some(if is_mlp {
+            lol_rl_protocol::PolicyBackbone::Mlp
+        } else {
+            lol_rl_protocol::PolicyBackbone::Mamba
+        });
 
         // 同步刷新所有输入框的文本
         self.lr_input
@@ -586,6 +618,7 @@ impl CreateTaskDialogView {
         });
         self.parallel_envs_input
             .update(cx, |i, cx| i.set_value("0".to_string(), window, cx));
+        self.copied = false;
         cx.notify();
     }
 
@@ -1189,6 +1222,71 @@ impl Render for CreateTaskDialogView {
                                                 "⚡ 当前已指定自定义并行对局数：AutoTuner 将在此并发环境下求解最优 GPU 推理与训练 Mini-Batch 大小。"
                                             }),
                                     ),
+                            ),
+                    )
+                    // ══════════════════════════════════════════════════
+                    // 第三层级：CLI 启动命令预览 (Agent 调试与自动化训练)
+                    // ══════════════════════════════════════════════════
+                    .child(
+                        v_flex()
+                            .gap_2()
+                            .p_3()
+                            .rounded_lg()
+                            .bg(cx.theme().muted.opacity(0.15))
+                            .border_1()
+                            .border_color(cx.theme().border.opacity(0.6))
+                            .child(
+                                h_flex()
+                                    .justify_between()
+                                    .items_center()
+                                    .child(
+                                        h_flex()
+                                            .gap_1p5()
+                                            .items_center()
+                                            .child(
+                                                div()
+                                                    .font_semibold()
+                                                    .text_xs()
+                                                    .text_color(cx.theme().foreground)
+                                                    .child("CLI 启动命令预览 (可直接粘贴给实验 Agent)"),
+                                            ),
+                                    )
+                                    .child(
+                                        Button::new("copy-cli-cmd-btn")
+                                            .outline()
+                                            .xsmall()
+                                            .label(if self.copied {
+                                                "已复制到剪贴板！"
+                                            } else {
+                                                "复制启动命令"
+                                            })
+                                            .on_click({
+                                                let cmd_str = cfg.to_cargo_run_command();
+                                                let weak = cx.entity().downgrade();
+                                                move |_, _window, cx| {
+                                                    cx.write_to_clipboard(ClipboardItem::new_string(
+                                                        cmd_str.clone(),
+                                                    ));
+                                                    if let Some(view) = weak.upgrade() {
+                                                        let _ = view.update(cx, |this, cx| {
+                                                            this.copied = true;
+                                                            cx.notify();
+                                                        });
+                                                    }
+                                                }
+                                            }),
+                                    ),
+                            )
+                            .child(
+                                div()
+                                    .p_2()
+                                    .rounded_md()
+                                    .bg(cx.theme().background)
+                                    .border_1()
+                                    .border_color(cx.theme().border.opacity(0.4))
+                                    .text_xs()
+                                    .text_color(cx.theme().accent)
+                                    .child(cfg.to_cargo_run_command()),
                             ),
                     )
     }

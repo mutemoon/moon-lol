@@ -13,15 +13,11 @@ use bevy::window::{PrimaryWindow, RawHandleWrapper, WindowWrapper};
 use lol_rl_protocol::{ObsFeaturePayload, ObsValueNode, PolicyDisplay, RewardFormulaSpec};
 use winit::application::ApplicationHandler;
 use winit::dpi::LogicalSize;
-use winit::event::{ElementState, MouseButton, WindowEvent};
+use winit::event::WindowEvent;
 use winit::event_loop::{ActiveEventLoop, ControlFlow, EventLoop};
 use winit::window::{Window as WinitWindow, WindowId};
 
 use crate::traits::{RewardBreakdownItem, VisualEnvironment};
-
-/// 可视化窗口逻辑分辨率（与 env 的 bevy Window resolution 一致，用于把物理鼠标坐标归一化为逻辑视口坐标）。
-const VIEWPORT_W: f32 = 1280.0;
-const VIEWPORT_H: f32 = 720.0;
 
 /// 可视化环境渲染目标帧率（锁定 60 FPS 供 OBS 稳定捕获并杜绝 CPU 100% 满载）
 const TARGET_FPS: u64 = 60;
@@ -36,7 +32,6 @@ pub enum VisualRunnerCmd {
     Pause,
     Resume,
     StepOnce,
-    StepWithAction(usize),
     SetAutoPause(bool),
 }
 
@@ -135,12 +130,8 @@ struct CustomVisualRunner<E: VisualEnvironment> {
     episode_reward: f32,
     assets_loaded: bool,
     load_wait_frames: usize,
-    pending_manual_action: Option<E::Action>,
     pending_step_once: bool,
     window_created: bool,
-    window_size: Option<Vec2>,
-    cursor_pos: Option<Vec2>,
-    pending_click: Option<Vec2>,
     next_frame_time: Instant,
     metrics: VisualRunnerMetrics,
 }
@@ -174,36 +165,8 @@ impl<E: VisualEnvironment> ApplicationHandler for CustomVisualRunner<E> {
         &mut self,
         _event_loop: &ActiveEventLoop,
         _window_id: WindowId,
-        event: WindowEvent,
+        _event: WindowEvent,
     ) {
-        match event {
-            WindowEvent::Resized(size) => {
-                self.window_size = Some(Vec2::new(size.width as f32, size.height as f32));
-            }
-            WindowEvent::CursorMoved { position, .. } => {
-                // 参考 bevy 默认窗口插件（bevy_winit/state.rs）：物理坐标 → 逻辑视口坐标，
-                // 用窗口物理尺寸归一化到 VIEWPORT_W×VIEWPORT_H，绕开 WinitPlugin 关闭导致的 scale_factor 失真。
-                let Some(size) = self.window_size else {
-                    return;
-                };
-                if size.x <= 0.0 || size.y <= 0.0 {
-                    return;
-                }
-                let logical = Vec2::new(
-                    position.x as f32 / size.x * VIEWPORT_W,
-                    position.y as f32 / size.y * VIEWPORT_H,
-                );
-                self.cursor_pos = Some(logical);
-            }
-            WindowEvent::MouseInput {
-                state: ElementState::Pressed,
-                button: MouseButton::Left,
-                ..
-            } => {
-                self.pending_click = self.cursor_pos;
-            }
-            _ => {}
-        }
     }
 
     fn about_to_wait(&mut self, event_loop: &ActiveEventLoop) {
@@ -282,11 +245,6 @@ impl<E: VisualEnvironment> ApplicationHandler for CustomVisualRunner<E> {
                 }
                 VisualRunnerCmd::StepOnce => {
                     self.pending_step_once = true;
-                    self.pending_manual_action = None;
-                }
-                VisualRunnerCmd::StepWithAction(action_id) => {
-                    self.pending_step_once = true;
-                    self.pending_manual_action = Some(E::action_from_index(action_id));
                 }
                 VisualRunnerCmd::SetAutoPause(auto) => {
                     self.auto_pause_on_done = auto;
@@ -329,22 +287,7 @@ impl<E: VisualEnvironment> ApplicationHandler for CustomVisualRunner<E> {
             return;
         }
 
-        // 5. 鼠标点击 → 手动 step action（仅暂停时生效；点击在窗口插件内消费，不经过 Controller/on_click_map 移动管线）
-        if self.paused {
-            if let Some(screen_pos) = self.pending_click.take() {
-                if let Some(action) = self
-                    .env
-                    .action_from_screen_click(self.app.world_mut(), screen_pos)
-                {
-                    self.pending_manual_action = Some(action);
-                    self.pending_step_once = true;
-                }
-            }
-        } else {
-            self.pending_click = None;
-        }
-
-        // 6. Determine if an RL step should execute
+        // 5. Determine if an RL step should execute
         let should_step = if self.paused {
             if self.pending_step_once {
                 self.pending_step_once = false;
@@ -362,14 +305,9 @@ impl<E: VisualEnvironment> ApplicationHandler for CustomVisualRunner<E> {
 
             let obs_all = self.env.get_current_obs_all(self.app.world());
             let mut actions = Vec::with_capacity(obs_all.len());
-            for (agent_idx, obs) in obs_all.iter().enumerate() {
+            for obs in &obs_all {
                 let (policy_action, _) = (self.policy_arc.lock().unwrap())(obs);
-                let chosen = if agent_idx == 0 {
-                    self.pending_manual_action.take().unwrap_or(policy_action)
-                } else {
-                    policy_action
-                };
-                actions.push(chosen);
+                actions.push(policy_action);
             }
 
             let step_start = Instant::now();
@@ -543,12 +481,8 @@ pub fn run_visual_env<E, F>(
             episode_reward: 0.0,
             assets_loaded: false,
             load_wait_frames: 0,
-            pending_manual_action: None,
             pending_step_once: false,
             window_created: false,
-            window_size: None,
-            cursor_pos: None,
-            pending_click: None,
             next_frame_time: Instant::now(),
             metrics: VisualRunnerMetrics::default(),
         };

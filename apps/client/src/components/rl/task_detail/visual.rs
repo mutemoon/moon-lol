@@ -5,7 +5,7 @@ use gpui_component::switch::Switch;
 use gpui_component::{h_flex, v_flex, ActiveTheme, IconName, Sizable, StyledExt};
 use lol_rl_protocol::{
     ActionBranchDisplay, ActionNode, ObsValueNode, PolicyDisplay, PolicyItem, VisualInFrame,
-    VisualObsFrame, ENV_FIORA_V0,
+    VisualObsFrame,
 };
 use rust_i18n::t;
 
@@ -207,21 +207,12 @@ fn render_visual_telemetry(sidebar: &AppSidebar, cx: &mut Context<AppSidebar>) -
             .into_any_element();
     };
 
-    let is_paused = sidebar.visual_paused;
-    let show_manual_actions = is_paused
-        && sidebar.visual_ws_connected
-        && sidebar.visual_env_name.as_deref() == Some(ENV_FIORA_V0);
-
-    let mut left_cards = v_flex()
+    let left_cards = v_flex()
         .flex_1()
         .gap_3()
         .child(render_telemetry_status_card(f, cx))
         .child(render_telemetry_policy_card(f, cx))
         .child(render_telemetry_reward_card(f, cx));
-
-    if show_manual_actions {
-        left_cards = left_cards.child(render_manual_action_panel(sidebar, cx));
-    }
 
     let right_card = v_flex()
         .w(px(330.0))
@@ -495,6 +486,7 @@ fn render_telemetry_obs_card(
         .bg(cx.theme().background)
         .child(
             v_flex()
+                .overflow_y_scrollbar()
                 .gap_2()
                 .child(
                     h_flex()
@@ -1446,69 +1438,3 @@ fn render_telemetry_reward_card(f: &VisualObsFrame, cx: &Context<AppSidebar>) ->
         .into_any_element()
 }
 
-fn render_manual_action_panel(sidebar: &AppSidebar, cx: &mut Context<AppSidebar>) -> AnyElement {
-    let actions: Vec<(usize, String)> = sidebar
-        .latest_visual_frame
-        .as_ref()
-        .and_then(|frame| match &frame.policy {
-            PolicyDisplay::Discrete(items) if !items.is_empty() => Some(
-                items
-                    .iter()
-                    .map(|p| (p.action_id, p.action.clone()))
-                    .collect(),
-            ),
-            _ => None,
-        })
-        .unwrap_or_else(legacy_manual_actions);
-
-    v_flex()
-        .id("manual-action-panel-container")
-        .gap_2()
-        .p_3()
-        .rounded_md()
-        .border_1()
-        .border_color(cx.theme().border)
-        .bg(cx.theme().background)
-        .child(div().font_bold().text_sm().child("手动 Action 步进 (调试)"))
-        .child(
-            div()
-                .text_xs()
-                .text_color(cx.theme().foreground.opacity(0.85))
-                .child("点击下方按钮执行对应 action 并步进一步"),
-        )
-        .child(
-            h_flex()
-                .id("manual-action-buttons-flex")
-                .flex_wrap()
-                .gap_2()
-                .children(actions.into_iter().map(|(action_id, label)| {
-                    let btn_id = SharedString::from(format!("manual-action-btn-{}", action_id));
-                    let wrapper_id =
-                        SharedString::from(format!("manual-action-wrap-{}", action_id));
-                    div()
-                        .id(wrapper_id)
-                        .child(
-                            Button::new(btn_id)
-                                .outline()
-                                .label(label)
-                                .on_click(cx.listener(move |this, _, _, cx| {
-                                    this.send_visual_cmd(VisualInFrame::StepWithAction {
-                                        action_id,
-                                    });
-                                    cx.notify();
-                                })),
-                        )
-                })),
-        )
-        .into_any_element()
-}
-
-fn legacy_manual_actions() -> Vec<(usize, String)> {
-    vec![
-        (0, "MoveEast50 (东侧50u)".to_string()),
-        (1, "MoveWest50 (西侧50u)".to_string()),
-        (2, "MoveNorth50 (北侧50u)".to_string()),
-        (3, "MoveSouth50 (南侧50u)".to_string()),
-        (4, "AttackRiven (攻击瑞雯)".to_string()),
-    ]
-}

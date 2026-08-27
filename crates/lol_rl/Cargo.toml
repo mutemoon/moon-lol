@@ -36,6 +36,7 @@ crossbeam-channel.workspace = true
 num_cpus = "1.16"
 ctrlc = "3.4"
 bevy.workspace = true
+clap = { workspace = true }
 
 [features]
 default = ["cuda"]
@@ -44,3 +45,7 @@ cuda = ["candle-core/cuda", "candle-nn/cuda"]
 [[bin]]
 name = "lol_rl_visual"
 path = "src/bin/lol_rl_visual.rs"
+
+[[bin]]
+name = "lol_rl_cli"
+path = "src/bin/lol_rl_cli.rs"

@@ -2,7 +2,6 @@ use std::collections::HashMap;
 
 use bevy::app::App;
 use bevy::ecs::world::World;
-use bevy::math::Vec2;
 use lol_rl_protocol::{ActionSpace, ObsFeaturePayload, ObsSchema, RewardFormulaSpec};
 
 /// Controls whether the Env runs headless (for training) or with a window (for visualization).
@@ -99,7 +98,12 @@ pub trait RlEnvironment: 'static {
 
     fn state_dim() -> usize
     where
-        Self: Sized;
+        Self: Sized,
+    {
+        Self::obs_schema()
+            .map(|s| s.raw_dim())
+            .expect("Environment must implement obs_schema or override state_dim")
+    }
 
     fn action_labels() -> &'static [&'static str]
     where
@@ -190,8 +194,6 @@ pub trait RlEnvironment: 'static {
 
     fn obs_to_payload(obs: &Self::Obs) -> Option<ObsFeaturePayload>;
 
-    fn is_action_masked(obs: &Self::Obs, action_idx: usize) -> bool;
-
     /// 返回动作有效性掩码（true 为有效动作，false 为被掩码屏蔽的非法动作）。
     /// 纯离散空间对应各分类，混合空间对应离散控制头分类。
     fn action_mask(_obs: &Self::Obs) -> Option<Vec<bool>> {
@@ -224,6 +226,16 @@ pub trait RlEnvironment: 'static {
     fn reward_formula(&self) -> Option<RewardFormulaSpec> {
         None
     }
+
+    /// 运行时更新课程学习参数（默认无操作；支持课程学习的环境应覆盖此方法）。
+    fn update_curriculum(
+        &mut self,
+        _hp_scale: f32,
+        _cs_reward: f32,
+        _attack_no_cs_penalty: f32,
+        _harass_coef: f32,
+    ) {
+    }
 }
 
 /// Visual Environment Trait: Extends RlEnvironment to provide hooks for winit window event loop and rendering.
@@ -251,14 +263,6 @@ pub trait VisualEnvironment: RlEnvironment {
             .into_iter()
             .next()
             .expect("empty obs")
-    }
-    /// 将可视化窗口的鼠标点击（逻辑视口坐标）翻译为一步动作；默认无点击控制。
-    fn action_from_screen_click(
-        &mut self,
-        _world: &mut World,
-        _screen_pos: Vec2,
-    ) -> Option<Self::Action> {
-        None
     }
     fn step_world(&mut self, app: &mut App, actions: &[Self::Action])
     -> Vec<StepResult<Self::Obs>>;

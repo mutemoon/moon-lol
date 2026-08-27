@@ -134,7 +134,6 @@ pub enum VisualInFrame {
     Pause,
     Resume,
     StepOnce,
-    StepWithAction { action_id: usize },
     SetAutoPause(bool),
 }
 

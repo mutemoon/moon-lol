@@ -5,8 +5,7 @@ use lol_core::action::{Action, CommandAction};
 use lol_core::character::CharacterReady;
 use lol_core::life::Health;
 use lol_rl_protocol::{
-    ActionSpace, EntityEncoderSpec, ObsFeaturePayload, ObsNode, ObsSchema, RewardFormulaSpec,
-    RewardTermSpec,
+    ActionSchema, ActionSpace, ObsFeaturePayload, ObsSchema, RewardFormulaSpec, RewardTermSpec,
 };
 
 pub use crate::fiora_riven_common::{
@@ -19,7 +18,6 @@ pub use crate::flash_plugin::{
 };
 use crate::modifier_obs::{ModifierNameId, ModifierSlotObs, extract_entity_modifiers};
 use crate::obs_plugins::{extract_attack_state, extract_champion_base, extract_skill_cds};
-use crate::raycast_plugin::raycast_ground_plane;
 use crate::reward::RewardModel;
 use crate::traits::{EnvConfig, EnvMeta, RenderMode, RlEnvironment, StepResult, VisualEnvironment};
 
@@ -31,8 +29,27 @@ pub const V2_OBS_DISTANCE_IDX: usize = 3;
 pub const V2_OBS_DISTANCE_SCALE: f32 = 100.0;
 /// 靶子瑞雯在 V2 中的生命值上限
 pub const RIVEN_V2_HP: f32 = 10000.0;
-/// V2 观测总维度 (1 role_id + 3 空间 + 4 普攻 + 8 技能与闪现 + 2 血量 + 20 自身修饰符 + 20 目标修饰符 = 58)
-pub const V2_OBS_DIM: usize = 58;
+
+pub static FIORA_V2_SPEC: std::sync::LazyLock<lol_rl_protocol::EnvDslSpec> =
+    std::sync::LazyLock::new(|| {
+        lol_rl_protocol::parse_env_dsl(include_str!("../specs/fiora_v2.rl"))
+            .expect("specs/fiora_v2.rl DSL 解析失败")
+    });
+
+pub static FIORA_V2_OBS_SCHEMA: std::sync::LazyLock<ObsSchema> = std::sync::LazyLock::new(|| {
+    FIORA_V2_SPEC
+        .obs_schema
+        .clone()
+        .expect("FIORA_V2_SPEC 缺少 obs_schema")
+});
+
+pub static FIORA_V2_ACTION_SCHEMA: std::sync::LazyLock<ActionSchema> =
+    std::sync::LazyLock::new(|| {
+        FIORA_V2_SPEC
+            .action_schema
+            .clone()
+            .expect("FIORA_V2_SPEC 缺少 action_schema")
+    });
 
 // ── 瑞雯血量设置与 Observer ─────────────────────────────────────────────────
 
@@ -215,64 +232,62 @@ pub struct FioraV2Obs {
 }
 
 impl FioraV2Obs {
+    pub fn to_context(&self) -> lol_rl_protocol::ObsContext {
+        let mut ctx = lol_rl_protocol::ObsContext::new();
+        ctx.set_var("role_id", self.role_id);
+        ctx.set_var("fiora_x", self.fiora_pos.x);
+        ctx.set_var("fiora_z", self.fiora_pos.z);
+        ctx.set_var("riven_x", self.riven_pos.x);
+        ctx.set_var("riven_z", self.riven_pos.z);
+        ctx.set_var("distance", self.distance);
+
+        ctx.set_var(
+            "attack_is_ready",
+            if self.attack_state == 0 { 1.0 } else { 0.0 },
+        );
+        ctx.set_var(
+            "attack_is_windup",
+            if self.attack_is_windup { 1.0 } else { 0.0 },
+        );
+        ctx.set_var(
+            "attack_is_cooldown",
+            if self.attack_is_cooldown { 1.0 } else { 0.0 },
+        );
+        ctx.set_var("attack_timer_remaining", self.attack_timer_remaining);
+
+        ctx.set_var("q_ready", if self.q_ready { 1.0 } else { 0.0 });
+        ctx.set_var("q_cd", self.q_cd_remaining);
+        ctx.set_var("e_ready", if self.e_ready { 1.0 } else { 0.0 });
+        ctx.set_var("e_cd", self.e_cd_remaining);
+        ctx.set_var("r_ready", if self.r_ready { 1.0 } else { 0.0 });
+        ctx.set_var("r_cd", self.r_cd_remaining);
+        ctx.set_var("flash_ready", if self.flash_ready { 1.0 } else { 0.0 });
+        ctx.set_var("flash_cd", self.flash_cd_remaining);
+
+        ctx.set_var("fiora_hp", self.fiora_hp);
+        ctx.set_var("fiora_max_hp", self.fiora_max_hp);
+        ctx.set_var("riven_hp", self.riven_hp);
+        ctx.set_var("riven_max_hp", self.riven_max_hp);
+
+        let self_mods: Vec<_> = self.self_modifiers.iter().map(|m| m.to_context()).collect();
+        ctx.set_repeated("self_modifiers", self_mods);
+
+        let target_mods: Vec<_> = self
+            .target_modifiers
+            .iter()
+            .map(|m| m.to_context())
+            .collect();
+        ctx.set_repeated("target_modifiers", target_mods);
+
+        ctx
+    }
+
     pub fn to_vector(&self) -> Vec<f32> {
-        let rel_x = self.fiora_pos.x - self.riven_pos.x;
-        let rel_z = self.fiora_pos.z - self.riven_pos.z;
-        let b2f = |b: bool| if b { 1.0 } else { 0.0 };
-
-        let mut v = Vec::with_capacity(V2_OBS_DIM);
-
-        // 1. 角色标识 (兼容 hero embedding，单体视角填 0.0)
-        v.push(self.role_id);
-
-        // 2. 空间相对特征 (3维)
-        v.push(rel_x / V2_OBS_DISTANCE_SCALE);
-        v.push(rel_z / V2_OBS_DISTANCE_SCALE);
-        v.push(self.distance / V2_OBS_DISTANCE_SCALE);
-
-        // 3. 普攻状态机 (4维)
-        v.push(b2f(self.attack_state == 0));
-        v.push(b2f(self.attack_is_windup));
-        v.push(b2f(self.attack_is_cooldown));
-        v.push(self.attack_timer_remaining / 1.0);
-
-        // 4. 技能与闪现冷却 (8维)
-        v.push(b2f(self.q_ready));
-        v.push(self.q_cd_remaining / 10.0);
-        v.push(b2f(self.e_ready));
-        v.push(self.e_cd_remaining / 10.0);
-        v.push(b2f(self.r_ready));
-        v.push(self.r_cd_remaining / 60.0);
-        v.push(b2f(self.flash_ready));
-        v.push(self.flash_cd_remaining / 300.0);
-
-        // 5. 双方血量百分比 (2维)
-        v.push(self.fiora_hp / self.fiora_max_hp.max(1.0));
-        v.push(self.riven_hp / self.riven_max_hp.max(1.0));
-
-        // 6. 自身修饰符 (4 槽位 × 5 = 20维)
-        for i in 0..4 {
-            if let Some(slot) = self.self_modifiers.get(i) {
-                v.extend_from_slice(&slot.to_vector());
-            } else {
-                v.extend_from_slice(&[0.0; 5]);
-            }
-        }
-
-        // 7. 目标修饰符 (4 槽位 × 5 = 20维)
-        for i in 0..4 {
-            if let Some(slot) = self.target_modifiers.get(i) {
-                v.extend_from_slice(&slot.to_vector());
-            } else {
-                v.extend_from_slice(&[0.0; 5]);
-            }
-        }
-
-        v
+        FIORA_V2_OBS_SCHEMA.eval_to_vector(&self.to_context())
     }
 
     pub fn dim() -> usize {
-        V2_OBS_DIM
+        FIORA_V2_OBS_SCHEMA.raw_dim()
     }
 
     pub fn to_payload(&self) -> ObsFeaturePayload {
@@ -600,84 +615,11 @@ impl RlEnvironment for FioraV2Env {
     }
 
     fn obs_schema() -> Option<ObsSchema> {
-        Some(ObsSchema::new(vec![
-            // 1. 角色标识 (单体视角固定0=Fiora)
-            ObsNode::categorical("role", 4, 12),
-            // 2. 空间相对特征 (3维)
-            ObsNode::structure(
-                "spatial",
-                vec![
-                    ObsNode::vector("target_rel_pos", 2),
-                    ObsNode::scalar("distance", 0.0, 1.0),
-                ],
-            ),
-            // 3. 普攻状态机 (4维)
-            ObsNode::structure(
-                "attack",
-                vec![
-                    ObsNode::scalar("is_ready", 0.0, 1.0),
-                    ObsNode::scalar("is_windup", 0.0, 1.0),
-                    ObsNode::scalar("is_cooldown", 0.0, 1.0),
-                    ObsNode::scalar("timer_remaining", 0.0, 1.0),
-                ],
-            ),
-            // 4. 技能与闪现冷却 (8维: Q, E, R, Flash 及其剩余CD)
-            ObsNode::structure(
-                "cooldowns",
-                vec![
-                    ObsNode::scalar("q_ready", 0.0, 1.0),
-                    ObsNode::scalar("q_cd", 0.0, 1.0),
-                    ObsNode::scalar("e_ready", 0.0, 1.0),
-                    ObsNode::scalar("e_cd", 0.0, 1.0),
-                    ObsNode::scalar("r_ready", 0.0, 1.0),
-                    ObsNode::scalar("r_cd", 0.0, 1.0),
-                    ObsNode::scalar("flash_ready", 0.0, 1.0),
-                    ObsNode::scalar("flash_cd", 0.0, 1.0),
-                ],
-            ),
-            // 5. 双方血量百分比 (2维)
-            ObsNode::structure(
-                "health",
-                vec![
-                    ObsNode::scalar("fiora_hp_pct", 0.0, 1.0),
-                    ObsNode::scalar("riven_hp_pct", 0.0, 1.0),
-                ],
-            ),
-            // 6. 自身修饰符 (4 槽位 × 5维)
-            ObsNode::repeated(
-                "self_modifiers",
-                4,
-                ObsNode::structure(
-                    "slot",
-                    vec![
-                        ObsNode::categorical("name", ModifierNameId::COUNT + 1, 8),
-                        ObsNode::scalar("remaining_duration", 0.0, 1.0),
-                        ObsNode::scalar("stack_count", 0.0, 1.0),
-                        ObsNode::vector("params", 2),
-                    ],
-                ),
-                EntityEncoderSpec::SharedMlpFlatten {
-                    hidden_dims: vec![16],
-                },
-            ),
-            // 7. 目标修饰符 (4 槽位 × 5维)
-            ObsNode::repeated(
-                "target_modifiers",
-                4,
-                ObsNode::structure(
-                    "slot",
-                    vec![
-                        ObsNode::categorical("name", ModifierNameId::COUNT + 1, 8),
-                        ObsNode::scalar("remaining_duration", 0.0, 1.0),
-                        ObsNode::scalar("stack_count", 0.0, 1.0),
-                        ObsNode::vector("params", 2),
-                    ],
-                ),
-                EntityEncoderSpec::SharedMlpFlatten {
-                    hidden_dims: vec![16],
-                },
-            ),
-        ]))
+        Some(FIORA_V2_OBS_SCHEMA.clone())
+    }
+
+    fn action_schema() -> Option<ActionSchema> {
+        Some(FIORA_V2_ACTION_SCHEMA.clone())
     }
 
     fn action_from_index(idx: usize) -> Self::Action {
@@ -737,35 +679,8 @@ impl RlEnvironment for FioraV2Env {
         Some(obs.to_payload())
     }
 
-    fn is_action_masked(obs: &Self::Obs, action_idx: usize) -> bool {
-        match action_idx {
-            6 => obs.distance > ATTACK_MASK_DISTANCE,
-            7 => !obs.q_ready,
-            8 => !obs.e_ready,
-            9 => !obs.r_ready,
-            10 => !obs.flash_ready,
-            _ => false,
-        }
-    }
-
     fn action_mask(obs: &Self::Obs) -> Option<Vec<bool>> {
-        let mut mask = vec![true; 7];
-        if obs.distance > ATTACK_MASK_DISTANCE {
-            mask[2] = false;
-        }
-        if !obs.q_ready {
-            mask[3] = false;
-        }
-        if !obs.e_ready {
-            mask[4] = false;
-        }
-        if !obs.r_ready {
-            mask[5] = false;
-        }
-        if !obs.flash_ready {
-            mask[6] = false;
-        }
-        Some(mask)
+        Some(FIORA_V2_ACTION_SCHEMA.eval_flat_mask(&obs.to_context()))
     }
 
     fn reward_formula_spec() -> Option<RewardFormulaSpec> {
@@ -803,27 +718,6 @@ impl VisualEnvironment for FioraV2Env {
             self.base.fiora,
             self.base.riven,
         )]
-    }
-
-    fn action_from_screen_click(
-        &mut self,
-        world: &mut World,
-        screen_pos: Vec2,
-    ) -> Option<FioraV2Action> {
-        let rpos = world.get::<Transform>(self.base.riven)?.translation;
-        let hit = raycast_ground_plane(world, screen_pos, rpos.y)?;
-
-        let dx = hit.x - rpos.x;
-        let dz = hit.z - rpos.z;
-        let dist = (dx * dx + dz * dz).sqrt();
-
-        if dist < 60.0 {
-            Some(FioraV2Action::new(0.0, 0.0, FioraV2DiscreteAction::Attack))
-        } else {
-            let nx = (dx / OFFSET_SCALE).clamp(-1.0, 1.0);
-            let nz = (dz / OFFSET_SCALE).clamp(-1.0, 1.0);
-            Some(FioraV2Action::new(nx, nz, FioraV2DiscreteAction::Move))
-        }
     }
 
     fn step_world(

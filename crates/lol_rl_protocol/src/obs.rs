@@ -1,3 +1,6 @@
+use std::collections::HashMap;
+use std::ops::{Add, Div, Mul, Neg, Sub};
+
 use serde::{Deserialize, Serialize};
 
 fn default_max_one() -> f32 {
@@ -26,6 +29,225 @@ pub enum EntityEncoderSpec {
     PassThrough,
 }
 
+/// 结构化特征计算表达式 AST（类似于 RewardExpr，用于声明式特征工程与归一化计算）
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
+pub enum ObsExpr {
+    Constant(f32),
+    Variable(String),
+    Add(Box<ObsExpr>, Box<ObsExpr>),
+    Sub(Box<ObsExpr>, Box<ObsExpr>),
+    Mul(Box<ObsExpr>, Box<ObsExpr>),
+    Div(Box<ObsExpr>, Box<ObsExpr>),
+    Clamp {
+        expr: Box<ObsExpr>,
+        min: f32,
+        max: f32,
+    },
+    IfElse {
+        cond: Box<ObsExpr>,
+        then_branch: Box<ObsExpr>,
+        else_branch: Box<ObsExpr>,
+    },
+    Gt(Box<ObsExpr>, Box<ObsExpr>),
+    Lt(Box<ObsExpr>, Box<ObsExpr>),
+    Max(Box<ObsExpr>, Box<ObsExpr>),
+    Min(Box<ObsExpr>, Box<ObsExpr>),
+}
+
+impl ObsExpr {
+    pub fn var(name: impl Into<String>) -> Self {
+        Self::Variable(name.into())
+    }
+
+    pub fn c(val: f32) -> Self {
+        Self::Constant(val)
+    }
+
+    pub fn clamp(expr: Self, min: f32, max: f32) -> Self {
+        Self::Clamp {
+            expr: Box::new(expr),
+            min,
+            max,
+        }
+    }
+
+    pub fn max(a: Self, b: Self) -> Self {
+        Self::Max(Box::new(a), Box::new(b))
+    }
+
+    pub fn min(a: Self, b: Self) -> Self {
+        Self::Min(Box::new(a), Box::new(b))
+    }
+
+    pub fn if_else(cond: Self, then_branch: Self, else_branch: Self) -> Self {
+        Self::IfElse {
+            cond: Box::new(cond),
+            then_branch: Box::new(then_branch),
+            else_branch: Box::new(else_branch),
+        }
+    }
+
+    pub fn gt(a: Self, b: Self) -> Self {
+        Self::Gt(Box::new(a), Box::new(b))
+    }
+
+    pub fn lt(a: Self, b: Self) -> Self {
+        Self::Lt(Box::new(a), Box::new(b))
+    }
+
+    /// 在给定的环境变量上下文中对表达式求值
+    pub fn eval(&self, vars: &HashMap<String, f32>) -> f32 {
+        match self {
+            Self::Constant(c) => *c,
+            Self::Variable(name) => vars.get(name).copied().unwrap_or(0.0),
+            Self::Add(a, b) => a.eval(vars) + b.eval(vars),
+            Self::Sub(a, b) => a.eval(vars) - b.eval(vars),
+            Self::Mul(a, b) => a.eval(vars) * b.eval(vars),
+            Self::Div(a, b) => {
+                let denom = b.eval(vars);
+                if denom.abs() < 1e-7 {
+                    0.0
+                } else {
+                    a.eval(vars) / denom
+                }
+            }
+            Self::Clamp { expr, min, max } => expr.eval(vars).clamp(*min, *max),
+            Self::IfElse {
+                cond,
+                then_branch,
+                else_branch,
+            } => {
+                if cond.eval(vars) > 0.0 {
+                    then_branch.eval(vars)
+                } else {
+                    else_branch.eval(vars)
+                }
+            }
+            Self::Gt(a, b) => {
+                if a.eval(vars) > b.eval(vars) {
+                    1.0
+                } else {
+                    0.0
+                }
+            }
+            Self::Lt(a, b) => {
+                if a.eval(vars) < b.eval(vars) {
+                    1.0
+                } else {
+                    0.0
+                }
+            }
+            Self::Max(a, b) => a.eval(vars).max(b.eval(vars)),
+            Self::Min(a, b) => a.eval(vars).min(b.eval(vars)),
+        }
+    }
+}
+
+// ── 运算符重载 ─────────────────────────────────────────────────────────────
+
+impl Add for ObsExpr {
+    type Output = Self;
+    fn add(self, rhs: Self) -> Self {
+        Self::Add(Box::new(self), Box::new(rhs))
+    }
+}
+
+impl Add<f32> for ObsExpr {
+    type Output = Self;
+    fn add(self, rhs: f32) -> Self {
+        Self::Add(Box::new(self), Box::new(Self::Constant(rhs)))
+    }
+}
+
+impl Sub for ObsExpr {
+    type Output = Self;
+    fn sub(self, rhs: Self) -> Self {
+        Self::Sub(Box::new(self), Box::new(rhs))
+    }
+}
+
+impl Sub<f32> for ObsExpr {
+    type Output = Self;
+    fn sub(self, rhs: f32) -> Self {
+        Self::Sub(Box::new(self), Box::new(Self::Constant(rhs)))
+    }
+}
+
+impl Mul for ObsExpr {
+    type Output = Self;
+    fn mul(self, rhs: Self) -> Self {
+        Self::Mul(Box::new(self), Box::new(rhs))
+    }
+}
+
+impl Mul<f32> for ObsExpr {
+    type Output = Self;
+    fn mul(self, rhs: f32) -> Self {
+        Self::Mul(Box::new(self), Box::new(Self::Constant(rhs)))
+    }
+}
+
+impl Mul<ObsExpr> for f32 {
+    type Output = ObsExpr;
+    fn mul(self, rhs: ObsExpr) -> ObsExpr {
+        ObsExpr::Mul(Box::new(ObsExpr::Constant(self)), Box::new(rhs))
+    }
+}
+
+impl Div for ObsExpr {
+    type Output = Self;
+    fn div(self, rhs: Self) -> Self {
+        Self::Div(Box::new(self), Box::new(rhs))
+    }
+}
+
+impl Div<f32> for ObsExpr {
+    type Output = Self;
+    fn div(self, rhs: f32) -> Self {
+        Self::Div(Box::new(self), Box::new(Self::Constant(rhs)))
+    }
+}
+
+impl Neg for ObsExpr {
+    type Output = Self;
+    fn neg(self) -> Self {
+        Self::Mul(Box::new(Self::Constant(-1.0)), Box::new(self))
+    }
+}
+
+/// 原始观测特征上下文字典（包含未归一化的物理量、基础标量和重复实体列表）
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
+pub struct ObsContext {
+    #[serde(default)]
+    pub vars: HashMap<String, f32>,
+    #[serde(default)]
+    pub repeated: HashMap<String, Vec<ObsContext>>,
+}
+
+impl ObsContext {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn with_var(mut self, name: impl Into<String>, value: f32) -> Self {
+        self.vars.insert(name.into(), value);
+        self
+    }
+
+    pub fn set_var(&mut self, name: impl Into<String>, value: f32) {
+        self.vars.insert(name.into(), value);
+    }
+
+    pub fn with_repeated(mut self, key: impl Into<String>, items: Vec<ObsContext>) -> Self {
+        self.repeated.insert(key.into(), items);
+        self
+    }
+
+    pub fn set_repeated(&mut self, key: impl Into<String>, items: Vec<ObsContext>) {
+        self.repeated.insert(key.into(), items);
+    }
+}
+
 /// 观测空间 AST 节点定义
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub enum ObsNode {
@@ -33,15 +255,24 @@ pub enum ObsNode {
     Scalar {
         name: String,
         #[serde(default)]
+        expr: Option<ObsExpr>,
+        #[serde(default)]
         min: f32,
         #[serde(default = "default_max_one")]
         max: f32,
     },
     /// 连续向量特征（如 相对坐标 [x, z], 技能冷却数组等，占 dim 个 float 输入）
-    Vector { name: String, dim: usize },
+    Vector {
+        name: String,
+        #[serde(default)]
+        exprs: Vec<ObsExpr>,
+        dim: usize,
+    },
     /// 离散/类别特征（映射到 Embedding 表，占 1 个 float 类别索引输入）
     Categorical {
         name: String,
+        #[serde(default)]
+        expr: Option<ObsExpr>,
         num_classes: usize,
         embed_dim: usize,
     },
@@ -60,14 +291,34 @@ impl ObsNode {
     pub fn scalar(name: impl Into<String>, min: f32, max: f32) -> Self {
         Self::Scalar {
             name: name.into(),
+            expr: None,
             min,
             max,
+        }
+    }
+
+    pub fn scalar_expr(name: impl Into<String>, expr: ObsExpr) -> Self {
+        Self::Scalar {
+            name: name.into(),
+            expr: Some(expr),
+            min: 0.0,
+            max: 1.0,
         }
     }
 
     pub fn vector(name: impl Into<String>, dim: usize) -> Self {
         Self::Vector {
             name: name.into(),
+            exprs: Vec::new(),
+            dim,
+        }
+    }
+
+    pub fn vector_exprs(name: impl Into<String>, exprs: Vec<ObsExpr>) -> Self {
+        let dim = exprs.len();
+        Self::Vector {
+            name: name.into(),
+            exprs,
             dim,
         }
     }
@@ -75,6 +326,21 @@ impl ObsNode {
     pub fn categorical(name: impl Into<String>, num_classes: usize, embed_dim: usize) -> Self {
         Self::Categorical {
             name: name.into(),
+            expr: None,
+            num_classes,
+            embed_dim,
+        }
+    }
+
+    pub fn categorical_expr(
+        name: impl Into<String>,
+        expr: ObsExpr,
+        num_classes: usize,
+        embed_dim: usize,
+    ) -> Self {
+        Self::Categorical {
+            name: name.into(),
+            expr: Some(expr),
             num_classes,
             embed_dim,
         }
@@ -167,7 +433,7 @@ impl ObsNode {
     pub fn to_dim_labels(&self) -> Vec<String> {
         match self {
             Self::Scalar { name, .. } => vec![name.clone()],
-            Self::Vector { name, dim } => {
+            Self::Vector { name, dim, .. } => {
                 if *dim == 1 {
                     vec![name.clone()]
                 } else {
@@ -208,7 +474,7 @@ impl ObsNode {
                 name: name.clone(),
                 value: slice.first().copied().unwrap_or(0.0),
             },
-            Self::Vector { name, dim } => ObsValueNode::Vector {
+            Self::Vector { name, dim, .. } => ObsValueNode::Vector {
                 name: name.clone(),
                 values: slice[..(*dim).min(slice.len())].to_vec(),
             },
@@ -333,6 +599,15 @@ impl ObsSchema {
         self.nodes.iter().flat_map(|n| n.to_dim_labels()).collect()
     }
 
+    /// 依据当前 AST 表达式对给定的原始观测上下文求值，输出展平的一维浮点向量
+    pub fn eval_to_vector(&self, ctx: &ObsContext) -> Vec<f32> {
+        let mut out = Vec::with_capacity(self.raw_dim());
+        for node in &self.nodes {
+            node.eval_to_vector(ctx, &mut out);
+        }
+        out
+    }
+
     /// 将原始扁平浮点数组解析为结构化观测树
     pub fn decode_tree(&self, raw_obs: &[f32]) -> Vec<ObsValueNode> {
         let mut offset = 0;
@@ -351,9 +626,143 @@ impl ObsSchema {
     }
 }
 
+impl ObsNode {
+    /// 依据当前 AST 节点对给定的原始观测上下文求值，并将计算结果追加写入扁平浮点向量
+    pub fn eval_to_vector(&self, ctx: &ObsContext, out: &mut Vec<f32>) {
+        match self {
+            Self::Scalar { name, expr, .. } => {
+                let val = if let Some(e) = expr {
+                    e.eval(&ctx.vars)
+                } else {
+                    ctx.vars.get(name).copied().unwrap_or(0.0)
+                };
+                out.push(val);
+            }
+            Self::Vector { name, exprs, dim } => {
+                if !exprs.is_empty() {
+                    for e in exprs {
+                        out.push(e.eval(&ctx.vars));
+                    }
+                } else {
+                    for i in 0..*dim {
+                        let key = format!("{}[{}]", name, i);
+                        let val = ctx
+                            .vars
+                            .get(&key)
+                            .or_else(|| ctx.vars.get(name))
+                            .copied()
+                            .unwrap_or(0.0);
+                        out.push(val);
+                    }
+                }
+            }
+            Self::Categorical { name, expr, .. } => {
+                let val = if let Some(e) = expr {
+                    e.eval(&ctx.vars)
+                } else {
+                    ctx.vars.get(name).copied().unwrap_or(0.0)
+                };
+                out.push(val);
+            }
+            Self::Struct { fields, .. } => {
+                for f in fields {
+                    f.eval_to_vector(ctx, out);
+                }
+            }
+            Self::Repeated {
+                name,
+                max_count,
+                item,
+                ..
+            } => {
+                let items_ctx = ctx.repeated.get(name);
+                let item_raw = item.raw_dim();
+                for i in 0..*max_count {
+                    if let Some(sub_ctx) = items_ctx.and_then(|list| list.get(i)) {
+                        item.eval_to_vector(sub_ctx, out);
+                    } else {
+                        out.extend(std::iter::repeat(0.0).take(item_raw));
+                    }
+                }
+            }
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_obs_expr_eval_and_operators() {
+        let mut vars = HashMap::new();
+        vars.insert("self_hp".to_string(), 80.0);
+        vars.insert("self_max_hp".to_string(), 100.0);
+        vars.insert("pos_x".to_string(), 250.0);
+        vars.insert("target_x".to_string(), 100.0);
+
+        let hp_pct_expr = ObsExpr::clamp(
+            ObsExpr::var("self_hp") / ObsExpr::max(ObsExpr::var("self_max_hp"), ObsExpr::c(1.0)),
+            0.0,
+            1.0,
+        );
+        assert_eq!(hp_pct_expr.eval(&vars), 0.8);
+
+        let rel_x_expr = (ObsExpr::var("pos_x") - ObsExpr::var("target_x")) / 100.0;
+        assert_eq!(rel_x_expr.eval(&vars), 1.5);
+    }
+
+    #[test]
+    fn test_obs_schema_eval_to_vector() {
+        let schema = ObsSchema::new(vec![
+            ObsNode::categorical_expr("role", ObsExpr::var("role_id"), 4, 12),
+            ObsNode::structure(
+                "spatial",
+                vec![
+                    ObsNode::scalar_expr(
+                        "rel_x",
+                        (ObsExpr::var("x1") - ObsExpr::var("x2")) / 100.0,
+                    ),
+                    ObsNode::scalar_expr("dist", ObsExpr::var("dist") / 100.0),
+                ],
+            ),
+            ObsNode::repeated(
+                "units",
+                2,
+                ObsNode::structure(
+                    "unit",
+                    vec![
+                        ObsNode::categorical_expr("type", ObsExpr::var("unit_type"), 4, 8),
+                        ObsNode::scalar_expr("hp_pct", ObsExpr::var("hp_pct")),
+                    ],
+                ),
+                EntityEncoderSpec::PassThrough,
+            ),
+        ]);
+
+        assert_eq!(schema.raw_dim(), 1 + 2 + 2 * 2); // 1 + 2 + 4 = 7
+
+        let mut ctx = ObsContext::new()
+            .with_var("role_id", 0.0)
+            .with_var("x1", 300.0)
+            .with_var("x2", 100.0)
+            .with_var("dist", 200.0);
+
+        // 仅提供 1 个单位槽位，第 2 个槽位应自动补 0.0
+        let u0 = ObsContext::new()
+            .with_var("unit_type", 2.0)
+            .with_var("hp_pct", 0.5);
+        ctx.set_repeated("units", vec![u0]);
+
+        let vec = schema.eval_to_vector(&ctx);
+        assert_eq!(vec.len(), 7);
+        assert_eq!(vec[0], 0.0); // role
+        assert_eq!(vec[1], 2.0); // rel_x: (300 - 100)/100
+        assert_eq!(vec[2], 2.0); // dist: 200/100
+        assert_eq!(vec[3], 2.0); // units[0].type
+        assert_eq!(vec[4], 0.5); // units[0].hp_pct
+        assert_eq!(vec[5], 0.0); // units[1].type (padding)
+    }
 
     #[test]
     fn test_obs_schema_dims_and_labels() {

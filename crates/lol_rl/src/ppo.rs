@@ -2192,9 +2192,13 @@ mod tests {
         // 构造两个轨迹 Buffer（分别包含 25 个连续时间步）
         let mut buf1 = RolloutBuffer::new();
         let mut buf2 = RolloutBuffer::new();
+        let enc_dim = <lol_env::FioraV2Env as lol_env::RlEnvironment>::action_dim();
         for t in 0..25 {
             let state = vec![t as f32 * 0.1; state_dim];
-            let act = vec![(t % 4) as f32];
+            let mut act = vec![0.0; enc_dim];
+            if let Some(last) = act.last_mut() {
+                *last = (t % 7) as f32;
+            }
             buf1.push_unmasked(state.clone(), act.clone(), -1.0, 1.0, 0.5, t == 24);
             buf2.push_unmasked(state, act, -1.0, -1.0, -0.5, t == 24);
         }

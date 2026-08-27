@@ -10,18 +10,47 @@ pub enum RewardExpr {
     Add(Box<RewardExpr>, Box<RewardExpr>),
     Sub(Box<RewardExpr>, Box<RewardExpr>),
     Mul(Box<RewardExpr>, Box<RewardExpr>),
+    Div(Box<RewardExpr>, Box<RewardExpr>),
     IfElse {
         cond: Box<RewardExpr>,
         then_branch: Box<RewardExpr>,
         else_branch: Box<RewardExpr>,
     },
     Gt(Box<RewardExpr>, Box<RewardExpr>),
+    Lt(Box<RewardExpr>, Box<RewardExpr>),
     Max(Box<RewardExpr>, Box<RewardExpr>),
     Min(Box<RewardExpr>, Box<RewardExpr>),
     Exp(Box<RewardExpr>),
 }
 
 impl RewardExpr {
+    pub fn c(v: f32) -> Self {
+        Self::Constant(v)
+    }
+
+    pub fn var(name: impl Into<String>) -> Self {
+        Self::Variable(name.into())
+    }
+
+    pub fn exp(a: RewardExpr) -> Self {
+        Self::Exp(Box::new(a))
+    }
+
+    pub fn clamp(a: RewardExpr, min: f32, max: f32) -> Self {
+        Self::Max(
+            Box::new(Self::Constant(min)),
+            Box::new(Self::Min(Box::new(Self::Constant(max)), Box::new(a))),
+        )
+    }
+
+    pub fn if_else(cond: RewardExpr, then_branch: RewardExpr, else_branch: RewardExpr) -> Self {
+        Self::IfElse {
+            cond: Box::new(cond),
+            then_branch: Box::new(then_branch),
+            else_branch: Box::new(else_branch),
+        }
+    }
+
     /// 在给定的环境变量上下文中对表达式求值
     pub fn eval(&self, vars: &HashMap<String, f32>) -> f32 {
         match self {
@@ -30,6 +59,14 @@ impl RewardExpr {
             Self::Add(a, b) => a.eval(vars) + b.eval(vars),
             Self::Sub(a, b) => a.eval(vars) - b.eval(vars),
             Self::Mul(a, b) => a.eval(vars) * b.eval(vars),
+            Self::Div(a, b) => {
+                let denom = b.eval(vars);
+                if denom.abs() < 1e-7 {
+                    0.0
+                } else {
+                    a.eval(vars) / denom
+                }
+            }
             Self::IfElse {
                 cond,
                 then_branch,
@@ -43,6 +80,13 @@ impl RewardExpr {
             }
             Self::Gt(a, b) => {
                 if a.eval(vars) > b.eval(vars) {
+                    1.0
+                } else {
+                    0.0
+                }
+            }
+            Self::Lt(a, b) => {
+                if a.eval(vars) < b.eval(vars) {
                     1.0
                 } else {
                     0.0
@@ -68,6 +112,7 @@ impl RewardExpr {
             Self::Add(a, b) => format!("({} + {})", a.to_display_string(), b.to_display_string()),
             Self::Sub(a, b) => format!("({} - {})", a.to_display_string(), b.to_display_string()),
             Self::Mul(a, b) => format!("{} × {}", a.to_display_string(), b.to_display_string()),
+            Self::Div(a, b) => format!("({} / {})", a.to_display_string(), b.to_display_string()),
             Self::IfElse {
                 cond,
                 then_branch,
@@ -81,6 +126,7 @@ impl RewardExpr {
                 )
             }
             Self::Gt(a, b) => format!("({} > {})", a.to_display_string(), b.to_display_string()),
+            Self::Lt(a, b) => format!("({} < {})", a.to_display_string(), b.to_display_string()),
             Self::Max(a, b) => format!("max({}, {})", a.to_display_string(), b.to_display_string()),
             Self::Min(a, b) => format!("min({}, {})", a.to_display_string(), b.to_display_string()),
             Self::Exp(a) => format!("exp({})", a.to_display_string()),
@@ -111,6 +157,11 @@ impl RewardExpr {
                 a.to_latex_inner(vars),
                 b.to_latex_inner(vars)
             ),
+            Self::Div(a, b) => format!(
+                r"\frac{{{}}}{{{}}}",
+                a.to_latex_inner(vars),
+                b.to_latex_inner(vars)
+            ),
             Self::IfElse {
                 cond,
                 then_branch,
@@ -122,6 +173,7 @@ impl RewardExpr {
                 else_branch.to_latex_inner(vars)
             ),
             Self::Gt(a, b) => format!("{} > {}", a.to_latex_inner(vars), b.to_latex_inner(vars)),
+            Self::Lt(a, b) => format!("{} < {}", a.to_latex_inner(vars), b.to_latex_inner(vars)),
             Self::Max(a, b) => {
                 format!(
                     r"\max({}, {})",

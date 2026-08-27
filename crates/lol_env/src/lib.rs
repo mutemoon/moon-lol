@@ -5,17 +5,18 @@ pub mod fiora_v0;
 pub mod fiora_v1;
 pub mod fiora_v2;
 pub mod flash_plugin;
+pub mod curriculum;
 pub mod obs_plugins;
 pub mod parallel;
-pub mod raycast_plugin;
 pub mod reward;
 pub mod solo_v0;
 pub mod traits;
 pub mod visual_runner;
 
 pub use fiora_riven_common::{
-    ATTACK_MASK_DISTANCE, ChampionInitialSkillLevels, FioraRivenBaseEnv, FioraRivenEntities,
-    FioraRivenEnvBuilder, OBS_DISTANCE_IDX, OBS_DISTANCE_SCALE, setup_custom_skill_levels_world,
+    ATTACK_MASK_DISTANCE, ChampionInitialSkillLevels, FIORA_COMMON_OBS_SCHEMA, FioraRivenBaseEnv,
+    FioraRivenEntities, FioraRivenEnvBuilder, OBS_DISTANCE_IDX, OBS_DISTANCE_SCALE,
+    setup_custom_skill_levels_world,
 };
 pub use fiora_v0::{
     FioraVsRivenAction, FioraVsRivenEnv, FioraVsRivenObs, advance_action_simulation,
@@ -23,12 +24,15 @@ pub use fiora_v0::{
 };
 pub use fiora_v1::{FioraVsRivenRealAction, FioraVsRivenRealEnv, FioraVsRivenRealObs};
 pub use fiora_v2::{
-    FioraV2Action, FioraV2DiscreteAction, FioraV2Env, FioraV2Obs, FioraV2RewardContext,
-    FioraV2RewardModel, V2_OBS_DIM, V2_OBS_DISTANCE_IDX, V2_OBS_DISTANCE_SCALE,
+    FIORA_V2_OBS_SCHEMA, FioraV2Action, FioraV2DiscreteAction, FioraV2Env, FioraV2Obs,
+    FioraV2RewardContext, FioraV2RewardModel, V2_OBS_DISTANCE_IDX, V2_OBS_DISTANCE_SCALE,
 };
 pub use flash_plugin::{
     FLASH_COOLDOWN_SECS, FLASH_DISTANCE, FlashCooldown, dispatch_flash, extract_flash_obs,
     register_flash_plugin, tick_flash_cooldown,
+};
+pub use curriculum::{
+    CurriculumConfig, CurriculumPhase, CurriculumRewardConfig, CurriculumScheduler,
 };
 pub use obs_plugins::{
     AttackStateObs, ChampionBaseObs, SkillCdObs, extract_attack_state, extract_champion_base,
@@ -38,10 +42,9 @@ pub use parallel::{
     ParallelEnvs, ParallelFioraV2Envs, ParallelFioraVsRivenEnvs, ParallelFioraVsRivenRealEnvs,
     ParallelSoloV0Envs,
 };
-pub use raycast_plugin::raycast_ground_plane;
 pub use reward::{FioraRewardContext, FioraVsRivenRewardModel, RewardModel};
 pub use solo_v0::{
-    SOLO_V0_OBS_DIM, SOLO_V0_OBS_DISTANCE_SCALE, SOLO_V0_OFFSET_SCALE, SoloV0Action,
+    SOLO_V0_OBS_DISTANCE_SCALE, SOLO_V0_OBS_SCHEMA, SOLO_V0_OFFSET_SCALE, SoloV0Action,
     SoloV0DiscreteAction, SoloV0Env, SoloV0Obs, setup_solo_v0_env_world,
     setup_solo_v0_health_world, step_solo_v0_world,
 };

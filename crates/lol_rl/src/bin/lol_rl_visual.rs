@@ -334,9 +334,6 @@ async fn handle_ws_client(
                     VisualInFrame::Pause => VisualRunnerCmd::Pause,
                     VisualInFrame::Resume => VisualRunnerCmd::Resume,
                     VisualInFrame::StepOnce => VisualRunnerCmd::StepOnce,
-                    VisualInFrame::StepWithAction { action_id } => {
-                        VisualRunnerCmd::StepWithAction(action_id)
-                    }
                     VisualInFrame::SetAutoPause(auto) => VisualRunnerCmd::SetAutoPause(auto),
                 };
                 let _ = cmd_tx.send(vcmd);

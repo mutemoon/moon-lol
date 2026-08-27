@@ -3,6 +3,7 @@ use std::path::Path;
 use std::sync::Arc;
 
 use chrono::Utc;
+use lol_env::curriculum::{CurriculumConfig, CurriculumScheduler};
 pub use lol_rl_protocol::{
     CheckpointItem, InFrame, ObsFeaturePayload, OutFrame, RewardItem, TaskConfigPayload,
     TaskOverviewItem,
@@ -35,6 +36,7 @@ pub struct TaskState {
     pub env_name: String,
     pub status: String,
     pub current_step: usize,
+    pub current_iter: usize,
     pub ep_return: f32,
     pub config: TaskConfigPayload,
     pub checkpoints: Vec<CheckpointItem>,
@@ -56,6 +58,7 @@ impl TaskState {
             env_name: r.env_name.clone(),
             status: r.status.clone(),
             current_step: r.current_step as usize,
+            current_iter: 0,
             ep_return: r.ep_return,
             config,
             checkpoints: Vec::new(),
@@ -101,9 +104,13 @@ impl RLService {
             let mut state = TaskState::from_row(t);
             if let Ok(cps) = repo.list_checkpoints(&state.id).await {
                 for cp in &cps {
+                    let id = Path::new(&cp.path)
+                        .file_stem()
+                        .and_then(|s| s.to_str())
+                        .map(|s| s.to_string())
+                        .unwrap_or_else(|| format!("iter-{}", cp.step));
                     state.checkpoints.push(CheckpointItem {
-                        // 统一用展示 id "ckpt-{step}"，与运行中保存的一致
-                        id: format!("ckpt-{}", cp.step),
+                        id,
                         step: cp.step as usize,
                         path: cp.path.clone(),
                         ep_return: cp.ep_return,
@@ -188,6 +195,7 @@ impl RLService {
                     env_name: config.env_name.clone(),
                     status: "queued".to_string(),
                     current_step: 0,
+                    current_iter: 0,
                     ep_return: 0.0,
                     config,
                     checkpoints: Vec::new(),
@@ -313,12 +321,19 @@ impl RLService {
                     .await
                     .unwrap_or_default()
                     .into_iter()
-                    .map(|cp| CheckpointItem {
-                        id: format!("ckpt-{}", cp.step),
-                        step: cp.step as usize,
-                        path: cp.path,
-                        ep_return: cp.ep_return,
-                        created_at: cp.created_at.to_rfc3339(),
+                    .map(|cp| {
+                        let id = Path::new(&cp.path)
+                            .file_stem()
+                            .and_then(|s| s.to_str())
+                            .map(|s| s.to_string())
+                            .unwrap_or_else(|| format!("iter-{}", cp.step));
+                        CheckpointItem {
+                            id,
+                            step: cp.step as usize,
+                            path: cp.path,
+                            ep_return: cp.ep_return,
+                            created_at: cp.created_at.to_rfc3339(),
+                        }
                     })
                     .collect();
                 let m = self.repo.list_metrics(task_id).await.unwrap_or_default();
@@ -356,14 +371,14 @@ impl RLService {
     }
 
     async fn handle_save_checkpoint(&self, task_id: &str) {
-        let (save_tx, step, ep_return) = {
+        let (save_tx, iter, ep_return) = {
             let tasks = self.tasks.lock().await;
             match tasks.get(task_id) {
-                Some(t) => (t.save_tx.clone(), t.current_step, t.ep_return),
+                Some(t) => (t.save_tx.clone(), t.current_iter, t.ep_return),
                 None => return,
             }
         };
-        let ckpt_id = format!("ckpt-{}", step);
+        let ckpt_id = format!("iter-{}", iter);
         let Some(tx) = save_tx else {
             // 训练已结束：最终模型已在收敛时自动保存，无需重复写入
             let _ = self.event_tx.send(OutFrame::Log {
@@ -404,9 +419,13 @@ impl RLService {
         // 2. 从数据库中查询历史 checkpoint
         match self.repo.get_checkpoint(task_id, ckpt_id).await {
             Ok(Some(cp)) => {
+                let id = Path::new(&cp.path)
+                    .file_stem()
+                    .and_then(|s| s.to_str())
+                    .map(|s| s.to_string())
+                    .unwrap_or_else(|| ckpt_id.to_string());
                 let item = CheckpointItem {
-                    // 与保存流程一致，返回展示 id "ckpt-{step}"，供前端匹配 running_visual_model
-                    id: ckpt_id.to_string(),
+                    id,
                     step: cp.step as usize,
                     path: cp.path.clone(),
                     ep_return: cp.ep_return,
@@ -505,9 +524,10 @@ fn persist_checkpoint(
         return;
     }
 
-    let step = req
+    let iter = req
         .ckpt_id
-        .strip_prefix("ckpt-")
+        .strip_prefix("iter-")
+        .or_else(|| req.ckpt_id.strip_prefix("ckpt-"))
         .and_then(|s| s.parse::<usize>().ok())
         .unwrap_or(0);
     let now = Utc::now();
@@ -521,14 +541,16 @@ fn persist_checkpoint(
                 task.env_name.clone(),
                 task.config.hidden_dim,
                 task.agent_type.clone(),
+                task.current_step,
             )
         })
     };
-    if let Some((env_name, hidden_dim, agent_type)) = task_meta_opt {
+    if let Some((env_name, hidden_dim, agent_type, total_steps)) = task_meta_opt {
         let meta_json = serde_json::json!({
             "task_id": task_id,
             "ckpt_id": req.ckpt_id,
-            "step": step,
+            "iter": iter,
+            "step": total_steps,
             "ep_return": req.ep_return,
             "agent_type": agent_type,
             "env_name": env_name,
@@ -543,7 +565,7 @@ fn persist_checkpoint(
     let cp_row = CheckpointRow {
         id: Uuid::new_v4(),
         task_id: Uuid::parse_str(task_id).unwrap_or_default(),
-        step: step as i64,
+        step: iter as i64,
         path: req.path.clone(),
         ep_return: req.ep_return,
         created_at: now,
@@ -556,7 +578,7 @@ fn persist_checkpoint(
 
     let ckpt_item = CheckpointItem {
         id: req.ckpt_id,
-        step,
+        step: iter,
         path: req.path,
         ep_return: req.ep_return,
         created_at: now.to_rfc3339(),
@@ -778,7 +800,29 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment + 'static>(
         rollout_steps,
         candle_core::Device::Cpu,
     );
+
+    // 初始化课程学习调度器（支持任务显式配置，或对 SoloV0 自动启用默认课程）
+    let mut curriculum_scheduler = if let Some(ref c_cfg) = task_config.curriculum {
+        Some(CurriculumScheduler::new(c_cfg.clone()))
+    } else if task_config.env_name == "SoloV0" {
+        Some(CurriculumScheduler::new(CurriculumConfig::default()))
+    } else {
+        None
+    };
+
+    // 初始课程参数下发
+    if let Some(ref c) = curriculum_scheduler {
+        session.update_curriculum(
+            c.minion_hp_scale(),
+            c.cs_reward(),
+            c.attack_no_cs_penalty(),
+            c.harass_coef(),
+        );
+        info!("🎓 [Curriculum] 已启用课程学习: {}", c.summary());
+    }
+
     let mut recent_ep_returns: VecDeque<f32> = VecDeque::with_capacity(50);
+    let mut recent_ep_cs: VecDeque<f32> = VecDeque::with_capacity(50);
     let mut recent_ep_steps: VecDeque<usize> = VecDeque::with_capacity(50);
 
     // 注册保存通道
@@ -790,7 +834,7 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment + 'static>(
         }
     }
 
-    let mut final_saved_step = 0usize;
+    let mut final_saved_iter = 0usize;
     let mut final_saved_return = 0.0f32;
 
     for iter in 1..=total_iterations {
@@ -839,12 +883,18 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment + 'static>(
         let stats = outcome.stats;
         let mean_value = outcome.mean_value;
 
-        // 回合回报/步数合并进近 50 轮滑动窗口
+        // 回合回报/补刀/步数合并进近 50 轮滑动窗口
         for ret in outcome.ep_returns {
             if recent_ep_returns.len() >= 50 {
                 recent_ep_returns.pop_front();
             }
             recent_ep_returns.push_back(ret);
+        }
+        for cs in outcome.ep_cs {
+            if recent_ep_cs.len() >= 50 {
+                recent_ep_cs.pop_front();
+            }
+            recent_ep_cs.push_back(cs);
         }
         for s in outcome.ep_steps {
             if recent_ep_steps.len() >= 50 {
@@ -859,7 +909,24 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment + 'static>(
             0.0
         };
 
-        final_saved_step = total_steps;
+        let ep_cs_avg = if !recent_ep_cs.is_empty() {
+            recent_ep_cs.iter().sum::<f32>() / recent_ep_cs.len() as f32
+        } else {
+            0.0
+        };
+
+        // 课程学习调度：每轮根据步数和平均补刀更新课程状态并广播至 Worker
+        if let Some(ref mut c) = curriculum_scheduler {
+            c.tick(iter, ep_cs_avg);
+            session.update_curriculum(
+                c.minion_hp_scale(),
+                c.cs_reward(),
+                c.attack_no_cs_penalty(),
+                c.harass_coef(),
+            );
+        }
+
+        final_saved_iter = iter;
         final_saved_return = ep_return;
 
         let (ep_steps_max, ep_steps_min, ep_steps_avg) = if !recent_ep_steps.is_empty() {
@@ -884,6 +951,7 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment + 'static>(
             let mut t = tasks.blocking_lock();
             if let Some(task) = t.get_mut(&task_id) {
                 task.current_step = total_steps;
+                task.current_iter = iter;
                 task.ep_return = ep_return;
             }
         }
@@ -944,13 +1012,16 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment + 'static>(
             obs_feature: obs_payload,
             reward_formula,
             reward_variables: Some(outcome.last_reward_variables),
+            curriculum: curriculum_scheduler
+                .as_ref()
+                .map(|c| c.to_telemetry(ep_cs_avg)),
         };
 
         let _ = event_tx.send(out_metrics);
 
         // 每 10 次迭代自动保存一个 Checkpoint
         if iter % 10 == 0 {
-            let ckpt_id = format!("ckpt-{}", total_steps);
+            let ckpt_id = format!("iter-{}", iter);
             let path = new_checkpoint_path(&task_id, &ckpt_id)
                 .to_string_lossy()
                 .to_string();
@@ -969,15 +1040,22 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment + 'static>(
         }
 
         if iter % 5 == 0 || iter == 1 {
+            let curriculum_tag = if let Some(ref c) = curriculum_scheduler {
+                format!(" | [{}]", c.summary())
+            } else {
+                String::new()
+            };
             let log_msg = format!(
-                "[{}] Iter {:2}/{} | SPS: {:6.1} | Reward: {:6.2} | P-Loss: {:7.4} | V-Loss: {:7.4}",
+                "[{}] Iter {:2}/{} | SPS: {:6.1} | Reward: {:6.2} | CS: {:4.1} | P-Loss: {:7.4} | V-Loss: {:7.4}{}",
                 task_id,
                 iter,
                 total_iterations,
                 sps,
                 ep_return,
+                ep_cs_avg,
                 stats.policy_loss,
-                stats.value_loss
+                stats.value_loss,
+                curriculum_tag,
             );
             {
                 let mut t = tasks.blocking_lock();
@@ -998,7 +1076,7 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment + 'static>(
     session.stop();
 
     // 4. 训练收敛：自动保存最终模型
-    let ckpt_id = format!("ckpt-{}", final_saved_step);
+    let ckpt_id = format!("iter-{}", final_saved_iter);
     let path = new_checkpoint_path(&task_id, &ckpt_id)
         .to_string_lossy()
         .to_string();
@@ -1052,6 +1130,7 @@ pub fn run_direct_training<E: lol_env::RlEnvironment + 'static>(
             env_name: task_config.env_name.clone(),
             status: "running".to_string(),
             current_step: 0,
+            current_iter: 0,
             ep_return: 0.0,
             config: task_config.clone(),
             checkpoints: Vec::new(),

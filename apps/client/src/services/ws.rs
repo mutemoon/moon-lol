@@ -99,6 +99,7 @@ pub fn spawn_ws_service(
                                 obs_feature,
                                 reward_formula,
                                 reward_variables,
+                                curriculum,
                             } => {
                                 if let Some(item) =
                                     sidebar.task_list.iter_mut().find(|t| t.id == task_id)
@@ -137,6 +138,7 @@ pub fn spawn_ws_service(
                                         latest_obs: None,
                                         reward_formula: None,
                                         latest_reward_variables: None,
+                                        latest_curriculum: None,
                                         latest_clip_eps: 0.0,
                                         logs: Vec::new(),
                                     });
@@ -153,6 +155,9 @@ pub fn spawn_ws_service(
                                 }
                                 if reward_variables.is_some() {
                                     detail.latest_reward_variables = reward_variables;
+                                }
+                                if curriculum.is_some() {
+                                    detail.latest_curriculum = curriculum;
                                 }
                             }
                             OutFrame::Log {
@@ -241,6 +246,7 @@ pub fn spawn_ws_service(
                                         latest_obs: None,
                                         reward_formula: None,
                                         latest_reward_variables: None,
+                                        latest_curriculum: None,
                                         latest_clip_eps: 0.0,
                                         logs: Vec::new(),
                                     });

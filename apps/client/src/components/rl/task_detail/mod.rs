@@ -47,6 +47,7 @@ pub fn render_task_detail(
             latest_obs: None,
             reward_formula: None,
             latest_reward_variables: None,
+            latest_curriculum: None,
             latest_clip_eps: 0.0,
             logs: vec![],
         });

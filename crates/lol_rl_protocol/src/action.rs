@@ -213,14 +213,56 @@ impl ActionValueNode {
     }
 }
 
+use crate::obs::{ObsContext, ObsExpr};
+
+/// 声明式动作掩码规则：当 condition 在当前 ObsContext 下成立 (> 0.0) 时，禁用对应动作分支
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
+pub struct ActionMaskRule {
+    /// 禁用触发条件（ObsExpr 求值 > 0.0 时触发禁用）
+    pub condition: ObsExpr,
+    /// 目标动作头名称（可选，如 "action_type"）
+    #[serde(default)]
+    pub target_head: Option<String>,
+    /// 被禁用的动作分支索引
+    pub disabled_branch: usize,
+    /// 被禁用的动作标签（如 "Attack"）
+    pub branch_label: String,
+}
+
+impl ActionMaskRule {
+    pub fn new(
+        condition: ObsExpr,
+        target_head: Option<String>,
+        disabled_branch: usize,
+        branch_label: impl Into<String>,
+    ) -> Self {
+        Self {
+            condition,
+            target_head,
+            disabled_branch,
+            branch_label: branch_label.into(),
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Default)]
 pub struct ActionSchema {
     pub nodes: Vec<ActionNode>,
+    #[serde(default)]
+    pub mask_rules: Vec<ActionMaskRule>,
 }
 
 impl ActionSchema {
     pub fn new(nodes: Vec<ActionNode>) -> Self {
-        Self { nodes }
+        Self {
+            nodes,
+            mask_rules: Vec::new(),
+        }
+    }
+
+    pub fn with_mask_rules(mut self, mask_rules: Vec<ActionMaskRule>) -> Self {
+        self.mask_rules = mask_rules;
+        self
     }
 
     pub fn encoding_dim(&self) -> usize {
@@ -232,6 +274,25 @@ impl ActionSchema {
             .iter()
             .flat_map(|n| n.to_encoding_labels())
             .collect()
+    }
+
+    /// 根据当前观测上下文，计算扁平离散动作掩码向量（适用于单离散动作头，如 FioraV2）
+    pub fn eval_flat_mask(&self, ctx: &ObsContext) -> Vec<bool> {
+        let cat_node = self.nodes.iter().find_map(|n| match n {
+            ActionNode::Categorical { num_classes, .. } => Some(*num_classes),
+            _ => None,
+        });
+
+        let num_classes = cat_node.unwrap_or(0);
+        let mut mask = vec![true; num_classes];
+
+        for rule in &self.mask_rules {
+            if rule.disabled_branch < mask.len() && rule.condition.eval(&ctx.vars) > 0.0 {
+                mask[rule.disabled_branch] = false;
+            }
+        }
+
+        mask
     }
 
     /// 将扁平的动作编码数组解析为结构化动作树
@@ -297,6 +358,28 @@ pub struct ActionMasks {
     /// 每个叶子分支的掩码。
     /// Categorical → Some(Vec<bool>), UnitSelection → Some(Vec<bool>), Continuous → None
     pub branch_masks: Vec<Option<Vec<bool>>>,
+    /// 自回归条件目标动作掩码矩阵（目标维度 -> 动作类别维度有效性布尔切片）
+    /// conditional_target_masks.as_ref()[target_idx] 对应选中目标 target_idx 时 action_type 的合法动作掩码
+    pub conditional_target_masks: Option<Vec<Vec<bool>>>,
+}
+
+impl ActionMasks {
+    pub fn new(branch_masks: Vec<Option<Vec<bool>>>) -> Self {
+        Self {
+            branch_masks,
+            conditional_target_masks: None,
+        }
+    }
+
+    pub fn with_conditional_target_masks(
+        branch_masks: Vec<Option<Vec<bool>>>,
+        conditional_target_masks: Vec<Vec<bool>>,
+    ) -> Self {
+        Self {
+            branch_masks,
+            conditional_target_masks: Some(conditional_target_masks),
+        }
+    }
 }
 
 #[cfg(test)]

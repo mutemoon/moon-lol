@@ -1,0 +1,298 @@
+pub mod action_parser;
+pub mod common;
+pub mod expr_parser;
+pub mod obs_parser;
+pub mod reward_parser;
+
+use crate::action::ActionSchema;
+use crate::dsl::action_parser::parse_action_schema;
+use crate::dsl::common::ws;
+use crate::dsl::obs_parser::parse_obs_schema;
+use crate::dsl::reward_parser::parse_reward_formula;
+use crate::obs::ObsSchema;
+use crate::reward::RewardFormulaSpec;
+use serde::{Deserialize, Serialize};
+use winnow::combinator::repeat;
+use winnow::Parser;
+
+/// 完整的环境 DSL 规范定义
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Default)]
+pub struct EnvDslSpec {
+    pub name: String,
+    pub obs_schema: Option<ObsSchema>,
+    pub action_schema: Option<ActionSchema>,
+    pub reward_formula: Option<RewardFormulaSpec>,
+}
+
+enum DslBlock {
+    Obs(String, ObsSchema),
+    Action(String, ActionSchema),
+    Reward(RewardFormulaSpec),
+}
+
+/// 解析包含多个块（obs, action, reward）的完整 `.rl` 脚本
+pub fn parse_env_dsl(mut input: &str) -> Result<EnvDslSpec, String> {
+    let mut spec = EnvDslSpec::default();
+
+    let blocks: Vec<DslBlock> = repeat(
+        0..,
+        winnow::combinator::alt((
+            parse_obs_schema.map(|(n, s)| DslBlock::Obs(n, s)),
+            parse_action_schema.map(|(n, a)| DslBlock::Action(n, a)),
+            parse_reward_formula.map(DslBlock::Reward),
+        )),
+    )
+    .parse_next(&mut input)
+    .map_err(|e| format!("DSL 解析失败: {:?}", e))?;
+
+    ws.parse_next(&mut input)
+        .map_err(|e| format!("空白符处理失败: {:?}", e))?;
+
+    if !input.trim().is_empty() {
+        return Err(format!("无法识别的 DSL 尾随内容: {:?}", input));
+    }
+
+    for block in blocks {
+        match block {
+            DslBlock::Obs(name, obs) => {
+                if spec.name.is_empty() {
+                    spec.name = name;
+                }
+                spec.obs_schema = Some(obs);
+            }
+            DslBlock::Action(name, action) => {
+                if spec.name.is_empty() {
+                    spec.name = name;
+                }
+                spec.action_schema = Some(action);
+            }
+            DslBlock::Reward(reward) => {
+                if spec.name.is_empty() {
+                    spec.name = reward.name.clone();
+                }
+                spec.reward_formula = Some(reward);
+            }
+        }
+    }
+
+    Ok(spec)
+}
+
+impl ObsSchema {
+    /// 从 DSL 脚本解析 ObsSchema
+    pub fn from_dsl(mut input: &str) -> Result<Self, String> {
+        let (_, schema) = parse_obs_schema
+            .parse_next(&mut input)
+            .map_err(|e| format!("Obs DSL 解析错误: {:?}", e))?;
+        Ok(schema)
+    }
+}
+
+impl ActionSchema {
+    /// 从 DSL 脚本解析 ActionSchema
+    pub fn from_dsl(mut input: &str) -> Result<Self, String> {
+        let (_, schema) = parse_action_schema
+            .parse_next(&mut input)
+            .map_err(|e| format!("Action DSL 解析错误: {:?}", e))?;
+        Ok(schema)
+    }
+}
+
+impl RewardFormulaSpec {
+    /// 从 DSL 脚本解析 RewardFormulaSpec
+    pub fn from_dsl(mut input: &str) -> Result<Self, String> {
+        let schema = parse_reward_formula
+            .parse_next(&mut input)
+            .map_err(|e| format!("Reward DSL 解析错误: {:?}", e))?;
+        Ok(schema)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::obs::ObsContext;
+
+    #[test]
+    fn test_dsl_solo_v0_roundtrip() {
+        let dsl_src = r#"
+        // ── 观测空间 ──────────────────────────────────────────
+        obs SoloV0Obs {
+            category role: 4 -> embed(12) = role_id;
+
+            struct spatial {
+                vector target_rel_pos: 2 = [
+                    (self_x - target_x) / 100.0,
+                    (self_z - target_z) / 100.0
+                ];
+                scalar distance = distance / 100.0;
+            }
+
+            struct cooldowns {
+                scalar q_ready = q_ready;
+                scalar q_cd = q_cd / 10.0;
+                scalar flash_ready = flash_ready;
+                scalar flash_cd = flash_cd / 300.0;
+            }
+
+            repeated visible_units[20] -> encoder: SharedMlpPool(hidden=[32, 16], pool=Max) {
+                category unit_type: 6 -> embed(8) = unit_type;
+                vector rel_pos: 2 = [rel_pos[0] / 100.0, rel_pos[1] / 100.0];
+                scalar hp_pct = hp_pct;
+                scalar is_enemy = is_enemy;
+            }
+        }
+
+        // ── 动作空间 ──────────────────────────────────────────
+        action SoloV0Action {
+            continuous offset: 2;
+            unit_target target: visible_units[20 -> 16];
+            category action_type: 8 {
+                0: "NoOp",
+                1: "Move",
+                2: "Attack",
+                3: "CastQ",
+                4: "CastW",
+                5: "CastE",
+                6: "CastR",
+                7: "CastFlash",
+            }
+        }
+
+        // ── 奖励公式 ──────────────────────────────────────────
+        reward SoloV0Reward {
+            term vital_hit   : "击破破绽" = 80.0 * is_vital_break;
+            term damage_deal : "造成伤害" = 100.0 * (enemy_damage / enemy_max_hp);
+            term step_cost   : "时间惩罚" = -0.005;
+        }
+        "#;
+
+        let spec = parse_env_dsl(dsl_src).expect("DSL 脚本应成功解析");
+        assert_eq!(spec.name, "SoloV0Obs");
+
+        // 验证 ObsSchema
+        let obs = spec.obs_schema.expect("应包含 obs_schema");
+        // role(1) + spatial(3) + cooldowns(4) + visible_units(20 * 5 = 100) = 108 维 raw_dim
+        assert_eq!(obs.raw_dim(), 1 + 3 + 4 + 20 * 5);
+
+        // 验证求值
+        let mut ctx = ObsContext::new();
+        ctx.set_var("role_id", 0.0);
+        ctx.set_var("self_x", 150.0);
+        ctx.set_var("target_x", 50.0);
+        ctx.set_var("self_z", 0.0);
+        ctx.set_var("target_z", 0.0);
+        ctx.set_var("distance", 100.0);
+        ctx.set_var("q_ready", 1.0);
+        ctx.set_var("q_cd", 5.0);
+        ctx.set_var("flash_ready", 0.0);
+        ctx.set_var("flash_cd", 150.0);
+
+        let vec = obs.eval_to_vector(&ctx);
+        assert_eq!(vec.len(), obs.raw_dim());
+        assert_eq!(vec[0], 0.0); // role
+        assert_eq!(vec[1], 1.0); // target_rel_pos[0] = (150 - 50) / 100 = 1.0
+        assert_eq!(vec[2], 0.0); // target_rel_pos[1]
+        assert_eq!(vec[3], 1.0); // distance = 100 / 100 = 1.0
+        assert_eq!(vec[4], 1.0); // q_ready
+        assert_eq!(vec[5], 0.5); // q_cd = 5 / 10 = 0.5
+
+        // 验证 ActionSchema
+        let act = spec.action_schema.expect("应包含 action_schema");
+        assert_eq!(act.encoding_dim(), 2 + 1 + 1); // continuous(2) + target(1) + action_type(1) = 4
+
+        // 验证 RewardFormulaSpec
+        let rew = spec.reward_formula.expect("应包含 reward_formula");
+        assert_eq!(rew.terms.len(), 3);
+        assert_eq!(rew.terms[0].id, "vital_hit");
+        assert_eq!(rew.terms[0].label, "击破破绽");
+    }
+
+    #[test]
+    fn test_dsl_math_and_functions() {
+        let obs_src = r#"
+        obs MathTest {
+            scalar hp_pct = clamp(hp / max(max_hp, 1.0), 0.0, 1.0);
+            scalar cond_val = if(hp > 50.0, 1.0, 0.0);
+            scalar complex = (a + b * c) / 2.0;
+        }
+        "#;
+        let obs = ObsSchema::from_dsl(obs_src).expect("应成功解析");
+        assert_eq!(obs.raw_dim(), 3);
+
+        let mut ctx = ObsContext::new();
+        ctx.set_var("hp", 80.0);
+        ctx.set_var("max_hp", 100.0);
+        ctx.set_var("a", 10.0);
+        ctx.set_var("b", 4.0);
+        ctx.set_var("c", 5.0);
+
+        let vec = obs.eval_to_vector(&ctx);
+        assert_eq!(vec[0], 0.8); // 80 / 100
+        assert_eq!(vec[1], 1.0); // 80 > 50 -> 1.0
+        assert_eq!(vec[2], 15.0); // (10 + 4 * 5) / 2 = 30 / 2 = 15.0
+    }
+
+    #[test]
+    fn test_dsl_action_and_reward_standalone() {
+        let act_src = r#"
+        action SimpleAction {
+            continuous move: 2;
+            category skill [NoOp, Q, W, E, R];
+        }
+        "#;
+        let action = ActionSchema::from_dsl(act_src).expect("Action 应解析成功");
+        assert_eq!(action.encoding_dim(), 3);
+        assert_eq!(action.nodes.len(), 2);
+
+        let rew_src = r#"
+        reward SimpleReward {
+            term kill: "击杀奖励" = 100.0 * is_kill;
+            term step = -0.01;
+        }
+        "#;
+        let reward = RewardFormulaSpec::from_dsl(rew_src).expect("Reward 应解析成功");
+        assert_eq!(reward.terms.len(), 2);
+        assert_eq!(reward.terms[1].label, "step");
+    }
+
+    #[test]
+    fn test_dsl_action_mask_rules() {
+        let act_src = r#"
+        action FioraV2Action {
+            continuous offset: 2;
+            category action_type: 7 {
+                0: "NoOp",
+                1: "Move",
+                2: "Attack",
+                3: "CastQ",
+                4: "CastE",
+                5: "CastR",
+                6: "CastFlash",
+            }
+
+            mask {
+                if distance > 22.0 { disable Attack; }
+                if q_ready < 0.5   { disable CastQ; }
+                if e_ready < 0.5   { disable CastE; }
+                if r_ready < 0.5   { disable CastR; }
+                if flash_ready < 0.5 { disable CastFlash; }
+            }
+        }
+        "#;
+        let action = ActionSchema::from_dsl(act_src).expect("Action 应成功解析掩码规则");
+        assert_eq!(action.mask_rules.len(), 5);
+        assert_eq!(action.mask_rules[0].branch_label, "Attack");
+        assert_eq!(action.mask_rules[0].disabled_branch, 2);
+
+        let mut ctx = ObsContext::new();
+        ctx.set_var("distance", 30.0); // > 22.0 -> Attack disabled
+        ctx.set_var("q_ready", 1.0);  // CastQ enabled
+        ctx.set_var("e_ready", 0.0);  // < 0.5 -> CastE disabled
+        ctx.set_var("r_ready", 1.0);  // CastR enabled
+        ctx.set_var("flash_ready", 0.0); // CastFlash disabled
+
+        let mask = action.eval_flat_mask(&ctx);
+        assert_eq!(mask, vec![true, true, false, true, false, true, false]);
+    }
+}

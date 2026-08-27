@@ -18,12 +18,17 @@ const MAX_POINTS: usize = 1200;
 
 /// Tab 1: 图表与训练指标面板
 pub fn render_tab_metrics(detail: &LocalTaskDetail, cx: &mut Context<AppSidebar>) -> AnyElement {
-    let mut container = v_flex().flex_1().overflow_hidden().child(
+    let mut container = v_flex().flex_1().overflow_hidden().gap_3().child(
         div()
             .font_bold()
             .text_base()
             .child(t!("app.rl.metrics_title")),
     );
+
+    // 课程学习状态卡片（通用数据驱动渲染）
+    if let Some(curriculum) = &detail.latest_curriculum {
+        container = container.child(render_curriculum_card(curriculum, cx));
+    }
 
     if let Some(formula) = &detail.reward_formula {
         container = container.child(
@@ -642,4 +647,168 @@ fn fmt_val(v: f64) -> String {
     } else {
         format!("{:.2}", v)
     }
+}
+
+/// 通用课程学习状态卡片（多阶段流水线 + 进度 + 动态参数）
+fn render_curriculum_card(
+    curriculum: &lol_rl_protocol::CurriculumTelemetry,
+    cx: &Context<AppSidebar>,
+) -> AnyElement {
+    let phase_idx = curriculum.phase_index;
+    let total_phases = curriculum.total_phases.max(1);
+    let progress_pct = (curriculum.progress * 100.0).clamp(0.0, 100.0);
+
+    // 1. 顶部状态头
+    let header = h_flex()
+        .justify_between()
+        .items_center()
+        .child(
+            h_flex()
+                .gap_2()
+                .items_center()
+                .child(
+                    div()
+                        .font_semibold()
+                        .text_sm()
+                        .child("🎓 课程学习调度 (Curriculum Learning)"),
+                )
+                .child(
+                    div()
+                        .px_2()
+                        .py_0p5()
+                        .rounded_md()
+                        .text_xs()
+                        .font_bold()
+                        .bg(cx.theme().primary.opacity(0.15))
+                        .text_color(cx.theme().primary)
+                        .child(format!("阶段 {} / {}", phase_idx + 1, total_phases)),
+                ),
+        )
+        .child(
+            div()
+                .text_xs()
+                .text_color(cx.theme().muted_foreground)
+                .child(format!("当前阶段进度: {:.1}%", progress_pct)),
+        );
+
+    // 2. 多阶段步骤条（Stepper Pipeline）
+    let mut stepper = h_flex().gap_2().items_center().flex_wrap();
+    for (i, name) in curriculum.all_phase_names.iter().enumerate() {
+        if i > 0 {
+            stepper = stepper.child(
+                div()
+                    .text_xs()
+                    .text_color(cx.theme().muted_foreground)
+                    .child("→"),
+            );
+        }
+        let is_current = i == phase_idx;
+        let is_completed = i < phase_idx;
+        let badge_bg = if is_current {
+            cx.theme().primary.opacity(0.2)
+        } else if is_completed {
+            cx.theme().success.opacity(0.15)
+        } else {
+            cx.theme().secondary.opacity(0.5)
+        };
+        let text_color = if is_current {
+            cx.theme().primary
+        } else if is_completed {
+            cx.theme().success
+        } else {
+            cx.theme().muted_foreground
+        };
+        let prefix = if is_completed {
+            "✓ "
+        } else if is_current {
+            "▶ "
+        } else {
+            "○ "
+        };
+
+        stepper = stepper.child(
+            div()
+                .px_2()
+                .py_1()
+                .rounded_md()
+                .text_xs()
+                .font_medium()
+                .bg(badge_bg)
+                .text_color(text_color)
+                .child(format!("{}{}", prefix, name)),
+        );
+    }
+
+    // 3. 阶段内部进度条
+    let progress_bar = div()
+        .w_full()
+        .h(px(6.))
+        .rounded_full()
+        .bg(cx.theme().border)
+        .overflow_hidden()
+        .child(
+            div()
+                .h_full()
+                .w(relative(progress_pct / 100.0))
+                .rounded_full()
+                .bg(cx.theme().primary),
+        );
+
+    // 4. 晋级条件（若有）
+    let mut content = v_flex().gap_2p5().child(header).child(stepper).child(progress_bar);
+
+    if let Some(ref cond) = curriculum.transition_condition {
+        content = content.child(
+            h_flex()
+                .gap_1p5()
+                .items_center()
+                .text_xs()
+                .text_color(cx.theme().muted_foreground)
+                .child(div().font_semibold().child("晋级判定:"))
+                .child(div().child(cond.clone())),
+        );
+    }
+
+    // 5. 动态参数网格（遍历 parameters，完全无硬编码）
+    if !curriculum.parameters.is_empty() {
+        let mut sorted_params: Vec<(&String, &f32)> = curriculum.parameters.iter().collect();
+        sorted_params.sort_by_key(|(k, _)| *k);
+
+        let params_flow = h_flex().gap_2().flex_wrap().children(
+            sorted_params.into_iter().map(|(k, v)| {
+                div()
+                    .px_2()
+                    .py_1()
+                    .rounded_md()
+                    .border_1()
+                    .border_color(cx.theme().border)
+                    .bg(cx.theme().secondary.opacity(0.3))
+                    .text_xs()
+                    .child(format!("{}: {:.2}", k, v))
+            }),
+        );
+
+        content = content.child(
+            v_flex()
+                .gap_1()
+                .child(
+                    div()
+                        .text_xs()
+                        .font_medium()
+                        .text_color(cx.theme().muted_foreground)
+                        .child("当前生效参数:"),
+                )
+                .child(params_flow),
+        );
+    }
+
+    v_flex()
+        .gap_2()
+        .p_3()
+        .rounded_md()
+        .border_1()
+        .border_color(cx.theme().border)
+        .bg(cx.theme().accent.opacity(0.04))
+        .child(content)
+        .into_any_element()
 }

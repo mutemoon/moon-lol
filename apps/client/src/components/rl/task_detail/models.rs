@@ -64,7 +64,7 @@ pub fn render_tab_models(
                                             div()
                                                 .text_xs()
                                                 .text_color(cx.theme().muted_foreground)
-                                                .child(format!("Step: {}", ckpt.step)),
+                                                .child(format!("Iteration: {}", ckpt.step)),
                                         ),
                                 )
                                 .child(

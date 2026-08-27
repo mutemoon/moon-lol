@@ -213,7 +213,7 @@ impl RlRepo for PgRlRepo {
 
     async fn get_checkpoint(&self, task_id: &str, id: &str) -> RepoResult<Option<CheckpointRow>> {
         let task_uuid = Uuid::parse_str(task_id).map_err(|_| RepoError::NotFound)?;
-        // id 可能是 DB 的 UUID，也可能是展示用的 "ckpt-{step}"
+        // id 可能是 DB 的 UUID，也可能是展示用的 "iter-{iter}" 或 "ckpt-{step}"
         if let Ok(cp_uuid) = Uuid::parse_str(id) {
             let row = sqlx::query("SELECT * FROM rl_checkpoints WHERE task_id = $1 AND id = $2")
                 .bind(task_uuid)
@@ -225,14 +225,27 @@ impl RlRepo for PgRlRepo {
                 None => Ok(None),
             };
         }
-        let Some(step) = id.strip_prefix("ckpt-").and_then(|s| s.parse::<i64>().ok()) else {
-            return Ok(None);
-        };
+        let step = id
+            .strip_prefix("iter-")
+            .or_else(|| id.strip_prefix("ckpt-"))
+            .and_then(|s| s.parse::<i64>().ok());
+        if let Some(step) = step {
+            let row = sqlx::query(
+                "SELECT * FROM rl_checkpoints WHERE task_id = $1 AND step = $2 ORDER BY created_at DESC LIMIT 1",
+            )
+            .bind(task_uuid)
+            .bind(step)
+            .fetch_optional(&self.pool)
+            .await?;
+            if let Some(ref r) = row {
+                return Ok(Some(parse_checkpoint_row(r)?));
+            }
+        }
         let row = sqlx::query(
-            "SELECT * FROM rl_checkpoints WHERE task_id = $1 AND step = $2 ORDER BY created_at DESC LIMIT 1",
+            "SELECT * FROM rl_checkpoints WHERE task_id = $1 AND path LIKE $2 ORDER BY created_at DESC LIMIT 1",
         )
         .bind(task_uuid)
-        .bind(step)
+        .bind(format!("%{id}.safetensors"))
         .fetch_optional(&self.pool)
         .await?;
         match row {

@@ -29,6 +29,8 @@ pub struct StepOutcome<O> {
     pub mean_value: f32,
     /// 本轮结束的所有回合累计回报。
     pub ep_returns: Vec<f32>,
+    /// 本轮结束的所有回合补刀数。
+    pub ep_cs: Vec<f32>,
     /// 本轮结束的所有回合步数。
     pub ep_steps: Vec<usize>,
     pub reward_breakdown: HashMap<String, f32>,
@@ -98,6 +100,19 @@ impl<E: RlEnvironment + 'static> TrainingSession<E> {
                                 error!("Worker Rollout 失败: {e}");
                                 WorkerTrajectory::empty()
                             }));
+                        }
+                        WorkerCommand::UpdateCurriculum {
+                            hp_scale,
+                            cs_reward,
+                            attack_no_cs_penalty,
+                            harass_coef,
+                        } => {
+                            worker.update_curriculum(
+                                hp_scale,
+                                cs_reward,
+                                attack_no_cs_penalty,
+                                harass_coef,
+                            );
                         }
                         WorkerCommand::Stop => break,
                     }
@@ -181,6 +196,7 @@ impl<E: RlEnvironment + 'static> TrainingSession<E> {
         let mut env_buffers = Vec::with_capacity(self.num_parallel_envs * 2);
         let mut last_values = Vec::with_capacity(self.num_parallel_envs * 2);
         let mut ep_returns_all = Vec::new();
+        let mut ep_cs_all = Vec::new();
         let mut ep_steps_all = Vec::new();
         let mut iter_reward_breakdown: HashMap<String, f32> = HashMap::new();
         let mut last_reward_variables = HashMap::new();
@@ -196,6 +212,9 @@ impl<E: RlEnvironment + 'static> TrainingSession<E> {
             }
             for ret in traj.ep_returns {
                 ep_returns_all.push(ret);
+            }
+            for cs in traj.ep_cs {
+                ep_cs_all.push(cs);
             }
             for s in traj.completed_steps {
                 ep_steps_all.push(s);
@@ -238,11 +257,30 @@ impl<E: RlEnvironment + 'static> TrainingSession<E> {
             stats,
             mean_value,
             ep_returns: ep_returns_all,
+            ep_cs: ep_cs_all,
             ep_steps: ep_steps_all,
             reward_breakdown: iter_reward_breakdown,
             last_reward_variables,
             last_obs: sample_obs,
         })
+    }
+
+    /// 向所有持久化 Worker 广播课程学习参数（小兵血量缩放与奖励配置）。
+    pub fn update_curriculum(
+        &self,
+        hp_scale: f32,
+        cs_reward: f32,
+        attack_no_cs_penalty: f32,
+        harass_coef: f32,
+    ) {
+        for tx in &self.cmd_senders {
+            let _ = tx.send(WorkerCommand::UpdateCurriculum {
+                hp_scale,
+                cs_reward,
+                attack_no_cs_penalty,
+                harass_coef,
+            });
+        }
     }
 
     /// 停止并回收所有 Worker 线程。
@@ -302,15 +340,21 @@ mod tests {
 
         let outcome = session.step_once(1, 3e-4, 0.05, 32)?;
         assert!(outcome.num_samples > 0);
-        // 验证 reward_breakdown 不为空
+        // 验证 reward_breakdown 不为空并包含课程学习奖励项
         assert!(
             !outcome.reward_breakdown.is_empty(),
             "reward_breakdown 应该包含统计项"
         );
         assert!(
-            outcome.reward_breakdown.contains_key("对敌伤害")
-                || outcome.reward_breakdown.contains_key("小兵伤害")
+            outcome.reward_breakdown.contains_key("补刀奖励")
+                || outcome.reward_breakdown.contains_key("攻击未补刀惩罚")
+                || outcome.reward_breakdown.contains_key("消耗对手")
         );
+
+        // 验证课程学习参数下发与第二轮迭代
+        session.update_curriculum(0.5, 1.0, 0.1, 0.3);
+        let outcome2 = session.step_once(2, 3e-4, 0.05, 32)?;
+        assert!(outcome2.num_samples > 0);
 
         Ok(())
     }

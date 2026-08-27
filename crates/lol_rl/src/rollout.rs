@@ -19,6 +19,7 @@ pub struct WorkerTrajectory<O> {
     /// 与 buffers 一一对齐的末尾价值（GAE bootstrap 用）。
     pub last_values: Vec<f32>,
     pub ep_returns: Vec<f32>,
+    pub ep_cs: Vec<f32>,
     pub completed_steps: Vec<usize>,
     pub reward_breakdown: HashMap<String, f32>,
     pub last_reward_variables: HashMap<String, f32>,
@@ -31,6 +32,7 @@ impl<O> WorkerTrajectory<O> {
             buffers: Vec::new(),
             last_values: Vec::new(),
             ep_returns: Vec::new(),
+            ep_cs: Vec::new(),
             completed_steps: Vec::new(),
             reward_breakdown: HashMap::new(),
             last_reward_variables: HashMap::new(),
@@ -46,6 +48,13 @@ pub enum WorkerCommand {
         opponent_policy: Option<Arc<ActorCritic>>,
         main_agent_idx: usize,
     },
+    /// 更新课程学习参数（小兵血量缩放 + 奖励配置）
+    UpdateCurriculum {
+        hp_scale: f32,
+        cs_reward: f32,
+        attack_no_cs_penalty: f32,
+        harass_coef: f32,
+    },
     Stop,
 }
 
@@ -54,6 +63,7 @@ pub struct RolloutWorker<E: RlEnvironment> {
     env: E,
     current_obs: Vec<E::Obs>,
     cur_return: f32,
+    cur_cs: f32,
     cur_steps: usize,
     agent_mamba_states: Vec<Option<crate::policy::MambaState>>,
 }
@@ -68,9 +78,22 @@ impl<E: RlEnvironment> RolloutWorker<E> {
             env,
             current_obs,
             cur_return: 0.0,
+            cur_cs: 0.0,
             cur_steps: 0,
             agent_mamba_states: vec![None; num_agents],
         }
+    }
+
+    /// 更新环境中的课程学习参数
+    pub fn update_curriculum(
+        &mut self,
+        hp_scale: f32,
+        cs_reward: f32,
+        attack_no_cs_penalty: f32,
+        harass_coef: f32,
+    ) {
+        self.env
+            .update_curriculum(hp_scale, cs_reward, attack_no_cs_penalty, harass_coef);
     }
 
     /// 执行一次完整 Rollout。
@@ -101,6 +124,7 @@ impl<E: RlEnvironment> RolloutWorker<E> {
             .map(|_| RolloutBuffer::new())
             .collect();
         let mut ep_returns = Vec::new();
+        let mut ep_cs = Vec::new();
         let mut completed_steps = Vec::new();
         let mut reward_breakdown = HashMap::new();
         let mut last_reward_variables = HashMap::new();
@@ -115,11 +139,13 @@ impl<E: RlEnvironment> RolloutWorker<E> {
                 // MLP 批量推理优化：双方使用同一策略时单次前向完成采样
                 let mut batch_flat = Vec::with_capacity(self.current_obs.len() * state_dim);
                 let mut masks = Vec::with_capacity(self.current_obs.len());
+                let mut structured_masks = Vec::with_capacity(self.current_obs.len());
                 let mut state_vecs = Vec::with_capacity(self.current_obs.len());
                 for obs in &self.current_obs {
                     let sv = E::obs_to_vector(obs);
                     batch_flat.extend_from_slice(&sv);
                     masks.push(E::action_mask(obs));
+                    structured_masks.push(E::action_masks(obs));
                     state_vecs.push(sv);
                 }
                 let batch_tensor = Tensor::from_vec(
@@ -127,7 +153,11 @@ impl<E: RlEnvironment> RolloutWorker<E> {
                     (self.current_obs.len(), state_dim),
                     sampler_device,
                 )?;
-                let batch_samples = main_policy.sample_batch(&batch_tensor, Some(&masks))?;
+                let batch_samples = main_policy.sample_batch_with_structured_masks(
+                    &batch_tensor,
+                    Some(&structured_masks),
+                    Some(&masks),
+                )?;
                 for ((state_vec, mask), (encoded, log_prob, val)) in state_vecs
                     .into_iter()
                     .zip(masks.into_iter())
@@ -142,6 +172,7 @@ impl<E: RlEnvironment> RolloutWorker<E> {
                 for (agent_idx, obs) in self.current_obs.iter().enumerate() {
                     let state_vec = E::obs_to_vector(obs);
                     let action_mask = E::action_mask(obs);
+                    let structured_mask = E::action_masks(obs);
                     let state_tensor =
                         Tensor::from_vec(state_vec.clone(), (1, state_dim), sampler_device)?;
 
@@ -151,9 +182,10 @@ impl<E: RlEnvironment> RolloutWorker<E> {
                         opp_policy
                     };
 
-                    let (encoded, log_prob, val) = active_policy.step(
+                    let (encoded, log_prob, val) = active_policy.step_with_structured_masks(
                         &state_tensor,
                         &mut self.agent_mamba_states[agent_idx],
+                        structured_mask.as_ref(),
                         action_mask.as_deref(),
                     )?;
 
@@ -179,6 +211,9 @@ impl<E: RlEnvironment> RolloutWorker<E> {
             if let Some(res) = primary_res {
                 self.cur_return += res.reward;
                 self.cur_steps += 1;
+                if let Some(&cs) = res.reward_variables.get("self_cs") {
+                    self.cur_cs += cs;
+                }
                 if !res.reward_variables.is_empty() {
                     last_reward_variables = res.reward_variables.clone();
                 }
@@ -256,8 +291,10 @@ impl<E: RlEnvironment> RolloutWorker<E> {
                     *s = None;
                 }
                 ep_returns.push(self.cur_return);
+                ep_cs.push(self.cur_cs);
                 completed_steps.push(self.cur_steps);
                 self.cur_return = 0.0;
+                self.cur_cs = 0.0;
                 self.cur_steps = 0;
                 self.current_obs = self.env.reset();
             } else {
@@ -298,6 +335,7 @@ impl<E: RlEnvironment> RolloutWorker<E> {
             buffers,
             last_values,
             ep_returns,
+            ep_cs,
             completed_steps,
             reward_breakdown,
             last_reward_variables,

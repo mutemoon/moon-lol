@@ -606,30 +606,65 @@ pub struct FioraVsRivenObs {
     pub vital_dir_neg_z: f32,
 }
 
-impl FioraVsRivenObs {
-    /// 转换为强化学习策略网络输入向量。
-    pub fn to_vector(&self) -> Vec<f32> {
-        let rel_x = self.fiora_pos.x - self.riven_pos.x;
-        let rel_z = self.fiora_pos.z - self.riven_pos.z;
+pub static FIORA_COMMON_OBS_SCHEMA: std::sync::LazyLock<lol_rl_protocol::ObsSchema> =
+    std::sync::LazyLock::new(|| {
+        use lol_rl_protocol::{ObsExpr, ObsNode, ObsSchema};
+        ObsSchema::new(vec![
+            ObsNode::structure(
+                "vital",
+                vec![
+                    ObsNode::vector_exprs(
+                        "direction",
+                        vec![
+                            ObsExpr::var("vital_dir_x"),
+                            ObsExpr::var("vital_dir_neg_x"),
+                            ObsExpr::var("vital_dir_z"),
+                            ObsExpr::var("vital_dir_neg_z"),
+                        ],
+                    ),
+                    ObsNode::scalar_expr("has_vital", ObsExpr::var("has_vital")),
+                    ObsNode::scalar_expr("is_active", ObsExpr::var("vital_is_active")),
+                ],
+            ),
+            ObsNode::structure(
+                "spatial",
+                vec![
+                    ObsNode::vector_exprs(
+                        "relative_pos",
+                        vec![
+                            (ObsExpr::var("fiora_x") - ObsExpr::var("riven_x")) / OBS_DISTANCE_SCALE,
+                            (ObsExpr::var("fiora_z") - ObsExpr::var("riven_z")) / OBS_DISTANCE_SCALE,
+                        ],
+                    ),
+                    ObsNode::scalar_expr("distance", ObsExpr::var("distance") / OBS_DISTANCE_SCALE),
+                ],
+            ),
+        ])
+    });
 
-        vec![
-            // 破绽四方位 (4维)
-            self.vital_dir_x,
-            self.vital_dir_neg_x,
-            self.vital_dir_z,
-            self.vital_dir_neg_z,
-            // 破绽状态 (2维：是否存在、是否已激活)
-            if self.has_vital { 1.0 } else { 0.0 },
-            if self.vital_is_active { 1.0 } else { 0.0 },
-            // 剑姬相对于瑞雯的相对位置与距离 (3维，归一化/OBS_DISTANCE_SCALE)
-            rel_x / OBS_DISTANCE_SCALE,
-            rel_z / OBS_DISTANCE_SCALE,
-            self.distance / OBS_DISTANCE_SCALE,
-        ]
+impl FioraVsRivenObs {
+    pub fn to_context(&self) -> lol_rl_protocol::ObsContext {
+        lol_rl_protocol::ObsContext::new()
+            .with_var("vital_dir_x", self.vital_dir_x)
+            .with_var("vital_dir_neg_x", self.vital_dir_neg_x)
+            .with_var("vital_dir_z", self.vital_dir_z)
+            .with_var("vital_dir_neg_z", self.vital_dir_neg_z)
+            .with_var("has_vital", if self.has_vital { 1.0 } else { 0.0 })
+            .with_var("vital_is_active", if self.vital_is_active { 1.0 } else { 0.0 })
+            .with_var("fiora_x", self.fiora_pos.x)
+            .with_var("fiora_z", self.fiora_pos.z)
+            .with_var("riven_x", self.riven_pos.x)
+            .with_var("riven_z", self.riven_pos.z)
+            .with_var("distance", self.distance)
+    }
+
+    /// 转换为强化学习策略网络输入向量（由 ObsSchema AST 自动求值）。
+    pub fn to_vector(&self) -> Vec<f32> {
+        FIORA_COMMON_OBS_SCHEMA.eval_to_vector(&self.to_context())
     }
 
     pub fn dim() -> usize {
-        9
+        FIORA_COMMON_OBS_SCHEMA.raw_dim()
     }
 
     pub fn to_payload(&self) -> lol_rl_protocol::ObsFeaturePayload {

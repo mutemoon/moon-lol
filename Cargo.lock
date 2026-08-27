@@ -9754,6 +9754,7 @@ dependencies = [
  "candle-core",
  "candle-nn",
  "chrono",
+ "clap",
  "crossbeam-channel",
  "ctrlc",
  "futures-util",
@@ -9780,6 +9781,8 @@ version = "0.1.0"
 dependencies = [
  "bincode",
  "serde",
+ "serde_json",
+ "winnow 0.7.15",
 ]
 
 [[package]]

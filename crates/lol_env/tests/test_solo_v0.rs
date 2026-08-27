@@ -28,14 +28,14 @@ fn test_solo_v0_real_map_and_level_one_laning() {
 
     // 验证初始坐标在上路兵线交汇点附近
     assert!(
-        (fiora_obs.self_pos.x - 2200.0).abs() < 50.0
-            && (fiora_obs.self_pos.z - 12650.0).abs() < 50.0,
+        (fiora_obs.self_pos.x - 2350.0).abs() < 50.0
+            && (fiora_obs.self_pos.z - 12750.0).abs() < 50.0,
         "剑姬初始坐标应在上路 Order 侧兵线交汇区，实际: {:?}",
         fiora_obs.self_pos
     );
     assert!(
-        (riven_obs.self_pos.x - 2500.0).abs() < 50.0
-            && (riven_obs.self_pos.z - 12910.0).abs() < 50.0,
+        (riven_obs.self_pos.x - 2450.0).abs() < 50.0
+            && (riven_obs.self_pos.z - 12850.0).abs() < 50.0,
         "瑞雯初始坐标应在上路 Chaos 侧兵线交汇区，实际: {:?}",
         riven_obs.self_pos
     );
@@ -139,7 +139,7 @@ fn test_solo_v0_last_hit_and_minion_shaping_reward() {
     let fiora_res = &step_res[0];
     let riven_res = &step_res[1];
 
-    // 验证补刀收益（补一刀 +5.0）
+    // 验证补刀收益（补一刀 +1.0 课程奖励）
     assert_eq!(
         fiora_res.reward_variables.get("self_cs"),
         Some(&1.0),
@@ -151,12 +151,221 @@ fn test_solo_v0_last_hit_and_minion_shaping_reward() {
         "锐雯 reward_variables 应当记录 target_cs = 1.0"
     );
     assert!(
-        fiora_res.reward >= 5.0,
-        "剑姬完成补刀时单步奖励应包含至少 +5.0 的补刀奖励，实际: {}",
+        (fiora_res.reward - 1.0).abs() < 1e-4,
+        "剑姬完成补刀时单步奖励应为 +1.0，实际: {}",
         fiora_res.reward
     );
-    assert_eq!(
-        fiora_res.reward, -riven_res.reward,
-        "双方奖励应严格满足零和对称性"
+    assert!(
+        (riven_res.reward - 0.0).abs() < 1e-4,
+        "锐雯未补刀且无动作时单步奖励应为 0.0（不被动受对手补刀惩罚），实际: {}",
+        riven_res.reward
     );
 }
+
+#[test]
+fn test_solo_v0_curriculum_hp_scale_and_update() {
+    use lol_core::entities::minion::Minion;
+    use lol_core::life::Health;
+
+    let mut env = SoloV0Env::with_config(EnvConfig {
+        max_steps: 10,
+        render_mode: RenderMode::Headless,
+    });
+    env.reset();
+
+    // 更新课程参数：设置非对称对比残血小兵为 10% 血量
+    env.update_curriculum(0.1, 2.0, 0.2, 0.5);
+
+    let mut q_minions = env.world_mut().query_filtered::<&Health, With<Minion>>();
+    let minion_hps: Vec<f32> = q_minions.iter(env.world()).map(|h| h.value).collect();
+    assert!(!minion_hps.is_empty(), "必须存在存活小兵");
+
+    let low_hp_count = minion_hps.iter().filter(|&&hp| hp <= 60.0).count();
+    let full_hp_count = minion_hps.iter().filter(|&&hp| hp > 400.0).count();
+
+    assert!(
+        low_hp_count > 0,
+        "对比式课程中必须存在 <= 60.0 HP 的残血小兵供模型锁定，实际数量: {}",
+        low_hp_count
+    );
+    assert!(
+        full_hp_count > 0,
+        "对比式课程中必须存在 > 400.0 HP 的满血小兵作为对比项，实际数量: {}",
+        full_hp_count
+    );
+
+    // 恢复为 100% 满血时，所有小兵均恢复满血
+    env.update_curriculum(1.0, 2.0, 0.2, 0.5);
+    let mut q_minions_full = env.world_mut().query_filtered::<&Health, With<Minion>>();
+    for h in q_minions_full.iter(env.world()) {
+        assert_eq!(h.value, h.max, "scale=1.0 时所有小兵应恢复 100% 满血");
+    }
+}
+
+#[test]
+fn test_solo_v0_action_mask_windup_and_cooldown() {
+    use lol_env::solo_v0::SoloV0Obs;
+
+    let mut obs = SoloV0Obs {
+        role_id: 0.0,
+        self_pos: Vec3::ZERO,
+        self_hp: 1000.0,
+        self_max_hp: 1000.0,
+        target_pos: Vec3::new(100.0, 0.0, 0.0), // 距离 100 <= ATTACK_MASK_DISTANCE (220.0)
+        target_hp: 1000.0,
+        target_max_hp: 1000.0,
+        distance: 100.0,
+        attack_state: 0,
+        attack_is_windup: false,
+        attack_is_cooldown: false,
+        attack_timer_remaining: 0.0,
+        q_ready: true,
+        q_cd_remaining: 0.0,
+        w_ready: false,
+        w_cd_remaining: 10.0,
+        e_ready: false,
+        e_cd_remaining: 8.0,
+        r_ready: false,
+        r_cd_remaining: 60.0,
+        flash_ready: true,
+        flash_cd_remaining: 0.0,
+        self_modifiers: Vec::new(),
+        target_modifiers: Vec::new(),
+        visible_units: Vec::new(),
+        visible_unit_entities: Vec::new(),
+    };
+
+    // 1. 正常就绪状态
+    let mask = SoloV0Env::action_mask(&obs).expect("应返回掩码");
+    assert!(mask[0], "NoOp 应有效");
+    assert!(mask[1], "Move 应有效");
+    assert!(mask[2], "距离在范围内且无冷却，Attack 应有效");
+    assert!(mask[3], "Q ready，CastQ 应有效");
+    assert!(!mask[4], "W 未学习/冷却中，CastW 应被屏蔽");
+    assert!(mask[7], "Flash ready，闪现应有效");
+
+    // 2. 前摇阶段 (attack_is_windup = true):
+    // 前摇可以被取消，所以不能用前摇 mask 掉技能或移动
+    obs.attack_is_windup = true;
+    obs.attack_state = 1;
+    let mask_windup = SoloV0Env::action_mask(&obs).expect("应返回掩码");
+    assert!(mask_windup[1], "前摇中 Move 应有效（用于取消前摇）");
+    assert!(mask_windup[3], "前摇中就绪技能 CastQ 应有效（用于取消前摇）");
+    assert!(mask_windup[7], "前摇中 Flash 应有效");
+
+    // 3. 后摇阶段 (attack_is_cooldown = true):
+    // 攻击生效后的后摇阶段必须 mask 掉普通攻击，但不用 mask 别的动作
+    obs.attack_is_windup = false;
+    obs.attack_is_cooldown = true;
+    obs.attack_state = 2;
+    let mask_cooldown = SoloV0Env::action_mask(&obs).expect("应返回掩码");
+    assert!(!mask_cooldown[2], "后摇/普攻冷却阶段必须 mask 掉普通攻击");
+    assert!(mask_cooldown[1], "后摇阶段 Move 应有效（用于走位/取消后摇）");
+    assert!(mask_cooldown[3], "后摇阶段 CastQ 应有效（用于施法/取消后摇）");
+    assert!(mask_cooldown[7], "后摇阶段 Flash 应有效");
+}
+
+#[test]
+fn test_solo_v0_conditional_target_masks_friendly_unit() {
+    use lol_env::solo_v0::SoloV0Obs;
+    use lol_rl_protocol::ObsContext;
+
+    let obs = SoloV0Obs {
+        role_id: 0.0,
+        self_pos: Vec3::ZERO,
+        self_hp: 1000.0,
+        self_max_hp: 1000.0,
+        target_pos: Vec3::new(100.0, 0.0, 0.0),
+        target_hp: 1000.0,
+        target_max_hp: 1000.0,
+        distance: 100.0,
+        attack_state: 0,
+        attack_is_windup: false,
+        attack_is_cooldown: false,
+        attack_timer_remaining: 0.0,
+        q_ready: true,
+        q_cd_remaining: 0.0,
+        w_ready: true,
+        w_cd_remaining: 0.0,
+        e_ready: true,
+        e_cd_remaining: 0.0,
+        r_ready: true,
+        r_cd_remaining: 0.0,
+        flash_ready: true,
+        flash_cd_remaining: 0.0,
+        self_modifiers: Vec::new(),
+        target_modifiers: Vec::new(),
+        visible_units: vec![
+            // Slot 0: 敌方英雄
+            ObsContext::new()
+                .with_var("unit_type", 1.0)
+                .with_var("rel_pos[0]", 1.0)
+                .with_var("rel_pos[1]", 0.0)
+                .with_var("hp_pct", 1.0)
+                .with_var("is_enemy", 1.0),
+            // Slot 1: 敌方近战小兵
+            ObsContext::new()
+                .with_var("unit_type", 2.0)
+                .with_var("rel_pos[0]", 0.5)
+                .with_var("rel_pos[1]", 0.0)
+                .with_var("hp_pct", 0.8)
+                .with_var("is_enemy", 1.0),
+            // Slot 2: 友方近战小兵
+            ObsContext::new()
+                .with_var("unit_type", 2.0)
+                .with_var("rel_pos[0]", -0.5)
+                .with_var("rel_pos[1]", 0.0)
+                .with_var("hp_pct", 0.9)
+                .with_var("is_enemy", 0.0),
+            // Slot 3: 空槽位
+            ObsContext::new(),
+        ],
+        visible_unit_entities: vec![None; 4],
+    };
+
+    assert!(obs.is_target_enemy(0), "Slot 0 英雄应判定为敌方");
+    assert!(obs.is_target_enemy(1), "Slot 1 敌方小兵应判定为敌方");
+    assert!(!obs.is_target_enemy(2), "Slot 2 友方小兵应判定为非敌方");
+    assert!(!obs.is_target_enemy(3), "Slot 3 空槽位应判定为非敌方");
+
+    let action_masks = SoloV0Env::action_masks(&obs).expect("应返回因式分解动作掩码");
+    let cond_masks = action_masks
+        .conditional_target_masks
+        .expect("应包含自回归条件目标掩码矩阵");
+
+    // 1. Slot 0（敌方英雄）：攻击与全技能均开放
+    let enemy_hero_mask = &cond_masks[0];
+    assert!(enemy_hero_mask[0], "NoOp 有效");
+    assert!(enemy_hero_mask[1], "Move 有效");
+    assert!(enemy_hero_mask[2], "Attack 有效");
+    assert!(enemy_hero_mask[3], "CastQ 有效");
+    assert!(enemy_hero_mask[4], "CastW 有效");
+    assert!(enemy_hero_mask[5], "CastE 有效");
+    assert!(enemy_hero_mask[6], "CastR 有效");
+    assert!(enemy_hero_mask[7], "Flash 有效");
+
+    // 2. Slot 1（敌方小兵）：攻击与全技能均开放
+    let enemy_minion_mask = &cond_masks[1];
+    assert!(enemy_minion_mask[2], "敌方小兵 Attack 有效");
+    assert!(enemy_minion_mask[3], "敌方小兵 CastQ 有效");
+
+    // 3. Slot 2（友方小兵）：严格只允许 NoOp (0) 和 Move (1)，其余全部屏蔽
+    let ally_minion_mask = &cond_masks[2];
+    assert!(ally_minion_mask[0], "友方小兵 NoOp 有效");
+    assert!(ally_minion_mask[1], "友方小兵 Move 有效");
+    assert!(!ally_minion_mask[2], "友方小兵 Attack 必须被屏蔽");
+    assert!(!ally_minion_mask[3], "友方小兵 CastQ 必须被屏蔽");
+    assert!(!ally_minion_mask[4], "友方小兵 CastW 必须被屏蔽");
+    assert!(!ally_minion_mask[5], "友方小兵 CastE 必须被屏蔽");
+    assert!(!ally_minion_mask[6], "友方小兵 CastR 必须被屏蔽");
+    assert!(!ally_minion_mask[7], "友方小兵 Flash 必须被屏蔽");
+
+    // 4. Slot 3（空槽位）：同样只能空操作或移动
+    let empty_mask = &cond_masks[3];
+    assert!(empty_mask[0], "空槽位 NoOp 有效");
+    assert!(empty_mask[1], "空槽位 Move 有效");
+    assert!(!empty_mask[2], "空槽位 Attack 必须被屏蔽");
+    assert!(!empty_mask[3], "空槽位 CastQ 必须被屏蔽");
+}
+
+

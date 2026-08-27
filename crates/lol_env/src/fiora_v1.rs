@@ -1,13 +1,12 @@
 use bevy::prelude::*;
 use lol_core::action::{Action, CommandAction};
-use lol_rl_protocol::{ActionSpace, ObsFeaturePayload, ObsNode, ObsSchema, RewardFormulaSpec};
+use lol_rl_protocol::{ActionSpace, ObsFeaturePayload, ObsSchema, RewardFormulaSpec};
 
 pub use crate::fiora_riven_common::{
-    ATTACK_MASK_DISTANCE, AttackEventTracker, FioraRivenBaseEnv, FioraVsRivenObs,
-    VitalBreakTracker, compute_step_reward, get_obs_from_world, setup_skill_levels_world,
-    unpause_virtual_time,
+    ATTACK_MASK_DISTANCE, AttackEventTracker, FIORA_COMMON_OBS_SCHEMA, FioraRivenBaseEnv,
+    FioraVsRivenObs, VitalBreakTracker, compute_step_reward, get_obs_from_world,
+    setup_skill_levels_world, unpause_virtual_time,
 };
-use crate::raycast_plugin::raycast_ground_plane;
 use crate::reward::{FioraVsRivenRewardModel, RewardModel};
 use crate::traits::{EnvConfig, EnvMeta, RenderMode, RlEnvironment, StepResult, VisualEnvironment};
 
@@ -258,23 +257,7 @@ impl RlEnvironment for FioraVsRivenRealEnv {
     }
 
     fn obs_schema() -> Option<ObsSchema> {
-        Some(ObsSchema::new(vec![
-            ObsNode::structure(
-                "vital",
-                vec![
-                    ObsNode::vector("direction", 4),
-                    ObsNode::scalar("has_vital", 0.0, 1.0),
-                    ObsNode::scalar("is_active", 0.0, 1.0),
-                ],
-            ),
-            ObsNode::structure(
-                "spatial",
-                vec![
-                    ObsNode::vector("relative_pos", 2),
-                    ObsNode::scalar("distance", 0.0, 1.0),
-                ],
-            ),
-        ]))
+        Some(FIORA_COMMON_OBS_SCHEMA.clone())
     }
 
     fn action_from_index(idx: usize) -> Self::Action {
@@ -333,10 +316,6 @@ impl RlEnvironment for FioraVsRivenRealEnv {
         Some(obs.to_payload())
     }
 
-    fn is_action_masked(obs: &Self::Obs, action_idx: usize) -> bool {
-        action_idx == 5 && obs.distance > ATTACK_MASK_DISTANCE
-    }
-
     fn action_mask(obs: &Self::Obs) -> Option<Vec<bool>> {
         let mut mask = vec![true; 2];
         if obs.distance > ATTACK_MASK_DISTANCE {
@@ -376,27 +355,6 @@ impl VisualEnvironment for FioraVsRivenRealEnv {
 
     fn get_current_obs_all(&self, world: &World) -> Vec<Self::Obs> {
         vec![get_obs_from_world(world, self.base.fiora, self.base.riven)]
-    }
-
-    fn action_from_screen_click(
-        &mut self,
-        world: &mut World,
-        screen_pos: Vec2,
-    ) -> Option<FioraVsRivenRealAction> {
-        let rpos = world.get::<Transform>(self.base.riven)?.translation;
-        let hit = raycast_ground_plane(world, screen_pos, rpos.y)?;
-
-        let dx = hit.x - rpos.x;
-        let dz = hit.z - rpos.z;
-        let dist = (dx * dx + dz * dz).sqrt();
-
-        if dist < 60.0 {
-            Some(FioraVsRivenRealAction::new(0.0, 0.0, true))
-        } else {
-            let nx = (dx / MOVE_SCALE).clamp(-1.0, 1.0);
-            let nz = (dz / MOVE_SCALE).clamp(-1.0, 1.0);
-            Some(FioraVsRivenRealAction::new(nx, nz, false))
-        }
     }
 
     fn step_world(

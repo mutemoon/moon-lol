@@ -74,6 +74,27 @@ pub struct ObsFeaturePayload {
     pub attack_timer: f32,
 }
 
+/// 通用的课程学习实时遥测状态（零业务侵入）
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Default)]
+pub struct CurriculumTelemetry {
+    /// 当前阶段序号（0-based，如 0 表示第一阶段）
+    pub phase_index: usize,
+    /// 课程总阶段数（如 2）
+    pub total_phases: usize,
+    /// 当前阶段显示名称（如 "第一阶段: 基础补刀练习"）
+    pub phase_name: String,
+    /// 所有阶段的名称清单（用于渲染步骤流水线）
+    pub all_phase_names: Vec<String>,
+    /// 当前阶段内部进度 (0.0 ~ 1.0)
+    pub progress: f32,
+    /// 晋级下一阶段的判定说明文本（如 "需滑动平均 CS ≥ 2.0 (当前: 1.45)"）
+    #[serde(default)]
+    pub transition_condition: Option<String>,
+    /// 当前生效的动态超参数列表（键值对，用于通用动态参数卡片渲染）
+    #[serde(default)]
+    pub parameters: HashMap<String, f32>,
+}
+
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct CheckpointItem {
     pub id: String,
@@ -114,6 +135,8 @@ pub enum OutFrame {
         obs_feature: Option<ObsFeaturePayload>,
         reward_formula: Option<RewardFormulaSpec>,
         reward_variables: Option<HashMap<String, f32>>,
+        #[serde(default)]
+        curriculum: Option<CurriculumTelemetry>,
     },
     Log {
         task_id: String,

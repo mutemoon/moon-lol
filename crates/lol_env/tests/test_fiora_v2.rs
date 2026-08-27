@@ -11,8 +11,9 @@ fn test_fiora_v2_env_basic_step_and_obs() {
     });
 
     let obs = env.reset();
-    assert_eq!(FioraV2Obs::dim(), 58);
-    assert_eq!(obs.to_vector().len(), 58);
+    let expected_dim = FioraV2Env::state_dim();
+    assert_eq!(FioraV2Obs::dim(), expected_dim);
+    assert_eq!(obs.to_vector().len(), expected_dim);
     assert!(obs.fiora_hp > 0.0);
     assert_eq!(obs.riven_hp, 10000.0, "Riven 初始血量应为 10000.0");
     assert_eq!(obs.riven_max_hp, 10000.0, "Riven 最大血量应为 10000.0");
@@ -21,7 +22,7 @@ fn test_fiora_v2_env_basic_step_and_obs() {
     let noop_act = FioraV2Action::new(0.0, 0.0, FioraV2DiscreteAction::NoOp);
     let res_noop = env.step(noop_act);
     assert_eq!(res_noop.step, 1);
-    assert_eq!(res_noop.obs.to_vector().len(), 58);
+    assert_eq!(res_noop.obs.to_vector().len(), expected_dim);
 
     // 2. 测试 Move 动作（复用 offset）
     let move_act = FioraV2Action::new(0.5, -0.5, FioraV2DiscreteAction::Move);
@@ -204,10 +205,6 @@ fn test_fiora_v2_skills_action_mask() {
     if !res_q.obs.q_ready {
         let mask_q = FioraV2Env::action_mask(&res_q.obs).unwrap();
         assert!(!mask_q[3], "Q 技能冷却中应被掩码");
-        assert!(
-            FioraV2Env::is_action_masked(&res_q.obs, 7),
-            "Q 技能冷却中 preset 7 应被掩码"
-        );
     }
 
     // 施放闪现进入冷却
@@ -218,10 +215,6 @@ fn test_fiora_v2_skills_action_mask() {
     ));
     let mask1 = FioraV2Env::action_mask(&res.obs).expect("应有动作掩码");
     assert!(!mask1[6], "闪现冷却中应被掩码");
-    assert!(
-        FioraV2Env::is_action_masked(&res.obs, 10),
-        "闪现冷却中 preset 10 应被掩码"
-    );
 }
 
 #[test]

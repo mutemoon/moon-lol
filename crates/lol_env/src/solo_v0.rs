@@ -11,6 +11,7 @@ use lol_rl_protocol::{
     ObsSchema, PoolType, RewardFormulaSpec, RewardTermSpec,
 };
 
+use crate::curriculum::CurriculumRewardConfig;
 pub use crate::fiora_riven_common::{
     ATTACK_MASK_DISTANCE, AttackEventTracker, FioraRivenBaseEnv, FioraRivenEntities,
     setup_skill_levels_world, unpause_virtual_time,
@@ -21,7 +22,6 @@ pub use crate::flash_plugin::{
 };
 use crate::modifier_obs::{ModifierNameId, ModifierSlotObs, extract_entity_modifiers};
 use crate::obs_plugins::{extract_attack_state, extract_champion_base, extract_skill_cds};
-use crate::raycast_plugin::raycast_ground_plane;
 use crate::traits::{
     EnvConfig, EnvMeta, RenderMode, RewardBreakdownItem, RlEnvironment, StepResult,
     VisualEnvironment,
@@ -30,47 +30,145 @@ use crate::traits::{
 // ── 常量定义 ─────────────────────────────────────────────────────────────────
 
 pub const SOLO_V0_OFFSET_SCALE: f32 = 100.0;
-pub const SOLO_V0_BASE_OBS_DIM: usize = 60;
-pub const SOLO_V0_MAX_VISIBLE_UNITS: usize = 7;
-pub const SOLO_V0_UNIT_FEAT_DIM: usize = 5;
-pub const SOLO_V0_OBS_DIM: usize =
-    SOLO_V0_BASE_OBS_DIM + SOLO_V0_MAX_VISIBLE_UNITS * SOLO_V0_UNIT_FEAT_DIM; // 60 + 35 = 95
+pub const SOLO_V0_MAX_VISIBLE_UNITS: usize = 20;
 pub const SOLO_V0_OBS_DISTANCE_SCALE: f32 = 100.0;
 
-/// 可见单位特征槽位 (1 敌方英雄 + 6 小兵)
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub struct UnitSlotObs {
-    /// 单位类别: 0=None, 1=Champion, 2=MeleeMinion, 3=RangedMinion, 4=SiegeMinion, 5=SuperMinion
-    pub unit_type: f32,
-    pub rel_x: f32,
-    pub rel_z: f32,
-    pub hp_pct: f32,
-    pub is_enemy: f32,
-}
-
-impl Default for UnitSlotObs {
-    fn default() -> Self {
-        Self {
-            unit_type: 0.0,
-            rel_x: 0.0,
-            rel_z: 0.0,
-            hp_pct: 0.0,
-            is_enemy: 0.0,
-        }
-    }
-}
-
-impl UnitSlotObs {
-    pub fn to_vector(&self) -> [f32; SOLO_V0_UNIT_FEAT_DIM] {
-        [
-            self.unit_type,
-            self.rel_x,
-            self.rel_z,
-            self.hp_pct,
-            self.is_enemy,
-        ]
-    }
-}
+pub static SOLO_V0_OBS_SCHEMA: std::sync::LazyLock<ObsSchema> = std::sync::LazyLock::new(|| {
+    use lol_rl_protocol::ObsExpr;
+    ObsSchema::new(vec![
+        // 1. 角色标识 (离散类别: 0=Fiora, 1=Riven, 预留4类 -> 12维 Embedding)
+        ObsNode::categorical_expr("role", ObsExpr::var("role_id"), 4, 12),
+        // 2. 空间相对特征 (3维: 相对X, 相对Z, 相对距离)
+        ObsNode::structure(
+            "spatial",
+            vec![
+                ObsNode::vector_exprs(
+                    "target_rel_pos",
+                    vec![
+                        (ObsExpr::var("self_x") - ObsExpr::var("target_x")) / SOLO_V0_OBS_DISTANCE_SCALE,
+                        (ObsExpr::var("self_z") - ObsExpr::var("target_z")) / SOLO_V0_OBS_DISTANCE_SCALE,
+                    ],
+                ),
+                ObsNode::scalar_expr(
+                    "distance",
+                    ObsExpr::var("distance") / SOLO_V0_OBS_DISTANCE_SCALE,
+                ),
+            ],
+        ),
+        // 3. 普攻状态机 (4维: 就绪, 前摇中, 后摇中, 剩余倒计时)
+        ObsNode::structure(
+            "attack",
+            vec![
+                ObsNode::scalar_expr("is_ready", ObsExpr::var("attack_is_ready")),
+                ObsNode::scalar_expr("is_windup", ObsExpr::var("attack_is_windup")),
+                ObsNode::scalar_expr("is_cooldown", ObsExpr::var("attack_is_cooldown")),
+                ObsNode::scalar_expr("timer_remaining", ObsExpr::var("attack_timer_remaining")),
+            ],
+        ),
+        // 4. 技能与闪现冷却 (10维: Q, W, E, R, Flash 及其剩余CD)
+        ObsNode::structure(
+            "cooldowns",
+            vec![
+                ObsNode::scalar_expr("q_ready", ObsExpr::var("q_ready")),
+                ObsNode::scalar_expr("q_cd", ObsExpr::var("q_cd") / 10.0),
+                ObsNode::scalar_expr("w_ready", ObsExpr::var("w_ready")),
+                ObsNode::scalar_expr("w_cd", ObsExpr::var("w_cd") / 15.0),
+                ObsNode::scalar_expr("e_ready", ObsExpr::var("e_ready")),
+                ObsNode::scalar_expr("e_cd", ObsExpr::var("e_cd") / 10.0),
+                ObsNode::scalar_expr("r_ready", ObsExpr::var("r_ready")),
+                ObsNode::scalar_expr("r_cd", ObsExpr::var("r_cd") / 60.0),
+                ObsNode::scalar_expr("flash_ready", ObsExpr::var("flash_ready")),
+                ObsNode::scalar_expr("flash_cd", ObsExpr::var("flash_cd") / 300.0),
+            ],
+        ),
+        // 5. 双方血量百分比 (2维)
+        ObsNode::structure(
+            "health",
+            vec![
+                ObsNode::scalar_expr(
+                    "self_hp_pct",
+                    ObsExpr::clamp(
+                        ObsExpr::var("self_hp") / ObsExpr::max(ObsExpr::var("self_max_hp"), ObsExpr::c(1.0)),
+                        0.0,
+                        1.0,
+                    ),
+                ),
+                ObsNode::scalar_expr(
+                    "target_hp_pct",
+                    ObsExpr::clamp(
+                        ObsExpr::var("target_hp") / ObsExpr::max(ObsExpr::var("target_max_hp"), ObsExpr::c(1.0)),
+                        0.0,
+                        1.0,
+                    ),
+                ),
+            ],
+        ),
+        // 6. 自身修饰符 (4 槽位 × 5维 -> 经 Shared MLP(16) 编码)
+        ObsNode::repeated(
+            "self_modifiers",
+            4,
+            ObsNode::structure(
+                "slot",
+                vec![
+                    ObsNode::categorical_expr("name", ObsExpr::var("name"), ModifierNameId::COUNT + 1, 8),
+                    ObsNode::scalar_expr("remaining_duration", ObsExpr::var("remaining_duration")),
+                    ObsNode::scalar_expr("stack_count", ObsExpr::var("stack_count")),
+                    ObsNode::vector_exprs(
+                        "params",
+                        vec![ObsExpr::var("params[0]"), ObsExpr::var("params[1]")],
+                    ),
+                ],
+            ),
+            EntityEncoderSpec::SharedMlpFlatten {
+                hidden_dims: vec![16],
+            },
+        ),
+        // 7. 目标修饰符 (4 槽位 × 5维 -> 经 Shared MLP(16) 编码)
+        ObsNode::repeated(
+            "target_modifiers",
+            4,
+            ObsNode::structure(
+                "slot",
+                vec![
+                    ObsNode::categorical_expr("name", ObsExpr::var("name"), ModifierNameId::COUNT + 1, 8),
+                    ObsNode::scalar_expr("remaining_duration", ObsExpr::var("remaining_duration")),
+                    ObsNode::scalar_expr("stack_count", ObsExpr::var("stack_count")),
+                    ObsNode::vector_exprs(
+                        "params",
+                        vec![ObsExpr::var("params[0]"), ObsExpr::var("params[1]")],
+                    ),
+                ],
+            ),
+            EntityEncoderSpec::SharedMlpFlatten {
+                hidden_dims: vec![16],
+            },
+        ),
+        // 8. 可见单位列表 (20 槽位: 1 敌方英雄 + 19 小兵 -> 经 Shared MLP(16) 编码保留嵌入供 UnitSelection)
+        ObsNode::repeated(
+            "visible_units",
+            SOLO_V0_MAX_VISIBLE_UNITS,
+            ObsNode::structure(
+                "unit",
+                vec![
+                    ObsNode::categorical_expr("unit_type", ObsExpr::var("unit_type"), 6, 8),
+                    ObsNode::vector_exprs(
+                        "rel_pos",
+                        vec![
+                            ObsExpr::var("rel_pos[0]") / SOLO_V0_OBS_DISTANCE_SCALE,
+                            ObsExpr::var("rel_pos[1]") / SOLO_V0_OBS_DISTANCE_SCALE,
+                        ],
+                    ),
+                    ObsNode::scalar_expr("hp_pct", ObsExpr::var("hp_pct")),
+                    ObsNode::scalar_expr("is_enemy", ObsExpr::var("is_enemy")),
+                ],
+            ),
+            EntityEncoderSpec::SharedMlpPool {
+                hidden_dims: vec![32, 16],
+                pool_type: PoolType::Max,
+            },
+        ),
+    ])
+});
 
 // ── 初始化与重置 ─────────────────────────────────────────────────────────────
 
@@ -267,80 +365,71 @@ pub struct SoloV0Obs {
     pub self_modifiers: Vec<ModifierSlotObs>,
     pub target_modifiers: Vec<ModifierSlotObs>,
 
-    pub visible_units: Vec<UnitSlotObs>,
+    pub visible_units: Vec<lol_rl_protocol::ObsContext>,
     pub visible_unit_entities: Vec<Option<Entity>>,
 }
 
 impl SoloV0Obs {
+    pub fn to_context(&self) -> lol_rl_protocol::ObsContext {
+        let mut ctx = lol_rl_protocol::ObsContext::new();
+        ctx.set_var("role_id", self.role_id);
+        ctx.set_var("self_x", self.self_pos.x);
+        ctx.set_var("self_z", self.self_pos.z);
+        ctx.set_var("target_x", self.target_pos.x);
+        ctx.set_var("target_z", self.target_pos.z);
+        ctx.set_var("distance", self.distance);
+
+        ctx.set_var(
+            "attack_is_ready",
+            if self.attack_state == 0 { 1.0 } else { 0.0 },
+        );
+        ctx.set_var(
+            "attack_is_windup",
+            if self.attack_is_windup { 1.0 } else { 0.0 },
+        );
+        ctx.set_var(
+            "attack_is_cooldown",
+            if self.attack_is_cooldown { 1.0 } else { 0.0 },
+        );
+        ctx.set_var("attack_timer_remaining", self.attack_timer_remaining);
+
+        ctx.set_var("q_ready", if self.q_ready { 1.0 } else { 0.0 });
+        ctx.set_var("q_cd", self.q_cd_remaining);
+        ctx.set_var("w_ready", if self.w_ready { 1.0 } else { 0.0 });
+        ctx.set_var("w_cd", self.w_cd_remaining);
+        ctx.set_var("e_ready", if self.e_ready { 1.0 } else { 0.0 });
+        ctx.set_var("e_cd", self.e_cd_remaining);
+        ctx.set_var("r_ready", if self.r_ready { 1.0 } else { 0.0 });
+        ctx.set_var("r_cd", self.r_cd_remaining);
+        ctx.set_var("flash_ready", if self.flash_ready { 1.0 } else { 0.0 });
+        ctx.set_var("flash_cd", self.flash_cd_remaining);
+
+        ctx.set_var("self_hp", self.self_hp);
+        ctx.set_var("self_max_hp", self.self_max_hp);
+        ctx.set_var("target_hp", self.target_hp);
+        ctx.set_var("target_max_hp", self.target_max_hp);
+
+        let self_mods: Vec<_> = self.self_modifiers.iter().map(|m| m.to_context()).collect();
+        ctx.set_repeated("self_modifiers", self_mods);
+
+        let target_mods: Vec<_> = self
+            .target_modifiers
+            .iter()
+            .map(|m| m.to_context())
+            .collect();
+        ctx.set_repeated("target_modifiers", target_mods);
+
+        ctx.set_repeated("visible_units", self.visible_units.clone());
+
+        ctx
+    }
+
     pub fn to_vector(&self) -> Vec<f32> {
-        let rel_x = self.self_pos.x - self.target_pos.x;
-        let rel_z = self.self_pos.z - self.target_pos.z;
-        let b2f = |b: bool| if b { 1.0 } else { 0.0 };
-
-        let mut v = Vec::with_capacity(SOLO_V0_OBS_DIM);
-
-        // 1. 角色标识 (兼容 hero embedding)
-        v.push(self.role_id);
-
-        // 2. 空间相对特征 (3维)
-        v.push(rel_x / SOLO_V0_OBS_DISTANCE_SCALE);
-        v.push(rel_z / SOLO_V0_OBS_DISTANCE_SCALE);
-        v.push(self.distance / SOLO_V0_OBS_DISTANCE_SCALE);
-
-        // 3. 普攻状态机 (4维)
-        v.push(b2f(self.attack_state == 0));
-        v.push(b2f(self.attack_is_windup));
-        v.push(b2f(self.attack_is_cooldown));
-        v.push(self.attack_timer_remaining / 1.0);
-
-        // 4. 技能与闪现冷却 (10维: Q, W, E, R, Flash)
-        v.push(b2f(self.q_ready));
-        v.push(self.q_cd_remaining / 10.0);
-        v.push(b2f(self.w_ready));
-        v.push(self.w_cd_remaining / 15.0);
-        v.push(b2f(self.e_ready));
-        v.push(self.e_cd_remaining / 10.0);
-        v.push(b2f(self.r_ready));
-        v.push(self.r_cd_remaining / 60.0);
-        v.push(b2f(self.flash_ready));
-        v.push(self.flash_cd_remaining / 300.0);
-
-        // 5. 双方血量百分比 (2维)
-        v.push(self.self_hp / self.self_max_hp.max(1.0));
-        v.push(self.target_hp / self.target_max_hp.max(1.0));
-
-        // 6. 自身修饰符 (4 槽位 × 5 = 20维)
-        for i in 0..4 {
-            if let Some(slot) = self.self_modifiers.get(i) {
-                v.extend_from_slice(&slot.to_vector());
-            } else {
-                v.extend_from_slice(&[0.0; 5]);
-            }
-        }
-
-        // 7. 目标修饰符 (4 槽位 × 5 = 20维)
-        for i in 0..4 {
-            if let Some(slot) = self.target_modifiers.get(i) {
-                v.extend_from_slice(&slot.to_vector());
-            } else {
-                v.extend_from_slice(&[0.0; 5]);
-            }
-        }
-
-        // 8. 可见单位列表 (7 槽位 × 5 = 35维)
-        for i in 0..SOLO_V0_MAX_VISIBLE_UNITS {
-            if let Some(slot) = self.visible_units.get(i) {
-                v.extend_from_slice(&slot.to_vector());
-            } else {
-                v.extend_from_slice(&[0.0; SOLO_V0_UNIT_FEAT_DIM]);
-            }
-        }
-
-        v
+        SOLO_V0_OBS_SCHEMA.eval_to_vector(&self.to_context())
     }
 
     pub fn dim() -> usize {
-        SOLO_V0_OBS_DIM
+        SOLO_V0_OBS_SCHEMA.raw_dim()
     }
 
     pub fn to_payload(&self) -> ObsFeaturePayload {
@@ -438,13 +527,82 @@ impl SoloV0Obs {
             ..Default::default()
         }
     }
+
+    /// 检查指定目标槽位是否为有效敌方单位（0 号恒为敌方英雄，1..6 为小兵，需有效且 is_enemy > 0.5）
+    pub fn is_target_enemy(&self, target_idx: usize) -> bool {
+        if target_idx == 0 {
+            true
+        } else if let Some(unit) = self.visible_units.get(target_idx) {
+            let unit_type = unit.vars.get("unit_type").copied().unwrap_or(0.0);
+            let is_enemy = unit.vars.get("is_enemy").copied().unwrap_or(0.0);
+            unit_type > 0.0 && is_enemy > 0.5
+        } else {
+            false
+        }
+    }
 }
 
 // ── 环境主体 ─────────────────────────────────────────────────────────────────
 
-/// 统一的有头/无头世界初始化与重置逻辑（双方满血与闪现重置）
+/// 对世界中小兵应用非对称对比课程血量缩放 (Contrastive Curriculum)
+///
+/// 当 scale < 1.0 时，每队挑选 1 只小兵设置为残血（health.max * scale），其余小兵保持 100% 满血，
+/// 创造明确的“残血 vs 满血”对比度，迫使注意力机制学习通过 hp_pct 挑选残血目标。
+/// 当 scale >= 1.0 时，所有小兵全部恢复 100% 满血（真实自然对线）。
+pub fn apply_minion_hp_scale(world: &mut World, scale: f32) {
+    if scale >= 1.0 {
+        let mut q = world.query_filtered::<&mut Health, With<Minion>>();
+        for mut health in q.iter_mut(world) {
+            health.value = health.max;
+        }
+        return;
+    }
+
+    let mut order_minions = Vec::new();
+    let mut chaos_minions = Vec::new();
+
+    {
+        let mut q = world.query_filtered::<(Entity, &Team), With<Minion>>();
+        for (entity, team) in q.iter(world) {
+            match team {
+                Team::Order => order_minions.push(entity),
+                Team::Chaos => chaos_minions.push(entity),
+                _ => {}
+            }
+        }
+    }
+
+    for minion_list in [order_minions, chaos_minions] {
+        if minion_list.is_empty() {
+            continue;
+        }
+        // 阶梯式残血对比：前 3 只小兵设置递增残血梯度 (scale, scale * 2.5, scale * 4.0)，其余小兵保持 100% 满血
+        for (i, entity) in minion_list.into_iter().enumerate() {
+            if let Some(mut health) = world.get_mut::<Health>(entity) {
+                if i < 3 {
+                    let factor = match i {
+                        0 => 1.0,
+                        1 => 2.5,
+                        _ => 4.0,
+                    };
+                    let target_hp = (health.max * (scale * factor).min(0.95)).max(1.0);
+                    health.value = target_hp;
+                } else {
+                    health.value = health.max;
+                }
+            }
+        }
+    }
+}
+
+/// 统一的有头/无头世界初始化与重置逻辑（双方满血、闪现重置与小兵课程血量设置）
 pub fn setup_solo_v0_env_world(fiora: Entity, riven: Entity, world: &mut World) {
     setup_solo_v0_health_world(world, fiora, riven);
+    let scale = world
+        .get_resource::<CurriculumRewardConfig>()
+        .map(|c| c.minion_hp_scale)
+        .unwrap_or(1.0);
+    apply_minion_hp_scale(world, scale);
 }
 
 pub struct SoloV0Env {
@@ -484,8 +642,8 @@ impl SoloV0Env {
             .map_name("solo")
             .enable_barrack(true)
             .initial_positions(
-                Vec3::new(2200.0, 0.0, 12650.0),
-                Vec3::new(2500.0, 0.0, 12910.0),
+                Vec3::new(2350.0, 0.0, 12750.0),
+                Vec3::new(2450.0, 0.0, 12850.0),
             )
             .initial_skill_levels([1, 0, 0, 0])
             .warmup_secs(30.0)
@@ -603,7 +761,7 @@ impl RlEnvironment for SoloV0Env {
     }
 
     fn state_dim() -> usize {
-        SOLO_V0_OBS_DIM
+        SoloV0Obs::dim()
     }
 
     fn action_labels() -> &'static [&'static str] {
@@ -620,104 +778,7 @@ impl RlEnvironment for SoloV0Env {
     }
 
     fn obs_schema() -> Option<ObsSchema> {
-        Some(ObsSchema::new(vec![
-            // 1. 角色标识 (离散类别: 0=Fiora, 1=Riven, 预留4类 -> 12维 Embedding)
-            ObsNode::categorical("role", 4, 12),
-            // 2. 空间相对特征 (3维: 相对X, 相对Z, 相对距离)
-            ObsNode::structure(
-                "spatial",
-                vec![
-                    ObsNode::vector("target_rel_pos", 2),
-                    ObsNode::scalar("distance", 0.0, 1.0),
-                ],
-            ),
-            // 3. 普攻状态机 (4维: 就绪, 前摇中, 后摇中, 剩余倒计时)
-            ObsNode::structure(
-                "attack",
-                vec![
-                    ObsNode::scalar("is_ready", 0.0, 1.0),
-                    ObsNode::scalar("is_windup", 0.0, 1.0),
-                    ObsNode::scalar("is_cooldown", 0.0, 1.0),
-                    ObsNode::scalar("timer_remaining", 0.0, 1.0),
-                ],
-            ),
-            // 4. 技能与闪现冷却 (10维: Q, W, E, R, Flash 及其剩余CD)
-            ObsNode::structure(
-                "cooldowns",
-                vec![
-                    ObsNode::scalar("q_ready", 0.0, 1.0),
-                    ObsNode::scalar("q_cd", 0.0, 1.0),
-                    ObsNode::scalar("w_ready", 0.0, 1.0),
-                    ObsNode::scalar("w_cd", 0.0, 1.0),
-                    ObsNode::scalar("e_ready", 0.0, 1.0),
-                    ObsNode::scalar("e_cd", 0.0, 1.0),
-                    ObsNode::scalar("r_ready", 0.0, 1.0),
-                    ObsNode::scalar("r_cd", 0.0, 1.0),
-                    ObsNode::scalar("flash_ready", 0.0, 1.0),
-                    ObsNode::scalar("flash_cd", 0.0, 1.0),
-                ],
-            ),
-            // 5. 双方血量百分比 (2维)
-            ObsNode::structure(
-                "health",
-                vec![
-                    ObsNode::scalar("self_hp_pct", 0.0, 1.0),
-                    ObsNode::scalar("target_hp_pct", 0.0, 1.0),
-                ],
-            ),
-            // 6. 自身修饰符 (4 槽位 × 5维 -> 经 Shared MLP(16) 编码)
-            ObsNode::repeated(
-                "self_modifiers",
-                4,
-                ObsNode::structure(
-                    "slot",
-                    vec![
-                        ObsNode::categorical("name", ModifierNameId::COUNT + 1, 8),
-                        ObsNode::scalar("remaining_duration", 0.0, 1.0),
-                        ObsNode::scalar("stack_count", 0.0, 1.0),
-                        ObsNode::vector("params", 2),
-                    ],
-                ),
-                EntityEncoderSpec::SharedMlpFlatten {
-                    hidden_dims: vec![16],
-                },
-            ),
-            // 7. 目标修饰符 (4 槽位 × 5维 -> 经 Shared MLP(16) 编码)
-            ObsNode::repeated(
-                "target_modifiers",
-                4,
-                ObsNode::structure(
-                    "slot",
-                    vec![
-                        ObsNode::categorical("name", ModifierNameId::COUNT + 1, 8),
-                        ObsNode::scalar("remaining_duration", 0.0, 1.0),
-                        ObsNode::scalar("stack_count", 0.0, 1.0),
-                        ObsNode::vector("params", 2),
-                    ],
-                ),
-                EntityEncoderSpec::SharedMlpFlatten {
-                    hidden_dims: vec![16],
-                },
-            ),
-            // 8. 可见单位列表 (7 槽位: 1 敌方英雄 + 6 小兵 -> 经 Shared MLP(16) 编码保留嵌入供 UnitSelection)
-            ObsNode::repeated(
-                "visible_units",
-                SOLO_V0_MAX_VISIBLE_UNITS,
-                ObsNode::structure(
-                    "unit",
-                    vec![
-                        ObsNode::categorical("unit_type", 6, 8),
-                        ObsNode::vector("rel_pos", 2),
-                        ObsNode::scalar("hp_pct", 0.0, 1.0),
-                        ObsNode::scalar("is_enemy", 0.0, 1.0),
-                    ],
-                ),
-                EntityEncoderSpec::SharedMlpPool {
-                    hidden_dims: vec![32, 16],
-                    pool_type: PoolType::Max,
-                },
-            ),
-        ]))
+        Some(SOLO_V0_OBS_SCHEMA.clone())
     }
 
     fn action_schema() -> Option<ActionSchema> {
@@ -804,116 +865,137 @@ impl RlEnvironment for SoloV0Env {
         Some(obs.to_payload())
     }
 
-    fn is_action_masked(obs: &Self::Obs, action_idx: usize) -> bool {
-        let is_windup = obs.attack_is_windup;
-        let dist_ok = obs.distance <= ATTACK_MASK_DISTANCE;
-
-        match action_idx {
-            2 => !dist_ok || is_windup,
-            3 => !obs.q_ready || is_windup,
-            4 => !obs.w_ready || is_windup,
-            5 => !obs.e_ready || is_windup,
-            6 => !obs.r_ready || is_windup,
-            7 => !obs.flash_ready,
-            _ => false,
-        }
-    }
-
     fn action_mask(obs: &Self::Obs) -> Option<Vec<bool>> {
-        let is_windup = obs.attack_is_windup;
+        let is_cooldown = obs.attack_is_cooldown;
         let dist_ok = obs.distance <= ATTACK_MASK_DISTANCE;
 
         Some(vec![
             true,
             true,
-            dist_ok && !is_windup,
-            obs.q_ready && !is_windup,
-            obs.w_ready && !is_windup,
-            obs.e_ready && !is_windup,
-            obs.r_ready && !is_windup,
+            dist_ok && !is_cooldown,
+            obs.q_ready,
+            obs.w_ready,
+            obs.e_ready,
+            obs.r_ready,
             obs.flash_ready,
         ])
+    }
+
+    fn action_masks(obs: &Self::Obs) -> Option<lol_rl_protocol::ActionMasks> {
+        let is_cooldown = obs.attack_is_cooldown;
+        let dist_ok = obs.distance <= ATTACK_MASK_DISTANCE;
+
+        let enemy_action_mask = vec![
+            true,                    // 0: NoOp
+            true,                    // 1: Move
+            dist_ok && !is_cooldown, // 2: Attack
+            obs.q_ready,             // 3: CastQ
+            obs.w_ready,             // 4: CastW
+            obs.e_ready,             // 5: CastE
+            obs.r_ready,             // 6: CastR
+            obs.flash_ready,         // 7: Flash
+        ];
+
+        let ally_action_mask = vec![
+            true,  // 0: NoOp
+            true,  // 1: Move
+            false, // 2: Attack (友军不可攻击)
+            false, // 3: CastQ (不可对友军施放伤害技能)
+            false, // 4: CastW
+            false, // 5: CastE
+            false, // 6: CastR
+            false, // 7: Flash
+        ];
+
+        let mut conditional_target_masks = Vec::with_capacity(SOLO_V0_MAX_VISIBLE_UNITS);
+        let mut target_valid_mask = Vec::with_capacity(SOLO_V0_MAX_VISIBLE_UNITS);
+
+        for target_idx in 0..SOLO_V0_MAX_VISIBLE_UNITS {
+            if target_idx == 0 {
+                target_valid_mask.push(true);
+                conditional_target_masks.push(enemy_action_mask.clone());
+            } else if let Some(unit) = obs.visible_units.get(target_idx) {
+                let unit_type = unit.vars.get("unit_type").copied().unwrap_or(0.0);
+                let is_enemy = unit.vars.get("is_enemy").copied().unwrap_or(0.0);
+                let is_valid_unit = unit_type > 0.0;
+                target_valid_mask.push(is_valid_unit);
+                if is_valid_unit && is_enemy > 0.5 {
+                    conditional_target_masks.push(enemy_action_mask.clone());
+                } else {
+                    conditional_target_masks.push(ally_action_mask.clone());
+                }
+            } else {
+                target_valid_mask.push(false);
+                conditional_target_masks.push(ally_action_mask.clone());
+            }
+        }
+
+        Some(lol_rl_protocol::ActionMasks::with_conditional_target_masks(
+            vec![
+                None,                          // 0: offset (Continuous)
+                Some(target_valid_mask),       // 1: target (UnitSelection)
+                Some(enemy_action_mask),       // 2: action_type 兜底基线
+            ],
+            conditional_target_masks,
+        ))
     }
 
     fn reward_formula_spec() -> Option<RewardFormulaSpec> {
         use lol_rl_protocol::RewardExpr;
         Some(RewardFormulaSpec {
-            name: "Solo 1v1 对决与补兵公式 (SoloV0)".to_string(),
+            name: "补刀效率与课程学习奖励公式 (SoloV0)".to_string(),
             terms: vec![
                 RewardTermSpec::new(
-                    "damage_dealt",
-                    "造成伤害收益(低)",
-                    RewardExpr::Mul(
-                        Box::new(RewardExpr::Constant(0.5 / 1000.0)),
-                        Box::new(RewardExpr::Variable("self_dmg".to_string())),
-                    ),
-                ),
-                RewardTermSpec::new(
-                    "damage_taken",
-                    "承受伤害惩罚(低)",
-                    RewardExpr::Mul(
-                        Box::new(RewardExpr::Constant(-0.5 / 1000.0)),
-                        Box::new(RewardExpr::Variable("target_dmg".to_string())),
-                    ),
-                ),
-                RewardTermSpec::new(
                     "last_hit",
-                    "补兵成功奖励(高)",
+                    "补刀成功奖励",
                     RewardExpr::Mul(
-                        Box::new(RewardExpr::Constant(5.0)),
+                        Box::new(RewardExpr::Variable("cs_reward_coef".to_string())),
                         Box::new(RewardExpr::Variable("self_cs".to_string())),
                     ),
                 ),
                 RewardTermSpec::new(
-                    "enemy_last_hit",
-                    "敌方补兵惩罚(高)",
+                    "attack_no_cs_penalty",
+                    "攻击小兵未补刀惩罚",
                     RewardExpr::Mul(
-                        Box::new(RewardExpr::Constant(-5.0)),
-                        Box::new(RewardExpr::Variable("target_cs".to_string())),
+                        Box::new(RewardExpr::Constant(-1.0)),
+                        Box::new(RewardExpr::Mul(
+                            Box::new(RewardExpr::Variable("penalty_coef".to_string())),
+                            Box::new(RewardExpr::Variable("self_attack_no_cs".to_string())),
+                        )),
                     ),
                 ),
                 RewardTermSpec::new(
-                    "minion_damage_shaping",
-                    "小兵伤害诱导",
+                    "harass",
+                    "消耗对手奖励",
                     RewardExpr::Mul(
-                        Box::new(RewardExpr::Constant(0.5 / 1000.0)),
-                        Box::new(RewardExpr::Variable("self_minion_dmg".to_string())),
-                    ),
-                ),
-                RewardTermSpec::new(
-                    "enemy_minion_damage_shaping",
-                    "敌方小兵伤害抵消",
-                    RewardExpr::Mul(
-                        Box::new(RewardExpr::Constant(-0.5 / 1000.0)),
-                        Box::new(RewardExpr::Variable("target_minion_dmg".to_string())),
-                    ),
-                ),
-                RewardTermSpec::new(
-                    "last_hit_window",
-                    "残血斩杀窗口诱导",
-                    RewardExpr::Mul(
-                        Box::new(RewardExpr::Constant(0.2)),
-                        Box::new(RewardExpr::Variable("self_cs_window".to_string())),
-                    ),
-                ),
-                RewardTermSpec::new(
-                    "enemy_last_hit_window",
-                    "敌方斩杀窗口抵消",
-                    RewardExpr::Mul(
-                        Box::new(RewardExpr::Constant(-0.2)),
-                        Box::new(RewardExpr::Variable("target_cs_window".to_string())),
-                    ),
-                ),
-                RewardTermSpec::new(
-                    "kill_win",
-                    "击杀获胜奖励",
-                    RewardExpr::Mul(
-                        Box::new(RewardExpr::Constant(10.0)),
-                        Box::new(RewardExpr::Variable("is_kill_win".to_string())),
+                        Box::new(RewardExpr::Variable("harass_coef".to_string())),
+                        Box::new(RewardExpr::Sub(
+                            Box::new(RewardExpr::Variable("self_harass_dmg".to_string())),
+                            Box::new(RewardExpr::Variable("target_harass_dmg".to_string())),
+                        )),
                     ),
                 ),
             ],
         })
+    }
+
+    fn update_curriculum(
+        &mut self,
+        hp_scale: f32,
+        cs_reward: f32,
+        attack_no_cs_penalty: f32,
+        harass_coef: f32,
+    ) {
+        let cfg = CurriculumRewardConfig {
+            cs_reward,
+            attack_no_cs_penalty,
+            harass_coef,
+            minion_hp_scale: hp_scale,
+        };
+        self.base.app.world_mut().insert_resource(cfg);
+
+        // 对当前存活的所有小兵应用血量缩放
+        apply_minion_hp_scale(self.base.app.world_mut(), hp_scale);
     }
 }
 
@@ -949,27 +1031,6 @@ impl VisualEnvironment for SoloV0Env {
             get_ego_obs_from_world(world, self.base.fiora, self.base.riven, 0.0),
             get_ego_obs_from_world(world, self.base.riven, self.base.fiora, 1.0),
         ]
-    }
-
-    fn action_from_screen_click(
-        &mut self,
-        world: &mut World,
-        screen_pos: Vec2,
-    ) -> Option<SoloV0Action> {
-        let rpos = world.get::<Transform>(self.base.riven)?.translation;
-        let hit = raycast_ground_plane(world, screen_pos, rpos.y)?;
-
-        let dx = hit.x - rpos.x;
-        let dz = hit.z - rpos.z;
-        let dist = (dx * dx + dz * dz).sqrt();
-
-        if dist < 60.0 {
-            Some(SoloV0Action::new(0.0, 0.0, SoloV0DiscreteAction::Attack))
-        } else {
-            let nx = (dx / SOLO_V0_OFFSET_SCALE).clamp(-1.0, 1.0);
-            let nz = (dz / SOLO_V0_OFFSET_SCALE).clamp(-1.0, 1.0);
-            Some(SoloV0Action::new(nx, nz, SoloV0DiscreteAction::Move))
-        }
     }
 
     fn step_world(
@@ -1056,35 +1117,14 @@ pub fn get_default_riven_combat_action(
     }
 }
 
-pub fn extract_visible_units_from_world(
+pub fn get_visible_minion_entities(
     world: &World,
-    _self_entity: Entity,
-    target_entity: Entity,
     self_pos: Vec3,
     self_team: Team,
-    target_pos: Vec3,
-    target_hp: f32,
-    target_max_hp: f32,
-) -> (Vec<UnitSlotObs>, Vec<Option<Entity>>) {
-    let mut slots = Vec::with_capacity(SOLO_V0_MAX_VISIBLE_UNITS);
-    let mut entities = Vec::with_capacity(SOLO_V0_MAX_VISIBLE_UNITS);
+) -> (Vec<Entity>, Vec<lol_rl_protocol::ObsContext>) {
+    let mut enemy_minions: Vec<(Entity, f32, Vec3, Team, f32, f32, Minion)> = Vec::new();
+    let mut ally_minions: Vec<(Entity, f32, Vec3, Team, f32, f32, Minion)> = Vec::new();
 
-    // Slot 0: 对手英雄
-    slots.push(UnitSlotObs {
-        unit_type: 1.0, // Champion
-        rel_x: (target_pos.x - self_pos.x) / SOLO_V0_OBS_DISTANCE_SCALE,
-        rel_z: (target_pos.z - self_pos.z) / SOLO_V0_OBS_DISTANCE_SCALE,
-        hp_pct: if target_max_hp > 0.0 {
-            (target_hp / target_max_hp).clamp(0.0, 1.0)
-        } else {
-            0.0
-        },
-        is_enemy: 1.0,
-    });
-    entities.push(Some(target_entity));
-
-    // Slots 1..=6: 最近的小兵
-    let mut minion_candidates: Vec<(Entity, f32, Vec3, Team, f32, f32, Minion)> = Vec::new();
     for entity_ref in world.iter_entities() {
         if let Some(minion) = entity_ref.get::<Minion>() {
             if let (Some(hp), Some(tf), Some(team)) = (
@@ -1095,25 +1135,29 @@ pub fn extract_visible_units_from_world(
                 if hp.value > 0.0 {
                     let m_pos = tf.translation;
                     let dist = self_pos.distance(m_pos);
-                    minion_candidates.push((
-                        entity_ref.id(),
-                        dist,
-                        m_pos,
-                        *team,
-                        hp.value,
-                        hp.max,
-                        *minion,
-                    ));
+                    let item = (entity_ref.id(), dist, m_pos, *team, hp.value, hp.max, *minion);
+                    if *team != self_team {
+                        enemy_minions.push(item);
+                    } else {
+                        ally_minions.push(item);
+                    }
                 }
             }
         }
     }
 
-    minion_candidates.sort_by(|a, b| a.1.partial_cmp(&b.1).unwrap_or(std::cmp::Ordering::Equal));
+    enemy_minions.sort_by(|a, b| a.1.partial_cmp(&b.1).unwrap_or(std::cmp::Ordering::Equal));
+    ally_minions.sort_by(|a, b| a.1.partial_cmp(&b.1).unwrap_or(std::cmp::Ordering::Equal));
 
-    for (e, _dist, m_pos, team, hp_val, hp_max, m_type) in minion_candidates
-        .into_iter()
-        .take(SOLO_V0_MAX_VISIBLE_UNITS - 1)
+    // 优先填入敌方小兵（可攻击补刀目标），剩余槽位填入友方小兵
+    let mut candidates = enemy_minions;
+    candidates.extend(ally_minions);
+
+    let mut entities = Vec::with_capacity(SOLO_V0_MAX_VISIBLE_UNITS - 1);
+    let mut slots = Vec::with_capacity(SOLO_V0_MAX_VISIBLE_UNITS - 1);
+
+    for (e, _dist, m_pos, team, hp_val, hp_max, m_type) in
+        candidates.into_iter().take(SOLO_V0_MAX_VISIBLE_UNITS - 1)
     {
         let type_code = match m_type {
             Minion::Melee => 2.0,
@@ -1121,22 +1165,65 @@ pub fn extract_visible_units_from_world(
             Minion::Siege => 4.0,
             Minion::Super => 5.0,
         };
-        slots.push(UnitSlotObs {
-            unit_type: type_code,
-            rel_x: (m_pos.x - self_pos.x) / SOLO_V0_OBS_DISTANCE_SCALE,
-            rel_z: (m_pos.z - self_pos.z) / SOLO_V0_OBS_DISTANCE_SCALE,
-            hp_pct: if hp_max > 0.0 {
-                (hp_val / hp_max).clamp(0.0, 1.0)
-            } else {
-                0.0
-            },
-            is_enemy: if team != self_team { 1.0 } else { 0.0 },
-        });
-        entities.push(Some(e));
+        slots.push(
+            lol_rl_protocol::ObsContext::new()
+                .with_var("unit_type", type_code)
+                .with_var("rel_pos[0]", m_pos.x - self_pos.x)
+                .with_var("rel_pos[1]", m_pos.z - self_pos.z)
+                .with_var(
+                    "hp_pct",
+                    if hp_max > 0.0 {
+                        (hp_val / hp_max).clamp(0.0, 1.0)
+                    } else {
+                        0.0
+                    },
+                )
+                .with_var("is_enemy", if team != self_team { 1.0 } else { 0.0 }),
+        );
+        entities.push(e);
     }
 
+    (entities, slots)
+}
+
+pub fn extract_visible_units_from_world(
+    world: &World,
+    _self_entity: Entity,
+    target_entity: Entity,
+    self_pos: Vec3,
+    self_team: Team,
+    target_pos: Vec3,
+    target_hp: f32,
+    target_max_hp: f32,
+) -> (Vec<lol_rl_protocol::ObsContext>, Vec<Option<Entity>>) {
+    let mut slots = Vec::with_capacity(SOLO_V0_MAX_VISIBLE_UNITS);
+    let mut entities = Vec::with_capacity(SOLO_V0_MAX_VISIBLE_UNITS);
+
+    // Slot 0: 对手英雄
+    slots.push(
+        lol_rl_protocol::ObsContext::new()
+            .with_var("unit_type", 1.0) // Champion
+            .with_var("rel_pos[0]", target_pos.x - self_pos.x)
+            .with_var("rel_pos[1]", target_pos.z - self_pos.z)
+            .with_var(
+                "hp_pct",
+                if target_max_hp > 0.0 {
+                    (target_hp / target_max_hp).clamp(0.0, 1.0)
+                } else {
+                    0.0
+                },
+            )
+            .with_var("is_enemy", 1.0),
+    );
+    entities.push(Some(target_entity));
+
+    // Slots 1..: 敌方小兵优先，其次友方小兵
+    let (minion_entities, minion_slots) = get_visible_minion_entities(world, self_pos, self_team);
+    slots.extend(minion_slots);
+    entities.extend(minion_entities.into_iter().map(Some));
+
     while slots.len() < SOLO_V0_MAX_VISIBLE_UNITS {
-        slots.push(UnitSlotObs::default());
+        slots.push(lol_rl_protocol::ObsContext::new());
         entities.push(None);
     }
 
@@ -1217,29 +1304,18 @@ pub fn dispatch_single_action(
         .map(|t| t.translation)
         .unwrap_or_default();
 
-    // 解析目标：0 为敌方英雄，1..=6 为按距离排序的小兵
+    let self_team = world.get::<Team>(self_entity).copied();
+
+    // 解析目标：0 为敌方英雄，1.. 为小兵（敌方小兵优先，其次友方小兵）
     let chosen_target = if action.target_idx == 0 {
         target_entity
     } else {
-        let mut minion_candidates = Vec::new();
-        for entity_ref in world.iter_entities() {
-            if entity_ref.contains::<Minion>() {
-                if let (Some(hp), Some(tf)) =
-                    (entity_ref.get::<Health>(), entity_ref.get::<Transform>())
-                {
-                    if hp.value > 0.0 {
-                        let dist = spos.distance(tf.translation);
-                        minion_candidates.push((entity_ref.id(), dist));
-                    }
-                }
-            }
-        }
-        minion_candidates
-            .sort_by(|a, b| a.1.partial_cmp(&b.1).unwrap_or(std::cmp::Ordering::Equal));
+        let (minion_entities, _) =
+            get_visible_minion_entities(world, spos, self_team.unwrap_or(Team::Order));
         let minion_idx = (action.target_idx as usize) - 1;
-        minion_candidates
+        minion_entities
             .get(minion_idx)
-            .map(|(e, _)| *e)
+            .copied()
             .unwrap_or(target_entity)
     };
 
@@ -1254,7 +1330,27 @@ pub fn dispatch_single_action(
         chosen_target_pos.z + action.offset_z.clamp(-1.0, 1.0) * SOLO_V0_OFFSET_SCALE,
     );
 
-    match action.discrete {
+    let chosen_target_team = world.get::<Team>(chosen_target).copied();
+    let is_target_enemy = match (self_team, chosen_target_team) {
+        (Some(st), Some(tt)) => st != tt,
+        _ => true,
+    };
+
+    // 友方目标防御性降级：若选中的是非敌方目标（友军/自身），普攻和技能自动降级为 Move
+    let actual_discrete = if !is_target_enemy {
+        match action.discrete {
+            SoloV0DiscreteAction::Attack
+            | SoloV0DiscreteAction::CastQ
+            | SoloV0DiscreteAction::CastW
+            | SoloV0DiscreteAction::CastE
+            | SoloV0DiscreteAction::CastR => SoloV0DiscreteAction::Move,
+            other => other,
+        }
+    } else {
+        action.discrete
+    };
+
+    match actual_discrete {
         SoloV0DiscreteAction::NoOp => {}
         SoloV0DiscreteAction::Move => {
             world.trigger(CommandAction {
@@ -1382,152 +1478,101 @@ pub fn step_solo_v0_world(
     let fiora_cs_diff = curr_f_cs.saturating_sub(prev_f_cs) as f32;
     let riven_cs_diff = curr_r_cs.saturating_sub(prev_r_cs) as f32;
 
-    // 统计小兵血量变化与残血斩杀窗口诱导
-    let mut fiora_minion_dmg = 0.0f32;
-    let mut riven_minion_dmg = 0.0f32;
-    let mut fiora_near_low_hp_minion = false;
-    let mut riven_near_low_hp_minion = false;
+    // ── 补刀效率与课程学习奖励计算 ──────────────────────────────────────
+    let reward_cfg = app
+        .world()
+        .get_resource::<CurriculumRewardConfig>()
+        .cloned()
+        .unwrap_or_default();
 
-    let f_pos = curr_f_obs.self_pos;
-    let r_pos = curr_r_obs.self_pos;
-
-    {
-        let mut q_minions = app
-            .world_mut()
-            .query_filtered::<(Entity, &Team, &Health, &Transform), With<Minion>>();
-        for (e, team, hp, tf) in q_minions.iter(app.world()) {
-            let m_pos = tf.translation;
-            if let Some(&(prev_team, prev_hp)) = prev_minion_hps.get(&e) {
-                let dmg = (prev_hp - hp.value).max(0.0);
-                match prev_team {
-                    Team::Chaos => fiora_minion_dmg += dmg,
-                    Team::Order => riven_minion_dmg += dmg,
-                    _ => {}
-                }
-            }
-
-            // 斩杀窗口诱导：敌方小兵残血(<=120且存活)且在斩杀距离(<=450)内
-            if hp.value > 0.0 && hp.value <= 120.0 {
-                match team {
-                    Team::Chaos => {
-                        if f_pos.distance(m_pos) <= 450.0 {
-                            fiora_near_low_hp_minion = true;
-                        }
-                    }
-                    Team::Order => {
-                        if r_pos.distance(m_pos) <= 450.0 {
-                            riven_near_low_hp_minion = true;
-                        }
-                    }
-                    _ => {}
-                }
-            }
-        }
-    }
-
-    // 1. 英雄伤害收益（调低至 0.5 / 1000.0）
-    let fiora_dmg_dealt = (prev_r_hp - curr_r_hp).max(0.0) / 1000.0;
-    let riven_dmg_dealt = (prev_f_hp - curr_f_hp).max(0.0) / 1000.0;
-    let r_hero_dmg = (fiora_dmg_dealt - riven_dmg_dealt) * 0.5;
-
-    // 2. 补兵成功奖励（提很高：5.0 / 刀）
-    let r_cs = (fiora_cs_diff - riven_cs_diff) * 5.0;
-
-    // 3. 补兵诱导奖励（小兵伤害诱导 0.5/1000 + 残血斩杀窗口 0.2）
-    let r_minion_dmg = ((fiora_minion_dmg - riven_minion_dmg) / 1000.0) * 0.5;
-    let f_cs_window = if fiora_near_low_hp_minion { 1.0 } else { 0.0 };
-    let r_cs_window = if riven_near_low_hp_minion { 1.0 } else { 0.0 };
-    let r_cs_window_diff = (f_cs_window - r_cs_window) * 0.2;
-
-    let fiora_killed = curr_r_hp <= 0.0 && prev_r_hp > 0.0;
-    let riven_killed = curr_f_hp <= 0.0 && prev_f_hp > 0.0;
-    let kill_bonus_fiora = if fiora_killed {
-        10.0
-    } else if riven_killed {
-        -10.0
+    // 1. 识别对小兵的攻击行为与无效攻击（未产生击杀）
+    let fiora_attacked_minion = matches!(
+        act_fiora.discrete,
+        SoloV0DiscreteAction::Attack
+            | SoloV0DiscreteAction::CastQ
+            | SoloV0DiscreteAction::CastW
+            | SoloV0DiscreteAction::CastE
+            | SoloV0DiscreteAction::CastR
+    ) && act_fiora.target_idx > 0;
+    let riven_attacked_minion = matches!(
+        act_riven.discrete,
+        SoloV0DiscreteAction::Attack
+            | SoloV0DiscreteAction::CastQ
+            | SoloV0DiscreteAction::CastW
+            | SoloV0DiscreteAction::CastE
+            | SoloV0DiscreteAction::CastR
+    ) && act_riven.target_idx > 0;
+    let fiora_wasted = if fiora_attacked_minion && fiora_cs_diff == 0.0 {
+        1.0
+    } else {
+        0.0
+    };
+    let riven_wasted = if riven_attacked_minion && riven_cs_diff == 0.0 {
+        1.0
     } else {
         0.0
     };
 
-    let r_fiora = r_hero_dmg + r_cs + r_minion_dmg + r_cs_window_diff + kill_bonus_fiora;
-    let r_riven = -r_fiora;
+    // 2. 纯粹正向补刀奖励（注：暂时注释掉零和博弈与无效攻击惩罚，验证目标选择与补尾刀能力）
+    let r_fiora_cs = fiora_cs_diff * reward_cfg.cs_reward;
+    let r_riven_cs = riven_cs_diff * reward_cfg.cs_reward;
+
+    // 暂不启用惩罚与换血（设为 0.0），避免负反馈干扰目标选择探索
+    let fiora_dmg_dealt = (prev_r_hp - curr_r_hp).max(0.0) / 1000.0;
+    let riven_dmg_dealt = (prev_f_hp - curr_f_hp).max(0.0) / 1000.0;
+    let _r_fiora_penalty = 0.0; // fiora_wasted * reward_cfg.attack_no_cs_penalty;
+    let _r_riven_penalty = 0.0; // riven_wasted * reward_cfg.attack_no_cs_penalty;
+    let _r_fiora_harass = 0.0;
+    let _r_riven_harass = 0.0;
+
+    // 双方单步奖励（纯补刀正向反馈）
+    let r_fiora = r_fiora_cs;
+    let r_riven = r_riven_cs;
 
     let terminated = curr_f_hp <= 0.0 || curr_r_hp <= 0.0;
     let truncated = step_count >= max_steps;
 
     let f_vars = HashMap::from([
-        ("self_dmg".to_string(), fiora_dmg_dealt * 1000.0),
-        ("target_dmg".to_string(), riven_dmg_dealt * 1000.0),
         ("self_cs".to_string(), fiora_cs_diff),
         ("target_cs".to_string(), riven_cs_diff),
-        ("self_minion_dmg".to_string(), fiora_minion_dmg),
-        ("target_minion_dmg".to_string(), riven_minion_dmg),
-        ("self_cs_window".to_string(), f_cs_window),
-        ("target_cs_window".to_string(), r_cs_window),
-        (
-            "is_kill_win".to_string(),
-            if fiora_killed { 1.0 } else { 0.0 },
-        ),
+        ("self_minion_attack".to_string(), if fiora_attacked_minion { 1.0 } else { 0.0 }),
+        ("target_minion_attack".to_string(), if riven_attacked_minion { 1.0 } else { 0.0 }),
+        ("self_attack_no_cs".to_string(), fiora_wasted),
+        ("target_attack_no_cs".to_string(), riven_wasted),
+        ("self_harass_dmg".to_string(), fiora_dmg_dealt),
+        ("target_harass_dmg".to_string(), riven_dmg_dealt),
+        ("cs_reward_coef".to_string(), reward_cfg.cs_reward),
+        ("penalty_coef".to_string(), 0.0),
+        ("harass_coef".to_string(), 0.0),
+        ("minion_hp_scale".to_string(), reward_cfg.minion_hp_scale),
     ]);
 
     let r_vars = HashMap::from([
-        ("self_dmg".to_string(), riven_dmg_dealt * 1000.0),
-        ("target_dmg".to_string(), fiora_dmg_dealt * 1000.0),
         ("self_cs".to_string(), riven_cs_diff),
         ("target_cs".to_string(), fiora_cs_diff),
-        ("self_minion_dmg".to_string(), riven_minion_dmg),
-        ("target_minion_dmg".to_string(), fiora_minion_dmg),
-        ("self_cs_window".to_string(), r_cs_window),
-        ("target_cs_window".to_string(), f_cs_window),
-        (
-            "is_kill_win".to_string(),
-            if riven_killed { 1.0 } else { 0.0 },
-        ),
+        ("self_minion_attack".to_string(), if riven_attacked_minion { 1.0 } else { 0.0 }),
+        ("target_minion_attack".to_string(), if fiora_attacked_minion { 1.0 } else { 0.0 }),
+        ("self_attack_no_cs".to_string(), riven_wasted),
+        ("target_attack_no_cs".to_string(), fiora_wasted),
+        ("self_harass_dmg".to_string(), riven_dmg_dealt),
+        ("target_harass_dmg".to_string(), fiora_dmg_dealt),
+        ("cs_reward_coef".to_string(), reward_cfg.cs_reward),
+        ("penalty_coef".to_string(), 0.0),
+        ("harass_coef".to_string(), 0.0),
+        ("minion_hp_scale".to_string(), reward_cfg.minion_hp_scale),
     ]);
 
     let f_breakdown = vec![
         RewardBreakdownItem {
-            name: "对敌伤害".to_string(),
-            value: r_hero_dmg,
-        },
-        RewardBreakdownItem {
-            name: "补兵奖励".to_string(),
-            value: r_cs,
-        },
-        RewardBreakdownItem {
-            name: "小兵伤害".to_string(),
-            value: r_minion_dmg,
-        },
-        RewardBreakdownItem {
-            name: "残血斩杀诱导".to_string(),
-            value: r_cs_window_diff,
-        },
-        RewardBreakdownItem {
-            name: "击杀获胜".to_string(),
-            value: kill_bonus_fiora,
+            name: "补刀奖励".to_string(),
+            value: r_fiora_cs,
         },
     ];
 
     let r_breakdown = vec![
         RewardBreakdownItem {
-            name: "对敌伤害".to_string(),
-            value: -r_hero_dmg,
-        },
-        RewardBreakdownItem {
-            name: "补兵奖励".to_string(),
-            value: -r_cs,
-        },
-        RewardBreakdownItem {
-            name: "小兵伤害".to_string(),
-            value: -r_minion_dmg,
-        },
-        RewardBreakdownItem {
-            name: "残血斩杀诱导".to_string(),
-            value: -r_cs_window_diff,
-        },
-        RewardBreakdownItem {
-            name: "击杀获胜".to_string(),
-            value: -kill_bonus_fiora,
+            name: "补刀奖励".to_string(),
+            value: r_riven_cs,
         },
     ];
 
@@ -1560,10 +1605,10 @@ mod tests {
     #[test]
     fn test_solo_v0_obs_schema_and_dim() {
         let schema = SoloV0Env::obs_schema().expect("SoloV0 obs schema");
-        assert_eq!(schema.raw_dim(), SOLO_V0_OBS_DIM);
-        assert_eq!(SOLO_V0_OBS_DIM, 95);
+        assert_eq!(schema.raw_dim(), SoloV0Env::state_dim());
+        assert_eq!(SoloV0Obs::dim(), SoloV0Env::state_dim());
         let labels = schema.to_dim_labels();
-        assert_eq!(labels.len(), 95);
+        assert_eq!(labels.len(), SoloV0Env::state_dim());
     }
 
     #[test]

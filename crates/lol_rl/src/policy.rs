@@ -764,6 +764,7 @@ impl NodeExtractor {
                 name,
                 num_classes,
                 embed_dim,
+                ..
             } => {
                 let embed = candle_nn::embedding(
                     *num_classes,
@@ -1573,12 +1574,23 @@ impl ActorCritic {
         state: &Tensor,
         mask: Option<&[bool]>,
     ) -> Result<(Vec<f32>, f32, f32)> {
+        self.sample_action_with_structured_masks(state, None, mask)
+    }
+
+    /// 从策略采样一个动作（支持结构化掩码 ActionMasks）。
+    pub fn sample_action_with_structured_masks(
+        &self,
+        state: &Tensor,
+        structured_mask: Option<&ActionMasks>,
+        mask: Option<&[bool]>,
+    ) -> Result<(Vec<f32>, f32, f32)> {
         if let Some(ref structured_head) = self.structured_action_head {
             let ext = self.feature_extractor.forward_with_entities(state)?;
             let feat = self.backbone.forward(&ext.aggregated)?;
             let values = self.critic_head.forward(&feat)?;
             let val_scalar: f32 = values.squeeze(0)?.squeeze(0)?.to_scalar()?;
-            let (encoded, log_prob) = structured_head.sample(&feat, None, &ext.entity_embeds)?;
+            let (encoded, log_prob) =
+                structured_head.sample(&feat, structured_mask, &ext.entity_embeds)?;
             return Ok((encoded, log_prob, val_scalar));
         }
 
@@ -1643,6 +1655,16 @@ impl ActorCritic {
         states: &Tensor,
         masks: Option<&[Option<Vec<bool>>]>,
     ) -> Result<Vec<(Vec<f32>, f32, f32)>> {
+        self.sample_batch_with_structured_masks(states, None, masks)
+    }
+
+    /// 批量从策略采样动作（支持结构化掩码 ActionMasks 列表）。
+    pub fn sample_batch_with_structured_masks(
+        &self,
+        states: &Tensor,
+        structured_masks: Option<&[Option<ActionMasks>]>,
+        masks: Option<&[Option<Vec<bool>>]>,
+    ) -> Result<Vec<(Vec<f32>, f32, f32)>> {
         let b = states.dim(0)?;
         if b == 0 {
             return Ok(Vec::new());
@@ -1660,7 +1682,10 @@ impl ActorCritic {
                 for (k, v) in &ext.entity_embeds {
                     embeds_i.insert(k.clone(), v.narrow(0, i, 1)?);
                 }
-                let (encoded, log_prob) = structured_head.sample(&feat_i, None, &embeds_i)?;
+                let mask_i = structured_masks
+                    .and_then(|ms| ms.get(i))
+                    .and_then(|m| m.as_ref());
+                let (encoded, log_prob) = structured_head.sample(&feat_i, mask_i, &embeds_i)?;
                 results.push((encoded, log_prob, val_vec[i]));
             }
             return Ok(results);
@@ -1739,10 +1764,21 @@ impl ActorCritic {
 
     /// 确定性贪心动作（连续取均值、离散取 argmax），用于可视化与评估。
     pub fn select_greedy_action(&self, state: &Tensor, mask: Option<&[bool]>) -> Result<Vec<f32>> {
+        self.select_greedy_action_with_structured_masks(state, None, mask)
+    }
+
+    /// 确定性贪心动作（支持结构化掩码 ActionMasks）。
+    pub fn select_greedy_action_with_structured_masks(
+        &self,
+        state: &Tensor,
+        structured_mask: Option<&ActionMasks>,
+        mask: Option<&[bool]>,
+    ) -> Result<Vec<f32>> {
         if let Some(ref structured_head) = self.structured_action_head {
             let ext = self.feature_extractor.forward_with_entities(state)?;
             let feat = self.backbone.forward(&ext.aggregated)?;
-            let (encoded, _lp) = structured_head.sample(&feat, None, &ext.entity_embeds)?;
+            let (encoded, _lp) =
+                structured_head.sample(&feat, structured_mask, &ext.entity_embeds)?;
             return Ok(encoded);
         }
 
@@ -1889,9 +1925,22 @@ impl ActorCritic {
         state_obj: &mut Option<MambaState>,
         mask: Option<&[bool]>,
     ) -> Result<(Vec<f32>, f32, f32)> {
+        self.step_with_structured_masks(state, state_obj, None, mask)
+    }
+
+    /// 单步状态化采样（支持结构化掩码 ActionMasks）
+    pub fn step_with_structured_masks(
+        &self,
+        state: &Tensor,
+        state_obj: &mut Option<MambaState>,
+        structured_mask: Option<&ActionMasks>,
+        mask: Option<&[bool]>,
+    ) -> Result<(Vec<f32>, f32, f32)> {
         if let Some(ref structured_head) = self.structured_action_head {
             match &self.backbone {
-                Backbone::Mlp { .. } => return self.sample_action(state, mask),
+                Backbone::Mlp { .. } => {
+                    return self.sample_action_with_structured_masks(state, structured_mask, mask);
+                }
                 Backbone::Mamba {
                     proj_in,
                     mamba,
@@ -1907,7 +1956,7 @@ impl ActorCritic {
                     let values = self.critic_head.forward(&feat)?;
                     let val_scalar: f32 = values.squeeze(0)?.squeeze(0)?.to_scalar()?;
                     let (encoded, log_prob) =
-                        structured_head.sample(&feat, None, &ext.entity_embeds)?;
+                        structured_head.sample(&feat, structured_mask, &ext.entity_embeds)?;
                     return Ok((encoded, log_prob, val_scalar));
                 }
             }
@@ -2354,13 +2403,27 @@ impl StructuredActionHead {
         let mut encoded = Vec::new();
         let mut total_log_prob = 0.0f32;
         let mut rng = rand::rng();
+        let mut chosen_target_idx: Option<usize> = None;
 
         for (i, branch) in self.branches.iter().enumerate() {
-            let mask_i = masks
+            let mut mask_i = masks
                 .and_then(|m| m.branch_masks.get(i))
                 .and_then(|m| m.as_deref());
             match branch {
                 ActionBranchHead::Categorical { head, .. } => {
+                    // 自回归条件目标掩码：若已采样目标，优先使用目标对应的条件掩码
+                    let cond_mask: Option<&[bool]> = if let Some(target_idx) = chosen_target_idx {
+                        masks
+                            .and_then(|m| m.conditional_target_masks.as_ref())
+                            .and_then(|ctm| ctm.get(target_idx))
+                            .map(|v| v.as_slice())
+                    } else {
+                        None
+                    };
+                    if cond_mask.is_some() {
+                        mask_i = cond_mask;
+                    }
+
                     let logits: Vec<f32> = head.forward(feat)?.squeeze(0)?.to_vec1()?;
                     let masked = mask_logits_slice(&logits, mask_i);
                     let (idx, lp) = sample_categorical(&masked);
@@ -2397,6 +2460,7 @@ impl StructuredActionHead {
                     let logits: Vec<f32> = logits_t.squeeze(1)?.to_vec1()?;
                     let masked = mask_logits_slice(&logits, mask_i);
                     let (idx, lp) = sample_categorical(&masked);
+                    chosen_target_idx = Some(idx);
                     encoded.push(idx as f32);
                     total_log_prob += lp;
                 }
@@ -2409,21 +2473,53 @@ impl StructuredActionHead {
         &self,
         feat: &Tensor,
         actions: &Tensor,
-        _masks: Option<&ActionMasks>,
+        masks: Option<&ActionMasks>,
         entity_embeds: &HashMap<String, Tensor>,
-        _batch_masks: Option<&Tensor>,
+        batch_masks: Option<&Tensor>,
     ) -> Result<(Tensor, Tensor)> {
         let n = feat.dim(0)?;
         let mut all_log_probs: Vec<Tensor> = Vec::new();
         let mut all_entropies: Vec<Tensor> = Vec::new();
         let mut action_offset = 0usize;
+        let mut unit_selection_offset: Option<usize> = None;
 
         for (_i, branch) in self.branches.iter().enumerate() {
             match branch {
-                ActionBranchHead::Categorical { head, .. } => {
+                ActionBranchHead::Categorical {
+                    head, num_classes, ..
+                } => {
                     let logits = head.forward(feat)?;
-                    let log_probs_all = candle_nn::ops::log_softmax(&logits, D::Minus1)?;
-                    let probs_all = candle_nn::ops::softmax(&logits, D::Minus1)?;
+                    let masked_logits = if let (Some(u_off), Some(m)) = (unit_selection_offset, masks) {
+                        if let Some(ref ctm) = m.conditional_target_masks {
+                            let target_indices: Vec<u32> = actions
+                                .narrow(1, u_off, 1)?
+                                .squeeze(1)?
+                                .to_dtype(DType::U32)?
+                                .to_vec1()?;
+                            let mut flat_mask = Vec::with_capacity(n * *num_classes);
+                            let default_row = vec![true; *num_classes];
+                            for &t_idx in &target_indices {
+                                let row = ctm.get(t_idx as usize).unwrap_or(&default_row);
+                                for &valid in row {
+                                    flat_mask.push(if valid { 1.0f32 } else { 0.0f32 });
+                                }
+                            }
+                            let mask_tensor =
+                                Tensor::from_vec(flat_mask, (n, *num_classes), feat.device())?;
+                            mask_logits_tensor(&logits, Some(&mask_tensor))?
+                        } else if let Some(bm) = batch_masks {
+                            mask_logits_tensor(&logits, Some(bm))?
+                        } else {
+                            logits
+                        }
+                    } else if let Some(bm) = batch_masks {
+                        mask_logits_tensor(&logits, Some(bm))?
+                    } else {
+                        logits
+                    };
+
+                    let log_probs_all = candle_nn::ops::log_softmax(&masked_logits, D::Minus1)?;
+                    let probs_all = candle_nn::ops::softmax(&masked_logits, D::Minus1)?;
                     let act = actions
                         .narrow(1, action_offset, 1)?
                         .squeeze(1)?
@@ -2464,6 +2560,7 @@ impl StructuredActionHead {
                     obs_entity_name,
                     ..
                 } => {
+                    unit_selection_offset = Some(action_offset);
                     let query = query_proj.forward(feat)?;
                     let embeds = entity_embeds.get(obs_entity_name).ok_or_else(|| {
                         candle_core::Error::Msg(format!(
@@ -2507,7 +2604,7 @@ impl StructuredActionHead {
         let mut displays = Vec::with_capacity(self.branches.len());
 
         for (i, branch) in self.branches.iter().enumerate() {
-            let mask_i = masks
+            let mut mask_i = masks
                 .and_then(|m| m.branch_masks.get(i))
                 .and_then(|m| m.as_deref());
             let node = flat.get(i);
@@ -2517,6 +2614,12 @@ impl StructuredActionHead {
                     num_classes,
                     name,
                 } => {
+                    // 若存在条件掩码，默认以 0 号目标（敌方英雄）展示基线动作分布
+                    if let Some(ref ctm) = masks.and_then(|m| m.conditional_target_masks.as_ref()) {
+                        if let Some(first_mask) = ctm.first() {
+                            mask_i = Some(first_mask.as_slice());
+                        }
+                    }
                     let logits: Vec<f32> = head.forward(feat)?.squeeze(0)?.to_vec1()?;
                     let raw_probs = softmax_slice(&logits);
                     let masked = mask_logits_slice(&logits, mask_i);
@@ -2973,4 +3076,85 @@ mod tests {
 
         Ok(())
     }
+
+    #[test]
+    fn test_structured_action_head_conditional_target_masking() -> Result<()> {
+        let device = candle_core::Device::Cpu;
+        let varmap = VarMap::new();
+        let vb = VarBuilder::from_varmap(&varmap, DType::F32, &device);
+
+        let schema = ActionSchema::new(vec![
+            ActionNode::unit_selection("target", 2, 16, "visible_units"),
+            ActionNode::categorical(
+                "action_type",
+                vec!["NoOp", "Move", "Attack", "CastQ"]
+                    .into_iter()
+                    .map(String::from)
+                    .collect(),
+            ),
+        ]);
+
+        let head = StructuredActionHead::new(schema, 32, vb)?;
+        let feat = Tensor::zeros((1, 32), DType::F32, &device)?;
+
+        let mut entity_embeds = HashMap::new();
+        entity_embeds.insert(
+            "visible_units".to_string(),
+            Tensor::randn(0.0f32, 1.0, (1, 2, 16), &device)?,
+        );
+
+        // Target 0: 敌方 -> 全部 4 种动作允许
+        // Target 1: 友方 -> 仅允许 0 (NoOp) 和 1 (Move)
+        let cond_masks = vec![
+            vec![true, true, true, true],
+            vec![true, true, false, false],
+        ];
+
+        // 1. 强制选择 target=1（友军）时测试采样
+        let masks_target_1 = ActionMasks::with_conditional_target_masks(
+            vec![Some(vec![false, true]), Some(vec![true, true, true, true])],
+            cond_masks.clone(),
+        );
+
+        for _ in 0..20 {
+            let (encoded, _lp) = head.sample(&feat, Some(&masks_target_1), &entity_embeds)?;
+            assert_eq!(encoded.len(), 2);
+            assert_eq!(encoded[0], 1.0, "目标应强制选择友军 Slot 1");
+            assert!(
+                encoded[1] == 0.0 || encoded[1] == 1.0,
+                "选中友军时，动作类型只能为 0(NoOp) 或 1(Move)，实际采样到: {}",
+                encoded[1]
+            );
+        }
+
+        // 2. 测试 evaluate 条件评估对齐
+        // Sample A: target=0 (敌军), action_type=2 (Attack) -> 合法
+        // Sample B: target=1 (友军), action_type=1 (Move) -> 合法
+        let actions = Tensor::from_vec(vec![0.0f32, 2.0, 1.0, 1.0], (2, 2), &device)?;
+        let feat_2 = Tensor::zeros((2, 32), DType::F32, &device)?;
+        let mut entity_embeds_2 = HashMap::new();
+        entity_embeds_2.insert(
+            "visible_units".to_string(),
+            Tensor::randn(0.0f32, 1.0, (2, 2, 16), &device)?,
+        );
+
+        let masks_all = ActionMasks::with_conditional_target_masks(
+            vec![Some(vec![true, true]), Some(vec![true, true, true, true])],
+            cond_masks,
+        );
+
+        let (total_lp, total_ent) = head.evaluate(
+            &feat_2,
+            &actions,
+            Some(&masks_all),
+            &entity_embeds_2,
+            None,
+        )?;
+
+        assert_eq!(total_lp.dims(), &[2]);
+        assert_eq!(total_ent.dims(), &[2]);
+
+        Ok(())
+    }
 }
+
