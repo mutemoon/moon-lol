@@ -24,11 +24,7 @@ struct AblationResult {
     savings_us: f64,
 }
 
-fn create_env(
-    enable_barrack: bool,
-    enable_log: bool,
-    enable_navigation: bool,
-) -> SoloV0Env {
+fn create_env(enable_barrack: bool, enable_log: bool, enable_navigation: bool) -> SoloV0Env {
     let base = FioraRivenBaseEnv::builder(
         EnvConfig {
             max_steps: 1000,
@@ -94,11 +90,18 @@ fn main() -> anyhow::Result<()> {
     let warmup_steps = 30;
 
     println!();
-    println!("========================================================================================================");
+    println!(
+        "========================================================================================================"
+    );
     println!("🧪 [SoloV0 性能消融实验 (Ablation Study)]");
     println!("🎯 目标: 拆解单步 10 帧 (1000µs / 100µs 帧) 耗时来源，精准定位寻路与日志损失");
-    println!("⚙️ 测试步数: {} steps/配置 (每 step = 10 ticks 固定时间步)", test_steps);
-    println!("========================================================================================================");
+    println!(
+        "⚙️ 测试步数: {} steps/配置 (每 step = 10 ticks 固定时间步)",
+        test_steps
+    );
+    println!(
+        "========================================================================================================"
+    );
     println!();
 
     // 1. 基线配置
@@ -119,18 +122,8 @@ fn main() -> anyhow::Result<()> {
     });
 
     let configurations: Vec<(&'static str, bool, bool, bool)> = vec![
-        (
-            "Ablation 1: No-Log (禁用日志系统)",
-            true,
-            false,
-            true,
-        ),
-        (
-            "Ablation 2: No-Nav (禁用寻路系统)",
-            true,
-            true,
-            false,
-        ),
+        ("Ablation 1: No-Log (禁用日志系统)", true, false, true),
+        ("Ablation 2: No-Nav (禁用寻路系统)", true, true, false),
         (
             "Ablation 3: No-Log & No-Nav (禁用日志+寻路)",
             true,
@@ -194,7 +187,12 @@ fn main() -> anyhow::Result<()> {
         let t_m0 = Instant::now();
         let mut prev_minion_hps = std::collections::HashMap::new();
         {
-            let mut q_minions = env.base.world_mut().query_filtered::<(Entity, &lol_core::team::Team, &lol_core::life::Health), With<lol_core::entities::minion::Minion>>();
+            let mut q_minions = env.base.world_mut().query_filtered::<(
+                Entity,
+                &lol_core::team::Team,
+                &lol_core::life::Health,
+            ), With<lol_core::entities::minion::Minion>>(
+            );
             for (e, team, hp) in q_minions.iter(env.base.world()) {
                 prev_minion_hps.insert(e, (*team, hp.value));
             }
@@ -219,7 +217,13 @@ fn main() -> anyhow::Result<()> {
 
         let t_m1 = Instant::now();
         {
-            let mut q_minions = env.base.world_mut().query_filtered::<(Entity, &lol_core::team::Team, &lol_core::life::Health, &Transform), With<lol_core::entities::minion::Minion>>();
+            let mut q_minions = env.base.world_mut().query_filtered::<(
+                Entity,
+                &lol_core::team::Team,
+                &lol_core::life::Health,
+                &Transform,
+            ), With<lol_core::entities::minion::Minion>>(
+            );
             for (e, _, hp, _) in q_minions.iter(env.base.world()) {
                 if let Some(&(_, prev_hp)) = prev_minion_hps.get(&e) {
                     let _ = prev_hp - hp.value;
@@ -244,37 +248,75 @@ fn main() -> anyhow::Result<()> {
     // 在最后一次性全部打印所有消融结果和微观剖析
     // ─────────────────────────────────────────────────────────────────────────────
     println!();
-    println!("========================================================================================================");
+    println!(
+        "========================================================================================================"
+    );
     println!("📊 [SoloV0 模块性能消融实验全景表]");
-    println!("--------------------------------------------------------------------------------------------------------");
+    println!(
+        "--------------------------------------------------------------------------------------------------------"
+    );
     println!(
         "{:<38} {:<13} {:<13} {:<15} {:<15} {:<18}",
-        "测试配置 (Configuration)", "单步耗时(µs)", "单帧耗时(µs)", "Env 吞吐(TPS)", "Agent SPS", "性能提升 / 优化收益"
+        "测试配置 (Configuration)",
+        "单步耗时(µs)",
+        "单帧耗时(µs)",
+        "Env 吞吐(TPS)",
+        "Agent SPS",
+        "性能提升 / 优化收益"
     );
-    println!("--------------------------------------------------------------------------------------------------------");
+    println!(
+        "--------------------------------------------------------------------------------------------------------"
+    );
 
     for r in &results {
         let speedup_str = if r.savings_us >= 0.0 {
             format!("+{:.1}% (-{:.0}µs)", r.delta_vs_baseline_pct, r.savings_us)
         } else {
-            format!("-{:.1}% (+{:.0}µs)", -r.delta_vs_baseline_pct, -r.savings_us)
+            format!(
+                "-{:.1}% (+{:.0}µs)",
+                -r.delta_vs_baseline_pct, -r.savings_us
+            )
         };
         println!(
             "{:<38} {:<13.1} {:<13.1} {:<15.1} {:<15.1} {:<18}",
             r.name, r.step_us, r.frame_us, r.step_tps, r.agent_sps, speedup_str
         );
     }
-    println!("--------------------------------------------------------------------------------------------------------");
+    println!(
+        "--------------------------------------------------------------------------------------------------------"
+    );
     println!();
     println!("🔬 [微观剖析] Baseline 单 Step (10 帧) 内部耗时拆解:");
     println!("--------------------------------------------------------------------------------");
-    println!("  1. 动作触发与分发 (dispatch_single_action):     {:>7.1} µs ({:>4.1}%)", avg_dispatch_us, (avg_dispatch_us / avg_total_us) * 100.0);
-    println!("  2. ECS 10 帧主调度推进 (10x app.update()):      {:>7.1} µs ({:>4.1}%)  --> 单帧约为 {:.1} µs", avg_update_us, (avg_update_us / avg_total_us) * 100.0, avg_update_us / 10.0);
-    println!("  3. 前后观测抽取 (2x get_ego_obs_from_world):  {:>7.1} µs ({:>4.1}%)", avg_obs_us, (avg_obs_us / avg_total_us) * 100.0);
-    println!("  4. 小兵血量追踪/奖励辅助计算:                 {:>7.1} µs ({:>4.1}%)", avg_minion_us, (avg_minion_us / avg_total_us) * 100.0);
+    println!(
+        "  1. 动作触发与分发 (dispatch_single_action):     {:>7.1} µs ({:>4.1}%)",
+        avg_dispatch_us,
+        (avg_dispatch_us / avg_total_us) * 100.0
+    );
+    println!(
+        "  2. ECS 10 帧主调度推进 (10x app.update()):      {:>7.1} µs ({:>4.1}%)  --> 单帧约为 {:.1} µs",
+        avg_update_us,
+        (avg_update_us / avg_total_us) * 100.0,
+        avg_update_us / 10.0
+    );
+    println!(
+        "  3. 前后观测抽取 (2x get_ego_obs_from_world):  {:>7.1} µs ({:>4.1}%)",
+        avg_obs_us,
+        (avg_obs_us / avg_total_us) * 100.0
+    );
+    println!(
+        "  4. 小兵血量追踪/奖励辅助计算:                 {:>7.1} µs ({:>4.1}%)",
+        avg_minion_us,
+        (avg_minion_us / avg_total_us) * 100.0
+    );
     println!("  ----------------------------------------------------------------");
-    println!("  单 Step 汇总总计:                               {:>7.1} µs (100.0%)", avg_total_us);
-    println!("========================================================================================================\n");
+    println!(
+        "  单 Step 汇总总计:                               {:>7.1} µs (100.0%)",
+        avg_total_us
+    );
+    println!(
+        "========================================================================================================\n"
+    );
 
     Ok(())
 }

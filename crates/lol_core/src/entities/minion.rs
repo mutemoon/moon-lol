@@ -9,7 +9,9 @@ use crate::lane::Lane;
 use crate::life::{Death, EventDead};
 use crate::log::{CommandLog, EnumLogCategory};
 use crate::map::MinionPath;
-use crate::movement::{CommandMovement, MovementAction, MovementSource, MovementState, MovementWay};
+use crate::movement::{
+    CommandMovement, MovementAction, MovementSource, MovementState, MovementWay,
+};
 use crate::team::Team;
 
 #[derive(Component, Debug, Clone, Copy, PartialEq, Serialize, Deserialize, Reflect)]
@@ -70,7 +72,14 @@ pub fn on_reset_minions(
 pub fn fixed_update(
     mut commands: Commands,
     q_minion: Query<
-        (Entity, &Transform, &Team, &Lane, &MinionState, Option<&MovementState>),
+        (
+            Entity,
+            &Transform,
+            &Team,
+            &Lane,
+            &MinionState,
+            Option<&MovementState>,
+        ),
         (With<Minion>, Without<Death>),
     >,
     res_minion_path: Res<MinionPath>,

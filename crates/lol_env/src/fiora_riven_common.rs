@@ -438,7 +438,8 @@ impl FioraRivenEnvBuilder {
                 core_plugins = core_plugins.disable::<lol_core::log::PluginLog>();
             }
             if !self.enable_navigation {
-                core_plugins = core_plugins.disable::<lol_core::navigation::navigation::PluginNavigaton>();
+                core_plugins =
+                    core_plugins.disable::<lol_core::navigation::navigation::PluginNavigaton>();
             }
             app.add_plugins(core_plugins);
             app.add_plugins(lol_particle::PluginParticle);
@@ -472,7 +473,8 @@ impl FioraRivenEnvBuilder {
                 core_plugins = core_plugins.disable::<lol_core::log::PluginLog>();
             }
             if !self.enable_navigation {
-                core_plugins = core_plugins.disable::<lol_core::navigation::navigation::PluginNavigaton>();
+                core_plugins =
+                    core_plugins.disable::<lol_core::navigation::navigation::PluginNavigaton>();
             }
             app.add_plugins(core_plugins);
         }
@@ -622,7 +624,10 @@ impl FioraVsRivenObs {
             .with_var("vital_dir_z", self.vital_dir_z)
             .with_var("vital_dir_neg_z", self.vital_dir_neg_z)
             .with_var("has_vital", if self.has_vital { 1.0 } else { 0.0 })
-            .with_var("vital_is_active", if self.vital_is_active { 1.0 } else { 0.0 })
+            .with_var(
+                "vital_is_active",
+                if self.vital_is_active { 1.0 } else { 0.0 },
+            )
             .with_var("fiora_x", self.fiora_pos.x)
             .with_var("fiora_z", self.fiora_pos.z)
             .with_var("riven_x", self.riven_pos.x)

@@ -156,9 +156,23 @@ impl AutoTuner {
                     device.clone(),
                     backbone_type,
                 )?;
-                let cpu_policy = Arc::new(agent.actor_critic.policy.to_device(&candle_core::Device::Cpu)?);
-                let cpu_critic = Arc::new(agent.actor_critic.critic.to_device(&candle_core::Device::Cpu)?);
-                (cpu_policy, Some(cpu_critic), crate::training::RlAgent::Ppo(agent))
+                let cpu_policy = Arc::new(
+                    agent
+                        .actor_critic
+                        .policy
+                        .to_device(&candle_core::Device::Cpu)?,
+                );
+                let cpu_critic = Arc::new(
+                    agent
+                        .actor_critic
+                        .critic
+                        .to_device(&candle_core::Device::Cpu)?,
+                );
+                (
+                    cpu_policy,
+                    Some(cpu_critic),
+                    crate::training::RlAgent::Ppo(agent),
+                )
             }
         };
 
@@ -538,10 +552,8 @@ impl AutoTuner {
                     lr: 3e-4,
                     gamma: 0.99,
                     clip_eps: 0.2,
-                    c2: 0.05,
                     grpo_epochs: ppo_epochs.max(1),
                     group_size: 4,
-                    kl_coef: 0.04,
                     ..Default::default()
                 };
                 let agent = crate::grpo::GRPOAgent::create_for_env_with_backbone::<E>(
@@ -561,7 +573,6 @@ impl AutoTuner {
                     gae_lambda: 0.95,
                     clip_eps: 0.2,
                     c1: 0.5,
-                    c2: 0.05,
                     ppo_epochs: ppo_epochs.max(1),
                     clip_vloss: true,
                     max_grad_norm: 0.5,
@@ -588,7 +599,7 @@ impl AutoTuner {
 
         let mut sps_sum = 0.0f64;
         for i in 1..=iters {
-            let outcome = session.step_once(i, 3e-4, 0.05, tuned.train_batch_size)?;
+            let outcome = session.step_once(i, 3e-4, tuned.train_batch_size)?;
             sps_sum += outcome.sps;
             info!(
                 "    └─ 校准 Iter {i}: 真实 SPS {:8.1} | samples {}",
@@ -708,7 +719,7 @@ mod tests {
         let device = Device::Cpu;
         let action_space = FioraV2Env::action_space();
         let state_dim = FioraV2Env::state_dim();
-        
+
         let profile = AutoTuner::profile_with_algo_and_backbone::<FioraV2Env>(
             state_dim,
             64,

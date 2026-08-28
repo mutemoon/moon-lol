@@ -1,12 +1,12 @@
 pub mod fiora_riven_common;
 pub mod modifier_obs;
 pub use modifier_obs::*;
+pub mod curriculum;
 pub mod fiora_v0;
 pub mod fiora_v1;
 pub mod fiora_v2;
 pub mod fiora_v3;
 pub mod flash_plugin;
-pub mod curriculum;
 pub mod obs_plugins;
 pub mod parallel;
 pub mod reward;
@@ -14,6 +14,9 @@ pub mod solo_v0;
 pub mod traits;
 pub mod visual_runner;
 
+pub use curriculum::{
+    CurriculumConfig, CurriculumPhase, CurriculumRewardConfig, CurriculumScheduler,
+};
 pub use fiora_riven_common::{
     ATTACK_MASK_DISTANCE, ChampionInitialSkillLevels, FIORA_COMMON_OBS_SCHEMA, FioraRivenBaseEnv,
     FioraRivenEntities, FioraRivenEnvBuilder, OBS_DISTANCE_IDX, OBS_DISTANCE_SCALE,
@@ -36,9 +39,6 @@ pub use fiora_v3::{
 pub use flash_plugin::{
     FLASH_COOLDOWN_SECS, FLASH_DISTANCE, FlashCooldown, dispatch_flash, extract_flash_obs,
     register_flash_plugin, tick_flash_cooldown,
-};
-pub use curriculum::{
-    CurriculumConfig, CurriculumPhase, CurriculumRewardConfig, CurriculumScheduler,
 };
 pub use obs_plugins::{
     AttackStateObs, ChampionBaseObs, SkillCdObs, extract_attack_state, extract_champion_base,

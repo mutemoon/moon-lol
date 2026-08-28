@@ -1,8 +1,8 @@
+use winnow::Parser;
 use winnow::ascii::{dec_uint, float, multispace1};
 use winnow::combinator::{alt, delimited, opt, preceded, repeat};
 use winnow::error::{ContextError, ErrMode};
 use winnow::token::{none_of, one_of, take_until, take_while};
-use winnow::Parser;
 
 pub type PResult<O, E = ContextError> = Result<O, ErrMode<E>>;
 
@@ -22,11 +22,7 @@ pub fn block_comment<'i>(input: &mut &'i str) -> PResult<(), ContextError> {
 
 /// 跳过任意空白符与注释
 pub fn ws<'i>(input: &mut &'i str) -> PResult<(), ContextError> {
-    repeat(
-        0..,
-        alt((multispace1.void(), line_comment, block_comment)),
-    )
-    .parse_next(input)
+    repeat(0.., alt((multispace1.void(), line_comment, block_comment))).parse_next(input)
 }
 
 /// 前后包裹空白符的词法单元
@@ -61,12 +57,8 @@ pub fn ident<'i>(input: &mut &'i str) -> PResult<String, ContextError> {
 pub fn var_ident<'i>(input: &mut &'i str) -> PResult<String, ContextError> {
     ws.parse_next(input)?;
     let base = ident.parse_next(input)?;
-    let index: Option<usize> = opt(delimited(
-        symbol("["),
-        number_usize,
-        symbol("]"),
-    ))
-    .parse_next(input)?;
+    let index: Option<usize> =
+        opt(delimited(symbol("["), number_usize, symbol("]"))).parse_next(input)?;
 
     if let Some(idx) = index {
         Ok(format!("{}[{}]", base, idx))

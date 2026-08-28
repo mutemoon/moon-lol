@@ -4,9 +4,7 @@ use bevy::prelude::*;
 use lol_core::action::{Action, CommandAction};
 use lol_core::character::CharacterReady;
 use lol_core::life::Health;
-use lol_rl_protocol::{
-    ActionSchema, ActionSpace, ObsFeaturePayload, ObsSchema, RewardFormulaSpec,
-};
+use lol_rl_protocol::{ActionSchema, ActionSpace, ObsFeaturePayload, ObsSchema, RewardFormulaSpec};
 
 pub use crate::fiora_riven_common::{
     ATTACK_MASK_DISTANCE, AttackEventTracker, FioraRivenBaseEnv, FioraRivenEntities,

@@ -140,15 +140,13 @@ impl AsyncLearner {
             }
             total_samples_collected += num_collected;
 
-            // 2. 动态调节策略熵与学习率（对齐机制 A 的 Cosine Schedule with Safe Entropy Floor）
+            // 2. 动态调节学习率（Cosine Schedule）
             let progress = if total_iterations > 1 {
                 (iter - 1) as f32 / (total_iterations - 1) as f32
             } else {
                 1.0
             };
             let cos_progress = (1.0 + (std::f32::consts::PI * progress).cos()) * 0.5;
-            let current_c2 = (0.015 + (0.05 - 0.015) * cos_progress).max(0.015);
-            self.agent.set_entropy_coef(current_c2);
             let current_lr = (initial_lr * 0.1
                 + (initial_lr - initial_lr * 0.1) * (cos_progress as f64))
                 .max(initial_lr * 0.05);

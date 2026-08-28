@@ -9,7 +9,7 @@ use crate::task::{TaskConfigPayload, TaskOverviewItem};
 pub struct MetricsRow {
     pub step: usize,
     pub ep_return: f32,
-    /// 兼容旧数据：policy_loss + value_loss 之和
+    /// 训练总损失（等同于 total_loss）
     pub loss: f32,
     pub policy_loss: f32,
     pub value_loss: f32,

@@ -629,11 +629,7 @@ impl Backbone {
                     fc1.weight().dims(),
                 ));
                 if let Some(b) = fc1.bias() {
-                    out.push(LayerParamInfo::new(
-                        "Backbone (MLP)",
-                        "fc1.bias",
-                        b.dims(),
-                    ));
+                    out.push(LayerParamInfo::new("Backbone (MLP)", "fc1.bias", b.dims()));
                 }
                 out.push(LayerParamInfo::new(
                     "Backbone (MLP)",
@@ -641,11 +637,7 @@ impl Backbone {
                     fc2.weight().dims(),
                 ));
                 if let Some(b) = fc2.bias() {
-                    out.push(LayerParamInfo::new(
-                        "Backbone (MLP)",
-                        "fc2.bias",
-                        b.dims(),
-                    ));
+                    out.push(LayerParamInfo::new("Backbone (MLP)", "fc2.bias", b.dims()));
                 }
             }
             Self::Mamba { proj_in, mamba, .. } => {
@@ -1403,11 +1395,7 @@ impl PolicyNetwork {
     }
 
     /// 从策略采样一个动作。返回 (编码动作向量, log_prob)。
-    pub fn sample_action(
-        &self,
-        state: &Tensor,
-        mask: Option<&[bool]>,
-    ) -> Result<(Vec<f32>, f32)> {
+    pub fn sample_action(&self, state: &Tensor, mask: Option<&[bool]>) -> Result<(Vec<f32>, f32)> {
         self.sample_action_with_structured_masks(state, None, mask)
     }
 
@@ -2124,11 +2112,7 @@ impl ValueHead {
 
     pub fn to_device(&self, device: &candle_core::Device) -> Result<Self> {
         let w = self.head.weight().to_device(device)?;
-        let b = self
-            .head
-            .bias()
-            .map(|b| b.to_device(device))
-            .transpose()?;
+        let b = self.head.bias().map(|b| b.to_device(device)).transpose()?;
         Ok(Self {
             head: Linear::new(w, b),
         })
@@ -2823,34 +2807,35 @@ impl StructuredActionHead {
                     head, num_classes, ..
                 } => {
                     let logits = head.forward(feat)?;
-                    let masked_logits = if let (Some(u_off), Some(m)) = (unit_selection_offset, masks) {
-                        if let Some(ref ctm) = m.conditional_target_masks {
-                            let target_indices: Vec<u32> = actions
-                                .narrow(1, u_off, 1)?
-                                .squeeze(1)?
-                                .to_dtype(DType::U32)?
-                                .to_vec1()?;
-                            let mut flat_mask = Vec::with_capacity(n * *num_classes);
-                            let default_row = vec![true; *num_classes];
-                            for &t_idx in &target_indices {
-                                let row = ctm.get(t_idx as usize).unwrap_or(&default_row);
-                                for &valid in row {
-                                    flat_mask.push(if valid { 1.0f32 } else { 0.0f32 });
+                    let masked_logits =
+                        if let (Some(u_off), Some(m)) = (unit_selection_offset, masks) {
+                            if let Some(ref ctm) = m.conditional_target_masks {
+                                let target_indices: Vec<u32> = actions
+                                    .narrow(1, u_off, 1)?
+                                    .squeeze(1)?
+                                    .to_dtype(DType::U32)?
+                                    .to_vec1()?;
+                                let mut flat_mask = Vec::with_capacity(n * *num_classes);
+                                let default_row = vec![true; *num_classes];
+                                for &t_idx in &target_indices {
+                                    let row = ctm.get(t_idx as usize).unwrap_or(&default_row);
+                                    for &valid in row {
+                                        flat_mask.push(if valid { 1.0f32 } else { 0.0f32 });
+                                    }
                                 }
+                                let mask_tensor =
+                                    Tensor::from_vec(flat_mask, (n, *num_classes), feat.device())?;
+                                mask_logits_tensor(&logits, Some(&mask_tensor))?
+                            } else if let Some(bm) = batch_masks {
+                                mask_logits_tensor(&logits, Some(bm))?
+                            } else {
+                                logits
                             }
-                            let mask_tensor =
-                                Tensor::from_vec(flat_mask, (n, *num_classes), feat.device())?;
-                            mask_logits_tensor(&logits, Some(&mask_tensor))?
                         } else if let Some(bm) = batch_masks {
                             mask_logits_tensor(&logits, Some(bm))?
                         } else {
                             logits
-                        }
-                    } else if let Some(bm) = batch_masks {
-                        mask_logits_tensor(&logits, Some(bm))?
-                    } else {
-                        logits
-                    };
+                        };
 
                     let log_probs_all = candle_nn::ops::log_softmax(&masked_logits, D::Minus1)?;
                     let probs_all = candle_nn::ops::softmax(&masked_logits, D::Minus1)?;
@@ -3076,7 +3061,10 @@ impl StructuredActionHead {
                     }
                 }
                 ActionBranchHead::Continuous {
-                    head, log_std, name, ..
+                    head,
+                    log_std,
+                    name,
+                    ..
                 } => {
                     out.push(LayerParamInfo::new(
                         "Actor 策略头",
@@ -3183,7 +3171,10 @@ impl ModelParamSummary {
             }
             *map.entry(layer.category).or_insert(0) += layer.count;
         }
-        ordered_cats.into_iter().map(|cat| (cat, map[cat])).collect()
+        ordered_cats
+            .into_iter()
+            .map(|cat| (cat, map[cat]))
+            .collect()
     }
 
     /// 格式化为美观的表格字符串
@@ -3439,10 +3430,7 @@ mod tests {
 
         // Target 0: 敌方 -> 全部 4 种动作允许
         // Target 1: 友方 -> 仅允许 0 (NoOp) 和 1 (Move)
-        let cond_masks = vec![
-            vec![true, true, true, true],
-            vec![true, true, false, false],
-        ];
+        let cond_masks = vec![vec![true, true, true, true], vec![true, true, false, false]];
 
         // 1. 强制选择 target=1（友军）时测试采样
         let masks_target_1 = ActionMasks::with_conditional_target_masks(
@@ -3477,13 +3465,8 @@ mod tests {
             cond_masks,
         );
 
-        let (total_lp, total_ent) = head.evaluate(
-            &feat_2,
-            &actions,
-            Some(&masks_all),
-            &entity_embeds_2,
-            None,
-        )?;
+        let (total_lp, total_ent) =
+            head.evaluate(&feat_2, &actions, Some(&masks_all), &entity_embeds_2, None)?;
 
         assert_eq!(total_lp.dims(), &[2]);
         assert_eq!(total_ent.dims(), &[2]);
@@ -3491,4 +3474,3 @@ mod tests {
         Ok(())
     }
 }
-

@@ -1,9 +1,10 @@
-use crate::dsl::common::{ident, number_f32, symbol, var_ident, PResult};
-use crate::obs::ObsExpr;
-use crate::reward::RewardExpr;
+use winnow::Parser;
 use winnow::combinator::{alt, delimited, opt, separated_pair};
 use winnow::error::ContextError;
-use winnow::Parser;
+
+use crate::dsl::common::{PResult, ident, number_f32, symbol, var_ident};
+use crate::obs::ObsExpr;
+use crate::reward::RewardExpr;
 
 // ── ObsExpr 解析 ─────────────────────────────────────────────────────────────
 
@@ -64,11 +65,7 @@ fn parse_obs_primary<'i>(input: &mut &'i str) -> PResult<ObsExpr, ContextError> 
 fn parse_obs_unary<'i>(input: &mut &'i str) -> PResult<ObsExpr, ContextError> {
     let minus = opt(symbol("-")).parse_next(input)?;
     let expr = parse_obs_primary.parse_next(input)?;
-    if minus.is_some() {
-        Ok(-expr)
-    } else {
-        Ok(expr)
-    }
+    if minus.is_some() { Ok(-expr) } else { Ok(expr) }
 }
 
 /// 解析乘除法项: expr * expr, expr / expr
@@ -143,12 +140,8 @@ fn parse_reward_primary<'i>(input: &mut &'i str) -> PResult<RewardExpr, ContextE
         )
         .map(|(e, _, min, _, max)| RewardExpr::clamp(e, min, max)),
         // 函数调用: exp(expr)
-        delimited(
-            (symbol("exp"), symbol("(")),
-            parse_reward_expr,
-            symbol(")"),
-        )
-        .map(RewardExpr::exp),
+        delimited((symbol("exp"), symbol("(")), parse_reward_expr, symbol(")"))
+            .map(RewardExpr::exp),
         // 函数调用: if(cond, then, else)
         delimited(
             (symbol("if"), symbol("(")),

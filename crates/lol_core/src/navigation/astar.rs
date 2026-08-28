@@ -226,7 +226,9 @@ pub fn find_grid_path_with_result_cache(
                     continue;
                 }
 
-                if cache.g_fwd[neighbor_idx] == f32::INFINITY && cache.g_bwd[neighbor_idx] == f32::INFINITY {
+                if cache.g_fwd[neighbor_idx] == f32::INFINITY
+                    && cache.g_bwd[neighbor_idx] == f32::INFINITY
+                {
                     cache.touched_indices.push(neighbor_idx);
                 }
 
@@ -274,7 +276,9 @@ pub fn find_grid_path_with_result_cache(
                     continue;
                 }
 
-                if cache.g_fwd[neighbor_idx] == f32::INFINITY && cache.g_bwd[neighbor_idx] == f32::INFINITY {
+                if cache.g_fwd[neighbor_idx] == f32::INFINITY
+                    && cache.g_bwd[neighbor_idx] == f32::INFINITY
+                {
                     cache.touched_indices.push(neighbor_idx);
                 }
 
@@ -302,7 +306,12 @@ pub fn find_grid_path_with_result_cache(
 
     if let Some(meet_idx) = best_connection {
         debug!("双向 A* 找到路径 迭代次数 {}", iterations);
-        let path = reconstruct_bidirectional_path(meet_idx, &cache.came_from_fwd, &cache.came_from_bwd, x_len);
+        let path = reconstruct_bidirectional_path(
+            meet_idx,
+            &cache.came_from_fwd,
+            &cache.came_from_bwd,
+            x_len,
+        );
         if !path.is_empty() {
             return Some(AStarResult {
                 path,

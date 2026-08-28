@@ -67,13 +67,6 @@ impl RlAgent {
         }
     }
 
-    pub fn set_entropy_coef(&mut self, c2: f32) {
-        match self {
-            Self::Ppo(a) => a.set_entropy_coef(c2),
-            Self::Grpo(a) => a.set_entropy_coef(c2),
-        }
-    }
-
     pub fn set_lr(&mut self, lr: f64) -> Result<()> {
         match self {
             Self::Ppo(a) => a.set_lr(lr),
@@ -227,20 +220,18 @@ impl<E: RlEnvironment + 'static> TrainingSession<E> {
     }
 
     /// 一次真实训练迭代：
-    /// 熵/学习率调度 → 克隆采样策略 → 分发 Rollout → 聚合轨迹 → 真实 PPO Mini-Batch 更新。
+    /// 学习率调度 → 克隆采样策略 → 分发 Rollout → 聚合轨迹 → 真实 PPO Mini-Batch 更新。
     ///
     /// 返回与 UI `fps` 同口径的 SPS（不含 DB/事件广播，与 UI 上报时机一致）。
     pub fn step_once(
         &mut self,
         iter: usize,
         lr: f64,
-        c2: f32,
         train_batch_size: usize,
     ) -> Result<StepOutcome<E::Obs>> {
         let is_multi_agent = E::num_agents() > 1;
         let iter_start = Instant::now();
 
-        self.agent.set_entropy_coef(c2);
         let _ = self.agent.set_lr(lr);
 
         // 1. 克隆采样策略（设备与 sampler_device 一致，默认 CPU）
@@ -419,7 +410,6 @@ mod tests {
             gae_lambda: 0.95,
             clip_eps: 0.2,
             c1: 0.5,
-            c2: 0.05,
             ppo_epochs: 2,
             clip_vloss: true,
             max_grad_norm: 0.5,
@@ -441,7 +431,7 @@ mod tests {
         // 2 个并行环境，horizon = 30 步快速测试
         let mut session = TrainingSession::<SoloV0Env>::new(agent, 2, state_dim, 30, device);
 
-        let outcome = session.step_once(1, 3e-4, 0.05, 32)?;
+        let outcome = session.step_once(1, 3e-4, 32)?;
         assert!(outcome.num_samples > 0);
         // 验证 reward_breakdown 不为空并包含课程学习奖励项
         assert!(
@@ -459,7 +449,7 @@ mod tests {
 
         // 验证课程学习参数下发与第二轮迭代
         session.update_curriculum(0.5, 1.0, 0.1, 0.3);
-        let outcome2 = session.step_once(2, 3e-4, 0.05, 32)?;
+        let outcome2 = session.step_once(2, 3e-4, 32)?;
         assert!(outcome2.num_samples > 0);
 
         Ok(())
@@ -472,10 +462,8 @@ mod tests {
             lr: 3e-4,
             gamma: 0.99,
             clip_eps: 0.2,
-            c2: 0.05,
             grpo_epochs: 2,
             group_size: 2,
-            kl_coef: 0.04,
             max_grad_norm: 0.5,
         };
 
@@ -495,14 +483,14 @@ mod tests {
         // 2 个并行环境，horizon = 30 步快速测试
         let mut session = TrainingSession::<SoloV0Env>::new(agent, 2, state_dim, 30, device);
 
-        let outcome = session.step_once(1, 3e-4, 0.05, 32)?;
+        let outcome = session.step_once(1, 3e-4, 32)?;
         assert!(outcome.num_samples > 0);
         assert_eq!(outcome.stats.value_loss, 0.0, "GRPO value loss 应恒为 0");
         assert!(outcome.stats.policy_loss.is_finite());
         assert!(outcome.sps > 0.0);
 
         // 第二轮迭代
-        let outcome2 = session.step_once(2, 3e-4, 0.05, 32)?;
+        let outcome2 = session.step_once(2, 3e-4, 32)?;
         assert!(outcome2.num_samples > 0);
         assert_eq!(outcome2.stats.value_loss, 0.0);
 

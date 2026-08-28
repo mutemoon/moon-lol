@@ -127,7 +127,6 @@ pub struct PPOConfig {
     pub gae_lambda: f32,
     pub clip_eps: f32,
     pub c1: f32, // Value loss coefficient
-    pub c2: f32, // Entropy coefficient
     pub ppo_epochs: usize,
     /// 价值函数损失截断 (Value Loss Clipping, PPO2 工业级标准)
     pub clip_vloss: bool,
@@ -143,7 +142,6 @@ impl Default for PPOConfig {
             gae_lambda: 0.95,
             clip_eps: 0.2,
             c1: 0.5,
-            c2: 0.05,
             ppo_epochs: 4,
             clip_vloss: true,
             max_grad_norm: 0.5,
@@ -155,8 +153,7 @@ impl Default for PPOConfig {
 pub struct PPOStats {
     pub policy_loss: f32,
     pub value_loss: f32,
-    pub entropy_loss: f32,
-    /// 平均策略熵（正值，上报/展示用），与 entropy_loss（负值，参与总损失）区分。
+    /// 平均策略熵（正值，上报/展示用）
     pub entropy: f32,
     pub total_loss: f32,
     pub kl: f32,
@@ -553,10 +550,6 @@ impl PPOAgent {
         self.config.lr
     }
 
-    pub fn set_entropy_coef(&mut self, c2: f32) {
-        self.config.c2 = c2;
-    }
-
     pub fn set_lr(&mut self, lr: f64) -> Result<()> {
         self.config.lr = lr;
         let params = ParamsAdamW {
@@ -874,7 +867,6 @@ impl PPOAgent {
             return Ok(PPOStats {
                 policy_loss: 0.0,
                 value_loss: 0.0,
-                entropy_loss: 0.0,
                 entropy: 0.0,
                 total_loss: 0.0,
                 kl: 0.0,
@@ -896,7 +888,6 @@ impl PPOAgent {
             return Ok(PPOStats {
                 policy_loss: 0.0,
                 value_loss: 0.0,
-                entropy_loss: 0.0,
                 entropy: 0.0,
                 total_loss: 0.0,
                 kl: 0.0,
@@ -918,7 +909,6 @@ impl PPOAgent {
             return Ok(PPOStats {
                 policy_loss: 0.0,
                 value_loss: 0.0,
-                entropy_loss: 0.0,
                 entropy: 0.0,
                 total_loss: 0.0,
                 kl: 0.0,
@@ -955,7 +945,6 @@ impl PPOAgent {
         let mut last_stats = PPOStats {
             policy_loss: 0.0,
             value_loss: 0.0,
-            entropy_loss: 0.0,
             entropy: 0.0,
             total_loss: 0.0,
             kl: 0.0,
@@ -1158,8 +1147,6 @@ impl PPOAgent {
                         (&val_diff * &val_diff)?.mean_all()?.affine(0.5, 0.0)?
                     };
 
-                    let entropy_loss = entropy.neg()?.mean_all()?;
-
                     let kl = (&ratio - 1.0 - &log_ratio)?.mean_all()?;
                     let clip_frac =
                         (ratio.lt(1.0 - self.config.clip_eps)?.to_dtype(DType::F32)?
@@ -1168,15 +1155,12 @@ impl PPOAgent {
 
                     let p_loss_val: f32 = policy_loss.to_scalar()?;
                     let v_loss_val: f32 = value_loss.to_scalar()?;
-                    let e_loss_val: f32 = entropy_loss.to_scalar()?;
                     let entropy_val: f32 = entropy.mean_all()?.to_scalar()?;
                     let kl_val: f32 = kl.to_scalar()?;
                     let clip_frac_val: f32 = clip_frac.to_scalar()?;
 
-                    let c1_val =
-                        (&policy_loss + (value_loss.affine(self.config.c1 as f64, 0.0)?))?;
                     let total_loss =
-                        (c1_val + (entropy_loss.affine(self.config.c2 as f64, 0.0)?))?;
+                        (&policy_loss + (value_loss.affine(self.config.c1 as f64, 0.0)?))?;
                     let tot_loss_val: f32 = total_loss.to_scalar()?;
 
                     let mut grads = total_loss.backward()?;
@@ -1186,7 +1170,6 @@ impl PPOAgent {
                     last_stats = PPOStats {
                         policy_loss: p_loss_val,
                         value_loss: v_loss_val,
-                        entropy_loss: e_loss_val,
                         entropy: entropy_val,
                         total_loss: tot_loss_val,
                         kl: kl_val,
@@ -1256,7 +1239,6 @@ impl PPOAgent {
         let mut last_stats = PPOStats {
             policy_loss: 0.0,
             value_loss: 0.0,
-            entropy_loss: 0.0,
             entropy: 0.0,
             total_loss: 0.0,
             kl: 0.0,
@@ -1373,8 +1355,6 @@ impl PPOAgent {
                     (&val_diff * &val_diff)?.mean_all()?.affine(0.5, 0.0)?
                 };
 
-                let entropy_loss = entropy.neg()?.mean_all()?;
-
                 let kl = (&ratio - 1.0 - &log_ratio)?.mean_all()?;
                 let clip_frac = (ratio.lt(1.0 - self.config.clip_eps)?.to_dtype(DType::F32)?
                     + ratio.gt(1.0 + self.config.clip_eps)?.to_dtype(DType::F32)?)?
@@ -1382,13 +1362,12 @@ impl PPOAgent {
 
                 let p_loss_val: f32 = policy_loss.to_scalar()?;
                 let v_loss_val: f32 = value_loss.to_scalar()?;
-                let e_loss_val: f32 = entropy_loss.to_scalar()?;
                 let entropy_val: f32 = entropy.mean_all()?.to_scalar()?;
                 let kl_val: f32 = kl.to_scalar()?;
                 let clip_frac_val: f32 = clip_frac.to_scalar()?;
 
-                let c1_val = (&policy_loss + (value_loss.affine(self.config.c1 as f64, 0.0)?))?;
-                let total_loss = (c1_val + (entropy_loss.affine(self.config.c2 as f64, 0.0)?))?;
+                let total_loss =
+                    (&policy_loss + (value_loss.affine(self.config.c1 as f64, 0.0)?))?;
                 let tot_loss_val: f32 = total_loss.to_scalar()?;
 
                 let mut grads = total_loss.backward()?;
@@ -1398,7 +1377,6 @@ impl PPOAgent {
                 last_stats = PPOStats {
                     policy_loss: p_loss_val,
                     value_loss: v_loss_val,
-                    entropy_loss: e_loss_val,
                     entropy: entropy_val,
                     total_loss: tot_loss_val,
                     kl: kl_val,
@@ -1648,10 +1626,7 @@ mod tests {
             "V2 policy_loss 应为有效有限值"
         );
         assert!(stats.value_loss.is_finite(), "V2 value_loss 应为有效有限值");
-        assert!(
-            stats.entropy_loss.is_finite(),
-            "V2 entropy_loss 应为有效有限值"
-        );
+        assert!(stats.entropy.is_finite(), "V2 entropy 应为有效有限值");
 
         // 验证批量采样 sample_batch
         let states = Tensor::zeros((4, state_dim), DType::F32, &device)?;
@@ -1749,7 +1724,7 @@ mod tests {
         let stats = agent.update_multi_buffer(&[buffer_f, buffer_r], &[0.0, 0.0], 8)?;
         assert!(stats.policy_loss.is_finite());
         assert!(stats.value_loss.is_finite());
-        assert!(stats.entropy_loss.is_finite());
+        assert!(stats.entropy.is_finite());
 
         Ok(())
     }

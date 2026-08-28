@@ -18,13 +18,22 @@ use crate::types::ActiveView;
 /// 可选训练算法（PPO / GRPO）
 const ALGORITHM_OPTIONS: &[(lol_rl_protocol::RlAlgorithm, &str)] = &[
     (lol_rl_protocol::RlAlgorithm::Ppo, "PPO (近端策略优化)"),
-    (lol_rl_protocol::RlAlgorithm::Grpo, "GRPO (分组相对策略优化)"),
+    (
+        lol_rl_protocol::RlAlgorithm::Grpo,
+        "GRPO (分组相对策略优化)",
+    ),
 ];
 
 /// 可选策略网络骨干架构（Mamba 状态空间模型 / MLP 多层感知机）
 const BACKBONE_OPTIONS: &[(lol_rl_protocol::PolicyBackbone, &str)] = &[
-    (lol_rl_protocol::PolicyBackbone::Mamba, "Mamba (状态空间模型 - 时序记忆)"),
-    (lol_rl_protocol::PolicyBackbone::Mlp, "MLP (多层感知机 - 无状态极速)"),
+    (
+        lol_rl_protocol::PolicyBackbone::Mamba,
+        "Mamba (状态空间模型 - 时序记忆)",
+    ),
+    (
+        lol_rl_protocol::PolicyBackbone::Mlp,
+        "MLP (多层感知机 - 无状态极速)",
+    ),
 ];
 
 /// 任务概览表 delegate：驱动 `DataTable` 的列宽/单元格渲染，并反向通信到 `AppSidebar`。
@@ -132,9 +141,7 @@ impl TableDelegate for TaskTableDelegate {
             1 => div()
                 .child(task.algorithm.display_name())
                 .into_any_element(),
-            2 => div()
-                .child(task.backbone.display_name())
-                .into_any_element(),
+            2 => div().child(task.backbone.display_name()).into_any_element(),
             3 => div().child(env_label(&task.env_name)).into_any_element(),
             4 => {
                 let is_running = task.status == "running";

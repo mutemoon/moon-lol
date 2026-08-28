@@ -1,47 +1,47 @@
+use winnow::Parser;
+use winnow::combinator::{
+    alt, delimited, opt, preceded, repeat, separated, separated_pair, terminated,
+};
+use winnow::error::ContextError;
+
 use crate::action::{ActionMaskRule, ActionNode, ActionSchema};
-use crate::dsl::common::{ident, number_usize, string_literal, symbol, ws, PResult};
+use crate::dsl::common::{PResult, ident, number_usize, string_literal, symbol, ws};
 use crate::dsl::expr_parser::parse_obs_expr;
 use crate::obs::ObsExpr;
-use winnow::combinator::{alt, delimited, opt, preceded, repeat, separated, separated_pair, terminated};
-use winnow::error::ContextError;
-use winnow::Parser;
 
 /// 解析连续高斯动作: `continuous offset: 2;`
 fn parse_continuous_node<'i>(input: &mut &'i str) -> PResult<ActionNode, ContextError> {
-    preceded(symbol("continuous"), (
-        ident,
-        preceded(symbol(":"), number_usize),
-        symbol(";"),
-    ))
+    preceded(
+        symbol("continuous"),
+        (ident, preceded(symbol(":"), number_usize), symbol(";")),
+    )
     .map(|(name, dim, _)| ActionNode::continuous(name, dim))
     .parse_next(input)
 }
 
 /// 解析单位选择动作: `unit_target target: visible_units[20 -> 16];` 或 `unit_target target;`
 fn parse_unit_selection_node<'i>(input: &mut &'i str) -> PResult<ActionNode, ContextError> {
-    preceded(symbol("unit_target"), (
-        ident,
-        opt(preceded(
-            symbol(":"),
-            (
-                ident,
-                opt(delimited(
-                    symbol("["),
-                    (
-                        number_usize,
-                        opt(preceded(symbol("->"), number_usize)),
-                    ),
-                    symbol("]"),
-                )),
-            ),
-        )),
-        symbol(";"),
-    ))
+    preceded(
+        symbol("unit_target"),
+        (
+            ident,
+            opt(preceded(
+                symbol(":"),
+                (
+                    ident,
+                    opt(delimited(
+                        symbol("["),
+                        (number_usize, opt(preceded(symbol("->"), number_usize))),
+                        symbol("]"),
+                    )),
+                ),
+            )),
+            symbol(";"),
+        ),
+    )
     .map(|(name, details, _)| {
         let (entity_name, max_units, embed_dim) = if let Some((ename, shape)) = details {
-            let (max_u, edim) = shape
-                .map(|(m, e)| (m, e.unwrap_or(16)))
-                .unwrap_or((20, 16));
+            let (max_u, edim) = shape.map(|(m, e)| (m, e.unwrap_or(16))).unwrap_or((20, 16));
             (ename, max_u, edim)
         } else {
             ("visible_units".to_string(), 20, 16)
@@ -65,39 +65,39 @@ fn parse_category_branch<'i>(input: &mut &'i str) -> PResult<(usize, String), Co
 
 /// 解析分类动作: `category action_type: 8 { 0: "NoOp", 1: "Move", ... }`
 fn parse_category_node<'i>(input: &mut &'i str) -> PResult<ActionNode, ContextError> {
-    preceded(symbol("category"), (
-        ident,
-        opt(preceded(symbol(":"), number_usize)),
-        alt((
-            // 花括号分支表: { 0: "NoOp", 1: "Move", ... }
-            delimited(
-                symbol("{"),
-                repeat(0.., parse_category_branch),
-                symbol("}"),
-            )
-            .map(|branches: Vec<(usize, String)>| {
-                if branches.is_empty() {
-                    Vec::new()
-                } else {
-                    let max_idx = branches.iter().map(|(i, _)| *i).max().unwrap_or(0);
-                    let mut labels = vec!["Unknown".to_string(); max_idx + 1];
-                    for (i, label) in branches {
-                        labels[i] = label;
-                    }
-                    labels
-                }
-            }),
-            // 数组简写: ["NoOp", "Move", ...]
-            terminated(
-                delimited(
-                    symbol("["),
-                    separated(0.., alt((string_literal, ident)), symbol(",")),
-                    symbol("]"),
+    preceded(
+        symbol("category"),
+        (
+            ident,
+            opt(preceded(symbol(":"), number_usize)),
+            alt((
+                // 花括号分支表: { 0: "NoOp", 1: "Move", ... }
+                delimited(symbol("{"), repeat(0.., parse_category_branch), symbol("}")).map(
+                    |branches: Vec<(usize, String)>| {
+                        if branches.is_empty() {
+                            Vec::new()
+                        } else {
+                            let max_idx = branches.iter().map(|(i, _)| *i).max().unwrap_or(0);
+                            let mut labels = vec!["Unknown".to_string(); max_idx + 1];
+                            for (i, label) in branches {
+                                labels[i] = label;
+                            }
+                            labels
+                        }
+                    },
                 ),
-                symbol(";"),
-            ),
-        )),
-    ))
+                // 数组简写: ["NoOp", "Move", ...]
+                terminated(
+                    delimited(
+                        symbol("["),
+                        separated(0.., alt((string_literal, ident)), symbol(",")),
+                        symbol("]"),
+                    ),
+                    symbol(";"),
+                ),
+            )),
+        ),
+    )
     .map(|(name, num_classes, labels)| {
         let label_count = labels.len();
         let classes = num_classes.unwrap_or(label_count);
@@ -114,14 +114,13 @@ fn parse_category_node<'i>(input: &mut &'i str) -> PResult<ActionNode, ContextEr
 
 /// 解析复合动作结构体: `struct sub_action { ... }`
 fn parse_struct_node<'i>(input: &mut &'i str) -> PResult<ActionNode, ContextError> {
-    preceded(symbol("struct"), (
-        ident,
-        delimited(
-            symbol("{"),
-            repeat(0.., parse_action_node),
-            symbol("}"),
+    preceded(
+        symbol("struct"),
+        (
+            ident,
+            delimited(symbol("{"), repeat(0.., parse_action_node), symbol("}")),
         ),
-    ))
+    )
     .map(|(name, fields)| ActionNode::structure(name, fields))
     .parse_next(input)
 }
@@ -184,7 +183,8 @@ fn parse_mask_block<'i>(
         symbol("mask"),
         delimited(
             symbol("{"),
-            repeat(0.., parse_mask_rule_entry).map(|v: Vec<Vec<_>>| v.into_iter().flatten().collect()),
+            repeat(0.., parse_mask_rule_entry)
+                .map(|v: Vec<Vec<_>>| v.into_iter().flatten().collect()),
             symbol("}"),
         ),
     )
@@ -203,47 +203,60 @@ pub fn parse_action_node<'i>(input: &mut &'i str) -> PResult<ActionNode, Context
 }
 
 /// 解析顶级 action 块: `action SoloV0Action { ... }`
-pub fn parse_action_schema<'i>(input: &mut &'i str) -> PResult<(String, ActionSchema), ContextError> {
+pub fn parse_action_schema<'i>(
+    input: &mut &'i str,
+) -> PResult<(String, ActionSchema), ContextError> {
     ws.parse_next(input)?;
-    preceded(symbol("action"), (
-        ident,
-        delimited(
-            symbol("{"),
-            (
-                repeat(0.., parse_action_node),
-                opt(parse_mask_block),
+    preceded(
+        symbol("action"),
+        (
+            ident,
+            delimited(
+                symbol("{"),
+                (repeat(0.., parse_action_node), opt(parse_mask_block)),
+                symbol("}"),
             ),
-            symbol("}"),
         ),
-    ))
-    .map(|(name, (nodes, raw_masks)): (String, (Vec<ActionNode>, Option<Vec<_>>))| {
-        let mut mask_rules = Vec::new();
-        if let Some(masks) = raw_masks {
-            for (cond, head, branch_name) in masks {
-                // 优先直接解析数字分支索引
-                let mut resolved_idx = branch_name.parse::<usize>().ok();
+    )
+    .map(
+        |(name, (nodes, raw_masks)): (String, (Vec<ActionNode>, Option<Vec<_>>))| {
+            let mut mask_rules = Vec::new();
+            if let Some(masks) = raw_masks {
+                for (cond, head, branch_name) in masks {
+                    // 优先直接解析数字分支索引
+                    let mut resolved_idx = branch_name.parse::<usize>().ok();
 
-                if resolved_idx.is_none() {
-                    // 按名称在 Category 节点中查找
-                    for node in nodes.iter() {
-                        if let ActionNode::Categorical { name: node_name, labels, .. } = node {
-                            if head.as_ref().map_or(true, |h| h.as_str() == node_name.as_str()) {
-                                if let Some(idx) = labels.iter().position(|l| l == &branch_name) {
-                                    resolved_idx = Some(idx);
-                                    break;
+                    if resolved_idx.is_none() {
+                        // 按名称在 Category 节点中查找
+                        for node in nodes.iter() {
+                            if let ActionNode::Categorical {
+                                name: node_name,
+                                labels,
+                                ..
+                            } = node
+                            {
+                                if head
+                                    .as_ref()
+                                    .map_or(true, |h| h.as_str() == node_name.as_str())
+                                {
+                                    if let Some(idx) = labels.iter().position(|l| l == &branch_name)
+                                    {
+                                        resolved_idx = Some(idx);
+                                        break;
+                                    }
                                 }
                             }
                         }
                     }
-                }
 
-                if let Some(idx) = resolved_idx {
-                    mask_rules.push(ActionMaskRule::new(cond, head, idx, branch_name));
+                    if let Some(idx) = resolved_idx {
+                        mask_rules.push(ActionMaskRule::new(cond, head, idx, branch_name));
+                    }
                 }
             }
-        }
 
-        (name, ActionSchema::new(nodes).with_mask_rules(mask_rules))
-    })
+            (name, ActionSchema::new(nodes).with_mask_rules(mask_rules))
+        },
+    )
     .parse_next(input)
 }

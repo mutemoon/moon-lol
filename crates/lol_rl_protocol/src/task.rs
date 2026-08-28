@@ -145,9 +145,6 @@ pub struct TaskConfigPayload {
     /// GRPO 算法每组环境/轨迹大小（默认 4 或 8）
     #[serde(default)]
     pub grpo_group_size: Option<usize>,
-    /// GRPO 算法 KL 散度约束系数（默认 0.04）
-    #[serde(default)]
-    pub grpo_kl_coef: Option<f32>,
 }
 
 impl TaskConfigPayload {
@@ -169,7 +166,6 @@ impl TaskConfigPayload {
             total_iterations: params.total_iterations,
             curriculum: None,
             grpo_group_size: None,
-            grpo_kl_coef: None,
         }
     }
 
@@ -183,7 +179,11 @@ impl TaskConfigPayload {
 
     /// 格式化用于 UI 展示的算法模型组合名称（如 "PPO (MLP)", "GRPO (Mamba)"）
     pub fn display_agent_name(&self) -> String {
-        format!("{} ({})", self.algorithm.display_name(), self.backbone.display_name())
+        format!(
+            "{} ({})",
+            self.algorithm.display_name(),
+            self.backbone.display_name()
+        )
     }
 
     /// 转换为 lol_rl_cli 接收的命令行参数列表
@@ -220,10 +220,6 @@ impl TaskConfigPayload {
             args.push("--grpo-group-size".to_string());
             args.push(group_size.to_string());
         }
-        if let Some(kl_coef) = self.grpo_kl_coef {
-            args.push("--grpo-kl-coef".to_string());
-            args.push(kl_coef.to_string());
-        }
         if let Some(curriculum) = &self.curriculum {
             if let Ok(json) = serde_json::to_string(curriculum) {
                 args.push("--curriculum-json".to_string());
@@ -253,7 +249,10 @@ impl TaskConfigPayload {
                 i += 1;
             }
         }
-        format!("cargo run -p lol_rl --bin lol_rl_cli -- {}", escaped_args.join(" "))
+        format!(
+            "cargo run -p lol_rl --bin lol_rl_cli -- {}",
+            escaped_args.join(" ")
+        )
     }
 }
 
@@ -281,4 +280,3 @@ pub struct TaskOverviewItem {
     pub rollout_steps_per_env: usize,
     pub created_at: String,
 }
-

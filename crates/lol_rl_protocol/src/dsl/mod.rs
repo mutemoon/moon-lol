@@ -5,18 +5,19 @@ pub mod expr_parser;
 pub mod obs_parser;
 pub mod reward_parser;
 
+use serde::{Deserialize, Serialize};
+use winnow::Parser;
+use winnow::combinator::repeat;
+
 use crate::action::ActionSchema;
 use crate::dsl::action_parser::parse_action_schema;
 use crate::dsl::common::ws;
-use crate::dsl::env_parser::{parse_env_meta_block, EnvMetaBlock};
+use crate::dsl::env_parser::{EnvMetaBlock, parse_env_meta_block};
 use crate::dsl::obs_parser::parse_obs_schema;
 use crate::dsl::reward_parser::parse_reward_formula;
 use crate::env_spec::{EnvSpec, EnvTrainingParams};
 use crate::obs::ObsSchema;
 use crate::reward::RewardFormulaSpec;
-use serde::{Deserialize, Serialize};
-use winnow::combinator::repeat;
-use winnow::Parser;
 
 /// 完整的环境 DSL 规范定义
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Default)]
@@ -334,9 +335,9 @@ mod tests {
 
         let mut ctx = ObsContext::new();
         ctx.set_var("distance", 30.0); // > 22.0 -> Attack disabled
-        ctx.set_var("q_ready", 1.0);  // CastQ enabled
-        ctx.set_var("e_ready", 0.0);  // < 0.5 -> CastE disabled
-        ctx.set_var("r_ready", 1.0);  // CastR enabled
+        ctx.set_var("q_ready", 1.0); // CastQ enabled
+        ctx.set_var("e_ready", 0.0); // < 0.5 -> CastE disabled
+        ctx.set_var("r_ready", 1.0); // CastR enabled
         ctx.set_var("flash_ready", 0.0); // CastFlash disabled
 
         let mask = action.eval_flat_mask(&ctx);

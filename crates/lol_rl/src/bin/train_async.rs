@@ -40,7 +40,6 @@ fn main() -> anyhow::Result<()> {
         gae_lambda: 0.95,
         clip_eps: 0.2,
         c1: 0.5,
-        c2: 0.05,
         ppo_epochs: 4,
         clip_vloss: true,
         max_grad_norm: 0.5,

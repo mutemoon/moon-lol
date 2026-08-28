@@ -1,13 +1,13 @@
 //! 目标选择机制独立诊断脚本 (Target Selection Diagnostic Toy Task)
-//! 
+//!
 //! 本脚本隔离了复杂的 MOBA 对线多任务环境，专门构建一个仅考察“从多个小兵中识别并攻击最低血量目标”的微型 MDP。
 //! 验证 PPO + StructuredActionHead (UnitSelection Attention) 在当前架构下能否快速学会目标选择。
 
 use candle_core::{Device, Tensor};
 use lol_env::solo_v0::SoloV0Env;
 use lol_env::traits::RlEnvironment;
-use lol_rl_protocol::PolicyBackbone;
 use lol_rl::ppo::{PPOAgent, PPOConfig, RolloutBuffer};
+use lol_rl_protocol::PolicyBackbone;
 use rand::Rng;
 
 fn main() -> anyhow::Result<()> {
@@ -23,7 +23,6 @@ fn main() -> anyhow::Result<()> {
         gae_lambda: 0.95,
         clip_eps: 0.2,
         c1: 0.5,
-        c2: 0.02, // 熵正则化鼓励适度探索
         ppo_epochs: 4,
         clip_vloss: true,
         max_grad_norm: 0.5,
@@ -47,9 +46,15 @@ fn main() -> anyhow::Result<()> {
     let rollout_steps = 128;
     let mut rng = rand::rng();
 
-    println!("-----------------------------------------------------------------------------------------");
-    println!(" Iter | Target Acc (选残血) | Action Acc (选普攻) | Perfect Last-Hit | Avg Return | PPO Loss ");
-    println!("-----------------------------------------------------------------------------------------");
+    println!(
+        "-----------------------------------------------------------------------------------------"
+    );
+    println!(
+        " Iter | Target Acc (选残血) | Action Acc (选普攻) | Perfect Last-Hit | Avg Return | PPO Loss "
+    );
+    println!(
+        "-----------------------------------------------------------------------------------------"
+    );
 
     for iter in 1..=total_iterations {
         let mut buffer = RolloutBuffer::new();
@@ -76,7 +81,7 @@ fn main() -> anyhow::Result<()> {
             // 2. 构造 20 个槽位的可见单位 (Slot 0 是敌方英雄，Slot 1..6 是存活小兵，Slot 7..19 是空白单位)
             // 基础槽位从 index 60 开始，每个槽位 5 维: [unit_type, rel_x, rel_z, hp_pct, is_enemy]
             let slot_offset_base = 60;
-            
+
             // Slot 0: 敌方英雄
             state_vec[slot_offset_base] = 1.0; // unit_type = 1 (Champion)
             state_vec[slot_offset_base + 3] = 1.0; // hp_pct = 1.0
@@ -89,7 +94,7 @@ fn main() -> anyhow::Result<()> {
                 let off = slot_offset_base + slot * 5;
                 state_vec[off] = 2.0; // unit_type = 2 (Melee Minion)
                 state_vec[off + 1] = rng.random_range(-0.5..0.5); // rel_x
-                state_vec[off + 2] = rng.random_range(0.1..0.8);  // rel_z
+                state_vec[off + 2] = rng.random_range(0.1..0.8); // rel_z
                 state_vec[off + 4] = 1.0; // is_enemy = 1.0
 
                 if slot == target_low_hp_slot {
@@ -104,7 +109,8 @@ fn main() -> anyhow::Result<()> {
             // Slots 7..=19 保持默认空白槽位 (unit_type=0.0, hp_pct=0.0, is_enemy=0.0)
 
             let state_tensor = Tensor::from_vec(state_vec.clone(), (1, state_dim), &device)?;
-            let (action_encoded, log_prob, val) = agent.actor_critic.sample_action(&state_tensor, None)?;
+            let (action_encoded, log_prob, val) =
+                agent.actor_critic.sample_action(&state_tensor, None)?;
 
             let chosen_target = action_encoded[2] as usize;
             let chosen_action = action_encoded[3] as usize;
@@ -157,7 +163,9 @@ fn main() -> anyhow::Result<()> {
         );
     }
 
-    println!("-----------------------------------------------------------------------------------------\n");
+    println!(
+        "-----------------------------------------------------------------------------------------\n"
+    );
     println!("✅ [Diagnostic Completed] 诊断测试运行结束。");
 
     Ok(())

@@ -250,7 +250,10 @@ fn test_solo_v0_action_mask_windup_and_cooldown() {
     obs.attack_state = 1;
     let mask_windup = SoloV0Env::action_mask(&obs).expect("应返回掩码");
     assert!(mask_windup[1], "前摇中 Move 应有效（用于取消前摇）");
-    assert!(mask_windup[3], "前摇中就绪技能 CastQ 应有效（用于取消前摇）");
+    assert!(
+        mask_windup[3],
+        "前摇中就绪技能 CastQ 应有效（用于取消前摇）"
+    );
     assert!(mask_windup[7], "前摇中 Flash 应有效");
 
     // 3. 后摇阶段 (attack_is_cooldown = true):
@@ -260,8 +263,14 @@ fn test_solo_v0_action_mask_windup_and_cooldown() {
     obs.attack_state = 2;
     let mask_cooldown = SoloV0Env::action_mask(&obs).expect("应返回掩码");
     assert!(!mask_cooldown[2], "后摇/普攻冷却阶段必须 mask 掉普通攻击");
-    assert!(mask_cooldown[1], "后摇阶段 Move 应有效（用于走位/取消后摇）");
-    assert!(mask_cooldown[3], "后摇阶段 CastQ 应有效（用于施法/取消后摇）");
+    assert!(
+        mask_cooldown[1],
+        "后摇阶段 Move 应有效（用于走位/取消后摇）"
+    );
+    assert!(
+        mask_cooldown[3],
+        "后摇阶段 CastQ 应有效（用于施法/取消后摇）"
+    );
     assert!(mask_cooldown[7], "后摇阶段 Flash 应有效");
 }
 
@@ -367,5 +376,3 @@ fn test_solo_v0_conditional_target_masks_friendly_unit() {
     assert!(!empty_mask[2], "空槽位 Attack 必须被屏蔽");
     assert!(!empty_mask[3], "空槽位 CastQ 必须被屏蔽");
 }
-
-

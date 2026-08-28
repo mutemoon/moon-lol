@@ -55,3 +55,8 @@ client (gpui)
 bevy 分布：`league_utils`/`league_property`/`league_loader` bevy-free；`league_to_lol` 及 `Data` trait（`league_to_lol::data`）保持 bevy-bound，仅提取/游戏栈用。
 
 子进程二进制解析统一走 `lol_client::launch::resolve_executable(pkg, bin)`：dev `cargo run -p <pkg> --bin <bin>`，release 从 client 可执行文件同级目录解析。release 打包布局：`client.exe` 与 `moon_lol.exe`/`lol_extractor.exe`/`lol_rl_visual.exe` 及 `assets/` 放同一目录，cwd 用 `install_root()`。
+
+# 代码质量
+
+**拒绝任何向后兼容**
+**追求极致的 clean code**

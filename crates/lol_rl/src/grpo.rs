@@ -13,14 +13,10 @@ pub struct GRPOConfig {
     pub lr: f64,
     pub gamma: f32,
     pub clip_eps: f32,
-    /// 策略熵正则化系数 c2
-    pub c2: f32,
     /// 每轮采样后的更新 Epoch 次数
     pub grpo_epochs: usize,
     /// 相对优势估计的分组大小 G（默认 4）
     pub group_size: usize,
-    /// KL 散度惩罚约束系数 beta（默认 0.04，0.0 表示仅依靠 PPO-clip）
-    pub kl_coef: f32,
     /// 全局梯度 L2 范数截断上限 (0.0 为不截断，推荐 0.5)
     pub max_grad_norm: f32,
 }
@@ -31,10 +27,8 @@ impl Default for GRPOConfig {
             lr: 5e-4,
             gamma: 0.99,
             clip_eps: 0.2,
-            c2: 0.05,
             grpo_epochs: 4,
             group_size: 4,
-            kl_coef: 0.04,
             max_grad_norm: 0.5,
         }
     }
@@ -44,7 +38,6 @@ impl Default for GRPOConfig {
 #[derive(Debug, Clone, Copy)]
 pub struct GRPOStats {
     pub policy_loss: f32,
-    pub entropy_loss: f32,
     /// 平均策略熵（正值，上报/展示用）
     pub entropy: f32,
     pub total_loss: f32,
@@ -63,7 +56,6 @@ impl GRPOStats {
         PPOStats {
             policy_loss: self.policy_loss,
             value_loss: 0.0,
-            entropy_loss: self.entropy_loss,
             entropy: self.entropy,
             total_loss: self.total_loss,
             kl: self.kl,
@@ -410,10 +402,6 @@ impl GRPOAgent {
         self.config.lr
     }
 
-    pub fn set_entropy_coef(&mut self, c2: f32) {
-        self.config.c2 = c2;
-    }
-
     pub fn set_lr(&mut self, lr: f64) -> Result<()> {
         self.config.lr = lr;
         let params = ParamsAdamW {
@@ -692,7 +680,8 @@ impl GRPOAgent {
             let cur_group_buffers = &buffers[start_idx..end_idx];
 
             // 1. 计算当前组内每个 buffer 每步的未来折扣累积回报
-            let mut group_discounted_returns: Vec<Vec<f32>> = Vec::with_capacity(cur_group_buffers.len());
+            let mut group_discounted_returns: Vec<Vec<f32>> =
+                Vec::with_capacity(cur_group_buffers.len());
             let mut all_returns_in_group = Vec::new();
 
             for buffer in cur_group_buffers {
@@ -762,7 +751,6 @@ impl GRPOAgent {
         if total_n == 0 {
             return Ok(GRPOStats {
                 policy_loss: 0.0,
-                entropy_loss: 0.0,
                 entropy: 0.0,
                 total_loss: 0.0,
                 kl: 0.0,
@@ -802,7 +790,6 @@ impl GRPOAgent {
 
         let mut last_stats = GRPOStats {
             policy_loss: 0.0,
-            entropy_loss: 0.0,
             entropy: 0.0,
             total_loss: 0.0,
             kl: 0.0,
@@ -962,9 +949,8 @@ impl GRPOAgent {
 
                     // GRPO 策略损失（Clipped Surrogate）
                     let policy_loss = surr1.minimum(&surr2)?.neg()?.mean_all()?;
-                    let entropy_loss = entropy.neg()?.mean_all()?;
 
-                    // KL 散度约束: KL = exp(log_ratio) - 1 - log_ratio
+                    // KL 散度与指标监控
                     let kl_loss = (&ratio - 1.0 - &log_ratio)?.mean_all()?;
                     let clip_frac =
                         (ratio.lt(1.0 - self.config.clip_eps)?.to_dtype(DType::F32)?
@@ -972,33 +958,18 @@ impl GRPOAgent {
                         .mean_all()?;
 
                     let p_loss_val: f32 = policy_loss.to_scalar()?;
-                    let e_loss_val: f32 = entropy_loss.to_scalar()?;
                     let entropy_val: f32 = entropy.mean_all()?.to_scalar()?;
                     let kl_val: f32 = kl_loss.to_scalar()?;
                     let clip_frac_val: f32 = clip_frac.to_scalar()?;
 
-                    // GRPO 总损失 = policy_loss + kl_coef * kl + c2 * entropy_loss
-                    let mut total_loss = policy_loss.clone();
-                    if self.config.kl_coef > 0.0 {
-                        let kl_term = kl_loss.affine(self.config.kl_coef as f64, 0.0)?;
-                        total_loss = (&total_loss + &kl_term)?;
-                    }
-                    if self.config.c2 > 0.0 {
-                        let ent_term = entropy_loss.affine(self.config.c2 as f64, 0.0)?;
-                        total_loss = (&total_loss + &ent_term)?;
-                    }
-
-                    let tot_loss_val: f32 = total_loss.to_scalar()?;
-
-                    let mut grads = total_loss.backward()?;
+                    let mut grads = policy_loss.backward()?;
                     self.clip_grad_norm(&mut grads)?;
                     self.optimizer.step(&grads)?;
 
                     last_stats = GRPOStats {
                         policy_loss: p_loss_val,
-                        entropy_loss: e_loss_val,
                         entropy: entropy_val,
-                        total_loss: tot_loss_val,
+                        total_loss: p_loss_val,
                         kl: kl_val,
                         clip_frac: clip_frac_val,
                         group_reward_mean: grp_mean,
@@ -1070,8 +1041,10 @@ impl GRPOAgent {
                 };
 
                 for &idx in mb_indices {
-                    mb_states_vec.extend_from_slice(&all_states[idx * state_dim..(idx + 1) * state_dim]);
-                    mb_actions_vec.extend_from_slice(&all_actions[idx * enc_dim..(idx + 1) * enc_dim]);
+                    mb_states_vec
+                        .extend_from_slice(&all_states[idx * state_dim..(idx + 1) * state_dim]);
+                    mb_actions_vec
+                        .extend_from_slice(&all_actions[idx * enc_dim..(idx + 1) * enc_dim]);
                     mb_old_log_probs_vec.push(all_old_log_probs[idx]);
                     mb_advantages_vec.push(all_advs[idx]);
                     if let (Some(mbm), Some(am)) = (&mut mb_masks_vec, &all_masks) {
@@ -1097,11 +1070,9 @@ impl GRPOAgent {
                     None
                 };
 
-                let (new_log_probs, entropy) = self.policy.evaluate_actions(
-                    &mb_states,
-                    &mb_actions,
-                    mb_masks.as_ref(),
-                )?;
+                let (new_log_probs, entropy) =
+                    self.policy
+                        .evaluate_actions(&mb_states, &mb_actions, mb_masks.as_ref())?;
 
                 let log_ratio = (&new_log_probs - &mb_old_log_probs)?;
                 let ratio = log_ratio.exp()?;
@@ -1112,41 +1083,25 @@ impl GRPOAgent {
                 let surr2 = (&clamped_ratio * &mb_advantages)?;
 
                 let policy_loss = surr1.minimum(&surr2)?.neg()?.mean_all()?;
-                let entropy_loss = entropy.neg()?.mean_all()?;
 
                 let kl_loss = (&ratio - 1.0 - &log_ratio)?.mean_all()?;
-                let clip_frac =
-                    (ratio.lt(1.0 - self.config.clip_eps)?.to_dtype(DType::F32)?
-                        + ratio.gt(1.0 + self.config.clip_eps)?.to_dtype(DType::F32)?)?
-                    .mean_all()?;
+                let clip_frac = (ratio.lt(1.0 - self.config.clip_eps)?.to_dtype(DType::F32)?
+                    + ratio.gt(1.0 + self.config.clip_eps)?.to_dtype(DType::F32)?)?
+                .mean_all()?;
 
                 let p_loss_val: f32 = policy_loss.to_scalar()?;
-                let e_loss_val: f32 = entropy_loss.to_scalar()?;
                 let entropy_val: f32 = entropy.mean_all()?.to_scalar()?;
                 let kl_val: f32 = kl_loss.to_scalar()?;
                 let clip_frac_val: f32 = clip_frac.to_scalar()?;
 
-                let mut total_loss = policy_loss.clone();
-                if self.config.kl_coef > 0.0 {
-                    let kl_term = kl_loss.affine(self.config.kl_coef as f64, 0.0)?;
-                    total_loss = (&total_loss + &kl_term)?;
-                }
-                if self.config.c2 > 0.0 {
-                    let ent_term = entropy_loss.affine(self.config.c2 as f64, 0.0)?;
-                    total_loss = (&total_loss + &ent_term)?;
-                }
-
-                let tot_loss_val: f32 = total_loss.to_scalar()?;
-
-                let mut grads = total_loss.backward()?;
+                let mut grads = policy_loss.backward()?;
                 self.clip_grad_norm(&mut grads)?;
                 self.optimizer.step(&grads)?;
 
                 last_stats = GRPOStats {
                     policy_loss: p_loss_val,
-                    entropy_loss: e_loss_val,
                     entropy: entropy_val,
-                    total_loss: tot_loss_val,
+                    total_loss: p_loss_val,
                     kl: kl_val,
                     clip_frac: clip_frac_val,
                     group_reward_mean: grp_mean,
@@ -1277,7 +1232,11 @@ mod tests {
 
         // 验证 100% 没有任何 Critic 模块或参数
         let categories = summary.category_totals();
-        assert!(!categories.iter().any(|(cat, _)| cat.contains("Critic") || cat.contains("价值")));
+        assert!(
+            !categories
+                .iter()
+                .any(|(cat, _)| cat.contains("Critic") || cat.contains("价值"))
+        );
         assert!(!summary.layers.iter().any(|l| l.name.contains("critic")));
     }
 }

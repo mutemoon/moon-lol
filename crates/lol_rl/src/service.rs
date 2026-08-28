@@ -767,10 +767,8 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment + 'static>(
             lr: task_config.lr as f64,
             gamma: task_config.gamma,
             clip_eps: task_config.clip_eps,
-            c2: 0.05,
             grpo_epochs: task_config.ppo_epochs.max(1),
             group_size: task_config.grpo_group_size.unwrap_or(4),
-            kl_coef: task_config.grpo_kl_coef.unwrap_or(0.04),
             max_grad_norm: 0.5,
         };
         match crate::grpo::GRPOAgent::create_for_env_with_backbone::<E>(
@@ -794,7 +792,6 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment + 'static>(
             gae_lambda: task_config.gae_lambda,
             clip_eps: task_config.clip_eps,
             c1: 0.5,
-            c2: 0.05,
             ppo_epochs: task_config.ppo_epochs.max(1),
             clip_vloss: true,
             max_grad_norm: 0.5,
@@ -890,22 +887,20 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment + 'static>(
             persist_checkpoint(&task_id, req, &session.agent, &tasks, &repo, &event_tx);
         }
 
-        // 平滑余弦退火策略熵与学习率 (Cosine Schedule with Safe Entropy Floor)
+        // 平滑余弦退火学习率 (Cosine Schedule)
         let progress = if total_iterations > 1 {
             (iter - 1) as f32 / (total_iterations - 1) as f32
         } else {
             1.0
         };
         let cos_progress = (1.0 + (std::f32::consts::PI * progress).cos()) * 0.5;
-        let current_c2 = (0.015 + (0.05 - 0.015) * cos_progress).max(0.015);
         let initial_lr = task_config.lr as f64;
         let current_lr = (initial_lr * 0.1
             + (initial_lr - initial_lr * 0.1) * (cos_progress as f64))
             .max(initial_lr * 0.05);
 
         // 3. 一次真实训练迭代（调度→克隆 CPU 策略→Worker Rollout→聚合→PPO 更新）
-        let outcome = match session.step_once(iter, current_lr, current_c2, tuned.train_batch_size)
-        {
+        let outcome = match session.step_once(iter, current_lr, tuned.train_batch_size) {
             Ok(o) => o,
             Err(e) => {
                 error!("训练迭代失败: {e}");
@@ -999,7 +994,7 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment + 'static>(
         let metric_row = lol_rl_protocol::MetricsRow {
             step: total_steps,
             ep_return,
-            loss: stats.policy_loss + stats.value_loss,
+            loss: stats.total_loss,
             policy_loss: stats.policy_loss,
             value_loss: stats.value_loss,
             total_loss: stats.total_loss,

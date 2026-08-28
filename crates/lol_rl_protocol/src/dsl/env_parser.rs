@@ -1,8 +1,9 @@
-use crate::dsl::common::{ident, number_f32, number_usize, string_literal, symbol, ws, PResult};
-use crate::env_spec::EnvTrainingParams;
+use winnow::Parser;
 use winnow::combinator::{alt, delimited, opt, repeat};
 use winnow::error::ContextError;
-use winnow::Parser;
+
+use crate::dsl::common::{PResult, ident, number_f32, number_usize, string_literal, symbol, ws};
+use crate::env_spec::EnvTrainingParams;
 
 /// 从 DSL 中解析出来的环境元数据块
 #[derive(Debug, Clone, PartialEq, Default)]
@@ -30,12 +31,8 @@ pub fn parse_env_meta_block<'i>(input: &mut &'i str) -> PResult<EnvMetaBlock, Co
 
     let name = ident.parse_next(input)?;
 
-    let fields: Vec<EnvField> = delimited(
-        symbol("{"),
-        repeat(0.., parse_env_field),
-        symbol("}"),
-    )
-    .parse_next(input)?;
+    let fields: Vec<EnvField> =
+        delimited(symbol("{"), repeat(0.., parse_env_field), symbol("}")).parse_next(input)?;
 
     let mut block = EnvMetaBlock {
         name,
@@ -103,12 +100,8 @@ enum ParamField {
 }
 
 fn parse_params_block<'i>(input: &mut &'i str) -> PResult<EnvTrainingParams, ContextError> {
-    let fields: Vec<ParamField> = delimited(
-        symbol("{"),
-        repeat(0.., parse_param_field),
-        symbol("}"),
-    )
-    .parse_next(input)?;
+    let fields: Vec<ParamField> =
+        delimited(symbol("{"), repeat(0.., parse_param_field), symbol("}")).parse_next(input)?;
 
     let mut params = EnvTrainingParams {
         lr: 3e-4,
@@ -190,9 +183,14 @@ mod tests {
         }
         "#;
         let mut input = src;
-        let meta = parse_env_meta_block.parse_next(&mut input).expect("meta parse ok");
+        let meta = parse_env_meta_block
+            .parse_next(&mut input)
+            .expect("meta parse ok");
         assert_eq!(meta.name, "SoloV0");
-        assert_eq!(meta.label.as_deref(), Some("剑姬 vs 瑞雯 (Solo 1v1 自博弈)"));
+        assert_eq!(
+            meta.label.as_deref(),
+            Some("剑姬 vs 瑞雯 (Solo 1v1 自博弈)")
+        );
         assert_eq!(meta.tag.as_deref(), Some("SoloV0"));
         assert_eq!(meta.num_agents, Some(2));
         let p = meta.params.expect("params ok");

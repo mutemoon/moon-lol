@@ -6,9 +6,7 @@ use lol_core::base::stats::ChampionStats;
 use lol_core::entities::minion::Minion;
 use lol_core::life::Health;
 use lol_core::team::Team;
-use lol_rl_protocol::{
-    ActionSchema, ActionSpace, ObsFeaturePayload, ObsSchema, RewardFormulaSpec,
-};
+use lol_rl_protocol::{ActionSchema, ActionSpace, ObsFeaturePayload, ObsSchema, RewardFormulaSpec};
 
 use crate::curriculum::CurriculumRewardConfig;
 pub use crate::fiora_riven_common::{
@@ -796,9 +794,9 @@ impl RlEnvironment for SoloV0Env {
 
         Some(lol_rl_protocol::ActionMasks::with_conditional_target_masks(
             vec![
-                None,                          // 0: offset (Continuous)
-                Some(target_valid_mask),       // 1: target (UnitSelection)
-                Some(enemy_action_mask),       // 2: action_type 兜底基线
+                None,                    // 0: offset (Continuous)
+                Some(target_valid_mask), // 1: target (UnitSelection)
+                Some(enemy_action_mask), // 2: action_type 兜底基线
             ],
             conditional_target_masks,
         ))
@@ -964,7 +962,15 @@ pub fn get_visible_minion_entities(
                 if hp.value > 0.0 {
                     let m_pos = tf.translation;
                     let dist = self_pos.distance(m_pos);
-                    let item = (entity_ref.id(), dist, m_pos, *team, hp.value, hp.max, *minion);
+                    let item = (
+                        entity_ref.id(),
+                        dist,
+                        m_pos,
+                        *team,
+                        hp.value,
+                        hp.max,
+                        *minion,
+                    );
                     if *team != self_team {
                         enemy_minions.push(item);
                     } else {
@@ -1348,8 +1354,14 @@ pub fn step_solo_v0_world(
     let f_vars = HashMap::from([
         ("self_cs".to_string(), fiora_cs_diff),
         ("target_cs".to_string(), riven_cs_diff),
-        ("self_minion_attack".to_string(), if fiora_attacked_minion { 1.0 } else { 0.0 }),
-        ("target_minion_attack".to_string(), if riven_attacked_minion { 1.0 } else { 0.0 }),
+        (
+            "self_minion_attack".to_string(),
+            if fiora_attacked_minion { 1.0 } else { 0.0 },
+        ),
+        (
+            "target_minion_attack".to_string(),
+            if riven_attacked_minion { 1.0 } else { 0.0 },
+        ),
         ("self_attack_no_cs".to_string(), fiora_wasted),
         ("target_attack_no_cs".to_string(), riven_wasted),
         ("self_harass_dmg".to_string(), fiora_dmg_dealt),
@@ -1363,8 +1375,14 @@ pub fn step_solo_v0_world(
     let r_vars = HashMap::from([
         ("self_cs".to_string(), riven_cs_diff),
         ("target_cs".to_string(), fiora_cs_diff),
-        ("self_minion_attack".to_string(), if riven_attacked_minion { 1.0 } else { 0.0 }),
-        ("target_minion_attack".to_string(), if fiora_attacked_minion { 1.0 } else { 0.0 }),
+        (
+            "self_minion_attack".to_string(),
+            if riven_attacked_minion { 1.0 } else { 0.0 },
+        ),
+        (
+            "target_minion_attack".to_string(),
+            if fiora_attacked_minion { 1.0 } else { 0.0 },
+        ),
         ("self_attack_no_cs".to_string(), riven_wasted),
         ("target_attack_no_cs".to_string(), fiora_wasted),
         ("self_harass_dmg".to_string(), riven_dmg_dealt),

@@ -1437,4 +1437,3 @@ fn render_telemetry_reward_card(f: &VisualObsFrame, cx: &Context<AppSidebar>) ->
         )
         .into_any_element()
 }
-

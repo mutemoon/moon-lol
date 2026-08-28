@@ -6,9 +6,7 @@ use lol_core::base::stats::ChampionStats;
 use lol_core::entities::minion::Minion;
 use lol_core::life::Health;
 use lol_core::team::Team;
-use lol_rl_protocol::{
-    ActionSchema, ActionSpace, ObsFeaturePayload, ObsSchema, RewardFormulaSpec,
-};
+use lol_rl_protocol::{ActionSchema, ActionSpace, ObsFeaturePayload, ObsSchema, RewardFormulaSpec};
 
 use crate::curriculum::CurriculumRewardConfig;
 pub use crate::fiora_riven_common::{
@@ -692,11 +690,8 @@ impl RlEnvironment for FioraV3Env {
             0.0,
             FioraV3DiscreteAction::NoOp,
         ));
-        let riven_action = get_default_riven_combat_action(
-            self.base.world(),
-            self.base.riven,
-            self.base.fiora,
-        );
+        let riven_action =
+            get_default_riven_combat_action(self.base.world(), self.base.riven, self.base.fiora);
 
         self.base.increment_step();
         let res = step_fiora_v3_world(
@@ -786,9 +781,9 @@ impl RlEnvironment for FioraV3Env {
 
         Some(lol_rl_protocol::ActionMasks::with_conditional_target_masks(
             vec![
-                None,                          // 0: offset (Continuous)
-                Some(target_valid_mask),       // 1: target (UnitSelection)
-                Some(enemy_action_mask),       // 2: action_type 兜底基线
+                None,                    // 0: offset (Continuous)
+                Some(target_valid_mask), // 1: target (UnitSelection)
+                Some(enemy_action_mask), // 2: action_type 兜底基线
             ],
             conditional_target_masks,
         ))
@@ -861,11 +856,8 @@ impl VisualEnvironment for FioraV3Env {
             0.0,
             FioraV3DiscreteAction::NoOp,
         ));
-        let riven_action = get_default_riven_combat_action(
-            app.world(),
-            self.base.riven,
-            self.base.fiora,
-        );
+        let riven_action =
+            get_default_riven_combat_action(app.world(), self.base.riven, self.base.fiora);
 
         self.base.increment_step();
         let res = step_fiora_v3_world(
@@ -953,7 +945,15 @@ pub fn get_visible_minion_entities(
                 if hp.value > 0.0 {
                     let m_pos = tf.translation;
                     let dist = self_pos.distance(m_pos);
-                    let item = (entity_ref.id(), dist, m_pos, *team, hp.value, hp.max, *minion);
+                    let item = (
+                        entity_ref.id(),
+                        dist,
+                        m_pos,
+                        *team,
+                        hp.value,
+                        hp.max,
+                        *minion,
+                    );
                     if *team != self_team {
                         enemy_minions.push(item);
                     } else {
@@ -1363,4 +1363,3 @@ mod tests {
         assert_eq!(decoded.discrete, FioraV3DiscreteAction::Attack);
     }
 }
-

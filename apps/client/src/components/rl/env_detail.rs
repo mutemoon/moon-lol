@@ -264,29 +264,54 @@ fn render_env_overview_card(
         .bg(cx.theme().background)
         .gap_2p5()
         .child(
-            h_flex()
-                .items_center()
-                .justify_between()
-                .child(
-                    div()
-                        .text_xs()
-                        .text_color(cx.theme().foreground)
-                        .child(spec.description),
-                ),
+            h_flex().items_center().justify_between().child(
+                div()
+                    .text_xs()
+                    .text_color(cx.theme().foreground)
+                    .child(spec.description),
+            ),
         )
         .child(
             h_flex()
                 .items_center()
                 .gap_3()
                 .flex_wrap()
-                .child(render_param_chip("学习率 (LR)", format!("{:.0e}", p.lr), cx))
-                .child(render_param_chip("折扣因子 (Gamma)", format!("{:.2}", p.gamma), cx))
-                .child(render_param_chip("GAE Lambda", format!("{:.2}", p.gae_lambda), cx))
-                .child(render_param_chip("PPO Clip Eps", format!("{:.2}", p.clip_eps), cx))
+                .child(render_param_chip(
+                    "学习率 (LR)",
+                    format!("{:.0e}", p.lr),
+                    cx,
+                ))
+                .child(render_param_chip(
+                    "折扣因子 (Gamma)",
+                    format!("{:.2}", p.gamma),
+                    cx,
+                ))
+                .child(render_param_chip(
+                    "GAE Lambda",
+                    format!("{:.2}", p.gae_lambda),
+                    cx,
+                ))
+                .child(render_param_chip(
+                    "PPO Clip Eps",
+                    format!("{:.2}", p.clip_eps),
+                    cx,
+                ))
                 .child(render_param_chip("Epochs", p.ppo_epochs.to_string(), cx))
-                .child(render_param_chip("隐藏层维度", format!("{}维", p.hidden_dim), cx))
-                .child(render_param_chip("每轮步数", format!("{}步", p.rollout_steps_per_env), cx))
-                .child(render_param_chip("推荐迭代", format!("{}轮", p.total_iterations), cx)),
+                .child(render_param_chip(
+                    "隐藏层维度",
+                    format!("{}维", p.hidden_dim),
+                    cx,
+                ))
+                .child(render_param_chip(
+                    "每轮步数",
+                    format!("{}步", p.rollout_steps_per_env),
+                    cx,
+                ))
+                .child(render_param_chip(
+                    "推荐迭代",
+                    format!("{}轮", p.total_iterations),
+                    cx,
+                )),
         )
         .into_any_element()
 }
@@ -364,7 +389,10 @@ fn flatten_obs_schema_nodes<'a>(
                 embed_dim,
                 expr,
             } => {
-                let expr_str = expr.as_ref().map(expr_to_code).unwrap_or_else(|| name.clone());
+                let expr_str = expr
+                    .as_ref()
+                    .map(expr_to_code)
+                    .unwrap_or_else(|| name.clone());
                 out.push(FlatObsSchemaItem::Categorical {
                     depth,
                     name,
@@ -373,12 +401,11 @@ fn flatten_obs_schema_nodes<'a>(
                     expr_str,
                 });
             }
-            ObsNode::Scalar {
-                name,
-                expr,
-                ..
-            } => {
-                let expr_str = expr.as_ref().map(expr_to_code).unwrap_or_else(|| name.clone());
+            ObsNode::Scalar { name, expr, .. } => {
+                let expr_str = expr
+                    .as_ref()
+                    .map(expr_to_code)
+                    .unwrap_or_else(|| name.clone());
                 out.push(FlatObsSchemaItem::Scalar {
                     depth,
                     name,
@@ -388,7 +415,11 @@ fn flatten_obs_schema_nodes<'a>(
             ObsNode::Vector { name, dim, exprs } => {
                 let expr_str = format!(
                     "[{}]",
-                    exprs.iter().map(expr_to_code).collect::<Vec<_>>().join(", ")
+                    exprs
+                        .iter()
+                        .map(expr_to_code)
+                        .collect::<Vec<_>>()
+                        .join(", ")
                 );
                 out.push(FlatObsSchemaItem::Vector {
                     depth,
@@ -426,7 +457,10 @@ fn flatten_obs_schema_nodes<'a>(
                         hidden_dims,
                         pool_type,
                     } => {
-                        format!("SharedMlpPool(hidden={:?}, pool={:?})", hidden_dims, pool_type)
+                        format!(
+                            "SharedMlpPool(hidden={:?}, pool={:?})",
+                            hidden_dims, pool_type
+                        )
                     }
                     EntityEncoderSpec::PassThrough => "PassThrough".to_string(),
                 };
@@ -530,11 +564,7 @@ fn render_flat_obs_schema_item(
                             .child(format!("= {}", expr_str)),
                     ),
             )
-            .child(
-                div()
-                    .text_color(cx.theme().muted_foreground)
-                    .child("1 维"),
-            )
+            .child(div().text_color(cx.theme().muted_foreground).child("1 维"))
             .into_any_element(),
 
         FlatObsSchemaItem::Vector {
@@ -611,7 +641,8 @@ fn render_flat_obs_schema_item(
                                     if this.env_detail_obs_collapsed.contains(&path_for_click) {
                                         this.env_detail_obs_collapsed.remove(&path_for_click);
                                     } else {
-                                        this.env_detail_obs_collapsed.insert(path_for_click.clone());
+                                        this.env_detail_obs_collapsed
+                                            .insert(path_for_click.clone());
                                     }
                                     cx.notify();
                                 })),
@@ -633,7 +664,11 @@ fn render_flat_obs_schema_item(
                                 })
                                 .font_bold()
                                 .text_xs()
-                                .child(if is_repeated { "重复实体" } else { "结构体" }),
+                                .child(if is_repeated {
+                                    "重复实体"
+                                } else {
+                                    "结构体"
+                                }),
                         )
                         .child(
                             div()
@@ -688,12 +723,7 @@ fn render_obs_schema_card(
                         .gap_2()
                         .items_center()
                         .child(IconName::Eye)
-                        .child(
-                            div()
-                                .font_bold()
-                                .text_sm()
-                                .child("观测空间"),
-                        ),
+                        .child(div().font_bold().text_sm().child("观测空间")),
                 )
                 .child(
                     div()
@@ -858,7 +888,11 @@ fn render_flat_action_schema_item(
     let pl_px = (action_item_depth(&item) as f32) * 12.0;
 
     match item {
-        FlatActionSchemaItem::Continuous { depth: _, name, dim } => h_flex()
+        FlatActionSchemaItem::Continuous {
+            depth: _,
+            name,
+            dim,
+        } => h_flex()
             .justify_between()
             .items_center()
             .text_xs()
@@ -1017,7 +1051,8 @@ fn render_flat_action_schema_item(
                                     if this.env_detail_action_collapsed.contains(&path_for_click) {
                                         this.env_detail_action_collapsed.remove(&path_for_click);
                                     } else {
-                                        this.env_detail_action_collapsed.insert(path_for_click.clone());
+                                        this.env_detail_action_collapsed
+                                            .insert(path_for_click.clone());
                                     }
                                     cx.notify();
                                 })),
@@ -1086,12 +1121,7 @@ fn render_action_schema_card(
                         .gap_2()
                         .items_center()
                         .child(IconName::Settings2)
-                        .child(
-                            div()
-                                .font_bold()
-                                .text_sm()
-                                .child("动作空间"),
-                        ),
+                        .child(div().font_bold().text_sm().child("动作空间")),
                 )
                 .child(
                     div()
@@ -1131,7 +1161,11 @@ fn render_action_schema_card(
                                     .text_color(cx.theme().foreground)
                                     .child("动作掩码规则 (Action Mask Rules)"),
                             )
-                            .children(s.mask_rules.iter().map(|rule| render_mask_rule_item(rule, cx))),
+                            .children(
+                                s.mask_rules
+                                    .iter()
+                                    .map(|rule| render_mask_rule_item(rule, cx)),
+                            ),
                     )
                 })
                 .into_any_element()
@@ -1206,12 +1240,7 @@ fn render_reward_formula_card(
                         .gap_2()
                         .items_center()
                         .child(IconName::Heart)
-                        .child(
-                            div()
-                                .font_bold()
-                                .text_sm()
-                                .child("奖励公式"),
-                        ),
+                        .child(div().font_bold().text_sm().child("奖励公式")),
                 )
                 .child(
                     div()
@@ -1314,10 +1343,18 @@ fn reward_expr_to_code(expr: &RewardExpr) -> String {
     match expr {
         RewardExpr::Constant(v) => format!("{v:+}"),
         RewardExpr::Variable(var) => var.clone(),
-        RewardExpr::Add(l, r) => format!("({} + {})", reward_expr_to_code(l), reward_expr_to_code(r)),
-        RewardExpr::Sub(l, r) => format!("({} - {})", reward_expr_to_code(l), reward_expr_to_code(r)),
-        RewardExpr::Mul(l, r) => format!("({} * {})", reward_expr_to_code(l), reward_expr_to_code(r)),
-        RewardExpr::Div(l, r) => format!("({} / {})", reward_expr_to_code(l), reward_expr_to_code(r)),
+        RewardExpr::Add(l, r) => {
+            format!("({} + {})", reward_expr_to_code(l), reward_expr_to_code(r))
+        }
+        RewardExpr::Sub(l, r) => {
+            format!("({} - {})", reward_expr_to_code(l), reward_expr_to_code(r))
+        }
+        RewardExpr::Mul(l, r) => {
+            format!("({} * {})", reward_expr_to_code(l), reward_expr_to_code(r))
+        }
+        RewardExpr::Div(l, r) => {
+            format!("({} / {})", reward_expr_to_code(l), reward_expr_to_code(r))
+        }
         RewardExpr::Exp(val) => format!("exp({})", reward_expr_to_code(val)),
         RewardExpr::IfElse {
             cond,
@@ -1329,10 +1366,22 @@ fn reward_expr_to_code(expr: &RewardExpr) -> String {
             reward_expr_to_code(then_branch),
             reward_expr_to_code(else_branch)
         ),
-        RewardExpr::Gt(l, r) => format!("({} > {})", reward_expr_to_code(l), reward_expr_to_code(r)),
-        RewardExpr::Lt(l, r) => format!("({} < {})", reward_expr_to_code(l), reward_expr_to_code(r)),
-        RewardExpr::Max(l, r) => format!("max({}, {})", reward_expr_to_code(l), reward_expr_to_code(r)),
-        RewardExpr::Min(l, r) => format!("min({}, {})", reward_expr_to_code(l), reward_expr_to_code(r)),
+        RewardExpr::Gt(l, r) => {
+            format!("({} > {})", reward_expr_to_code(l), reward_expr_to_code(r))
+        }
+        RewardExpr::Lt(l, r) => {
+            format!("({} < {})", reward_expr_to_code(l), reward_expr_to_code(r))
+        }
+        RewardExpr::Max(l, r) => format!(
+            "max({}, {})",
+            reward_expr_to_code(l),
+            reward_expr_to_code(r)
+        ),
+        RewardExpr::Min(l, r) => format!(
+            "min({}, {})",
+            reward_expr_to_code(l),
+            reward_expr_to_code(r)
+        ),
     }
 }
 
@@ -1358,16 +1407,12 @@ fn render_dsl_source_card(
                 .justify_between()
                 .items_center()
                 .child(
-                    h_flex()
-                        .gap_2()
-                        .items_center()
-                        .child(IconName::File)
-                        .child(
-                            div()
-                                .font_bold()
-                                .text_sm()
-                                .child("声明式 DSL 规范脚本 (.rl)"),
-                        ),
+                    h_flex().gap_2().items_center().child(IconName::File).child(
+                        div()
+                            .font_bold()
+                            .text_sm()
+                            .child("声明式 DSL 规范脚本 (.rl)"),
+                    ),
                 )
                 .child(
                     Button::new("copy-dsl-code-btn")
@@ -1399,19 +1444,12 @@ fn render_dsl_source_card(
                 .max_h(px(320.0))
                 .min_h_0()
                 .overflow_y_scrollbar()
-                .child(
-                    v_flex()
-                        .gap_0p5()
-                        .children(
-                            src.lines()
-                                .map(|line| {
-                                    div()
-                                        .text_xs()
-                                        .text_color(cx.theme().foreground.opacity(0.9))
-                                        .child(if line.is_empty() { " " } else { line })
-                                }),
-                        ),
-                )
+                .child(v_flex().gap_0p5().children(src.lines().map(|line| {
+                    div()
+                        .text_xs()
+                        .text_color(cx.theme().foreground.opacity(0.9))
+                        .child(if line.is_empty() { " " } else { line })
+                })))
                 .into_any_element()
         } else {
             div()

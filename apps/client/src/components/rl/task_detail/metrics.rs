@@ -755,7 +755,11 @@ fn render_curriculum_card(
         );
 
     // 4. 晋级条件（若有）
-    let mut content = v_flex().gap_2p5().child(header).child(stepper).child(progress_bar);
+    let mut content = v_flex()
+        .gap_2p5()
+        .child(header)
+        .child(stepper)
+        .child(progress_bar);
 
     if let Some(ref cond) = curriculum.transition_condition {
         content = content.child(
@@ -774,8 +778,10 @@ fn render_curriculum_card(
         let mut sorted_params: Vec<(&String, &f32)> = curriculum.parameters.iter().collect();
         sorted_params.sort_by_key(|(k, _)| *k);
 
-        let params_flow = h_flex().gap_2().flex_wrap().children(
-            sorted_params.into_iter().map(|(k, v)| {
+        let params_flow = h_flex()
+            .gap_2()
+            .flex_wrap()
+            .children(sorted_params.into_iter().map(|(k, v)| {
                 div()
                     .px_2()
                     .py_1()
@@ -785,8 +791,7 @@ fn render_curriculum_card(
                     .bg(cx.theme().secondary.opacity(0.3))
                     .text_xs()
                     .child(format!("{}: {:.2}", k, v))
-            }),
-        );
+            }));
 
         content = content.child(
             v_flex()

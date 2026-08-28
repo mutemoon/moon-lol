@@ -1,6 +1,6 @@
 use gpui::*;
 use gpui_component::{h_flex, v_flex, ActiveTheme, IconName, StyledExt};
-use lol_rl_protocol::{AVAILABLE_ENVS, EnvSpec};
+use lol_rl_protocol::{EnvSpec, AVAILABLE_ENVS};
 
 use crate::components::sidebar::AppSidebar;
 use crate::types::ActiveView;
@@ -15,38 +15,32 @@ pub fn render_env_cards(
         .w_full()
         .gap_2()
         .child(
-            h_flex()
-                .justify_between()
-                .items_center()
-                .child(
-                    h_flex()
-                        .gap_2()
-                        .items_center()
-                        .child(IconName::LayoutDashboard)
-                        .child(
-                            div()
-                                .font_bold()
-                                .text_sm()
-                                .text_color(cx.theme().foreground)
-                                .child("强化学习环境"),
-                        )
-                        .child(
-                            div()
-                                .text_xs()
-                                .text_color(cx.theme().muted_foreground)
-                                .child("（点击卡片查看 AST 规范与详情）"),
-                        ),
-                ),
+            h_flex().justify_between().items_center().child(
+                h_flex()
+                    .gap_2()
+                    .items_center()
+                    .child(IconName::LayoutDashboard)
+                    .child(
+                        div()
+                            .font_bold()
+                            .text_sm()
+                            .text_color(cx.theme().foreground)
+                            .child("强化学习环境"),
+                    )
+                    .child(
+                        div()
+                            .text_xs()
+                            .text_color(cx.theme().muted_foreground)
+                            .child("（点击卡片查看 AST 规范与详情）"),
+                    ),
+            ),
         )
         .child(
-            h_flex()
-                .w_full()
-                .gap_3()
-                .children(
-                    AVAILABLE_ENVS
-                        .iter()
-                        .map(|spec| render_single_env_card(spec, sidebar, cx)),
-                ),
+            h_flex().w_full().gap_3().children(
+                AVAILABLE_ENVS
+                    .iter()
+                    .map(|spec| render_single_env_card(spec, sidebar, cx)),
+            ),
         )
         .into_any_element()
 }
@@ -103,35 +97,32 @@ fn render_single_env_card(
         })
         // 顶部行：Tag + 模式徽章
         .child(
-            h_flex()
-                .justify_between()
-                .items_center()
-                .child(
-                    h_flex()
-                        .gap_1p5()
-                        .items_center()
-                        .child(
-                            div()
-                                .px_1p5()
-                                .py_0p5()
-                                .rounded_sm()
-                                .bg(cx.theme().accent.opacity(0.15))
-                                .text_color(cx.theme().accent)
-                                .font_bold()
-                                .text_xs()
-                                .child(spec.tag),
-                        )
-                        .child(
-                            div()
-                                .px_1p5()
-                                .py_0p5()
-                                .rounded_sm()
-                                .bg(cx.theme().muted.opacity(0.25))
-                                .text_color(cx.theme().muted_foreground)
-                                .text_xs()
-                                .child(mode_label),
-                        ),
-                ),
+            h_flex().justify_between().items_center().child(
+                h_flex()
+                    .gap_1p5()
+                    .items_center()
+                    .child(
+                        div()
+                            .px_1p5()
+                            .py_0p5()
+                            .rounded_sm()
+                            .bg(cx.theme().accent.opacity(0.15))
+                            .text_color(cx.theme().accent)
+                            .font_bold()
+                            .text_xs()
+                            .child(spec.tag),
+                    )
+                    .child(
+                        div()
+                            .px_1p5()
+                            .py_0p5()
+                            .rounded_sm()
+                            .bg(cx.theme().muted.opacity(0.25))
+                            .text_color(cx.theme().muted_foreground)
+                            .text_xs()
+                            .child(mode_label),
+                    ),
+            ),
         )
         // 环境标题
         .child(
@@ -192,19 +183,15 @@ fn render_single_env_card(
         )
         // 底部动作链接
         .child(
-            h_flex()
-                .justify_between()
-                .items_center()
-                .pt_1()
-                .child(
-                    h_flex()
-                        .items_center()
-                        .gap_1()
-                        .text_xs()
-                        .text_color(cx.theme().accent)
-                        .child("查看环境规范 (AST / DSL)")
-                        .child(IconName::ChevronRight),
-                ),
+            h_flex().justify_between().items_center().pt_1().child(
+                h_flex()
+                    .items_center()
+                    .gap_1()
+                    .text_xs()
+                    .text_color(cx.theme().accent)
+                    .child("查看环境规范 (AST / DSL)")
+                    .child(IconName::ChevronRight),
+            ),
         )
         .into_any_element()
 }

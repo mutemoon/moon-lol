@@ -1,5 +1,6 @@
-use crate::dsl::{EnvDslSpec, parse_env_dsl};
 use serde::{Deserialize, Serialize};
+
+use crate::dsl::{EnvDslSpec, parse_env_dsl};
 
 pub const ENV_SOLO_V0: &str = "SoloV0";
 pub const ENV_FIORA_V3: &str = "FioraV3";
@@ -85,13 +86,16 @@ pub static ENV_FIORA_V1_SPEC: std::sync::LazyLock<EnvSpec> =
 pub static ENV_FIORA_V0_SPEC: std::sync::LazyLock<EnvSpec> =
     std::sync::LazyLock::new(|| SPEC_FIORA_V0.to_env_spec());
 
-pub static AVAILABLE_ENVS: std::sync::LazyLock<[&'static EnvSpec; 5]> = std::sync::LazyLock::new(|| [
-    &*ENV_SOLO_V0_SPEC,
-    &*ENV_FIORA_V3_SPEC,
-    &*ENV_FIORA_V2_SPEC,
-    &*ENV_FIORA_V1_SPEC,
-    &*ENV_FIORA_V0_SPEC,
-]);
+pub static AVAILABLE_ENVS: std::sync::LazyLock<[&'static EnvSpec; 5]> =
+    std::sync::LazyLock::new(|| {
+        [
+            &*ENV_SOLO_V0_SPEC,
+            &*ENV_FIORA_V3_SPEC,
+            &*ENV_FIORA_V2_SPEC,
+            &*ENV_FIORA_V1_SPEC,
+            &*ENV_FIORA_V0_SPEC,
+        ]
+    });
 
 /// 获取环境对应的 DSL 源代码字符串
 pub fn get_env_dsl_source(env_name: &str) -> Option<&'static str> {

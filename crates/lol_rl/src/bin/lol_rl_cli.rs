@@ -4,8 +4,8 @@ use std::time::Duration;
 use clap::Parser;
 use futures_util::{SinkExt, StreamExt};
 use lol_rl_protocol::{
-    CurriculumConfig, InFrame, OutFrame, PolicyBackbone, RlAlgorithm, TaskConfigPayload,
-    DEFAULT_RL_SERVER_ADDR, get_env_training_params,
+    CurriculumConfig, DEFAULT_RL_SERVER_ADDR, InFrame, OutFrame, PolicyBackbone, RlAlgorithm,
+    TaskConfigPayload, get_env_training_params,
 };
 use tokio_tungstenite::connect_async;
 use tokio_tungstenite::tungstenite::Message;
@@ -81,10 +81,6 @@ pub struct Cli {
     #[arg(long)]
     pub grpo_group_size: Option<usize>,
 
-    /// GRPO 算法 KL 散度约束系数（默认 0.04）
-    #[arg(long)]
-    pub grpo_kl_coef: Option<f32>,
-
     /// 直接传入完整的 TaskConfigPayload JSON 字符串 (可选，提供时覆盖其他所有参数)
     #[arg(long)]
     pub config_json: Option<String>,
@@ -140,12 +136,9 @@ async fn main() {
             rollout_steps_per_env: cli
                 .rollout_steps_per_env
                 .unwrap_or(env_params.rollout_steps_per_env),
-            total_iterations: cli
-                .total_iterations
-                .unwrap_or(env_params.total_iterations),
+            total_iterations: cli.total_iterations.unwrap_or(env_params.total_iterations),
             curriculum,
             grpo_group_size: cli.grpo_group_size,
-            grpo_kl_coef: cli.grpo_kl_coef,
         }
     };
 

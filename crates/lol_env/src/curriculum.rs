@@ -1,5 +1,5 @@
 //! 课程学习调度器模块
-//! 
+//!
 //! 该模块定义了智能体的课程学习阶段、配置及调度逻辑。
 //! 通过逐步提高任务难度，帮助智能体更快收敛。
 
@@ -148,8 +148,14 @@ impl CurriculumScheduler {
         let mut parameters = std::collections::HashMap::new();
         parameters.insert("小兵血量比例 (hp_scale)".to_string(), self.current_hp_scale);
         parameters.insert("补刀奖励 (cs_reward)".to_string(), self.config.cs_reward);
-        parameters.insert("无效攻击惩罚 (penalty)".to_string(), self.config.attack_no_cs_penalty);
-        parameters.insert("消耗对手系数 (harass)".to_string(), self.current_harass_coef);
+        parameters.insert(
+            "无效攻击惩罚 (penalty)".to_string(),
+            self.config.attack_no_cs_penalty,
+        );
+        parameters.insert(
+            "消耗对手系数 (harass)".to_string(),
+            self.current_harass_coef,
+        );
 
         lol_rl_protocol::CurriculumTelemetry {
             phase_index,

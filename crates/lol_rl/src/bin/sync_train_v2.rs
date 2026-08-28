@@ -39,7 +39,6 @@ fn main() -> anyhow::Result<()> {
         gae_lambda: 0.95,
         clip_eps: 0.2,
         c1: 0.5,
-        c2: 0.05,
         ppo_epochs: 8,
         clip_vloss: true,
         max_grad_norm: 0.5,
@@ -113,16 +112,24 @@ fn main() -> anyhow::Result<()> {
     let mut total_steps = 0usize;
 
     for iter in 1..=iters {
-        // 熵 + lr cosine 退火（对齐 A）
+        // 学习率 cosine 退火
         let progress = (iter - 1) as f32 / (iters - 1).max(1) as f32;
         let cos_progress = (1.0 + (std::f32::consts::PI * progress).cos()) * 0.5;
-        let current_c2 = (0.015 + (0.05 - 0.015) * cos_progress).max(0.015);
-        agent.set_entropy_coef(current_c2);
         let current_lr = (3e-4 * 0.1 + (3e-4 - 3e-4 * 0.1) * cos_progress as f64).max(3e-4 * 0.05);
         let _ = agent.set_lr(current_lr);
 
-        let cpu_policy = Arc::new(agent.actor_critic.policy.to_device(&candle_core::Device::Cpu)?);
-        let cpu_critic = Arc::new(agent.actor_critic.critic.to_device(&candle_core::Device::Cpu)?);
+        let cpu_policy = Arc::new(
+            agent
+                .actor_critic
+                .policy
+                .to_device(&candle_core::Device::Cpu)?,
+        );
+        let cpu_critic = Arc::new(
+            agent
+                .actor_critic
+                .critic
+                .to_device(&candle_core::Device::Cpu)?,
+        );
         for tx in &cmd_senders {
             let _ = tx.send(WorkerCommand::Rollout {
                 main_policy: cpu_policy.clone(),
