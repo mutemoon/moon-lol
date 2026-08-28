@@ -15,10 +15,12 @@ use rust_i18n::t;
 use crate::components::sidebar::AppSidebar;
 use crate::types::ActiveView;
 
-/// 可选算法模型（PPO + Mamba 状态空间模型 或 PPO + MLP 无状态感知机）。
+/// 可选算法模型（PPO / GRPO + Mamba 状态空间模型 或 MLP 无状态感知机）。
 const AGENT_OPTIONS: &[&str] = &[
     lol_rl_protocol::AGENT_PPO_MAMBA,
     lol_rl_protocol::AGENT_PPO_MLP,
+    lol_rl_protocol::AGENT_GRPO_MAMBA,
+    lol_rl_protocol::AGENT_GRPO_MLP,
 ];
 
 /// 任务概览表 delegate：驱动 `DataTable` 的列宽/单元格渲染，并反向通信到 `AppSidebar`。

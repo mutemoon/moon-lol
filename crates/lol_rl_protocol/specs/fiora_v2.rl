@@ -87,11 +87,8 @@ action FioraV2Action {
     }
 }
 
-// ── 奖励公式 ─────────────────────────────────────────────────────────────────
 reward FioraV2Reward {
-    term step_cost   : "时间惩罚" = -0.005;
-    term vital_hit   : "击破破绽" = 80.0 * is_vital_break;
-    term align       : "破绽对齐" = 5.0 * is_newly_aligned;
-    term distance    : "接近奖励" = -0.01 * (distance / 500.0);
-    term damage_deal : "造成伤害" = 100.0 * (damage_dealt / 10000.0);
+    term time_penalty : "每步时间惩罚"     = -0.001;
+    term damage_dealt : "造成伤害比例奖励" = 2.5 * damage_ratio;
+    term kill_reward  : "击杀瑞雯奖励"     = 2.0 * is_kill;
 }

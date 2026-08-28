@@ -61,6 +61,7 @@ fn render_single_env_card(
 
     let (obs_summary, act_summary) = match spec.name {
         lol_rl_protocol::ENV_SOLO_V0 => ("108 维 · 树状 AST", "混合控制 · 3 分支"),
+        lol_rl_protocol::ENV_FIORA_V3 => ("108 维 · 树状 AST", "补刀训练 · 3 分支"),
         lol_rl_protocol::ENV_FIORA_V2 => ("48 维 · 树状 AST", "连续 + 7 离散动作 (带掩码)"),
         lol_rl_protocol::ENV_FIORA_V1 => ("7 维 · 连续移动", "连续 + 2 离散动作"),
         lol_rl_protocol::ENV_FIORA_V0 => ("7 维 · 瞬移微操", "5 离散动作 (带掩码)"),

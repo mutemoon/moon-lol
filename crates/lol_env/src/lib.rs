@@ -4,6 +4,7 @@ pub use modifier_obs::*;
 pub mod fiora_v0;
 pub mod fiora_v1;
 pub mod fiora_v2;
+pub mod fiora_v3;
 pub mod flash_plugin;
 pub mod curriculum;
 pub mod obs_plugins;
@@ -27,6 +28,11 @@ pub use fiora_v2::{
     FIORA_V2_OBS_SCHEMA, FioraV2Action, FioraV2DiscreteAction, FioraV2Env, FioraV2Obs,
     FioraV2RewardContext, FioraV2RewardModel, V2_OBS_DISTANCE_IDX, V2_OBS_DISTANCE_SCALE,
 };
+pub use fiora_v3::{
+    FIORA_V3_OBS_DISTANCE_SCALE, FIORA_V3_OBS_SCHEMA, FIORA_V3_OFFSET_SCALE, FioraV3Action,
+    FioraV3DiscreteAction, FioraV3Env, FioraV3Obs, setup_fiora_v3_env_world,
+    setup_fiora_v3_health_world, step_fiora_v3_world,
+};
 pub use flash_plugin::{
     FLASH_COOLDOWN_SECS, FLASH_DISTANCE, FlashCooldown, dispatch_flash, extract_flash_obs,
     register_flash_plugin, tick_flash_cooldown,
@@ -39,8 +45,8 @@ pub use obs_plugins::{
     extract_skill_cds,
 };
 pub use parallel::{
-    ParallelEnvs, ParallelFioraV2Envs, ParallelFioraVsRivenEnvs, ParallelFioraVsRivenRealEnvs,
-    ParallelSoloV0Envs,
+    ParallelEnvs, ParallelFioraV2Envs, ParallelFioraV3Envs, ParallelFioraVsRivenEnvs,
+    ParallelFioraVsRivenRealEnvs, ParallelSoloV0Envs,
 };
 pub use reward::{FioraRewardContext, FioraVsRivenRewardModel, RewardModel};
 pub use solo_v0::{

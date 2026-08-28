@@ -77,6 +77,14 @@ pub struct Cli {
     #[arg(long)]
     pub curriculum_json: Option<String>,
 
+    /// GRPO 算法每组环境/轨迹大小（默认 4）
+    #[arg(long)]
+    pub grpo_group_size: Option<usize>,
+
+    /// GRPO 算法 KL 散度约束系数（默认 0.04）
+    #[arg(long)]
+    pub grpo_kl_coef: Option<f32>,
+
     /// 直接传入完整的 TaskConfigPayload JSON 字符串 (可选，提供时覆盖其他所有参数)
     #[arg(long)]
     pub config_json: Option<String>,
@@ -140,6 +148,8 @@ async fn main() {
                 .unwrap_or(env_params.total_iterations),
             backbone,
             curriculum,
+            grpo_group_size: cli.grpo_group_size,
+            grpo_kl_coef: cli.grpo_kl_coef,
         };
 
         if payload.backbone.is_none() {

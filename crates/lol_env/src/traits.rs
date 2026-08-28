@@ -285,6 +285,7 @@ macro_rules! for_all_rl_environments {
     ($macro_name:ident) => {
         $macro_name!(
             ($crate::solo_v0::SoloV0Env, lol_rl_protocol::ENV_SOLO_V0),
+            ($crate::fiora_v3::FioraV3Env, lol_rl_protocol::ENV_FIORA_V3),
             ($crate::fiora_v2::FioraV2Env, lol_rl_protocol::ENV_FIORA_V2),
             (
                 $crate::fiora_v1::FioraVsRivenRealEnv,
@@ -301,6 +302,7 @@ macro_rules! for_all_rl_environments {
 pub fn list_available_envs() -> Vec<EnvMeta> {
     vec![
         crate::solo_v0::SoloV0Env::meta(),
+        crate::fiora_v3::FioraV3Env::meta(),
         crate::fiora_v2::FioraV2Env::meta(),
         crate::fiora_v1::FioraVsRivenRealEnv::meta(),
         crate::fiora_v0::FioraVsRivenEnv::meta(),

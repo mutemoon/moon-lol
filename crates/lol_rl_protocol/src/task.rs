@@ -6,6 +6,8 @@ use crate::env_spec::{ENV_FIORA_V2, get_env_training_params};
 
 pub const AGENT_PPO_MAMBA: &str = "PPO (Mamba)";
 pub const AGENT_PPO_MLP: &str = "PPO (MLP)";
+pub const AGENT_GRPO_MAMBA: &str = "GRPO (Mamba)";
+pub const AGENT_GRPO_MLP: &str = "GRPO (MLP)";
 
 /// 策略网络的主干网络架构类型
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
@@ -83,6 +85,12 @@ pub struct TaskConfigPayload {
     /// 课程学习配置（可选，None 表示不使用课程学习，使用默认奖励函数）
     #[serde(default)]
     pub curriculum: Option<CurriculumConfig>,
+    /// GRPO 算法每组环境/轨迹大小（默认 4 或 8）
+    #[serde(default)]
+    pub grpo_group_size: Option<usize>,
+    /// GRPO 算法 KL 散度约束系数（默认 0.04）
+    #[serde(default)]
+    pub grpo_kl_coef: Option<f32>,
 }
 
 impl TaskConfigPayload {
@@ -103,7 +111,14 @@ impl TaskConfigPayload {
             total_iterations: params.total_iterations,
             backbone: Some(PolicyBackbone::Mlp),
             curriculum: None,
+            grpo_group_size: None,
+            grpo_kl_coef: None,
         }
+    }
+
+    /// 判断当前算法是否为 GRPO (Group Relative Policy Optimization)
+    pub fn is_grpo(&self) -> bool {
+        self.agent_type.to_uppercase().contains("GRPO")
     }
 
     /// 解析当前任务的主干网络架构（优先与 agent_type 一致，其次使用 backbone 字段）
@@ -147,6 +162,14 @@ impl TaskConfigPayload {
             "--total-iterations".to_string(),
             self.total_iterations.to_string(),
         ];
+        if let Some(group_size) = self.grpo_group_size {
+            args.push("--grpo-group-size".to_string());
+            args.push(group_size.to_string());
+        }
+        if let Some(kl_coef) = self.grpo_kl_coef {
+            args.push("--grpo-kl-coef".to_string());
+            args.push(kl_coef.to_string());
+        }
         if let Some(curriculum) = &self.curriculum {
             if let Ok(json) = serde_json::to_string(curriculum) {
                 args.push("--curriculum-json".to_string());

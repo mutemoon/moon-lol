@@ -15,9 +15,87 @@ use lol_env::RlEnvironment;
 use rand::seq::IndexedRandom;
 use tracing::{error, info};
 
-use crate::policy::ActorCritic;
+use crate::grpo::GRPOAgent;
+use crate::policy::{ActorCritic, ModelParamSummary};
 use crate::ppo::{PPOAgent, PPOStats};
 use crate::rollout::{RolloutWorker, WorkerCommand, WorkerTrajectory};
+
+/// 强化学习算法后端抽象：支持经典 PPO 与高效 GRPO
+pub enum RlAgent {
+    Ppo(PPOAgent),
+    Grpo(GRPOAgent),
+}
+
+impl From<PPOAgent> for RlAgent {
+    fn from(a: PPOAgent) -> Self {
+        Self::Ppo(a)
+    }
+}
+
+impl From<GRPOAgent> for RlAgent {
+    fn from(a: GRPOAgent) -> Self {
+        Self::Grpo(a)
+    }
+}
+
+impl RlAgent {
+    pub fn parameter_summary(&self) -> ModelParamSummary {
+        match self {
+            Self::Ppo(a) => a.parameter_summary(),
+            Self::Grpo(a) => a.parameter_summary(),
+        }
+    }
+
+    pub fn print_parameter_summary(&self) {
+        match self {
+            Self::Ppo(a) => a.print_parameter_summary(),
+            Self::Grpo(a) => a.print_parameter_summary(),
+        }
+    }
+
+    pub fn actor_critic(&self) -> &ActorCritic {
+        match self {
+            Self::Ppo(a) => &a.actor_critic,
+            Self::Grpo(a) => &a.actor_critic,
+        }
+    }
+
+    pub fn set_entropy_coef(&mut self, c2: f32) {
+        match self {
+            Self::Ppo(a) => a.set_entropy_coef(c2),
+            Self::Grpo(a) => a.set_entropy_coef(c2),
+        }
+    }
+
+    pub fn set_lr(&mut self, lr: f64) -> Result<()> {
+        match self {
+            Self::Ppo(a) => a.set_lr(lr),
+            Self::Grpo(a) => a.set_lr(lr),
+        }
+    }
+
+    pub fn save(&self, path: &std::path::Path) -> Result<()> {
+        match self {
+            Self::Ppo(a) => a.save(path),
+            Self::Grpo(a) => a.save(path),
+        }
+    }
+
+    pub fn update_multi_buffer(
+        &mut self,
+        buffers: &[crate::ppo::RolloutBuffer],
+        last_vals: &[f32],
+        mini_batch_size: usize,
+    ) -> Result<PPOStats> {
+        match self {
+            Self::Ppo(a) => a.update_multi_buffer(buffers, last_vals, mini_batch_size),
+            Self::Grpo(a) => {
+                let stats = a.update_multi_buffer(buffers, mini_batch_size)?;
+                Ok(stats.to_ppo_stats())
+            }
+        }
+    }
+}
 
 /// 一次训练迭代的产出（训练机制部分；DB/事件/日志等簿记由调用方完成）。
 pub struct StepOutcome<O> {
@@ -38,9 +116,9 @@ pub struct StepOutcome<O> {
     pub last_obs: Option<O>,
 }
 
-/// 同步训练会话：持有 PPOAgent + N 个持久化 Rollout Worker。
+/// 同步训练会话：持有 RlAgent + N 个持久化 Rollout Worker。
 pub struct TrainingSession<E: RlEnvironment + 'static> {
-    pub agent: PPOAgent,
+    pub agent: RlAgent,
     num_parallel_envs: usize,
     sampler_device: Device,
     cmd_senders: Vec<Sender<WorkerCommand>>,
@@ -52,17 +130,18 @@ pub struct TrainingSession<E: RlEnvironment + 'static> {
 }
 
 impl<E: RlEnvironment + 'static> TrainingSession<E> {
-    /// 初始化 PPO Agent 并启动 N 个持久化 Rollout Worker（环境只在此时初始化一次）。
+    /// 初始化训练会话并启动 N 个持久化 Rollout Worker（环境只在此时初始化一次）。
     ///
     /// `sampler_device` 指定采样前向运行的设备：`Device::Cpu`（默认，机制 A 的 CPU 推理路径）
     /// 或一个 GPU device（把每步策略前向放到 GPU，需权衡 kernel 启动/同步开销）。
     pub fn new(
-        agent: PPOAgent,
+        agent: impl Into<RlAgent>,
         num_parallel_envs: usize,
         state_dim: usize,
         horizon: usize,
         sampler_device: Device,
     ) -> Self {
+        let agent: RlAgent = agent.into();
         agent.print_parameter_summary();
 
         info!(
@@ -154,7 +233,7 @@ impl<E: RlEnvironment + 'static> TrainingSession<E> {
         let _ = self.agent.set_lr(lr);
 
         // 1. 克隆采样策略（设备与 sampler_device 一致，默认 CPU）
-        let sampler_policy = Arc::new(self.agent.actor_critic.to_device(&self.sampler_device)?);
+        let sampler_policy = Arc::new(self.agent.actor_critic().to_device(&self.sampler_device)?);
 
         // 2. 定期将策略快照存入历史对手池（仅多智能体自博弈环境启用，每 5 轮或第二轮开始）
         if is_multi_agent && (iter % 5 == 0 || (iter == 2 && self.opponent_pool.is_empty())) {
@@ -347,7 +426,10 @@ mod tests {
         );
         assert!(
             outcome.reward_breakdown.contains_key("补刀奖励")
+                || outcome.reward_breakdown.contains_key("补刀成功奖励")
+                || outcome.reward_breakdown.contains_key("攻击小兵未补刀惩罚")
                 || outcome.reward_breakdown.contains_key("攻击未补刀惩罚")
+                || outcome.reward_breakdown.contains_key("消耗对手奖励")
                 || outcome.reward_breakdown.contains_key("消耗对手")
         );
 
@@ -355,6 +437,50 @@ mod tests {
         session.update_curriculum(0.5, 1.0, 0.1, 0.3);
         let outcome2 = session.step_once(2, 3e-4, 0.05, 32)?;
         assert!(outcome2.num_samples > 0);
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_solo_v0_grpo_training_2_envs() -> Result<()> {
+        let device = Device::Cpu;
+        let grpo_config = crate::grpo::GRPOConfig {
+            lr: 3e-4,
+            gamma: 0.99,
+            clip_eps: 0.2,
+            c2: 0.05,
+            grpo_epochs: 2,
+            group_size: 2,
+            kl_coef: 0.04,
+            max_grad_norm: 0.5,
+        };
+
+        let state_dim = SoloV0Env::state_dim();
+        let hidden_dim = 64;
+        let action_space = SoloV0Env::action_space();
+
+        let agent = crate::grpo::GRPOAgent::create_for_env_with_backbone::<SoloV0Env>(
+            state_dim,
+            hidden_dim,
+            action_space,
+            grpo_config,
+            device.clone(),
+            PolicyBackbone::Mlp,
+        )?;
+
+        // 2 个并行环境，horizon = 30 步快速测试
+        let mut session = TrainingSession::<SoloV0Env>::new(agent, 2, state_dim, 30, device);
+
+        let outcome = session.step_once(1, 3e-4, 0.05, 32)?;
+        assert!(outcome.num_samples > 0);
+        assert_eq!(outcome.stats.value_loss, 0.0, "GRPO value loss 应恒为 0");
+        assert!(outcome.stats.policy_loss.is_finite());
+        assert!(outcome.sps > 0.0);
+
+        // 第二轮迭代
+        let outcome2 = session.step_once(2, 3e-4, 0.05, 32)?;
+        assert!(outcome2.num_samples > 0);
+        assert_eq!(outcome2.stats.value_loss, 0.0);
 
         Ok(())
     }

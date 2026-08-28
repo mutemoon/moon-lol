@@ -51,7 +51,11 @@ action FioraV1Action {
 
 // ── 奖励公式 ─────────────────────────────────────────────────────────────────
 reward FioraV1Reward {
-    term time_penalty : "时间惩罚" = -0.002;
-    term align        : "破绽对齐" = 0.02 * is_newly_aligned;
-    term vital_hit    : "击破破绽" = 0.8 * is_vital_break;
+    term time_penalty     : "时间惩罚 (Time Penalty)"               = -0.002;
+    term alignment        : "对齐破绽方向 (Alignment Bonus)"         = 0.02 * is_newly_aligned;
+    term misalignment     : "错误方向移动 (Misalignment Penalty)"     = -0.02 * is_misaligned_move;
+    term attack_miss      : "空挥攻击 (Attack Miss Penalty)"         = -0.1 * is_attack_missed;
+    term vital_break      : "打破绽成功 (Vital Break)"               = 0.8 * is_vital_break;
+    term kill_reward      : "击杀基础奖励 (Kill Reward)"             = 2.0 * is_kill;
+    term quick_kill_bonus : "极速击杀时效奖励 (Quick Kill Time Reward)" = if(is_kill > 0.5, quick_kill_reward, 0.0);
 }

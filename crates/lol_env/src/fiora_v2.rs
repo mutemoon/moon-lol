@@ -5,7 +5,7 @@ use lol_core::action::{Action, CommandAction};
 use lol_core::character::CharacterReady;
 use lol_core::life::Health;
 use lol_rl_protocol::{
-    ActionSchema, ActionSpace, ObsFeaturePayload, ObsSchema, RewardFormulaSpec, RewardTermSpec,
+    ActionSchema, ActionSpace, ObsFeaturePayload, ObsSchema, RewardFormulaSpec,
 };
 
 pub use crate::fiora_riven_common::{
@@ -384,30 +384,11 @@ pub struct FioraV2RewardModel;
 impl RewardModel for FioraV2RewardModel {
     type Context = FioraV2RewardContext;
 
-    fn formula_spec(&self) -> RewardFormulaSpec {
-        use lol_rl_protocol::RewardExpr;
-        RewardFormulaSpec {
-            name: "全技能实战公式 (V2)".to_string(),
-            terms: vec![
-                RewardTermSpec::new("time_penalty", "每步时间惩罚", RewardExpr::Constant(-0.001)),
-                RewardTermSpec::new(
-                    "damage_dealt",
-                    "造成伤害比例奖励",
-                    RewardExpr::Mul(
-                        Box::new(RewardExpr::Constant(2.5)),
-                        Box::new(RewardExpr::Variable("damage_ratio".to_string())),
-                    ),
-                ),
-                RewardTermSpec::new(
-                    "kill_reward",
-                    "击杀瑞雯奖励",
-                    RewardExpr::Mul(
-                        Box::new(RewardExpr::Constant(2.0)),
-                        Box::new(RewardExpr::Variable("is_kill".to_string())),
-                    ),
-                ),
-            ],
-        }
+    fn formula_spec(&self) -> &RewardFormulaSpec {
+        FIORA_V2_SPEC
+            .reward_formula
+            .as_ref()
+            .expect("FIORA_V2_SPEC 缺少 reward_formula DSL 规范")
     }
 
     fn extract_variables(&self, ctx: &FioraV2RewardContext) -> HashMap<String, f32> {

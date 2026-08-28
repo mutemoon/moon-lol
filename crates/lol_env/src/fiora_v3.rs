@@ -28,31 +28,31 @@ use crate::traits::{
 
 // ── 常量定义 ─────────────────────────────────────────────────────────────────
 
-pub const SOLO_V0_OFFSET_SCALE: f32 = 100.0;
-pub const SOLO_V0_MAX_VISIBLE_UNITS: usize = 20;
-pub const SOLO_V0_OBS_DISTANCE_SCALE: f32 = 100.0;
+pub const FIORA_V3_OFFSET_SCALE: f32 = 100.0;
+pub const FIORA_V3_MAX_VISIBLE_UNITS: usize = 20;
+pub const FIORA_V3_OBS_DISTANCE_SCALE: f32 = 100.0;
 
-pub static SOLO_V0_SPEC: std::sync::LazyLock<&'static lol_rl_protocol::EnvDslSpec> =
-    std::sync::LazyLock::new(|| &lol_rl_protocol::SPEC_SOLO_V0);
+pub static FIORA_V3_SPEC: std::sync::LazyLock<&'static lol_rl_protocol::EnvDslSpec> =
+    std::sync::LazyLock::new(|| &lol_rl_protocol::SPEC_FIORA_V3);
 
-pub static SOLO_V0_OBS_SCHEMA: std::sync::LazyLock<ObsSchema> = std::sync::LazyLock::new(|| {
-    SOLO_V0_SPEC
+pub static FIORA_V3_OBS_SCHEMA: std::sync::LazyLock<ObsSchema> = std::sync::LazyLock::new(|| {
+    FIORA_V3_SPEC
         .obs_schema
         .clone()
-        .expect("SPEC_SOLO_V0 缺少 obs_schema")
+        .expect("FIORA_V3_SPEC 缺少 obs_schema")
 });
 
-pub static SOLO_V0_ACTION_SCHEMA: std::sync::LazyLock<ActionSchema> =
+pub static FIORA_V3_ACTION_SCHEMA: std::sync::LazyLock<ActionSchema> =
     std::sync::LazyLock::new(|| {
-        SOLO_V0_SPEC
+        FIORA_V3_SPEC
             .action_schema
             .clone()
-            .expect("SPEC_SOLO_V0 缺少 action_schema")
+            .expect("FIORA_V3_SPEC 缺少 action_schema")
     });
 
 // ── 初始化与重置 ─────────────────────────────────────────────────────────────
 
-pub fn setup_solo_v0_health_world(world: &mut World, fiora: Entity, riven: Entity) {
+pub fn setup_fiora_v3_health_world(world: &mut World, fiora: Entity, riven: Entity) {
     for champion in [fiora, riven] {
         if let Some(mut hp) = world.get_mut::<Health>(champion) {
             hp.value = hp.max;
@@ -75,7 +75,7 @@ pub fn setup_solo_v0_health_world(world: &mut World, fiora: Entity, riven: Entit
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-pub enum SoloV0DiscreteAction {
+pub enum FioraV3DiscreteAction {
     NoOp = 0,
     Move = 1,
     Attack = 2,
@@ -86,7 +86,7 @@ pub enum SoloV0DiscreteAction {
     CastFlash = 7,
 }
 
-impl SoloV0DiscreteAction {
+impl FioraV3DiscreteAction {
     pub fn from_u8(val: u8) -> Self {
         match val {
             0 => Self::NoOp,
@@ -107,15 +107,15 @@ impl SoloV0DiscreteAction {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
-pub struct SoloV0Action {
+pub struct FioraV3Action {
     pub offset_x: f32,
     pub offset_z: f32,
     pub target_idx: u8,
-    pub discrete: SoloV0DiscreteAction,
+    pub discrete: FioraV3DiscreteAction,
 }
 
-impl SoloV0Action {
-    pub const fn new(offset_x: f32, offset_z: f32, discrete: SoloV0DiscreteAction) -> Self {
+impl FioraV3Action {
+    pub const fn new(offset_x: f32, offset_z: f32, discrete: FioraV3DiscreteAction) -> Self {
         Self {
             offset_x,
             offset_z,
@@ -128,7 +128,7 @@ impl SoloV0Action {
         offset_x: f32,
         offset_z: f32,
         target_idx: u8,
-        discrete: SoloV0DiscreteAction,
+        discrete: FioraV3DiscreteAction,
     ) -> Self {
         Self {
             offset_x,
@@ -148,7 +148,7 @@ impl SoloV0Action {
                 offset_x,
                 offset_z,
                 target_idx,
-                discrete: SoloV0DiscreteAction::from_u8(discrete_idx),
+                discrete: FioraV3DiscreteAction::from_u8(discrete_idx),
             }
         } else {
             let discrete_idx = encoded.get(2).copied().unwrap_or(0.0) as u8;
@@ -156,7 +156,7 @@ impl SoloV0Action {
                 offset_x,
                 offset_z,
                 target_idx: 0,
-                discrete: SoloV0DiscreteAction::from_u8(discrete_idx),
+                discrete: FioraV3DiscreteAction::from_u8(discrete_idx),
             }
         }
     }
@@ -172,41 +172,41 @@ impl SoloV0Action {
 
     pub fn preset_from_index(index: usize) -> Self {
         match index {
-            0 => Self::new(0.0, 0.0, SoloV0DiscreteAction::NoOp),
-            1 => Self::new(0.5, 0.0, SoloV0DiscreteAction::Move),
-            2 => Self::new(0.0, 0.0, SoloV0DiscreteAction::Attack),
-            3 => Self::new(0.5, 0.0, SoloV0DiscreteAction::CastQ),
-            4 => Self::new(0.0, 0.0, SoloV0DiscreteAction::CastW),
-            5 => Self::new(0.0, 0.0, SoloV0DiscreteAction::CastE),
-            6 => Self::new(0.0, 0.0, SoloV0DiscreteAction::CastR),
-            7 => Self::new(1.0, 0.0, SoloV0DiscreteAction::CastFlash),
-            _ => Self::new(0.0, 0.0, SoloV0DiscreteAction::NoOp),
+            0 => Self::new(0.0, 0.0, FioraV3DiscreteAction::NoOp),
+            1 => Self::new(0.5, 0.0, FioraV3DiscreteAction::Move),
+            2 => Self::new(0.0, 0.0, FioraV3DiscreteAction::Attack),
+            3 => Self::new(0.5, 0.0, FioraV3DiscreteAction::CastQ),
+            4 => Self::new(0.0, 0.0, FioraV3DiscreteAction::CastW),
+            5 => Self::new(0.0, 0.0, FioraV3DiscreteAction::CastE),
+            6 => Self::new(0.0, 0.0, FioraV3DiscreteAction::CastR),
+            7 => Self::new(1.0, 0.0, FioraV3DiscreteAction::CastFlash),
+            _ => Self::new(0.0, 0.0, FioraV3DiscreteAction::NoOp),
         }
     }
 
     pub fn preset_index(&self) -> usize {
         match self.discrete {
-            SoloV0DiscreteAction::NoOp => 0,
-            SoloV0DiscreteAction::Move => 1,
-            SoloV0DiscreteAction::Attack => 2,
-            SoloV0DiscreteAction::CastQ => 3,
-            SoloV0DiscreteAction::CastW => 4,
-            SoloV0DiscreteAction::CastE => 5,
-            SoloV0DiscreteAction::CastR => 6,
-            SoloV0DiscreteAction::CastFlash => 7,
+            FioraV3DiscreteAction::NoOp => 0,
+            FioraV3DiscreteAction::Move => 1,
+            FioraV3DiscreteAction::Attack => 2,
+            FioraV3DiscreteAction::CastQ => 3,
+            FioraV3DiscreteAction::CastW => 4,
+            FioraV3DiscreteAction::CastE => 5,
+            FioraV3DiscreteAction::CastR => 6,
+            FioraV3DiscreteAction::CastFlash => 7,
         }
     }
 
     pub fn desc(&self) -> &'static str {
         match self.discrete {
-            SoloV0DiscreteAction::NoOp => "保持当前 (NoOp)",
-            SoloV0DiscreteAction::Move => "移动",
-            SoloV0DiscreteAction::Attack => "普通攻击",
-            SoloV0DiscreteAction::CastQ => "施放 Q",
-            SoloV0DiscreteAction::CastW => "施放 W",
-            SoloV0DiscreteAction::CastE => "施放 E",
-            SoloV0DiscreteAction::CastR => "施放 R",
-            SoloV0DiscreteAction::CastFlash => "闪现",
+            FioraV3DiscreteAction::NoOp => "保持当前 (NoOp)",
+            FioraV3DiscreteAction::Move => "移动",
+            FioraV3DiscreteAction::Attack => "普通攻击",
+            FioraV3DiscreteAction::CastQ => "施放 Q",
+            FioraV3DiscreteAction::CastW => "施放 W",
+            FioraV3DiscreteAction::CastE => "施放 E",
+            FioraV3DiscreteAction::CastR => "施放 R",
+            FioraV3DiscreteAction::CastFlash => "闪现",
         }
     }
 }
@@ -214,7 +214,7 @@ impl SoloV0Action {
 // ── 自我中心化观测数据结构 ─────────────────────────────────────────────────────
 
 #[derive(Debug, Clone)]
-pub struct SoloV0Obs {
+pub struct FioraV3Obs {
     pub role_id: f32,
 
     pub self_pos: Vec3,
@@ -249,7 +249,7 @@ pub struct SoloV0Obs {
     pub visible_unit_entities: Vec<Option<Entity>>,
 }
 
-impl SoloV0Obs {
+impl FioraV3Obs {
     pub fn to_context(&self) -> lol_rl_protocol::ObsContext {
         let mut ctx = lol_rl_protocol::ObsContext::new();
         ctx.set_var("role_id", self.role_id);
@@ -305,11 +305,11 @@ impl SoloV0Obs {
     }
 
     pub fn to_vector(&self) -> Vec<f32> {
-        SOLO_V0_OBS_SCHEMA.eval_to_vector(&self.to_context())
+        FIORA_V3_OBS_SCHEMA.eval_to_vector(&self.to_context())
     }
 
     pub fn dim() -> usize {
-        SOLO_V0_OBS_SCHEMA.raw_dim()
+        FIORA_V3_OBS_SCHEMA.raw_dim()
     }
 
     pub fn to_payload(&self) -> ObsFeaturePayload {
@@ -476,8 +476,8 @@ pub fn apply_minion_hp_scale(world: &mut World, scale: f32) {
 }
 
 /// 统一的有头/无头世界初始化与重置逻辑（双方满血、闪现重置与小兵课程血量设置）
-pub fn setup_solo_v0_env_world(fiora: Entity, riven: Entity, world: &mut World) {
-    setup_solo_v0_health_world(world, fiora, riven);
+pub fn setup_fiora_v3_env_world(fiora: Entity, riven: Entity, world: &mut World) {
+    setup_fiora_v3_health_world(world, fiora, riven);
     let scale = world
         .get_resource::<CurriculumRewardConfig>()
         .map(|c| c.minion_hp_scale)
@@ -485,24 +485,24 @@ pub fn setup_solo_v0_env_world(fiora: Entity, riven: Entity, world: &mut World) 
     apply_minion_hp_scale(world, scale);
 }
 
-pub struct SoloV0Env {
+pub struct FioraV3Env {
     pub base: FioraRivenBaseEnv,
 }
 
-impl std::ops::Deref for SoloV0Env {
+impl std::ops::Deref for FioraV3Env {
     type Target = FioraRivenBaseEnv;
     fn deref(&self) -> &Self::Target {
         &self.base
     }
 }
 
-impl std::ops::DerefMut for SoloV0Env {
+impl std::ops::DerefMut for FioraV3Env {
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.base
     }
 }
 
-impl SoloV0Env {
+impl FioraV3Env {
     pub const DEFAULT_MAX_STEPS: usize = 160;
 
     pub fn new() -> Self {
@@ -518,7 +518,7 @@ impl SoloV0Env {
 
     pub fn with_config(config: EnvConfig) -> Self {
         let base = FioraRivenBaseEnv::builder(config, Self::DEFAULT_MAX_STEPS)
-            .window_title("Solo 1v1 V0 (Self-Play RL Viewer)")
+            .window_title("Fiora V3 (Last Hit Viewer)")
             .map_name("solo")
             .enable_barrack(true)
             .initial_positions(
@@ -528,8 +528,8 @@ impl SoloV0Env {
             .initial_skill_levels([1, 0, 0, 0])
             .warmup_secs(30.0)
             .with_plugin(register_flash_plugin)
-            .on_ready(setup_solo_v0_env_world)
-            .on_reset(setup_solo_v0_env_world)
+            .on_ready(setup_fiora_v3_env_world)
+            .on_reset(setup_fiora_v3_env_world)
             .build();
 
         Self { base }
@@ -576,57 +576,32 @@ impl SoloV0Env {
     pub fn step_count(&self) -> usize {
         self.base.step_count()
     }
-
-    pub fn reset_both(&mut self) -> Vec<SoloV0Obs> {
-        self.base.reset_base();
-        vec![
-            get_ego_obs_from_world(self.base.world(), self.base.fiora, self.base.riven, 0.0),
-            get_ego_obs_from_world(self.base.world(), self.base.riven, self.base.fiora, 1.0),
-        ]
-    }
-
-    pub fn step_both(
-        &mut self,
-        act_fiora: SoloV0Action,
-        act_riven: SoloV0Action,
-    ) -> (StepResult<SoloV0Obs>, StepResult<SoloV0Obs>) {
-        self.base.increment_step();
-        step_solo_v0_world(
-            &mut self.base.app,
-            self.base.fiora,
-            self.base.riven,
-            act_fiora,
-            act_riven,
-            self.base.step_count,
-            self.base.max_steps,
-        )
-    }
 }
 
 // ── RlEnvironment Trait 实现 ─────────────────────────────────────────────────
 
-impl RlEnvironment for SoloV0Env {
-    type Action = SoloV0Action;
-    type Obs = SoloV0Obs;
+impl RlEnvironment for FioraV3Env {
+    type Action = FioraV3Action;
+    type Obs = FioraV3Obs;
 
     fn num_agents() -> usize {
-        2
+        1
     }
 
     fn agent_names() -> &'static [&'static str] {
-        &["Fiora", "Riven"]
+        &["Fiora"]
     }
 
     fn env_name() -> &'static str {
-        "SoloV0"
+        "FioraV3"
     }
 
     fn display_name() -> &'static str {
-        "Solo 1v1 (自博弈 V0)"
+        "Fiora V3 (补刀训练)"
     }
 
     fn description() -> &'static str {
-        "剑姬 vs 瑞雯 Solo 1v1 双智能体自博弈环境（真实地图召唤师峡谷上路对线，1级Q技能+闪现，40s兵线交汇起手）"
+        "剑姬在召唤师峡谷上路Solo地图进行对线补刀训练（补刀成功奖励，普通攻击未补刀惩罚）"
     }
 
     fn action_space() -> ActionSpace {
@@ -641,7 +616,7 @@ impl RlEnvironment for SoloV0Env {
     }
 
     fn state_dim() -> usize {
-        SoloV0Obs::dim()
+        FioraV3Obs::dim()
     }
 
     fn action_labels() -> &'static [&'static str] {
@@ -658,15 +633,15 @@ impl RlEnvironment for SoloV0Env {
     }
 
     fn obs_schema() -> Option<ObsSchema> {
-        Some(SOLO_V0_OBS_SCHEMA.clone())
+        Some(FIORA_V3_OBS_SCHEMA.clone())
     }
 
     fn action_schema() -> Option<ActionSchema> {
-        Some(SOLO_V0_ACTION_SCHEMA.clone())
+        Some(FIORA_V3_ACTION_SCHEMA.clone())
     }
 
     fn action_from_index(idx: usize) -> Self::Action {
-        SoloV0Action::preset_from_index(idx)
+        FioraV3Action::preset_from_index(idx)
     }
 
     fn action_to_index(action: Self::Action) -> usize {
@@ -674,7 +649,7 @@ impl RlEnvironment for SoloV0Env {
     }
 
     fn action_from_encoding(encoded: &[f32]) -> Self::Action {
-        SoloV0Action::from_encoding(encoded)
+        FioraV3Action::from_encoding(encoded)
     }
 
     fn action_to_encoding(action: Self::Action) -> Vec<f32> {
@@ -702,23 +677,38 @@ impl RlEnvironment for SoloV0Env {
     }
 
     fn reset(&mut self) -> Vec<Self::Obs> {
-        self.reset_both()
+        self.base.reset_base();
+        vec![get_ego_obs_from_world(
+            self.base.world(),
+            self.base.fiora,
+            self.base.riven,
+            0.0,
+        )]
     }
 
     fn step(&mut self, actions: &[Self::Action]) -> Vec<StepResult<Self::Obs>> {
-        let fiora_action = actions.first().copied().unwrap_or(SoloV0Action::new(
+        let fiora_action = actions.first().copied().unwrap_or(FioraV3Action::new(
             0.0,
             0.0,
-            SoloV0DiscreteAction::NoOp,
+            FioraV3DiscreteAction::NoOp,
         ));
-        let riven_action = if actions.len() > 1 {
-            actions[1]
-        } else {
-            get_default_riven_combat_action(self.base.world(), self.base.riven, self.base.fiora)
-        };
+        let riven_action = get_default_riven_combat_action(
+            self.base.world(),
+            self.base.riven,
+            self.base.fiora,
+        );
 
-        let (f_res, r_res) = self.step_both(fiora_action, riven_action);
-        vec![f_res, r_res]
+        self.base.increment_step();
+        let res = step_fiora_v3_world(
+            &mut self.base.app,
+            self.base.fiora,
+            self.base.riven,
+            fiora_action,
+            riven_action,
+            self.base.step_count,
+            self.base.max_steps,
+        );
+        vec![res]
     }
 
     fn obs_to_vector(obs: &Self::Obs) -> Vec<f32> {
@@ -771,10 +761,10 @@ impl RlEnvironment for SoloV0Env {
             false, // 7: Flash
         ];
 
-        let mut conditional_target_masks = Vec::with_capacity(SOLO_V0_MAX_VISIBLE_UNITS);
-        let mut target_valid_mask = Vec::with_capacity(SOLO_V0_MAX_VISIBLE_UNITS);
+        let mut conditional_target_masks = Vec::with_capacity(FIORA_V3_MAX_VISIBLE_UNITS);
+        let mut target_valid_mask = Vec::with_capacity(FIORA_V3_MAX_VISIBLE_UNITS);
 
-        for target_idx in 0..SOLO_V0_MAX_VISIBLE_UNITS {
+        for target_idx in 0..FIORA_V3_MAX_VISIBLE_UNITS {
             if target_idx == 0 {
                 target_valid_mask.push(true);
                 conditional_target_masks.push(enemy_action_mask.clone());
@@ -805,7 +795,7 @@ impl RlEnvironment for SoloV0Env {
     }
 
     fn reward_formula_spec() -> Option<RewardFormulaSpec> {
-        SOLO_V0_SPEC.reward_formula.clone()
+        FIORA_V3_SPEC.reward_formula.clone()
     }
 
     fn update_curriculum(
@@ -830,13 +820,13 @@ impl RlEnvironment for SoloV0Env {
 
 // ── VisualEnvironment Trait 实现 ─────────────────────────────────────────────
 
-impl VisualEnvironment for SoloV0Env {
+impl VisualEnvironment for FioraV3Env {
     fn take_app(&mut self) -> App {
         std::mem::replace(&mut self.base.app, App::new())
     }
 
     fn window_title(&self) -> &'static str {
-        "Solo 1v1 V0 (Self-Play RL Viewer)"
+        "Fiora V3 (Last Hit Viewer)"
     }
 
     fn is_assets_loaded(&self, world: &World) -> bool {
@@ -849,17 +839,16 @@ impl VisualEnvironment for SoloV0Env {
 
     fn reset_world(&mut self, app: &mut App) -> Vec<Self::Obs> {
         let (fiora, riven) = self.base.reset_app(app);
-        vec![
-            get_ego_obs_from_world(app.world(), fiora, riven, 0.0),
-            get_ego_obs_from_world(app.world(), riven, fiora, 1.0),
-        ]
+        vec![get_ego_obs_from_world(app.world(), fiora, riven, 0.0)]
     }
 
     fn get_current_obs_all(&self, world: &World) -> Vec<Self::Obs> {
-        vec![
-            get_ego_obs_from_world(world, self.base.fiora, self.base.riven, 0.0),
-            get_ego_obs_from_world(world, self.base.riven, self.base.fiora, 1.0),
-        ]
+        vec![get_ego_obs_from_world(
+            world,
+            self.base.fiora,
+            self.base.riven,
+            0.0,
+        )]
     }
 
     fn step_world(
@@ -867,19 +856,19 @@ impl VisualEnvironment for SoloV0Env {
         app: &mut App,
         actions: &[Self::Action],
     ) -> Vec<StepResult<Self::Obs>> {
-        let fiora_action = actions.first().copied().unwrap_or(SoloV0Action::new(
+        let fiora_action = actions.first().copied().unwrap_or(FioraV3Action::new(
             0.0,
             0.0,
-            SoloV0DiscreteAction::NoOp,
+            FioraV3DiscreteAction::NoOp,
         ));
-        let riven_action = if actions.len() > 1 {
-            actions[1]
-        } else {
-            get_default_riven_combat_action(app.world(), self.base.riven, self.base.fiora)
-        };
+        let riven_action = get_default_riven_combat_action(
+            app.world(),
+            self.base.riven,
+            self.base.fiora,
+        );
 
         self.base.increment_step();
-        let (f_res, r_res) = step_solo_v0_world(
+        let res = step_fiora_v3_world(
             app,
             self.base.fiora,
             self.base.riven,
@@ -888,7 +877,7 @@ impl VisualEnvironment for SoloV0Env {
             self.base.step_count,
             self.base.max_steps,
         );
-        vec![f_res, r_res]
+        vec![res]
     }
 }
 
@@ -898,7 +887,7 @@ pub fn get_default_riven_combat_action(
     world: &World,
     riven: Entity,
     fiora: Entity,
-) -> SoloV0Action {
+) -> FioraV3Action {
     let r_base = extract_champion_base(world, riven);
     let f_base = extract_champion_base(world, fiora);
     let dist = r_base.pos.distance(f_base.pos);
@@ -906,7 +895,7 @@ pub fn get_default_riven_combat_action(
     let skills = extract_skill_cds(world, riven);
 
     if atk.is_windup {
-        return SoloV0Action::new(0.0, 0.0, SoloV0DiscreteAction::NoOp);
+        return FioraV3Action::new(0.0, 0.0, FioraV3DiscreteAction::NoOp);
     }
 
     let target_modifiers = extract_entity_modifiers(world, riven, 4);
@@ -925,24 +914,24 @@ pub fn get_default_riven_combat_action(
 
     if dist <= ATTACK_MASK_DISTANCE {
         if skills[1].ready {
-            SoloV0Action::new(0.0, 0.0, SoloV0DiscreteAction::CastW)
+            FioraV3Action::new(0.0, 0.0, FioraV3DiscreteAction::CastW)
         } else if skills[0].ready {
-            SoloV0Action::new(offset_x, offset_z, SoloV0DiscreteAction::CastQ)
+            FioraV3Action::new(offset_x, offset_z, FioraV3DiscreteAction::CastQ)
         } else if !atk.is_cooldown {
-            SoloV0Action::new(0.0, 0.0, SoloV0DiscreteAction::Attack)
+            FioraV3Action::new(0.0, 0.0, FioraV3DiscreteAction::Attack)
         } else if skills[2].ready {
-            SoloV0Action::new(offset_x, offset_z, SoloV0DiscreteAction::CastE)
+            FioraV3Action::new(offset_x, offset_z, FioraV3DiscreteAction::CastE)
         } else if skills[3].ready {
-            SoloV0Action::new(0.0, 0.0, SoloV0DiscreteAction::CastR)
+            FioraV3Action::new(0.0, 0.0, FioraV3DiscreteAction::CastR)
         } else {
-            SoloV0Action::new(offset_x, offset_z, SoloV0DiscreteAction::Move)
+            FioraV3Action::new(offset_x, offset_z, FioraV3DiscreteAction::Move)
         }
     } else if skills[2].ready {
-        SoloV0Action::new(0.0, 0.0, SoloV0DiscreteAction::CastE)
+        FioraV3Action::new(0.0, 0.0, FioraV3DiscreteAction::CastE)
     } else if skills[0].ready {
-        SoloV0Action::new(0.0, 0.0, SoloV0DiscreteAction::CastQ)
+        FioraV3Action::new(0.0, 0.0, FioraV3DiscreteAction::CastQ)
     } else {
-        SoloV0Action::new(0.0, 0.0, SoloV0DiscreteAction::Move)
+        FioraV3Action::new(0.0, 0.0, FioraV3DiscreteAction::Move)
     }
 }
 
@@ -982,11 +971,11 @@ pub fn get_visible_minion_entities(
     let mut candidates = enemy_minions;
     candidates.extend(ally_minions);
 
-    let mut entities = Vec::with_capacity(SOLO_V0_MAX_VISIBLE_UNITS - 1);
-    let mut slots = Vec::with_capacity(SOLO_V0_MAX_VISIBLE_UNITS - 1);
+    let mut entities = Vec::with_capacity(FIORA_V3_MAX_VISIBLE_UNITS - 1);
+    let mut slots = Vec::with_capacity(FIORA_V3_MAX_VISIBLE_UNITS - 1);
 
     for (e, _dist, m_pos, team, hp_val, hp_max, m_type) in
-        candidates.into_iter().take(SOLO_V0_MAX_VISIBLE_UNITS - 1)
+        candidates.into_iter().take(FIORA_V3_MAX_VISIBLE_UNITS - 1)
     {
         let type_code = match m_type {
             Minion::Melee => 2.0,
@@ -1025,8 +1014,8 @@ pub fn extract_visible_units_from_world(
     target_hp: f32,
     target_max_hp: f32,
 ) -> (Vec<lol_rl_protocol::ObsContext>, Vec<Option<Entity>>) {
-    let mut slots = Vec::with_capacity(SOLO_V0_MAX_VISIBLE_UNITS);
-    let mut entities = Vec::with_capacity(SOLO_V0_MAX_VISIBLE_UNITS);
+    let mut slots = Vec::with_capacity(FIORA_V3_MAX_VISIBLE_UNITS);
+    let mut entities = Vec::with_capacity(FIORA_V3_MAX_VISIBLE_UNITS);
 
     // Slot 0: 对手英雄
     slots.push(
@@ -1051,7 +1040,7 @@ pub fn extract_visible_units_from_world(
     slots.extend(minion_slots);
     entities.extend(minion_entities.into_iter().map(Some));
 
-    while slots.len() < SOLO_V0_MAX_VISIBLE_UNITS {
+    while slots.len() < FIORA_V3_MAX_VISIBLE_UNITS {
         slots.push(lol_rl_protocol::ObsContext::new());
         entities.push(None);
     }
@@ -1064,7 +1053,7 @@ pub fn get_ego_obs_from_world(
     self_entity: Entity,
     target_entity: Entity,
     role_id: f32,
-) -> SoloV0Obs {
+) -> FioraV3Obs {
     let self_base = extract_champion_base(world, self_entity);
     let target_base = extract_champion_base(world, target_entity);
     let dist = self_base.pos.distance(target_base.pos);
@@ -1088,7 +1077,7 @@ pub fn get_ego_obs_from_world(
         target_base.max_hp,
     );
 
-    SoloV0Obs {
+    FioraV3Obs {
         role_id,
         self_pos: self_base.pos,
         self_hp: self_base.hp,
@@ -1122,7 +1111,7 @@ pub fn dispatch_single_action(
     world: &mut World,
     self_entity: Entity,
     target_entity: Entity,
-    action: SoloV0Action,
+    action: FioraV3Action,
 ) {
     let tpos = world
         .get::<Transform>(target_entity)
@@ -1154,9 +1143,9 @@ pub fn dispatch_single_action(
         .unwrap_or(tpos);
 
     let target_offset_pos = Vec3::new(
-        chosen_target_pos.x + action.offset_x.clamp(-1.0, 1.0) * SOLO_V0_OFFSET_SCALE,
+        chosen_target_pos.x + action.offset_x.clamp(-1.0, 1.0) * FIORA_V3_OFFSET_SCALE,
         chosen_target_pos.y,
-        chosen_target_pos.z + action.offset_z.clamp(-1.0, 1.0) * SOLO_V0_OFFSET_SCALE,
+        chosen_target_pos.z + action.offset_z.clamp(-1.0, 1.0) * FIORA_V3_OFFSET_SCALE,
     );
 
     let chosen_target_team = world.get::<Team>(chosen_target).copied();
@@ -1168,11 +1157,11 @@ pub fn dispatch_single_action(
     // 友方目标防御性降级：若选中的是非敌方目标（友军/自身），普攻和技能自动降级为 Move
     let actual_discrete = if !is_target_enemy {
         match action.discrete {
-            SoloV0DiscreteAction::Attack
-            | SoloV0DiscreteAction::CastQ
-            | SoloV0DiscreteAction::CastW
-            | SoloV0DiscreteAction::CastE
-            | SoloV0DiscreteAction::CastR => SoloV0DiscreteAction::Move,
+            FioraV3DiscreteAction::Attack
+            | FioraV3DiscreteAction::CastQ
+            | FioraV3DiscreteAction::CastW
+            | FioraV3DiscreteAction::CastE
+            | FioraV3DiscreteAction::CastR => FioraV3DiscreteAction::Move,
             other => other,
         }
     } else {
@@ -1180,20 +1169,20 @@ pub fn dispatch_single_action(
     };
 
     match actual_discrete {
-        SoloV0DiscreteAction::NoOp => {}
-        SoloV0DiscreteAction::Move => {
+        FioraV3DiscreteAction::NoOp => {}
+        FioraV3DiscreteAction::Move => {
             world.trigger(CommandAction {
                 entity: self_entity,
                 action: Action::Move(Vec2::new(target_offset_pos.x, target_offset_pos.z)),
             });
         }
-        SoloV0DiscreteAction::Attack => {
+        FioraV3DiscreteAction::Attack => {
             world.trigger(CommandAction {
                 entity: self_entity,
                 action: Action::Attack(chosen_target),
             });
         }
-        SoloV0DiscreteAction::CastQ => {
+        FioraV3DiscreteAction::CastQ => {
             world.trigger(CommandAction {
                 entity: self_entity,
                 action: Action::Skill {
@@ -1202,7 +1191,7 @@ pub fn dispatch_single_action(
                 },
             });
         }
-        SoloV0DiscreteAction::CastW => {
+        FioraV3DiscreteAction::CastW => {
             world.trigger(CommandAction {
                 entity: self_entity,
                 action: Action::Skill {
@@ -1211,7 +1200,7 @@ pub fn dispatch_single_action(
                 },
             });
         }
-        SoloV0DiscreteAction::CastE => {
+        FioraV3DiscreteAction::CastE => {
             world.trigger(CommandAction {
                 entity: self_entity,
                 action: Action::Skill {
@@ -1220,7 +1209,7 @@ pub fn dispatch_single_action(
                 },
             });
         }
-        SoloV0DiscreteAction::CastR => {
+        FioraV3DiscreteAction::CastR => {
             world.trigger(CommandAction {
                 entity: self_entity,
                 action: Action::Skill {
@@ -1229,7 +1218,7 @@ pub fn dispatch_single_action(
                 },
             });
         }
-        SoloV0DiscreteAction::CastFlash => {
+        FioraV3DiscreteAction::CastFlash => {
             let offset_dir = Vec3::new(action.offset_x, 0.0, action.offset_z);
             let dir = if offset_dir.length_squared() > 1e-4 {
                 offset_dir.normalize()
@@ -1246,40 +1235,26 @@ pub fn dispatch_single_action(
     }
 }
 
-pub fn step_solo_v0_world(
+pub fn step_fiora_v3_world(
     app: &mut App,
     fiora: Entity,
     riven: Entity,
-    act_fiora: SoloV0Action,
-    act_riven: SoloV0Action,
+    act_fiora: FioraV3Action,
+    act_riven: FioraV3Action,
     step_count: usize,
     max_steps: usize,
-) -> (StepResult<SoloV0Obs>, StepResult<SoloV0Obs>) {
+) -> StepResult<FioraV3Obs> {
     let prev_f_obs = get_ego_obs_from_world(app.world(), fiora, riven, 0.0);
-    let prev_r_obs = get_ego_obs_from_world(app.world(), riven, fiora, 1.0);
-    let prev_f_hp = prev_f_obs.self_hp;
-    let prev_r_hp = prev_r_obs.self_hp;
     let prev_f_cs = app
         .world()
         .get::<ChampionStats>(fiora)
         .map(|s| s.minion_kills)
         .unwrap_or(0);
-    let prev_r_cs = app
-        .world()
-        .get::<ChampionStats>(riven)
-        .map(|s| s.minion_kills)
-        .unwrap_or(0);
 
-    // 记录更新前的小兵血量与队伍
-    let mut prev_minion_hps: HashMap<Entity, (Team, f32)> = HashMap::new();
-    {
-        let mut q_minions = app
-            .world_mut()
-            .query_filtered::<(Entity, &Team, &Health), With<Minion>>();
-        for (e, team, hp) in q_minions.iter(app.world()) {
-            prev_minion_hps.insert(e, (*team, hp.value));
-        }
-    }
+    // 1. 识别对小兵的普通攻击行为
+    let fiora_attacked_minion = act_fiora.discrete == FioraV3DiscreteAction::Attack
+        && act_fiora.target_idx > 0
+        && prev_f_obs.is_target_enemy(act_fiora.target_idx as usize);
 
     dispatch_single_action(app.world_mut(), fiora, riven, act_fiora);
     dispatch_single_action(app.world_mut(), riven, fiora, act_riven);
@@ -1290,108 +1265,44 @@ pub fn step_solo_v0_world(
     }
 
     let curr_f_obs = get_ego_obs_from_world(app.world(), fiora, riven, 0.0);
-    let curr_r_obs = get_ego_obs_from_world(app.world(), riven, fiora, 1.0);
     let curr_f_hp = curr_f_obs.self_hp;
-    let curr_r_hp = curr_r_obs.self_hp;
+    let curr_r_hp = curr_f_obs.target_hp;
     let curr_f_cs = app
         .world()
         .get::<ChampionStats>(fiora)
         .map(|s| s.minion_kills)
         .unwrap_or(0);
-    let curr_r_cs = app
-        .world()
-        .get::<ChampionStats>(riven)
-        .map(|s| s.minion_kills)
-        .unwrap_or(0);
 
     let fiora_cs_diff = curr_f_cs.saturating_sub(prev_f_cs) as f32;
-    let riven_cs_diff = curr_r_cs.saturating_sub(prev_r_cs) as f32;
 
-    // ── 补刀效率与课程学习奖励计算 ──────────────────────────────────────
+    // 普通攻击但是没产生补刀判定
+    let fiora_wasted = if fiora_attacked_minion && fiora_cs_diff == 0.0 {
+        1.0
+    } else {
+        0.0
+    };
+
     let reward_cfg = app
         .world()
         .get_resource::<CurriculumRewardConfig>()
         .cloned()
         .unwrap_or_default();
 
-    // 1. 识别对小兵的攻击行为与无效攻击（未产生击杀）
-    let fiora_attacked_minion = matches!(
-        act_fiora.discrete,
-        SoloV0DiscreteAction::Attack
-            | SoloV0DiscreteAction::CastQ
-            | SoloV0DiscreteAction::CastW
-            | SoloV0DiscreteAction::CastE
-            | SoloV0DiscreteAction::CastR
-    ) && act_fiora.target_idx > 0;
-    let riven_attacked_minion = matches!(
-        act_riven.discrete,
-        SoloV0DiscreteAction::Attack
-            | SoloV0DiscreteAction::CastQ
-            | SoloV0DiscreteAction::CastW
-            | SoloV0DiscreteAction::CastE
-            | SoloV0DiscreteAction::CastR
-    ) && act_riven.target_idx > 0;
-    let fiora_wasted = if fiora_attacked_minion && fiora_cs_diff == 0.0 {
-        1.0
-    } else {
-        0.0
-    };
-    let riven_wasted = if riven_attacked_minion && riven_cs_diff == 0.0 {
-        1.0
-    } else {
-        0.0
-    };
-
-    let fiora_dmg_dealt = (prev_r_hp - curr_r_hp).max(0.0) / 1000.0;
-    let riven_dmg_dealt = (prev_f_hp - curr_f_hp).max(0.0) / 1000.0;
-
     let f_vars = HashMap::from([
         ("self_cs".to_string(), fiora_cs_diff),
-        ("target_cs".to_string(), riven_cs_diff),
-        ("self_minion_attack".to_string(), if fiora_attacked_minion { 1.0 } else { 0.0 }),
-        ("target_minion_attack".to_string(), if riven_attacked_minion { 1.0 } else { 0.0 }),
         ("self_attack_no_cs".to_string(), fiora_wasted),
-        ("target_attack_no_cs".to_string(), riven_wasted),
-        ("self_harass_dmg".to_string(), fiora_dmg_dealt),
-        ("target_harass_dmg".to_string(), riven_dmg_dealt),
         ("cs_reward_coef".to_string(), reward_cfg.cs_reward),
-        ("penalty_coef".to_string(), 0.0),
-        ("harass_coef".to_string(), 0.0),
+        ("penalty_coef".to_string(), reward_cfg.attack_no_cs_penalty),
         ("minion_hp_scale".to_string(), reward_cfg.minion_hp_scale),
     ]);
 
-    let r_vars = HashMap::from([
-        ("self_cs".to_string(), riven_cs_diff),
-        ("target_cs".to_string(), fiora_cs_diff),
-        ("self_minion_attack".to_string(), if riven_attacked_minion { 1.0 } else { 0.0 }),
-        ("target_minion_attack".to_string(), if fiora_attacked_minion { 1.0 } else { 0.0 }),
-        ("self_attack_no_cs".to_string(), riven_wasted),
-        ("target_attack_no_cs".to_string(), fiora_wasted),
-        ("self_harass_dmg".to_string(), riven_dmg_dealt),
-        ("target_harass_dmg".to_string(), fiora_dmg_dealt),
-        ("cs_reward_coef".to_string(), reward_cfg.cs_reward),
-        ("penalty_coef".to_string(), 0.0),
-        ("harass_coef".to_string(), 0.0),
-        ("minion_hp_scale".to_string(), reward_cfg.minion_hp_scale),
-    ]);
-
-    let formula = SOLO_V0_SPEC
+    let (r_fiora, f_breakdown_items) = FIORA_V3_SPEC
         .reward_formula
         .as_ref()
-        .expect("SOLO_V0_SPEC 缺少 reward_formula DSL 规范");
-
-    let (r_fiora, f_breakdown_items) = formula.compute(&f_vars);
-    let (r_riven, r_breakdown_items) = formula.compute(&r_vars);
+        .expect("FIORA_V3_SPEC 缺少 reward_formula DSL 规范")
+        .compute(&f_vars);
 
     let f_breakdown = f_breakdown_items
-        .into_iter()
-        .map(|it| RewardBreakdownItem {
-            name: it.name,
-            value: it.value,
-        })
-        .collect();
-
-    let r_breakdown = r_breakdown_items
         .into_iter()
         .map(|it| RewardBreakdownItem {
             name: it.name,
@@ -1402,26 +1313,15 @@ pub fn step_solo_v0_world(
     let terminated = curr_f_hp <= 0.0 || curr_r_hp <= 0.0;
     let truncated = step_count >= max_steps;
 
-    (
-        StepResult {
-            obs: curr_f_obs,
-            reward: r_fiora,
-            terminated,
-            truncated,
-            step: step_count,
-            reward_breakdown: f_breakdown,
-            reward_variables: f_vars,
-        },
-        StepResult {
-            obs: curr_r_obs,
-            reward: r_riven,
-            terminated,
-            truncated,
-            step: step_count,
-            reward_breakdown: r_breakdown,
-            reward_variables: r_vars,
-        },
-    )
+    StepResult {
+        obs: curr_f_obs,
+        reward: r_fiora,
+        terminated,
+        truncated,
+        step: step_count,
+        reward_breakdown: f_breakdown,
+        reward_variables: f_vars,
+    }
 }
 
 #[cfg(test)]
@@ -1429,17 +1329,17 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_solo_v0_obs_schema_and_dim() {
-        let schema = SoloV0Env::obs_schema().expect("SoloV0 obs schema");
-        assert_eq!(schema.raw_dim(), SoloV0Env::state_dim());
-        assert_eq!(SoloV0Obs::dim(), SoloV0Env::state_dim());
+    fn test_fiora_v3_obs_schema_and_dim() {
+        let schema = FioraV3Env::obs_schema().expect("FioraV3 obs schema");
+        assert_eq!(schema.raw_dim(), FioraV3Env::state_dim());
+        assert_eq!(FioraV3Obs::dim(), FioraV3Env::state_dim());
         let labels = schema.to_dim_labels();
-        assert_eq!(labels.len(), SoloV0Env::state_dim());
+        assert_eq!(labels.len(), FioraV3Env::state_dim());
     }
 
     #[test]
-    fn test_solo_v0_action_schema() {
-        let schema = SoloV0Env::action_schema().expect("SoloV0 action schema");
+    fn test_fiora_v3_action_schema() {
+        let schema = FioraV3Env::action_schema().expect("FioraV3 action schema");
         assert_eq!(schema.encoding_dim(), 4); // 2 continuous + 1 unit selection + 1 categorical
         assert_eq!(schema.num_branches(), 3);
         let labels = schema.to_encoding_labels();
@@ -1447,8 +1347,8 @@ mod tests {
     }
 
     #[test]
-    fn test_solo_v0_action_encoding_roundtrip() {
-        let act = SoloV0Action::with_target(0.5, -0.5, 3, SoloV0DiscreteAction::Attack);
+    fn test_fiora_v3_action_encoding_roundtrip() {
+        let act = FioraV3Action::with_target(0.5, -0.5, 3, FioraV3DiscreteAction::Attack);
         let encoded = act.to_encoding();
         assert_eq!(encoded.len(), 4);
         assert_eq!(encoded[0], 0.5);
@@ -1456,18 +1356,11 @@ mod tests {
         assert_eq!(encoded[2], 3.0);
         assert_eq!(encoded[3], 2.0);
 
-        let decoded = SoloV0Action::from_encoding(&encoded);
+        let decoded = FioraV3Action::from_encoding(&encoded);
         assert_eq!(decoded.offset_x, 0.5);
         assert_eq!(decoded.offset_z, -0.5);
         assert_eq!(decoded.target_idx, 3);
-        assert_eq!(decoded.discrete, SoloV0DiscreteAction::Attack);
-
-        // 兼容旧 3 维编码
-        let legacy = vec![0.2, 0.4, 1.0];
-        let decoded_legacy = SoloV0Action::from_encoding(&legacy);
-        assert_eq!(decoded_legacy.offset_x, 0.2);
-        assert_eq!(decoded_legacy.offset_z, 0.4);
-        assert_eq!(decoded_legacy.target_idx, 0);
-        assert_eq!(decoded_legacy.discrete, SoloV0DiscreteAction::Move);
+        assert_eq!(decoded.discrete, FioraV3DiscreteAction::Attack);
     }
 }
+

@@ -499,7 +499,7 @@ fn block_on_db<F: std::future::Future>(fut: F) -> F::Output {
 fn persist_checkpoint(
     task_id: &str,
     req: SaveRequest,
-    agent: &PPOAgent,
+    agent: &crate::training::RlAgent,
     tasks: &Arc<Mutex<HashMap<String, TaskState>>>,
     repo: &Arc<dyn RlRepo>,
     event_tx: &broadcast::Sender<OutFrame>,
@@ -753,48 +753,75 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment + 'static>(
         }
     }
 
-    let ppo_config = PPOConfig {
-        lr: task_config.lr as f64,
-        gamma: task_config.gamma,
-        gae_lambda: task_config.gae_lambda,
-        clip_eps: task_config.clip_eps,
-        c1: 0.5,
-        c2: 0.05,
-        ppo_epochs: task_config.ppo_epochs.max(1),
-        clip_vloss: true,
-        max_grad_norm: 0.5,
-    };
-
-    let agent = match PPOAgent::create_for_env_with_backbone::<E>(
-        state_dim,
-        hidden_dim,
-        action_space.clone(),
-        ppo_config,
-        device.clone(),
-        backbone,
-    ) {
-        Ok(a) => a,
-        Err(e) => {
-            error!("创建 PPOAgent 失败: {e}");
-            return;
+    let rl_agent: crate::training::RlAgent = if task_config.is_grpo() {
+        let grpo_config = crate::grpo::GRPOConfig {
+            lr: task_config.lr as f64,
+            gamma: task_config.gamma,
+            clip_eps: task_config.clip_eps,
+            c2: 0.05,
+            grpo_epochs: task_config.ppo_epochs.max(1),
+            group_size: task_config.grpo_group_size.unwrap_or(4),
+            kl_coef: task_config.grpo_kl_coef.unwrap_or(0.04),
+            max_grad_norm: 0.5,
+        };
+        match crate::grpo::GRPOAgent::create_for_env_with_backbone::<E>(
+            state_dim,
+            hidden_dim,
+            action_space.clone(),
+            grpo_config,
+            device.clone(),
+            backbone,
+        ) {
+            Ok(a) => a.into(),
+            Err(e) => {
+                error!("创建 GRPOAgent 失败: {e}");
+                return;
+            }
+        }
+    } else {
+        let ppo_config = PPOConfig {
+            lr: task_config.lr as f64,
+            gamma: task_config.gamma,
+            gae_lambda: task_config.gae_lambda,
+            clip_eps: task_config.clip_eps,
+            c1: 0.5,
+            c2: 0.05,
+            ppo_epochs: task_config.ppo_epochs.max(1),
+            clip_vloss: true,
+            max_grad_norm: 0.5,
+        };
+        match PPOAgent::create_for_env_with_backbone::<E>(
+            state_dim,
+            hidden_dim,
+            action_space.clone(),
+            ppo_config,
+            device.clone(),
+            backbone,
+        ) {
+            Ok(a) => a.into(),
+            Err(e) => {
+                error!("创建 PPOAgent 失败: {e}");
+                return;
+            }
         }
     };
 
-    let summary = agent.parameter_summary();
+    let summary = rl_agent.parameter_summary();
     let _ = event_tx.send(OutFrame::Log {
         task_id: task_id.clone(),
         level: "info".into(),
         message: format!(
-            "🧠 [模型网络结构] 主干: {:?}, 总可训练参数量: {} ({})",
+            "🧠 [模型网络结构] 算法: {}, 主干: {:?}, 总可训练参数量: {} ({})",
+            if task_config.is_grpo() { "GRPO" } else { "PPO" },
             backbone,
             summary.total_params,
             crate::policy::format_param_k_m(summary.total_params)
         ),
     });
 
-    // 2. 启动 TrainingSession（机制 A：同步 Rollout Worker 池 + PPOAgent，CPU 推理）
+    // 2. 启动 TrainingSession（机制 A：同步 Rollout Worker 池 + RlAgent，CPU 推理）
     let mut session = TrainingSession::<E>::new(
-        agent,
+        rl_agent,
         num_parallel_envs,
         state_dim,
         rollout_steps,

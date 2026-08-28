@@ -22,9 +22,10 @@ pub use dsl::{EnvDslSpec, parse_env_dsl};
 pub use env_spec::{
     AVAILABLE_ENVS, ENV_FIORA_V0, ENV_FIORA_V0_DSL, ENV_FIORA_V0_SPEC, ENV_FIORA_V1,
     ENV_FIORA_V1_DSL, ENV_FIORA_V1_SPEC, ENV_FIORA_V2, ENV_FIORA_V2_DSL, ENV_FIORA_V2_SPEC,
-    ENV_SOLO_V0, ENV_SOLO_V0_DSL, ENV_SOLO_V0_SPEC, EnvSpec, EnvTrainingParams,
-    SPEC_FIORA_V0, SPEC_FIORA_V1, SPEC_FIORA_V2, SPEC_SOLO_V0,
-    get_env_dsl_source, get_env_dsl_spec, get_env_spec, get_env_training_params,
+    ENV_FIORA_V3, ENV_FIORA_V3_DSL, ENV_FIORA_V3_SPEC, ENV_SOLO_V0, ENV_SOLO_V0_DSL,
+    ENV_SOLO_V0_SPEC, EnvSpec, EnvTrainingParams, SPEC_FIORA_V0, SPEC_FIORA_V1, SPEC_FIORA_V2,
+    SPEC_FIORA_V3, SPEC_SOLO_V0, get_env_dsl_source, get_env_dsl_spec, get_env_spec,
+    get_env_training_params,
 };
 pub use frames::{
     CheckpointItem, CurriculumTelemetry, InFrame, MetricsRow, ObsFeaturePayload, OutFrame,
@@ -32,8 +33,8 @@ pub use frames::{
 pub use obs::{EntityEncoderSpec, ObsContext, ObsExpr, ObsNode, ObsSchema, ObsValueNode, PoolType};
 pub use reward::{RewardExpr, RewardFormulaSpec, RewardItem, RewardTermSpec};
 pub use task::{
-    AGENT_PPO_MAMBA, AGENT_PPO_MLP, CurriculumConfig, PolicyBackbone, TaskConfigPayload,
-    TaskOverviewItem,
+    AGENT_GRPO_MAMBA, AGENT_GRPO_MLP, AGENT_PPO_MAMBA, AGENT_PPO_MLP, CurriculumConfig,
+    PolicyBackbone, TaskConfigPayload, TaskOverviewItem,
 };
 pub use visual::{
     ActionBranchDisplay, PolicyDisplay, PolicyItem, VisualInFrame, VisualObsFrame, VisualOutFrame,

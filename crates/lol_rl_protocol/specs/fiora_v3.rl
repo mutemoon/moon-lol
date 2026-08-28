@@ -1,26 +1,26 @@
 // =============================================================================
-// SoloV0 规范：剑姬 vs 瑞雯 1v1 对战强化学习环境
+// FioraV3 规范：剑姬补刀训练强化学习环境 (Solo 1v1 地图)
 // =============================================================================
 
-env SoloV0 {
-    label: "剑姬 vs 瑞雯 (Solo 1v1 自博弈)"
-    tag: "SoloV0"
-    description: "单神经网络通过 role_id (0:剑姬, 1:瑞雯) 自博弈对抗，对称零和奖励与自我中心化全技能对决"
-    num_agents: 2
+env FioraV3 {
+    label: "剑姬补刀训练 (Solo地图-补刀效率)"
+    tag: "FioraV3"
+    description: "剑姬在召唤师峡谷上路Solo地图进行对线补刀训练（补刀成功奖励，普通攻击未补刀惩罚）"
+    num_agents: 1
     params {
         lr: 0.0003
         gamma: 0.99
         gae_lambda: 0.95
         clip_eps: 0.2
-        ppo_epochs: 8
+        ppo_epochs: 4
         hidden_dim: 64
         rollout_steps_per_env: 160
-        total_iterations: 500
+        total_iterations: 300
     }
 }
 
 // ── 观测空间 ─────────────────────────────────────────────────────────────────
-obs SoloV0Obs {
+obs FioraV3Obs {
     category role: 4 -> embed(12) = role_id;
 
     struct spatial {
@@ -79,7 +79,7 @@ obs SoloV0Obs {
 }
 
 // ── 动作空间 ─────────────────────────────────────────────────────────────────
-action SoloV0Action {
+action FioraV3Action {
     continuous offset: 2;
     unit_target target: visible_units[20 -> 16];
     category action_type: 8 {
@@ -95,8 +95,7 @@ action SoloV0Action {
 }
 
 // ── 奖励公式 ─────────────────────────────────────────────────────────────────
-reward SoloV0Reward {
-    term last_hit             : "补刀奖励"         = cs_reward_coef * self_cs;
+reward FioraV3Reward {
+    term last_hit             : "补刀成功奖励"     = cs_reward_coef * self_cs;
     term attack_no_cs_penalty : "攻击小兵未补刀惩罚" = -1.0 * (penalty_coef * self_attack_no_cs);
-    term harass               : "消耗对手奖励"     = harass_coef * (self_harass_dmg - target_harass_dmg);
 }

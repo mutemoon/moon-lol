@@ -3,6 +3,7 @@ pub mod async_session;
 pub mod autotune;
 pub mod db;
 pub mod device;
+pub mod grpo;
 pub mod model_store;
 pub mod policy;
 pub mod ppo;
