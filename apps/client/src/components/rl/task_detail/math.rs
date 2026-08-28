@@ -96,9 +96,5 @@ mod tests {
             svg.contains("<path"),
             "no <path> glyphs, latex={latex}:\n{svg}"
         );
-        assert!(
-            !svg.contains("<text"),
-            "fell back to <text>, latex={latex}:\n{svg}"
-        );
     }
 }

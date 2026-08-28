@@ -7,8 +7,7 @@ use lol_core::entities::minion::Minion;
 use lol_core::life::Health;
 use lol_core::team::Team;
 use lol_rl_protocol::{
-    ActionNode, ActionSchema, ActionSpace, EntityEncoderSpec, ObsFeaturePayload, ObsNode,
-    ObsSchema, PoolType, RewardFormulaSpec, RewardTermSpec,
+    ActionSchema, ActionSpace, ObsFeaturePayload, ObsSchema, RewardFormulaSpec,
 };
 
 use crate::curriculum::CurriculumRewardConfig;
@@ -33,142 +32,23 @@ pub const SOLO_V0_OFFSET_SCALE: f32 = 100.0;
 pub const SOLO_V0_MAX_VISIBLE_UNITS: usize = 20;
 pub const SOLO_V0_OBS_DISTANCE_SCALE: f32 = 100.0;
 
+pub static SOLO_V0_SPEC: std::sync::LazyLock<&'static lol_rl_protocol::EnvDslSpec> =
+    std::sync::LazyLock::new(|| &lol_rl_protocol::SPEC_SOLO_V0);
+
 pub static SOLO_V0_OBS_SCHEMA: std::sync::LazyLock<ObsSchema> = std::sync::LazyLock::new(|| {
-    use lol_rl_protocol::ObsExpr;
-    ObsSchema::new(vec![
-        // 1. 角色标识 (离散类别: 0=Fiora, 1=Riven, 预留4类 -> 12维 Embedding)
-        ObsNode::categorical_expr("role", ObsExpr::var("role_id"), 4, 12),
-        // 2. 空间相对特征 (3维: 相对X, 相对Z, 相对距离)
-        ObsNode::structure(
-            "spatial",
-            vec![
-                ObsNode::vector_exprs(
-                    "target_rel_pos",
-                    vec![
-                        (ObsExpr::var("self_x") - ObsExpr::var("target_x")) / SOLO_V0_OBS_DISTANCE_SCALE,
-                        (ObsExpr::var("self_z") - ObsExpr::var("target_z")) / SOLO_V0_OBS_DISTANCE_SCALE,
-                    ],
-                ),
-                ObsNode::scalar_expr(
-                    "distance",
-                    ObsExpr::var("distance") / SOLO_V0_OBS_DISTANCE_SCALE,
-                ),
-            ],
-        ),
-        // 3. 普攻状态机 (4维: 就绪, 前摇中, 后摇中, 剩余倒计时)
-        ObsNode::structure(
-            "attack",
-            vec![
-                ObsNode::scalar_expr("is_ready", ObsExpr::var("attack_is_ready")),
-                ObsNode::scalar_expr("is_windup", ObsExpr::var("attack_is_windup")),
-                ObsNode::scalar_expr("is_cooldown", ObsExpr::var("attack_is_cooldown")),
-                ObsNode::scalar_expr("timer_remaining", ObsExpr::var("attack_timer_remaining")),
-            ],
-        ),
-        // 4. 技能与闪现冷却 (10维: Q, W, E, R, Flash 及其剩余CD)
-        ObsNode::structure(
-            "cooldowns",
-            vec![
-                ObsNode::scalar_expr("q_ready", ObsExpr::var("q_ready")),
-                ObsNode::scalar_expr("q_cd", ObsExpr::var("q_cd") / 10.0),
-                ObsNode::scalar_expr("w_ready", ObsExpr::var("w_ready")),
-                ObsNode::scalar_expr("w_cd", ObsExpr::var("w_cd") / 15.0),
-                ObsNode::scalar_expr("e_ready", ObsExpr::var("e_ready")),
-                ObsNode::scalar_expr("e_cd", ObsExpr::var("e_cd") / 10.0),
-                ObsNode::scalar_expr("r_ready", ObsExpr::var("r_ready")),
-                ObsNode::scalar_expr("r_cd", ObsExpr::var("r_cd") / 60.0),
-                ObsNode::scalar_expr("flash_ready", ObsExpr::var("flash_ready")),
-                ObsNode::scalar_expr("flash_cd", ObsExpr::var("flash_cd") / 300.0),
-            ],
-        ),
-        // 5. 双方血量百分比 (2维)
-        ObsNode::structure(
-            "health",
-            vec![
-                ObsNode::scalar_expr(
-                    "self_hp_pct",
-                    ObsExpr::clamp(
-                        ObsExpr::var("self_hp") / ObsExpr::max(ObsExpr::var("self_max_hp"), ObsExpr::c(1.0)),
-                        0.0,
-                        1.0,
-                    ),
-                ),
-                ObsNode::scalar_expr(
-                    "target_hp_pct",
-                    ObsExpr::clamp(
-                        ObsExpr::var("target_hp") / ObsExpr::max(ObsExpr::var("target_max_hp"), ObsExpr::c(1.0)),
-                        0.0,
-                        1.0,
-                    ),
-                ),
-            ],
-        ),
-        // 6. 自身修饰符 (4 槽位 × 5维 -> 经 Shared MLP(16) 编码)
-        ObsNode::repeated(
-            "self_modifiers",
-            4,
-            ObsNode::structure(
-                "slot",
-                vec![
-                    ObsNode::categorical_expr("name", ObsExpr::var("name"), ModifierNameId::COUNT + 1, 8),
-                    ObsNode::scalar_expr("remaining_duration", ObsExpr::var("remaining_duration")),
-                    ObsNode::scalar_expr("stack_count", ObsExpr::var("stack_count")),
-                    ObsNode::vector_exprs(
-                        "params",
-                        vec![ObsExpr::var("params[0]"), ObsExpr::var("params[1]")],
-                    ),
-                ],
-            ),
-            EntityEncoderSpec::SharedMlpFlatten {
-                hidden_dims: vec![16],
-            },
-        ),
-        // 7. 目标修饰符 (4 槽位 × 5维 -> 经 Shared MLP(16) 编码)
-        ObsNode::repeated(
-            "target_modifiers",
-            4,
-            ObsNode::structure(
-                "slot",
-                vec![
-                    ObsNode::categorical_expr("name", ObsExpr::var("name"), ModifierNameId::COUNT + 1, 8),
-                    ObsNode::scalar_expr("remaining_duration", ObsExpr::var("remaining_duration")),
-                    ObsNode::scalar_expr("stack_count", ObsExpr::var("stack_count")),
-                    ObsNode::vector_exprs(
-                        "params",
-                        vec![ObsExpr::var("params[0]"), ObsExpr::var("params[1]")],
-                    ),
-                ],
-            ),
-            EntityEncoderSpec::SharedMlpFlatten {
-                hidden_dims: vec![16],
-            },
-        ),
-        // 8. 可见单位列表 (20 槽位: 1 敌方英雄 + 19 小兵 -> 经 Shared MLP(16) 编码保留嵌入供 UnitSelection)
-        ObsNode::repeated(
-            "visible_units",
-            SOLO_V0_MAX_VISIBLE_UNITS,
-            ObsNode::structure(
-                "unit",
-                vec![
-                    ObsNode::categorical_expr("unit_type", ObsExpr::var("unit_type"), 6, 8),
-                    ObsNode::vector_exprs(
-                        "rel_pos",
-                        vec![
-                            ObsExpr::var("rel_pos[0]") / SOLO_V0_OBS_DISTANCE_SCALE,
-                            ObsExpr::var("rel_pos[1]") / SOLO_V0_OBS_DISTANCE_SCALE,
-                        ],
-                    ),
-                    ObsNode::scalar_expr("hp_pct", ObsExpr::var("hp_pct")),
-                    ObsNode::scalar_expr("is_enemy", ObsExpr::var("is_enemy")),
-                ],
-            ),
-            EntityEncoderSpec::SharedMlpPool {
-                hidden_dims: vec![32, 16],
-                pool_type: PoolType::Max,
-            },
-        ),
-    ])
+    SOLO_V0_SPEC
+        .obs_schema
+        .clone()
+        .expect("SPEC_SOLO_V0 缺少 obs_schema")
 });
+
+pub static SOLO_V0_ACTION_SCHEMA: std::sync::LazyLock<ActionSchema> =
+    std::sync::LazyLock::new(|| {
+        SOLO_V0_SPEC
+            .action_schema
+            .clone()
+            .expect("SPEC_SOLO_V0 缺少 action_schema")
+    });
 
 // ── 初始化与重置 ─────────────────────────────────────────────────────────────
 
@@ -782,23 +662,7 @@ impl RlEnvironment for SoloV0Env {
     }
 
     fn action_schema() -> Option<ActionSchema> {
-        Some(ActionSchema::new(vec![
-            ActionNode::continuous("offset", 2),
-            ActionNode::unit_selection("target", SOLO_V0_MAX_VISIBLE_UNITS, 16, "visible_units"),
-            ActionNode::categorical(
-                "action_type",
-                vec![
-                    "保持当前 (NoOp)".into(),
-                    "移动 (Move)".into(),
-                    "普通攻击 (Attack)".into(),
-                    "施放 Q".into(),
-                    "施放 W".into(),
-                    "施放 E".into(),
-                    "施放 R".into(),
-                    "闪现".into(),
-                ],
-            ),
-        ]))
+        Some(SOLO_V0_ACTION_SCHEMA.clone())
     }
 
     fn action_from_index(idx: usize) -> Self::Action {
@@ -941,42 +805,7 @@ impl RlEnvironment for SoloV0Env {
     }
 
     fn reward_formula_spec() -> Option<RewardFormulaSpec> {
-        use lol_rl_protocol::RewardExpr;
-        Some(RewardFormulaSpec {
-            name: "补刀效率与课程学习奖励公式 (SoloV0)".to_string(),
-            terms: vec![
-                RewardTermSpec::new(
-                    "last_hit",
-                    "补刀成功奖励",
-                    RewardExpr::Mul(
-                        Box::new(RewardExpr::Variable("cs_reward_coef".to_string())),
-                        Box::new(RewardExpr::Variable("self_cs".to_string())),
-                    ),
-                ),
-                RewardTermSpec::new(
-                    "attack_no_cs_penalty",
-                    "攻击小兵未补刀惩罚",
-                    RewardExpr::Mul(
-                        Box::new(RewardExpr::Constant(-1.0)),
-                        Box::new(RewardExpr::Mul(
-                            Box::new(RewardExpr::Variable("penalty_coef".to_string())),
-                            Box::new(RewardExpr::Variable("self_attack_no_cs".to_string())),
-                        )),
-                    ),
-                ),
-                RewardTermSpec::new(
-                    "harass",
-                    "消耗对手奖励",
-                    RewardExpr::Mul(
-                        Box::new(RewardExpr::Variable("harass_coef".to_string())),
-                        Box::new(RewardExpr::Sub(
-                            Box::new(RewardExpr::Variable("self_harass_dmg".to_string())),
-                            Box::new(RewardExpr::Variable("target_harass_dmg".to_string())),
-                        )),
-                    ),
-                ),
-            ],
-        })
+        SOLO_V0_SPEC.reward_formula.clone()
     }
 
     fn update_curriculum(

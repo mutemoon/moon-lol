@@ -1,5 +1,6 @@
 pub mod action_parser;
 pub mod common;
+pub mod env_parser;
 pub mod expr_parser;
 pub mod obs_parser;
 pub mod reward_parser;
@@ -7,8 +8,10 @@ pub mod reward_parser;
 use crate::action::ActionSchema;
 use crate::dsl::action_parser::parse_action_schema;
 use crate::dsl::common::ws;
+use crate::dsl::env_parser::{parse_env_meta_block, EnvMetaBlock};
 use crate::dsl::obs_parser::parse_obs_schema;
 use crate::dsl::reward_parser::parse_reward_formula;
+use crate::env_spec::{EnvSpec, EnvTrainingParams};
 use crate::obs::ObsSchema;
 use crate::reward::RewardFormulaSpec;
 use serde::{Deserialize, Serialize};
@@ -19,24 +22,60 @@ use winnow::Parser;
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Default)]
 pub struct EnvDslSpec {
     pub name: String,
+    pub label: Option<String>,
+    pub tag: Option<String>,
+    pub description: Option<String>,
+    pub num_agents: Option<usize>,
+    pub default_params: Option<EnvTrainingParams>,
     pub obs_schema: Option<ObsSchema>,
     pub action_schema: Option<ActionSchema>,
     pub reward_formula: Option<RewardFormulaSpec>,
 }
 
+impl EnvDslSpec {
+    /// 转换为环境展示与默认超参数规范
+    pub fn to_env_spec(&self) -> EnvSpec {
+        EnvSpec {
+            name: Box::leak(self.name.clone().into_boxed_str()),
+            label: Box::leak(
+                self.label
+                    .clone()
+                    .unwrap_or_else(|| self.name.clone())
+                    .into_boxed_str(),
+            ),
+            tag: Box::leak(
+                self.tag
+                    .clone()
+                    .unwrap_or_else(|| self.name.clone())
+                    .into_boxed_str(),
+            ),
+            description: Box::leak(
+                self.description
+                    .clone()
+                    .unwrap_or_default()
+                    .into_boxed_str(),
+            ),
+            num_agents: self.num_agents.unwrap_or(1),
+            default_params: self.default_params.clone().unwrap_or_default(),
+        }
+    }
+}
+
 enum DslBlock {
+    Env(EnvMetaBlock),
     Obs(String, ObsSchema),
     Action(String, ActionSchema),
     Reward(RewardFormulaSpec),
 }
 
-/// 解析包含多个块（obs, action, reward）的完整 `.rl` 脚本
+/// 解析包含多个块（env, obs, action, reward）的完整 `.rl` 脚本
 pub fn parse_env_dsl(mut input: &str) -> Result<EnvDslSpec, String> {
     let mut spec = EnvDslSpec::default();
 
     let blocks: Vec<DslBlock> = repeat(
         0..,
         winnow::combinator::alt((
+            parse_env_meta_block.map(DslBlock::Env),
             parse_obs_schema.map(|(n, s)| DslBlock::Obs(n, s)),
             parse_action_schema.map(|(n, a)| DslBlock::Action(n, a)),
             parse_reward_formula.map(DslBlock::Reward),
@@ -54,6 +93,14 @@ pub fn parse_env_dsl(mut input: &str) -> Result<EnvDslSpec, String> {
 
     for block in blocks {
         match block {
+            DslBlock::Env(meta) => {
+                spec.name = meta.name;
+                spec.label = meta.label;
+                spec.tag = meta.tag;
+                spec.description = meta.description;
+                spec.num_agents = meta.num_agents;
+                spec.default_params = meta.params;
+            }
             DslBlock::Obs(name, obs) => {
                 if spec.name.is_empty() {
                     spec.name = name;

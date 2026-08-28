@@ -7,11 +7,28 @@ pub use crate::fiora_riven_common::{
     FioraVsRivenObs, VitalBreakTracker, compute_step_reward, get_obs_from_world,
     setup_skill_levels_world, unpause_virtual_time,
 };
-use crate::reward::{FioraVsRivenRewardModel, RewardModel};
 use crate::traits::{EnvConfig, EnvMeta, RenderMode, RlEnvironment, StepResult, VisualEnvironment};
 
 /// 真实移动缩放：策略网络输出的 `move_x/move_z ∈ [-1, 1]` 映射为相对瑞雯 `±100.0` 单位的目标点
 pub const MOVE_SCALE: f32 = 100.0;
+
+pub static FIORA_V1_SPEC: std::sync::LazyLock<&'static lol_rl_protocol::EnvDslSpec> =
+    std::sync::LazyLock::new(|| &lol_rl_protocol::SPEC_FIORA_V1);
+
+pub static FIORA_V1_OBS_SCHEMA: std::sync::LazyLock<ObsSchema> = std::sync::LazyLock::new(|| {
+    FIORA_V1_SPEC
+        .obs_schema
+        .clone()
+        .expect("SPEC_FIORA_V1 缺少 obs_schema")
+});
+
+pub static FIORA_V1_ACTION_SCHEMA: std::sync::LazyLock<lol_rl_protocol::ActionSchema> =
+    std::sync::LazyLock::new(|| {
+        FIORA_V1_SPEC
+            .action_schema
+            .clone()
+            .expect("SPEC_FIORA_V1 缺少 action_schema")
+    });
 
 // ── 动作空间 ────────────────────────────────────────────────────────────────
 
@@ -257,7 +274,11 @@ impl RlEnvironment for FioraVsRivenRealEnv {
     }
 
     fn obs_schema() -> Option<ObsSchema> {
-        Some(FIORA_COMMON_OBS_SCHEMA.clone())
+        Some(FIORA_V1_OBS_SCHEMA.clone())
+    }
+
+    fn action_schema() -> Option<lol_rl_protocol::ActionSchema> {
+        Some(FIORA_V1_ACTION_SCHEMA.clone())
     }
 
     fn action_from_index(idx: usize) -> Self::Action {
@@ -317,15 +338,11 @@ impl RlEnvironment for FioraVsRivenRealEnv {
     }
 
     fn action_mask(obs: &Self::Obs) -> Option<Vec<bool>> {
-        let mut mask = vec![true; 2];
-        if obs.distance > ATTACK_MASK_DISTANCE {
-            mask[1] = false;
-        }
-        Some(mask)
+        Some(FIORA_V1_ACTION_SCHEMA.eval_flat_mask(&obs.to_context()))
     }
 
     fn reward_formula_spec() -> Option<RewardFormulaSpec> {
-        Some(FioraVsRivenRewardModel.formula_spec())
+        FIORA_V1_SPEC.reward_formula.clone()
     }
 }
 

@@ -139,6 +139,17 @@ pub fn render_topbar(
                             "任务详情".into()
                         }
                     }
+                    ActiveView::RlEnvDetail => {
+                        if let Some(env_name) = &sidebar.selected_env_name {
+                            if let Some(spec) = lol_rl_protocol::get_env_spec(env_name) {
+                                format!("环境详情 - {}", spec.label).into()
+                            } else {
+                                "环境详情".into()
+                            }
+                        } else {
+                            "环境详情".into()
+                        }
+                    }
                     ActiveView::VisualEnv => "可视环境监控".into(),
                     ActiveView::WadBrowser => "WAD 文件浏览器".into(),
                     ActiveView::Extractor => "资源提取中心".into(),
@@ -367,7 +378,12 @@ pub fn render_sidebar_menu(sidebar: &AppSidebar, cx: &mut Context<AppSidebar>) -
                     .child(
                         SidebarMenuItem::new(t!("app.nav.menu_rl_training"))
                             .icon(IconName::Settings2)
-                            .active(active == ActiveView::RlTraining)
+                            .active(matches!(
+                                active,
+                                ActiveView::RlTraining
+                                    | ActiveView::RlEnvDetail
+                                    | ActiveView::RlTaskDetail
+                            ))
                             .on_click(cx.listener(|this, _, _, cx| {
                                 this.navigate_to(ActiveView::RlTraining);
                                 cx.notify();

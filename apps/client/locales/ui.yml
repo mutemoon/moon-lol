@@ -46,7 +46,7 @@ app:
       zh-CN: "社区"
       en: "Community"
     menu_rl_training:
-      zh-CN: "RL 训练面板"
+      zh-CN: "强化学习"
       en: "RL Training"
     menu_particles:
       zh-CN: "粒子播放"
@@ -112,8 +112,8 @@ app:
       zh-CN: "精粹与订阅"
       en: "Essence & Subscriptions"
     title_rl_training:
-      zh-CN: "RL 强化学习中枢"
-      en: "RL Training Hub"
+      zh-CN: "强化学习"
+      en: "RL Training"
     title_particles:
       zh-CN: "粒子播放"
       en: "Particles"
@@ -165,8 +165,8 @@ app:
   # ── RL Training ──
   rl:
     page_title:
-      zh-CN: "强化学习训练实例管理"
-      en: "RL Training Instance Management (Data Table)"
+      zh-CN: "训练任务"
+      en: "Training Tasks"
     new_task:
       zh-CN: "开始训练"
       en: "Start Training"
@@ -183,7 +183,7 @@ app:
       zh-CN: "环境"
       en: "Env"
     col_status:
-      zh-CN: "运行状态"
+      zh-CN: "状态"
       en: "Status"
     col_steps_per_iter:
       zh-CN: "每轮步数"
@@ -207,7 +207,7 @@ app:
       zh-CN: "模型数"
       en: "Checkpoints"
     col_actions:
-      zh-CN: "交互控制操作栏"
+      zh-CN: "操作"
       en: "Actions"
     ws_connected:
       zh-CN: "已连接"

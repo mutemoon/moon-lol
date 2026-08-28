@@ -309,168 +309,183 @@ fn render_actions(
         .into_any_element()
 }
 
-// 渲染多强化学习任务/学习实例概览表格
+// 渲染强化学习中心主页面（上方环境卡片，下方训练任务列表）
 pub fn render_tasks_table(
     sidebar: &mut AppSidebar,
-    _window: &mut Window,
+    window: &mut Window,
     cx: &mut Context<AppSidebar>,
 ) -> AnyElement {
+    let env_cards = crate::components::rl::render_env_cards(sidebar, window, cx);
+
     let main_content = v_flex()
         .size_full()
         .flex_1()
-        .gap_4()
+        .gap_3()
         .overflow_hidden()
+        // ── 上方：Fiora / Solo 强化学习环境卡片区 ──
+        .child(env_cards)
+        // ── 分隔线 ──
+        .child(div().w_full().h(px(1.0)).bg(cx.theme().border.opacity(0.5)))
+        // ── 下方：训练任务列表区 ──
         .child(
-            h_flex()
-                .items_center()
-                .justify_between()
+            v_flex()
+                .flex_1()
+                .w_full()
+                .gap_2p5()
+                .overflow_hidden()
                 .child(
                     h_flex()
-                        .gap_2()
                         .items_center()
-                        .child(IconName::LayoutDashboard)
-                        .child(div().font_bold().text_lg().child(t!("app.rl.page_title"))),
-                )
-                .child(
-                    h_flex()
-                        .gap_2()
-                        .items_center()
-                        .child(ws_status_badge(sidebar.ws_connected, cx))
+                        .justify_between()
                         .child(
-                            Button::new("new-task-btn")
-                                .primary()
-                                .icon(IconName::Plus)
-                                .on_click(cx.listener(|this, _, window, cx| {
-                                    let task_count = this.task_list.len() + 1;
-                                    let last_env = this.last_chosen_env.clone();
-                                    let weak_sidebar = cx.entity().downgrade();
-                                    let dialog_view = cx.new(|cx| {
-                                        CreateTaskDialogView::new(
-                                            task_count,
-                                            last_env,
-                                            Some(weak_sidebar),
-                                            window,
-                                            cx,
-                                        )
-                                    });
-                                    window.open_dialog(cx, move |dialog, _window, _cx| {
-                                        let dialog_view = dialog_view.clone();
-                                        dialog
-                                            .title("开始训练")
-                                            .w(px(680.))
-                                            .max_h(px(720.))
-                                            .overlay_closable(false)
-                                            .child(dialog_view.clone())
-                                            .footer(
-                                                DialogFooter::new()
-                                                    .justify_between()
-                                                    .child(
-                                                        Button::new("reset-default-btn")
-                                                            .outline()
-                                                            .label("恢复默认配置")
-                                                            .on_click({
-                                                                let dialog_view = dialog_view.clone();
-                                                                move |_, window, cx| {
-                                                                    dialog_view.update(cx, |this, cx| {
-                                                                        let name = this.default_name.clone();
-                                                                        let current_env = this.form.env_name.clone();
-                                                                        this.apply_env_params(&current_env, window, cx);
-                                                                        this.form.name = name.clone();
-                                                                        this.name_input.update(cx, |input, cx| {
-                                                                            input.set_value(name, window, cx);
-                                                                        });
-                                                                        cx.notify();
-                                                                    });
-                                                                }
-                                                            }),
-                                                    )
-                                                    .child(
-                                                        h_flex()
-                                                            .gap_2()
+                            h_flex()
+                                .gap_2()
+                                .items_center()
+                                .child(IconName::LayoutDashboard)
+                                .child(div().font_bold().text_sm().child(t!("app.rl.page_title"))),
+                        )
+                        .child(
+                            h_flex()
+                                .gap_2()
+                                .items_center()
+                                .child(ws_status_badge(sidebar.ws_connected, cx))
+                                .child(
+                                    Button::new("new-task-btn")
+                                        .primary()
+                                        .icon(IconName::Plus)
+                                        .label(t!("app.rl.new_task"))
+                                        .on_click(cx.listener(|this, _, window, cx| {
+                                            let task_count = this.task_list.len() + 1;
+                                            let last_env = this.last_chosen_env.clone();
+                                            let weak_sidebar = cx.entity().downgrade();
+                                            let dialog_view = cx.new(|cx| {
+                                                CreateTaskDialogView::new(
+                                                    task_count,
+                                                    last_env,
+                                                    Some(weak_sidebar),
+                                                    window,
+                                                    cx,
+                                                )
+                                            });
+                                            window.open_dialog(cx, move |dialog, _window, _cx| {
+                                                let dialog_view = dialog_view.clone();
+                                                dialog
+                                                    .title("开始训练")
+                                                    .w(px(680.))
+                                                    .max_h(px(720.))
+                                                    .overlay_closable(false)
+                                                    .child(dialog_view.clone())
+                                                    .footer(
+                                                        DialogFooter::new()
+                                                            .justify_between()
                                                             .child(
-                                                                Button::new("cancel-create-btn")
-                                                                    .ghost()
-                                                                    .label("取消")
-                                                                    .on_click(|_, window, cx| {
-                                                                        window.close_dialog(cx);
-                                                                    }),
-                                                            )
-                                                            .child(
-                                                                Button::new("confirm-create-btn")
-                                                                    .primary()
-                                                                    .icon(IconName::Plus)
-                                                                    .label("确认创建任务")
+                                                                Button::new("reset-default-btn")
+                                                                    .outline()
+                                                                    .label("恢复默认配置")
                                                                     .on_click({
                                                                         let dialog_view = dialog_view.clone();
                                                                         move |_, window, cx| {
-                                                                            dialog_view.update(cx, |this, _cx| {
-                                                                                let config = this.form.clone();
-                                                                                let cmd_str = config.to_cargo_run_command();
-
-                                                                                println!("\n================================================================================");
-                                                                                println!("🚀 [Client GUI] 通过 lol_rl_cli 启动强化学习训练任务");
-                                                                                println!("📋 启动命令（可直接复制给实验 Agent 运行/调试）：");
-                                                                                println!("{cmd_str}");
-                                                                                println!("================================================================================\n");
-                                                                                tracing::info!("🚀 [Client GUI] 训练启动命令: {}", cmd_str);
-
-                                                                                let (program, prefix_args) = lol_client::launch::resolve_executable("lol_rl", "lol_rl_cli");
-                                                                                let cli_args = config.to_cli_args();
-                                                                                let full_args: Vec<String> = prefix_args.into_iter().chain(cli_args.into_iter()).collect();
-
-                                                                                crate::services::runtime::tokio_runtime().spawn(async move {
-                                                                                    let mut cmd = tokio::process::Command::new(&program);
-                                                                                    cmd.args(&full_args)
-                                                                                        .stdout(std::process::Stdio::inherit())
-                                                                                        .stderr(std::process::Stdio::inherit());
-                                                                                    if let Some(root) = lol_client::launch::install_root() {
-                                                                                        cmd.current_dir(root);
-                                                                                    }
-                                                                                    match cmd.spawn() {
-                                                                                        Ok(mut child) => {
-                                                                                            let _ = child.wait().await;
-                                                                                        }
-                                                                                        Err(e) => {
-                                                                                            eprintln!("❌ 启动 lol_rl_cli 子进程失败: {e}");
-                                                                                        }
-                                                                                    }
+                                                                            dialog_view.update(cx, |this, cx| {
+                                                                                let name = this.default_name.clone();
+                                                                                let current_env = this.form.env_name.clone();
+                                                                                this.apply_env_params(&current_env, window, cx);
+                                                                                this.form.name = name.clone();
+                                                                                this.name_input.update(cx, |input, cx| {
+                                                                                    input.set_value(name, window, cx);
                                                                                 });
+                                                                                cx.notify();
                                                                             });
-                                                                            window.close_dialog(cx);
                                                                         }
                                                                     }),
+                                                            )
+                                                            .child(
+                                                                h_flex()
+                                                                    .gap_2()
+                                                                    .child(
+                                                                        Button::new("cancel-create-btn")
+                                                                            .ghost()
+                                                                            .label("取消")
+                                                                            .on_click(|_, window, cx| {
+                                                                                window.close_dialog(cx);
+                                                                            }),
+                                                                    )
+                                                                    .child(
+                                                                        Button::new("confirm-create-btn")
+                                                                            .primary()
+                                                                            .icon(IconName::Plus)
+                                                                            .label("确认创建任务")
+                                                                            .on_click({
+                                                                                let dialog_view = dialog_view.clone();
+                                                                                move |_, window, cx| {
+                                                                                    dialog_view.update(cx, |this, _cx| {
+                                                                                        let config = this.form.clone();
+                                                                                        let cmd_str = config.to_cargo_run_command();
+
+                                                                                        println!("\n================================================================================");
+                                                                                        println!("🚀 [Client GUI] 通过 lol_rl_cli 启动强化学习训练任务");
+                                                                                        println!("📋 启动命令（可直接复制给实验 Agent 运行/调试）：");
+                                                                                        println!("{cmd_str}");
+                                                                                        println!("================================================================================\n");
+                                                                                        tracing::info!("🚀 [Client GUI] 训练启动命令: {}", cmd_str);
+
+                                                                                        let (program, prefix_args) = lol_client::launch::resolve_executable("lol_rl", "lol_rl_cli");
+                                                                                        let cli_args = config.to_cli_args();
+                                                                                        let full_args: Vec<String> = prefix_args.into_iter().chain(cli_args.into_iter()).collect();
+
+                                                                                        crate::services::runtime::tokio_runtime().spawn(async move {
+                                                                                            let mut cmd = tokio::process::Command::new(&program);
+                                                                                            cmd.args(&full_args)
+                                                                                                .stdout(std::process::Stdio::inherit())
+                                                                                                .stderr(std::process::Stdio::inherit());
+                                                                                            if let Some(root) = lol_client::launch::install_root() {
+                                                                                                cmd.current_dir(root);
+                                                                                            }
+                                                                                            match cmd.spawn() {
+                                                                                                Ok(mut child) => {
+                                                                                                    let _ = child.wait().await;
+                                                                                                }
+                                                                                                Err(e) => {
+                                                                                                    eprintln!("❌ 启动 lol_rl_cli 子进程失败: {e}");
+                                                                                                }
+                                                                                            }
+                                                                                        });
+                                                                                    });
+                                                                                    window.close_dialog(cx);
+                                                                                }
+                                                                            }),
+                                                                    ),
                                                             ),
-                                                    ),
-                                            )
-                                    });
-                                })),
-                        )
-                        .child(
-                            Button::new("refresh-btn")
-                                .outline()
-                                .icon(IconName::Loader)
-                                .label(t!("app.rl.refresh_list"))
-                                .on_click(cx.listener(|this, _, _, cx| {
-                                    this.send_in_frame(InFrame::GetTaskList);
-                                    cx.notify();
-                                })),
+                                                    )
+                                            });
+                                        })),
+                                )
+                                .child(
+                                    Button::new("refresh-btn")
+                                        .outline()
+                                        .icon(IconName::Loader)
+                                        .label(t!("app.rl.refresh_list"))
+                                        .on_click(cx.listener(|this, _, _, cx| {
+                                            this.send_in_frame(InFrame::GetTaskList);
+                                            cx.notify();
+                                        })),
+                                ),
                         ),
-                ),
-        )
-        .child(match &sidebar.table_state {
-            Some(table_state) => div()
-                .id("tasks-table-scroll")
-                .flex_1()
-                .w_full()
-                .child(
-                    DataTable::new(table_state)
-                        .bordered(true)
-                        .stripe(false)
-                        .with_size(px(52.)),
                 )
-                .into_any_element(),
-            None => div().flex_1().into_any_element(),
-        });
+                .child(match &sidebar.table_state {
+                    Some(table_state) => div()
+                        .id("tasks-table-scroll")
+                        .flex_1()
+                        .w_full()
+                        .child(
+                            DataTable::new(table_state)
+                                .bordered(true)
+                                .stripe(false)
+                                .with_size(px(52.)),
+                        )
+                        .into_any_element(),
+                    None => div().flex_1().into_any_element(),
+                }),
+        );
 
     main_content.into_any_element()
 }
@@ -945,7 +960,7 @@ impl Render for CreateTaskDialogView {
                                                         let weak = cx.entity().downgrade();
                                                         move |menu, _window, _cx| {
                                                             let mut menu = menu;
-                                                            for spec in lol_rl_protocol::AVAILABLE_ENVS {
+                                                            for &spec in lol_rl_protocol::AVAILABLE_ENVS.iter() {
                                                                 let checked = spec.name == current_env_name;
                                                                 let env_name = spec.name;
                                                                 let label = spec.label.to_string();

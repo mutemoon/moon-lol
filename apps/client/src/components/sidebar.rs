@@ -17,7 +17,9 @@ use crate::components::auth_dialog::{open_auth_dialog, AuthDialogState};
 use crate::components::game_console_logs::GameConsoleLogsState;
 use crate::components::navigation::{render_sidebar_menu, render_topbar};
 use crate::components::tasks_table::TaskTableDelegate;
-use crate::components::{render_running_visual, render_task_detail, render_tasks_table};
+use crate::components::{
+    render_env_detail, render_running_visual, render_task_detail, render_tasks_table,
+};
 use crate::pages::heroes::HeroesState;
 use crate::pages::settings::SettingsState;
 use crate::pages::{
@@ -80,6 +82,15 @@ pub struct AppSidebar {
     pub visual_task_id: Option<String>,
     /// 当前可视化子进程的 env 名（用于决定是否显示离散手动 action 按钮）
     pub visual_env_name: Option<String>,
+    /// 当前选中的环境名（用于查看环境 AST 规范详情）
+    pub selected_env_name: Option<String>,
+    /// 环境详情页 Obs AST 节点折叠状态
+    pub env_detail_obs_collapsed: std::collections::HashSet<String>,
+    /// 环境详情页 Action AST 节点折叠状态
+    #[allow(dead_code)]
+    pub env_detail_action_collapsed: std::collections::HashSet<String>,
+    /// 环境详情页 DSL 源码复制状态
+    pub env_detail_copied: bool,
     /// 最近一次创建任务时选择的环境名
     pub last_chosen_env: Option<String>,
     /// 任务概览 DataTable 状态（惰性创建）
@@ -200,6 +211,10 @@ impl AppSidebar {
             visual_error: None,
             visual_task_id: None,
             visual_env_name: None,
+            selected_env_name: None,
+            env_detail_obs_collapsed: std::collections::HashSet::new(),
+            env_detail_action_collapsed: std::collections::HashSet::new(),
+            env_detail_copied: false,
             last_chosen_env: None,
             table_state: None,
             // Auth
@@ -423,6 +438,13 @@ impl Render for AppSidebar {
 
         let main_view_content = match active {
             ActiveView::RlTraining => render_tasks_table(self, window, cx),
+            ActiveView::RlEnvDetail => {
+                if let Some(env_name) = self.selected_env_name.clone() {
+                    render_env_detail(self, env_name, window, cx)
+                } else {
+                    render_tasks_table(self, window, cx)
+                }
+            }
             ActiveView::RlTaskDetail => {
                 if let Some(task_id) = self.selected_task_id.clone() {
                     render_task_detail(self, task_id, cx)

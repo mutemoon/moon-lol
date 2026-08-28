@@ -126,16 +126,23 @@ fn parse_struct_node<'i>(input: &mut &'i str) -> PResult<ActionNode, ContextErro
     .parse_next(input)
 }
 
-/// 解析目标引用: `action_type.Attack` 或 `Attack`
+/// 解析目标引用: `action_type.Attack` 或 `Attack` 或 `"攻击瑞雯"`
 fn parse_target_ref<'i>(input: &mut &'i str) -> PResult<(Option<String>, String), ContextError> {
     alt((
-        separated_pair(ident, symbol("."), ident).map(|(h, b)| (Some(h), b)),
+        separated_pair(
+            ident,
+            symbol("."),
+            alt((string_literal, ident, number_usize.map(|n| n.to_string()))),
+        )
+        .map(|(h, b)| (Some(h), b)),
+        string_literal.map(|b| (None, b)),
         ident.map(|b| (None, b)),
+        number_usize.map(|n| (None, n.to_string())),
     ))
     .parse_next(input)
 }
 
-/// 解析单条掩码规则: `if distance > 22.0 { disable Attack; }`
+/// 解析单条掩码规则: `if distance > 22.0 { disable Attack; }` 或 `if distance > 22.0 { disable 2; }`
 fn parse_mask_rule_entry<'i>(
     input: &mut &'i str,
 ) -> PResult<Vec<(ObsExpr, Option<String>, String)>, ContextError> {
@@ -213,14 +220,18 @@ pub fn parse_action_schema<'i>(input: &mut &'i str) -> PResult<(String, ActionSc
         let mut mask_rules = Vec::new();
         if let Some(masks) = raw_masks {
             for (cond, head, branch_name) in masks {
-                // 查找对应 Category 节点的分支索引
-                let mut resolved_idx = None;
-                for node in nodes.iter() {
-                    if let ActionNode::Categorical { name: node_name, labels, .. } = node {
-                        if head.as_ref().map_or(true, |h| h.as_str() == node_name.as_str()) {
-                            if let Some(idx) = labels.iter().position(|l| l == &branch_name) {
-                                resolved_idx = Some(idx);
-                                break;
+                // 优先直接解析数字分支索引
+                let mut resolved_idx = branch_name.parse::<usize>().ok();
+
+                if resolved_idx.is_none() {
+                    // 按名称在 Category 节点中查找
+                    for node in nodes.iter() {
+                        if let ActionNode::Categorical { name: node_name, labels, .. } = node {
+                            if head.as_ref().map_or(true, |h| h.as_str() == node_name.as_str()) {
+                                if let Some(idx) = labels.iter().position(|l| l == &branch_name) {
+                                    resolved_idx = Some(idx);
+                                    break;
+                                }
                             }
                         }
                     }

@@ -30,11 +30,8 @@ pub const V2_OBS_DISTANCE_SCALE: f32 = 100.0;
 /// 靶子瑞雯在 V2 中的生命值上限
 pub const RIVEN_V2_HP: f32 = 10000.0;
 
-pub static FIORA_V2_SPEC: std::sync::LazyLock<lol_rl_protocol::EnvDslSpec> =
-    std::sync::LazyLock::new(|| {
-        lol_rl_protocol::parse_env_dsl(include_str!("../specs/fiora_v2.rl"))
-            .expect("specs/fiora_v2.rl DSL 解析失败")
-    });
+pub static FIORA_V2_SPEC: std::sync::LazyLock<&'static lol_rl_protocol::EnvDslSpec> =
+    std::sync::LazyLock::new(|| &lol_rl_protocol::SPEC_FIORA_V2);
 
 pub static FIORA_V2_OBS_SCHEMA: std::sync::LazyLock<ObsSchema> = std::sync::LazyLock::new(|| {
     FIORA_V2_SPEC
@@ -684,7 +681,7 @@ impl RlEnvironment for FioraV2Env {
     }
 
     fn reward_formula_spec() -> Option<RewardFormulaSpec> {
-        Some(FioraV2RewardModel.formula_spec())
+        FIORA_V2_SPEC.reward_formula.clone()
     }
 }
 

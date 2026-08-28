@@ -608,38 +608,10 @@ pub struct FioraVsRivenObs {
 
 pub static FIORA_COMMON_OBS_SCHEMA: std::sync::LazyLock<lol_rl_protocol::ObsSchema> =
     std::sync::LazyLock::new(|| {
-        use lol_rl_protocol::{ObsExpr, ObsNode, ObsSchema};
-        ObsSchema::new(vec![
-            ObsNode::structure(
-                "vital",
-                vec![
-                    ObsNode::vector_exprs(
-                        "direction",
-                        vec![
-                            ObsExpr::var("vital_dir_x"),
-                            ObsExpr::var("vital_dir_neg_x"),
-                            ObsExpr::var("vital_dir_z"),
-                            ObsExpr::var("vital_dir_neg_z"),
-                        ],
-                    ),
-                    ObsNode::scalar_expr("has_vital", ObsExpr::var("has_vital")),
-                    ObsNode::scalar_expr("is_active", ObsExpr::var("vital_is_active")),
-                ],
-            ),
-            ObsNode::structure(
-                "spatial",
-                vec![
-                    ObsNode::vector_exprs(
-                        "relative_pos",
-                        vec![
-                            (ObsExpr::var("fiora_x") - ObsExpr::var("riven_x")) / OBS_DISTANCE_SCALE,
-                            (ObsExpr::var("fiora_z") - ObsExpr::var("riven_z")) / OBS_DISTANCE_SCALE,
-                        ],
-                    ),
-                    ObsNode::scalar_expr("distance", ObsExpr::var("distance") / OBS_DISTANCE_SCALE),
-                ],
-            ),
-        ])
+        lol_rl_protocol::SPEC_FIORA_V0
+            .obs_schema
+            .clone()
+            .expect("SPEC_FIORA_V0 缺少 obs_schema")
     });
 
 impl FioraVsRivenObs {

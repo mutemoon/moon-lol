@@ -7,8 +7,25 @@ pub use crate::fiora_riven_common::{
     FioraVsRivenObs, VitalBreakTracker, compute_step_reward, get_obs_from_world,
     setup_skill_levels_world, unpause_virtual_time,
 };
-use crate::reward::{FioraVsRivenRewardModel, RewardModel};
 use crate::traits::{EnvConfig, EnvMeta, RenderMode, RlEnvironment, StepResult, VisualEnvironment};
+
+pub static FIORA_V0_SPEC: std::sync::LazyLock<&'static lol_rl_protocol::EnvDslSpec> =
+    std::sync::LazyLock::new(|| &lol_rl_protocol::SPEC_FIORA_V0);
+
+pub static FIORA_V0_OBS_SCHEMA: std::sync::LazyLock<ObsSchema> = std::sync::LazyLock::new(|| {
+    FIORA_V0_SPEC
+        .obs_schema
+        .clone()
+        .expect("SPEC_FIORA_V0 缺少 obs_schema")
+});
+
+pub static FIORA_V0_ACTION_SCHEMA: std::sync::LazyLock<lol_rl_protocol::ActionSchema> =
+    std::sync::LazyLock::new(|| {
+        FIORA_V0_SPEC
+            .action_schema
+            .clone()
+            .expect("SPEC_FIORA_V0 缺少 action_schema")
+    });
 
 // ── 动作空间 ────────────────────────────────────────────────────────────────
 
@@ -211,7 +228,11 @@ impl RlEnvironment for FioraVsRivenEnv {
     }
 
     fn obs_schema() -> Option<ObsSchema> {
-        Some(FIORA_COMMON_OBS_SCHEMA.clone())
+        Some(FIORA_V0_OBS_SCHEMA.clone())
+    }
+
+    fn action_schema() -> Option<lol_rl_protocol::ActionSchema> {
+        Some(FIORA_V0_ACTION_SCHEMA.clone())
     }
 
     fn action_from_index(idx: usize) -> Self::Action {
@@ -272,15 +293,11 @@ impl RlEnvironment for FioraVsRivenEnv {
     }
 
     fn action_mask(obs: &Self::Obs) -> Option<Vec<bool>> {
-        let mut mask = vec![true; 5];
-        if obs.distance > ATTACK_MASK_DISTANCE {
-            mask[4] = false;
-        }
-        Some(mask)
+        Some(FIORA_V0_ACTION_SCHEMA.eval_flat_mask(&obs.to_context()))
     }
 
     fn reward_formula_spec() -> Option<RewardFormulaSpec> {
-        Some(FioraVsRivenRewardModel.formula_spec())
+        FIORA_V0_SPEC.reward_formula.clone()
     }
 }
 

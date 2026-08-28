@@ -30,6 +30,7 @@ pub enum ActiveView {
     RoomDetail,
     Hero,
     RlTaskDetail,
+    RlEnvDetail,
     VisualEnv,
     WadBrowser,
     Extractor,

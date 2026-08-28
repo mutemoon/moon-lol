@@ -16,13 +16,15 @@ pub mod dsl;
 
 pub const DEFAULT_RL_SERVER_ADDR: &str = "127.0.0.1:8765";
 
-pub use action::{ActionMasks, ActionNode, ActionSchema, ActionValueNode};
+pub use action::{ActionMaskRule, ActionMasks, ActionNode, ActionSchema, ActionValueNode};
 pub use action_space::ActionSpace;
 pub use dsl::{EnvDslSpec, parse_env_dsl};
 pub use env_spec::{
-    AVAILABLE_ENVS, ENV_FIORA_V0, ENV_FIORA_V0_SPEC, ENV_FIORA_V1, ENV_FIORA_V1_SPEC, ENV_FIORA_V2,
-    ENV_FIORA_V2_SPEC, ENV_SOLO_V0, ENV_SOLO_V0_SPEC, EnvSpec, EnvTrainingParams, get_env_spec,
-    get_env_training_params,
+    AVAILABLE_ENVS, ENV_FIORA_V0, ENV_FIORA_V0_DSL, ENV_FIORA_V0_SPEC, ENV_FIORA_V1,
+    ENV_FIORA_V1_DSL, ENV_FIORA_V1_SPEC, ENV_FIORA_V2, ENV_FIORA_V2_DSL, ENV_FIORA_V2_SPEC,
+    ENV_SOLO_V0, ENV_SOLO_V0_DSL, ENV_SOLO_V0_SPEC, EnvSpec, EnvTrainingParams,
+    SPEC_FIORA_V0, SPEC_FIORA_V1, SPEC_FIORA_V2, SPEC_SOLO_V0,
+    get_env_dsl_source, get_env_dsl_spec, get_env_spec, get_env_training_params,
 };
 pub use frames::{
     CheckpointItem, CurriculumTelemetry, InFrame, MetricsRow, ObsFeaturePayload, OutFrame,
