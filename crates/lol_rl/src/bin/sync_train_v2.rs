@@ -68,12 +68,16 @@ fn main() -> anyhow::Result<()> {
                 match cmd {
                     WorkerCommand::Rollout {
                         main_policy,
+                        main_critic,
                         opponent_policy,
+                        opponent_critic,
                         main_agent_idx,
                     } => {
                         let traj = worker.rollout(
                             &main_policy,
+                            main_critic.as_deref(),
                             opponent_policy.as_deref(),
+                            opponent_critic.as_deref(),
                             main_agent_idx,
                             horizon,
                             state_dim,
@@ -117,11 +121,14 @@ fn main() -> anyhow::Result<()> {
         let current_lr = (3e-4 * 0.1 + (3e-4 - 3e-4 * 0.1) * cos_progress as f64).max(3e-4 * 0.05);
         let _ = agent.set_lr(current_lr);
 
-        let cpu_policy = Arc::new(agent.actor_critic.to_device(&candle_core::Device::Cpu)?);
+        let cpu_policy = Arc::new(agent.actor_critic.policy.to_device(&candle_core::Device::Cpu)?);
+        let cpu_critic = Arc::new(agent.actor_critic.critic.to_device(&candle_core::Device::Cpu)?);
         for tx in &cmd_senders {
             let _ = tx.send(WorkerCommand::Rollout {
                 main_policy: cpu_policy.clone(),
+                main_critic: Some(cpu_critic.clone()),
                 opponent_policy: None,
+                opponent_critic: None,
                 main_agent_idx: 0,
             });
         }

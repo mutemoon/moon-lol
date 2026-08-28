@@ -79,10 +79,10 @@ action FioraV2Action {
     }
 
     mask {
-        if distance > 22.0 { disable 2; }
-        if q_ready < 0.5   { disable 3; }
-        if e_ready < 0.5   { disable 4; }
-        if r_ready < 0.5   { disable 5; }
+        if distance > 220.0 { disable 2; }
+        if q_ready < 0.5    { disable 3; }
+        if e_ready < 0.5    { disable 4; }
+        if r_ready < 0.5    { disable 5; }
         if flash_ready < 0.5 { disable 6; }
     }
 }

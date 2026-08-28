@@ -4,8 +4,8 @@ use std::time::Duration;
 use clap::Parser;
 use futures_util::{SinkExt, StreamExt};
 use lol_rl_protocol::{
-    CurriculumConfig, InFrame, OutFrame, PolicyBackbone, TaskConfigPayload, DEFAULT_RL_SERVER_ADDR,
-    get_env_training_params,
+    CurriculumConfig, InFrame, OutFrame, PolicyBackbone, RlAlgorithm, TaskConfigPayload,
+    DEFAULT_RL_SERVER_ADDR, get_env_training_params,
 };
 use tokio_tungstenite::connect_async;
 use tokio_tungstenite::tungstenite::Message;
@@ -26,16 +26,16 @@ pub struct Cli {
     pub name: String,
 
     /// 训练环境名称 (如: solo_v0, fiora_v0, fiora_v1, fiora_v2)
-    #[arg(long, default_value = "solo_v0")]
+    #[arg(long, default_value = "fiora_v2")]
     pub env: String,
 
-    /// 算法模型名称 (如: "PPO (MLP)", "PPO (Mamba)")
-    #[arg(long, default_value = "PPO (MLP)")]
-    pub agent: String,
+    /// 强化学习训练算法 (ppo 或 grpo)
+    #[arg(long, default_value = "ppo")]
+    pub algo: String,
 
-    /// 主干网络架构 (mlp 或 mamba，未指定时由 --agent 自动推断)
-    #[arg(long)]
-    pub backbone: Option<String>,
+    /// 特征主干网络架构 (mlp 或 mamba)
+    #[arg(long, default_value = "mlp")]
+    pub backbone: String,
 
     /// 学习率 (Learning Rate / lr)
     #[arg(long)]
@@ -49,7 +49,7 @@ pub struct Cli {
     #[arg(long)]
     pub gae_lambda: Option<f32>,
 
-    /// PPO Clip 截断系数 (Clip Eps / ε)
+    /// PPO/GRPO Clip 截断系数 (Clip Eps / ε)
     #[arg(long)]
     pub clip_eps: Option<f32>,
 
@@ -104,18 +104,14 @@ async fn main() {
         }
     } else {
         let env_params = get_env_training_params(&cli.env);
-        let backbone = if let Some(bb) = &cli.backbone {
-            match bb.to_lowercase().as_str() {
-                "mlp" => Some(PolicyBackbone::Mlp),
-                "mamba" => Some(PolicyBackbone::Mamba),
-                other => {
-                    eprintln!("⚠️ 未知 backbone '{other}'，回退为根据 agent 名称推断");
-                    None
-                }
-            }
-        } else {
-            None
-        };
+        let algorithm = cli.algo.parse::<RlAlgorithm>().unwrap_or_else(|_| {
+            eprintln!("⚠️ 未知算法 '{}'，默认使用 PPO", cli.algo);
+            RlAlgorithm::Ppo
+        });
+        let backbone = cli.backbone.parse::<PolicyBackbone>().unwrap_or_else(|_| {
+            eprintln!("⚠️ 未知主干架构 '{}'，默认使用 MLP", cli.backbone);
+            PolicyBackbone::Mlp
+        });
 
         let curriculum = if let Some(curriculum_str) = &cli.curriculum_json {
             match serde_json::from_str::<CurriculumConfig>(curriculum_str) {
@@ -129,10 +125,11 @@ async fn main() {
             None
         };
 
-        let mut payload = TaskConfigPayload {
+        TaskConfigPayload {
             name: cli.name,
-            agent_type: cli.agent,
             env_name: cli.env,
+            algorithm,
+            backbone,
             lr: cli.lr.unwrap_or(env_params.lr),
             gamma: cli.gamma.unwrap_or(env_params.gamma),
             gae_lambda: cli.gae_lambda.unwrap_or(env_params.gae_lambda),
@@ -146,104 +143,69 @@ async fn main() {
             total_iterations: cli
                 .total_iterations
                 .unwrap_or(env_params.total_iterations),
-            backbone,
             curriculum,
             grpo_group_size: cli.grpo_group_size,
             grpo_kl_coef: cli.grpo_kl_coef,
-        };
-
-        if payload.backbone.is_none() {
-            payload.backbone = Some(payload.backbone());
         }
-        payload
     };
 
-    let ws_url = format!("ws://{}", cli.server_addr);
-    println!("🚀 [lol_rl_cli] 正在连接 RL 训练服务端: {}", ws_url);
+    let ws_url = if cli.server_addr.starts_with("ws://") {
+        cli.server_addr.clone()
+    } else {
+        format!("ws://{}", cli.server_addr)
+    };
 
+    println!("🚀 [lol_rl_cli] 正在连接 RL 训练服务: {ws_url} ...");
     let (ws_stream, _) = match connect_async(&ws_url).await {
         Ok(res) => res,
         Err(e) => {
-            eprintln!("\n❌ 无法连接到 RL 服务端: {}", ws_url);
-            eprintln!("   底层错误: {e}");
-            eprintln!("💡 请确保已启动 RL 服务端: cargo run -p lol_rl\n");
+            eprintln!("❌ 连接 RL 训练服务失败 ({ws_url}): {e}");
+            eprintln!("💡 请确保后台 lol_server / lol_rl 服务正在运行。");
             exit(1);
         }
     };
-
-    println!("✅ 成功建立 WebSocket 连接，正在提交创建训练任务请求...");
+    println!("✅ 成功连接到 RL 训练服务！");
 
     let (mut ws_writer, mut ws_reader) = ws_stream.split();
 
-    let frame = InFrame::CreateTask {
+    let create_frame = InFrame::CreateTask {
         config: config.clone(),
     };
-    let msg_bytes = match bincode::serialize(&frame) {
-        Ok(b) => b,
-        Err(e) => {
-            eprintln!("❌ 序列化请求帧失败: {e}");
-            exit(1);
-        }
-    };
-
-    if let Err(e) = ws_writer.send(Message::Binary(msg_bytes.into())).await {
-        eprintln!("❌ 发送创建任务帧失败: {e}");
+    let json_msg = serde_json::to_string(&create_frame).expect("序列化 CreateTask 帧失败");
+    if let Err(e) = ws_writer.send(Message::Text(json_msg.into())).await {
+        eprintln!("❌ 发送创建任务请求失败: {e}");
         exit(1);
     }
+    println!("📤 已提交训练任务配置...");
 
-    println!("📤 创建训练任务指令已发送，等待服务端确认...");
-
-    let timeout_duration = Duration::from_secs(10);
     let mut created_task_id = None;
-
-    let listen_result = tokio::time::timeout(timeout_duration, async {
+    let listen_result = tokio::time::timeout(Duration::from_secs(10), async {
         while let Some(msg_res) = ws_reader.next().await {
             match msg_res {
-                Ok(Message::Binary(bytes)) => {
-                    if let Ok(out_frame) = bincode::deserialize::<OutFrame>(&bytes) {
-                        match out_frame {
-                            OutFrame::Status { task_id, status } => {
-                                if status == "running" && task_id != "global" {
-                                    created_task_id = Some(task_id);
-                                    break;
-                                }
-                            }
-                            OutFrame::TaskList { tasks } => {
-                                if let Some(task) = tasks
-                                    .iter()
-                                    .find(|t| t.name == config.name && t.env_name == config.env_name)
-                                {
-                                    created_task_id = Some(task.id.clone());
-                                    break;
-                                }
-                            }
-                            _ => {}
-                        }
-                    }
-                }
                 Ok(Message::Text(text)) => {
                     if let Ok(out_frame) = serde_json::from_str::<OutFrame>(&text) {
                         match out_frame {
                             OutFrame::Status { task_id, status } => {
-                                if status == "running" && task_id != "global" {
-                                    created_task_id = Some(task_id);
+                                println!("📢 [服务端状态更新] 任务: {task_id}, 状态: {status}");
+                                created_task_id = Some(task_id);
+                                if status == "running" {
                                     break;
                                 }
                             }
                             OutFrame::TaskList { tasks } => {
-                                if let Some(task) = tasks
-                                    .iter()
-                                    .find(|t| t.name == config.name && t.env_name == config.env_name)
-                                {
-                                    created_task_id = Some(task.id.clone());
-                                    break;
+                                if let Some(latest) = tasks.first() {
+                                    created_task_id = Some(latest.id.clone());
                                 }
+                            }
+                            OutFrame::Log { message, .. } => {
+                                println!("📝 {message}");
                             }
                             _ => {}
                         }
                     }
                 }
                 Ok(Message::Close(_)) => {
+                    eprintln!("⚠️ 服务端关闭了连接");
                     break;
                 }
                 Err(e) => {
@@ -269,9 +231,9 @@ async fn main() {
     println!("🏷️ 任务名称:     {}", config.name);
     println!("🎮 训练环境:     {}", config.env_name);
     println!(
-        "🧠 算法模型:     {} (Backbone: {})",
-        config.agent_type,
-        config.backbone().as_str()
+        "🧠 训练算法:     {} (Backbone: {})",
+        config.algorithm.display_name(),
+        config.backbone.display_name()
     );
     println!("⚙️ 隐藏层维度:   {}", config.hidden_dim);
     println!(

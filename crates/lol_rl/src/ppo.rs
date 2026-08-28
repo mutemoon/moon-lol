@@ -530,6 +530,14 @@ impl PPOAgent {
         &self.device
     }
 
+    pub fn policy(&self) -> &crate::policy::PolicyNetwork {
+        &self.actor_critic.policy
+    }
+
+    pub fn critic(&self) -> &crate::policy::ValueHead {
+        &self.actor_critic.critic
+    }
+
     /// 提取策略与价值网络的所有层级参数量明细
     pub fn parameter_summary(&self) -> ModelParamSummary {
         self.actor_critic.parameter_summary()

@@ -74,6 +74,24 @@ impl AutoTuner {
         device: &Device,
         backbone_type: lol_rl_protocol::PolicyBackbone,
     ) -> Result<SystemProfile> {
+        Self::profile_with_algo_and_backbone::<E>(
+            state_dim,
+            hidden_dim,
+            action_space,
+            device,
+            lol_rl_protocol::RlAlgorithm::Ppo,
+            backbone_type,
+        )
+    }
+
+    pub fn profile_with_algo_and_backbone<E: RlEnvironment + 'static>(
+        state_dim: usize,
+        hidden_dim: usize,
+        action_space: &ActionSpace,
+        device: &Device,
+        algorithm: lol_rl_protocol::RlAlgorithm,
+        backbone_type: lol_rl_protocol::PolicyBackbone,
+    ) -> Result<SystemProfile> {
         let cpu_cores = num_cpus::get();
         let is_cuda = !device.is_cpu();
         let agents_per_env = E::num_agents().max(1);
@@ -87,7 +105,8 @@ impl AutoTuner {
         };
 
         info!(
-            "🔍 [AutoTuner] 开始硬件算力探测 (Backbone: {:?}, Device: {:?}, CPU逻辑核心: {}, 每环境智能体: {})...",
+            "🔍 [AutoTuner] 开始硬件算力探测 (Algorithm: {:?}, Backbone: {:?}, Device: {:?}, CPU逻辑核心: {}, 每环境智能体: {})...",
+            algorithm,
             backbone_type,
             if is_cuda { "CUDA / GPU" } else { "CPU" },
             cpu_cores,
@@ -104,27 +123,51 @@ impl AutoTuner {
         let clone_warmup = 5;
         let clone_iters = 20;
 
-        // 1. 创建真实 PPOAgent（含 AdamW 优化器），探测全程复用同一网络。
-        //    训练探测只测单 epoch 成本（ppo_epochs=1），solve 按任务配置乘回。
-        let ppo_config = PPOConfig {
-            lr: 3e-4,
-            ppo_epochs: 1,
-            ..Default::default()
+        // 1. 创建真实 Agent（含 AdamW 优化器），探测全程复用同一网络。
+        let (cpu_policy, cpu_critic, mut rl_agent) = match algorithm {
+            lol_rl_protocol::RlAlgorithm::Grpo => {
+                let grpo_config = crate::grpo::GRPOConfig {
+                    lr: 3e-4,
+                    grpo_epochs: 1,
+                    ..Default::default()
+                };
+                let agent = crate::grpo::GRPOAgent::create_for_env_with_backbone::<E>(
+                    state_dim,
+                    hidden_dim,
+                    action_space.clone(),
+                    grpo_config,
+                    device.clone(),
+                    backbone_type,
+                )?;
+                let cpu_policy = Arc::new(agent.policy.to_device(&candle_core::Device::Cpu)?);
+                (cpu_policy, None, crate::training::RlAgent::Grpo(agent))
+            }
+            lol_rl_protocol::RlAlgorithm::Ppo => {
+                let ppo_config = PPOConfig {
+                    lr: 3e-4,
+                    ppo_epochs: 1,
+                    ..Default::default()
+                };
+                let agent = PPOAgent::create_for_env_with_backbone::<E>(
+                    state_dim,
+                    hidden_dim,
+                    action_space.clone(),
+                    ppo_config,
+                    device.clone(),
+                    backbone_type,
+                )?;
+                let cpu_policy = Arc::new(agent.actor_critic.policy.to_device(&candle_core::Device::Cpu)?);
+                let cpu_critic = Arc::new(agent.actor_critic.critic.to_device(&candle_core::Device::Cpu)?);
+                (cpu_policy, Some(cpu_critic), crate::training::RlAgent::Ppo(agent))
+            }
         };
-        let mut agent = PPOAgent::create_for_env_with_backbone::<E>(
-            state_dim,
-            hidden_dim,
-            action_space.clone(),
-            ppo_config,
-            device.clone(),
-            backbone_type,
-        )?;
-        let cpu_policy = Arc::new(agent.actor_critic.to_device(&candle_core::Device::Cpu)?);
 
         // 2. 单环境真实单步耗时（含策略推理 + 采样簿记 + env step）
         let mut single_worker = RolloutWorker::<E>::new();
         let _ = single_worker.rollout(
             &cpu_policy,
+            cpu_critic.as_deref(),
+            None,
             None,
             0,
             warmup_steps,
@@ -134,6 +177,8 @@ impl AutoTuner {
         let env_start = Instant::now();
         let _ = single_worker.rollout(
             &cpu_policy,
+            cpu_critic.as_deref(),
+            None,
             None,
             0,
             single_steps,
@@ -152,8 +197,8 @@ impl AutoTuner {
         }
         if !candidate_n.contains(&cpu_cores) && cpu_cores <= 64 {
             candidate_n.push(cpu_cores);
-            candidate_n.sort_unstable();
         }
+        candidate_n.sort_unstable();
 
         let mut parallel_env_us = Vec::with_capacity(candidate_n.len());
         for &n in &candidate_n {
@@ -163,11 +208,14 @@ impl AutoTuner {
             for _ in 0..n {
                 let b = barrier.clone();
                 let policy = cpu_policy.clone();
+                let critic = cpu_critic.clone();
                 let h = std::thread::spawn(move || {
                     let mut worker = RolloutWorker::<E>::new();
                     b.wait();
                     let _ = worker.rollout(
                         &policy,
+                        critic.as_deref(),
+                        None,
                         None,
                         0,
                         steps_per_env,
@@ -196,7 +244,7 @@ impl AutoTuner {
         }
 
         // 4. GPU 批量推理参考曲线（动态批推理引擎用，训练循环本身不依赖）
-        let ac = &agent.actor_critic;
+        let policy_ref = rl_agent.policy();
         let infer_batches = [1, 2, 4, 8, 16, 24, 32, 48, 64, 96, 128];
         let mut infer_latency_us = Vec::with_capacity(infer_batches.len());
 
@@ -204,12 +252,12 @@ impl AutoTuner {
             let dummy_input = Tensor::zeros((b, state_dim), DType::F32, device)?;
 
             for _ in 0..infer_warmup {
-                let _ = ac.sample_batch(&dummy_input, None)?;
+                let _ = policy_ref.sample_batch(&dummy_input, None)?;
             }
 
             let start = Instant::now();
             for _ in 0..infer_iters {
-                let _ = ac.sample_batch(&dummy_input, None)?;
+                let _ = policy_ref.sample_batch(&dummy_input, None)?;
             }
             let lat_us = (start.elapsed().as_micros() as f64) / (infer_iters as f64);
             let throughput = (b as f64) / (lat_us / 1_000_000.0);
@@ -228,30 +276,51 @@ impl AutoTuner {
             let buffers = synthetic_buffers(state_dim, enc_dim, mask_dim, b, agents_per_env);
             let last_vals = vec![0.0f32; buffers.len()];
 
-            for _ in 0..train_warmup {
-                let _ = agent.update_multi_buffer(&buffers, &last_vals, b)?;
-            }
+            match &mut rl_agent {
+                crate::training::RlAgent::Ppo(agent) => {
+                    for _ in 0..train_warmup {
+                        let _ = agent.update_multi_buffer(&buffers, &last_vals, b)?;
+                    }
 
-            let start = Instant::now();
-            for _ in 0..train_iters {
-                let _ = agent.update_multi_buffer(&buffers, &last_vals, b)?;
+                    let start = Instant::now();
+                    for _ in 0..train_iters {
+                        let _ = agent.update_multi_buffer(&buffers, &last_vals, b)?;
+                    }
+                    let lat_us = (start.elapsed().as_micros() as f64) / (train_iters as f64);
+                    let throughput = (b as f64) / (lat_us / 1_000_000.0);
+                    train_step_us.push((b, lat_us));
+                    info!(
+                        "    ├─ 训练 Batch {:3}: 耗时 {:7.2} µs | 梯度吞吐: {:8.1} samples/s",
+                        b, lat_us, throughput
+                    );
+                }
+                crate::training::RlAgent::Grpo(agent) => {
+                    for _ in 0..train_warmup {
+                        let _ = agent.update_multi_buffer(&buffers, b)?;
+                    }
+
+                    let start = Instant::now();
+                    for _ in 0..train_iters {
+                        let _ = agent.update_multi_buffer(&buffers, b)?;
+                    }
+                    let lat_us = (start.elapsed().as_micros() as f64) / (train_iters as f64);
+                    let throughput = (b as f64) / (lat_us / 1_000_000.0);
+                    train_step_us.push((b, lat_us));
+                    info!(
+                        "    ├─ 训练 Batch {:3}: 耗时 {:7.2} µs | 梯度吞吐: {:8.1} samples/s",
+                        b, lat_us, throughput
+                    );
+                }
             }
-            let lat_us = (start.elapsed().as_micros() as f64) / (train_iters as f64);
-            let throughput = (b as f64) / (lat_us / 1_000_000.0);
-            train_step_us.push((b, lat_us));
-            info!(
-                "    ├─ 训练 Batch {:3}: 耗时 {:7.2} µs | 梯度吞吐: {:8.1} samples/s",
-                b, lat_us, throughput
-            );
         }
 
         // 6. 每迭代固定开销：GPU→CPU 权重克隆（真实循环每轮执行一次）
         for _ in 0..clone_warmup {
-            let _ = agent.actor_critic.to_device(&candle_core::Device::Cpu)?;
+            let _ = rl_agent.policy().to_device(&candle_core::Device::Cpu)?;
         }
         let start = Instant::now();
         for _ in 0..clone_iters {
-            let _ = agent.actor_critic.to_device(&candle_core::Device::Cpu)?;
+            let _ = rl_agent.policy().to_device(&candle_core::Device::Cpu)?;
         }
         let clone_us = start.elapsed().as_micros() as f64 / (clone_iters as f64);
         // 300µs 预留给熵/LR 调度与轨迹聚合簿记
@@ -429,36 +498,88 @@ impl AutoTuner {
         tuned: &TunedConfig,
         backbone_type: lol_rl_protocol::PolicyBackbone,
     ) -> Result<f64> {
+        Self::calibrate_with_algo_and_backbone::<E>(
+            state_dim,
+            hidden_dim,
+            action_space,
+            device,
+            horizon,
+            ppo_epochs,
+            tuned,
+            lol_rl_protocol::RlAlgorithm::Ppo,
+            backbone_type,
+        )
+    }
+
+    pub fn calibrate_with_algo_and_backbone<E: RlEnvironment + 'static>(
+        state_dim: usize,
+        hidden_dim: usize,
+        action_space: &ActionSpace,
+        device: &Device,
+        horizon: usize,
+        ppo_epochs: usize,
+        tuned: &TunedConfig,
+        algorithm: lol_rl_protocol::RlAlgorithm,
+        backbone_type: lol_rl_protocol::PolicyBackbone,
+    ) -> Result<f64> {
         let iters = calibrate_iters();
         if iters == 0 {
             return Ok(tuned.estimated_sps);
         }
 
         info!(
-            "🎯 [AutoTuner] 真实校准 (主干: {:?})：{} 并发 Workers 跑 {iters} 轮完整真实迭代，测量实测 SPS...",
-            backbone_type, tuned.num_parallel_envs
+            "🎯 [AutoTuner] 真实校准 (算法: {:?}, 主干: {:?})：{} 并发 Workers 跑 {iters} 轮完整真实迭代，测量实测 SPS...",
+            algorithm, backbone_type, tuned.num_parallel_envs
         );
-        let ppo_config = PPOConfig {
-            lr: 3e-4,
-            gamma: 0.99,
-            gae_lambda: 0.95,
-            clip_eps: 0.2,
-            c1: 0.5,
-            c2: 0.05,
-            ppo_epochs: ppo_epochs.max(1),
-            clip_vloss: true,
-            max_grad_norm: 0.5,
+
+        let rl_agent: crate::training::RlAgent = match algorithm {
+            lol_rl_protocol::RlAlgorithm::Grpo => {
+                let grpo_config = crate::grpo::GRPOConfig {
+                    lr: 3e-4,
+                    gamma: 0.99,
+                    clip_eps: 0.2,
+                    c2: 0.05,
+                    grpo_epochs: ppo_epochs.max(1),
+                    group_size: 4,
+                    kl_coef: 0.04,
+                    ..Default::default()
+                };
+                let agent = crate::grpo::GRPOAgent::create_for_env_with_backbone::<E>(
+                    state_dim,
+                    hidden_dim,
+                    action_space.clone(),
+                    grpo_config,
+                    device.clone(),
+                    backbone_type,
+                )?;
+                crate::training::RlAgent::Grpo(agent)
+            }
+            lol_rl_protocol::RlAlgorithm::Ppo => {
+                let ppo_config = PPOConfig {
+                    lr: 3e-4,
+                    gamma: 0.99,
+                    gae_lambda: 0.95,
+                    clip_eps: 0.2,
+                    c1: 0.5,
+                    c2: 0.05,
+                    ppo_epochs: ppo_epochs.max(1),
+                    clip_vloss: true,
+                    max_grad_norm: 0.5,
+                };
+                let agent = PPOAgent::create_for_env_with_backbone::<E>(
+                    state_dim,
+                    hidden_dim,
+                    action_space.clone(),
+                    ppo_config,
+                    device.clone(),
+                    backbone_type,
+                )?;
+                crate::training::RlAgent::Ppo(agent)
+            }
         };
-        let agent = PPOAgent::create_for_env_with_backbone::<E>(
-            state_dim,
-            hidden_dim,
-            action_space.clone(),
-            ppo_config,
-            device.clone(),
-            backbone_type,
-        )?;
+
         let mut session = crate::training::TrainingSession::<E>::new(
-            agent,
+            rl_agent,
             tuned.num_parallel_envs,
             state_dim,
             horizon,
@@ -579,5 +700,39 @@ mod tests {
         let small_forced = AutoTuner::solve_with_forced_n(&profile, 64, 4, Some(1));
         assert_eq!(small_forced.num_parallel_envs, 1);
         assert!(small_forced.train_batch_size >= 16);
+    }
+
+    #[test]
+    fn test_autotuner_grpo_profile_and_calibrate() {
+        use lol_env::FioraV2Env;
+        let device = Device::Cpu;
+        let action_space = FioraV2Env::action_space();
+        let state_dim = FioraV2Env::state_dim();
+        
+        let profile = AutoTuner::profile_with_algo_and_backbone::<FioraV2Env>(
+            state_dim,
+            64,
+            &action_space,
+            &device,
+            lol_rl_protocol::RlAlgorithm::Grpo,
+            lol_rl_protocol::PolicyBackbone::Mlp,
+        )
+        .unwrap();
+        assert!(profile.env_step_us > 0.0);
+
+        let tuned = AutoTuner::solve(&profile, 32, 1);
+        let measured = AutoTuner::calibrate_with_algo_and_backbone::<FioraV2Env>(
+            state_dim,
+            64,
+            &action_space,
+            &device,
+            32,
+            1,
+            &tuned,
+            lol_rl_protocol::RlAlgorithm::Grpo,
+            lol_rl_protocol::PolicyBackbone::Mlp,
+        )
+        .unwrap();
+        assert!(measured > 0.0);
     }
 }

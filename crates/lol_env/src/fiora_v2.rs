@@ -266,6 +266,28 @@ impl FioraV2Obs {
         ctx.set_var("riven_hp", self.riven_hp);
         ctx.set_var("riven_max_hp", self.riven_max_hp);
 
+        let primary_vital = self
+            .target_modifiers
+            .iter()
+            .find(|m| m.name_id == ModifierNameId::FioraPassiveVital);
+        let has_vital = primary_vital.is_some();
+        let vital_is_active = primary_vital.map(|v| v.stack_count > 0.5).unwrap_or(false);
+        let (vx, vnx, vz, vnz) = match primary_vital {
+            Some(v) => (
+                if v.param0 > 0.5 { 1.0 } else { 0.0 },
+                if v.param0 < -0.5 { 1.0 } else { 0.0 },
+                if v.param1 > 0.5 { 1.0 } else { 0.0 },
+                if v.param1 < -0.5 { 1.0 } else { 0.0 },
+            ),
+            None => (0.0, 0.0, 0.0, 0.0),
+        };
+        ctx.set_var("vital_dir_x", vx);
+        ctx.set_var("vital_dir_neg_x", vnx);
+        ctx.set_var("vital_dir_z", vz);
+        ctx.set_var("vital_dir_neg_z", vnz);
+        ctx.set_var("has_vital", if has_vital { 1.0 } else { 0.0 });
+        ctx.set_var("vital_is_active", if vital_is_active { 1.0 } else { 0.0 });
+
         let self_mods: Vec<_> = self.self_modifiers.iter().map(|m| m.to_context()).collect();
         ctx.set_repeated("self_modifiers", self_mods);
 
@@ -274,7 +296,8 @@ impl FioraV2Obs {
             .iter()
             .map(|m| m.to_context())
             .collect();
-        ctx.set_repeated("target_modifiers", target_mods);
+        ctx.set_repeated("target_modifiers", target_mods.clone());
+        ctx.set_repeated("modifiers", target_mods);
 
         ctx
     }
@@ -659,6 +682,14 @@ impl RlEnvironment for FioraV2Env {
 
     fn action_mask(obs: &Self::Obs) -> Option<Vec<bool>> {
         Some(FIORA_V2_ACTION_SCHEMA.eval_flat_mask(&obs.to_context()))
+    }
+
+    fn action_masks(obs: &Self::Obs) -> Option<lol_rl_protocol::ActionMasks> {
+        let flat_mask = FIORA_V2_ACTION_SCHEMA.eval_flat_mask(&obs.to_context());
+        Some(lol_rl_protocol::ActionMasks {
+            branch_masks: vec![None, Some(flat_mask)],
+            conditional_target_masks: None,
+        })
     }
 
     fn reward_formula_spec() -> Option<RewardFormulaSpec> {

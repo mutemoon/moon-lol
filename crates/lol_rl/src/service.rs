@@ -171,10 +171,15 @@ impl RLService {
                 let task_id = Uuid::new_v4();
                 let config_json = serde_json::to_value(&config).unwrap_or_default();
                 let now = Utc::now();
+                let agent_display = format!(
+                    "{} ({})",
+                    config.algorithm.display_name(),
+                    config.backbone.display_name()
+                );
                 let row = TaskRow {
                     id: task_id,
                     name: config.name.clone(),
-                    agent_type: config.agent_type.clone(),
+                    agent_type: agent_display.clone(),
                     env_name: config.env_name.clone(),
                     status: "queued".to_string(),
                     config_json,
@@ -191,7 +196,7 @@ impl RLService {
                 let new_task = TaskState {
                     id: task_id.to_string(),
                     name: config.name.clone(),
-                    agent_type: config.agent_type.clone(),
+                    agent_type: agent_display,
                     env_name: config.env_name.clone(),
                     status: "queued".to_string(),
                     current_step: 0,
@@ -456,7 +461,8 @@ impl RLService {
             .map(|t| TaskOverviewItem {
                 id: t.id.clone(),
                 name: t.name.clone(),
-                agent_type: t.agent_type.clone(),
+                algorithm: t.config.algorithm,
+                backbone: t.config.backbone,
                 env_name: t.env_name.clone(),
                 status: t.status.clone(),
                 current_step: t.current_step,
@@ -679,18 +685,20 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment + 'static>(
         )
     } else {
         // 1. 自动调整模式：运行 AutoTuner 全面硬件算力探测与最优配置求解
-        let tuned = match AutoTuner::profile_with_backbone::<E>(
+        let tuned = match AutoTuner::profile_with_algo_and_backbone::<E>(
             state_dim,
             hidden_dim,
             &action_space,
             &device,
+            task_config.algorithm,
             backbone,
         ) {
             Ok(profile) => {
                 let res = AutoTuner::solve(&profile, rollout_steps, task_config.ppo_epochs.max(1));
                 info!(
-                    "🎯 [AutoTuner] 为任务 {} (主干: {}) 自动求解最优配置: 并发 Actors={}, 推理 Batch={}, 训练 MiniBatch={}, 预估 SPS: {:.1}",
+                    "🎯 [AutoTuner] 为任务 {} (算法: {}, 主干: {}) 自动求解最优配置: 并发 Actors={}, 推理 Batch={}, 训练 MiniBatch={}, 预估 SPS: {:.1}",
                     task_id,
+                    task_config.algorithm,
                     backbone,
                     res.num_parallel_envs,
                     res.infer_batch_size,
@@ -720,7 +728,7 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment + 'static>(
     if !is_custom {
         let mut calib_config = tuned.clone();
         calib_config.num_parallel_envs = num_parallel_envs;
-        match AutoTuner::calibrate_with_backbone::<E>(
+        match AutoTuner::calibrate_with_algo_and_backbone::<E>(
             state_dim,
             hidden_dim,
             &action_space,
@@ -728,6 +736,7 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment + 'static>(
             rollout_steps,
             task_config.ppo_epochs.max(1),
             &calib_config,
+            task_config.algorithm,
             backbone,
         ) {
             Ok(measured) => {
@@ -1153,7 +1162,11 @@ pub fn run_direct_training<E: lol_env::RlEnvironment + 'static>(
         TaskState {
             id: task_id.clone(),
             name: task_config.name.clone(),
-            agent_type: task_config.agent_type.clone(),
+            agent_type: format!(
+                "{} ({})",
+                task_config.algorithm.display_name(),
+                task_config.backbone.display_name()
+            ),
             env_name: task_config.env_name.clone(),
             status: "running".to_string(),
             current_step: 0,

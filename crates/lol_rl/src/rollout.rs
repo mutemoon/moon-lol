@@ -9,7 +9,7 @@ use std::sync::Arc;
 use candle_core::{Device, Result, Tensor};
 use lol_env::RlEnvironment;
 
-use crate::policy::ActorCritic;
+use crate::policy::{PolicyNetwork, ValueHead};
 use crate::ppo::RolloutBuffer;
 
 /// 一次 Rollout 的完整产出（单个 Worker 一次 horizon 推演）。
@@ -44,8 +44,10 @@ impl<O> WorkerTrajectory<O> {
 /// 发给持久化 Worker 的命令。
 pub enum WorkerCommand {
     Rollout {
-        main_policy: Arc<ActorCritic>,
-        opponent_policy: Option<Arc<ActorCritic>>,
+        main_policy: Arc<PolicyNetwork>,
+        main_critic: Option<Arc<ValueHead>>,
+        opponent_policy: Option<Arc<PolicyNetwork>>,
+        opponent_critic: Option<Arc<ValueHead>>,
         main_agent_idx: usize,
     },
     /// 更新课程学习参数（小兵血量缩放 + 奖励配置）
@@ -104,8 +106,10 @@ impl<E: RlEnvironment> RolloutWorker<E> {
     ///   传 GPU device 则把每次策略前向放到 GPU（需 `main_policy`/`opponent_policy` 已迁到该 device）。
     pub fn rollout(
         &mut self,
-        main_policy: &ActorCritic,
-        opponent_policy: Option<&ActorCritic>,
+        main_policy: &PolicyNetwork,
+        main_critic: Option<&ValueHead>,
+        opponent_policy: Option<&PolicyNetwork>,
+        opponent_critic: Option<&ValueHead>,
         main_agent_idx: usize,
         horizon: usize,
         state_dim: usize,
@@ -113,6 +117,7 @@ impl<E: RlEnvironment> RolloutWorker<E> {
     ) -> Result<WorkerTrajectory<E::Obs>> {
         let has_opp_policy = opponent_policy.is_some();
         let opp_policy = opponent_policy.unwrap_or(main_policy);
+        let opp_critic = opponent_critic.or(main_critic);
         let num_agents = self.current_obs.len().max(1);
         let train_agent_count = if has_opp_policy { 1 } else { num_agents };
 
@@ -158,10 +163,19 @@ impl<E: RlEnvironment> RolloutWorker<E> {
                     Some(&structured_masks),
                     Some(&masks),
                 )?;
-                for ((state_vec, mask), (encoded, log_prob, val)) in state_vecs
+                let val_vec = if let Some(critic) = main_critic {
+                    let feat = main_policy.hidden(&batch_tensor)?;
+                    let v = critic.forward(&feat)?;
+                    v.squeeze(1)?.to_vec1()?
+                } else {
+                    vec![0.0; self.current_obs.len()]
+                };
+
+                for (((state_vec, mask), (encoded, log_prob)), val) in state_vecs
                     .into_iter()
                     .zip(masks.into_iter())
                     .zip(batch_samples.into_iter())
+                    .zip(val_vec.into_iter())
                 {
                     let act = E::action_from_encoding(&encoded);
                     actions.push(act);
@@ -176,18 +190,27 @@ impl<E: RlEnvironment> RolloutWorker<E> {
                     let state_tensor =
                         Tensor::from_vec(state_vec.clone(), (1, state_dim), sampler_device)?;
 
-                    let active_policy = if !has_opp_policy || agent_idx == main_agent_idx {
-                        main_policy
-                    } else {
-                        opp_policy
-                    };
+                    let (active_policy, active_critic) =
+                        if !has_opp_policy || agent_idx == main_agent_idx {
+                            (main_policy, main_critic)
+                        } else {
+                            (opp_policy, opp_critic)
+                        };
 
-                    let (encoded, log_prob, val) = active_policy.step_with_structured_masks(
+                    let (encoded, log_prob) = active_policy.step_with_structured_masks(
                         &state_tensor,
                         &mut self.agent_mamba_states[agent_idx],
                         structured_mask.as_ref(),
                         action_mask.as_deref(),
                     )?;
+
+                    let val = if let Some(critic) = active_critic {
+                        let feat = active_policy.hidden(&state_tensor)?;
+                        let v = critic.forward(&feat)?;
+                        v.squeeze(0)?.squeeze(0)?.to_scalar()?
+                    } else {
+                        0.0
+                    };
 
                     let act = E::action_from_encoding(&encoded);
                     actions.push(act);
@@ -229,17 +252,30 @@ impl<E: RlEnvironment> RolloutWorker<E> {
                 .map(|(idx, res)| {
                     if res.truncated {
                         let sv = E::obs_to_vector(&res.obs);
-                        let active_policy = if !has_opp_policy || idx == main_agent_idx {
-                            main_policy
+                        let (active_policy, active_critic) =
+                            if !has_opp_policy || idx == main_agent_idx {
+                                (main_policy, main_critic)
+                            } else {
+                                (opp_policy, opp_critic)
+                            };
+                        if let Some(critic) = active_critic {
+                            match Tensor::from_vec(sv, (1, state_dim), sampler_device) {
+                                Ok(t) => {
+                                    if let Ok(feat) = active_policy.hidden(&t) {
+                                        critic
+                                            .forward(&feat)
+                                            .ok()
+                                            .and_then(|v| v.squeeze(0).ok())
+                                            .and_then(|v| v.squeeze(0).ok())
+                                            .and_then(|v| v.to_scalar().ok())
+                                    } else {
+                                        None
+                                    }
+                                }
+                                Err(_) => None,
+                            }
                         } else {
-                            opp_policy
-                        };
-                        match Tensor::from_vec(sv, (1, state_dim), sampler_device) {
-                            Ok(t) => active_policy
-                                .get_values(&t)
-                                .ok()
-                                .and_then(|v| v.first().copied()),
-                            Err(_) => None,
+                            Some(0.0)
                         }
                     } else {
                         None
@@ -307,24 +343,37 @@ impl<E: RlEnvironment> RolloutWorker<E> {
         if !has_opp_policy {
             for obs in &self.current_obs {
                 let last_state_vec = E::obs_to_vector(obs);
-                let last_val =
+                let last_val = if let Some(critic) = main_critic {
                     match Tensor::from_vec(last_state_vec, (1, state_dim), sampler_device) {
                         Ok(tensor) => main_policy
-                            .get_values(&tensor)
-                            .map(|v| v.first().copied().unwrap_or(0.0))
+                            .hidden(&tensor)
+                            .and_then(|feat| critic.forward(&feat))
+                            .and_then(|v| v.squeeze(0))
+                            .and_then(|v| v.squeeze(0))
+                            .and_then(|v| v.to_scalar())
                             .unwrap_or(0.0),
                         Err(_) => 0.0,
-                    };
+                    }
+                } else {
+                    0.0
+                };
                 last_values.push(last_val);
             }
         } else if let Some(obs) = self.current_obs.get(main_agent_idx) {
             let last_state_vec = E::obs_to_vector(obs);
-            let last_val = match Tensor::from_vec(last_state_vec, (1, state_dim), sampler_device) {
-                Ok(tensor) => main_policy
-                    .get_values(&tensor)
-                    .map(|v| v.first().copied().unwrap_or(0.0))
-                    .unwrap_or(0.0),
-                Err(_) => 0.0,
+            let last_val = if let Some(critic) = main_critic {
+                match Tensor::from_vec(last_state_vec, (1, state_dim), sampler_device) {
+                    Ok(tensor) => main_policy
+                        .hidden(&tensor)
+                        .and_then(|feat| critic.forward(&feat))
+                        .and_then(|v| v.squeeze(0))
+                        .and_then(|v| v.squeeze(0))
+                        .and_then(|v| v.to_scalar())
+                        .unwrap_or(0.0),
+                    Err(_) => 0.0,
+                }
+            } else {
+                0.0
             };
             last_values.push(last_val);
         }

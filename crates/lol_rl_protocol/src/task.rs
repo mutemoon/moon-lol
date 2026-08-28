@@ -1,16 +1,55 @@
 use std::fmt::{self, Display, Formatter};
+use std::str::FromStr;
 
 use serde::{Deserialize, Serialize};
 
 use crate::env_spec::{ENV_FIORA_V2, get_env_training_params};
 
-pub const AGENT_PPO_MAMBA: &str = "PPO (Mamba)";
-pub const AGENT_PPO_MLP: &str = "PPO (MLP)";
-pub const AGENT_GRPO_MAMBA: &str = "GRPO (Mamba)";
-pub const AGENT_GRPO_MLP: &str = "GRPO (MLP)";
+/// 强化学习训练算法类型
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
+#[serde(rename_all = "snake_case")]
+pub enum RlAlgorithm {
+    Ppo,
+    Grpo,
+}
+
+impl RlAlgorithm {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            Self::Ppo => "ppo",
+            Self::Grpo => "grpo",
+        }
+    }
+
+    pub fn display_name(&self) -> &'static str {
+        match self {
+            Self::Ppo => "PPO",
+            Self::Grpo => "GRPO",
+        }
+    }
+}
+
+impl Display for RlAlgorithm {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.display_name())
+    }
+}
+
+impl FromStr for RlAlgorithm {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.trim().to_lowercase().as_str() {
+            "ppo" => Ok(Self::Ppo),
+            "grpo" => Ok(Self::Grpo),
+            other => Err(format!("未知算法 '{other}'，可选: ppo, grpo")),
+        }
+    }
+}
 
 /// 策略网络的主干网络架构类型
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
+#[serde(rename_all = "snake_case")]
 pub enum PolicyBackbone {
     /// 经典多层感知机（无状态前馈网络，计算速度极快）
     Mlp,
@@ -21,6 +60,13 @@ pub enum PolicyBackbone {
 impl PolicyBackbone {
     pub fn as_str(&self) -> &'static str {
         match self {
+            Self::Mlp => "mlp",
+            Self::Mamba => "mamba",
+        }
+    }
+
+    pub fn display_name(&self) -> &'static str {
+        match self {
             Self::Mlp => "MLP",
             Self::Mamba => "Mamba",
         }
@@ -29,7 +75,19 @@ impl PolicyBackbone {
 
 impl Display for PolicyBackbone {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.as_str())
+        write!(f, "{}", self.display_name())
+    }
+}
+
+impl FromStr for PolicyBackbone {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.trim().to_lowercase().as_str() {
+            "mlp" => Ok(Self::Mlp),
+            "mamba" => Ok(Self::Mamba),
+            other => Err(format!("未知主干架构 '{other}'，可选: mlp, mamba")),
+        }
     }
 }
 
@@ -69,8 +127,9 @@ impl Default for CurriculumConfig {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct TaskConfigPayload {
     pub name: String,
-    pub agent_type: String,
     pub env_name: String,
+    pub algorithm: RlAlgorithm,
+    pub backbone: PolicyBackbone,
     pub lr: f32,
     pub gamma: f32,
     pub gae_lambda: f32,
@@ -80,8 +139,6 @@ pub struct TaskConfigPayload {
     pub parallel_envs: usize,
     pub rollout_steps_per_env: usize,
     pub total_iterations: usize,
-    #[serde(default)]
-    pub backbone: Option<PolicyBackbone>,
     /// 课程学习配置（可选，None 表示不使用课程学习，使用默认奖励函数）
     #[serde(default)]
     pub curriculum: Option<CurriculumConfig>,
@@ -98,8 +155,9 @@ impl TaskConfigPayload {
         let params = get_env_training_params(env_name);
         Self {
             name: "RL 对战训练任务".to_string(),
-            agent_type: AGENT_PPO_MLP.to_string(),
             env_name: env_name.to_string(),
+            algorithm: RlAlgorithm::Ppo,
+            backbone: PolicyBackbone::Mlp,
             lr: params.lr,
             gamma: params.gamma,
             gae_lambda: params.gae_lambda,
@@ -109,29 +167,23 @@ impl TaskConfigPayload {
             parallel_envs: 0,
             rollout_steps_per_env: params.rollout_steps_per_env,
             total_iterations: params.total_iterations,
-            backbone: Some(PolicyBackbone::Mlp),
             curriculum: None,
             grpo_group_size: None,
             grpo_kl_coef: None,
         }
     }
 
-    /// 判断当前算法是否为 GRPO (Group Relative Policy Optimization)
     pub fn is_grpo(&self) -> bool {
-        self.agent_type.to_uppercase().contains("GRPO")
+        self.algorithm == RlAlgorithm::Grpo
     }
 
-    /// 解析当前任务的主干网络架构（优先与 agent_type 一致，其次使用 backbone 字段）
     pub fn backbone(&self) -> PolicyBackbone {
-        if self.agent_type.to_lowercase().contains("mlp") {
-            PolicyBackbone::Mlp
-        } else if self.agent_type.to_lowercase().contains("mamba") {
-            PolicyBackbone::Mamba
-        } else if let Some(bb) = self.backbone {
-            bb
-        } else {
-            PolicyBackbone::Mlp
-        }
+        self.backbone
+    }
+
+    /// 格式化用于 UI 展示的算法模型组合名称（如 "PPO (MLP)", "GRPO (Mamba)"）
+    pub fn display_agent_name(&self) -> String {
+        format!("{} ({})", self.algorithm.display_name(), self.backbone.display_name())
     }
 
     /// 转换为 lol_rl_cli 接收的命令行参数列表
@@ -141,8 +193,10 @@ impl TaskConfigPayload {
             self.name.clone(),
             "--env".to_string(),
             self.env_name.clone(),
-            "--agent".to_string(),
-            self.agent_type.clone(),
+            "--algo".to_string(),
+            self.algorithm.as_str().to_string(),
+            "--backbone".to_string(),
+            self.backbone.as_str().to_string(),
             "--lr".to_string(),
             self.lr.to_string(),
             "--gamma".to_string(),
@@ -213,7 +267,8 @@ impl Default for TaskConfigPayload {
 pub struct TaskOverviewItem {
     pub id: String,
     pub name: String,
-    pub agent_type: String,
+    pub algorithm: RlAlgorithm,
+    pub backbone: PolicyBackbone,
     pub env_name: String,
     pub status: String,
     pub current_step: usize,

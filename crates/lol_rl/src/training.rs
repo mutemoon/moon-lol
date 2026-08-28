@@ -16,7 +16,7 @@ use rand::seq::IndexedRandom;
 use tracing::{error, info};
 
 use crate::grpo::GRPOAgent;
-use crate::policy::{ActorCritic, ModelParamSummary};
+use crate::policy::{ModelParamSummary, PolicyNetwork, ValueHead};
 use crate::ppo::{PPOAgent, PPOStats};
 use crate::rollout::{RolloutWorker, WorkerCommand, WorkerTrajectory};
 
@@ -53,10 +53,17 @@ impl RlAgent {
         }
     }
 
-    pub fn actor_critic(&self) -> &ActorCritic {
+    pub fn policy(&self) -> &PolicyNetwork {
         match self {
-            Self::Ppo(a) => &a.actor_critic,
-            Self::Grpo(a) => &a.actor_critic,
+            Self::Ppo(a) => &a.actor_critic.policy,
+            Self::Grpo(a) => &a.policy,
+        }
+    }
+
+    pub fn critic(&self) -> Option<&ValueHead> {
+        match self {
+            Self::Ppo(a) => Some(&a.actor_critic.critic),
+            Self::Grpo(_) => None,
         }
     }
 
@@ -124,7 +131,7 @@ pub struct TrainingSession<E: RlEnvironment + 'static> {
     cmd_senders: Vec<Sender<WorkerCommand>>,
     resp_receivers: Vec<Receiver<WorkerTrajectory<E::Obs>>>,
     thread_handles: Vec<JoinHandle<()>>,
-    opponent_pool: VecDeque<Arc<ActorCritic>>,
+    opponent_pool: VecDeque<(Arc<PolicyNetwork>, Option<Arc<ValueHead>>)>,
     /// 累计训练样本总数（跨迭代累加，与 UI step 计数同口径）。
     pub total_steps: usize,
 }
@@ -164,12 +171,16 @@ impl<E: RlEnvironment + 'static> TrainingSession<E> {
                     match cmd {
                         WorkerCommand::Rollout {
                             main_policy,
+                            main_critic,
                             opponent_policy,
+                            opponent_critic,
                             main_agent_idx,
                         } => {
                             let traj = worker.rollout(
                                 &main_policy,
+                                main_critic.as_deref(),
                                 opponent_policy.as_deref(),
+                                opponent_critic.as_deref(),
                                 main_agent_idx,
                                 horizon,
                                 state_dim,
@@ -233,14 +244,21 @@ impl<E: RlEnvironment + 'static> TrainingSession<E> {
         let _ = self.agent.set_lr(lr);
 
         // 1. 克隆采样策略（设备与 sampler_device 一致，默认 CPU）
-        let sampler_policy = Arc::new(self.agent.actor_critic().to_device(&self.sampler_device)?);
+        let sampler_policy = Arc::new(self.agent.policy().to_device(&self.sampler_device)?);
+        let sampler_critic = self
+            .agent
+            .critic()
+            .map(|c| c.to_device(&self.sampler_device))
+            .transpose()?
+            .map(Arc::new);
 
         // 2. 定期将策略快照存入历史对手池（仅多智能体自博弈环境启用，每 5 轮或第二轮开始）
         if is_multi_agent && (iter % 5 == 0 || (iter == 2 && self.opponent_pool.is_empty())) {
             if self.opponent_pool.len() >= 8 {
                 self.opponent_pool.pop_front();
             }
-            self.opponent_pool.push_back(sampler_policy.clone());
+            self.opponent_pool
+                .push_back((sampler_policy.clone(), sampler_critic.clone()));
         }
 
         // 3. 触发持久化 Worker 并行采样
@@ -256,17 +274,23 @@ impl<E: RlEnvironment + 'static> TrainingSession<E> {
         let pool_vec: Vec<_> = self.opponent_pool.iter().cloned().collect();
 
         for (worker_idx, tx) in self.cmd_senders.iter().enumerate() {
-            let (opp_policy, main_agent_idx) = if worker_idx < opp_count {
+            let (opp_policy, opp_critic, main_agent_idx) = if worker_idx < opp_count {
                 let opp = pool_vec.choose(&mut rng).cloned();
+                let (op_p, op_c) = match opp {
+                    Some((p, c)) => (Some(p), c),
+                    None => (None, None),
+                };
                 // 双角色轮换：偶数 Worker 主策略扮演 Fiora (0)，奇数 Worker 主策略扮演 Riven (1)
                 let role = if worker_idx % 2 == 0 { 0 } else { 1 };
-                (opp, role)
+                (op_p, op_c, role)
             } else {
-                (None, 0)
+                (None, None, 0)
             };
             let _ = tx.send(WorkerCommand::Rollout {
                 main_policy: sampler_policy.clone(),
+                main_critic: sampler_critic.clone(),
                 opponent_policy: opp_policy,
+                opponent_critic: opp_critic,
                 main_agent_idx,
             });
         }

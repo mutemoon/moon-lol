@@ -4,7 +4,7 @@ use candle_core::{DType, Device, Result, Tensor};
 use candle_nn::{AdamW, Optimizer, ParamsAdamW, VarBuilder, VarMap};
 use lol_rl_protocol::{ActionSchema, ActionSpace, ObsSchema, PolicyBackbone};
 
-use crate::policy::{ActorCritic, HeroEmbedConfig, ModelParamSummary};
+use crate::policy::{HeroEmbedConfig, ModelParamSummary, PolicyNetwork};
 use crate::ppo::{PPOStats, RolloutBuffer};
 
 /// GRPO 超参数配置 (Group Relative Policy Optimization)
@@ -74,7 +74,7 @@ impl GRPOStats {
 
 /// GRPO 算法 Agent：无 Critic 网络，纯 Actor + 分组相对优势优化
 pub struct GRPOAgent {
-    pub actor_critic: ActorCritic,
+    pub policy: PolicyNetwork,
     varmap: VarMap,
     optimizer: AdamW,
     config: GRPOConfig,
@@ -132,7 +132,7 @@ impl GRPOAgent {
         let mut varmap = VarMap::new();
         let vb = VarBuilder::from_varmap(&varmap, DType::F32, &device);
 
-        let actor_critic = ActorCritic::with_hero_embed_and_backbone(
+        let policy = PolicyNetwork::with_hero_embed_and_backbone(
             state_dim,
             hidden_dim,
             action_space,
@@ -195,11 +195,11 @@ impl GRPOAgent {
 
         let actor_w = Tensor::from_vec(
             crate::policy::orthogonal_weight(
-                actor_critic.action_space().actor_head_dim(),
+                policy.action_space().actor_head_dim(),
                 hidden_dim,
                 0.01,
             ),
-            (actor_critic.action_space().actor_head_dim(), hidden_dim),
+            (policy.action_space().actor_head_dim(), hidden_dim),
             &device,
         )?;
         let _ = varmap.set_one("actor_head.weight", actor_w);
@@ -211,7 +211,7 @@ impl GRPOAgent {
         let optimizer = AdamW::new(varmap.all_vars(), params)?;
 
         Ok(Self {
-            actor_critic,
+            policy,
             varmap,
             optimizer,
             config,
@@ -232,7 +232,7 @@ impl GRPOAgent {
         let mut varmap = VarMap::new();
         let vb = VarBuilder::from_varmap(&varmap, DType::F32, &device);
 
-        let actor_critic = ActorCritic::from_schema_and_backbone(
+        let policy = PolicyNetwork::from_schema_and_backbone(
             schema.clone(),
             hidden_dim,
             action_space,
@@ -276,7 +276,7 @@ impl GRPOAgent {
         let optimizer = AdamW::new(varmap.all_vars(), params)?;
 
         Ok(Self {
-            actor_critic,
+            policy,
             varmap,
             optimizer,
             config,
@@ -297,7 +297,7 @@ impl GRPOAgent {
         let mut varmap = VarMap::new();
         let vb = VarBuilder::from_varmap(&varmap, DType::F32, &device);
 
-        let actor_critic = ActorCritic::from_schemas(
+        let policy = PolicyNetwork::from_schemas(
             obs_schema.clone(),
             action_schema,
             hidden_dim,
@@ -341,7 +341,7 @@ impl GRPOAgent {
         let optimizer = AdamW::new(varmap.all_vars(), params)?;
 
         Ok(Self {
-            actor_critic,
+            policy,
             varmap,
             optimizer,
             config,
@@ -399,11 +399,11 @@ impl GRPOAgent {
     }
 
     pub fn parameter_summary(&self) -> ModelParamSummary {
-        self.actor_critic.parameter_summary()
+        self.policy.parameter_summary()
     }
 
     pub fn print_parameter_summary(&self) {
-        self.actor_critic.parameter_summary().print_summary();
+        self.policy.parameter_summary().print_summary();
     }
 
     pub fn lr(&self) -> f64 {
@@ -510,7 +510,7 @@ impl GRPOAgent {
 
         let mut varmap = VarMap::new();
         let vb = VarBuilder::from_varmap(&varmap, DType::F32, &device);
-        let actor_critic = ActorCritic::from_schemas(
+        let policy = PolicyNetwork::from_schemas(
             obs_schema,
             action_schema,
             hidden_dim,
@@ -526,7 +526,7 @@ impl GRPOAgent {
         let optimizer = AdamW::new(varmap.all_vars(), params)?;
 
         Ok(Self {
-            actor_critic,
+            policy,
             varmap,
             optimizer,
             config,
@@ -567,7 +567,7 @@ impl GRPOAgent {
 
         let mut varmap = VarMap::new();
         let vb = VarBuilder::from_varmap(&varmap, DType::F32, &device);
-        let actor_critic = ActorCritic::from_schema_and_backbone(
+        let policy = PolicyNetwork::from_schema_and_backbone(
             schema,
             hidden_dim,
             action_space,
@@ -583,7 +583,7 @@ impl GRPOAgent {
         let optimizer = AdamW::new(varmap.all_vars(), params)?;
 
         Ok(Self {
-            actor_critic,
+            policy,
             varmap,
             optimizer,
             config,
@@ -634,7 +634,7 @@ impl GRPOAgent {
                 }
             })
             .unwrap_or_default();
-        let actor_critic = ActorCritic::with_hero_embed_and_backbone(
+        let policy = PolicyNetwork::with_hero_embed_and_backbone(
             state_dim,
             hidden_dim,
             action_space,
@@ -650,7 +650,7 @@ impl GRPOAgent {
         };
         let optimizer = AdamW::new(varmap.all_vars(), params)?;
         Ok(Self {
-            actor_critic,
+            policy,
             varmap,
             optimizer,
             config,
@@ -795,7 +795,7 @@ impl GRPOAgent {
                 .iter()
                 .any(|b| b.action_masks.iter().any(|m| m.is_some()));
 
-        let is_mamba = self.actor_critic.backbone().backbone_type() == PolicyBackbone::Mamba;
+        let is_mamba = self.policy.backbone().backbone_type() == PolicyBackbone::Mamba;
 
         use rand::seq::SliceRandom;
         let mut rng = rand::rng();
@@ -946,7 +946,7 @@ impl GRPOAgent {
                         None
                     };
 
-                    let (new_log_probs, _dummy_values, entropy) = self.actor_critic.evaluate_actions(
+                    let (new_log_probs, entropy) = self.policy.evaluate_actions(
                         &mb_states_3d,
                         &mb_actions,
                         mb_masks.as_ref(),
@@ -1097,7 +1097,7 @@ impl GRPOAgent {
                     None
                 };
 
-                let (new_log_probs, _dummy_values, entropy) = self.actor_critic.evaluate_actions(
+                let (new_log_probs, entropy) = self.policy.evaluate_actions(
                     &mb_states,
                     &mb_actions,
                     mb_masks.as_ref(),
@@ -1257,5 +1257,27 @@ mod tests {
 
         let stats = agent.update_multi_buffer(&[b1, b2], 8).unwrap();
         assert!(stats.policy_loss.is_finite());
+    }
+
+    #[test]
+    fn test_grpo_has_zero_critic_parameters() {
+        use lol_env::{FioraV2Env, RlEnvironment};
+        let agent = GRPOAgent::create_for_env_with_backbone::<FioraV2Env>(
+            FioraV2Env::state_dim(),
+            64,
+            FioraV2Env::action_space(),
+            GRPOConfig::default(),
+            Device::Cpu,
+            PolicyBackbone::Mlp,
+        )
+        .unwrap();
+
+        let summary = agent.parameter_summary();
+        agent.print_parameter_summary();
+
+        // 验证 100% 没有任何 Critic 模块或参数
+        let categories = summary.category_totals();
+        assert!(!categories.iter().any(|(cat, _)| cat.contains("Critic") || cat.contains("价值")));
+        assert!(!summary.layers.iter().any(|l| l.name.contains("critic")));
     }
 }

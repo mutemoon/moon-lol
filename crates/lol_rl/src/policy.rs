@@ -1080,9 +1080,9 @@ impl ObsFeatureExtractor {
     }
 }
 
-/// ActorCritic 策略与价值网络（支持 MLP 与 Mamba 双主干，原生基于 AST ObsSchema）
+/// PolicyNetwork 纯策略网络（专注特征提取、主干网络与动作采样/分布推演，100% 纯 Actor，无 Critic）
 #[derive(Clone)]
-pub struct ActorCritic {
+pub struct PolicyNetwork {
     /// 可选的结构化多头 Actor（当环境提供 ActionSchema 时使用）
     pub structured_action_head: Option<StructuredActionHead>,
     /// AST 声明式特征提取器
@@ -1095,14 +1095,12 @@ pub struct ActorCritic {
     log_std: Option<Tensor>,
     /// 混合动作：离散分类头
     attack_head: Option<Linear>,
-    /// 状态价值 Critic 估值头
-    critic_head: Linear,
     /// 可选：Belief-State 信念解码头
     belief_head: Option<BeliefHead>,
     action_space: ActionSpace,
 }
 
-impl ActorCritic {
+impl PolicyNetwork {
     pub fn new(
         state_dim: usize,
         hidden_dim: usize,
@@ -1161,8 +1159,6 @@ impl ActorCritic {
             }
         };
 
-        let critic_head = candle_nn::linear(feat_dim, 1, vb.pp("critic_head"))?;
-
         let (actor_out_dim, log_std, attack_head) = match action_space {
             ActionSpace::Discrete(n) => (n, None, None),
             ActionSpace::Continuous(d) => (
@@ -1201,7 +1197,6 @@ impl ActorCritic {
             actor_head,
             log_std,
             attack_head,
-            critic_head,
             belief_head,
             action_space,
         })
@@ -1288,69 +1283,7 @@ impl ActorCritic {
         )
     }
 
-    /// 将策略网络权重复制并迁移到指定计算设备（例如将 GPU 权重克隆至 CPU）
-    pub fn to_device(&self, device: &candle_core::Device) -> Result<Self> {
-        let feature_extractor = self.feature_extractor.to_device(device)?;
-        let backbone = self.backbone.to_device(device)?;
-
-        let actor_w = self.actor_head.weight().to_device(device)?;
-        let actor_b = self
-            .actor_head
-            .bias()
-            .map(|b| b.to_device(device))
-            .transpose()?;
-        let actor_head = Linear::new(actor_w, actor_b);
-
-        let critic_w = self.critic_head.weight().to_device(device)?;
-        let critic_b = self
-            .critic_head
-            .bias()
-            .map(|b| b.to_device(device))
-            .transpose()?;
-        let critic_head = Linear::new(critic_w, critic_b);
-
-        let log_std = self
-            .log_std
-            .as_ref()
-            .map(|s| s.to_device(device))
-            .transpose()?;
-
-        let attack_head = self
-            .attack_head
-            .as_ref()
-            .map(|a| -> Result<Linear> {
-                let w = a.weight().to_device(device)?;
-                let b = a.bias().map(|b| b.to_device(device)).transpose()?;
-                Ok(Linear::new(w, b))
-            })
-            .transpose()?;
-
-        let belief_head = self
-            .belief_head
-            .as_ref()
-            .map(|b| b.to_device(device))
-            .transpose()?;
-
-        let structured_action_head = self
-            .structured_action_head
-            .as_ref()
-            .map(|h| h.to_device(device))
-            .transpose()?;
-
-        Ok(Self {
-            structured_action_head,
-            feature_extractor,
-            backbone,
-            actor_head,
-            log_std,
-            attack_head,
-            critic_head,
-            belief_head,
-            action_space: self.action_space.clone(),
-        })
-    }
-
-    /// 基于 ObsSchema + ActionSchema 自动推导完整的 Actor-Critic 网络
+    /// 基于 ObsSchema + ActionSchema 自动推导完整的 Policy 网络
     pub fn from_schemas(
         obs_schema: ObsSchema,
         action_schema: ActionSchema,
@@ -1391,7 +1324,6 @@ impl ActorCritic {
             }
         };
 
-        let critic_head = candle_nn::linear(feat_dim, 1, vb.pp("critic_head"))?;
         let belief_head = match belief_dim {
             Some(b_dim) => Some(BeliefHead::new(feat_dim, b_dim, vb.pp("belief_head"))?),
             None => None,
@@ -1400,7 +1332,6 @@ impl ActorCritic {
         let structured_action_head =
             StructuredActionHead::new(action_schema, feat_dim, vb.pp("structured_actor"))?;
 
-        // 构造虚拟的 action_space
         let action_space = ActionSpace::Discrete(1);
         let actor_head = candle_nn::linear(feat_dim, 1, vb.pp("dummy_actor_head"))?;
 
@@ -1411,7 +1342,6 @@ impl ActorCritic {
             actor_head,
             log_std: None,
             attack_head: None,
-            critic_head,
             belief_head,
             action_space,
         })
@@ -1448,109 +1378,20 @@ impl ActorCritic {
         true
     }
 
-    /// 提取模型所有可训练参数的层级明细与参数量统计（单位 K / M）
-    pub fn parameter_summary(&self) -> ModelParamSummary {
-        let mut out = Vec::new();
-        self.feature_extractor.collect_params(&mut out);
-        self.backbone.collect_params(&mut out);
-        if let Some(ref structured_head) = self.structured_action_head {
-            structured_head.collect_params(&mut out);
-        } else {
-            out.push(LayerParamInfo::new(
-                "Actor 策略头",
-                "actor_head.weight",
-                self.actor_head.weight().dims(),
-            ));
-            if let Some(b) = self.actor_head.bias() {
-                out.push(LayerParamInfo::new(
-                    "Actor 策略头",
-                    "actor_head.bias",
-                    b.dims(),
-                ));
-            }
-            if let Some(ref log_std) = self.log_std {
-                out.push(LayerParamInfo::new(
-                    "Actor 策略头",
-                    "log_std",
-                    log_std.dims(),
-                ));
-            }
-            if let Some(ref attack_head) = self.attack_head {
-                out.push(LayerParamInfo::new(
-                    "Actor 策略头",
-                    "attack_head.weight",
-                    attack_head.weight().dims(),
-                ));
-                if let Some(b) = attack_head.bias() {
-                    out.push(LayerParamInfo::new(
-                        "Actor 策略头",
-                        "attack_head.bias",
-                        b.dims(),
-                    ));
-                }
-            }
-        }
-        out.push(LayerParamInfo::new(
-            "Critic 价值头",
-            "critic_head.weight",
-            self.critic_head.weight().dims(),
-        ));
-        if let Some(b) = self.critic_head.bias() {
-            out.push(LayerParamInfo::new(
-                "Critic 价值头",
-                "critic_head.bias",
-                b.dims(),
-            ));
-        }
-        if let Some(ref belief_head) = self.belief_head {
-            out.push(LayerParamInfo::new(
-                "Belief 信念头",
-                "belief_mu.weight",
-                belief_head.mu.weight().dims(),
-            ));
-            if let Some(b) = belief_head.mu.bias() {
-                out.push(LayerParamInfo::new(
-                    "Belief 信念头",
-                    "belief_mu.bias",
-                    b.dims(),
-                ));
-            }
-            out.push(LayerParamInfo::new(
-                "Belief 信念头",
-                "belief_logvar.weight",
-                belief_head.logvar.weight().dims(),
-            ));
-            if let Some(b) = belief_head.logvar.bias() {
-                out.push(LayerParamInfo::new(
-                    "Belief 信念头",
-                    "belief_logvar.bias",
-                    b.dims(),
-                ));
-            }
-        }
-        ModelParamSummary::new(out)
-    }
-
-    /// Prepare the input by replacing categorical/entity features with embeddings/MLP.
-    fn prepare_input(&self, state: &Tensor) -> Result<Tensor> {
+    pub fn prepare_input(&self, state: &Tensor) -> Result<Tensor> {
         self.feature_extractor.forward(state)
     }
 
-    /// 特征提取输出（支持 MLP 与 Mamba）。
-    fn hidden(&self, state: &Tensor) -> Result<Tensor> {
+    pub fn hidden(&self, state: &Tensor) -> Result<Tensor> {
         let input = self.prepare_input(state)?;
         self.backbone.forward(&input)
     }
 
-    /// Forward pass 返回 (actor_head 原始输出, values)。
-    pub fn forward(&self, state: &Tensor) -> Result<(Tensor, Tensor)> {
+    pub fn forward_actor(&self, state: &Tensor) -> Result<Tensor> {
         let feat = self.hidden(state)?;
-        let out = self.actor_head.forward(&feat)?;
-        let values = self.critic_head.forward(&feat)?;
-        Ok((out, values))
+        self.actor_head.forward(&feat)
     }
 
-    /// 信念估计前向返回 Option<(mu, std)>
     pub fn forward_belief(&self, state: &Tensor) -> Result<Option<(Tensor, Tensor)>> {
         if let Some(ref bh) = self.belief_head {
             let feat = self.hidden(state)?;
@@ -1561,19 +1402,12 @@ impl ActorCritic {
         }
     }
 
-    /// 批量获取 Critic 状态价值估值
-    pub fn get_values(&self, state: &Tensor) -> Result<Vec<f32>> {
-        let feat = self.hidden(state)?;
-        let values = self.critic_head.forward(&feat)?;
-        values.squeeze(1)?.to_vec1()
-    }
-
-    /// 从策略采样一个动作。返回 (编码动作向量, log_prob, value)。
+    /// 从策略采样一个动作。返回 (编码动作向量, log_prob)。
     pub fn sample_action(
         &self,
         state: &Tensor,
         mask: Option<&[bool]>,
-    ) -> Result<(Vec<f32>, f32, f32)> {
+    ) -> Result<(Vec<f32>, f32)> {
         self.sample_action_with_structured_masks(state, None, mask)
     }
 
@@ -1583,27 +1417,22 @@ impl ActorCritic {
         state: &Tensor,
         structured_mask: Option<&ActionMasks>,
         mask: Option<&[bool]>,
-    ) -> Result<(Vec<f32>, f32, f32)> {
+    ) -> Result<(Vec<f32>, f32)> {
         if let Some(ref structured_head) = self.structured_action_head {
             let ext = self.feature_extractor.forward_with_entities(state)?;
             let feat = self.backbone.forward(&ext.aggregated)?;
-            let values = self.critic_head.forward(&feat)?;
-            let val_scalar: f32 = values.squeeze(0)?.squeeze(0)?.to_scalar()?;
             let (encoded, log_prob) =
                 structured_head.sample(&feat, structured_mask, &ext.entity_embeds)?;
-            return Ok((encoded, log_prob, val_scalar));
+            return Ok((encoded, log_prob));
         }
 
         let feat = self.hidden(state)?;
-        let values = self.critic_head.forward(&feat)?;
-        let val_scalar: f32 = values.squeeze(0)?.squeeze(0)?.to_scalar()?;
-
         match self.action_space {
             ActionSpace::Discrete(_) => {
                 let logits: Vec<f32> = self.actor_head.forward(&feat)?.squeeze(0)?.to_vec1()?;
                 let masked = mask_logits_slice(&logits, mask);
                 let (idx, log_prob) = sample_categorical(&masked);
-                Ok((vec![idx as f32], log_prob, val_scalar))
+                Ok((vec![idx as f32], log_prob))
             }
             ActionSpace::Continuous(d) => {
                 let means: Vec<f32> = self.actor_head.forward(&feat)?.squeeze(0)?.to_vec1()?;
@@ -1617,7 +1446,7 @@ impl ActorCritic {
                     encoded.push(a);
                     log_prob += gaussian_log_prob(means[i], std, a);
                 }
-                Ok((encoded, log_prob, val_scalar))
+                Ok((encoded, log_prob))
             }
             ActionSpace::Hybrid {
                 continuous_dims, ..
@@ -1644,17 +1473,17 @@ impl ActorCritic {
                 let (idx, cat_log_prob) = sample_categorical(&masked);
                 encoded.push(idx as f32);
                 log_prob += cat_log_prob;
-                Ok((encoded, log_prob, val_scalar))
+                Ok((encoded, log_prob))
             }
         }
     }
 
-    /// 批量从策略采样动作（一次 GPU/CPU 前向计算），返回每个样本的 (encoded_action, log_prob, value)。
+    /// 批量从策略采样动作（一次 GPU/CPU 前向计算），返回每个样本的 (encoded_action, log_prob)。
     pub fn sample_batch(
         &self,
         states: &Tensor,
         masks: Option<&[Option<Vec<bool>>]>,
-    ) -> Result<Vec<(Vec<f32>, f32, f32)>> {
+    ) -> Result<Vec<(Vec<f32>, f32)>> {
         self.sample_batch_with_structured_masks(states, None, masks)
     }
 
@@ -1664,7 +1493,7 @@ impl ActorCritic {
         states: &Tensor,
         structured_masks: Option<&[Option<ActionMasks>]>,
         masks: Option<&[Option<Vec<bool>>]>,
-    ) -> Result<Vec<(Vec<f32>, f32, f32)>> {
+    ) -> Result<Vec<(Vec<f32>, f32)>> {
         let b = states.dim(0)?;
         if b == 0 {
             return Ok(Vec::new());
@@ -1673,8 +1502,6 @@ impl ActorCritic {
         if let Some(ref structured_head) = self.structured_action_head {
             let ext = self.feature_extractor.forward_with_entities(states)?;
             let feat = self.backbone.forward(&ext.aggregated)?;
-            let values = self.critic_head.forward(&feat)?;
-            let val_vec: Vec<f32> = values.squeeze(1)?.to_vec1()?;
             let mut results = Vec::with_capacity(b);
             for i in 0..b {
                 let feat_i = feat.narrow(0, i, 1)?;
@@ -1686,15 +1513,12 @@ impl ActorCritic {
                     .and_then(|ms| ms.get(i))
                     .and_then(|m| m.as_ref());
                 let (encoded, log_prob) = structured_head.sample(&feat_i, mask_i, &embeds_i)?;
-                results.push((encoded, log_prob, val_vec[i]));
+                results.push((encoded, log_prob));
             }
             return Ok(results);
         }
 
         let feat = self.hidden(states)?;
-        let values = self.critic_head.forward(&feat)?;
-        let val_vec: Vec<f32> = values.squeeze(1)?.to_vec1()?;
-
         let mut results = Vec::with_capacity(b);
 
         match self.action_space {
@@ -1705,7 +1529,7 @@ impl ActorCritic {
                     let mask_i = masks.and_then(|ms| ms.get(i)).and_then(|m| m.as_deref());
                     let masked = mask_logits_slice(&logits_mat[i], mask_i);
                     let (idx, log_prob) = sample_categorical(&masked);
-                    results.push((vec![idx as f32], log_prob, val_vec[i]));
+                    results.push((vec![idx as f32], log_prob));
                 }
             }
             ActionSpace::Continuous(d) => {
@@ -1722,7 +1546,7 @@ impl ActorCritic {
                         encoded.push(a);
                         log_prob += gaussian_log_prob(means[j], std, a);
                     }
-                    results.push((encoded, log_prob, val_vec[i]));
+                    results.push((encoded, log_prob));
                 }
             }
             ActionSpace::Hybrid {
@@ -1754,7 +1578,7 @@ impl ActorCritic {
                     let (idx, cat_log_prob) = sample_categorical(&masked);
                     encoded.push(idx as f32);
                     log_prob += cat_log_prob;
-                    results.push((encoded, log_prob, val_vec[i]));
+                    results.push((encoded, log_prob));
                 }
             }
         }
@@ -1924,7 +1748,7 @@ impl ActorCritic {
         state: &Tensor,
         state_obj: &mut Option<MambaState>,
         mask: Option<&[bool]>,
-    ) -> Result<(Vec<f32>, f32, f32)> {
+    ) -> Result<(Vec<f32>, f32)> {
         self.step_with_structured_masks(state, state_obj, None, mask)
     }
 
@@ -1935,7 +1759,7 @@ impl ActorCritic {
         state_obj: &mut Option<MambaState>,
         structured_mask: Option<&ActionMasks>,
         mask: Option<&[bool]>,
-    ) -> Result<(Vec<f32>, f32, f32)> {
+    ) -> Result<(Vec<f32>, f32)> {
         if let Some(ref structured_head) = self.structured_action_head {
             match &self.backbone {
                 Backbone::Mlp { .. } => {
@@ -1953,11 +1777,9 @@ impl ActorCritic {
                     let ext = self.feature_extractor.forward_with_entities(state)?;
                     let x_proj = proj_in.forward(&ext.aggregated)?;
                     let feat = mamba.step(&x_proj, s)?;
-                    let values = self.critic_head.forward(&feat)?;
-                    let val_scalar: f32 = values.squeeze(0)?.squeeze(0)?.to_scalar()?;
                     let (encoded, log_prob) =
                         structured_head.sample(&feat, structured_mask, &ext.entity_embeds)?;
-                    return Ok((encoded, log_prob, val_scalar));
+                    return Ok((encoded, log_prob));
                 }
             }
         }
@@ -1976,8 +1798,6 @@ impl ActorCritic {
                 let input = self.prepare_input(state)?;
                 let x_proj = proj_in.forward(&input)?;
                 let feat = mamba.step(&x_proj, s)?;
-                let values = self.critic_head.forward(&feat)?;
-                let val_scalar: f32 = values.squeeze(0)?.squeeze(0)?.to_scalar()?;
 
                 match self.action_space {
                     ActionSpace::Discrete(_) => {
@@ -1985,7 +1805,7 @@ impl ActorCritic {
                             self.actor_head.forward(&feat)?.squeeze(0)?.to_vec1()?;
                         let masked = mask_logits_slice(&logits, mask);
                         let (idx, log_prob) = sample_categorical(&masked);
-                        Ok((vec![idx as f32], log_prob, val_scalar))
+                        Ok((vec![idx as f32], log_prob))
                     }
                     ActionSpace::Continuous(d) => {
                         let means: Vec<f32> =
@@ -2000,7 +1820,7 @@ impl ActorCritic {
                             encoded.push(a);
                             log_prob += gaussian_log_prob(means[i], std, a);
                         }
-                        Ok((encoded, log_prob, val_scalar))
+                        Ok((encoded, log_prob))
                     }
                     ActionSpace::Hybrid {
                         continuous_dims, ..
@@ -2028,23 +1848,20 @@ impl ActorCritic {
                         let (idx, cat_log_prob) = sample_categorical(&masked);
                         encoded.push(idx as f32);
                         log_prob += cat_log_prob;
-                        Ok((encoded, log_prob, val_scalar))
+                        Ok((encoded, log_prob))
                     }
                 }
             }
         }
     }
 
-    /// PPO update：给定 (state, actions, masks) 计算 (log_probs, values, entropy)。
-    /// state 支持 2D (n, state_dim) 或 3D (batch_chunks, seq_len, state_dim)。
-    /// actions 形状 (n, encoding_dim)，Discrete=1 / Continuous=d / Hybrid=d+1。
-    /// masks 形状 (n, num_classes)，用于屏蔽非法离散动作（1.0 = 有效，0.0 = 屏蔽）。
+    /// 给定 (state, actions, masks) 计算 (log_probs, entropy)
     pub fn evaluate_actions(
         &self,
         state: &Tensor,
         actions: &Tensor,
         masks: Option<&Tensor>,
-    ) -> Result<(Tensor, Tensor, Tensor)> {
+    ) -> Result<(Tensor, Tensor)> {
         if let Some(ref structured_head) = self.structured_action_head {
             let (feat, entity_embeds) = if state.rank() == 3 {
                 let (b, t, _) = state.dims3()?;
@@ -2062,10 +1879,9 @@ impl ActorCritic {
                 let feat = self.backbone.forward(&ext.aggregated)?;
                 (feat, ext.entity_embeds)
             };
-            let values = self.critic_head.forward(&feat)?;
             let (log_prob, entropy) =
                 structured_head.evaluate(&feat, actions, None, &entity_embeds, masks)?;
-            return Ok((log_prob, values.squeeze(1)?, entropy));
+            return Ok((log_prob, entropy));
         }
 
         let feat = if state.rank() == 3 {
@@ -2076,7 +1892,6 @@ impl ActorCritic {
             self.hidden(state)?
         };
         let n = feat.dim(0)?;
-        let values = self.critic_head.forward(&feat)?;
 
         match self.action_space {
             ActionSpace::Discrete(_) => {
@@ -2090,7 +1905,7 @@ impl ActorCritic {
                     .neg()?
                     .sum_keepdim(D::Minus1)?
                     .squeeze(1)?;
-                Ok((selected_log_probs, values.squeeze(1)?, entropy))
+                Ok((selected_log_probs, entropy))
             }
             ActionSpace::Continuous(d) => {
                 let means = self.actor_head.forward(&feat)?;
@@ -2112,7 +1927,7 @@ impl ActorCritic {
                 let entropy = log_std_b
                     .affine(1.0, (0.5 + HALF_LN_2PI) as f64)?
                     .sum(D::Minus1)?;
-                Ok((log_prob, values.squeeze(1)?, entropy))
+                Ok((log_prob, entropy))
             }
             ActionSpace::Hybrid {
                 continuous_dims, ..
@@ -2153,9 +1968,528 @@ impl ActorCritic {
 
                 let log_prob = (&gauss_log_prob + &cat_log_prob)?;
                 let entropy = (&gauss_entropy + &cat_entropy)?;
-                Ok((log_prob, values.squeeze(1)?, entropy))
+                Ok((log_prob, entropy))
             }
         }
+    }
+
+    /// 将策略网络权重复制并迁移到指定计算设备
+    pub fn to_device(&self, device: &candle_core::Device) -> Result<Self> {
+        let feature_extractor = self.feature_extractor.to_device(device)?;
+        let backbone = self.backbone.to_device(device)?;
+
+        let actor_w = self.actor_head.weight().to_device(device)?;
+        let actor_b = self
+            .actor_head
+            .bias()
+            .map(|b| b.to_device(device))
+            .transpose()?;
+        let actor_head = Linear::new(actor_w, actor_b);
+
+        let log_std = self
+            .log_std
+            .as_ref()
+            .map(|s| s.to_device(device))
+            .transpose()?;
+
+        let attack_head = self
+            .attack_head
+            .as_ref()
+            .map(|a| -> Result<Linear> {
+                let w = a.weight().to_device(device)?;
+                let b = a.bias().map(|b| b.to_device(device)).transpose()?;
+                Ok(Linear::new(w, b))
+            })
+            .transpose()?;
+
+        let belief_head = self
+            .belief_head
+            .as_ref()
+            .map(|b| b.to_device(device))
+            .transpose()?;
+
+        let structured_action_head = self
+            .structured_action_head
+            .as_ref()
+            .map(|h| h.to_device(device))
+            .transpose()?;
+
+        Ok(Self {
+            structured_action_head,
+            feature_extractor,
+            backbone,
+            actor_head,
+            log_std,
+            attack_head,
+            belief_head,
+            action_space: self.action_space.clone(),
+        })
+    }
+
+    pub fn collect_params(&self, out: &mut Vec<LayerParamInfo>) {
+        self.feature_extractor.collect_params(out);
+        self.backbone.collect_params(out);
+        if let Some(ref structured_head) = self.structured_action_head {
+            structured_head.collect_params(out);
+        } else {
+            out.push(LayerParamInfo::new(
+                "Actor 策略头",
+                "actor_head.weight",
+                self.actor_head.weight().dims(),
+            ));
+            if let Some(b) = self.actor_head.bias() {
+                out.push(LayerParamInfo::new(
+                    "Actor 策略头",
+                    "actor_head.bias",
+                    b.dims(),
+                ));
+            }
+            if let Some(ref log_std) = self.log_std {
+                out.push(LayerParamInfo::new(
+                    "Actor 策略头",
+                    "log_std",
+                    log_std.dims(),
+                ));
+            }
+            if let Some(ref attack_head) = self.attack_head {
+                out.push(LayerParamInfo::new(
+                    "Actor 策略头",
+                    "attack_head.weight",
+                    attack_head.weight().dims(),
+                ));
+                if let Some(b) = attack_head.bias() {
+                    out.push(LayerParamInfo::new(
+                        "Actor 策略头",
+                        "attack_head.bias",
+                        b.dims(),
+                    ));
+                }
+            }
+        }
+        if let Some(ref belief_head) = self.belief_head {
+            out.push(LayerParamInfo::new(
+                "Belief 信念头",
+                "belief_mu.weight",
+                belief_head.mu.weight().dims(),
+            ));
+            if let Some(b) = belief_head.mu.bias() {
+                out.push(LayerParamInfo::new(
+                    "Belief 信念头",
+                    "belief_mu.bias",
+                    b.dims(),
+                ));
+            }
+            out.push(LayerParamInfo::new(
+                "Belief 信念头",
+                "belief_logvar.weight",
+                belief_head.logvar.weight().dims(),
+            ));
+            if let Some(b) = belief_head.logvar.bias() {
+                out.push(LayerParamInfo::new(
+                    "Belief 信念头",
+                    "belief_logvar.bias",
+                    b.dims(),
+                ));
+            }
+        }
+    }
+
+    /// 提取模型所有可训练参数的层级明细与参数量统计（单位 K / M）
+    pub fn parameter_summary(&self) -> ModelParamSummary {
+        let mut out = Vec::new();
+        self.collect_params(&mut out);
+        ModelParamSummary::new(out)
+    }
+
+    pub fn print_parameter_summary(&self) {
+        self.parameter_summary().print_summary();
+    }
+}
+
+/// ValueHead 状态价值估计头（Critic，专供需要 Value 学习的算法如 PPO）
+#[derive(Clone)]
+pub struct ValueHead {
+    pub head: Linear,
+}
+
+impl ValueHead {
+    pub fn new(feat_dim: usize, vb: VarBuilder) -> Result<Self> {
+        let head = candle_nn::linear(feat_dim, 1, vb.pp("critic_head"))?;
+        Ok(Self { head })
+    }
+
+    pub fn forward(&self, feat: &Tensor) -> Result<Tensor> {
+        self.head.forward(feat)
+    }
+
+    pub fn to_device(&self, device: &candle_core::Device) -> Result<Self> {
+        let w = self.head.weight().to_device(device)?;
+        let b = self
+            .head
+            .bias()
+            .map(|b| b.to_device(device))
+            .transpose()?;
+        Ok(Self {
+            head: Linear::new(w, b),
+        })
+    }
+
+    pub fn collect_params(&self, out: &mut Vec<LayerParamInfo>) {
+        out.push(LayerParamInfo::new(
+            "Critic 价值头",
+            "critic_head.weight",
+            self.head.weight().dims(),
+        ));
+        if let Some(b) = self.head.bias() {
+            out.push(LayerParamInfo::new(
+                "Critic 价值头",
+                "critic_head.bias",
+                b.dims(),
+            ));
+        }
+    }
+}
+
+/// ActorCritic 策略与价值网络组合（由 PolicyNetwork + ValueHead 组合而成，专供 PPO 算法）
+#[derive(Clone)]
+pub struct ActorCritic {
+    pub policy: PolicyNetwork,
+    pub critic: ValueHead,
+}
+
+impl ActorCritic {
+    pub fn new(
+        state_dim: usize,
+        hidden_dim: usize,
+        action_space: ActionSpace,
+        vb: VarBuilder,
+    ) -> Result<Self> {
+        let policy = PolicyNetwork::new(state_dim, hidden_dim, action_space, vb.clone())?;
+        let feat_dim = policy.backbone().output_dim();
+        let critic = ValueHead::new(feat_dim, vb)?;
+        Ok(Self { policy, critic })
+    }
+
+    pub fn from_schema_and_backbone(
+        schema: ObsSchema,
+        hidden_dim: usize,
+        action_space: ActionSpace,
+        backbone_type: PolicyBackbone,
+        belief_dim: Option<usize>,
+        vb: VarBuilder,
+    ) -> Result<Self> {
+        let policy = PolicyNetwork::from_schema_and_backbone(
+            schema,
+            hidden_dim,
+            action_space,
+            backbone_type,
+            belief_dim,
+            vb.clone(),
+        )?;
+        let feat_dim = policy.backbone().output_dim();
+        let critic = ValueHead::new(feat_dim, vb)?;
+        Ok(Self { policy, critic })
+    }
+
+    pub fn from_schema(
+        schema: ObsSchema,
+        hidden_dim: usize,
+        action_space: ActionSpace,
+        vb: VarBuilder,
+    ) -> Result<Self> {
+        Self::from_schema_and_backbone(
+            schema,
+            hidden_dim,
+            action_space,
+            PolicyBackbone::Mamba,
+            None,
+            vb,
+        )
+    }
+
+    pub fn with_hero_embed(
+        state_dim: usize,
+        hidden_dim: usize,
+        action_space: ActionSpace,
+        hero_embed_config: HeroEmbedConfig,
+        vb: VarBuilder,
+    ) -> Result<Self> {
+        Self::with_hero_embed_and_backbone(
+            state_dim,
+            hidden_dim,
+            action_space,
+            hero_embed_config,
+            PolicyBackbone::Mamba,
+            None,
+            vb,
+        )
+    }
+
+    pub fn with_hero_embed_and_backbone(
+        state_dim: usize,
+        hidden_dim: usize,
+        action_space: ActionSpace,
+        hero_embed_config: HeroEmbedConfig,
+        backbone_type: PolicyBackbone,
+        belief_dim: Option<usize>,
+        vb: VarBuilder,
+    ) -> Result<Self> {
+        let policy = PolicyNetwork::with_hero_embed_and_backbone(
+            state_dim,
+            hidden_dim,
+            action_space,
+            hero_embed_config,
+            backbone_type,
+            belief_dim,
+            vb.clone(),
+        )?;
+        let feat_dim = policy.backbone().output_dim();
+        let critic = ValueHead::new(feat_dim, vb)?;
+        Ok(Self { policy, critic })
+    }
+
+    pub fn with_hero_embed_and_mamba(
+        state_dim: usize,
+        _hidden_dim: usize,
+        action_space: ActionSpace,
+        hero_embed_config: HeroEmbedConfig,
+        mamba_config: MambaConfig,
+        belief_dim: Option<usize>,
+        vb: VarBuilder,
+    ) -> Result<Self> {
+        Self::with_hero_embed_and_backbone(
+            state_dim,
+            mamba_config.d_model,
+            action_space,
+            hero_embed_config,
+            PolicyBackbone::Mamba,
+            belief_dim,
+            vb,
+        )
+    }
+
+    pub fn from_schemas(
+        obs_schema: ObsSchema,
+        action_schema: ActionSchema,
+        hidden_dim: usize,
+        backbone_type: PolicyBackbone,
+        belief_dim: Option<usize>,
+        vb: VarBuilder,
+    ) -> Result<Self> {
+        let policy = PolicyNetwork::from_schemas(
+            obs_schema,
+            action_schema,
+            hidden_dim,
+            backbone_type,
+            belief_dim,
+            vb.clone(),
+        )?;
+        let feat_dim = policy.backbone().output_dim();
+        let critic = ValueHead::new(feat_dim, vb)?;
+        Ok(Self { policy, critic })
+    }
+
+    pub fn policy(&self) -> &PolicyNetwork {
+        &self.policy
+    }
+
+    pub fn policy_mut(&mut self) -> &mut PolicyNetwork {
+        &mut self.policy
+    }
+
+    pub fn critic(&self) -> &ValueHead {
+        &self.critic
+    }
+
+    pub fn action_space(&self) -> &ActionSpace {
+        self.policy.action_space()
+    }
+
+    pub fn feature_extractor(&self) -> &ObsFeatureExtractor {
+        self.policy.feature_extractor()
+    }
+
+    pub fn schema(&self) -> &ObsSchema {
+        self.policy.schema()
+    }
+
+    pub fn backbone(&self) -> &Backbone {
+        self.policy.backbone()
+    }
+
+    pub fn mamba_config(&self) -> Option<&MambaConfig> {
+        self.policy.mamba_config()
+    }
+
+    pub fn belief_head(&self) -> Option<&BeliefHead> {
+        self.policy.belief_head()
+    }
+
+    pub fn has_hero_embed(&self) -> bool {
+        self.policy.has_hero_embed()
+    }
+
+    pub fn forward(&self, state: &Tensor) -> Result<(Tensor, Tensor)> {
+        let feat = self.policy.hidden(state)?;
+        let actor_out = self.policy.actor_head.forward(&feat)?;
+        let values = self.critic.forward(&feat)?;
+        Ok((actor_out, values))
+    }
+
+    pub fn forward_belief(&self, state: &Tensor) -> Result<Option<(Tensor, Tensor)>> {
+        self.policy.forward_belief(state)
+    }
+
+    pub fn policy_display_real(
+        &self,
+        state: &Tensor,
+        mask: Option<&[bool]>,
+        labels: &[&str],
+    ) -> Result<PolicyDisplay> {
+        self.policy.policy_display_real(state, mask, labels)
+    }
+
+    pub fn select_greedy_action(&self, state: &Tensor, mask: Option<&[bool]>) -> Result<Vec<f32>> {
+        self.policy.select_greedy_action(state, mask)
+    }
+
+    pub fn select_greedy_action_with_structured_masks(
+        &self,
+        state: &Tensor,
+        structured_mask: Option<&ActionMasks>,
+        mask: Option<&[bool]>,
+    ) -> Result<Vec<f32>> {
+        self.policy
+            .select_greedy_action_with_structured_masks(state, structured_mask, mask)
+    }
+
+    pub fn get_values(&self, state: &Tensor) -> Result<Vec<f32>> {
+        let feat = self.policy.hidden(state)?;
+        let values = self.critic.forward(&feat)?;
+        values.squeeze(1)?.to_vec1()
+    }
+
+    pub fn sample_action(
+        &self,
+        state: &Tensor,
+        mask: Option<&[bool]>,
+    ) -> Result<(Vec<f32>, f32, f32)> {
+        let feat = self.policy.hidden(state)?;
+        let values = self.critic.forward(&feat)?;
+        let val_scalar: f32 = values.squeeze(0)?.squeeze(0)?.to_scalar()?;
+        let (action, log_prob) = self.policy.sample_action(state, mask)?;
+        Ok((action, log_prob, val_scalar))
+    }
+
+    pub fn sample_action_with_structured_masks(
+        &self,
+        state: &Tensor,
+        structured_mask: Option<&ActionMasks>,
+        mask: Option<&[bool]>,
+    ) -> Result<(Vec<f32>, f32, f32)> {
+        let feat = self.policy.hidden(state)?;
+        let values = self.critic.forward(&feat)?;
+        let val_scalar: f32 = values.squeeze(0)?.squeeze(0)?.to_scalar()?;
+        let (action, log_prob) =
+            self.policy
+                .sample_action_with_structured_masks(state, structured_mask, mask)?;
+        Ok((action, log_prob, val_scalar))
+    }
+
+    pub fn sample_batch(
+        &self,
+        states: &Tensor,
+        masks: Option<&[Option<Vec<bool>>]>,
+    ) -> Result<Vec<(Vec<f32>, f32, f32)>> {
+        let feat = self.policy.hidden(states)?;
+        let values = self.critic.forward(&feat)?;
+        let val_vec: Vec<f32> = values.squeeze(1)?.to_vec1()?;
+        let act_lps = self.policy.sample_batch(states, masks)?;
+        let mut res = Vec::with_capacity(act_lps.len());
+        for (i, (act, lp)) in act_lps.into_iter().enumerate() {
+            res.push((act, lp, val_vec[i]));
+        }
+        Ok(res)
+    }
+
+    pub fn sample_batch_with_structured_masks(
+        &self,
+        states: &Tensor,
+        structured_masks: Option<&[Option<ActionMasks>]>,
+        masks: Option<&[Option<Vec<bool>>]>,
+    ) -> Result<Vec<(Vec<f32>, f32, f32)>> {
+        let feat = self.policy.hidden(states)?;
+        let values = self.critic.forward(&feat)?;
+        let val_vec: Vec<f32> = values.squeeze(1)?.to_vec1()?;
+        let act_lps =
+            self.policy
+                .sample_batch_with_structured_masks(states, structured_masks, masks)?;
+        let mut res = Vec::with_capacity(act_lps.len());
+        for (i, (act, lp)) in act_lps.into_iter().enumerate() {
+            res.push((act, lp, val_vec[i]));
+        }
+        Ok(res)
+    }
+
+    pub fn step(
+        &self,
+        state: &Tensor,
+        state_obj: &mut Option<MambaState>,
+        mask: Option<&[bool]>,
+    ) -> Result<(Vec<f32>, f32, f32)> {
+        self.step_with_structured_masks(state, state_obj, None, mask)
+    }
+
+    pub fn step_with_structured_masks(
+        &self,
+        state: &Tensor,
+        state_obj: &mut Option<MambaState>,
+        structured_mask: Option<&ActionMasks>,
+        mask: Option<&[bool]>,
+    ) -> Result<(Vec<f32>, f32, f32)> {
+        let feat = self.policy.hidden(state)?;
+        let values = self.critic.forward(&feat)?;
+        let val_scalar: f32 = values.squeeze(0)?.squeeze(0)?.to_scalar()?;
+        let (action, log_prob) =
+            self.policy
+                .step_with_structured_masks(state, state_obj, structured_mask, mask)?;
+        Ok((action, log_prob, val_scalar))
+    }
+
+    pub fn evaluate_actions(
+        &self,
+        state: &Tensor,
+        actions: &Tensor,
+        masks: Option<&Tensor>,
+    ) -> Result<(Tensor, Tensor, Tensor)> {
+        let feat = if state.rank() == 3 {
+            let (b, t, _) = state.dims3()?;
+            let feat_3d = self.policy.hidden(state)?;
+            feat_3d.reshape((b * t, self.policy.backbone().output_dim()))?
+        } else {
+            self.policy.hidden(state)?
+        };
+        let values = self.critic.forward(&feat)?;
+        let (log_prob, entropy) = self.policy.evaluate_actions(state, actions, masks)?;
+        Ok((log_prob, values.squeeze(1)?, entropy))
+    }
+
+    pub fn to_device(&self, device: &candle_core::Device) -> Result<Self> {
+        Ok(Self {
+            policy: self.policy.to_device(device)?,
+            critic: self.critic.to_device(device)?,
+        })
+    }
+
+    pub fn parameter_summary(&self) -> ModelParamSummary {
+        let mut out = Vec::new();
+        self.policy.collect_params(&mut out);
+        self.critic.collect_params(&mut out);
+        ModelParamSummary::new(out)
+    }
+
+    pub fn print_parameter_summary(&self) {
+        self.parameter_summary().print_summary();
     }
 }
 

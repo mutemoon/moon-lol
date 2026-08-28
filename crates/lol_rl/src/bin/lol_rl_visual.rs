@@ -173,11 +173,13 @@ fn start_visual_runner_for_env<E: VisualEnvironment>(
 
         let display = agent_clone
             .actor_critic
+            .policy
             .policy_display_real(&state, mask.as_deref(), &class_labels)
             .unwrap_or(PolicyDisplay::Discrete(vec![]));
 
         let chosen = match agent_clone
             .actor_critic
+            .policy
             .select_greedy_action(&state, mask.as_deref())
         {
             Ok(encoded) => E::action_from_encoding(&encoded),

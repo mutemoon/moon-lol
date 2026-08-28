@@ -15,12 +15,16 @@ use rust_i18n::t;
 use crate::components::sidebar::AppSidebar;
 use crate::types::ActiveView;
 
-/// 可选算法模型（PPO / GRPO + Mamba 状态空间模型 或 MLP 无状态感知机）。
-const AGENT_OPTIONS: &[&str] = &[
-    lol_rl_protocol::AGENT_PPO_MAMBA,
-    lol_rl_protocol::AGENT_PPO_MLP,
-    lol_rl_protocol::AGENT_GRPO_MAMBA,
-    lol_rl_protocol::AGENT_GRPO_MLP,
+/// 可选训练算法（PPO / GRPO）
+const ALGORITHM_OPTIONS: &[(lol_rl_protocol::RlAlgorithm, &str)] = &[
+    (lol_rl_protocol::RlAlgorithm::Ppo, "PPO (近端策略优化)"),
+    (lol_rl_protocol::RlAlgorithm::Grpo, "GRPO (分组相对策略优化)"),
+];
+
+/// 可选策略网络骨干架构（Mamba 状态空间模型 / MLP 多层感知机）
+const BACKBONE_OPTIONS: &[(lol_rl_protocol::PolicyBackbone, &str)] = &[
+    (lol_rl_protocol::PolicyBackbone::Mamba, "Mamba (状态空间模型 - 时序记忆)"),
+    (lol_rl_protocol::PolicyBackbone::Mlp, "MLP (多层感知机 - 无状态极速)"),
 ];
 
 /// 任务概览表 delegate：驱动 `DataTable` 的列宽/单元格渲染，并反向通信到 `AppSidebar`。
@@ -38,7 +42,8 @@ impl TaskTableDelegate {
                 Column::new("task", t!("app.rl.col_task"))
                     .width(px(180.))
                     .min_width(px(120.)),
-                Column::new("agent", t!("app.rl.col_algorithm")).width(px(110.)),
+                Column::new("algo", "算法").width(px(80.)),
+                Column::new("backbone", "骨干网络").width(px(90.)),
                 Column::new("env", t!("app.rl.col_env")).width(px(160.)),
                 Column::new("status", t!("app.rl.col_status"))
                     .width(px(90.))
@@ -58,15 +63,16 @@ impl TaskTableDelegate {
                 Column::new("lr", t!("app.rl.col_lr"))
                     .width(px(80.))
                     .text_right(),
-                Column::new("return", t!("app.rl.col_return"))
+                Column::new("ep_return", t!("app.rl.col_ep_return"))
                     .width(px(90.))
                     .text_right(),
-                Column::new("ckpt", t!("app.rl.col_checkpoints"))
-                    .width(px(70.))
+                Column::new("checkpoints", t!("app.rl.col_checkpoints"))
+                    .width(px(60.))
                     .text_right(),
+                Column::new("created_at", t!("app.rl.col_created_at")).width(px(140.)),
                 Column::new("actions", t!("app.rl.col_actions"))
-                    .width(px(130.))
-                    .selectable(false),
+                    .width(px(80.))
+                    .text_center(),
             ],
             sidebar,
         }
@@ -124,10 +130,13 @@ impl TableDelegate for TaskTableDelegate {
                 .child(task.name.clone())
                 .into_any_element(),
             1 => div()
-                .child(agent_label(&task.agent_type))
+                .child(task.algorithm.display_name())
                 .into_any_element(),
-            2 => div().child(env_label(&task.env_name)).into_any_element(),
-            3 => {
+            2 => div()
+                .child(task.backbone.display_name())
+                .into_any_element(),
+            3 => div().child(env_label(&task.env_name)).into_any_element(),
+            4 => {
                 let is_running = task.status == "running";
                 div()
                     .px_2()
@@ -143,22 +152,22 @@ impl TableDelegate for TaskTableDelegate {
                     .child(status_label(&task.status))
                     .into_any_element()
             }
-            4 => div()
+            5 => div()
                 .w_full()
                 .text_right()
                 .child(task.rollout_steps_per_env.to_string())
                 .into_any_element(),
-            5 => div()
+            6 => div()
                 .w_full()
                 .text_right()
                 .child(task.total_iterations.to_string())
                 .into_any_element(),
-            6 => div()
+            7 => div()
                 .w_full()
                 .text_right()
                 .child(task.hidden_dim.to_string())
                 .into_any_element(),
-            7 => div()
+            8 => div()
                 .w_full()
                 .text_right()
                 .child(if task.parallel_envs == 0 {
@@ -167,22 +176,22 @@ impl TableDelegate for TaskTableDelegate {
                     task.parallel_envs.to_string()
                 })
                 .into_any_element(),
-            8 => div()
+            9 => div()
                 .w_full()
                 .text_right()
                 .child(format_lr(task.lr))
                 .into_any_element(),
-            9 => div()
+            10 => div()
                 .w_full()
                 .text_right()
                 .child(format!("{:.2}", task.ep_return))
                 .into_any_element(),
-            10 => div()
+            11 => div()
                 .w_full()
                 .text_right()
                 .child(task.checkpoints_count.to_string())
                 .into_any_element(),
-            11 => render_actions(
+            12 => render_actions(
                 task.id.clone(),
                 task.status == "running",
                 self.sidebar.clone(),
@@ -198,10 +207,6 @@ impl TableDelegate for TaskTableDelegate {
             .child(cell_content)
             .into_any_element()
     }
-}
-
-fn agent_label(raw: &str) -> String {
-    raw.to_string()
 }
 
 fn env_label(raw: &str) -> String {
@@ -605,12 +610,6 @@ impl CreateTaskDialogView {
         self.form.rollout_steps_per_env = params.rollout_steps_per_env;
         self.form.total_iterations = params.total_iterations;
         self.form.parallel_envs = 0;
-        let is_mlp = self.form.agent_type.to_lowercase().contains("mlp");
-        self.form.backbone = Some(if is_mlp {
-            lol_rl_protocol::PolicyBackbone::Mlp
-        } else {
-            lol_rl_protocol::PolicyBackbone::Mamba
-        });
 
         // 同步刷新所有输入框的文本
         self.lr_input
@@ -887,7 +886,6 @@ impl CreateTaskDialogView {
 impl Render for CreateTaskDialogView {
     fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         let cfg = &self.form;
-        let current_agent = cfg.agent_type.clone();
         let current_env_spec = lol_rl_protocol::get_env_spec(&cfg.env_name);
         let current_env_tag = current_env_spec.map(|s| s.tag).unwrap_or("Env");
 
@@ -898,7 +896,7 @@ impl Render for CreateTaskDialogView {
             .overflow_y_scrollbar()
             .p_1()
                     // ══════════════════════════════════════════════════
-                    // 第一层级：核心基础配置 (任务名称、训练环境、算法模型)
+                    // 第一层级：核心基础配置 (任务名称、训练环境、训练算法、骨干网络)
                     // ══════════════════════════════════════════════════
                     .child(
                         v_flex()
@@ -1013,7 +1011,7 @@ impl Render for CreateTaskDialogView {
                                         ),
                                 )
                             })
-                            // 3. 算法模型
+                            // 3. 训练算法 (Algorithm)
                             .child(
                                 h_flex()
                                     .w_full()
@@ -1026,40 +1024,84 @@ impl Render for CreateTaskDialogView {
                                             .text_xs()
                                             .font_semibold()
                                             .text_color(cx.theme().foreground)
-                                            .child("算法模型 (Agent)"),
+                                            .child("训练算法 (Algorithm)"),
                                     )
                                     .child(
                                         div()
                                             .flex_1()
                                             .child(
-                                                Button::new("agent-dropdown")
-                                                    .label(agent_label(&current_agent))
+                                                Button::new("algo-dropdown")
+                                                    .label(cfg.algorithm.display_name())
                                                     .dropdown_caret(true)
                                                     .outline()
                                                     .w_full()
                                                     .dropdown_menu({
-                                                        let current_agent = current_agent.clone();
+                                                        let current_algo = cfg.algorithm;
                                                         let weak = cx.entity().downgrade();
                                                         move |menu, _window, _cx| {
                                                             let mut menu = menu;
-                                                            for &alg in AGENT_OPTIONS {
-                                                                let alg = alg.to_string();
-                                                                let checked = alg == current_agent;
+                                                            for &(algo, label) in ALGORITHM_OPTIONS {
+                                                                let checked = algo == current_algo;
                                                                 let weak = weak.clone();
-                                                                let alg_val = alg.clone();
                                                                 menu = menu.item(
-                                                                    PopupMenuItem::new(alg.clone())
+                                                                    PopupMenuItem::new(label.to_string())
+                                                                        .checked(checked)
+                                                                        .on_click(move |_, _window, cx| {
+                                                                            if let Some(view) = weak.upgrade() {
+                                                                                let _ = view.update(cx, |this, cx| {
+                                                                                    this.form.algorithm = algo;
+                                                                                    cx.notify();
+                                                                                });
+                                                                            }
+                                                                        }),
+                                                                );
+                                                            }
+                                                            menu
+                                                        }
+                                                    }),
+                                            ),
+                                    ),
+                            )
+                            // 4. 骨干网络 (Backbone)
+                            .child(
+                                h_flex()
+                                    .w_full()
+                                    .items_center()
+                                    .gap_3()
+                                    .child(
+                                        div()
+                                            .w(px(140.))
+                                            .flex_shrink_0()
+                                            .text_xs()
+                                            .font_semibold()
+                                            .text_color(cx.theme().foreground)
+                                            .child("骨干网络 (Backbone)"),
+                                    )
+                                    .child(
+                                        div()
+                                            .flex_1()
+                                            .child(
+                                                Button::new("backbone-dropdown")
+                                                    .label(cfg.backbone.display_name())
+                                                    .dropdown_caret(true)
+                                                    .outline()
+                                                    .w_full()
+                                                    .dropdown_menu({
+                                                        let current_backbone = cfg.backbone;
+                                                        let weak = cx.entity().downgrade();
+                                                        move |menu, _window, _cx| {
+                                                            let mut menu = menu;
+                                                            for &(bb, label) in BACKBONE_OPTIONS {
+                                                                let checked = bb == current_backbone;
+                                                                let weak = weak.clone();
+                                                                menu = menu.item(
+                                                                    PopupMenuItem::new(label.to_string())
                                                                         .checked(checked)
                                                                         .on_click(move |_, window, cx| {
                                                                             if let Some(view) = weak.upgrade() {
                                                                                 let _ = view.update(cx, |this, cx| {
-                                                                                    this.form.agent_type = alg_val.clone();
-                                                                                    let is_mlp = alg_val.contains("MLP");
-                                                                                    this.form.backbone = Some(if is_mlp {
-                                                                                        lol_rl_protocol::PolicyBackbone::Mlp
-                                                                                    } else {
-                                                                                        lol_rl_protocol::PolicyBackbone::Mamba
-                                                                                    });
+                                                                                    this.form.backbone = bb;
+                                                                                    let is_mlp = bb == lol_rl_protocol::PolicyBackbone::Mlp;
                                                                                     if is_mlp && this.form.hidden_dim == 64 {
                                                                                         this.form.hidden_dim = 256;
                                                                                         this.hidden_dim_input.update(cx, |i, cx| {
@@ -1190,7 +1232,7 @@ impl Render for CreateTaskDialogView {
                             ))
                             // 策略模型工作维度（动态判断 MLP 或 Mamba）
                             .child({
-                                let is_mlp = cfg.agent_type.contains("MLP") || cfg.backbone == Some(lol_rl_protocol::PolicyBackbone::Mlp);
+                                let is_mlp = cfg.backbone == lol_rl_protocol::PolicyBackbone::Mlp;
                                 let dim_label = if is_mlp {
                                     "MLP 隐藏层 (Hidden Dim)"
                                 } else {

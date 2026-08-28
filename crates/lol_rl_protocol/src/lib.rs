@@ -33,8 +33,7 @@ pub use frames::{
 pub use obs::{EntityEncoderSpec, ObsContext, ObsExpr, ObsNode, ObsSchema, ObsValueNode, PoolType};
 pub use reward::{RewardExpr, RewardFormulaSpec, RewardItem, RewardTermSpec};
 pub use task::{
-    AGENT_GRPO_MAMBA, AGENT_GRPO_MLP, AGENT_PPO_MAMBA, AGENT_PPO_MLP, CurriculumConfig,
-    PolicyBackbone, TaskConfigPayload, TaskOverviewItem,
+    CurriculumConfig, PolicyBackbone, RlAlgorithm, TaskConfigPayload, TaskOverviewItem,
 };
 pub use visual::{
     ActionBranchDisplay, PolicyDisplay, PolicyItem, VisualInFrame, VisualObsFrame, VisualOutFrame,
