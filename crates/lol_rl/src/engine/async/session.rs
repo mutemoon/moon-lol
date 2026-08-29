@@ -14,9 +14,6 @@ use crate::algo::agent::RlAgent;
 use crate::engine::traits::{StepOutcome, TrainingEngine};
 use crate::engine::trajectory::WorkerTrajectory;
 
-/// 异步训练会话的并发环境安全上限。
-pub const MAX_PARALLEL_ENVS: usize = 8;
-
 /// 异步训练会话：统一编排 B 的三件套 + 自博弈对手池。
 pub struct AsyncTrainingSession<E: RlEnvironment + 'static> {
     pub learner: AsyncLearner<E::Obs>,
@@ -41,7 +38,7 @@ impl<E: RlEnvironment + 'static> AsyncTrainingSession<E> {
         device: Device,
     ) -> Self {
         let agent: RlAgent = agent.into();
-        let num_parallel_envs = num_parallel_envs.min(MAX_PARALLEL_ENVS);
+        let num_parallel_envs = num_parallel_envs.max(1);
         let target_rollout_steps = num_parallel_envs * horizon * E::num_agents().max(1);
 
         info!(
