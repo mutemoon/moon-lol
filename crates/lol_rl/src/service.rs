@@ -5,20 +5,24 @@ use std::sync::Arc;
 use chrono::Utc;
 use lol_env::curriculum::{CurriculumConfig, CurriculumScheduler};
 pub use lol_rl_protocol::{
-    CheckpointItem, InFrame, ObsFeaturePayload, OutFrame, RewardItem, TaskConfigPayload,
-    TaskOverviewItem,
+    CheckpointItem, EngineMode, InFrame, ObsFeaturePayload, OutFrame, RewardItem,
+    TaskConfigPayload, TaskOverviewItem,
 };
 use sqlx::PgPool;
 use tokio::sync::{Mutex, broadcast, mpsc};
 use tracing::{error, info};
 use uuid::Uuid;
 
+use crate::algo::agent::RlAgent;
+use crate::algo::grpo::{GRPOAgent, GRPOConfig};
+use crate::algo::ppo::{PPOAgent, PPOConfig};
 use crate::autotune::AutoTuner;
 use crate::db::{self, CheckpointRow, PgRlRepo, RlRepo, TaskRow};
+use crate::engine::pool::TrainingWorkerPool;
+use crate::engine::r#async::AsyncTrainingSession;
+use crate::engine::sync::SyncTrainingSession;
+use crate::engine::traits::TrainingEngine;
 use crate::model_store::{checkpoint_dir, new_checkpoint_path};
-use crate::ppo::{PPOAgent, PPOConfig};
-use crate::training::TrainingSession;
-use crate::worker::TrainingWorkerPool;
 
 /// 训练循环内保存当前权重的请求。
 #[derive(Debug, Clone)]
@@ -463,6 +467,7 @@ impl RLService {
                 name: t.name.clone(),
                 algorithm: t.config.algorithm,
                 backbone: t.config.backbone,
+                engine_mode: t.config.engine_mode,
                 env_name: t.env_name.clone(),
                 status: t.status.clone(),
                 current_step: t.current_step,
@@ -479,6 +484,7 @@ impl RLService {
         task_items.sort_by(|a, b| b.created_at.cmp(&a.created_at));
         let _ = self.event_tx.send(OutFrame::TaskList { tasks: task_items });
     }
+
 
     pub fn spawn_command_handler(self: Arc<Self>, mut rx: mpsc::Receiver<InFrame>) {
         tokio::spawn(async move {
@@ -505,7 +511,7 @@ fn block_on_db<F: std::future::Future>(fut: F) -> F::Output {
 fn persist_checkpoint(
     task_id: &str,
     req: SaveRequest,
-    agent: &crate::training::RlAgent,
+    agent: &RlAgent,
     tasks: &Arc<Mutex<HashMap<String, TaskState>>>,
     repo: &Arc<dyn RlRepo>,
     event_tx: &broadcast::Sender<OutFrame>,
@@ -762,8 +768,8 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment + 'static>(
         }
     }
 
-    let rl_agent: crate::training::RlAgent = if task_config.is_grpo() {
-        let grpo_config = crate::grpo::GRPOConfig {
+    let rl_agent: RlAgent = if task_config.is_grpo() {
+        let grpo_config = GRPOConfig {
             lr: task_config.lr as f64,
             gamma: task_config.gamma,
             clip_eps: task_config.clip_eps,
@@ -771,7 +777,7 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment + 'static>(
             group_size: task_config.grpo_group_size.unwrap_or(4),
             max_grad_norm: 0.5,
         };
-        match crate::grpo::GRPOAgent::create_for_env_with_backbone::<E>(
+        match GRPOAgent::create_for_env_with_backbone::<E>(
             state_dim,
             hidden_dim,
             action_space.clone(),
@@ -817,22 +823,35 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment + 'static>(
         task_id: task_id.clone(),
         level: "info".into(),
         message: format!(
-            "🧠 [模型网络结构] 算法: {}, 主干: {:?}, 总可训练参数量: {} ({})",
+            "🧠 [模型网络结构] 算法: {}, 引擎: {}, 主干: {:?}, 总可训练参数量: {} ({})",
             if task_config.is_grpo() { "GRPO" } else { "PPO" },
+            task_config.engine_mode,
             backbone,
             summary.total_params,
             crate::policy::format_param_k_m(summary.total_params)
         ),
     });
 
-    // 2. 启动 TrainingSession（机制 A：同步 Rollout Worker 池 + RlAgent，CPU 推理）
-    let mut session = TrainingSession::<E>::new(
-        rl_agent,
-        num_parallel_envs,
-        state_dim,
-        rollout_steps,
-        candle_core::Device::Cpu,
-    );
+    // 2. 根据 engine_mode 构建面向统一 TrainingEngine Trait 的训练引擎
+    let mut engine: Box<dyn TrainingEngine> = match task_config.engine_mode {
+        EngineMode::Async => Box::new(AsyncTrainingSession::<E>::new(
+            rl_agent,
+            num_parallel_envs,
+            state_dim,
+            rollout_steps,
+            tuned.train_batch_size,
+            tuned.infer_batch_size,
+            tuned.dynamic_batch_timeout_us,
+            device.clone(),
+        )),
+        EngineMode::Sync => Box::new(SyncTrainingSession::<E>::new(
+            rl_agent,
+            num_parallel_envs,
+            state_dim,
+            rollout_steps,
+            candle_core::Device::Cpu,
+        )),
+    };
 
     // 初始化课程学习调度器（支持任务显式配置，或对 SoloV0 自动启用默认课程）
     let mut curriculum_scheduler = if let Some(ref c_cfg) = task_config.curriculum {
@@ -845,7 +864,7 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment + 'static>(
 
     // 初始课程参数下发
     if let Some(ref c) = curriculum_scheduler {
-        session.update_curriculum(
+        engine.update_curriculum(
             c.minion_hp_scale(),
             c.cs_reward(),
             c.attack_no_cs_penalty(),
@@ -884,7 +903,7 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment + 'static>(
 
         // 处理实时保存模型请求
         while let Ok(req) = save_rx.try_recv() {
-            persist_checkpoint(&task_id, req, &session.agent, &tasks, &repo, &event_tx);
+            persist_checkpoint(&task_id, req, engine.agent(), &tasks, &repo, &event_tx);
         }
 
         // 平滑余弦退火学习率 (Cosine Schedule)
@@ -899,8 +918,8 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment + 'static>(
             + (initial_lr - initial_lr * 0.1) * (cos_progress as f64))
             .max(initial_lr * 0.05);
 
-        // 3. 一次真实训练迭代（调度→克隆 CPU 策略→Worker Rollout→聚合→PPO 更新）
-        let outcome = match session.step_once(iter, current_lr, tuned.train_batch_size) {
+        // 3. 一次真实训练迭代（面向 TrainingEngine trait）
+        let outcome = match engine.step_once(iter, current_lr, tuned.train_batch_size) {
             Ok(o) => o,
             Err(e) => {
                 error!("训练迭代失败: {e}");
@@ -908,7 +927,7 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment + 'static>(
             }
         };
 
-        let total_steps = session.total_steps;
+        let total_steps = engine.total_steps();
         let num_samples = outcome.num_samples;
         let sps = outcome.sps;
         let stats = outcome.stats;
@@ -949,7 +968,7 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment + 'static>(
         // 课程学习调度：每轮根据步数和平均补刀更新课程状态并广播至 Worker
         if let Some(ref mut c) = curriculum_scheduler {
             c.tick(iter, ep_cs_avg);
-            session.update_curriculum(
+            engine.update_curriculum(
                 c.minion_hp_scale(),
                 c.cs_reward(),
                 c.attack_no_cs_penalty(),
@@ -1018,8 +1037,6 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment + 'static>(
 
         let _ = block_on_db(repo.insert_metric(&task_id, &metric_row));
 
-        let obs_payload = outcome.last_obs.as_ref().and_then(|o| E::obs_to_payload(o));
-
         let reward_formula = E::reward_formula_spec();
 
         let out_metrics = OutFrame::Metrics {
@@ -1040,7 +1057,7 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment + 'static>(
             ep_steps_min,
             ep_steps_avg,
             reward_breakdown: real_reward_breakdown,
-            obs_feature: obs_payload,
+            obs_feature: outcome.obs_payload,
             reward_formula,
             reward_variables: Some(outcome.last_reward_variables),
             curriculum: curriculum_scheduler
@@ -1063,7 +1080,7 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment + 'static>(
                     path,
                     ep_return,
                 },
-                &session.agent,
+                engine.agent(),
                 &tasks,
                 &repo,
                 &event_tx,
@@ -1104,7 +1121,7 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment + 'static>(
     }
 
     // 关闭 Worker 线程池
-    session.stop();
+    engine.stop();
 
     // 4. 训练收敛：自动保存最终模型
     let ckpt_id = format!("iter-{}", final_saved_iter);
@@ -1118,7 +1135,7 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment + 'static>(
             path,
             ep_return: final_saved_return,
         },
-        &session.agent,
+        engine.agent(),
         &tasks,
         &repo,
         &event_tx,

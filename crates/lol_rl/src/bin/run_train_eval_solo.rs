@@ -2,8 +2,8 @@
 use candle_core::Device;
 use lol_env::solo_v0::SoloV0Env;
 use lol_env::traits::RlEnvironment;
-use lol_rl::ppo::{PPOAgent, PPOConfig};
-use lol_rl::training::TrainingSession;
+use lol_rl::algo::ppo::{PPOAgent, PPOConfig};
+use lol_rl::engine::sync::TrainingSession;
 
 fn main() -> anyhow::Result<()> {
     println!("🏋️ [SoloV0 Real Training Test] 启动 SoloV0 真实训练环境实测...\n");

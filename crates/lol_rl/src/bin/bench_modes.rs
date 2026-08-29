@@ -8,10 +8,10 @@ use std::sync::atomic::AtomicBool;
 use crossbeam_channel::unbounded;
 use lol_env::RlEnvironment;
 use lol_env::solo_v0::SoloV0Env;
-use lol_rl::async_engine::actor::SampleTransition;
-use lol_rl::async_engine::{ActorPool, AsyncLearner, InferenceServer};
+use lol_rl::algo::ppo::{PPOAgent, PPOConfig};
 use lol_rl::device::select_device;
-use lol_rl::ppo::{PPOAgent, PPOConfig};
+use lol_rl::engine::r#async::{ActorPool, AsyncLearner, InferenceServer};
+use lol_rl::engine::trajectory::WorkerTrajectory;
 use tracing::info;
 
 fn main() -> anyhow::Result<()> {
@@ -62,10 +62,10 @@ fn main() -> anyhow::Result<()> {
                 ppo_config.clone(),
                 device.clone(),
             )?;
-            let (sample_tx, sample_rx) = unbounded::<SampleTransition>();
+            let (traj_tx, traj_rx) = unbounded::<WorkerTrajectory<<SoloV0Env as RlEnvironment>::Obs>>();
             let target_rollout_steps = envs * horizon * 2;
             let mut infer_server = InferenceServer::new(
-                agent.actor_critic.clone(),
+                agent.actor_critic.clone().into(),
                 state_dim,
                 (envs * 2).max(4),
                 200,
@@ -74,14 +74,15 @@ fn main() -> anyhow::Result<()> {
             let mut actor_pool = ActorPool::spawn::<SoloV0Env>(
                 envs,
                 infer_server.req_tx.clone(),
-                sample_tx,
+                traj_tx,
+                horizon,
                 vec![(0, 0); envs], // 纯自博弈：无历史对手
             );
             let mut learner = AsyncLearner::new(
                 agent,
                 512,
                 target_rollout_steps,
-                sample_rx,
+                traj_rx,
                 infer_server.model_tx.clone(),
             );
             let is_running = Arc::new(AtomicBool::new(true));
@@ -104,3 +105,4 @@ fn main() -> anyhow::Result<()> {
     info!("🏁 对照基准完成.");
     Ok(())
 }
+

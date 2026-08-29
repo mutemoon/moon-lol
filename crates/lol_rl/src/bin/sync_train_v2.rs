@@ -6,9 +6,10 @@ use std::sync::Arc;
 use crossbeam_channel::unbounded;
 use lol_env::RlEnvironment;
 use lol_env::fiora_v2::FioraV2Env;
+use lol_rl::algo::ppo::{PPOAgent, PPOConfig};
 use lol_rl::device::select_device;
-use lol_rl::ppo::{PPOAgent, PPOConfig};
-use lol_rl::rollout::{RolloutWorker, WorkerCommand};
+use lol_rl::engine::trajectory::{WorkerCommand, WorkerTrajectory};
+use lol_rl::engine::worker::RolloutWorker;
 use tracing::info;
 
 fn main() -> anyhow::Result<()> {
@@ -60,7 +61,7 @@ fn main() -> anyhow::Result<()> {
     for _ in 0..envs {
         let (cmd_tx, cmd_rx) = unbounded::<WorkerCommand>();
         let (resp_tx, resp_rx) =
-            unbounded::<lol_rl::rollout::WorkerTrajectory<lol_env::fiora_v2::FioraV2Obs>>();
+            unbounded::<WorkerTrajectory<lol_env::fiora_v2::FioraV2Obs>>();
         let h = std::thread::spawn(move || {
             let mut worker = RolloutWorker::<FioraV2Env>::new();
             while let Ok(cmd) = cmd_rx.recv() {
@@ -83,7 +84,7 @@ fn main() -> anyhow::Result<()> {
                             &candle_core::Device::Cpu,
                         );
                         let _ = resp_tx.send(
-                            traj.unwrap_or_else(|_| lol_rl::rollout::WorkerTrajectory::empty()),
+                            traj.unwrap_or_else(|_| WorkerTrajectory::empty()),
                         );
                     }
                     WorkerCommand::UpdateCurriculum {
@@ -144,7 +145,7 @@ fn main() -> anyhow::Result<()> {
         for rx in &resp_receivers {
             let traj = rx
                 .recv()
-                .unwrap_or_else(|_| lol_rl::rollout::WorkerTrajectory::empty());
+                .unwrap_or_else(|_| WorkerTrajectory::empty());
             for ret in traj.ep_returns {
                 if recent_returns.len() >= 50 {
                     recent_returns.pop_front();

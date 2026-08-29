@@ -1,13 +1,14 @@
 use gpui::prelude::FluentBuilder as _;
 use gpui::*;
-use gpui_component::button::{Button, ButtonVariants};
+use gpui_component::button::{Button, ButtonGroup, ButtonVariants};
 use gpui_component::dialog::DialogFooter;
 use gpui_component::input::{Input, InputEvent, InputState, NumberInput};
 use gpui_component::menu::{DropdownMenu, PopupMenuItem};
 use gpui_component::scroll::ScrollableElement;
 use gpui_component::table::{Column, DataTable, TableDelegate, TableState};
 use gpui_component::{
-    h_flex, v_flex, ActiveTheme, Disableable, IconName, Sizable as _, StyledExt, WindowExt as _,
+    h_flex, v_flex, ActiveTheme, Disableable, IconName, Selectable, Sizable as _, StyledExt,
+    WindowExt as _,
 };
 use lol_rl_protocol::{InFrame, TaskConfigPayload, TaskOverviewItem};
 use rust_i18n::t;
@@ -38,7 +39,9 @@ const BACKBONE_OPTIONS: &[(lol_rl_protocol::PolicyBackbone, &str)] = &[
 
 /// 任务概览表 delegate：驱动 `DataTable` 的列宽/单元格渲染，并反向通信到 `AppSidebar`。
 pub struct TaskTableDelegate {
-    tasks: Vec<TaskOverviewItem>,
+    all_tasks: Vec<TaskOverviewItem>,
+    filtered_tasks: Vec<TaskOverviewItem>,
+    filter_engine_mode: Option<lol_rl_protocol::EngineMode>,
     columns: Vec<Column>,
     sidebar: gpui::WeakEntity<AppSidebar>,
 }
@@ -46,39 +49,42 @@ pub struct TaskTableDelegate {
 impl TaskTableDelegate {
     pub fn new(sidebar: gpui::WeakEntity<AppSidebar>) -> Self {
         Self {
-            tasks: Vec::new(),
+            all_tasks: Vec::new(),
+            filtered_tasks: Vec::new(),
+            filter_engine_mode: None,
             columns: vec![
                 Column::new("task", t!("app.rl.col_task"))
                     .width(px(180.))
                     .min_width(px(120.)),
-                Column::new("algo", "算法").width(px(80.)),
-                Column::new("backbone", "骨干网络").width(px(90.)),
-                Column::new("env", t!("app.rl.col_env")).width(px(160.)),
+                Column::new("algo", "算法").width(px(70.)),
+                Column::new("backbone", "骨干网络").width(px(80.)),
+                Column::new("engine", "引擎模式").width(px(85.)).text_center(),
+                Column::new("env", t!("app.rl.col_env")).width(px(150.)),
                 Column::new("status", t!("app.rl.col_status"))
-                    .width(px(90.))
+                    .width(px(80.))
                     .text_center(),
                 Column::new("steps_per_iter", t!("app.rl.col_steps_per_iter"))
                     .width(px(80.))
                     .text_right(),
                 Column::new("total_iters", t!("app.rl.col_total_iters"))
-                    .width(px(80.))
+                    .width(px(75.))
                     .text_right(),
                 Column::new("hidden_dim", t!("app.rl.col_hidden_dim"))
-                    .width(px(90.))
+                    .width(px(80.))
                     .text_right(),
                 Column::new("parallel", t!("app.rl.col_parallel"))
-                    .width(px(80.))
+                    .width(px(75.))
                     .text_right(),
                 Column::new("lr", t!("app.rl.col_lr"))
-                    .width(px(80.))
+                    .width(px(75.))
                     .text_right(),
                 Column::new("ep_return", t!("app.rl.col_ep_return"))
-                    .width(px(90.))
+                    .width(px(80.))
                     .text_right(),
                 Column::new("checkpoints", t!("app.rl.col_checkpoints"))
                     .width(px(60.))
                     .text_right(),
-                Column::new("created_at", t!("app.rl.col_created_at")).width(px(140.)),
+                Column::new("created_at", t!("app.rl.col_created_at")).width(px(130.)),
                 Column::new("actions", t!("app.rl.col_actions"))
                     .width(px(80.))
                     .text_center(),
@@ -87,10 +93,29 @@ impl TaskTableDelegate {
         }
     }
 
+    /// 设置引擎过滤模式
+    pub fn set_filter(&mut self, mode: Option<lol_rl_protocol::EngineMode>) {
+        self.filter_engine_mode = mode;
+        self.reapply_filter();
+    }
+
     /// 更新数据。不触发 `TableState::refresh()`，以保留用户手动调整过的列宽。
     pub fn set_tasks(&mut self, mut tasks: Vec<TaskOverviewItem>) {
         tasks.sort_by(|a, b| b.created_at.cmp(&a.created_at));
-        self.tasks = tasks;
+        self.all_tasks = tasks;
+        self.reapply_filter();
+    }
+
+    fn reapply_filter(&mut self) {
+        self.filtered_tasks = match self.filter_engine_mode {
+            Some(mode) => self
+                .all_tasks
+                .iter()
+                .filter(|t| t.engine_mode == mode)
+                .cloned()
+                .collect(),
+            None => self.all_tasks.clone(),
+        };
     }
 }
 
@@ -100,7 +125,7 @@ impl TableDelegate for TaskTableDelegate {
     }
 
     fn rows_count(&self, _: &App) -> usize {
-        self.tasks.len()
+        self.filtered_tasks.len()
     }
 
     fn column(&self, col_ix: usize, _cx: &App) -> Column {
@@ -130,7 +155,7 @@ impl TableDelegate for TaskTableDelegate {
         _window: &mut Window,
         cx: &mut Context<TableState<Self>>,
     ) -> impl IntoElement {
-        let Some(task) = self.tasks.get(row_ix) else {
+        let Some(task) = self.filtered_tasks.get(row_ix) else {
             return div().into_any_element();
         };
         let cell_content: AnyElement = match col_ix {
@@ -142,8 +167,28 @@ impl TableDelegate for TaskTableDelegate {
                 .child(task.algorithm.display_name())
                 .into_any_element(),
             2 => div().child(task.backbone.display_name()).into_any_element(),
-            3 => div().child(env_label(&task.env_name)).into_any_element(),
-            4 => {
+            3 => {
+                let is_async = task.engine_mode == lol_rl_protocol::EngineMode::Async;
+                div()
+                    .px_2()
+                    .py_0p5()
+                    .rounded_md()
+                    .text_xs()
+                    .font_semibold()
+                    .when(is_async, |d| {
+                        d.bg(cx.theme().accent.opacity(0.15))
+                            .text_color(cx.theme().accent)
+                            .child("异步 (Async)")
+                    })
+                    .when(!is_async, |d| {
+                        d.bg(cx.theme().muted.opacity(0.4))
+                            .text_color(cx.theme().foreground)
+                            .child("同步 (Sync)")
+                    })
+                    .into_any_element()
+            }
+            4 => div().child(env_label(&task.env_name)).into_any_element(),
+            5 => {
                 let is_running = task.status == "running";
                 div()
                     .px_2()
@@ -159,22 +204,22 @@ impl TableDelegate for TaskTableDelegate {
                     .child(status_label(&task.status))
                     .into_any_element()
             }
-            5 => div()
+            6 => div()
                 .w_full()
                 .text_right()
                 .child(task.rollout_steps_per_env.to_string())
                 .into_any_element(),
-            6 => div()
+            7 => div()
                 .w_full()
                 .text_right()
                 .child(task.total_iterations.to_string())
                 .into_any_element(),
-            7 => div()
+            8 => div()
                 .w_full()
                 .text_right()
                 .child(task.hidden_dim.to_string())
                 .into_any_element(),
-            8 => div()
+            9 => div()
                 .w_full()
                 .text_right()
                 .child(if task.parallel_envs == 0 {
@@ -183,22 +228,23 @@ impl TableDelegate for TaskTableDelegate {
                     task.parallel_envs.to_string()
                 })
                 .into_any_element(),
-            9 => div()
+            10 => div()
                 .w_full()
                 .text_right()
                 .child(format_lr(task.lr))
                 .into_any_element(),
-            10 => div()
+            11 => div()
                 .w_full()
                 .text_right()
                 .child(format!("{:.2}", task.ep_return))
                 .into_any_element(),
-            11 => div()
+            12 => div()
                 .w_full()
                 .text_right()
                 .child(task.checkpoints_count.to_string())
                 .into_any_element(),
-            12 => render_actions(
+            13 => div().child(task.created_at.clone()).into_any_element(),
+            14 => render_actions(
                 task.id.clone(),
                 task.status == "running",
                 self.sidebar.clone(),
@@ -215,6 +261,7 @@ impl TableDelegate for TaskTableDelegate {
             .into_any_element()
     }
 }
+
 
 fn env_label(raw: &str) -> String {
     if let Some(spec) = lol_rl_protocol::get_env_spec(raw) {
@@ -353,10 +400,61 @@ pub fn render_tasks_table(
                         .justify_between()
                         .child(
                             h_flex()
-                                .gap_2()
+                                .gap_3()
                                 .items_center()
-                                .child(IconName::LayoutDashboard)
-                                .child(div().font_bold().text_sm().child(t!("app.rl.page_title"))),
+                                .child(
+                                    h_flex()
+                                        .gap_2()
+                                        .items_center()
+                                        .child(IconName::LayoutDashboard)
+                                        .child(div().font_bold().text_sm().child(t!("app.rl.page_title"))),
+                                )
+                                .child(
+                                    div()
+                                        .w(px(1.0))
+                                        .h(px(14.0))
+                                        .bg(cx.theme().border),
+                                )
+                                // ── 同步/异步训练切换筛选 Tabs ──
+                                .child(
+                                    h_flex()
+                                        .gap_1()
+                                        .p_0p5()
+                                        .rounded_md()
+                                        .bg(cx.theme().muted.opacity(0.3))
+                                        .border_1()
+                                        .border_color(cx.theme().border.opacity(0.5))
+                                        .children([
+                                            (None, "全部任务"),
+                                            (Some(lol_rl_protocol::EngineMode::Sync), "同步训练 (Sync)"),
+                                            (Some(lol_rl_protocol::EngineMode::Async), "异步训练 (Async)"),
+                                        ].into_iter().map(|(filter_mode, label)| {
+                                            let is_active = sidebar.task_engine_filter == filter_mode;
+                                            let btn = if is_active {
+                                                Button::new(format!("tab-filter-{filter_mode:?}"))
+                                                    .primary()
+                                                    .xsmall()
+                                                    .compact()
+                                                    .label(label)
+                                            } else {
+                                                Button::new(format!("tab-filter-{filter_mode:?}"))
+                                                    .ghost()
+                                                    .xsmall()
+                                                    .compact()
+                                                    .label(label)
+                                            };
+                                            btn.on_click(cx.listener(move |this, _, _, cx| {
+                                                this.task_engine_filter = filter_mode;
+                                                if let Some(table) = &this.table_state {
+                                                    let _ = table.update(cx, |state, cx| {
+                                                        state.delegate_mut().set_filter(filter_mode);
+                                                        cx.notify();
+                                                    });
+                                                }
+                                                cx.notify();
+                                            }))
+                                        })),
+                                ),
                         )
                         .child(
                             h_flex()
@@ -364,6 +462,7 @@ pub fn render_tasks_table(
                                 .items_center()
                                 .child(ws_status_badge(sidebar.ws_connected, cx))
                                 .child(
+
                                     Button::new("new-task-btn")
                                         .primary()
                                         .icon(IconName::Plus)
@@ -902,17 +1001,19 @@ impl Render for CreateTaskDialogView {
             .gap_4()
             .overflow_y_scrollbar()
             .p_1()
-                    // ══════════════════════════════════════════════════
-                    // 第一层级：核心基础配置 (任务名称、训练环境、训练算法、骨干网络)
-                    // ══════════════════════════════════════════════════
-                    .child(
-                        v_flex()
-                            .gap_3()
-                            .p_3()
-                            .rounded_lg()
-                            .bg(cx.theme().muted.opacity(0.15))
-                            .border_1()
-                            .border_color(cx.theme().border.opacity(0.6))
+            // ══════════════════════════════════════════════════
+            // 第一层级：核心基础配置 (任务名称、训练环境、训练引擎、训练算法、骨干网络)
+            // ══════════════════════════════════════════════════
+            .child(
+                v_flex()
+                    .gap_3()
+                    .p_3()
+                    .rounded_lg()
+                    .bg(cx.theme().muted.opacity(0.15))
+                    .border_1()
+                    .border_color(cx.theme().border.opacity(0.6))
+
+
                             // 1. 任务名称
                             .child(
                                 h_flex()
@@ -1018,7 +1119,51 @@ impl Render for CreateTaskDialogView {
                                         ),
                                 )
                             })
-                            // 3. 训练算法 (Algorithm)
+                            // 3. 训练引擎 (Engine Mode)
+                            .child(
+                                h_flex()
+                                    .w_full()
+                                    .items_center()
+                                    .gap_3()
+                                    .child(
+                                        div()
+                                            .w(px(140.))
+                                            .flex_shrink_0()
+                                            .text_xs()
+                                            .font_semibold()
+                                            .text_color(cx.theme().foreground)
+                                            .child("训练引擎 (Engine)"),
+                                    )
+                                    .child(
+                                        div()
+                                            .flex_1()
+                                            .child(
+                                                ButtonGroup::new("engine-mode-group")
+                                                    .child(
+                                                        Button::new("engine-sync")
+                                                            .label("同步训练 (Sync)")
+                                                            .selected(cfg.engine_mode == lol_rl_protocol::EngineMode::Sync)
+                                                            .flex_1(),
+                                                    )
+                                                    .child(
+                                                        Button::new("engine-async")
+                                                            .label("异步训练 (Async)")
+                                                            .selected(cfg.engine_mode == lol_rl_protocol::EngineMode::Async)
+                                                            .flex_1(),
+                                                    )
+                                                    .on_click(cx.listener(|this, clicks: &Vec<usize>, _, cx| {
+                                                        if clicks.contains(&0) {
+                                                            this.form.engine_mode = lol_rl_protocol::EngineMode::Sync;
+                                                        } else if clicks.contains(&1) {
+                                                            this.form.engine_mode = lol_rl_protocol::EngineMode::Async;
+                                                        }
+                                                        this.copied = false;
+                                                        cx.notify();
+                                                    })),
+                                            ),
+                                    ),
+                            )
+                            // 4. 训练算法 (Algorithm)
                             .child(
                                 h_flex()
                                     .w_full()
@@ -1069,7 +1214,7 @@ impl Render for CreateTaskDialogView {
                                             ),
                                     ),
                             )
-                            // 4. 骨干网络 (Backbone)
+                            // 5. 骨干网络 (Backbone)
                             .child(
                                 h_flex()
                                     .w_full()

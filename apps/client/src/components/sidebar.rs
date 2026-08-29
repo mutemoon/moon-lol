@@ -95,6 +95,8 @@ pub struct AppSidebar {
     pub last_chosen_env: Option<String>,
     /// 任务概览 DataTable 状态（惰性创建）
     pub table_state: Option<Entity<TableState<TaskTableDelegate>>>,
+    /// 任务引擎模式筛选（全部 / 同步 / 异步）
+    pub task_engine_filter: Option<lol_rl_protocol::EngineMode>,
 
     // ── 全局状态：Auth（M3/M4 对接 cloud REST 客户端后填充） ──
     pub auth_token: Option<String>,
@@ -217,6 +219,7 @@ impl AppSidebar {
             env_detail_copied: false,
             last_chosen_env: None,
             table_state: None,
+            task_engine_filter: None,
             // Auth
             auth_token: None,
             current_user: None,

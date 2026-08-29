@@ -7,7 +7,7 @@ use futures_util::{SinkExt, StreamExt};
 use lol_env::visual_runner::{VisualRunnerCmd, VisualStepOutput, run_visual_env};
 use lol_env::{EnvConfig, RenderMode, VisualEnvironment};
 use lol_rl::device::select_device;
-use lol_rl::ppo::{PPOAgent, PPOConfig};
+use lol_rl::algo::ppo::{PPOAgent, PPOConfig};
 use lol_rl_protocol::{
     ActionSpace, ObsFeaturePayload, PolicyDisplay, RewardItem, VisualInFrame, VisualObsFrame,
     VisualOutFrame,

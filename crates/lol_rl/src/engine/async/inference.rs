@@ -4,16 +4,88 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::thread::{self, JoinHandle};
 use std::time::{Duration, Instant};
 
-use candle_core::{Device, Tensor};
+use candle_core::{Device, Result, Tensor};
 use crossbeam_channel::{Sender, unbounded};
+use lol_rl_protocol::ActionMasks;
 use tracing::{debug, error, info};
 
-use crate::policy::ActorCritic;
+use crate::algo::agent::RlAgent;
+use crate::policy::{ActorCritic, PolicyNetwork, ValueHead};
+
+/// 供推理引擎使用的策略快照（包含 Actor 策略网络与可选的 Critic 价值头）
+#[derive(Clone)]
+pub struct PolicySnapshot {
+    pub policy: PolicyNetwork,
+    pub critic: Option<ValueHead>,
+}
+
+impl PolicySnapshot {
+    pub fn new(policy: PolicyNetwork, critic: Option<ValueHead>) -> Self {
+        Self { policy, critic }
+    }
+
+    pub fn from_agent(agent: &RlAgent, device: &Device) -> Result<Self> {
+        let policy = agent.policy().to_device(device)?;
+        let critic = agent.critic().map(|c| c.to_device(device)).transpose()?;
+        Ok(Self { policy, critic })
+    }
+
+    pub fn to_device(&self, device: &Device) -> Result<Self> {
+        let policy = self.policy.to_device(device)?;
+        let critic = self
+            .critic
+            .as_ref()
+            .map(|c| c.to_device(device))
+            .transpose()?;
+        Ok(Self { policy, critic })
+    }
+
+    pub fn sample_batch(
+        &self,
+        states: &Tensor,
+        masks: Option<&[Option<Vec<bool>>]>,
+    ) -> Result<Vec<(Vec<f32>, f32, f32)>> {
+        self.sample_batch_with_structured_masks(states, None, masks)
+    }
+
+    pub fn sample_batch_with_structured_masks(
+        &self,
+        states: &Tensor,
+        structured_masks: Option<&[Option<ActionMasks>]>,
+        masks: Option<&[Option<Vec<bool>>]>,
+    ) -> Result<Vec<(Vec<f32>, f32, f32)>> {
+        let act_lps = self
+            .policy
+            .sample_batch_with_structured_masks(states, structured_masks, masks)?;
+        let values = if let Some(ref critic) = self.critic {
+            let feat = self.policy.hidden(states)?;
+            let v = critic.forward(&feat)?;
+            v.squeeze(1)?.to_vec1()?
+        } else {
+            vec![0.0; act_lps.len()]
+        };
+        let mut res = Vec::with_capacity(act_lps.len());
+        for (i, (act, lp)) in act_lps.into_iter().enumerate() {
+            res.push((act, lp, values[i]));
+        }
+        Ok(res)
+    }
+}
+
+impl From<ActorCritic> for PolicySnapshot {
+    fn from(ac: ActorCritic) -> Self {
+        Self {
+            policy: ac.policy,
+            critic: Some(ac.critic),
+        }
+    }
+}
 
 pub struct InferenceRequest {
     pub worker_id: usize,
     pub obs_vec: Vec<f32>,
     pub action_mask: Option<Vec<bool>>,
+    pub structured_mask: Option<ActionMasks>,
     /// 策略槽位：0 = 当前训练权重，>=1 = 历史对手快照（由 opponents 表提供）。
     pub policy_slot: usize,
     pub reply_tx: Sender<InferenceResponse>,
@@ -29,27 +101,27 @@ pub struct InferenceResponse {
 pub struct InferenceServer {
     pub req_tx: Sender<InferenceRequest>,
     /// 更新策略槽位：(slot, 新权重)。slot 0 为当前主策略，slot>0 为历史对手。
-    pub model_tx: Sender<(usize, ActorCritic)>,
+    pub model_tx: Sender<(usize, PolicySnapshot)>,
     is_running: Arc<AtomicBool>,
     handle: Option<JoinHandle<()>>,
 }
 
 impl InferenceServer {
     pub fn new(
-        initial_ac: ActorCritic,
+        initial_model: PolicySnapshot,
         state_dim: usize,
         max_batch_size: usize,
         timeout_us: u64,
         device: Device,
     ) -> Self {
         let (req_tx, req_rx) = unbounded::<InferenceRequest>();
-        let (model_tx, model_rx) = unbounded::<(usize, ActorCritic)>();
+        let (model_tx, model_rx) = unbounded::<(usize, PolicySnapshot)>();
         let is_running = Arc::new(AtomicBool::new(true));
         let running_clone = is_running.clone();
 
         let handle = thread::spawn(move || {
-            let mut current_ac = initial_ac;
-            let mut opponents: HashMap<usize, ActorCritic> = HashMap::new();
+            let mut current_model = initial_model;
+            let mut opponents: HashMap<usize, PolicySnapshot> = HashMap::new();
             let timeout = Duration::from_micros(timeout_us);
             let mut batch_reqs = Vec::with_capacity(max_batch_size);
 
@@ -60,12 +132,12 @@ impl InferenceServer {
 
             while running_clone.load(Ordering::Relaxed) {
                 // 1. 检查是否有策略权重更新（slot 0 主策略 / slot>0 历史对手）
-                while let Ok((slot, new_ac)) = model_rx.try_recv() {
+                while let Ok((slot, new_model)) = model_rx.try_recv() {
                     if slot == 0 {
-                        current_ac = new_ac;
+                        current_model = new_model;
                         debug!("🔄 [InferenceServer] 已同步最新模型权重 (slot 0)");
                     } else {
-                        opponents.insert(slot, new_ac);
+                        opponents.insert(slot, new_model);
                         debug!("🔄 [InferenceServer] 已注册历史对手 (slot {slot})");
                     }
                 }
@@ -89,7 +161,6 @@ impl InferenceServer {
                     match req_rx.try_recv() {
                         Ok(req) => batch_reqs.push(req),
                         Err(crossbeam_channel::TryRecvError::Empty) => {
-                            // 轻微让步或微自旋
                             std::hint::spin_loop();
                         }
                         Err(crossbeam_channel::TryRecvError::Disconnected) => break,
@@ -102,39 +173,35 @@ impl InferenceServer {
                 }
 
                 // 4. 按策略槽位分组：同一槽位的一批请求用同一策略一次前向
-                //    slot 0 用当前主策略，slot>0 用对应的历史对手策略。
                 let mut by_slot: HashMap<usize, Vec<usize>> = HashMap::new();
                 for (i, req) in batch_reqs.iter().enumerate() {
                     by_slot.entry(req.policy_slot).or_default().push(i);
                 }
 
-                // 取走请求（后面按 slot 回填结果）
                 let taken: Vec<_> = batch_reqs.drain(..).collect();
-
                 let mut results: Vec<Option<InferenceResponse>> = vec![None; taken.len()];
                 let mut any_error = false;
 
                 for (slot, idxs) in &by_slot {
-                    // 选定本组策略
-                    let policy = if *slot == 0 {
-                        &current_ac
+                    let model = if *slot == 0 {
+                        &current_model
                     } else {
                         match opponents.get(slot) {
                             Some(p) => p,
                             None => {
-                                // 对手槽位尚未注册：退化为当前主策略
                                 error!("策略槽位 {slot} 未注册，退化为当前主策略");
-                                &current_ac
+                                &current_model
                             }
                         }
                     };
 
-                    // 组装本组输入
                     let mut flat_states = Vec::with_capacity(idxs.len() * state_dim);
                     let mut masks = Vec::with_capacity(idxs.len());
+                    let mut structured_masks = Vec::with_capacity(idxs.len());
                     for &i in idxs {
                         flat_states.extend_from_slice(&taken[i].obs_vec);
                         masks.push(taken[i].action_mask.clone());
+                        structured_masks.push(taken[i].structured_mask.clone());
                     }
 
                     let state_tensor =
@@ -153,8 +220,14 @@ impl InferenceServer {
                     } else {
                         None
                     };
+                    let has_any_struct_mask = structured_masks.iter().any(|m| m.is_some());
+                    let struct_masks_ref = if has_any_struct_mask {
+                        Some(structured_masks.as_slice())
+                    } else {
+                        None
+                    };
 
-                    match policy.sample_batch(&state_tensor, masks_ref) {
+                    match model.sample_batch_with_structured_masks(&state_tensor, struct_masks_ref, masks_ref) {
                         Ok(samples) => {
                             for (&i, (encoded_action, log_prob, value)) in
                                 idxs.iter().zip(samples.into_iter())

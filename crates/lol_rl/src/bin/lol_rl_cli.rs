@@ -37,6 +37,10 @@ pub struct Cli {
     #[arg(long, default_value = "mlp")]
     pub backbone: String,
 
+    /// 训练引擎模式 (async 或 sync)
+    #[arg(long, default_value = "sync")]
+    pub engine: String,
+
     /// 学习率 (Learning Rate / lr)
     #[arg(long)]
     pub lr: Option<f32>,
@@ -108,6 +112,13 @@ async fn main() {
             eprintln!("⚠️ 未知主干架构 '{}'，默认使用 MLP", cli.backbone);
             PolicyBackbone::Mlp
         });
+        let engine_mode = cli
+            .engine
+            .parse::<lol_rl_protocol::EngineMode>()
+            .unwrap_or_else(|_| {
+                eprintln!("⚠️ 未知引擎模式 '{}'，默认使用 Async", cli.engine);
+                lol_rl_protocol::EngineMode::Async
+            });
 
         let curriculum = if let Some(curriculum_str) = &cli.curriculum_json {
             match serde_json::from_str::<CurriculumConfig>(curriculum_str) {
@@ -126,6 +137,7 @@ async fn main() {
             env_name: cli.env,
             algorithm,
             backbone,
+            engine_mode,
             lr: cli.lr.unwrap_or(env_params.lr),
             gamma: cli.gamma.unwrap_or(env_params.gamma),
             gae_lambda: cli.gae_lambda.unwrap_or(env_params.gae_lambda),

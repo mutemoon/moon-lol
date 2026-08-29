@@ -33,7 +33,7 @@ pub use frames::{
 pub use obs::{EntityEncoderSpec, ObsContext, ObsExpr, ObsNode, ObsSchema, ObsValueNode, PoolType};
 pub use reward::{RewardExpr, RewardFormulaSpec, RewardItem, RewardTermSpec};
 pub use task::{
-    CurriculumConfig, PolicyBackbone, RlAlgorithm, TaskConfigPayload, TaskOverviewItem,
+    CurriculumConfig, EngineMode, PolicyBackbone, RlAlgorithm, TaskConfigPayload, TaskOverviewItem,
 };
 pub use visual::{
     ActionBranchDisplay, PolicyDisplay, PolicyItem, VisualInFrame, VisualObsFrame, VisualOutFrame,

@@ -6,7 +6,8 @@
 use candle_core::{Device, Tensor};
 use lol_env::solo_v0::SoloV0Env;
 use lol_env::traits::RlEnvironment;
-use lol_rl::ppo::{PPOAgent, PPOConfig, RolloutBuffer};
+use lol_rl::algo::buffer::RolloutBuffer;
+use lol_rl::algo::ppo::{PPOAgent, PPOConfig};
 use lol_rl_protocol::PolicyBackbone;
 use rand::Rng;
 

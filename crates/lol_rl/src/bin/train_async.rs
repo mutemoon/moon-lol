@@ -4,11 +4,11 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use crossbeam_channel::unbounded;
 use lol_env::fiora_v1::FioraVsRivenRealObs;
 use lol_env::{FioraVsRivenRealEnv, RlEnvironment};
-use lol_rl::async_engine::actor::SampleTransition;
-use lol_rl::async_engine::{ActorPool, AsyncLearner, InferenceServer};
+use lol_rl::algo::ppo::{PPOAgent, PPOConfig};
 use lol_rl::autotune::AutoTuner;
 use lol_rl::device::select_device;
-use lol_rl::ppo::{PPOAgent, PPOConfig};
+use lol_rl::engine::r#async::{ActorPool, AsyncLearner, InferenceServer};
+use lol_rl::engine::trajectory::WorkerTrajectory;
 use tracing::info;
 
 fn main() -> anyhow::Result<()> {
@@ -60,11 +60,11 @@ fn main() -> anyhow::Result<()> {
     )?;
 
     // 4. 创建异步通信管道
-    let (sample_tx, sample_rx) = unbounded::<SampleTransition>();
+    let (traj_tx, traj_rx) = unbounded::<WorkerTrajectory<<FioraVsRivenRealEnv as RlEnvironment>::Obs>>();
 
     // 5. 启动 GPU/CPU 动态批处理推理引擎
     let mut infer_server = InferenceServer::new(
-        agent.actor_critic.clone(),
+        agent.actor_critic.clone().into(),
         state_dim,
         tuned.infer_batch_size,
         tuned.dynamic_batch_timeout_us,
@@ -75,7 +75,8 @@ fn main() -> anyhow::Result<()> {
     let mut actor_pool = ActorPool::spawn::<FioraVsRivenRealEnv>(
         tuned.num_parallel_envs,
         infer_server.req_tx.clone(),
-        sample_tx,
+        traj_tx,
+        horizon,
         vec![(0, 0); tuned.num_parallel_envs], // 单智能体：无对手池
     );
 
@@ -85,7 +86,7 @@ fn main() -> anyhow::Result<()> {
         agent,
         tuned.train_batch_size,
         target_rollout_steps,
-        sample_rx,
+        traj_rx,
         infer_server.model_tx.clone(),
     );
 
@@ -124,3 +125,4 @@ fn main() -> anyhow::Result<()> {
     info!("🎉 异步训练完成！");
     Ok(())
 }
+

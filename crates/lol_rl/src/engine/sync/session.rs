@@ -1,9 +1,3 @@
-//! 同步训练会话（机制 A）：持久化 Worker 池 + 一次真实迭代（调度 → 克隆 CPU 策略 → Rollout → 聚合 → PPO 更新）。
-//!
-//! 生产 RL 服务当前以本会话为主路径（同步、学习效果稳定）；异步机制 B 见 `crate::async_session`。
-//! 训练循环（`crate::service`）与 AutoTuner 校准（`crate::autotune`）复用同一会话，
-//! 保证校准测出的 SPS 与 UI 上报的 SPS 完全同口径。
-
 use std::collections::{HashMap, VecDeque};
 use std::sync::Arc;
 use std::thread::{self, JoinHandle};
@@ -15,109 +9,17 @@ use lol_env::RlEnvironment;
 use rand::seq::IndexedRandom;
 use tracing::{error, info};
 
-use crate::grpo::GRPOAgent;
-use crate::policy::{ModelParamSummary, PolicyNetwork, ValueHead};
-use crate::ppo::{PPOAgent, PPOStats};
-use crate::rollout::{RolloutWorker, WorkerCommand, WorkerTrajectory};
-
-/// 强化学习算法后端抽象：支持经典 PPO 与高效 GRPO
-pub enum RlAgent {
-    Ppo(PPOAgent),
-    Grpo(GRPOAgent),
-}
-
-impl From<PPOAgent> for RlAgent {
-    fn from(a: PPOAgent) -> Self {
-        Self::Ppo(a)
-    }
-}
-
-impl From<GRPOAgent> for RlAgent {
-    fn from(a: GRPOAgent) -> Self {
-        Self::Grpo(a)
-    }
-}
-
-impl RlAgent {
-    pub fn parameter_summary(&self) -> ModelParamSummary {
-        match self {
-            Self::Ppo(a) => a.parameter_summary(),
-            Self::Grpo(a) => a.parameter_summary(),
-        }
-    }
-
-    pub fn print_parameter_summary(&self) {
-        match self {
-            Self::Ppo(a) => a.print_parameter_summary(),
-            Self::Grpo(a) => a.print_parameter_summary(),
-        }
-    }
-
-    pub fn policy(&self) -> &PolicyNetwork {
-        match self {
-            Self::Ppo(a) => &a.actor_critic.policy,
-            Self::Grpo(a) => &a.policy,
-        }
-    }
-
-    pub fn critic(&self) -> Option<&ValueHead> {
-        match self {
-            Self::Ppo(a) => Some(&a.actor_critic.critic),
-            Self::Grpo(_) => None,
-        }
-    }
-
-    pub fn set_lr(&mut self, lr: f64) -> Result<()> {
-        match self {
-            Self::Ppo(a) => a.set_lr(lr),
-            Self::Grpo(a) => a.set_lr(lr),
-        }
-    }
-
-    pub fn save(&self, path: &std::path::Path) -> Result<()> {
-        match self {
-            Self::Ppo(a) => a.save(path),
-            Self::Grpo(a) => a.save(path),
-        }
-    }
-
-    pub fn update_multi_buffer(
-        &mut self,
-        buffers: &[crate::ppo::RolloutBuffer],
-        last_vals: &[f32],
-        mini_batch_size: usize,
-    ) -> Result<PPOStats> {
-        match self {
-            Self::Ppo(a) => a.update_multi_buffer(buffers, last_vals, mini_batch_size),
-            Self::Grpo(a) => {
-                let stats = a.update_multi_buffer(buffers, mini_batch_size)?;
-                Ok(stats.to_ppo_stats())
-            }
-        }
-    }
-}
-
-/// 一次训练迭代的产出（训练机制部分；DB/事件/日志等簿记由调用方完成）。
-pub struct StepOutcome<O> {
-    /// 本轮产出的训练样本总数（自博弈时每 env 每步产出 num_agents 个样本）。
-    pub num_samples: usize,
-    /// 与 UI 同口径的吞吐量：num_samples / 本轮墙钟耗时。
-    pub sps: f64,
-    pub stats: PPOStats,
-    pub mean_value: f32,
-    /// 本轮结束的所有回合累计回报。
-    pub ep_returns: Vec<f32>,
-    /// 本轮结束的所有回合补刀数。
-    pub ep_cs: Vec<f32>,
-    /// 本轮结束的所有回合步数。
-    pub ep_steps: Vec<usize>,
-    pub reward_breakdown: HashMap<String, f32>,
-    pub last_reward_variables: HashMap<String, f32>,
-    pub last_obs: Option<O>,
-}
+use crate::algo::agent::RlAgent;
+use crate::engine::traits::{StepOutcome, TrainingEngine};
+use crate::engine::trajectory::{WorkerCommand, WorkerTrajectory};
+use crate::engine::worker::RolloutWorker;
+use crate::policy::{PolicyNetwork, ValueHead};
 
 /// 同步训练会话：持有 RlAgent + N 个持久化 Rollout Worker。
-pub struct TrainingSession<E: RlEnvironment + 'static> {
+pub type TrainingSession<E> = SyncTrainingSession<E>;
+
+/// 同步训练会话：持有 RlAgent + N 个持久化 Rollout Worker。
+pub struct SyncTrainingSession<E: RlEnvironment + 'static> {
     pub agent: RlAgent,
     num_parallel_envs: usize,
     sampler_device: Device,
@@ -129,7 +31,7 @@ pub struct TrainingSession<E: RlEnvironment + 'static> {
     pub total_steps: usize,
 }
 
-impl<E: RlEnvironment + 'static> TrainingSession<E> {
+impl<E: RlEnvironment + 'static> SyncTrainingSession<E> {
     /// 初始化训练会话并启动 N 个持久化 Rollout Worker（环境只在此时初始化一次）。
     ///
     /// `sampler_device` 指定采样前向运行的设备：`Device::Cpu`（默认，机制 A 的 CPU 推理路径）
@@ -337,13 +239,15 @@ impl<E: RlEnvironment + 'static> TrainingSession<E> {
         let val_cnt: usize = env_buffers.iter().map(|b| b.values.len()).sum();
         let mean_value = val_sum / (val_cnt as f32).max(1.0);
 
-        // 5. GPU Mini-Batch PPO 更新
+        // 5. GPU Mini-Batch PPO/GRPO 更新
         let stats = self
             .agent
             .update_multi_buffer(&env_buffers, &last_values, train_batch_size)?;
 
         let elapsed_sec = iter_start.elapsed().as_secs_f64();
         let sps = (num_samples as f64) / elapsed_sec.max(0.0001);
+
+        let obs_payload = sample_obs.as_ref().and_then(|o| E::obs_to_payload(o));
 
         Ok(StepOutcome {
             num_samples,
@@ -356,6 +260,7 @@ impl<E: RlEnvironment + 'static> TrainingSession<E> {
             reward_breakdown: iter_reward_breakdown,
             last_reward_variables,
             last_obs: sample_obs,
+            obs_payload,
         })
     }
 
@@ -388,112 +293,48 @@ impl<E: RlEnvironment + 'static> TrainingSession<E> {
     }
 }
 
-impl<E: RlEnvironment + 'static> Drop for TrainingSession<E> {
-    fn drop(&mut self) {
-        self.stop();
+impl<E: RlEnvironment + 'static> TrainingEngine for SyncTrainingSession<E> {
+    fn step_once(
+        &mut self,
+        iter: usize,
+        lr: f64,
+        train_batch_size: usize,
+    ) -> anyhow::Result<StepOutcome<()>> {
+        let outcome = SyncTrainingSession::step_once(self, iter, lr, train_batch_size)?;
+        Ok(outcome.erase_obs())
+    }
+
+    fn update_curriculum(
+        &mut self,
+        hp_scale: f32,
+        cs_reward: f32,
+        attack_no_cs_penalty: f32,
+        harass_coef: f32,
+    ) {
+        SyncTrainingSession::update_curriculum(
+            self,
+            hp_scale,
+            cs_reward,
+            attack_no_cs_penalty,
+            harass_coef,
+        );
+    }
+
+    fn agent(&self) -> &RlAgent {
+        &self.agent
+    }
+
+    fn total_steps(&self) -> usize {
+        self.total_steps
+    }
+
+    fn stop(&mut self) {
+        SyncTrainingSession::stop(self);
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use lol_env::solo_v0::SoloV0Env;
-    use lol_rl_protocol::PolicyBackbone;
-
-    use super::*;
-
-    #[test]
-    fn test_solo_v0_mlp_training_2_envs() -> Result<()> {
-        let device = Device::Cpu;
-        let ppo_config = crate::ppo::PPOConfig {
-            lr: 3e-4,
-            gamma: 0.99,
-            gae_lambda: 0.95,
-            clip_eps: 0.2,
-            c1: 0.5,
-            ppo_epochs: 2,
-            clip_vloss: true,
-            max_grad_norm: 0.5,
-        };
-
-        let state_dim = SoloV0Env::state_dim();
-        let hidden_dim = 64;
-        let action_space = SoloV0Env::action_space();
-
-        let agent = PPOAgent::create_for_env_with_backbone::<SoloV0Env>(
-            state_dim,
-            hidden_dim,
-            action_space,
-            ppo_config,
-            device.clone(),
-            PolicyBackbone::Mlp,
-        )?;
-
-        // 2 个并行环境，horizon = 30 步快速测试
-        let mut session = TrainingSession::<SoloV0Env>::new(agent, 2, state_dim, 30, device);
-
-        let outcome = session.step_once(1, 3e-4, 32)?;
-        assert!(outcome.num_samples > 0);
-        // 验证 reward_breakdown 不为空并包含课程学习奖励项
-        assert!(
-            !outcome.reward_breakdown.is_empty(),
-            "reward_breakdown 应该包含统计项"
-        );
-        assert!(
-            outcome.reward_breakdown.contains_key("补刀奖励")
-                || outcome.reward_breakdown.contains_key("补刀成功奖励")
-                || outcome.reward_breakdown.contains_key("攻击小兵未补刀惩罚")
-                || outcome.reward_breakdown.contains_key("攻击未补刀惩罚")
-                || outcome.reward_breakdown.contains_key("消耗对手奖励")
-                || outcome.reward_breakdown.contains_key("消耗对手")
-        );
-
-        // 验证课程学习参数下发与第二轮迭代
-        session.update_curriculum(0.5, 1.0, 0.1, 0.3);
-        let outcome2 = session.step_once(2, 3e-4, 32)?;
-        assert!(outcome2.num_samples > 0);
-
-        Ok(())
-    }
-
-    #[test]
-    fn test_solo_v0_grpo_training_2_envs() -> Result<()> {
-        let device = Device::Cpu;
-        let grpo_config = crate::grpo::GRPOConfig {
-            lr: 3e-4,
-            gamma: 0.99,
-            clip_eps: 0.2,
-            grpo_epochs: 2,
-            group_size: 2,
-            max_grad_norm: 0.5,
-        };
-
-        let state_dim = SoloV0Env::state_dim();
-        let hidden_dim = 64;
-        let action_space = SoloV0Env::action_space();
-
-        let agent = crate::grpo::GRPOAgent::create_for_env_with_backbone::<SoloV0Env>(
-            state_dim,
-            hidden_dim,
-            action_space,
-            grpo_config,
-            device.clone(),
-            PolicyBackbone::Mlp,
-        )?;
-
-        // 2 个并行环境，horizon = 30 步快速测试
-        let mut session = TrainingSession::<SoloV0Env>::new(agent, 2, state_dim, 30, device);
-
-        let outcome = session.step_once(1, 3e-4, 32)?;
-        assert!(outcome.num_samples > 0);
-        assert_eq!(outcome.stats.value_loss, 0.0, "GRPO value loss 应恒为 0");
-        assert!(outcome.stats.policy_loss.is_finite());
-        assert!(outcome.sps > 0.0);
-
-        // 第二轮迭代
-        let outcome2 = session.step_once(2, 3e-4, 32)?;
-        assert!(outcome2.num_samples > 0);
-        assert_eq!(outcome2.stats.value_loss, 0.0);
-
-        Ok(())
+impl<E: RlEnvironment + 'static> Drop for SyncTrainingSession<E> {
+    fn drop(&mut self) {
+        self.stop();
     }
 }

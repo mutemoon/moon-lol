@@ -6,8 +6,12 @@ use lol_env::RlEnvironment;
 use lol_rl_protocol::ActionSpace;
 use tracing::info;
 
-use crate::ppo::{PPOAgent, PPOConfig, RolloutBuffer};
-use crate::rollout::RolloutWorker;
+use crate::algo::agent::RlAgent;
+use crate::algo::buffer::RolloutBuffer;
+use crate::algo::grpo::{GRPOAgent, GRPOConfig};
+use crate::algo::ppo::{PPOAgent, PPOConfig};
+use crate::engine::sync::TrainingSession;
+use crate::engine::worker::RolloutWorker;
 
 /// 硬件基准测试结果画像
 #[derive(Debug, Clone)]
@@ -126,12 +130,12 @@ impl AutoTuner {
         // 1. 创建真实 Agent（含 AdamW 优化器），探测全程复用同一网络。
         let (cpu_policy, cpu_critic, mut rl_agent) = match algorithm {
             lol_rl_protocol::RlAlgorithm::Grpo => {
-                let grpo_config = crate::grpo::GRPOConfig {
+                let grpo_config = GRPOConfig {
                     lr: 3e-4,
                     grpo_epochs: 1,
                     ..Default::default()
                 };
-                let agent = crate::grpo::GRPOAgent::create_for_env_with_backbone::<E>(
+                let agent = GRPOAgent::create_for_env_with_backbone::<E>(
                     state_dim,
                     hidden_dim,
                     action_space.clone(),
@@ -140,7 +144,7 @@ impl AutoTuner {
                     backbone_type,
                 )?;
                 let cpu_policy = Arc::new(agent.policy.to_device(&candle_core::Device::Cpu)?);
-                (cpu_policy, None, crate::training::RlAgent::Grpo(agent))
+                (cpu_policy, None, RlAgent::Grpo(agent))
             }
             lol_rl_protocol::RlAlgorithm::Ppo => {
                 let ppo_config = PPOConfig {
@@ -171,7 +175,7 @@ impl AutoTuner {
                 (
                     cpu_policy,
                     Some(cpu_critic),
-                    crate::training::RlAgent::Ppo(agent),
+                    RlAgent::Ppo(agent),
                 )
             }
         };
@@ -291,7 +295,7 @@ impl AutoTuner {
             let last_vals = vec![0.0f32; buffers.len()];
 
             match &mut rl_agent {
-                crate::training::RlAgent::Ppo(agent) => {
+                RlAgent::Ppo(agent) => {
                     for _ in 0..train_warmup {
                         let _ = agent.update_multi_buffer(&buffers, &last_vals, b)?;
                     }
@@ -308,7 +312,7 @@ impl AutoTuner {
                         b, lat_us, throughput
                     );
                 }
-                crate::training::RlAgent::Grpo(agent) => {
+                RlAgent::Grpo(agent) => {
                     for _ in 0..train_warmup {
                         let _ = agent.update_multi_buffer(&buffers, b)?;
                     }
@@ -546,9 +550,9 @@ impl AutoTuner {
             algorithm, backbone_type, tuned.num_parallel_envs
         );
 
-        let rl_agent: crate::training::RlAgent = match algorithm {
+        let rl_agent: RlAgent = match algorithm {
             lol_rl_protocol::RlAlgorithm::Grpo => {
-                let grpo_config = crate::grpo::GRPOConfig {
+                let grpo_config = GRPOConfig {
                     lr: 3e-4,
                     gamma: 0.99,
                     clip_eps: 0.2,
@@ -556,7 +560,7 @@ impl AutoTuner {
                     group_size: 4,
                     ..Default::default()
                 };
-                let agent = crate::grpo::GRPOAgent::create_for_env_with_backbone::<E>(
+                let agent = GRPOAgent::create_for_env_with_backbone::<E>(
                     state_dim,
                     hidden_dim,
                     action_space.clone(),
@@ -564,7 +568,7 @@ impl AutoTuner {
                     device.clone(),
                     backbone_type,
                 )?;
-                crate::training::RlAgent::Grpo(agent)
+                RlAgent::Grpo(agent)
             }
             lol_rl_protocol::RlAlgorithm::Ppo => {
                 let ppo_config = PPOConfig {
@@ -585,11 +589,11 @@ impl AutoTuner {
                     device.clone(),
                     backbone_type,
                 )?;
-                crate::training::RlAgent::Ppo(agent)
+                RlAgent::Ppo(agent)
             }
         };
 
-        let mut session = crate::training::TrainingSession::<E>::new(
+        let mut session = TrainingSession::<E>::new(
             rl_agent,
             tuned.num_parallel_envs,
             state_dim,

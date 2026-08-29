@@ -13,6 +13,49 @@ pub enum RlAlgorithm {
     Grpo,
 }
 
+/// 强化学习训练引擎模式（异步 Actor-Learner 流水线 vs 同步 Rollout Worker 池）
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq, Default)]
+#[serde(rename_all = "snake_case")]
+pub enum EngineMode {
+    Async,
+    #[default]
+    Sync,
+}
+
+impl EngineMode {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            Self::Async => "async",
+            Self::Sync => "sync",
+        }
+    }
+
+    pub fn display_name(&self) -> &'static str {
+        match self {
+            Self::Async => "异步引擎 (Async)",
+            Self::Sync => "同步引擎 (Sync)",
+        }
+    }
+}
+
+impl Display for EngineMode {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.display_name())
+    }
+}
+
+impl FromStr for EngineMode {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.trim().to_lowercase().as_str() {
+            "async" => Ok(Self::Async),
+            "sync" => Ok(Self::Sync),
+            other => Err(format!("未知引擎模式 '{other}'，可选: async, sync")),
+        }
+    }
+}
+
 impl RlAlgorithm {
     pub fn as_str(&self) -> &'static str {
         match self {
@@ -130,6 +173,8 @@ pub struct TaskConfigPayload {
     pub env_name: String,
     pub algorithm: RlAlgorithm,
     pub backbone: PolicyBackbone,
+    #[serde(default)]
+    pub engine_mode: EngineMode,
     pub lr: f32,
     pub gamma: f32,
     pub gae_lambda: f32,
@@ -155,6 +200,7 @@ impl TaskConfigPayload {
             env_name: env_name.to_string(),
             algorithm: RlAlgorithm::Ppo,
             backbone: PolicyBackbone::Mlp,
+            engine_mode: EngineMode::Sync,
             lr: params.lr,
             gamma: params.gamma,
             gae_lambda: params.gae_lambda,
@@ -197,6 +243,8 @@ impl TaskConfigPayload {
             self.algorithm.as_str().to_string(),
             "--backbone".to_string(),
             self.backbone.as_str().to_string(),
+            "--engine".to_string(),
+            self.engine_mode.as_str().to_string(),
             "--lr".to_string(),
             self.lr.to_string(),
             "--gamma".to_string(),
@@ -268,6 +316,8 @@ pub struct TaskOverviewItem {
     pub name: String,
     pub algorithm: RlAlgorithm,
     pub backbone: PolicyBackbone,
+    #[serde(default)]
+    pub engine_mode: EngineMode,
     pub env_name: String,
     pub status: String,
     pub current_step: usize,
@@ -280,3 +330,4 @@ pub struct TaskOverviewItem {
     pub rollout_steps_per_env: usize,
     pub created_at: String,
 }
+
