@@ -215,33 +215,85 @@ impl ActionValueNode {
 
 use crate::obs::{ObsContext, ObsExpr};
 
-/// 声明式动作掩码规则：当 condition 在当前 ObsContext 下成立 (> 0.0) 时，禁用对应动作分支
+/// 声明式动作掩码规则
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
-pub struct ActionMaskRule {
-    /// 禁用触发条件（ObsExpr 求值 > 0.0 时触发禁用）
-    pub condition: ObsExpr,
-    /// 目标动作头名称（可选，如 "action_type"）
-    #[serde(default)]
-    pub target_head: Option<String>,
-    /// 被禁用的动作分支索引
-    pub disabled_branch: usize,
-    /// 被禁用的动作标签（如 "Attack"）
-    pub branch_label: String,
+pub enum ActionMaskRule {
+    /// 全局标量规则：当 condition 在当前 ObsContext 下成立 (> 0.0) 时，在 target_head 中禁用指定分支
+    Global {
+        condition: ObsExpr,
+        #[serde(default)]
+        target_head: Option<String>,
+        disabled_branch: usize,
+        branch_label: String,
+    },
+    /// 实体槽位过滤规则：遍历 entity_name（如 "visible_units"），当 condition (> 0.0) 成立时禁用 target_head 对应槽位
+    EntitySlot {
+        entity_name: String,
+        condition: ObsExpr,
+        #[serde(default)]
+        target_head: Option<String>,
+    },
+    /// 针对所选目标的条件动作规则：遍历 entity_name，为每个目标评估，若 condition (> 0.0) 成立则在 target_head 中禁用分支
+    ConditionalTarget {
+        entity_name: String,
+        condition: ObsExpr,
+        #[serde(default)]
+        target_head: Option<String>,
+        disabled_branch: usize,
+        branch_label: String,
+    },
 }
 
 impl ActionMaskRule {
+    pub fn global(
+        condition: ObsExpr,
+        target_head: Option<String>,
+        disabled_branch: usize,
+        branch_label: impl Into<String>,
+    ) -> Self {
+        Self::Global {
+            condition,
+            target_head,
+            disabled_branch,
+            branch_label: branch_label.into(),
+        }
+    }
+
+    pub fn entity_slot(
+        entity_name: impl Into<String>,
+        condition: ObsExpr,
+        target_head: Option<String>,
+    ) -> Self {
+        Self::EntitySlot {
+            entity_name: entity_name.into(),
+            condition,
+            target_head,
+        }
+    }
+
+    pub fn conditional_target(
+        entity_name: impl Into<String>,
+        condition: ObsExpr,
+        target_head: Option<String>,
+        disabled_branch: usize,
+        branch_label: impl Into<String>,
+    ) -> Self {
+        Self::ConditionalTarget {
+            entity_name: entity_name.into(),
+            condition,
+            target_head,
+            disabled_branch,
+            branch_label: branch_label.into(),
+        }
+    }
+
     pub fn new(
         condition: ObsExpr,
         target_head: Option<String>,
         disabled_branch: usize,
         branch_label: impl Into<String>,
     ) -> Self {
-        Self {
-            condition,
-            target_head,
-            disabled_branch,
-            branch_label: branch_label.into(),
-        }
+        Self::global(condition, target_head, disabled_branch, branch_label)
     }
 }
 
@@ -287,12 +339,208 @@ impl ActionSchema {
         let mut mask = vec![true; num_classes];
 
         for rule in &self.mask_rules {
-            if rule.disabled_branch < mask.len() && rule.condition.eval(&ctx.vars) > 0.0 {
-                mask[rule.disabled_branch] = false;
+            if let ActionMaskRule::Global {
+                disabled_branch,
+                condition,
+                ..
+            } = rule
+            {
+                if *disabled_branch < mask.len() && condition.eval(&ctx.vars) > 0.0 {
+                    mask[*disabled_branch] = false;
+                }
             }
         }
 
         mask
+    }
+
+    /// 统一求值：根据当前观测上下文，计算完整的 ActionMasks（包含各分支 branch_masks 与 conditional_target_masks）
+    pub fn eval_action_masks(&self, ctx: &ObsContext) -> ActionMasks {
+        let flat = self.flat_branches();
+        let mut branch_masks = Vec::with_capacity(flat.len());
+        let mut unit_selection_info: Option<(usize, String)> = None;
+        let mut cat_baseline_mask: Option<Vec<bool>> = None;
+
+        for node in &flat {
+            match node {
+                ActionNode::Continuous { .. } => {
+                    branch_masks.push(None);
+                }
+                ActionNode::UnitSelection {
+                    name,
+                    max_units,
+                    obs_entity_name,
+                    ..
+                } => {
+                    unit_selection_info = Some((*max_units, obs_entity_name.clone()));
+                    let mut slot_mask = vec![true; *max_units];
+                    let repeated_units = ctx.repeated.get(obs_entity_name);
+
+                    for i in 0..*max_units {
+                        if i == 0 {
+                            if let Some(unit) = repeated_units.and_then(|v| v.get(0)) {
+                                let mut entity_vars = ctx.vars.clone();
+                                for (k, v) in &unit.vars {
+                                    entity_vars.insert(k.clone(), *v);
+                                    entity_vars.insert(format!("u.{}", k), *v);
+                                }
+                                for rule in &self.mask_rules {
+                                    if let ActionMaskRule::EntitySlot {
+                                        entity_name,
+                                        condition,
+                                        target_head,
+                                    } = rule
+                                    {
+                                        if entity_name == obs_entity_name
+                                            && target_head
+                                                .as_ref()
+                                                .map_or(true, |h| h == name)
+                                            && condition.eval(&entity_vars) > 0.0
+                                        {
+                                            slot_mask[i] = false;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        } else if let Some(unit) = repeated_units.and_then(|v| v.get(i)) {
+                            let mut entity_vars = ctx.vars.clone();
+                            for (k, v) in &unit.vars {
+                                entity_vars.insert(k.clone(), *v);
+                                entity_vars.insert(format!("u.{}", k), *v);
+                            }
+                            let mut disabled = false;
+                            for rule in &self.mask_rules {
+                                if let ActionMaskRule::EntitySlot {
+                                    entity_name,
+                                    condition,
+                                    target_head,
+                                } = rule
+                                {
+                                    if entity_name == obs_entity_name
+                                        && target_head
+                                            .as_ref()
+                                            .map_or(true, |h| h == name)
+                                        && condition.eval(&entity_vars) > 0.0
+                                    {
+                                        disabled = true;
+                                        break;
+                                    }
+                                }
+                            }
+                            slot_mask[i] = !disabled;
+                        } else {
+                            slot_mask[i] = false;
+                        }
+                    }
+                    branch_masks.push(Some(slot_mask));
+                }
+                ActionNode::Categorical {
+                    name,
+                    num_classes,
+                    ..
+                } => {
+                    let mut mask = vec![true; *num_classes];
+                    for rule in &self.mask_rules {
+                        if let ActionMaskRule::Global {
+                            condition,
+                            target_head,
+                            disabled_branch,
+                            ..
+                        } = rule
+                        {
+                            if target_head.as_ref().map_or(true, |h| h == name)
+                                && *disabled_branch < mask.len()
+                                && condition.eval(&ctx.vars) > 0.0
+                            {
+                                mask[*disabled_branch] = false;
+                            }
+                        }
+                    }
+                    cat_baseline_mask = Some(mask.clone());
+                    branch_masks.push(Some(mask));
+                }
+                ActionNode::Struct { .. } => unreachable!(),
+            }
+        }
+
+        let conditional_target_masks = if let (Some((max_units, obs_entity_name)), Some(base_mask)) =
+            (unit_selection_info, cat_baseline_mask)
+        {
+            let repeated_units = ctx.repeated.get(&obs_entity_name);
+            let mut cond_masks = Vec::with_capacity(max_units);
+
+            for i in 0..max_units {
+                if i == 0 {
+                    let mut t_mask = base_mask.clone();
+                    if let Some(unit) = repeated_units.and_then(|v| v.get(0)) {
+                        let mut entity_vars = ctx.vars.clone();
+                        for (k, v) in &unit.vars {
+                            entity_vars.insert(k.clone(), *v);
+                            entity_vars.insert(format!("u.{}", k), *v);
+                        }
+                        for rule in &self.mask_rules {
+                            if let ActionMaskRule::ConditionalTarget {
+                                entity_name,
+                                condition,
+                                disabled_branch,
+                                ..
+                            } = rule
+                            {
+                                if entity_name == &obs_entity_name
+                                    && *disabled_branch < t_mask.len()
+                                    && condition.eval(&entity_vars) > 0.0
+                                {
+                                    t_mask[*disabled_branch] = false;
+                                }
+                            }
+                        }
+                    }
+                    cond_masks.push(t_mask);
+                } else if let Some(unit) = repeated_units.and_then(|v| v.get(i)) {
+                    let mut t_mask = base_mask.clone();
+                    let mut entity_vars = ctx.vars.clone();
+                    for (k, v) in &unit.vars {
+                        entity_vars.insert(k.clone(), *v);
+                        entity_vars.insert(format!("u.{}", k), *v);
+                    }
+                    for rule in &self.mask_rules {
+                        if let ActionMaskRule::ConditionalTarget {
+                            entity_name,
+                            condition,
+                            disabled_branch,
+                            ..
+                        } = rule
+                        {
+                            if entity_name == &obs_entity_name
+                                && *disabled_branch < t_mask.len()
+                                && condition.eval(&entity_vars) > 0.0
+                            {
+                                t_mask[*disabled_branch] = false;
+                            }
+                        }
+                    }
+                    cond_masks.push(t_mask);
+                } else {
+                    let mut fallback = vec![false; base_mask.len()];
+                    if !fallback.is_empty() {
+                        fallback[0] = true;
+                    }
+                    if fallback.len() > 1 {
+                        fallback[1] = true;
+                    }
+                    cond_masks.push(fallback);
+                }
+            }
+            Some(cond_masks)
+        } else {
+            None
+        };
+
+        ActionMasks {
+            branch_masks,
+            conditional_target_masks,
+        }
     }
 
     /// 将扁平的动作编码数组解析为结构化动作树

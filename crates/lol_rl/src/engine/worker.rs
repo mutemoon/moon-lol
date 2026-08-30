@@ -263,6 +263,7 @@ impl<E: RlEnvironment> RolloutWorker<E> {
             reward_breakdown,
             last_reward_variables,
             last_obs: last_obs_primary,
+            policy_version: evaluator.current_policy_version(),
         })
     }
 

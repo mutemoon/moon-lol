@@ -228,6 +228,8 @@ impl<E: RlEnvironment + 'static> SyncTrainingSession<E> {
             last_values.extend(traj.last_values);
         }
 
+        let collect_elapsed = iter_start.elapsed();
+
         let num_samples: usize = env_buffers.iter().map(|b| b.len()).sum();
         self.total_steps += num_samples;
 
@@ -240,12 +242,22 @@ impl<E: RlEnvironment + 'static> SyncTrainingSession<E> {
         let mean_value = val_sum / (val_cnt as f32).max(1.0);
 
         // 5. GPU Mini-Batch PPO/GRPO 更新
+        let train_start = Instant::now();
         let stats = self
             .agent
             .update_multi_buffer(&env_buffers, &last_values, train_batch_size)?;
+        let train_elapsed = train_start.elapsed();
 
         let elapsed_sec = iter_start.elapsed().as_secs_f64();
         let sps = (num_samples as f64) / elapsed_sec.max(0.0001);
+
+        let timing = crate::engine::traits::StepTiming {
+            collect_ms: collect_elapsed.as_secs_f64() * 1000.0,
+            train_ms: train_elapsed.as_secs_f64() * 1000.0,
+            total_ms: elapsed_sec * 1000.0,
+            infer_stats: None,
+            queue_stats: None,
+        };
 
         let obs_payload = sample_obs.as_ref().and_then(|o| E::obs_to_payload(o));
 
@@ -254,6 +266,7 @@ impl<E: RlEnvironment + 'static> SyncTrainingSession<E> {
             sps,
             stats,
             mean_value,
+            timing,
             ep_returns: ep_returns_all,
             ep_cs: ep_cs_all,
             ep_steps: ep_steps_all,

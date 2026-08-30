@@ -2,7 +2,6 @@ use std::collections::VecDeque;
 use std::sync::Arc;
 
 use candle_core::Device;
-use crossbeam_channel::unbounded;
 use lol_env::RlEnvironment;
 use rand::seq::IndexedRandom;
 use tracing::info;
@@ -10,9 +9,9 @@ use tracing::info;
 use super::actor::ActorPool;
 use super::inference::{InferenceServer, PolicySnapshot};
 use super::learner::AsyncLearner;
+use super::queue::TrajectoryRingBuffer;
 use crate::algo::agent::RlAgent;
 use crate::engine::traits::{StepOutcome, TrainingEngine};
-use crate::engine::trajectory::WorkerTrajectory;
 
 /// 异步训练会话：统一编排 B 的三件套 + 自博弈对手池。
 pub struct AsyncTrainingSession<E: RlEnvironment + 'static> {
@@ -46,7 +45,9 @@ impl<E: RlEnvironment + 'static> AsyncTrainingSession<E> {
             num_parallel_envs, horizon, train_batch_size, infer_batch_size
         );
 
-        let (traj_tx, traj_rx) = unbounded::<WorkerTrajectory<E::Obs>>();
+        // 环形缓冲容量为并行环境数的 2~4 倍，防止内存爆炸和策略严重过期
+        let queue_capacity = (num_parallel_envs * 4).clamp(32, 2048);
+        let traj_queue = TrajectoryRingBuffer::<E::Obs>::new(queue_capacity);
 
         let initial_snapshot = PolicySnapshot::new(agent.policy().clone(), agent.critic().cloned());
 
@@ -62,7 +63,7 @@ impl<E: RlEnvironment + 'static> AsyncTrainingSession<E> {
         let actor_pool = ActorPool::spawn::<E>(
             num_parallel_envs,
             infer_server.req_tx.clone(),
-            traj_tx,
+            traj_queue.clone(),
             horizon,
             initial_dispatch,
         );
@@ -71,7 +72,7 @@ impl<E: RlEnvironment + 'static> AsyncTrainingSession<E> {
             agent,
             train_batch_size,
             target_rollout_steps,
-            traj_rx,
+            traj_queue,
             infer_server.model_tx.clone(),
         );
 
@@ -135,13 +136,16 @@ impl<E: RlEnvironment + 'static> TrainingEngine for AsyncTrainingSession<E> {
             self.actor_pool.update_dispatch(new_dispatch);
         }
 
-        let outcome = self.learner.step_once(iter, lr, train_batch_size)?;
+        let mut outcome = self.learner.step_once(iter, lr, train_batch_size)?;
+        let infer_stats = self.infer_server.take_timing_stats();
+        outcome.timing.infer_stats = Some(infer_stats);
         let obs_payload = outcome.last_obs.as_ref().and_then(|o| E::obs_to_payload(o));
         Ok(StepOutcome {
             num_samples: outcome.num_samples,
             sps: outcome.sps,
             stats: outcome.stats,
             mean_value: outcome.mean_value,
+            timing: outcome.timing,
             ep_returns: outcome.ep_returns,
             ep_cs: outcome.ep_cs,
             ep_steps: outcome.ep_steps,

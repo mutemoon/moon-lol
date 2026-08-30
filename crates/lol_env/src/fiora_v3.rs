@@ -731,62 +731,7 @@ impl RlEnvironment for FioraV3Env {
     }
 
     fn action_masks(obs: &Self::Obs) -> Option<lol_rl_protocol::ActionMasks> {
-        let is_cooldown = obs.attack_is_cooldown;
-        let dist_ok = obs.distance <= ATTACK_MASK_DISTANCE;
-
-        let enemy_action_mask = vec![
-            true,                    // 0: NoOp
-            true,                    // 1: Move
-            dist_ok && !is_cooldown, // 2: Attack
-            obs.q_ready,             // 3: CastQ
-            obs.w_ready,             // 4: CastW
-            obs.e_ready,             // 5: CastE
-            obs.r_ready,             // 6: CastR
-            obs.flash_ready,         // 7: Flash
-        ];
-
-        let ally_action_mask = vec![
-            true,  // 0: NoOp
-            true,  // 1: Move
-            false, // 2: Attack (友军不可攻击)
-            false, // 3: CastQ (不可对友军施放伤害技能)
-            false, // 4: CastW
-            false, // 5: CastE
-            false, // 6: CastR
-            false, // 7: Flash
-        ];
-
-        let mut conditional_target_masks = Vec::with_capacity(FIORA_V3_MAX_VISIBLE_UNITS);
-        let mut target_valid_mask = Vec::with_capacity(FIORA_V3_MAX_VISIBLE_UNITS);
-
-        for target_idx in 0..FIORA_V3_MAX_VISIBLE_UNITS {
-            if target_idx == 0 {
-                target_valid_mask.push(true);
-                conditional_target_masks.push(enemy_action_mask.clone());
-            } else if let Some(unit) = obs.visible_units.get(target_idx) {
-                let unit_type = unit.vars.get("unit_type").copied().unwrap_or(0.0);
-                let is_enemy = unit.vars.get("is_enemy").copied().unwrap_or(0.0);
-                let is_valid_unit = unit_type > 0.0;
-                target_valid_mask.push(is_valid_unit);
-                if is_valid_unit && is_enemy > 0.5 {
-                    conditional_target_masks.push(enemy_action_mask.clone());
-                } else {
-                    conditional_target_masks.push(ally_action_mask.clone());
-                }
-            } else {
-                target_valid_mask.push(false);
-                conditional_target_masks.push(ally_action_mask.clone());
-            }
-        }
-
-        Some(lol_rl_protocol::ActionMasks::with_conditional_target_masks(
-            vec![
-                None,                    // 0: offset (Continuous)
-                Some(target_valid_mask), // 1: target (UnitSelection)
-                Some(enemy_action_mask), // 2: action_type 兜底基线
-            ],
-            conditional_target_masks,
-        ))
+        Some(FIORA_V3_ACTION_SCHEMA.eval_action_masks(&obs.to_context()))
     }
 
     fn reward_formula_spec() -> Option<RewardFormulaSpec> {

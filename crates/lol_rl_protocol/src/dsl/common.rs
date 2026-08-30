@@ -53,18 +53,30 @@ pub fn ident<'i>(input: &mut &'i str) -> PResult<String, ContextError> {
     .parse_next(input)
 }
 
-/// 解析变量名，支持带有数组下标的形式（如 `self_x`, `params[0]`, `rel_pos[1]`）
+/// 解析变量名，支持带有点号或数组下标的形式（如 `self_x`, `params[0]`, `rel_pos[1]`, `u.is_enemy`, `u.params[0]`）
 pub fn var_ident<'i>(input: &mut &'i str) -> PResult<String, ContextError> {
     ws.parse_next(input)?;
-    let base = ident.parse_next(input)?;
-    let index: Option<usize> =
-        opt(delimited(symbol("["), number_usize, symbol("]"))).parse_next(input)?;
+    let mut full = ident.parse_next(input)?;
 
-    if let Some(idx) = index {
-        Ok(format!("{}[{}]", base, idx))
-    } else {
-        Ok(base)
+    loop {
+        if let Ok(sub) = preceded(symbol("."), ident).parse_next(input) {
+            full.push('.');
+            full.push_str(&sub);
+            if let Ok(Some(idx)) =
+                opt(delimited(symbol("["), number_usize, symbol("]"))).parse_next(input)
+            {
+                full.push_str(&format!("[{}]", idx));
+            }
+        } else if let Ok(Some(idx)) =
+            opt(delimited(symbol("["), number_usize, symbol("]"))).parse_next(input)
+        {
+            full.push_str(&format!("[{}]", idx));
+        } else {
+            break;
+        }
     }
+
+    Ok(full)
 }
 
 /// 解析 usize 整数

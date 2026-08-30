@@ -86,11 +86,34 @@ action FioraV3Action {
         0: "保持当前 (NoOp)",
         1: "移动 (Move)",
         2: "普通攻击 (Attack)",
-        3: "施放 Q",
-        4: "施放 W",
-        5: "施放 E",
-        6: "施放 R",
-        7: "闪现",
+        3: "施放 Q (CastQ)",
+        4: "施放 W (CastW)",
+        5: "施放 E (CastE)",
+        6: "施放 R (CastR)",
+        7: "闪现 (Flash)",
+    }
+
+    mask {
+        // ① 目标实体槽位有效性过滤：当槽位单位无效 (unit_type <= 0) 时禁用该 target 槽位
+        for u in visible_units {
+            if u.unit_type <= 0.0 { disable target; }
+        }
+
+        // ② 全局基础冷却与射程过滤（敌方/主目标基准）
+        if distance > 220.0        { disable Attack; }
+        if attack_is_cooldown > 0.5 { disable Attack; }
+        if q_ready < 0.5            { disable CastQ; }
+        if w_ready < 0.5            { disable CastW; }
+        if e_ready < 0.5            { disable CastE; }
+        if r_ready < 0.5            { disable CastR; }
+        if flash_ready < 0.5        { disable Flash; }
+
+        // ③ 针对选中目标的条件动作过滤：友军或非敌军目标禁止普通攻击与技能
+        for u in visible_units {
+            if u.is_enemy <= 0.5 {
+                disable [Attack, CastQ, CastW, CastE, CastR, Flash];
+            }
+        }
     }
 }
 

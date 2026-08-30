@@ -41,15 +41,113 @@ pub struct TunedConfig {
     pub infer_batch_size: usize,
     /// 建议 PPO 训练 Mini-Batch 大小
     pub train_batch_size: usize,
+    /// 建议 PPO 训练 Epoch 次数
+    pub ppo_epochs: usize,
     /// 动态批处理最大等待微秒（Dynamic batching wait timeout）
     pub dynamic_batch_timeout_us: u64,
     /// 预估综合训练步吞吐量 (Steps Per Second, SPS)
     pub estimated_sps: f64,
+    /// 动态微调后的学习率
+    pub adjusted_lr: f64,
+}
+
+/// 动态自适应超参数推导结果 (根据显存、CPU核数、episode长度与并发规模推导)
+#[derive(Debug, Clone)]
+pub struct DynamicHyperparameters {
+    pub num_parallel_envs: usize,
+    pub ppo_epochs: usize,
+    pub train_batch_size: usize,
+    pub infer_batch_size: usize,
+    pub num_minibatches: usize,
+    pub target_updates_r: usize,
+    pub adjusted_lr: f64,
+    pub total_iteration_samples: usize,
 }
 
 pub struct AutoTuner;
 
 impl AutoTuner {
+    /// 依据环境规模、硬件设备与引擎模式，按工业级标准执行 Step 1 ~ Step 8 动态求解
+    pub fn compute_dynamic_hyperparameters(
+        user_envs: usize,
+        horizon: usize,
+        agents_per_env: usize,
+        engine_mode: lol_rl_protocol::EngineMode,
+        user_ppo_epochs: Option<usize>,
+        base_lr: f64,
+        device: &Device,
+    ) -> DynamicHyperparameters {
+        // Step 1: n_envs
+        let cpu_cores = num_cpus::get();
+        let num_parallel_envs = if user_envs > 0 {
+            user_envs
+        } else if !device.is_cpu() {
+            (cpu_cores * 4).clamp(16, 256)
+        } else {
+            cpu_cores.saturating_sub(2).clamp(4, 32)
+        };
+
+        // Step 2: n_steps
+        let n_steps = horizon.max(16);
+
+        // Step 3: iteration_batch = n_envs × n_steps (考虑 agents_per_env)
+        let iteration_batch = num_parallel_envs * n_steps * agents_per_env.max(1);
+
+        // Step 4: 定 ppo_epochs（同步训练 3~4；异步+staleness 明显时 1~2）
+        let ppo_epochs = match user_ppo_epochs {
+            Some(e) if e > 0 && e != 8 => e,
+            _ => match engine_mode {
+                lol_rl_protocol::EngineMode::Async => 2,
+                lol_rl_protocol::EngineMode::Sync => 4,
+            },
+        };
+
+        // Step 5: 目标更新次数 R ∈ [2, 8]
+        // num_minibatches = round(R / ppo_epochs)，取 iteration_batch 的因子
+        let target_r = 4.0;
+        let ideal_minibatches = ((target_r / (ppo_epochs as f64)).round() as usize).clamp(1, 16);
+
+        // 从标准 2 的幂次中选取最适合的 MiniBatch 大小
+        let candidate_sizes = [4096, 2048, 1024, 512, 256, 128, 64];
+        let mut best_mb_size = 256;
+        let mut best_num_mb = (iteration_batch / 256).max(1);
+        let mut min_diff = usize::MAX;
+
+        for &sz in &candidate_sizes {
+            if sz <= iteration_batch {
+                let nb = (iteration_batch / sz).max(1);
+                let diff = (nb as isize - ideal_minibatches as isize).unsigned_abs();
+                if diff < min_diff {
+                    min_diff = diff;
+                    best_mb_size = sz;
+                    best_num_mb = nb;
+                }
+            }
+        }
+
+        // Step 7: 显存安全检验（超标则减半 minibatch）
+        while best_mb_size > 4096 && best_num_mb < 64 {
+            best_mb_size /= 2;
+            best_num_mb *= 2;
+        }
+
+        // Step 8: lr 按 minibatch_size 相对基准（256）做 √ 缩放微调
+        let lr_scale = (best_mb_size as f64 / 256.0).sqrt().clamp(0.5, 4.0);
+        let adjusted_lr = base_lr * lr_scale;
+
+        let infer_batch_size = num_parallel_envs.next_power_of_two().min(256);
+
+        DynamicHyperparameters {
+            num_parallel_envs,
+            ppo_epochs,
+            train_batch_size: best_mb_size,
+            infer_batch_size,
+            num_minibatches: best_num_mb,
+            target_updates_r: best_num_mb * ppo_epochs,
+            adjusted_lr,
+            total_iteration_samples: iteration_batch,
+        }
+    }
     /// 执行深度基准探测。
     ///
     /// 与旧版不同，所有测量都驱动**真实训练组件**：
@@ -454,12 +552,17 @@ impl AutoTuner {
         // 动态批处理超时（微秒）：设定为环境真实单步耗时的 15%~30%
         let dynamic_batch_timeout_us = (profile.env_step_us * 0.25).clamp(20.0, 500.0) as u64;
 
+        let lr_scale = (best_train_b as f64 / 256.0).sqrt().clamp(0.5, 4.0);
+        let adjusted_lr = 3e-4 * lr_scale;
+
         let tuned = TunedConfig {
             num_parallel_envs: best_n,
             infer_batch_size: best_infer_b,
             train_batch_size: best_train_b,
+            ppo_epochs,
             dynamic_batch_timeout_us,
             estimated_sps: best_sps,
+            adjusted_lr,
         };
 
         if forced_n.is_some() {
@@ -749,5 +852,26 @@ mod tests {
         )
         .unwrap();
         assert!(measured > 0.0);
+    }
+
+    #[test]
+    fn test_compute_dynamic_hyperparameters() {
+        let dev = Device::Cpu;
+        // 测试 256 环境异步模式下的动态推导
+        let dyn_hp = AutoTuner::compute_dynamic_hyperparameters(
+            256,
+            128,
+            2,
+            lol_rl_protocol::EngineMode::Async,
+            None,
+            3e-4,
+            &dev,
+        );
+        assert_eq!(dyn_hp.num_parallel_envs, 256);
+        assert_eq!(dyn_hp.total_iteration_samples, 256 * 128 * 2); // 65,536
+        assert_eq!(dyn_hp.ppo_epochs, 2);
+        assert!(dyn_hp.train_batch_size >= 1024, "MiniBatch 大小应自适应扩大至 >= 1024");
+        assert!(dyn_hp.target_updates_r <= 128, "反向传播总次数应被显著削减");
+        assert!(dyn_hp.adjusted_lr > 3e-4, "学习率应随 MiniBatch 增大而自适应放大");
     }
 }

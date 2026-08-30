@@ -16,6 +16,8 @@ pub struct WorkerTrajectory<O> {
     pub reward_breakdown: HashMap<String, f32>,
     pub last_reward_variables: HashMap<String, f32>,
     pub last_obs: Option<O>,
+    /// 该轨迹产生时所依据的主策略版本号（用于异步 Staleness 检测与版本淘汰）。
+    pub policy_version: usize,
 }
 
 impl<O> WorkerTrajectory<O> {
@@ -29,6 +31,7 @@ impl<O> WorkerTrajectory<O> {
             reward_breakdown: HashMap::new(),
             last_reward_variables: HashMap::new(),
             last_obs: None,
+            policy_version: 0,
         }
     }
 }

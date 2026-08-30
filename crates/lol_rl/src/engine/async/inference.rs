@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 use std::sync::Arc;
-use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicU64, AtomicUsize, Ordering};
 use std::thread::{self, JoinHandle};
 use std::time::{Duration, Instant};
 
@@ -10,6 +10,7 @@ use lol_rl_protocol::ActionMasks;
 use tracing::{debug, error, info};
 
 use crate::algo::agent::RlAgent;
+use crate::engine::traits::InferenceTimingStats;
 use crate::policy::{ActorCritic, PolicyNetwork, ValueHead};
 
 /// 供推理引擎使用的策略快照（包含 Actor 策略网络与可选的 Critic 价值头）
@@ -17,17 +18,34 @@ use crate::policy::{ActorCritic, PolicyNetwork, ValueHead};
 pub struct PolicySnapshot {
     pub policy: PolicyNetwork,
     pub critic: Option<ValueHead>,
+    pub version: usize,
 }
 
 impl PolicySnapshot {
     pub fn new(policy: PolicyNetwork, critic: Option<ValueHead>) -> Self {
-        Self { policy, critic }
+        Self {
+            policy,
+            critic,
+            version: 0,
+        }
+    }
+
+    pub fn with_version(policy: PolicyNetwork, critic: Option<ValueHead>, version: usize) -> Self {
+        Self {
+            policy,
+            critic,
+            version,
+        }
     }
 
     pub fn from_agent(agent: &RlAgent, device: &Device) -> Result<Self> {
         let policy = agent.policy().to_device(device)?;
         let critic = agent.critic().map(|c| c.to_device(device)).transpose()?;
-        Ok(Self { policy, critic })
+        Ok(Self {
+            policy,
+            critic,
+            version: 0,
+        })
     }
 
     pub fn to_device(&self, device: &Device) -> Result<Self> {
@@ -37,7 +55,11 @@ impl PolicySnapshot {
             .as_ref()
             .map(|c| c.to_device(device))
             .transpose()?;
-        Ok(Self { policy, critic })
+        Ok(Self {
+            policy,
+            critic,
+            version: self.version,
+        })
     }
 
     pub fn sample_batch(
@@ -77,6 +99,7 @@ impl From<ActorCritic> for PolicySnapshot {
         Self {
             policy: ac.policy,
             critic: Some(ac.critic),
+            version: 0,
         }
     }
 }
@@ -96,12 +119,22 @@ pub struct InferenceResponse {
     pub encoded_action: Vec<f32>,
     pub log_prob: f32,
     pub value: f32,
+    pub policy_version: usize,
+}
+
+#[derive(Debug, Default)]
+pub struct InferenceMetrics {
+    pub total_requests: AtomicUsize,
+    pub total_batches: AtomicUsize,
+    pub forward_micros: AtomicU64,
+    pub wait_micros: AtomicU64,
 }
 
 pub struct InferenceServer {
     pub req_tx: Sender<InferenceRequest>,
     /// 更新策略槽位：(slot, 新权重)。slot 0 为当前主策略，slot>0 为历史对手。
     pub model_tx: Sender<(usize, PolicySnapshot)>,
+    pub metrics: Arc<InferenceMetrics>,
     is_running: Arc<AtomicBool>,
     handle: Option<JoinHandle<()>>,
 }
@@ -118,6 +151,8 @@ impl InferenceServer {
         let (model_tx, model_rx) = unbounded::<(usize, PolicySnapshot)>();
         let is_running = Arc::new(AtomicBool::new(true));
         let running_clone = is_running.clone();
+        let metrics = Arc::new(InferenceMetrics::default());
+        let metrics_clone = metrics.clone();
 
         let handle = thread::spawn(move || {
             let mut current_model = initial_model;
@@ -166,11 +201,22 @@ impl InferenceServer {
                         Err(crossbeam_channel::TryRecvError::Disconnected) => break,
                     }
                 }
+                let wait_time = start_batch_wait.elapsed();
 
                 let batch_len = batch_reqs.len();
                 if batch_len == 0 {
                     continue;
                 }
+
+                metrics_clone
+                    .wait_micros
+                    .fetch_add(wait_time.as_micros() as u64, Ordering::Relaxed);
+                metrics_clone
+                    .total_requests
+                    .fetch_add(batch_len, Ordering::Relaxed);
+                metrics_clone.total_batches.fetch_add(1, Ordering::Relaxed);
+
+                let forward_start = Instant::now();
 
                 // 4. 按策略槽位分组：同一槽位的一批请求用同一策略一次前向
                 let mut by_slot: HashMap<usize, Vec<usize>> = HashMap::new();
@@ -236,6 +282,7 @@ impl InferenceServer {
                                     encoded_action,
                                     log_prob,
                                     value,
+                                    policy_version: model.version,
                                 });
                             }
                         }
@@ -249,6 +296,11 @@ impl InferenceServer {
                 if any_error {
                     continue;
                 }
+
+                let forward_time = forward_start.elapsed();
+                metrics_clone
+                    .forward_micros
+                    .fetch_add(forward_time.as_micros() as u64, Ordering::Relaxed);
 
                 // 5. 回填响应
                 for (req, res) in taken.into_iter().zip(results.into_iter()) {
@@ -264,8 +316,29 @@ impl InferenceServer {
         Self {
             req_tx,
             model_tx,
+            metrics,
             is_running,
             handle: Some(handle),
+        }
+    }
+
+    /// 原子读取并重置推理服务器的单轮统计指标
+    pub fn take_timing_stats(&self) -> InferenceTimingStats {
+        let reqs = self.metrics.total_requests.swap(0, Ordering::Relaxed);
+        let batches = self.metrics.total_batches.swap(0, Ordering::Relaxed);
+        let fwd_us = self.metrics.forward_micros.swap(0, Ordering::Relaxed);
+        let wait_us = self.metrics.wait_micros.swap(0, Ordering::Relaxed);
+        let avg_batch_size = if batches > 0 {
+            reqs as f64 / batches as f64
+        } else {
+            0.0
+        };
+        InferenceTimingStats {
+            batch_count: batches,
+            request_count: reqs,
+            avg_batch_size,
+            forward_ms: fwd_us as f64 / 1000.0,
+            wait_ms: wait_us as f64 / 1000.0,
         }
     }
 

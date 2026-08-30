@@ -670,96 +670,46 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment + 'static>(
     let hidden_dim = task_config.hidden_dim.max(32);
     let device = crate::device::select_device().unwrap_or(candle_core::Device::Cpu);
     let backbone = task_config.backbone();
-    let (mut tuned, is_custom) = if task_config.parallel_envs > 0 {
-        let n = task_config.parallel_envs;
-        let total_samples = n * rollout_steps * E::num_agents().max(1);
-        let train_batch_size = (total_samples / 4).clamp(16, 256);
-        let infer_batch_size = n.next_power_of_two().min(128);
-        info!(
-            "🎯 为任务 {} (主干: {}) 应用自定义并发: 并发 Actors={}, 训练 MiniBatch={}, 推理 Batch={} (跳过 AutoTuner 探测，极速启动)",
-            task_id, backbone, n, train_batch_size, infer_batch_size
-        );
-        (
-            crate::autotune::TunedConfig {
-                num_parallel_envs: n,
-                infer_batch_size,
-                train_batch_size,
-                dynamic_batch_timeout_us: 200,
-                estimated_sps: 0.0,
-            },
-            true,
-        )
-    } else {
-        // 1. 自动调整模式：运行 AutoTuner 全面硬件算力探测与最优配置求解
-        let tuned = match AutoTuner::profile_with_algo_and_backbone::<E>(
-            state_dim,
-            hidden_dim,
-            &action_space,
-            &device,
-            task_config.algorithm,
-            backbone,
-        ) {
-            Ok(profile) => {
-                let res = AutoTuner::solve(&profile, rollout_steps, task_config.ppo_epochs.max(1));
-                info!(
-                    "🎯 [AutoTuner] 为任务 {} (算法: {}, 主干: {}) 自动求解最优配置: 并发 Actors={}, 推理 Batch={}, 训练 MiniBatch={}, 预估 SPS: {:.1}",
-                    task_id,
-                    task_config.algorithm,
-                    backbone,
-                    res.num_parallel_envs,
-                    res.infer_batch_size,
-                    res.train_batch_size,
-                    res.estimated_sps
-                );
-                res
-            }
-            Err(e) => {
-                let fallback_actors = num_cpus::get().clamp(2, 16);
-                tracing::warn!("AutoTuner 探测失败 ({e}), 降级使用配置: {fallback_actors}");
-                crate::autotune::TunedConfig {
-                    num_parallel_envs: fallback_actors,
-                    infer_batch_size: fallback_actors.min(32),
-                    train_batch_size: (fallback_actors * 16).clamp(32, 256),
-                    dynamic_batch_timeout_us: 200,
-                    estimated_sps: 2000.0,
-                }
-            }
-        };
-        (tuned, false)
+
+    // 动态求解自适应超参数 (依据用户指定、环境规模、硬件设备执行 Step 1 ~ Step 8 算法推导)
+    let dyn_hp = AutoTuner::compute_dynamic_hyperparameters(
+        task_config.parallel_envs,
+        rollout_steps,
+        E::num_agents(),
+        task_config.engine_mode,
+        if task_config.ppo_epochs != 8 {
+            Some(task_config.ppo_epochs)
+        } else {
+            None
+        },
+        task_config.lr as f64,
+        &device,
+    );
+
+    let num_parallel_envs = dyn_hp.num_parallel_envs;
+    let effective_ppo_epochs = dyn_hp.ppo_epochs;
+    let effective_lr = dyn_hp.adjusted_lr;
+
+    info!(
+        "🎯 为任务 {} (算法: {}, 主干: {:?}) 动态自适应推导配置:",
+        task_id, task_config.algorithm, backbone
+    );
+    info!("  ├─ 并发环境 Actors:  {}", dyn_hp.num_parallel_envs);
+    info!("  ├─ 每轮总样本量:     {} 步", dyn_hp.total_iteration_samples);
+    info!("  ├─ 训练 MiniBatch:   {} 样本 (每轮更新 {} 次)", dyn_hp.train_batch_size, dyn_hp.num_minibatches);
+    info!("  ├─ PPO Epochs:       {} 轮 (总反向传播 {} 次)", effective_ppo_epochs, dyn_hp.target_updates_r);
+    info!("  ├─ 动态缩放学习率:   {:.6} (基准: {:.6})", effective_lr, task_config.lr);
+    info!("  └─ 推理 Batch 大小:  {}", dyn_hp.infer_batch_size);
+
+    let tuned = crate::autotune::TunedConfig {
+        num_parallel_envs: dyn_hp.num_parallel_envs,
+        infer_batch_size: dyn_hp.infer_batch_size,
+        train_batch_size: dyn_hp.train_batch_size,
+        ppo_epochs: effective_ppo_epochs,
+        dynamic_batch_timeout_us: 200,
+        estimated_sps: 0.0,
+        adjusted_lr: effective_lr,
     };
-
-    let num_parallel_envs = tuned.num_parallel_envs;
-
-    // 1b. 真实校准（仅在自动调优模式下执行）：用实际生效配置跑 K 轮迭代实测 SPS
-    if !is_custom {
-        let mut calib_config = tuned.clone();
-        calib_config.num_parallel_envs = num_parallel_envs;
-        match AutoTuner::calibrate_with_algo_and_backbone::<E>(
-            state_dim,
-            hidden_dim,
-            &action_space,
-            &device,
-            rollout_steps,
-            task_config.ppo_epochs.max(1),
-            &calib_config,
-            task_config.algorithm,
-            backbone,
-        ) {
-            Ok(measured) => {
-                tuned.estimated_sps = measured;
-                info!(
-                    "🎯 [AutoTuner] 为任务 {} 真实校准完成，实测 SPS: {:.1}",
-                    task_id, measured
-                );
-            }
-            Err(e) => {
-                tracing::warn!(
-                    "AutoTuner 校准失败 ({e})，沿用组件级预估 SPS: {:.1}",
-                    tuned.estimated_sps
-                );
-            }
-        }
-    }
 
     {
         let mut t = tasks.blocking_lock();
@@ -770,10 +720,10 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment + 'static>(
 
     let rl_agent: RlAgent = if task_config.is_grpo() {
         let grpo_config = GRPOConfig {
-            lr: task_config.lr as f64,
+            lr: effective_lr,
             gamma: task_config.gamma,
             clip_eps: task_config.clip_eps,
-            grpo_epochs: task_config.ppo_epochs.max(1),
+            grpo_epochs: effective_ppo_epochs.max(1),
             group_size: task_config.grpo_group_size.unwrap_or(4),
             max_grad_norm: 0.5,
         };
@@ -793,12 +743,12 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment + 'static>(
         }
     } else {
         let ppo_config = PPOConfig {
-            lr: task_config.lr as f64,
+            lr: effective_lr,
             gamma: task_config.gamma,
             gae_lambda: task_config.gae_lambda,
             clip_eps: task_config.clip_eps,
             c1: 0.5,
-            ppo_epochs: task_config.ppo_epochs.max(1),
+            ppo_epochs: effective_ppo_epochs.max(1),
             clip_vloss: true,
             max_grad_norm: 0.5,
         };
@@ -819,17 +769,19 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment + 'static>(
     };
 
     let summary = rl_agent.parameter_summary();
+    let model_log = format!(
+        "🧠 [模型网络结构] 算法: {}, 引擎: {}, 主干: {:?}, 总可训练参数量: {} ({})",
+        if task_config.is_grpo() { "GRPO" } else { "PPO" },
+        task_config.engine_mode,
+        backbone,
+        summary.total_params,
+        crate::policy::format_param_k_m(summary.total_params)
+    );
+    info!("{}", model_log);
     let _ = event_tx.send(OutFrame::Log {
         task_id: task_id.clone(),
         level: "info".into(),
-        message: format!(
-            "🧠 [模型网络结构] 算法: {}, 引擎: {}, 主干: {:?}, 总可训练参数量: {} ({})",
-            if task_config.is_grpo() { "GRPO" } else { "PPO" },
-            task_config.engine_mode,
-            backbone,
-            summary.total_params,
-            crate::policy::format_param_k_m(summary.total_params)
-        ),
+        message: model_log,
     });
 
     // 2. 根据 engine_mode 构建面向统一 TrainingEngine Trait 的训练引擎
@@ -1087,35 +1039,157 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment + 'static>(
             );
         }
 
-        if iter % 5 == 0 || iter == 1 {
-            let curriculum_tag = if let Some(ref c) = curriculum_scheduler {
-                format!(" | [{}]", c.summary())
-            } else {
-                String::new()
-            };
-            let log_msg = format!(
-                "[{}] Iter {:2}/{} | SPS: {:6.1} | Reward: {:6.2} | CS: {:4.1} | P-Loss: {:7.4} | V-Loss: {:7.4}{}",
+        // 每一轮都输出性能遥测日志到控制台与 WebSocket
+        let timing = &outcome.timing;
+        let collect_pct =
+            (timing.collect_ms / timing.total_ms.max(0.001) * 100.0).clamp(0.0, 100.0);
+        let train_pct =
+            (timing.train_ms / timing.total_ms.max(0.001) * 100.0).clamp(0.0, 100.0);
+
+        let curriculum_tag = if let Some(ref c) = curriculum_scheduler {
+            format!(" | [{}]", c.summary())
+        } else {
+            String::new()
+        };
+        let log_msg = format!(
+            "[{}] Iter {:3}/{} | SPS: {:6.1} | 耗时: {:5.1}ms (采样: {:5.1}ms [{:2.0}%], 训练: {:5.1}ms [{:2.0}%]) | Reward: {:6.2} | CS: {:4.1} | P-Loss: {:7.4} | V-Loss: {:7.4}{}",
+            task_id,
+            iter,
+            total_iterations,
+            sps,
+            timing.total_ms,
+            timing.collect_ms,
+            collect_pct,
+            timing.train_ms,
+            train_pct,
+            ep_return,
+            ep_cs_avg,
+            stats.policy_loss,
+            stats.value_loss,
+            curriculum_tag,
+        );
+        info!("{}", log_msg);
+        {
+            let mut t = tasks.blocking_lock();
+            if let Some(task) = t.get_mut(&task_id) {
+                task.logs.push(format!("[info] {}", log_msg));
+            }
+        }
+        let _ = block_on_db(repo.insert_log(&task_id, "info", &log_msg));
+        let _ = event_tx.send(OutFrame::Log {
+            task_id: task_id.clone(),
+            level: "info".into(),
+            message: log_msg,
+        });
+
+        if let Some(ref infer) = timing.infer_stats {
+            if infer.batch_count > 0 {
+                let infer_msg = format!(
+                    "[{}] 🔍 [推理服务分析] 批次数: {}, 请求总数: {}, 均批大小: {:4.1} | 前向耗时: {:5.1}ms, 收集等待: {:5.1}ms",
+                    task_id,
+                    infer.batch_count,
+                    infer.request_count,
+                    infer.avg_batch_size,
+                    infer.forward_ms,
+                    infer.wait_ms
+                );
+                info!("{}", infer_msg);
+                {
+                    let mut t = tasks.blocking_lock();
+                    if let Some(task) = t.get_mut(&task_id) {
+                        task.logs.push(format!("[info] {}", infer_msg));
+                    }
+                }
+                let _ = block_on_db(repo.insert_log(&task_id, "info", &infer_msg));
+                let _ = event_tx.send(OutFrame::Log {
+                    task_id: task_id.clone(),
+                    level: "info".into(),
+                    message: infer_msg,
+                });
+            }
+        }
+
+        if let Some(ref q) = timing.queue_stats {
+            let q_pct = (q.queue_len as f64 / q.queue_capacity.max(1) as f64) * 100.0;
+            let queue_msg = format!(
+                "[{}] 📦 [队列监控] 环形缓冲水位: {}/{} ({:.0}%) | 丢弃率: {:.1}% | 平均策略版本差: {:.2} | 累计推入: {}, 累计丢弃: {}",
                 task_id,
-                iter,
-                total_iterations,
-                sps,
-                ep_return,
-                ep_cs_avg,
-                stats.policy_loss,
-                stats.value_loss,
-                curriculum_tag,
+                q.queue_len,
+                q.queue_capacity,
+                q_pct,
+                q.drop_ratio,
+                q.avg_policy_gap,
+                q.total_pushed,
+                q.total_dropped
             );
+            info!("{}", queue_msg);
             {
                 let mut t = tasks.blocking_lock();
                 if let Some(task) = t.get_mut(&task_id) {
-                    task.logs.push(format!("[info] {}", log_msg));
+                    task.logs.push(format!("[info] {}", queue_msg));
                 }
             }
-            let _ = block_on_db(repo.insert_log(&task_id, "info", &log_msg));
+            let _ = block_on_db(repo.insert_log(&task_id, "info", &queue_msg));
             let _ = event_tx.send(OutFrame::Log {
                 task_id: task_id.clone(),
                 level: "info".into(),
-                message: log_msg,
+                message: queue_msg,
+            });
+        }
+
+        if iter == 1 || iter % 5 == 0 {
+            let mut diag_msg = format!("[{}] ⏱️ [瓶颈诊断] ", task_id);
+            if let Some(ref q) = timing.queue_stats {
+                if q.drop_ratio > 20.0 {
+                    diag_msg.push_str(&format!(
+                        "⚠️ 轨迹丢弃率偏高 ({:.1}% > 20%)，表明采样生产速度远超训练消费速度。建议适当减少 sampler 数量或增大 MiniBatch 吞吐。",
+                        q.drop_ratio
+                    ));
+                } else if q.avg_policy_gap > 2.0 {
+                    diag_msg.push_str(&format!(
+                        "⚠️ 平均策略版本差偏大 (Δv = {:.2} > 2.0)，存在策略过期风险。建议调大 MiniBatch 或降低 ppo_epochs 以加速训练。",
+                        q.avg_policy_gap
+                    ));
+                }
+            }
+
+            if collect_pct >= 70.0 {
+                diag_msg.push_str(&format!(
+                    "当前瓶颈在【采样/推理阶段】({:.0}%)。耗时主要消耗在多 Actor 线程通信与推理上。",
+                    collect_pct
+                ));
+                if let Some(ref infer) = timing.infer_stats {
+                    if infer.avg_batch_size < 4.0 {
+                        diag_msg.push_str(&format!(
+                            " (平均推理批大小过小: {:.1}，Actor 请求稀疏触发超时等待。建议增大 --parallel-envs 或切换为 --engine sync 同步模式)",
+                            infer.avg_batch_size
+                        ));
+                    }
+                }
+            } else if train_pct >= 70.0 {
+                diag_msg.push_str(&format!(
+                    "当前瓶颈在【梯度训练阶段】({:.0}%)。当前 ppo_epochs={}，反向传播占主导。建议适当调低 --ppo-epochs 或增大 mini-batch。",
+                    train_pct,
+                    effective_ppo_epochs
+                ));
+            } else {
+                diag_msg.push_str(&format!(
+                    "采样与训练耗时均衡 (采样 {:.0}%, 训练 {:.0}%)。",
+                    collect_pct, train_pct
+                ));
+            }
+            info!("{}", diag_msg);
+            {
+                let mut t = tasks.blocking_lock();
+                if let Some(task) = t.get_mut(&task_id) {
+                    task.logs.push(format!("[info] {}", diag_msg));
+                }
+            }
+            let _ = block_on_db(repo.insert_log(&task_id, "info", &diag_msg));
+            let _ = event_tx.send(OutFrame::Log {
+                task_id: task_id.clone(),
+                level: "info".into(),
+                message: diag_msg,
             });
         }
     }

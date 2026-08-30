@@ -159,6 +159,7 @@ impl RewardFormulaSpec {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::action::ActionMaskRule;
     use crate::obs::ObsContext;
 
     #[test]
@@ -330,8 +331,17 @@ mod tests {
         "#;
         let action = ActionSchema::from_dsl(act_src).expect("Action 应成功解析掩码规则");
         assert_eq!(action.mask_rules.len(), 5);
-        assert_eq!(action.mask_rules[0].branch_label, "Attack");
-        assert_eq!(action.mask_rules[0].disabled_branch, 2);
+        match &action.mask_rules[0] {
+            ActionMaskRule::Global {
+                branch_label,
+                disabled_branch,
+                ..
+            } => {
+                assert_eq!(branch_label, "Attack");
+                assert_eq!(*disabled_branch, 2);
+            }
+            _ => panic!("Expected Global mask rule"),
+        }
 
         let mut ctx = ObsContext::new();
         ctx.set_var("distance", 30.0); // > 22.0 -> Attack disabled
@@ -342,5 +352,69 @@ mod tests {
 
         let mask = action.eval_flat_mask(&ctx);
         assert_eq!(mask, vec![true, true, false, true, false, true, false]);
+    }
+
+    #[test]
+    fn test_dsl_conditional_target_masks() {
+        let act_src = r#"
+        action CombatAction {
+            continuous offset: 2;
+            unit_target target: visible_units[3 -> 16];
+            category action_type: 4 {
+                0: "NoOp",
+                1: "Move",
+                2: "Attack",
+                3: "CastQ",
+            }
+
+            mask {
+                for u in visible_units {
+                    if u.unit_type <= 0.0 { disable target; }
+                }
+
+                if distance > 200.0 { disable Attack; }
+                if q_ready < 0.5    { disable CastQ; }
+
+                for u in visible_units {
+                    if u.is_enemy <= 0.5 {
+                        disable [Attack, CastQ];
+                    }
+                }
+            }
+        }
+        "#;
+        let action = ActionSchema::from_dsl(act_src).expect("CombatAction 应成功解析掩码规则");
+        assert_eq!(action.mask_rules.len(), 5); // 1 EntitySlot + 2 Global + 2 ConditionalTarget (Attack, CastQ)
+
+        let mut ctx = ObsContext::new();
+        ctx.set_var("distance", 150.0);
+        ctx.set_var("q_ready", 1.0);
+        ctx.set_repeated(
+            "visible_units",
+            vec![
+                ObsContext::new()
+                    .with_var("unit_type", 1.0)
+                    .with_var("is_enemy", 1.0),
+                ObsContext::new()
+                    .with_var("unit_type", 2.0)
+                    .with_var("is_enemy", 0.0),
+            ],
+        );
+
+        let action_masks = action.eval_action_masks(&ctx);
+        assert_eq!(action_masks.branch_masks.len(), 3);
+        assert!(action_masks.branch_masks[0].is_none()); // continuous offset
+
+        let target_mask = action_masks.branch_masks[1].as_ref().unwrap();
+        assert_eq!(target_mask, &vec![true, true, false]); // slot 0 (enemy), slot 1 (ally), slot 2 (empty)
+
+        let base_mask = action_masks.branch_masks[2].as_ref().unwrap();
+        assert_eq!(base_mask, &vec![true, true, true, true]); // NoOp, Move, Attack, CastQ all enabled
+
+        let cond_masks = action_masks.conditional_target_masks.as_ref().unwrap();
+        assert_eq!(cond_masks.len(), 3);
+        assert_eq!(cond_masks[0], vec![true, true, true, true]); // slot 0 (enemy): all enabled
+        assert_eq!(cond_masks[1], vec![true, true, false, false]); // slot 1 (ally): Attack & CastQ disabled
+        assert_eq!(cond_masks[2], vec![true, true, false, false]); // slot 2 (empty): Attack & CastQ disabled
     }
 }

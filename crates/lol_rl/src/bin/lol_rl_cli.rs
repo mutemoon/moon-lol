@@ -88,6 +88,10 @@ pub struct Cli {
     /// 直接传入完整的 TaskConfigPayload JSON 字符串 (可选，提供时覆盖其他所有参数)
     #[arg(long)]
     pub config_json: Option<String>,
+
+    /// 提交任务后立即退出（不实时跟随日志与指标）
+    #[arg(long)]
+    pub detach: bool,
 }
 
 #[tokio::main]
@@ -258,8 +262,74 @@ async fn main() {
         config.lr, config.gamma, config.gae_lambda, config.clip_eps
     );
     println!("--------------------------------------------------------------------------------");
-    println!("💡 Client GUI 客户端已实时连接并在图表详情页同步展示训练遥测与指标。");
+    println!("💡 正在实时同步训练遥测与性能分析日志 (按 Ctrl+C 可断开监听，后台任务不受影响)...");
     println!("================================================================================\n");
+
+    if cli.detach {
+        let _ = ws_writer.close().await;
+        return;
+    }
+
+    // 持续监听来自服务端的日志与指标
+    let active_task_id = created_task_id.unwrap_or_default();
+    loop {
+        tokio::select! {
+            _ = tokio::signal::ctrl_c() => {
+                println!("\n🛑 [lol_rl_cli] 已断开控制台监听（训练任务正在服务端后台持续运行）。");
+                break;
+            }
+            msg_opt = ws_reader.next() => {
+                let Some(msg_res) = msg_opt else {
+                    println!("⚠️ [lol_rl_cli] 与服务端的数据流已结束。");
+                    break;
+                };
+
+                match msg_res {
+                    Ok(Message::Text(text)) => {
+                        if let Ok(out_frame) = serde_json::from_str::<OutFrame>(&text) {
+                            match out_frame {
+                                OutFrame::Log { task_id, message, .. } => {
+                                    if active_task_id.is_empty() || task_id == active_task_id {
+                                        println!("📝 {message}");
+                                    }
+                                }
+                                OutFrame::Metrics { task_id, step, ep_return, fps, total_loss, policy_loss, value_loss, .. } => {
+                                    if active_task_id.is_empty() || task_id == active_task_id {
+                                        println!(
+                                            "📊 [Step {:>7}] FPS: {:>5} | Avg Return: {:>6.2} | Total Loss: {:>7.4} (P: {:>6.4}, V: {:>6.4})",
+                                            step, fps, ep_return, total_loss, policy_loss, value_loss
+                                        );
+                                    }
+                                }
+                                OutFrame::Status { task_id, status } => {
+                                    if active_task_id.is_empty() || task_id == active_task_id {
+                                        println!("📢 [状态变更] 任务 {task_id}: {status}");
+                                        if status == "finished" {
+                                            println!("🎉 [lol_rl] 训练任务已成功收敛完成！");
+                                            break;
+                                        } else if status == "stopped" || status == "interrupted" {
+                                            println!("🛑 [lol_rl] 训练任务已停止 ({status})。");
+                                            break;
+                                        }
+                                    }
+                                }
+                                _ => {}
+                            }
+                        }
+                    }
+                    Ok(Message::Close(_)) => {
+                        println!("⚠️ [lol_rl_cli] 服务端关闭了连接");
+                        break;
+                    }
+                    Err(e) => {
+                        eprintln!("⚠️ [lol_rl_cli] 读取异常: {e}");
+                        break;
+                    }
+                    _ => {}
+                }
+            }
+        }
+    }
 
     let _ = ws_writer.close().await;
 }

@@ -785,6 +785,10 @@ fn expr_to_code(expr: &ObsExpr) -> String {
         ),
         ObsExpr::Gt(l, r) => format!("({} > {})", expr_to_code(l), expr_to_code(r)),
         ObsExpr::Lt(l, r) => format!("({} < {})", expr_to_code(l), expr_to_code(r)),
+        ObsExpr::Gte(l, r) => format!("({} >= {})", expr_to_code(l), expr_to_code(r)),
+        ObsExpr::Lte(l, r) => format!("({} <= {})", expr_to_code(l), expr_to_code(r)),
+        ObsExpr::Eq(l, r) => format!("({} == {})", expr_to_code(l), expr_to_code(r)),
+        ObsExpr::Ne(l, r) => format!("({} != {})", expr_to_code(l), expr_to_code(r)),
     }
 }
 
@@ -1180,6 +1184,40 @@ fn render_action_schema_card(
 }
 
 fn render_mask_rule_item(rule: &ActionMaskRule, cx: &Context<AppSidebar>) -> AnyElement {
+    let (tag_label, cond_text, disable_text) = match rule {
+        ActionMaskRule::Global {
+            condition,
+            branch_label,
+            ..
+        } => (
+            "全局屏蔽",
+            format!("if {}", expr_to_code(condition)),
+            format!("disable {branch_label}"),
+        ),
+        ActionMaskRule::EntitySlot {
+            entity_name,
+            condition,
+            target_head,
+        } => (
+            "实体槽位",
+            format!("for in {entity_name}: if {}", expr_to_code(condition)),
+            format!(
+                "disable {}",
+                target_head.as_deref().unwrap_or("target")
+            ),
+        ),
+        ActionMaskRule::ConditionalTarget {
+            entity_name,
+            condition,
+            branch_label,
+            ..
+        } => (
+            "目标条件",
+            format!("for in {entity_name}: if {}", expr_to_code(condition)),
+            format!("disable {branch_label}"),
+        ),
+    };
+
     h_flex()
         .justify_between()
         .items_center()
@@ -1198,19 +1236,19 @@ fn render_mask_rule_item(rule: &ActionMaskRule, cx: &Context<AppSidebar>) -> Any
                         .rounded_sm()
                         .bg(cx.theme().danger.opacity(0.15))
                         .text_color(cx.theme().danger)
-                        .child("屏蔽条件"),
+                        .child(tag_label),
                 )
                 .child(
                     div()
                         .text_color(cx.theme().foreground)
-                        .child(format!("if {}", expr_to_code(&rule.condition))),
+                        .child(cond_text),
                 ),
         )
         .child(
             div()
                 .font_semibold()
                 .text_color(cx.theme().danger)
-                .child(format!("disable {}", rule.branch_label)),
+                .child(disable_text),
         )
         .into_any_element()
 }

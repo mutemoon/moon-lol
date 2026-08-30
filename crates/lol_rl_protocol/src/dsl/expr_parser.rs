@@ -100,13 +100,26 @@ fn parse_obs_arithmetic<'i>(input: &mut &'i str) -> PResult<ObsExpr, ContextErro
     Ok(left)
 }
 
-/// 解析比较运算: a > b, a < b
+/// 解析比较运算: a <= b, a >= b, a == b, a != b, a > b, a < b
 fn parse_obs_comparison<'i>(input: &mut &'i str) -> PResult<ObsExpr, ContextError> {
     let left = parse_obs_arithmetic.parse_next(input)?;
 
-    if let Ok(op) = alt((symbol(">"), symbol("<"))).parse_next(input) {
+    if let Ok(op) = alt((
+        symbol("<="),
+        symbol(">="),
+        symbol("=="),
+        symbol("!="),
+        symbol(">"),
+        symbol("<"),
+    ))
+    .parse_next(input)
+    {
         let right = parse_obs_arithmetic.parse_next(input)?;
         match op {
+            "<=" => Ok(ObsExpr::lte(left, right)),
+            ">=" => Ok(ObsExpr::gte(left, right)),
+            "==" => Ok(ObsExpr::eq(left, right)),
+            "!=" => Ok(ObsExpr::ne(left, right)),
             ">" => Ok(ObsExpr::gt(left, right)),
             "<" => Ok(ObsExpr::lt(left, right)),
             _ => unreachable!(),

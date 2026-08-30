@@ -491,8 +491,7 @@ pub fn render_output_dir(workspace_root: &PathBuf, champion: &str) -> PathBuf {
 }
 
 pub fn should_run_render_tests() -> bool {
-    // std::env::var("MOON_LOL_RUN_RENDER_TESTS").as_deref() == Ok("1")
-    true
+    std::env::var("MOON_LOL_RUN_RENDER_TESTS").as_deref() == Ok("1")
 }
 
 pub fn render_test_guard() -> bool {

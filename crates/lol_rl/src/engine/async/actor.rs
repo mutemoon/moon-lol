@@ -9,8 +9,8 @@ use lol_rl_protocol::ActionMasks;
 use tracing::{error, info};
 
 use super::inference::{InferenceRequest, InferenceResponse};
+use super::queue::TrajectoryRingBuffer;
 use crate::engine::evaluator::PolicyEvaluator;
-use crate::engine::trajectory::WorkerTrajectory;
 use crate::engine::worker::RolloutWorker;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -27,6 +27,7 @@ pub struct ChannelPolicyEvaluator {
     pub infer_tx: Sender<InferenceRequest>,
     pub reply_tx: Sender<InferenceResponse>,
     pub reply_rx: Receiver<InferenceResponse>,
+    pub last_policy_version: usize,
 }
 
 impl PolicyEvaluator for ChannelPolicyEvaluator {
@@ -52,9 +53,61 @@ impl PolicyEvaluator for ChannelPolicyEvaluator {
         }
 
         match self.reply_rx.recv_timeout(Duration::from_secs(5)) {
-            Ok(resp) => Ok((resp.encoded_action, resp.log_prob, resp.value)),
+            Ok(resp) => {
+                if policy_slot == 0 {
+                    self.last_policy_version = resp.policy_version;
+                }
+                Ok((resp.encoded_action, resp.log_prob, resp.value))
+            }
             Err(e) => candle_core::bail!("Inference response timeout: {e}"),
         }
+    }
+
+    fn evaluate_batch(
+        &mut self,
+        policy_slot: usize,
+        states: &[Vec<f32>],
+        action_masks: &[Option<Vec<bool>>],
+        structured_masks: &[Option<ActionMasks>],
+    ) -> candle_core::Result<Vec<(Vec<f32>, f32, f32)>> {
+        let count = states.len();
+        if count == 0 {
+            return Ok(Vec::new());
+        }
+
+        // 并发发送当前环境内所有 Agent 的单帧推理请求，使 InferenceServer 能聚合更大的 Batch
+        for i in 0..count {
+            let req = InferenceRequest {
+                worker_id: self.worker_id,
+                obs_vec: states[i].clone(),
+                action_mask: action_masks.get(i).cloned().flatten(),
+                structured_mask: structured_masks.get(i).cloned().flatten(),
+                policy_slot,
+                reply_tx: self.reply_tx.clone(),
+            };
+            if self.infer_tx.send(req).is_err() {
+                candle_core::bail!("Inference server channel disconnected");
+            }
+        }
+
+        let mut results = Vec::with_capacity(count);
+        for _ in 0..count {
+            match self.reply_rx.recv_timeout(Duration::from_secs(5)) {
+                Ok(resp) => {
+                    if policy_slot == 0 {
+                        self.last_policy_version = resp.policy_version;
+                    }
+                    results.push((resp.encoded_action, resp.log_prob, resp.value));
+                }
+                Err(e) => candle_core::bail!("Inference response timeout: {e}"),
+            }
+        }
+
+        Ok(results)
+    }
+
+    fn current_policy_version(&self) -> usize {
+        self.last_policy_version
     }
 }
 
@@ -75,7 +128,7 @@ impl ActorPool {
     pub fn spawn<E: RlEnvironment + 'static>(
         num_actors: usize,
         infer_tx: Sender<InferenceRequest>,
-        traj_tx: Sender<WorkerTrajectory<E::Obs>>,
+        traj_queue: Arc<TrajectoryRingBuffer<E::Obs>>,
         horizon: usize,
         dispatch: Vec<(usize, usize)>,
     ) -> Self {
@@ -85,14 +138,14 @@ impl ActorPool {
         let mut handles = Vec::with_capacity(num_actors);
 
         info!(
-            "🎮 [ActorPool] 启动 {} 个并行无头环境 Actor 线程...",
+            "🎮 [ActorPool] 启动 {} 个并行无头环境 Actor 线程 (有界环形缓冲队列)...",
             num_actors
         );
 
         for worker_id in 0..num_actors {
             let running = is_running.clone();
             let infer_tx = infer_tx.clone();
-            let traj_tx = traj_tx.clone();
+            let traj_queue = traj_queue.clone();
             let dispatch = dispatch_shared.clone();
             let curriculum = curriculum_shared.clone();
 
@@ -104,6 +157,7 @@ impl ActorPool {
                     infer_tx,
                     reply_tx,
                     reply_rx,
+                    last_policy_version: 0,
                 };
                 let mut applied_curriculum: Option<CurriculumParams> = None;
 
@@ -135,7 +189,7 @@ impl ActorPool {
                         main_agent_idx,
                     ) {
                         Ok(traj) => {
-                            if traj_tx.send(traj).is_err() {
+                            if !traj_queue.push(traj) {
                                 break;
                             }
                         }

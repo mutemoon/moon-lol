@@ -50,6 +50,10 @@ pub enum ObsExpr {
     },
     Gt(Box<ObsExpr>, Box<ObsExpr>),
     Lt(Box<ObsExpr>, Box<ObsExpr>),
+    Gte(Box<ObsExpr>, Box<ObsExpr>),
+    Lte(Box<ObsExpr>, Box<ObsExpr>),
+    Eq(Box<ObsExpr>, Box<ObsExpr>),
+    Ne(Box<ObsExpr>, Box<ObsExpr>),
     Max(Box<ObsExpr>, Box<ObsExpr>),
     Min(Box<ObsExpr>, Box<ObsExpr>),
 }
@@ -95,6 +99,22 @@ impl ObsExpr {
         Self::Lt(Box::new(a), Box::new(b))
     }
 
+    pub fn gte(a: Self, b: Self) -> Self {
+        Self::Gte(Box::new(a), Box::new(b))
+    }
+
+    pub fn lte(a: Self, b: Self) -> Self {
+        Self::Lte(Box::new(a), Box::new(b))
+    }
+
+    pub fn eq(a: Self, b: Self) -> Self {
+        Self::Eq(Box::new(a), Box::new(b))
+    }
+
+    pub fn ne(a: Self, b: Self) -> Self {
+        Self::Ne(Box::new(a), Box::new(b))
+    }
+
     /// 在给定的环境变量上下文中对表达式求值
     pub fn eval(&self, vars: &HashMap<String, f32>) -> f32 {
         match self {
@@ -132,6 +152,34 @@ impl ObsExpr {
             }
             Self::Lt(a, b) => {
                 if a.eval(vars) < b.eval(vars) {
+                    1.0
+                } else {
+                    0.0
+                }
+            }
+            Self::Gte(a, b) => {
+                if a.eval(vars) >= b.eval(vars) {
+                    1.0
+                } else {
+                    0.0
+                }
+            }
+            Self::Lte(a, b) => {
+                if a.eval(vars) <= b.eval(vars) {
+                    1.0
+                } else {
+                    0.0
+                }
+            }
+            Self::Eq(a, b) => {
+                if (a.eval(vars) - b.eval(vars)).abs() < 1e-6 {
+                    1.0
+                } else {
+                    0.0
+                }
+            }
+            Self::Ne(a, b) => {
+                if (a.eval(vars) - b.eval(vars)).abs() >= 1e-6 {
                     1.0
                 } else {
                     0.0

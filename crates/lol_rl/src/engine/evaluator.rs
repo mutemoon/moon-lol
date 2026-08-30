@@ -44,6 +44,11 @@ pub trait PolicyEvaluator {
         let (_, _, val) = self.evaluate_step(policy_slot, state_vec, None, None, &mut dummy_mamba)?;
         Ok(val)
     }
+
+    /// 获取当前评估器关联的主策略版本号
+    fn current_policy_version(&self) -> usize {
+        0
+    }
 }
 
 /// 本地直接前向评估器（同步模式使用，直接在当前线程使用持有策略与价值网络）

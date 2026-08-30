@@ -3,16 +3,16 @@ use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::Instant;
 
-use crossbeam_channel::{Receiver, Sender};
+use crossbeam_channel::Sender;
 use lol_rl_protocol::{ObsFeaturePayload, RewardItem};
 use tracing::info;
 
 use super::inference::PolicySnapshot;
+use super::queue::TrajectoryRingBuffer;
 use crate::algo::agent::RlAgent;
 use crate::algo::buffer::RolloutBuffer;
 use crate::algo::ppo::PPOStats;
 use crate::engine::traits::StepOutcome;
-use crate::engine::trajectory::WorkerTrajectory;
 
 #[derive(Debug, Clone)]
 pub struct LearnerMetrics {
@@ -34,10 +34,12 @@ pub struct AsyncLearner<O = ()> {
     pub agent: RlAgent,
     pub train_batch_size: usize,
     pub target_rollout_steps: usize,
-    pub traj_rx: Receiver<WorkerTrajectory<O>>,
+    pub traj_queue: Arc<TrajectoryRingBuffer<O>>,
     /// 模型推送通道：`(slot, 权重)`，slot 0 为主策略，slot>0 为历史对手。
     pub model_update_tx: Sender<(usize, PolicySnapshot)>,
     pub total_steps: usize,
+    pub current_version: usize,
+    pub max_staleness: usize,
     recent_ep_returns: VecDeque<f32>,
     recent_ep_steps: VecDeque<usize>,
     initial_lr: f64,
@@ -48,7 +50,7 @@ impl<O: Send + 'static> AsyncLearner<O> {
         agent: impl Into<RlAgent>,
         train_batch_size: usize,
         target_rollout_steps: usize,
-        traj_rx: Receiver<WorkerTrajectory<O>>,
+        traj_queue: Arc<TrajectoryRingBuffer<O>>,
         model_update_tx: Sender<(usize, PolicySnapshot)>,
     ) -> Self {
         let agent: RlAgent = agent.into();
@@ -61,16 +63,18 @@ impl<O: Send + 'static> AsyncLearner<O> {
             agent,
             train_batch_size,
             target_rollout_steps,
-            traj_rx,
+            traj_queue,
             model_update_tx,
             total_steps: 0,
+            current_version: 0,
+            max_staleness: 2, // 纯 PPO 建议容忍策略版本差 <= 2
             recent_ep_returns: VecDeque::with_capacity(50),
             recent_ep_steps: VecDeque::with_capacity(50),
             initial_lr,
         }
     }
 
-    /// 执行一次训练迭代（从各 Actor 持续拉取完整轨迹 WorkerTrajectory 满批即训）
+    /// 执行一次训练迭代（从有界环形队列中消费轨迹，过滤淘汰落后版本）
     pub fn step_once(
         &mut self,
         _iter: usize,
@@ -87,51 +91,50 @@ impl<O: Send + 'static> AsyncLearner<O> {
         let mut last_reward_variables: HashMap<String, f32> = HashMap::new();
         let mut last_obs: Option<O> = None;
 
-        let mut num_collected = 0usize;
-        while num_collected < self.target_rollout_steps {
-            match self.traj_rx.recv() {
-                Ok(traj) => {
-                    if traj.buffers.is_empty() {
-                        continue;
-                    }
-                    for ret in traj.ep_returns {
-                        if self.recent_ep_returns.len() >= 50 {
-                            self.recent_ep_returns.pop_front();
-                        }
-                        self.recent_ep_returns.push_back(ret);
-                        ep_returns_this_iter.push(ret);
-                    }
-                    for cs in traj.ep_cs {
-                        ep_cs_this_iter.push(cs);
-                    }
-                    for s in traj.completed_steps {
-                        if self.recent_ep_steps.len() >= 50 {
-                            self.recent_ep_steps.pop_front();
-                        }
-                        self.recent_ep_steps.push_back(s);
-                        ep_steps_this_iter.push(s);
-                    }
-                    for (k, v) in traj.reward_breakdown {
-                        *iter_reward_breakdown.entry(k).or_insert(0.0) += v;
-                    }
-                    if !traj.last_reward_variables.is_empty() {
-                        last_reward_variables = traj.last_reward_variables;
-                    }
-                    if last_obs.is_none() {
-                        last_obs = traj.last_obs;
-                    }
-                    for b in traj.buffers {
-                        num_collected += b.len();
-                        collected_buffers.push(b);
-                    }
-                    collected_last_values.extend(traj.last_values);
+        let (trajs, num_collected, queue_stats) = self.traj_queue.recv_rollout_batch(
+            self.target_rollout_steps,
+            self.current_version,
+            self.max_staleness,
+            std::time::Duration::from_secs(30),
+        )?;
+
+        for traj in trajs {
+            for ret in traj.ep_returns {
+                if self.recent_ep_returns.len() >= 50 {
+                    self.recent_ep_returns.pop_front();
                 }
-                Err(_) => break,
+                self.recent_ep_returns.push_back(ret);
+                ep_returns_this_iter.push(ret);
             }
+            for cs in traj.ep_cs {
+                ep_cs_this_iter.push(cs);
+            }
+            for s in traj.completed_steps {
+                if self.recent_ep_steps.len() >= 50 {
+                    self.recent_ep_steps.pop_front();
+                }
+                self.recent_ep_steps.push_back(s);
+                ep_steps_this_iter.push(s);
+            }
+            for (k, v) in traj.reward_breakdown {
+                *iter_reward_breakdown.entry(k).or_insert(0.0) += v;
+            }
+            if !traj.last_reward_variables.is_empty() {
+                last_reward_variables = traj.last_reward_variables;
+            }
+            if last_obs.is_none() {
+                last_obs = traj.last_obs;
+            }
+            for b in traj.buffers {
+                collected_buffers.push(b);
+            }
+            collected_last_values.extend(traj.last_values);
         }
 
+        let collect_elapsed = iter_start.elapsed();
+
         if collected_buffers.is_empty() {
-            anyhow::bail!("异步采样通道已断开，无样本被收集");
+            anyhow::bail!("异步环形缓冲队列无可用样本（可能全部严重过期或超时）");
         }
         self.total_steps += num_collected;
 
@@ -147,23 +150,38 @@ impl<O: Send + 'static> AsyncLearner<O> {
         let mean_value = val_sum / (val_cnt as f32).max(1.0);
 
         // 3. GPU/CPU PPO/GRPO Mini-Batch 梯度更新
+        let train_start = Instant::now();
         let stats = self
             .agent
             .update_multi_buffer(&collected_buffers, &collected_last_values, train_batch_size)?;
+        let train_elapsed = train_start.elapsed();
 
-        // 4. 将最新模型分发给推理引擎（slot 0 = 当前主策略）
-        let snapshot =
-            PolicySnapshot::new(self.agent.policy().clone(), self.agent.critic().cloned());
+        // 4. 更新主策略版本号，并将最新模型与版本号推送给推理引擎（slot 0 = 当前主策略）
+        self.current_version += 1;
+        let snapshot = PolicySnapshot::with_version(
+            self.agent.policy().clone(),
+            self.agent.critic().cloned(),
+            self.current_version,
+        );
         let _ = self.model_update_tx.send((0, snapshot));
 
         let elapsed_sec = iter_start.elapsed().as_secs_f64();
         let sps = (num_collected as f64) / elapsed_sec.max(0.0001);
+
+        let timing = crate::engine::traits::StepTiming {
+            collect_ms: collect_elapsed.as_secs_f64() * 1000.0,
+            train_ms: train_elapsed.as_secs_f64() * 1000.0,
+            total_ms: elapsed_sec * 1000.0,
+            infer_stats: None,
+            queue_stats: Some(queue_stats),
+        };
 
         Ok(StepOutcome {
             num_samples: num_collected,
             sps,
             stats,
             mean_value,
+            timing,
             ep_returns: ep_returns_this_iter,
             ep_cs: ep_cs_this_iter,
             ep_steps: ep_steps_this_iter,
