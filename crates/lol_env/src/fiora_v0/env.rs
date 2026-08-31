@@ -1,81 +1,11 @@
 use bevy::prelude::*;
-use lol_core::action::{Action, CommandAction};
 use lol_rl_protocol::{ActionSpace, ObsFeaturePayload, ObsSchema, RewardFormulaSpec};
 
+use super::action::{FIORA_V0_ACTION_SCHEMA, FioraVsRivenAction};
+use super::step::{dispatch_action_world, step_world};
 use crate::base_env::{LolBaseEnv, fiora_champion_spec, riven_champion_spec};
-pub use crate::fiora_riven_common::{
-    ATTACK_MASK_DISTANCE, AttackEventTracker, FIORA_COMMON_OBS_SCHEMA,
-    FioraVsRivenObs, VitalBreakTracker, compute_step_reward, get_obs_from_world,
-    setup_skill_levels_world, unpause_virtual_time,
-};
+use crate::fiora_riven_common::{FioraVsRivenObs, get_obs_from_world};
 use crate::traits::{EnvConfig, EnvMeta, RenderMode, RlEnvironment, StepResult, VisualEnvironment};
-
-pub static FIORA_V0_SPEC: std::sync::LazyLock<&'static lol_rl_protocol::EnvDslSpec> =
-    std::sync::LazyLock::new(|| &lol_rl_protocol::SPEC_FIORA_V0);
-
-pub static FIORA_V0_OBS_SCHEMA: std::sync::LazyLock<ObsSchema> = std::sync::LazyLock::new(|| {
-    FIORA_V0_SPEC
-        .obs_schema
-        .clone()
-        .expect("SPEC_FIORA_V0 缺少 obs_schema")
-});
-
-pub static FIORA_V0_ACTION_SCHEMA: std::sync::LazyLock<lol_rl_protocol::ActionSchema> =
-    std::sync::LazyLock::new(|| {
-        FIORA_V0_SPEC
-            .action_schema
-            .clone()
-            .expect("SPEC_FIORA_V0 缺少 action_schema")
-    });
-
-// ── 动作空间 ────────────────────────────────────────────────────────────────
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum FioraVsRivenAction {
-    MoveEast50 = 0,
-    MoveWest50 = 1,
-    MoveNorth50 = 2,
-    MoveSouth50 = 3,
-    AttackRiven = 4,
-}
-
-impl FioraVsRivenAction {
-    #[allow(non_upper_case_globals)]
-    pub const TeleportEast50: Self = Self::MoveEast50;
-    #[allow(non_upper_case_globals)]
-    pub const TeleportWest50: Self = Self::MoveWest50;
-    #[allow(non_upper_case_globals)]
-    pub const TeleportNorth50: Self = Self::MoveNorth50;
-    #[allow(non_upper_case_globals)]
-    pub const TeleportSouth50: Self = Self::MoveSouth50;
-
-    pub fn from_index(index: usize) -> Self {
-        match index {
-            0 => Self::MoveEast50,
-            1 => Self::MoveWest50,
-            2 => Self::MoveNorth50,
-            3 => Self::MoveSouth50,
-            4 => Self::AttackRiven,
-            _ => Self::AttackRiven,
-        }
-    }
-
-    pub fn to_index(self) -> usize {
-        self as usize
-    }
-
-    pub fn name(self) -> &'static str {
-        match self {
-            Self::MoveEast50 => "东移50u",
-            Self::MoveWest50 => "西移50u",
-            Self::MoveNorth50 => "北移50u",
-            Self::MoveSouth50 => "南移50u",
-            Self::AttackRiven => "攻击瑞雯",
-        }
-    }
-}
-
-// ── 环境主体 ────────────────────────────────────────────────────────────────
 
 pub struct FioraVsRivenEnv {
     pub base: LolBaseEnv,
@@ -199,8 +129,6 @@ impl FioraVsRivenEnv {
     }
 }
 
-// ── RlEnvironment Trait 实现 ────────────────────────────────────────────────
-
 impl RlEnvironment for FioraVsRivenEnv {
     type Action = FioraVsRivenAction;
     type Obs = FioraVsRivenObs;
@@ -234,7 +162,7 @@ impl RlEnvironment for FioraVsRivenEnv {
     }
 
     fn obs_schema() -> Option<ObsSchema> {
-        Some(FIORA_V0_OBS_SCHEMA.clone())
+        Some(super::FIORA_V0_OBS_SCHEMA.clone())
     }
 
     fn action_schema() -> Option<lol_rl_protocol::ActionSchema> {
@@ -303,11 +231,9 @@ impl RlEnvironment for FioraVsRivenEnv {
     }
 
     fn reward_formula_spec() -> Option<RewardFormulaSpec> {
-        FIORA_V0_SPEC.reward_formula.clone()
+        super::FIORA_V0_SPEC.reward_formula.clone()
     }
 }
-
-// ── VisualEnvironment Trait 实现 ────────────────────────────────────────────
 
 impl VisualEnvironment for FioraVsRivenEnv {
     fn take_app(&mut self) -> App {
@@ -354,142 +280,5 @@ impl VisualEnvironment for FioraVsRivenEnv {
             self.base.step_count,
             self.base.max_steps,
         )]
-    }
-}
-
-// ── 自由函数 ────────────────────────────────────────────────────────────────
-
-pub fn dispatch_action_world(
-    world: &mut World,
-    fiora: Entity,
-    riven: Entity,
-    action: FioraVsRivenAction,
-) {
-    match action {
-        FioraVsRivenAction::MoveEast50
-        | FioraVsRivenAction::MoveWest50
-        | FioraVsRivenAction::MoveNorth50
-        | FioraVsRivenAction::MoveSouth50 => {
-            let rpos = world
-                .get::<Transform>(riven)
-                .map(|t| t.translation)
-                .unwrap_or_default();
-            let new_pos = match action {
-                FioraVsRivenAction::MoveEast50 => Vec3::new(rpos.x + 50.0, rpos.y, rpos.z),
-                FioraVsRivenAction::MoveWest50 => Vec3::new(rpos.x - 50.0, rpos.y, rpos.z),
-                FioraVsRivenAction::MoveNorth50 => Vec3::new(rpos.x, rpos.y, rpos.z + 50.0),
-                FioraVsRivenAction::MoveSouth50 => Vec3::new(rpos.x, rpos.y, rpos.z - 50.0),
-                _ => unreachable!(),
-            };
-            if let Some(mut t) = world.get_mut::<Transform>(fiora) {
-                t.translation = new_pos;
-            }
-        }
-        FioraVsRivenAction::AttackRiven => {}
-    }
-}
-
-pub fn advance_action_simulation(
-    app: &mut App,
-    fiora: Entity,
-    riven: Entity,
-    action: FioraVsRivenAction,
-) -> Option<FioraVsRivenObs> {
-    if action == FioraVsRivenAction::AttackRiven {
-        for _ in 0..300 {
-            let is_active = app
-                .world()
-                .get::<lol_champions::fiora::passive::Vital>(riven)
-                .map(|v| v.is_active())
-                .unwrap_or(false);
-            if is_active {
-                break;
-            }
-            app.update();
-        }
-
-        let attack_obs = get_obs_from_world(app.world(), fiora, riven);
-
-        app.world_mut().trigger(CommandAction {
-            entity: fiora,
-            action: Action::Attack(riven),
-        });
-
-        if let Some(mut tracker) = app.world_mut().get_resource_mut::<AttackEventTracker>() {
-            tracker.attack_hit = false;
-            tracker.attack_ready = false;
-        }
-
-        for _ in 0..100 {
-            app.update();
-            let tracker = app.world().resource::<AttackEventTracker>();
-            if tracker.attack_hit && tracker.attack_ready {
-                break;
-            }
-        }
-
-        app.world_mut()
-            .trigger(lol_core::attack_auto::CommandAttackAutoStop { entity: fiora });
-
-        Some(attack_obs)
-    } else {
-        app.update();
-        None
-    }
-}
-
-pub fn step_world(
-    app: &mut App,
-    fiora: Entity,
-    riven: Entity,
-    action: FioraVsRivenAction,
-    step_count: usize,
-    max_steps: usize,
-) -> StepResult<FioraVsRivenObs> {
-    let prev_obs = get_obs_from_world(app.world(), fiora, riven);
-    let prev_fpos = prev_obs.fiora_pos;
-    let prev_riven_hp = prev_obs.riven_hp;
-
-    if let Some(mut tracker) = app.world_mut().get_resource_mut::<VitalBreakTracker>() {
-        tracker.hit = false;
-    }
-
-    dispatch_action_world(app.world_mut(), fiora, riven, action);
-    unpause_virtual_time(app.world_mut());
-
-    let attack_obs = advance_action_simulation(app, fiora, riven, action);
-
-    let obs = get_obs_from_world(app.world(), fiora, riven);
-    let curr_fpos = obs.fiora_pos;
-    let curr_riven_hp = obs.riven_hp;
-
-    let is_attack = action == FioraVsRivenAction::AttackRiven;
-    let tracker_hit = app.world().resource::<VitalBreakTracker>().hit;
-    let is_vital_break = tracker_hit && prev_obs.has_vital && prev_obs.vital_is_active;
-
-    let reward_obs = attack_obs.as_ref().unwrap_or(&prev_obs);
-    let (reward, reward_breakdown, reward_vars) = compute_step_reward(
-        prev_riven_hp,
-        curr_riven_hp,
-        prev_fpos,
-        curr_fpos,
-        prev_obs.riven_pos,
-        is_attack,
-        is_vital_break,
-        reward_obs,
-        step_count as f32 / 60.0,
-    );
-
-    let terminated = curr_riven_hp <= 0.0 || obs.fiora_hp <= 0.0;
-    let truncated = step_count >= max_steps;
-
-    StepResult {
-        obs,
-        reward,
-        terminated,
-        truncated,
-        step: step_count,
-        reward_breakdown,
-        reward_variables: reward_vars,
     }
 }

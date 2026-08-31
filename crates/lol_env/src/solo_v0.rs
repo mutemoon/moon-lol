@@ -455,10 +455,12 @@ pub fn apply_minion_hp_scale(world: &mut World, scale: f32) {
         if minion_list.is_empty() {
             continue;
         }
-        // 阶梯式残血对比：前 3 只小兵设置递增残血梯度 (scale, scale * 2.5, scale * 4.0)，其余小兵保持 100% 满血
+        let n = minion_list.len();
+        let num_low = (n.saturating_sub(1)).min(2).max(1);
+        // 阶梯式残血对比：前 num_low 只小兵设置递增残血梯度 (scale, scale * 2.5)，其余小兵保持 100% 满血
         for (i, entity) in minion_list.into_iter().enumerate() {
             if let Some(mut health) = world.get_mut::<Health>(entity) {
-                if i < 3 {
+                if i < num_low {
                     let factor = match i {
                         0 => 1.0,
                         1 => 2.5,
