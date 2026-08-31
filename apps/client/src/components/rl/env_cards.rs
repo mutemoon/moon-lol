@@ -53,13 +53,19 @@ fn render_single_env_card(
     let env_name = spec.name.to_string();
     let is_selected = sidebar.selected_env_name.as_deref() == Some(spec.name);
 
-    let (obs_summary, act_summary) = match spec.name {
-        lol_rl_protocol::ENV_SOLO_V0 => ("108 维 · 树状 AST", "混合控制 · 3 分支"),
-        lol_rl_protocol::ENV_FIORA_V3 => ("108 维 · 树状 AST", "补刀训练 · 3 分支"),
-        lol_rl_protocol::ENV_FIORA_V2 => ("48 维 · 树状 AST", "连续 + 7 离散动作 (带掩码)"),
-        lol_rl_protocol::ENV_FIORA_V1 => ("7 维 · 连续移动", "连续 + 2 离散动作"),
-        lol_rl_protocol::ENV_FIORA_V0 => ("7 维 · 瞬移微操", "5 离散动作 (带掩码)"),
-        _ => ("结构化 AST", "控制空间"),
+    let dsl_spec = lol_rl_protocol::get_env_dsl_spec(spec.name);
+    let obs_dim_str = dsl_spec
+        .and_then(|s| s.obs_schema.as_ref())
+        .map(|s| format!("{} 维 · 树状 AST", s.raw_dim()))
+        .unwrap_or_else(|| "结构化 AST".to_string());
+
+    let (obs_summary, act_summary): (String, &'static str) = match spec.name {
+        lol_rl_protocol::ENV_SOLO_V0 => (obs_dim_str, "混合控制 · 3 分支"),
+        lol_rl_protocol::ENV_FIORA_V3 => (obs_dim_str, "补刀训练 · 3 分支"),
+        lol_rl_protocol::ENV_FIORA_V2 => (obs_dim_str, "连续 + 7 离散动作 (带掩码)"),
+        lol_rl_protocol::ENV_FIORA_V1 => ("7 维 · 连续移动".to_string(), "连续 + 2 离散动作"),
+        lol_rl_protocol::ENV_FIORA_V0 => ("7 维 · 瞬移微操".to_string(), "5 离散动作 (带掩码)"),
+        _ => (obs_dim_str, "控制空间"),
     };
 
     let mode_label = if spec.num_agents > 1 {

@@ -3,22 +3,22 @@ use std::collections::HashMap;
 use bevy::prelude::*;
 use lol_core::action::{Action, CommandAction};
 use lol_core::base::stats::ChampionStats;
+use lol_core::damage::Damage;
 use lol_core::entities::minion::Minion;
 use lol_core::life::Health;
+use lol_core::missile::{Missile, MissileState};
 use lol_core::team::Team;
 use lol_rl_protocol::{ActionSchema, ActionSpace, ObsFeaturePayload, ObsSchema, RewardFormulaSpec};
+use rand::Rng;
+use rand::seq::SliceRandom;
 
+use crate::base_env::{LolBaseEnv, fiora_champion_spec};
 use crate::curriculum::CurriculumRewardConfig;
 pub use crate::fiora_riven_common::{
-    ATTACK_MASK_DISTANCE, AttackEventTracker, FioraRivenBaseEnv, FioraRivenEntities,
-    setup_skill_levels_world, unpause_virtual_time,
-};
-pub use crate::flash_plugin::{
-    FLASH_COOLDOWN_SECS, FLASH_DISTANCE, FlashCooldown, dispatch_flash, extract_flash_obs,
-    register_flash_plugin, tick_flash_cooldown,
+    AttackEventTracker, setup_skill_levels_world, unpause_virtual_time,
 };
 use crate::modifier_obs::{ModifierNameId, ModifierSlotObs, extract_entity_modifiers};
-use crate::obs_plugins::{extract_attack_state, extract_champion_base, extract_skill_cds};
+use crate::obs_plugins::{extract_attack_state, extract_champion_base};
 use crate::traits::{
     EnvConfig, EnvMeta, RenderMode, RewardBreakdownItem, RlEnvironment, StepResult,
     VisualEnvironment,
@@ -28,6 +28,7 @@ use crate::traits::{
 
 pub const FIORA_V3_OFFSET_SCALE: f32 = 100.0;
 pub const FIORA_V3_MAX_VISIBLE_UNITS: usize = 20;
+pub const FIORA_V3_MAX_VISIBLE_MISSILES: usize = 4;
 pub const FIORA_V3_OBS_DISTANCE_SCALE: f32 = 100.0;
 
 pub static FIORA_V3_SPEC: std::sync::LazyLock<&'static lol_rl_protocol::EnvDslSpec> =
@@ -48,24 +49,17 @@ pub static FIORA_V3_ACTION_SCHEMA: std::sync::LazyLock<ActionSchema> =
             .expect("FIORA_V3_SPEC 缺少 action_schema")
     });
 
-// ── 初始化与重置 ─────────────────────────────────────────────────────────────
+// ── 初始化与状态重置 ─────────────────────────────────────────────────────────
 
-pub fn setup_fiora_v3_health_world(world: &mut World, fiora: Entity, riven: Entity) {
-    for champion in [fiora, riven] {
-        if let Some(mut hp) = world.get_mut::<Health>(champion) {
-            hp.value = hp.max;
-        }
-        if let Some(mut flash) = world.get_mut::<FlashCooldown>(champion) {
-            flash.reset();
-        } else {
-            world.entity_mut(champion).insert(FlashCooldown::default());
-        }
-        if let Some(mut stats) = world.get_mut::<ChampionStats>(champion) {
-            stats.kills = 0;
-            stats.deaths = 0;
-            stats.assists = 0;
-            stats.minion_kills = 0;
-        }
+pub fn setup_fiora_v3_health_world(world: &mut World, fiora: Entity) {
+    if let Some(mut hp) = world.get_mut::<Health>(fiora) {
+        hp.value = hp.max;
+    }
+    if let Some(mut stats) = world.get_mut::<ChampionStats>(fiora) {
+        stats.kills = 0;
+        stats.deaths = 0;
+        stats.assists = 0;
+        stats.minion_kills = 0;
     }
 }
 
@@ -77,11 +71,6 @@ pub enum FioraV3DiscreteAction {
     NoOp = 0,
     Move = 1,
     Attack = 2,
-    CastQ = 3,
-    CastW = 4,
-    CastE = 5,
-    CastR = 6,
-    CastFlash = 7,
 }
 
 impl FioraV3DiscreteAction {
@@ -90,11 +79,6 @@ impl FioraV3DiscreteAction {
             0 => Self::NoOp,
             1 => Self::Move,
             2 => Self::Attack,
-            3 => Self::CastQ,
-            4 => Self::CastW,
-            5 => Self::CastE,
-            6 => Self::CastR,
-            7 => Self::CastFlash,
             _ => Self::NoOp,
         }
     }
@@ -173,11 +157,6 @@ impl FioraV3Action {
             0 => Self::new(0.0, 0.0, FioraV3DiscreteAction::NoOp),
             1 => Self::new(0.5, 0.0, FioraV3DiscreteAction::Move),
             2 => Self::new(0.0, 0.0, FioraV3DiscreteAction::Attack),
-            3 => Self::new(0.5, 0.0, FioraV3DiscreteAction::CastQ),
-            4 => Self::new(0.0, 0.0, FioraV3DiscreteAction::CastW),
-            5 => Self::new(0.0, 0.0, FioraV3DiscreteAction::CastE),
-            6 => Self::new(0.0, 0.0, FioraV3DiscreteAction::CastR),
-            7 => Self::new(1.0, 0.0, FioraV3DiscreteAction::CastFlash),
             _ => Self::new(0.0, 0.0, FioraV3DiscreteAction::NoOp),
         }
     }
@@ -187,11 +166,6 @@ impl FioraV3Action {
             FioraV3DiscreteAction::NoOp => 0,
             FioraV3DiscreteAction::Move => 1,
             FioraV3DiscreteAction::Attack => 2,
-            FioraV3DiscreteAction::CastQ => 3,
-            FioraV3DiscreteAction::CastW => 4,
-            FioraV3DiscreteAction::CastE => 5,
-            FioraV3DiscreteAction::CastR => 6,
-            FioraV3DiscreteAction::CastFlash => 7,
         }
     }
 
@@ -200,16 +174,11 @@ impl FioraV3Action {
             FioraV3DiscreteAction::NoOp => "保持当前 (NoOp)",
             FioraV3DiscreteAction::Move => "移动",
             FioraV3DiscreteAction::Attack => "普通攻击",
-            FioraV3DiscreteAction::CastQ => "施放 Q",
-            FioraV3DiscreteAction::CastW => "施放 W",
-            FioraV3DiscreteAction::CastE => "施放 E",
-            FioraV3DiscreteAction::CastR => "施放 R",
-            FioraV3DiscreteAction::CastFlash => "闪现",
         }
     }
 }
 
-// ── 自我中心化观测数据结构 ─────────────────────────────────────────────────────
+// ── 观测数据结构 ─────────────────────────────────────────────────────────────
 
 #[derive(Debug, Clone)]
 pub struct FioraV3Obs {
@@ -218,45 +187,24 @@ pub struct FioraV3Obs {
     pub self_pos: Vec3,
     pub self_hp: f32,
     pub self_max_hp: f32,
-    pub target_pos: Vec3,
-    pub target_hp: f32,
-    pub target_max_hp: f32,
-    pub distance: f32,
+    pub self_ad: f32,
 
     pub attack_state: u8,
     pub attack_is_windup: bool,
     pub attack_is_cooldown: bool,
     pub attack_timer_remaining: f32,
 
-    pub q_ready: bool,
-    pub q_cd_remaining: f32,
-    pub w_ready: bool,
-    pub w_cd_remaining: f32,
-    pub e_ready: bool,
-    pub e_cd_remaining: f32,
-    pub r_ready: bool,
-    pub r_cd_remaining: f32,
-
-    pub flash_ready: bool,
-    pub flash_cd_remaining: f32,
-
     pub self_modifiers: Vec<ModifierSlotObs>,
-    pub target_modifiers: Vec<ModifierSlotObs>,
 
     pub visible_units: Vec<lol_rl_protocol::ObsContext>,
     pub visible_unit_entities: Vec<Option<Entity>>,
+    pub visible_missiles: Vec<lol_rl_protocol::ObsContext>,
 }
 
 impl FioraV3Obs {
     pub fn to_context(&self) -> lol_rl_protocol::ObsContext {
         let mut ctx = lol_rl_protocol::ObsContext::new();
         ctx.set_var("role_id", self.role_id);
-        ctx.set_var("self_x", self.self_pos.x);
-        ctx.set_var("self_z", self.self_pos.z);
-        ctx.set_var("target_x", self.target_pos.x);
-        ctx.set_var("target_z", self.target_pos.z);
-        ctx.set_var("distance", self.distance);
-
         ctx.set_var(
             "attack_is_ready",
             if self.attack_state == 0 { 1.0 } else { 0.0 },
@@ -271,33 +219,14 @@ impl FioraV3Obs {
         );
         ctx.set_var("attack_timer_remaining", self.attack_timer_remaining);
 
-        ctx.set_var("q_ready", if self.q_ready { 1.0 } else { 0.0 });
-        ctx.set_var("q_cd", self.q_cd_remaining);
-        ctx.set_var("w_ready", if self.w_ready { 1.0 } else { 0.0 });
-        ctx.set_var("w_cd", self.w_cd_remaining);
-        ctx.set_var("e_ready", if self.e_ready { 1.0 } else { 0.0 });
-        ctx.set_var("e_cd", self.e_cd_remaining);
-        ctx.set_var("r_ready", if self.r_ready { 1.0 } else { 0.0 });
-        ctx.set_var("r_cd", self.r_cd_remaining);
-        ctx.set_var("flash_ready", if self.flash_ready { 1.0 } else { 0.0 });
-        ctx.set_var("flash_cd", self.flash_cd_remaining);
-
         ctx.set_var("self_hp", self.self_hp);
         ctx.set_var("self_max_hp", self.self_max_hp);
-        ctx.set_var("target_hp", self.target_hp);
-        ctx.set_var("target_max_hp", self.target_max_hp);
+        ctx.set_var("self_ad", self.self_ad);
 
         let self_mods: Vec<_> = self.self_modifiers.iter().map(|m| m.to_context()).collect();
         ctx.set_repeated("self_modifiers", self_mods);
-
-        let target_mods: Vec<_> = self
-            .target_modifiers
-            .iter()
-            .map(|m| m.to_context())
-            .collect();
-        ctx.set_repeated("target_modifiers", target_mods);
-
         ctx.set_repeated("visible_units", self.visible_units.clone());
+        ctx.set_repeated("visible_missiles", self.visible_missiles.clone());
 
         ctx
     }
@@ -311,73 +240,14 @@ impl FioraV3Obs {
     }
 
     pub fn to_payload(&self) -> ObsFeaturePayload {
-        let (fiora_hp, riven_hp, f_max, r_max) = if self.role_id < 0.5 {
-            (
-                self.self_hp,
-                self.target_hp,
-                self.self_max_hp,
-                self.target_max_hp,
-            )
-        } else {
-            (
-                self.target_hp,
-                self.self_hp,
-                self.target_max_hp,
-                self.self_max_hp,
-            )
-        };
-
-        let primary_vital = self
-            .target_modifiers
-            .iter()
-            .chain(self.self_modifiers.iter())
-            .find(|m| m.name_id == ModifierNameId::FioraPassiveVital);
-        let has_vital = primary_vital.is_some();
-        let vital_is_active = primary_vital.map(|v| v.stack_count > 0.5).unwrap_or(false);
-        let vital_dir = if let Some(v) = primary_vital {
-            if v.param0 > 0.5 {
-                "+X (东)".to_string()
-            } else if v.param0 < -0.5 {
-                "-X (西)".to_string()
-            } else if v.param1 > 0.5 {
-                "+Z (北)".to_string()
-            } else if v.param1 < -0.5 {
-                "-Z (南)".to_string()
-            } else {
-                "无".to_string()
-            }
-        } else {
-            "无".to_string()
-        };
-
         ObsFeaturePayload {
-            fiora_hp_pct: if f_max > 0.0 { fiora_hp / f_max } else { 1.0 },
-            riven_hp_pct: if r_max > 0.0 { riven_hp / r_max } else { 1.0 },
-            distance: self.distance,
-            q_ready: self.q_ready,
-            w_ready: self.w_ready,
-            e_ready: self.e_ready,
-            r_ready: self.r_ready,
-            has_vital,
-            vital_is_active,
-            vital_direction: vital_dir,
+            fiora_hp_pct: if self.self_max_hp > 0.0 {
+                self.self_hp / self.self_max_hp
+            } else {
+                1.0
+            },
             tags: HashMap::from([
-                (
-                    "role".to_string(),
-                    if self.role_id < 0.5 {
-                        "剑姬 (Fiora)".to_string()
-                    } else {
-                        "瑞雯 (Riven)".to_string()
-                    },
-                ),
-                ("q_cd".to_string(), format!("{:.1}s", self.q_cd_remaining)),
-                ("w_cd".to_string(), format!("{:.1}s", self.w_cd_remaining)),
-                ("e_cd".to_string(), format!("{:.1}s", self.e_cd_remaining)),
-                ("r_cd".to_string(), format!("{:.1}s", self.r_cd_remaining)),
-                (
-                    "flash_cd".to_string(),
-                    format!("{:.1}s", self.flash_cd_remaining),
-                ),
+                ("role".to_string(), "剑姬 (Fiora)".to_string()),
                 (
                     "atk_state".to_string(),
                     match self.attack_state {
@@ -390,15 +260,21 @@ impl FioraV3Obs {
                 (
                     "modifiers_count".to_string(),
                     format!(
-                        "Self:{}, Target:{}",
+                        "Self:{}",
                         self.self_modifiers
                             .iter()
                             .filter(|m| m.name_id != ModifierNameId::None)
                             .count(),
-                        self.target_modifiers
+                    ),
+                ),
+                (
+                    "visible_units".to_string(),
+                    format!(
+                        "{}",
+                        self.visible_units
                             .iter()
-                            .filter(|m| m.name_id != ModifierNameId::None)
-                            .count(),
+                            .filter(|u| u.vars.get("unit_type").copied().unwrap_or(0.0) > 0.0)
+                            .count()
                     ),
                 ),
             ]),
@@ -406,11 +282,9 @@ impl FioraV3Obs {
         }
     }
 
-    /// 检查指定目标槽位是否为有效敌方单位（0 号恒为敌方英雄，1..6 为小兵，需有效且 is_enemy > 0.5）
+    /// 检查指定目标槽位是否为有效敌方单位（小兵有效且 is_enemy > 0.5）
     pub fn is_target_enemy(&self, target_idx: usize) -> bool {
-        if target_idx == 0 {
-            true
-        } else if let Some(unit) = self.visible_units.get(target_idx) {
+        if let Some(unit) = self.visible_units.get(target_idx) {
             let unit_type = unit.vars.get("unit_type").copied().unwrap_or(0.0);
             let is_enemy = unit.vars.get("is_enemy").copied().unwrap_or(0.0);
             unit_type > 0.0 && is_enemy > 0.5
@@ -422,19 +296,11 @@ impl FioraV3Obs {
 
 // ── 环境主体 ─────────────────────────────────────────────────────────────────
 
-/// 对世界中小兵应用非对称对比课程血量缩放 (Contrastive Curriculum)
-///
-/// 当 scale < 1.0 时，每队挑选 1 只小兵设置为残血（health.max * scale），其余小兵保持 100% 满血，
-/// 创造明确的“残血 vs 满血”对比度，迫使注意力机制学习通过 hp_pct 挑选残血目标。
-/// 当 scale >= 1.0 时，所有小兵全部恢复 100% 满血（真实自然对线）。
-pub fn apply_minion_hp_scale(world: &mut World, scale: f32) {
-    if scale >= 1.0 {
-        let mut q = world.query_filtered::<&mut Health, With<Minion>>();
-        for mut health in q.iter_mut(world) {
-            health.value = health.max;
-        }
-        return;
-    }
+/// 对 Fiora V3 环境中的小兵血量进行随机化分配：
+/// 保证每波小兵中既有一击必杀（20~55 HP）的残血小兵，也有中等血量和近乎满血的小兵，
+/// 促使智能体学会识别血量并精准选取残血目标进行补刀。
+pub fn randomize_fiora_v3_minion_health(world: &mut World) {
+    let mut rng = rand::rng();
 
     let mut order_minions = Vec::new();
     let mut chaos_minions = Vec::new();
@@ -450,45 +316,48 @@ pub fn apply_minion_hp_scale(world: &mut World, scale: f32) {
         }
     }
 
-    for minion_list in [order_minions, chaos_minions] {
+    for mut minion_list in [order_minions, chaos_minions] {
         if minion_list.is_empty() {
             continue;
         }
-        // 阶梯式残血对比：前 3 只小兵设置递增残血梯度 (scale, scale * 2.5, scale * 4.0)，其余小兵保持 100% 满血
+        // 随机打乱顺序，使得一击必杀和残血小兵的位置在每局不同
+        minion_list.shuffle(&mut rng);
+        let n = minion_list.len();
+
         for (i, entity) in minion_list.into_iter().enumerate() {
             if let Some(mut health) = world.get_mut::<Health>(entity) {
-                if i < 3 {
-                    let factor = match i {
-                        0 => 1.0,
-                        1 => 2.5,
-                        _ => 4.0,
-                    };
-                    let target_hp = (health.max * (scale * factor).min(0.95)).max(1.0);
-                    health.value = target_hp;
+                // 分桶分配血量：
+                // 前 ~30% (至少1个)：一击必杀残血 (20 ~ 55 HP，Fiora 68 AD 一刀必杀)
+                // 紧接着 ~35%：中等血量 (120 ~ 240 HP，需多次攻击)
+                // 剩余 ~35%：高血量/满血 (320 ~ max_hp)
+                let target_hp: f32 = if i < (n.max(3) / 3).max(1) {
+                    rng.random_range(20.0f32..=55.0f32).min(health.max)
+                } else if i < (2 * n.max(3) / 3).max(2) {
+                    rng.random_range(120.0f32..=240.0f32).min(health.max)
                 } else {
-                    health.value = health.max;
-                }
+                    rng.random_range((health.max * 0.7)..=health.max)
+                };
+
+                health.value = target_hp.clamp(1.0, health.max);
             }
         }
     }
 }
 
-/// 统一的有头/无头世界初始化与重置逻辑（双方满血、闪现重置与小兵课程血量设置）
-pub fn setup_fiora_v3_env_world(fiora: Entity, riven: Entity, world: &mut World) {
-    setup_fiora_v3_health_world(world, fiora, riven);
-    let scale = world
-        .get_resource::<CurriculumRewardConfig>()
-        .map(|c| c.minion_hp_scale)
-        .unwrap_or(1.0);
-    apply_minion_hp_scale(world, scale);
+/// 统一的单人世界初始化与重置逻辑（满血重置与小兵随机血量设置）
+pub fn setup_fiora_v3_env_world(champions: &[Entity], world: &mut World) {
+    if let Some(&fiora) = champions.first() {
+        setup_fiora_v3_health_world(world, fiora);
+    }
+    randomize_fiora_v3_minion_health(world);
 }
 
 pub struct FioraV3Env {
-    pub base: FioraRivenBaseEnv,
+    pub base: LolBaseEnv,
 }
 
 impl std::ops::Deref for FioraV3Env {
-    type Target = FioraRivenBaseEnv;
+    type Target = LolBaseEnv;
     fn deref(&self) -> &Self::Target {
         &self.base
     }
@@ -515,17 +384,17 @@ impl FioraV3Env {
     }
 
     pub fn with_config(config: EnvConfig) -> Self {
-        let base = FioraRivenBaseEnv::builder(config, Self::DEFAULT_MAX_STEPS)
+        let base = LolBaseEnv::builder(config, Self::DEFAULT_MAX_STEPS)
             .window_title("Fiora V3 (Last Hit Viewer)")
             .map_name("solo")
             .enable_barrack(true)
-            .initial_positions(
-                Vec3::new(2350.0, 0.0, 12750.0),
-                Vec3::new(2450.0, 0.0, 12850.0),
-            )
-            .initial_skill_levels([1, 0, 0, 0])
             .warmup_secs(30.0)
-            .with_plugin(register_flash_plugin)
+            .add_champion(fiora_champion_spec(
+                Team::Order,
+                Vec3::new(2350.0, 0.0, 12750.0),
+                [0, 0, 0, 0],
+                true,
+            ))
             .on_ready(setup_fiora_v3_env_world)
             .on_reset(setup_fiora_v3_env_world)
             .build();
@@ -563,10 +432,6 @@ impl FioraV3Env {
         self.base.fiora()
     }
 
-    pub fn riven(&self) -> Entity {
-        self.base.riven()
-    }
-
     pub fn max_steps(&self) -> usize {
         self.base.max_steps()
     }
@@ -599,13 +464,13 @@ impl RlEnvironment for FioraV3Env {
     }
 
     fn description() -> &'static str {
-        "剑姬在召唤师峡谷上路Solo地图进行对线补刀训练（补刀成功奖励，普通攻击未补刀惩罚）"
+        "剑姬在召唤师峡谷上路Solo地图进行单人补刀训练（补刀成功奖励，普通攻击未补刀惩罚）"
     }
 
     fn action_space() -> ActionSpace {
         ActionSpace::Hybrid {
             continuous_dims: 2,
-            discrete_classes: 8,
+            discrete_classes: 3,
         }
     }
 
@@ -618,16 +483,7 @@ impl RlEnvironment for FioraV3Env {
     }
 
     fn action_labels() -> &'static [&'static str] {
-        &[
-            "保持当前 (NoOp)",
-            "移动 (Move)",
-            "普通攻击 (Attack)",
-            "施放 Q",
-            "施放 W",
-            "施放 E",
-            "施放 R",
-            "闪现",
-        ]
+        &["保持当前 (NoOp)", "移动 (Move)", "普通攻击 (Attack)"]
     }
 
     fn obs_schema() -> Option<ObsSchema> {
@@ -676,12 +532,8 @@ impl RlEnvironment for FioraV3Env {
 
     fn reset(&mut self) -> Vec<Self::Obs> {
         self.base.reset_base();
-        vec![get_ego_obs_from_world(
-            self.base.world(),
-            self.base.fiora,
-            self.base.riven,
-            0.0,
-        )]
+        let fiora = self.base.fiora();
+        vec![get_ego_obs_from_world(self.base.world(), fiora, 0.0)]
     }
 
     fn step(&mut self, actions: &[Self::Action]) -> Vec<StepResult<Self::Obs>> {
@@ -690,16 +542,13 @@ impl RlEnvironment for FioraV3Env {
             0.0,
             FioraV3DiscreteAction::NoOp,
         ));
-        let riven_action =
-            get_default_riven_combat_action(self.base.world(), self.base.riven, self.base.fiora);
 
         self.base.increment_step();
+        let fiora = self.base.fiora();
         let res = step_fiora_v3_world(
             &mut self.base.app,
-            self.base.fiora,
-            self.base.riven,
+            fiora,
             fiora_action,
-            riven_action,
             self.base.step_count,
             self.base.max_steps,
         );
@@ -716,18 +565,8 @@ impl RlEnvironment for FioraV3Env {
 
     fn action_mask(obs: &Self::Obs) -> Option<Vec<bool>> {
         let is_cooldown = obs.attack_is_cooldown;
-        let dist_ok = obs.distance <= ATTACK_MASK_DISTANCE;
 
-        Some(vec![
-            true,
-            true,
-            dist_ok && !is_cooldown,
-            obs.q_ready,
-            obs.w_ready,
-            obs.e_ready,
-            obs.r_ready,
-            obs.flash_ready,
-        ])
+        Some(vec![true, true, !is_cooldown])
     }
 
     fn action_masks(obs: &Self::Obs) -> Option<lol_rl_protocol::ActionMasks> {
@@ -736,6 +575,10 @@ impl RlEnvironment for FioraV3Env {
 
     fn reward_formula_spec() -> Option<RewardFormulaSpec> {
         FIORA_V3_SPEC.reward_formula.clone()
+    }
+
+    fn default_curriculum() -> Option<lol_rl_protocol::CurriculumConfig> {
+        None
     }
 
     fn update_curriculum(
@@ -752,9 +595,6 @@ impl RlEnvironment for FioraV3Env {
             minion_hp_scale: hp_scale,
         };
         self.base.app.world_mut().insert_resource(cfg);
-
-        // 对当前存活的所有小兵应用血量缩放
-        apply_minion_hp_scale(self.base.app.world_mut(), hp_scale);
     }
 }
 
@@ -778,17 +618,13 @@ impl VisualEnvironment for FioraV3Env {
     }
 
     fn reset_world(&mut self, app: &mut App) -> Vec<Self::Obs> {
-        let (fiora, riven) = self.base.reset_app(app);
-        vec![get_ego_obs_from_world(app.world(), fiora, riven, 0.0)]
+        let champions = self.base.reset_app(app);
+        let fiora = champions[0];
+        vec![get_ego_obs_from_world(app.world(), fiora, 0.0)]
     }
 
     fn get_current_obs_all(&self, world: &World) -> Vec<Self::Obs> {
-        vec![get_ego_obs_from_world(
-            world,
-            self.base.fiora,
-            self.base.riven,
-            0.0,
-        )]
+        vec![get_ego_obs_from_world(world, self.base.fiora(), 0.0)]
     }
 
     fn step_world(
@@ -801,16 +637,12 @@ impl VisualEnvironment for FioraV3Env {
             0.0,
             FioraV3DiscreteAction::NoOp,
         ));
-        let riven_action =
-            get_default_riven_combat_action(app.world(), self.base.riven, self.base.fiora);
 
         self.base.increment_step();
         let res = step_fiora_v3_world(
             app,
-            self.base.fiora,
-            self.base.riven,
+            self.base.fiora(),
             fiora_action,
-            riven_action,
             self.base.step_count,
             self.base.max_steps,
         );
@@ -818,59 +650,7 @@ impl VisualEnvironment for FioraV3Env {
     }
 }
 
-// ── 自由函数 ─────────────────────────────────────────────────────────────────
-
-pub fn get_default_riven_combat_action(
-    world: &World,
-    riven: Entity,
-    fiora: Entity,
-) -> FioraV3Action {
-    let r_base = extract_champion_base(world, riven);
-    let f_base = extract_champion_base(world, fiora);
-    let dist = r_base.pos.distance(f_base.pos);
-    let atk = extract_attack_state(world, riven);
-    let skills = extract_skill_cds(world, riven);
-
-    if atk.is_windup {
-        return FioraV3Action::new(0.0, 0.0, FioraV3DiscreteAction::NoOp);
-    }
-
-    let target_modifiers = extract_entity_modifiers(world, riven, 4);
-    let primary_vital = target_modifiers
-        .iter()
-        .find(|m| m.name_id == ModifierNameId::FioraPassiveVital);
-    let (offset_x, offset_z) = if let Some(v) = primary_vital {
-        if v.stack_count > 0.5 {
-            (-v.param0 * 0.5, -v.param1 * 0.5)
-        } else {
-            (0.0, 0.0)
-        }
-    } else {
-        (0.0, 0.0)
-    };
-
-    if dist <= ATTACK_MASK_DISTANCE {
-        if skills[1].ready {
-            FioraV3Action::new(0.0, 0.0, FioraV3DiscreteAction::CastW)
-        } else if skills[0].ready {
-            FioraV3Action::new(offset_x, offset_z, FioraV3DiscreteAction::CastQ)
-        } else if !atk.is_cooldown {
-            FioraV3Action::new(0.0, 0.0, FioraV3DiscreteAction::Attack)
-        } else if skills[2].ready {
-            FioraV3Action::new(offset_x, offset_z, FioraV3DiscreteAction::CastE)
-        } else if skills[3].ready {
-            FioraV3Action::new(0.0, 0.0, FioraV3DiscreteAction::CastR)
-        } else {
-            FioraV3Action::new(offset_x, offset_z, FioraV3DiscreteAction::Move)
-        }
-    } else if skills[2].ready {
-        FioraV3Action::new(0.0, 0.0, FioraV3DiscreteAction::CastE)
-    } else if skills[0].ready {
-        FioraV3Action::new(0.0, 0.0, FioraV3DiscreteAction::CastQ)
-    } else {
-        FioraV3Action::new(0.0, 0.0, FioraV3DiscreteAction::Move)
-    }
-}
+// ── 小兵与单位观测提取 ───────────────────────────────────────────────────────
 
 pub fn get_visible_minion_entities(
     world: &World,
@@ -916,11 +696,11 @@ pub fn get_visible_minion_entities(
     let mut candidates = enemy_minions;
     candidates.extend(ally_minions);
 
-    let mut entities = Vec::with_capacity(FIORA_V3_MAX_VISIBLE_UNITS - 1);
-    let mut slots = Vec::with_capacity(FIORA_V3_MAX_VISIBLE_UNITS - 1);
+    let mut entities = Vec::with_capacity(FIORA_V3_MAX_VISIBLE_UNITS);
+    let mut slots = Vec::with_capacity(FIORA_V3_MAX_VISIBLE_UNITS);
 
     for (e, _dist, m_pos, team, hp_val, hp_max, m_type) in
-        candidates.into_iter().take(FIORA_V3_MAX_VISIBLE_UNITS - 1)
+        candidates.into_iter().take(FIORA_V3_MAX_VISIBLE_UNITS)
     {
         let type_code = match m_type {
             Minion::Melee => 2.0,
@@ -941,6 +721,7 @@ pub fn get_visible_minion_entities(
                         0.0
                     },
                 )
+                .with_var("hp_norm", hp_val / 1000.0)
                 .with_var("is_enemy", if team != self_team { 1.0 } else { 0.0 }),
         );
         entities.push(e);
@@ -951,36 +732,12 @@ pub fn get_visible_minion_entities(
 
 pub fn extract_visible_units_from_world(
     world: &World,
-    _self_entity: Entity,
-    target_entity: Entity,
     self_pos: Vec3,
     self_team: Team,
-    target_pos: Vec3,
-    target_hp: f32,
-    target_max_hp: f32,
 ) -> (Vec<lol_rl_protocol::ObsContext>, Vec<Option<Entity>>) {
     let mut slots = Vec::with_capacity(FIORA_V3_MAX_VISIBLE_UNITS);
     let mut entities = Vec::with_capacity(FIORA_V3_MAX_VISIBLE_UNITS);
 
-    // Slot 0: 对手英雄
-    slots.push(
-        lol_rl_protocol::ObsContext::new()
-            .with_var("unit_type", 1.0) // Champion
-            .with_var("rel_pos[0]", target_pos.x - self_pos.x)
-            .with_var("rel_pos[1]", target_pos.z - self_pos.z)
-            .with_var(
-                "hp_pct",
-                if target_max_hp > 0.0 {
-                    (target_hp / target_max_hp).clamp(0.0, 1.0)
-                } else {
-                    0.0
-                },
-            )
-            .with_var("is_enemy", 1.0),
-    );
-    entities.push(Some(target_entity));
-
-    // Slots 1..: 敌方小兵优先，其次友方小兵
     let (minion_entities, minion_slots) = get_visible_minion_entities(world, self_pos, self_team);
     slots.extend(minion_slots);
     entities.extend(minion_entities.into_iter().map(Some));
@@ -993,99 +750,117 @@ pub fn extract_visible_units_from_world(
     (slots, entities)
 }
 
-pub fn get_ego_obs_from_world(
+pub fn extract_visible_missiles_from_world(
     world: &World,
-    self_entity: Entity,
-    target_entity: Entity,
-    role_id: f32,
-) -> FioraV3Obs {
+    self_pos: Vec3,
+    self_team: Team,
+) -> Vec<lol_rl_protocol::ObsContext> {
+    let mut candidate_missiles: Vec<(f32, Vec3, Team)> = Vec::new();
+
+    for entity_ref in world.iter_entities() {
+        if let (Some(_missile), Some(state), Some(tf)) = (
+            entity_ref.get::<Missile>(),
+            entity_ref.get::<MissileState>(),
+            entity_ref.get::<Transform>(),
+        ) {
+            // 筛选小兵发射的飞弹（或小兵普通攻击弹道）
+            let is_minion_missile = world.get::<Minion>(state.source).is_some();
+            if is_minion_missile {
+                let team = entity_ref.get::<Team>().copied().unwrap_or(Team::Order);
+                let m_pos = tf.translation;
+                let dist = self_pos.distance(m_pos);
+                candidate_missiles.push((dist, m_pos, team));
+            }
+        }
+    }
+
+    candidate_missiles.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap_or(std::cmp::Ordering::Equal));
+
+    let mut slots = Vec::with_capacity(FIORA_V3_MAX_VISIBLE_MISSILES);
+    for (_dist, m_pos, team) in candidate_missiles
+        .into_iter()
+        .take(FIORA_V3_MAX_VISIBLE_MISSILES)
+    {
+        slots.push(
+            lol_rl_protocol::ObsContext::new()
+                .with_var("rel_pos[0]", m_pos.x - self_pos.x)
+                .with_var("rel_pos[1]", m_pos.z - self_pos.z)
+                .with_var("is_enemy", if team != self_team { 1.0 } else { 0.0 })
+                .with_var("is_active", 1.0),
+        );
+    }
+
+    while slots.len() < FIORA_V3_MAX_VISIBLE_MISSILES {
+        slots.push(
+            lol_rl_protocol::ObsContext::new()
+                .with_var("rel_pos[0]", 0.0)
+                .with_var("rel_pos[1]", 0.0)
+                .with_var("is_enemy", 0.0)
+                .with_var("is_active", 0.0),
+        );
+    }
+
+    slots
+}
+
+pub fn get_ego_obs_from_world(world: &World, self_entity: Entity, role_id: f32) -> FioraV3Obs {
     let self_base = extract_champion_base(world, self_entity);
-    let target_base = extract_champion_base(world, target_entity);
-    let dist = self_base.pos.distance(target_base.pos);
     let self_team = world
         .get::<Team>(self_entity)
         .copied()
         .unwrap_or(Team::Order);
 
     let atk = extract_attack_state(world, self_entity);
-    let skills = extract_skill_cds(world, self_entity);
-    let (flash_ready, flash_cd) = extract_flash_obs(world, self_entity);
+    let self_ad = world
+        .get::<Damage>(self_entity)
+        .map(|d| d.0)
+        .unwrap_or(68.0);
 
-    let (visible_units, visible_unit_entities) = extract_visible_units_from_world(
-        world,
-        self_entity,
-        target_entity,
-        self_base.pos,
-        self_team,
-        target_base.pos,
-        target_base.hp,
-        target_base.max_hp,
-    );
+    let (visible_units, visible_unit_entities) =
+        extract_visible_units_from_world(world, self_base.pos, self_team);
+    let visible_missiles = extract_visible_missiles_from_world(world, self_base.pos, self_team);
 
     FioraV3Obs {
         role_id,
         self_pos: self_base.pos,
         self_hp: self_base.hp,
         self_max_hp: self_base.max_hp,
-        target_pos: target_base.pos,
-        target_hp: target_base.hp,
-        target_max_hp: target_base.max_hp,
-        distance: dist,
+        self_ad,
         attack_state: atk.state_code,
         attack_is_windup: atk.is_windup,
         attack_is_cooldown: atk.is_cooldown,
         attack_timer_remaining: atk.timer_remaining,
-        q_ready: skills[0].ready,
-        q_cd_remaining: skills[0].cd_remaining,
-        w_ready: skills[1].ready,
-        w_cd_remaining: skills[1].cd_remaining,
-        e_ready: skills[2].ready,
-        e_cd_remaining: skills[2].cd_remaining,
-        r_ready: skills[3].ready,
-        r_cd_remaining: skills[3].cd_remaining,
-        flash_ready,
-        flash_cd_remaining: flash_cd,
         self_modifiers: extract_entity_modifiers(world, self_entity, 4),
-        target_modifiers: extract_entity_modifiers(world, target_entity, 4),
         visible_units,
         visible_unit_entities,
+        visible_missiles,
     }
 }
 
 pub fn dispatch_single_action(
     world: &mut World,
     self_entity: Entity,
-    target_entity: Entity,
     action: FioraV3Action,
+    visible_unit_entities: &[Option<Entity>],
 ) {
-    let tpos = world
-        .get::<Transform>(target_entity)
-        .map(|t| t.translation)
-        .unwrap_or_default();
     let spos = world
         .get::<Transform>(self_entity)
         .map(|t| t.translation)
         .unwrap_or_default();
 
-    let self_team = world.get::<Team>(self_entity).copied();
+    let self_team = world
+        .get::<Team>(self_entity)
+        .copied()
+        .unwrap_or(Team::Order);
 
-    // 解析目标：0 为敌方英雄，1.. 为小兵（敌方小兵优先，其次友方小兵）
-    let chosen_target = if action.target_idx == 0 {
-        target_entity
-    } else {
-        let (minion_entities, _) =
-            get_visible_minion_entities(world, spos, self_team.unwrap_or(Team::Order));
-        let minion_idx = (action.target_idx as usize) - 1;
-        minion_entities
-            .get(minion_idx)
-            .copied()
-            .unwrap_or(target_entity)
-    };
+    let chosen_target = visible_unit_entities
+        .get(action.target_idx as usize)
+        .copied()
+        .flatten();
 
-    let chosen_target_pos = world
-        .get::<Transform>(chosen_target)
-        .map(|t| t.translation)
-        .unwrap_or(tpos);
+    let chosen_target_pos = chosen_target
+        .and_then(|e| world.get::<Transform>(e).map(|t| t.translation))
+        .unwrap_or(spos);
 
     let target_offset_pos = Vec3::new(
         chosen_target_pos.x + action.offset_x.clamp(-1.0, 1.0) * FIORA_V3_OFFSET_SCALE,
@@ -1093,24 +868,13 @@ pub fn dispatch_single_action(
         chosen_target_pos.z + action.offset_z.clamp(-1.0, 1.0) * FIORA_V3_OFFSET_SCALE,
     );
 
-    let chosen_target_team = world.get::<Team>(chosen_target).copied();
-    let is_target_enemy = match (self_team, chosen_target_team) {
-        (Some(st), Some(tt)) => st != tt,
-        _ => true,
-    };
+    let is_target_enemy =
+        chosen_target.is_some_and(|e| world.get::<Team>(e).is_some_and(|t| *t != self_team));
 
-    // 友方目标防御性降级：若选中的是非敌方目标（友军/自身），普攻和技能自动降级为 Move
-    let actual_discrete = if !is_target_enemy {
-        match action.discrete {
-            FioraV3DiscreteAction::Attack
-            | FioraV3DiscreteAction::CastQ
-            | FioraV3DiscreteAction::CastW
-            | FioraV3DiscreteAction::CastE
-            | FioraV3DiscreteAction::CastR => FioraV3DiscreteAction::Move,
-            other => other,
-        }
-    } else {
-        action.discrete
+    // 友方目标或无效目标防御性降级：普攻必须有敌方目标，否则降级为 Move
+    let actual_discrete = match action.discrete {
+        FioraV3DiscreteAction::Attack if !is_target_enemy => FioraV3DiscreteAction::Move,
+        other => other,
     };
 
     match actual_discrete {
@@ -1122,60 +886,12 @@ pub fn dispatch_single_action(
             });
         }
         FioraV3DiscreteAction::Attack => {
-            world.trigger(CommandAction {
-                entity: self_entity,
-                action: Action::Attack(chosen_target),
-            });
-        }
-        FioraV3DiscreteAction::CastQ => {
-            world.trigger(CommandAction {
-                entity: self_entity,
-                action: Action::Skill {
-                    index: 0,
-                    point: Vec2::new(target_offset_pos.x, target_offset_pos.z),
-                },
-            });
-        }
-        FioraV3DiscreteAction::CastW => {
-            world.trigger(CommandAction {
-                entity: self_entity,
-                action: Action::Skill {
-                    index: 1,
-                    point: Vec2::new(spos.x, spos.z),
-                },
-            });
-        }
-        FioraV3DiscreteAction::CastE => {
-            world.trigger(CommandAction {
-                entity: self_entity,
-                action: Action::Skill {
-                    index: 2,
-                    point: Vec2::new(target_offset_pos.x, target_offset_pos.z),
-                },
-            });
-        }
-        FioraV3DiscreteAction::CastR => {
-            world.trigger(CommandAction {
-                entity: self_entity,
-                action: Action::Skill {
-                    index: 3,
-                    point: Vec2::new(chosen_target_pos.x, chosen_target_pos.z),
-                },
-            });
-        }
-        FioraV3DiscreteAction::CastFlash => {
-            let offset_dir = Vec3::new(action.offset_x, 0.0, action.offset_z);
-            let dir = if offset_dir.length_squared() > 1e-4 {
-                offset_dir.normalize()
-            } else {
-                let to_target = chosen_target_pos - spos;
-                if to_target.length_squared() > 1e-4 {
-                    to_target.normalize()
-                } else {
-                    Vec3::X
-                }
-            };
-            dispatch_flash(world, self_entity, dir, FLASH_DISTANCE);
+            if let Some(target) = chosen_target {
+                world.trigger(CommandAction {
+                    entity: self_entity,
+                    action: Action::Attack(target),
+                });
+            }
         }
     }
 }
@@ -1183,35 +899,35 @@ pub fn dispatch_single_action(
 pub fn step_fiora_v3_world(
     app: &mut App,
     fiora: Entity,
-    riven: Entity,
     act_fiora: FioraV3Action,
-    act_riven: FioraV3Action,
     step_count: usize,
     max_steps: usize,
 ) -> StepResult<FioraV3Obs> {
-    let prev_f_obs = get_ego_obs_from_world(app.world(), fiora, riven, 0.0);
+    let prev_f_obs = get_ego_obs_from_world(app.world(), fiora, 0.0);
     let prev_f_cs = app
         .world()
         .get::<ChampionStats>(fiora)
         .map(|s| s.minion_kills)
         .unwrap_or(0);
 
-    // 1. 识别对小兵的普通攻击行为
+    // 1. 识别对有效敌方小兵的普通攻击行为
     let fiora_attacked_minion = act_fiora.discrete == FioraV3DiscreteAction::Attack
-        && act_fiora.target_idx > 0
         && prev_f_obs.is_target_enemy(act_fiora.target_idx as usize);
 
-    dispatch_single_action(app.world_mut(), fiora, riven, act_fiora);
-    dispatch_single_action(app.world_mut(), riven, fiora, act_riven);
+    dispatch_single_action(
+        app.world_mut(),
+        fiora,
+        act_fiora,
+        &prev_f_obs.visible_unit_entities,
+    );
     unpause_virtual_time(app.world_mut());
 
     for _ in 0..10 {
         app.update();
     }
 
-    let curr_f_obs = get_ego_obs_from_world(app.world(), fiora, riven, 0.0);
+    let curr_f_obs = get_ego_obs_from_world(app.world(), fiora, 0.0);
     let curr_f_hp = curr_f_obs.self_hp;
-    let curr_r_hp = curr_f_obs.target_hp;
     let curr_f_cs = app
         .world()
         .get::<ChampionStats>(fiora)
@@ -1255,7 +971,7 @@ pub fn step_fiora_v3_world(
         })
         .collect();
 
-    let terminated = curr_f_hp <= 0.0 || curr_r_hp <= 0.0;
+    let terminated = curr_f_hp <= 0.0;
     let truncated = step_count >= max_steps;
 
     StepResult {

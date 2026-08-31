@@ -2,8 +2,9 @@ use bevy::prelude::*;
 use lol_core::action::{Action, CommandAction};
 use lol_rl_protocol::{ActionSpace, ObsFeaturePayload, ObsSchema, RewardFormulaSpec};
 
+use crate::base_env::{LolBaseEnv, fiora_champion_spec, riven_champion_spec};
 pub use crate::fiora_riven_common::{
-    ATTACK_MASK_DISTANCE, AttackEventTracker, FIORA_COMMON_OBS_SCHEMA, FioraRivenBaseEnv,
+    ATTACK_MASK_DISTANCE, AttackEventTracker, FIORA_COMMON_OBS_SCHEMA,
     FioraVsRivenObs, VitalBreakTracker, compute_step_reward, get_obs_from_world,
     setup_skill_levels_world, unpause_virtual_time,
 };
@@ -113,11 +114,11 @@ pub type FioraVsRivenRealObs = FioraVsRivenObs;
 // ── 环境主体 ────────────────────────────────────────────────────────────────
 
 pub struct FioraVsRivenRealEnv {
-    pub base: FioraRivenBaseEnv,
+    pub base: LolBaseEnv,
 }
 
 impl std::ops::Deref for FioraVsRivenRealEnv {
-    type Target = FioraRivenBaseEnv;
+    type Target = LolBaseEnv;
     fn deref(&self) -> &Self::Target {
         &self.base
     }
@@ -144,9 +145,20 @@ impl FioraVsRivenRealEnv {
     }
 
     pub fn with_config(config: EnvConfig) -> Self {
-        let base = FioraRivenBaseEnv::builder(config, Self::DEFAULT_MAX_STEPS)
+        let base = LolBaseEnv::builder(config, Self::DEFAULT_MAX_STEPS)
             .window_title("Fiora vs Riven (Continuous) - RL Visual Viewer")
-            .initial_positions(Vec3::ZERO, Vec3::new(50.0, 0.0, 0.0))
+            .add_champion(fiora_champion_spec(
+                lol_core::team::Team::Order,
+                Vec3::ZERO,
+                [3, 1, 1, 1],
+                true,
+            ))
+            .add_champion(riven_champion_spec(
+                lol_core::team::Team::Chaos,
+                Vec3::new(50.0, 0.0, 0.0),
+                [3, 1, 1, 1],
+                false,
+            ))
             .build();
         Self { base }
     }
@@ -185,14 +197,6 @@ impl FioraVsRivenRealEnv {
         self.base.riven()
     }
 
-    pub fn initial_fiora_pos(&self) -> Vec3 {
-        self.base.initial_fiora_pos()
-    }
-
-    pub fn initial_riven_pos(&self) -> Vec3 {
-        self.base.initial_riven_pos()
-    }
-
     pub fn max_steps(&self) -> usize {
         self.base.max_steps()
     }
@@ -211,17 +215,19 @@ impl FioraVsRivenRealEnv {
     }
 
     pub fn dispatch_action(&mut self, action: FioraVsRivenRealAction) {
-        let fiora = self.base.fiora;
-        let riven = self.base.riven;
+        let fiora = self.base.fiora();
+        let riven = self.base.riven();
         dispatch_action_world(self.base.world_mut(), fiora, riven, action);
     }
 
     pub fn step(&mut self, action: FioraVsRivenRealAction) -> StepResult<FioraVsRivenRealObs> {
         self.base.increment_step();
+        let fiora = self.base.fiora();
+        let riven = self.base.riven();
         step_world(
             &mut self.base.app,
-            self.base.fiora,
-            self.base.riven,
+            fiora,
+            riven,
             action,
             self.base.step_count,
             self.base.max_steps,
@@ -366,12 +372,13 @@ impl VisualEnvironment for FioraVsRivenRealEnv {
     }
 
     fn reset_world(&mut self, app: &mut App) -> Vec<Self::Obs> {
-        let (new_fiora, new_riven) = self.base.reset_app(app);
+        let champions = self.base.reset_app(app);
+        let (new_fiora, new_riven) = (champions[0], champions[1]);
         vec![get_obs_from_world(app.world(), new_fiora, new_riven)]
     }
 
     fn get_current_obs_all(&self, world: &World) -> Vec<Self::Obs> {
-        vec![get_obs_from_world(world, self.base.fiora, self.base.riven)]
+        vec![get_obs_from_world(world, self.base.fiora(), self.base.riven())]
     }
 
     fn step_world(
@@ -386,8 +393,8 @@ impl VisualEnvironment for FioraVsRivenRealEnv {
             .unwrap_or(FioraVsRivenRealAction::new(0.0, 0.0, true));
         vec![step_world(
             app,
-            self.base.fiora,
-            self.base.riven,
+            self.base.fiora(),
+            self.base.riven(),
             action,
             self.base.step_count,
             self.base.max_steps,

@@ -95,9 +95,12 @@ impl CurriculumScheduler {
         self.config.cs_reward
     }
 
-    /// 获取当前攻击小兵未补到刀的惩罚
+    /// 获取当前攻击小兵未补到刀的惩罚（第一课 LastHitTraining 阶段不惩罚普攻探索，第二课 Harass 阶段启用惩罚）
     pub fn attack_no_cs_penalty(&self) -> f32 {
-        self.config.attack_no_cs_penalty
+        match self.phase {
+            CurriculumPhase::LastHitTraining => 0.0,
+            CurriculumPhase::HarassTraining => self.config.attack_no_cs_penalty,
+        }
     }
 
     /// 获取当前阶段名称
@@ -116,7 +119,7 @@ impl CurriculumScheduler {
             self.current_hp_scale,
             self.current_harass_coef,
             self.config.cs_reward,
-            self.config.attack_no_cs_penalty
+            self.attack_no_cs_penalty()
         )
     }
 
@@ -150,7 +153,7 @@ impl CurriculumScheduler {
         parameters.insert("补刀奖励 (cs_reward)".to_string(), self.config.cs_reward);
         parameters.insert(
             "无效攻击惩罚 (penalty)".to_string(),
-            self.config.attack_no_cs_penalty,
+            self.attack_no_cs_penalty(),
         );
         parameters.insert(
             "消耗对手系数 (harass)".to_string(),
@@ -189,9 +192,9 @@ impl Default for CurriculumRewardConfig {
     fn default() -> Self {
         Self {
             cs_reward: 1.0,
-            attack_no_cs_penalty: 0.1,
+            attack_no_cs_penalty: 0.0,
             harass_coef: 0.0,
-            minion_hp_scale: 1.0,
+            minion_hp_scale: 0.05,
         }
     }
 }

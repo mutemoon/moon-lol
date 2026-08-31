@@ -227,6 +227,15 @@ pub trait RlEnvironment: 'static {
         None
     }
 
+    /// 默认课程学习配置（环境声明自身是否支持课程学习及其默认参数）。
+    /// 若返回 Some(config)，在任务未显式指定自定义 curriculum_json 时，训练引擎自动激活该课程。
+    fn default_curriculum() -> Option<lol_rl_protocol::CurriculumConfig>
+    where
+        Self: Sized,
+    {
+        None
+    }
+
     /// 运行时更新课程学习参数（默认无操作；支持课程学习的环境应覆盖此方法）。
     fn update_curriculum(
         &mut self,

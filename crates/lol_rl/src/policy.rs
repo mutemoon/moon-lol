@@ -734,6 +734,7 @@ pub enum NodeExtractor {
         item_raw_dim: usize,
         item_extractor: Box<NodeExtractor>,
         mlp_layers: Vec<Linear>,
+        skip_proj: Option<Linear>,
         encoder_spec: EntityEncoderSpec,
     },
 }
@@ -807,12 +808,29 @@ impl NodeExtractor {
                     cur_dim = h_dim;
                 }
 
+                // 实体线性残差直通 (Linear Residual Skip-Connection)
+                let skip_proj = if !mlp_layers.is_empty() {
+                    let out_dim = *hidden_dims.last().unwrap();
+                    if item_in_dim != out_dim {
+                        Some(candle_nn::linear(
+                            item_in_dim,
+                            out_dim,
+                            rep_vb.pp("skip_proj"),
+                        )?)
+                    } else {
+                        None
+                    }
+                } else {
+                    None
+                };
+
                 Ok(Self::Repeated {
                     name: name.clone(),
                     max_count: *max_count,
                     item_raw_dim,
                     item_extractor,
                     mlp_layers,
+                    skip_proj,
                     encoder_spec: encoder.clone(),
                 })
             }
@@ -856,16 +874,29 @@ impl NodeExtractor {
                 item_raw_dim,
                 item_extractor,
                 mlp_layers,
+                skip_proj,
                 encoder_spec,
             } => {
                 let (b, _total_raw) = x.dims2()?;
                 let item_input = x.reshape((b * max_count, *item_raw_dim))?;
-                let (mut feat, mut embeds) =
+                let (in_feat, mut embeds) =
                     item_extractor.forward_2d_with_entities(&item_input)?;
 
+                let mut mlp_feat = in_feat.clone();
                 for layer in mlp_layers {
-                    feat = layer.forward(&feat)?.tanh()?;
+                    mlp_feat = layer.forward(&mlp_feat)?.tanh()?;
                 }
+
+                // 线性残差融合：非线性特征 + 线性直通特征
+                let feat = if !mlp_layers.is_empty() {
+                    let skip_feat = match skip_proj {
+                        Some(proj) => proj.forward(&in_feat)?,
+                        None => in_feat,
+                    };
+                    (mlp_feat + skip_feat)?
+                } else {
+                    in_feat
+                };
 
                 let item_feat_dim = feat.dim(1)?;
                 let feat_3d = feat.reshape((b, *max_count, item_feat_dim))?;
@@ -916,6 +947,7 @@ impl NodeExtractor {
                 item_raw_dim,
                 item_extractor,
                 mlp_layers,
+                skip_proj,
                 encoder_spec,
             } => {
                 let moved_item = Box::new(item_extractor.to_device(device)?);
@@ -925,12 +957,21 @@ impl NodeExtractor {
                     let b = layer.bias().map(|b| b.to_device(device)).transpose()?;
                     moved_layers.push(Linear::new(w, b));
                 }
+                let moved_skip = match skip_proj {
+                    Some(proj) => {
+                        let w = proj.weight().to_device(device)?;
+                        let b = proj.bias().map(|b| b.to_device(device)).transpose()?;
+                        Some(Linear::new(w, b))
+                    }
+                    None => None,
+                };
                 Ok(Self::Repeated {
                     name: name.clone(),
                     max_count: *max_count,
                     item_raw_dim: *item_raw_dim,
                     item_extractor: moved_item,
                     mlp_layers: moved_layers,
+                    skip_proj: moved_skip,
                     encoder_spec: encoder_spec.clone(),
                 })
             }
@@ -958,6 +999,7 @@ impl NodeExtractor {
                 name,
                 item_extractor,
                 mlp_layers,
+                skip_proj,
                 ..
             } => {
                 let pfx = if prefix.is_empty() || prefix == name {
@@ -976,6 +1018,20 @@ impl NodeExtractor {
                         out.push(LayerParamInfo::new(
                             "Obs 特征提取",
                             format!("{pfx}.mlp_{idx}.bias"),
+                            b.dims(),
+                        ));
+                    }
+                }
+                if let Some(proj) = skip_proj {
+                    out.push(LayerParamInfo::new(
+                        "Obs 特征提取 (Residual Skip)",
+                        format!("{pfx}.skip_proj.weight"),
+                        proj.weight().dims(),
+                    ));
+                    if let Some(b) = proj.bias() {
+                        out.push(LayerParamInfo::new(
+                            "Obs 特征提取 (Residual Skip)",
+                            format!("{pfx}.skip_proj.bias"),
                             b.dims(),
                         ));
                     }

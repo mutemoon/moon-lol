@@ -8,10 +8,11 @@ use lol_core::life::Health;
 use lol_core::team::Team;
 use lol_rl_protocol::{ActionSchema, ActionSpace, ObsFeaturePayload, ObsSchema, RewardFormulaSpec};
 
+use crate::base_env::{LolBaseEnv, fiora_champion_spec, riven_champion_spec};
 use crate::curriculum::CurriculumRewardConfig;
 pub use crate::fiora_riven_common::{
-    ATTACK_MASK_DISTANCE, AttackEventTracker, FioraRivenBaseEnv, FioraRivenEntities,
-    setup_skill_levels_world, unpause_virtual_time,
+    ATTACK_MASK_DISTANCE, AttackEventTracker, FioraRivenEntities, setup_skill_levels_world,
+    unpause_virtual_time,
 };
 pub use crate::flash_plugin::{
     FLASH_COOLDOWN_SECS, FLASH_DISTANCE, FlashCooldown, dispatch_flash, extract_flash_obs,
@@ -474,8 +475,10 @@ pub fn apply_minion_hp_scale(world: &mut World, scale: f32) {
 }
 
 /// 统一的有头/无头世界初始化与重置逻辑（双方满血、闪现重置与小兵课程血量设置）
-pub fn setup_solo_v0_env_world(fiora: Entity, riven: Entity, world: &mut World) {
-    setup_solo_v0_health_world(world, fiora, riven);
+pub fn setup_solo_v0_env_world(champions: &[Entity], world: &mut World) {
+    if champions.len() >= 2 {
+        setup_solo_v0_health_world(world, champions[0], champions[1]);
+    }
     let scale = world
         .get_resource::<CurriculumRewardConfig>()
         .map(|c| c.minion_hp_scale)
@@ -484,11 +487,11 @@ pub fn setup_solo_v0_env_world(fiora: Entity, riven: Entity, world: &mut World) 
 }
 
 pub struct SoloV0Env {
-    pub base: FioraRivenBaseEnv,
+    pub base: LolBaseEnv,
 }
 
 impl std::ops::Deref for SoloV0Env {
-    type Target = FioraRivenBaseEnv;
+    type Target = LolBaseEnv;
     fn deref(&self) -> &Self::Target {
         &self.base
     }
@@ -515,16 +518,23 @@ impl SoloV0Env {
     }
 
     pub fn with_config(config: EnvConfig) -> Self {
-        let base = FioraRivenBaseEnv::builder(config, Self::DEFAULT_MAX_STEPS)
+        let base = LolBaseEnv::builder(config, Self::DEFAULT_MAX_STEPS)
             .window_title("Solo 1v1 V0 (Self-Play RL Viewer)")
             .map_name("solo")
             .enable_barrack(true)
-            .initial_positions(
-                Vec3::new(2350.0, 0.0, 12750.0),
-                Vec3::new(2450.0, 0.0, 12850.0),
-            )
-            .initial_skill_levels([1, 0, 0, 0])
             .warmup_secs(30.0)
+            .add_champion(fiora_champion_spec(
+                Team::Order,
+                Vec3::new(2350.0, 0.0, 12750.0),
+                [1, 0, 0, 0],
+                true,
+            ))
+            .add_champion(riven_champion_spec(
+                Team::Chaos,
+                Vec3::new(2450.0, 0.0, 12850.0),
+                [1, 0, 0, 0],
+                false,
+            ))
             .with_plugin(register_flash_plugin)
             .on_ready(setup_solo_v0_env_world)
             .on_reset(setup_solo_v0_env_world)
@@ -577,9 +587,11 @@ impl SoloV0Env {
 
     pub fn reset_both(&mut self) -> Vec<SoloV0Obs> {
         self.base.reset_base();
+        let fiora = self.base.fiora();
+        let riven = self.base.riven();
         vec![
-            get_ego_obs_from_world(self.base.world(), self.base.fiora, self.base.riven, 0.0),
-            get_ego_obs_from_world(self.base.world(), self.base.riven, self.base.fiora, 1.0),
+            get_ego_obs_from_world(self.base.world(), fiora, riven, 0.0),
+            get_ego_obs_from_world(self.base.world(), riven, fiora, 1.0),
         ]
     }
 
@@ -589,10 +601,12 @@ impl SoloV0Env {
         act_riven: SoloV0Action,
     ) -> (StepResult<SoloV0Obs>, StepResult<SoloV0Obs>) {
         self.base.increment_step();
+        let fiora = self.base.fiora();
+        let riven = self.base.riven();
         step_solo_v0_world(
             &mut self.base.app,
-            self.base.fiora,
-            self.base.riven,
+            fiora,
+            riven,
             act_fiora,
             act_riven,
             self.base.step_count,
@@ -712,7 +726,7 @@ impl RlEnvironment for SoloV0Env {
         let riven_action = if actions.len() > 1 {
             actions[1]
         } else {
-            get_default_riven_combat_action(self.base.world(), self.base.riven, self.base.fiora)
+            get_default_riven_combat_action(self.base.world(), self.base.riven(), self.base.fiora())
         };
 
         let (f_res, r_res) = self.step_both(fiora_action, riven_action);
@@ -749,6 +763,10 @@ impl RlEnvironment for SoloV0Env {
 
     fn reward_formula_spec() -> Option<RewardFormulaSpec> {
         SOLO_V0_SPEC.reward_formula.clone()
+    }
+
+    fn default_curriculum() -> Option<lol_rl_protocol::CurriculumConfig> {
+        Some(lol_rl_protocol::CurriculumConfig::default())
     }
 
     fn update_curriculum(
@@ -791,7 +809,8 @@ impl VisualEnvironment for SoloV0Env {
     }
 
     fn reset_world(&mut self, app: &mut App) -> Vec<Self::Obs> {
-        let (fiora, riven) = self.base.reset_app(app);
+        let champions = self.base.reset_app(app);
+        let (fiora, riven) = (champions[0], champions[1]);
         vec![
             get_ego_obs_from_world(app.world(), fiora, riven, 0.0),
             get_ego_obs_from_world(app.world(), riven, fiora, 1.0),
@@ -800,8 +819,8 @@ impl VisualEnvironment for SoloV0Env {
 
     fn get_current_obs_all(&self, world: &World) -> Vec<Self::Obs> {
         vec![
-            get_ego_obs_from_world(world, self.base.fiora, self.base.riven, 0.0),
-            get_ego_obs_from_world(world, self.base.riven, self.base.fiora, 1.0),
+            get_ego_obs_from_world(world, self.base.fiora(), self.base.riven(), 0.0),
+            get_ego_obs_from_world(world, self.base.riven(), self.base.fiora(), 1.0),
         ]
     }
 
@@ -818,14 +837,14 @@ impl VisualEnvironment for SoloV0Env {
         let riven_action = if actions.len() > 1 {
             actions[1]
         } else {
-            get_default_riven_combat_action(app.world(), self.base.riven, self.base.fiora)
+            get_default_riven_combat_action(app.world(), self.base.riven(), self.base.fiora())
         };
 
         self.base.increment_step();
         let (f_res, r_res) = step_solo_v0_world(
             app,
-            self.base.fiora,
-            self.base.riven,
+            self.base.fiora(),
+            self.base.riven(),
             fiora_action,
             riven_action,
             self.base.step_count,

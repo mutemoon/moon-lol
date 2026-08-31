@@ -6,7 +6,6 @@
 use std::time::Instant;
 
 use bevy::prelude::*;
-use lol_env::fiora_riven_common::FioraRivenBaseEnv;
 use lol_env::flash_plugin::register_flash_plugin;
 use lol_env::solo_v0::{
     SoloV0Action, SoloV0DiscreteAction, SoloV0Env, dispatch_single_action, get_ego_obs_from_world,
@@ -25,7 +24,7 @@ struct AblationResult {
 }
 
 fn create_env(enable_barrack: bool, enable_log: bool, enable_navigation: bool) -> SoloV0Env {
-    let base = FioraRivenBaseEnv::builder(
+    let base = lol_env::base_env::LolBaseEnv::builder(
         EnvConfig {
             max_steps: 1000,
             render_mode: RenderMode::Headless,
@@ -37,11 +36,18 @@ fn create_env(enable_barrack: bool, enable_log: bool, enable_navigation: bool) -
     .enable_barrack(enable_barrack)
     .enable_log(enable_log)
     .enable_navigation(enable_navigation)
-    .initial_positions(
+    .add_champion(lol_env::base_env::fiora_champion_spec(
+        lol_core::team::Team::Order,
         Vec3::new(2200.0, 0.0, 12650.0),
+        [1, 0, 0, 0],
+        true,
+    ))
+    .add_champion(lol_env::base_env::riven_champion_spec(
+        lol_core::team::Team::Chaos,
         Vec3::new(2500.0, 0.0, 12910.0),
-    )
-    .initial_skill_levels([1, 0, 0, 0])
+        [1, 0, 0, 0],
+        false,
+    ))
     .warmup_secs(if enable_barrack { 30.0 } else { 0.0 })
     .with_plugin(register_flash_plugin)
     .on_ready(setup_solo_v0_env_world)
@@ -175,8 +181,8 @@ fn main() -> anyhow::Result<()> {
     let mut t_minion_query_sum = 0.0;
 
     let micro_steps = 300;
-    let fiora = env.base.fiora;
-    let riven = env.base.riven;
+    let fiora = env.base.fiora();
+    let riven = env.base.riven();
 
     for _ in 0..micro_steps {
         let t0 = Instant::now();

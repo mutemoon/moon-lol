@@ -6,8 +6,9 @@ use lol_core::character::CharacterReady;
 use lol_core::life::Health;
 use lol_rl_protocol::{ActionSchema, ActionSpace, ObsFeaturePayload, ObsSchema, RewardFormulaSpec};
 
+use crate::base_env::{LolBaseEnv, fiora_champion_spec, riven_champion_spec};
 pub use crate::fiora_riven_common::{
-    ATTACK_MASK_DISTANCE, AttackEventTracker, FioraRivenBaseEnv, FioraRivenEntities,
+    ATTACK_MASK_DISTANCE, AttackEventTracker, FioraRivenEntities,
     VitalBreakTracker, setup_skill_levels_world, unpause_virtual_time,
 };
 pub use crate::flash_plugin::{
@@ -439,21 +440,23 @@ impl RewardModel for FioraV2RewardModel {
 // ── 环境主体 ────────────────────────────────────────────────────────────────
 
 /// 统一的有头/无头世界初始化与重置逻辑（重设瑞雯 10000 血量并重置剑姬闪现）
-pub fn setup_v2_fiora_riven_world(fiora: Entity, riven: Entity, world: &mut World) {
-    setup_v2_riven_health_world(world, riven);
-    if let Some(mut flash) = world.get_mut::<FlashCooldown>(fiora) {
-        flash.reset();
-    } else {
-        world.entity_mut(fiora).insert(FlashCooldown::default());
+pub fn setup_v2_fiora_riven_world(champions: &[Entity], world: &mut World) {
+    if champions.len() >= 2 {
+        setup_v2_riven_health_world(world, champions[1]);
+        if let Some(mut flash) = world.get_mut::<FlashCooldown>(champions[0]) {
+            flash.reset();
+        } else {
+            world.entity_mut(champions[0]).insert(FlashCooldown::default());
+        }
     }
 }
 
 pub struct FioraV2Env {
-    pub base: FioraRivenBaseEnv,
+    pub base: LolBaseEnv,
 }
 
 impl std::ops::Deref for FioraV2Env {
-    type Target = FioraRivenBaseEnv;
+    type Target = LolBaseEnv;
     fn deref(&self) -> &Self::Target {
         &self.base
     }
@@ -480,13 +483,21 @@ impl FioraV2Env {
     }
 
     pub fn with_config(config: EnvConfig) -> Self {
-        let base = FioraRivenBaseEnv::builder(config, Self::DEFAULT_MAX_STEPS)
+        let base = LolBaseEnv::builder(config, Self::DEFAULT_MAX_STEPS)
             .window_title("Fiora vs Riven (V2 Full Skills 10f) - RL Visual Viewer")
-            .initial_positions(Vec3::ZERO, Vec3::new(50.0, 0.0, 0.0))
+            .add_champion(fiora_champion_spec(
+                lol_core::team::Team::Order,
+                Vec3::ZERO,
+                [3, 1, 1, 1],
+                true,
+            ))
+            .add_champion(riven_champion_spec(
+                lol_core::team::Team::Chaos,
+                Vec3::new(50.0, 0.0, 0.0),
+                [3, 1, 1, 1],
+                false,
+            ))
             .with_plugin(register_flash_plugin)
-            .with_observer(|app| {
-                app.add_observer(on_v2_character_ready_setup_riven_health);
-            })
             .on_ready(setup_v2_fiora_riven_world)
             .on_reset(setup_v2_fiora_riven_world)
             .build();
@@ -546,17 +557,19 @@ impl FioraV2Env {
     }
 
     pub fn dispatch_action(&mut self, action: FioraV2Action) {
-        let fiora = self.base.fiora;
-        let riven = self.base.riven;
+        let fiora = self.base.fiora();
+        let riven = self.base.riven();
         dispatch_action_world(self.base.world_mut(), fiora, riven, action);
     }
 
     pub fn step(&mut self, action: FioraV2Action) -> StepResult<FioraV2Obs> {
         self.base.increment_step();
+        let fiora = self.base.fiora();
+        let riven = self.base.riven();
         step_v2_world(
             &mut self.base.app,
-            self.base.fiora,
-            self.base.riven,
+            fiora,
+            riven,
             action,
             self.base.step_count,
             self.base.max_steps,
@@ -715,15 +728,16 @@ impl VisualEnvironment for FioraV2Env {
     }
 
     fn reset_world(&mut self, app: &mut App) -> Vec<Self::Obs> {
-        let (new_fiora, new_riven) = self.base.reset_app(app);
+        let champions = self.base.reset_app(app);
+        let (new_fiora, new_riven) = (champions[0], champions[1]);
         vec![get_v2_obs_from_world(app.world(), new_fiora, new_riven)]
     }
 
     fn get_current_obs_all(&self, world: &World) -> Vec<Self::Obs> {
         vec![get_v2_obs_from_world(
             world,
-            self.base.fiora,
-            self.base.riven,
+            self.base.fiora(),
+            self.base.riven(),
         )]
     }
 
@@ -740,8 +754,8 @@ impl VisualEnvironment for FioraV2Env {
         ));
         vec![step_v2_world(
             app,
-            self.base.fiora,
-            self.base.riven,
+            self.base.fiora(),
+            self.base.riven(),
             action,
             self.base.step_count,
             self.base.max_steps,

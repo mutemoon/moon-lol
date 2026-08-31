@@ -62,7 +62,7 @@ pub struct Death;
 #[reflect(Component)]
 pub struct RespawnTimer(pub Timer);
 
-#[derive(Component, Reflect, Serialize, Deserialize, Clone, Default)]
+#[derive(Component, Reflect, Serialize, Deserialize, Clone, Default, Debug)]
 #[reflect(Component, Default)]
 pub struct Health {
     pub value: f32,

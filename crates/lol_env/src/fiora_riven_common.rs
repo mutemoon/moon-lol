@@ -1,36 +1,24 @@
 use std::collections::HashMap;
-use std::env::var;
-use std::path::PathBuf;
-use std::time::Duration;
 
-use bevy::app::ScheduleRunnerPlugin;
-use bevy::asset::AssetPlugin;
-use bevy::ecs::schedule::SingleThreadedExecutor;
 use bevy::prelude::*;
-use bevy::time::TimeUpdateStrategy;
-use bevy::winit::WinitPlugin;
-use bevy::world_serialization::DynamicWorld;
 use lol_base::character::{ConfigCharacterRecord, ConfigSkin};
-use lol_base::map::MapPaths;
 use lol_base_render::camera::Focus;
 use lol_champions::fiora::passive::Vital;
-use lol_champions::fiora::{Fiora, PluginFiora};
-use lol_champions::riven::{PluginRiven, Riven};
-use lol_core::action::{Action, CommandAction};
+use lol_champions::fiora::Fiora;
+use lol_champions::riven::Riven;
 use lol_core::base::direction::Direction;
 use lol_core::character::{CharacterReady, SpawnTransform};
 use lol_core::damage::{Armor, DamageType, EventDamageCreate};
-use lol_core::game::{GameState, WaitCharacterReady};
+use lol_core::game::WaitCharacterReady;
 use lol_core::life::Health;
 use lol_core::movement::Movement;
-use lol_core::navigation::navigation::NavigationDebug;
 use lol_core::skill::{CoolDown, Skill, SkillRecastWindow, Skills, is_skill_ready};
 use lol_core::team::Team;
 use lol_render::controller::SelfPlayer;
-use rand::random;
 
+use crate::base_env::{LolBaseEnv, LolBaseEnvBuilder};
 use crate::reward::{FioraRewardContext, FioraVsRivenRewardModel, RewardModel};
-use crate::traits::{EnvConfig, RenderMode, RewardBreakdownItem};
+use crate::traits::RewardBreakdownItem;
 
 /// 攻击类动作的掩码距离阈值：超过该距离不允许攻击（单一事实来源）。
 pub const ATTACK_MASK_DISTANCE: f32 = 220.0;
@@ -39,8 +27,6 @@ pub const ATTACK_MASK_DISTANCE: f32 = 220.0;
 pub const OBS_DISTANCE_IDX: usize = 8;
 /// obs 向量中距离的归一化缩放：`to_vector` 写入 `distance / OBS_DISTANCE_SCALE`。
 pub const OBS_DISTANCE_SCALE: f32 = 100.0;
-
-// ── 基础环境宿主与 Builder (插件化架构) ──────────────────────────────────────
 
 /// 英雄初始技能等级配置（Q, W, E, R）
 #[derive(Resource, Debug, Clone, Copy, PartialEq, Eq)]
@@ -52,538 +38,9 @@ impl Default for ChampionInitialSkillLevels {
     }
 }
 
-/// 剑姬 vs 瑞雯对战环境的公共 ECS 引擎基底。
-/// 封装完整的 Bevy App 实例、实体句柄与生命周期管理。
-pub struct FioraRivenBaseEnv {
-    pub app: App,
-    pub fiora: Entity,
-    pub riven: Entity,
-    pub fiora_config_handle: Handle<DynamicWorld>,
-    pub riven_config_handle: Handle<DynamicWorld>,
-    pub fiora_skin_handle: Option<Handle<DynamicWorld>>,
-    pub riven_skin_handle: Option<Handle<DynamicWorld>>,
-    pub step_count: usize,
-    pub max_steps: usize,
-    pub initial_fiora_pos: Vec3,
-    pub initial_riven_pos: Vec3,
-    pub map_name: String,
-    pub enable_barrack: bool,
-    pub initial_skill_levels: [usize; 4],
-    pub warmup_secs: f32,
-    pub render_mode: RenderMode,
-    pub on_ready_hooks: Vec<fn(Entity, Entity, &mut World)>,
-    pub on_reset_hooks: Vec<fn(Entity, Entity, &mut World)>,
-}
-
-impl FioraRivenBaseEnv {
-    /// 获取环境 Builder
-    pub fn builder(config: EnvConfig, default_max_steps: usize) -> FioraRivenEnvBuilder {
-        FioraRivenEnvBuilder::new(config, default_max_steps)
-    }
-
-    pub fn app(&self) -> &App {
-        &self.app
-    }
-
-    pub fn app_mut(&mut self) -> &mut App {
-        &mut self.app
-    }
-
-    pub fn world(&self) -> &World {
-        self.app.world()
-    }
-
-    pub fn world_mut(&mut self) -> &mut World {
-        self.app.world_mut()
-    }
-
-    pub fn fiora(&self) -> Entity {
-        self.fiora
-    }
-
-    pub fn riven(&self) -> Entity {
-        self.riven
-    }
-
-    pub fn initial_fiora_pos(&self) -> Vec3 {
-        self.initial_fiora_pos
-    }
-
-    pub fn initial_riven_pos(&self) -> Vec3 {
-        self.initial_riven_pos
-    }
-
-    pub fn render_mode(&self) -> RenderMode {
-        self.render_mode
-    }
-
-    pub fn is_render(&self) -> bool {
-        matches!(
-            self.render_mode,
-            RenderMode::Window | RenderMode::WindowCustomLoop
-        )
-    }
-
-    pub fn max_steps(&self) -> usize {
-        self.max_steps
-    }
-
-    pub fn step_count(&self) -> usize {
-        self.step_count
-    }
-
-    pub fn increment_step(&mut self) {
-        self.step_count += 1;
-    }
-
-    pub fn setup_champion_skill_levels(&mut self) {
-        setup_skill_levels_world(self.app.world_mut(), self.fiora, self.riven);
-    }
-
-    /// 资产加载完成后的统一初次就绪流程（设置技能等级、执行 on_ready 钩子并进行预热）
-    /// 无头模式在 build 结束时调用，有头模式在 VisualEnvironment::on_assets_loaded 中调用。
-    pub fn on_assets_ready(&mut self, app: &mut App) {
-        setup_skill_levels_world(app.world_mut(), self.fiora, self.riven);
-        for hook in &self.on_ready_hooks {
-            hook(self.fiora, self.riven, app.world_mut());
-        }
-        run_warmup_on_app(
-            app,
-            self.fiora,
-            self.riven,
-            self.warmup_secs,
-            &self.on_ready_hooks,
-        );
-    }
-
-    /// 执行基础环境重置（通过 Action::Reset 进行就地状态重置，执行 on_reset 钩子与物理预热）
-    pub fn reset_base(&mut self) {
-        let mut app = std::mem::replace(&mut self.app, App::new());
-        self.reset_app(&mut app);
-        self.app = app;
-    }
-
-    /// 在传入的 App 中执行对局重置（通过 Action::Reset 就地重置所有组件，保留 Entity ID 与已加载资源）
-    pub fn reset_app(&mut self, app: &mut App) -> (Entity, Entity) {
-        let fiora = self.fiora;
-        let riven = self.riven;
-        reset_app_internal(app, fiora, riven, self.warmup_secs, &self.on_reset_hooks);
-        self.step_count = 0;
-        (fiora, riven)
-    }
-
-    /// 检查资产是否加载就绪（通过 GameState::Playing 判断）
-    pub fn is_assets_loaded(&self, world: &World) -> bool {
-        world
-            .get_resource::<State<GameState>>()
-            .is_some_and(|s| *s.get() == GameState::Playing)
-    }
-}
-
-/// 预热时每次 update 批量推进的固定步长数。模拟系统全在 FixedUpdate，
-/// 合并步进不改变模拟结果，只让有头模式的预热少渲染十几倍的帧。
-const WARMUP_TICKS_PER_UPDATE: u32 = 16;
-
-/// 执行统一预热（推进指定秒数的 App update，并重新执行状态钩子，无头与有头完全共用）
-/// 有头模式每次 update 都伴随一次 vsync 渲染，故按 WARMUP_TICKS_PER_UPDATE 批量推进固定步长，
-/// 避免 30s 预热退化成 30s 真实等待。
-pub fn run_warmup_on_app(
-    app: &mut App,
-    fiora: Entity,
-    riven: Entity,
-    warmup_secs: f32,
-    hooks: &[fn(Entity, Entity, &mut World)],
-) {
-    if warmup_secs <= 0.0 {
-        return;
-    }
-    let mut remaining = (warmup_secs * 64.0).round() as u32;
-    while remaining > 0 {
-        let ticks = remaining.min(WARMUP_TICKS_PER_UPDATE);
-        remaining -= ticks;
-        app.world_mut()
-            .insert_resource(TimeUpdateStrategy::FixedTimesteps(ticks));
-        app.update();
-    }
-    app.world_mut()
-        .insert_resource(TimeUpdateStrategy::FixedTimesteps(1));
-    for hook in hooks {
-        hook(fiora, riven, app.world_mut());
-    }
-}
-
-/// 在 App 中执行就地重置的核心逻辑（不销毁实体）
-fn reset_app_internal(
-    app: &mut App,
-    fiora: Entity,
-    riven: Entity,
-    warmup_secs: f32,
-    on_reset_hooks: &[fn(Entity, Entity, &mut World)],
-) {
-    // 确保虚拟时间恢复，避免预热期间因暂停导致 delta 为 0 无法生成小兵与推进物理
-    crate::visual_runner::unpause_virtual_time(app.world_mut());
-
-    // 1. 触发核心 Action::Reset -> 全局 EventReset
-    app.world_mut().trigger(CommandAction {
-        entity: fiora,
-        action: Action::Reset,
-    });
-
-    // 2. 推进一帧 schedule 使所有系统响应 EventReset 并清理缓冲区
-    app.update();
-
-    // 3. 重置环境专用 Tracker
-    if let Some(mut tracker) = app.world_mut().get_resource_mut::<AttackEventTracker>() {
-        tracker.attack_hit = false;
-        tracker.attack_ready = false;
-    }
-    if let Some(mut tracker) = app.world_mut().get_resource_mut::<VitalBreakTracker>() {
-        tracker.hit = false;
-    }
-
-    // 4. 重置剑姬初始要害
-    let random_dir = match random::<u8>() % 4 {
-        0 => Direction::X,
-        1 => Direction::NegX,
-        2 => Direction::Z,
-        _ => Direction::NegZ,
-    };
-    let mut initial_vital = Vital::new(random_dir, 0.0, 10.0);
-    initial_vital.active_timer.tick(Duration::from_millis(1));
-    app.world_mut().entity_mut(riven).insert(initial_vital);
-
-    // 5. 设置技能等级与执行重置钩子
-    setup_skill_levels_world(app.world_mut(), fiora, riven);
-
-    for hook in on_reset_hooks {
-        hook(fiora, riven, app.world_mut());
-    }
-
-    // 6. 统一执行物理预热（无头与有头完全共用）
-    run_warmup_on_app(app, fiora, riven, warmup_secs, on_reset_hooks);
-}
-
-/// 环境构造器：支持通过注册插件与钩子按需组装具体环境。
-pub struct FioraRivenEnvBuilder {
-    pub config: EnvConfig,
-    pub default_max_steps: usize,
-    pub window_title: String,
-    pub map_name: String,
-    pub enable_barrack: bool,
-    pub enable_log: bool,
-    pub enable_navigation: bool,
-    pub enable_bevy_animation: bool,
-    pub initial_skill_levels: [usize; 4],
-    pub warmup_secs: f32,
-    pub initial_fiora_pos: Vec3,
-    pub initial_riven_pos: Vec3,
-    pub app_plugins: Vec<fn(&mut App)>,
-    pub extra_observers: Vec<fn(&mut App)>,
-    pub on_ready_hooks: Vec<fn(Entity, Entity, &mut World)>,
-    pub on_reset_hooks: Vec<fn(Entity, Entity, &mut World)>,
-}
-
-impl FioraRivenEnvBuilder {
-    pub fn new(config: EnvConfig, default_max_steps: usize) -> Self {
-        Self {
-            config,
-            default_max_steps,
-            window_title: "Fiora vs Riven RL".to_string(),
-            map_name: "test".to_string(),
-            enable_barrack: false,
-            enable_log: true,
-            enable_navigation: true,
-            enable_bevy_animation: true,
-            initial_skill_levels: [3, 1, 1, 1],
-            warmup_secs: 0.0,
-            initial_fiora_pos: Vec3::ZERO,
-            initial_riven_pos: Vec3::new(50.0, 0.0, 0.0),
-            app_plugins: Vec::new(),
-            extra_observers: Vec::new(),
-            on_ready_hooks: Vec::new(),
-            on_reset_hooks: Vec::new(),
-        }
-    }
-
-    pub fn window_title(mut self, title: impl Into<String>) -> Self {
-        self.window_title = title.into();
-        self
-    }
-
-    pub fn map_name(mut self, map_name: impl Into<String>) -> Self {
-        self.map_name = map_name.into();
-        self
-    }
-
-    pub fn enable_barrack(mut self, enable: bool) -> Self {
-        self.enable_barrack = enable;
-        self
-    }
-
-    pub fn enable_log(mut self, enable: bool) -> Self {
-        self.enable_log = enable;
-        self
-    }
-
-    pub fn enable_navigation(mut self, enable: bool) -> Self {
-        self.enable_navigation = enable;
-        self
-    }
-
-    pub fn enable_bevy_animation(mut self, enable: bool) -> Self {
-        self.enable_bevy_animation = enable;
-        self
-    }
-
-    pub fn initial_skill_levels(mut self, levels: [usize; 4]) -> Self {
-        self.initial_skill_levels = levels;
-        self
-    }
-
-    pub fn warmup_secs(mut self, secs: f32) -> Self {
-        self.warmup_secs = secs;
-        self
-    }
-
-    pub fn initial_positions(mut self, fiora_pos: Vec3, riven_pos: Vec3) -> Self {
-        self.initial_fiora_pos = fiora_pos;
-        self.initial_riven_pos = riven_pos;
-        self
-    }
-
-    /// 注册一个插件函数（在 App::finish 之前向 App 注册系统/资源）
-    pub fn with_plugin(mut self, plugin_fn: fn(&mut App)) -> Self {
-        self.app_plugins.push(plugin_fn);
-        self
-    }
-
-    /// 注册额外的 ECS 观察者
-    pub fn with_observer(mut self, observer_fn: fn(&mut App)) -> Self {
-        self.extra_observers.push(observer_fn);
-        self
-    }
-
-    /// 注册资产加载就绪后的一次性初始化钩子
-    pub fn on_ready(mut self, hook: fn(Entity, Entity, &mut World)) -> Self {
-        self.on_ready_hooks.push(hook);
-        self
-    }
-
-    /// 注册重置钩子（每次 reset_base 与 reset_world_base 时都会被自动调用）
-    pub fn on_reset(mut self, hook: fn(Entity, Entity, &mut World)) -> Self {
-        self.on_reset_hooks.push(hook);
-        self
-    }
-
-    /// 组装并初始化 `FioraRivenBaseEnv`
-    pub fn build(self) -> FioraRivenBaseEnv {
-        let max_steps = if self.config.max_steps > 0 {
-            self.config.max_steps
-        } else {
-            self.default_max_steps
-        };
-        let render = matches!(
-            self.config.render_mode,
-            RenderMode::Window | RenderMode::WindowCustomLoop
-        );
-        let mut app = App::new();
-
-        app.insert_resource(TimeUpdateStrategy::FixedTimesteps(1));
-
-        let manifest_dir =
-            var("CARGO_MANIFEST_DIR").unwrap_or_else(|_| env!("CARGO_MANIFEST_DIR").to_string());
-        let workspace_root = PathBuf::from(&manifest_dir)
-            .parent()
-            .and_then(|p| p.parent())
-            .map(|p| p.to_path_buf())
-            .unwrap_or_else(|| PathBuf::from(&manifest_dir));
-
-        let asset_plugin = AssetPlugin {
-            file_path: workspace_root.join("assets").to_string_lossy().to_string(),
-            ..Default::default()
-        };
-
-        if render {
-            if self.config.render_mode == RenderMode::WindowCustomLoop {
-                app.add_plugins(
-                    DefaultPlugins
-                        .build()
-                        .disable::<WinitPlugin>()
-                        .set(asset_plugin)
-                        .set(WindowPlugin {
-                            primary_window: Some(Window {
-                                title: self.window_title.clone(),
-                                resolution: (1280, 720).into(),
-                                ..Default::default()
-                            }),
-                            ..Default::default()
-                        }),
-                );
-            } else {
-                app.add_plugins(DefaultPlugins.set(asset_plugin).set(WindowPlugin {
-                    primary_window: Some(Window {
-                        title: self.window_title.clone(),
-                        resolution: (1280, 720).into(),
-                        ..Default::default()
-                    }),
-                    ..Default::default()
-                }));
-            }
-            app.add_plugins(lol_render::PluginRender);
-            let mut core_plugins = lol_core::PluginCore.build();
-            if !self.enable_barrack {
-                core_plugins = core_plugins.disable::<lol_core::PluginBarrack>();
-            }
-            if !self.enable_log {
-                core_plugins = core_plugins.disable::<lol_core::log::PluginLog>();
-            }
-            if !self.enable_navigation {
-                core_plugins =
-                    core_plugins.disable::<lol_core::navigation::navigation::PluginNavigaton>();
-            }
-            app.add_plugins(core_plugins);
-            app.add_plugins(lol_particle::PluginParticle);
-        } else {
-            app.add_plugins((
-                MinimalPlugins.set(ScheduleRunnerPlugin::run_once()),
-                asset_plugin,
-                bevy::world_serialization::WorldSerializationPlugin,
-                bevy::mesh::MeshPlugin,
-                bevy::image::ImagePlugin::default(),
-                bevy::scene::ScenePlugin,
-            ));
-            league_core::register::init_league_asset(&mut app);
-            app.init_asset::<StandardMaterial>();
-            app.init_asset::<Shader>();
-            app.init_asset::<bevy::animation::AnimationClip>();
-            app.init_asset::<bevy::animation::graph::AnimationGraph>();
-            app.init_asset::<lol_base_render::animation::LOLAnimationGraph>();
-            app.init_asset::<lol_base_render::particle::ConfigVfx>();
-            app.init_asset::<bevy::prelude::WorldAsset>();
-            app.init_asset::<lol_base::audio::ConfigAudio>();
-            app.init_asset::<lol_base::spell::Spell>();
-            app.init_asset::<lol_base::grid::ConfigNavigationGrid>();
-            app.init_asset::<lol_base::item::ConfigItem>();
-
-            let mut core_plugins = lol_core::PluginCore.build();
-            if !self.enable_barrack {
-                core_plugins = core_plugins.disable::<lol_core::PluginBarrack>();
-            }
-            if !self.enable_log {
-                core_plugins = core_plugins.disable::<lol_core::log::PluginLog>();
-            }
-            if !self.enable_navigation {
-                core_plugins =
-                    core_plugins.disable::<lol_core::navigation::navigation::PluginNavigaton>();
-            }
-            app.add_plugins(core_plugins);
-        }
-
-        app.add_plugins(PluginFiora);
-        app.add_plugins(PluginRiven);
-
-        // 注册用户扩展插件
-        for plugin in &self.app_plugins {
-            plugin(&mut app);
-        }
-
-        app.insert_resource(MapPaths::new(&self.map_name));
-        app.insert_resource(NavigationDebug);
-        app.insert_resource(ChampionInitialSkillLevels(self.initial_skill_levels));
-
-        app.finish();
-        app.cleanup();
-
-        if !render {
-            let mut schedules = app.world_mut().resource_mut::<Schedules>();
-            for (_, schedule) in schedules.iter_mut() {
-                schedule.set_executor(SingleThreadedExecutor::new());
-            }
-        }
-
-        let (fiora_config_handle, riven_config_handle, fiora_skin_handle, riven_skin_handle) = {
-            let asset_server = app.world().resource::<AssetServer>();
-            let fc = asset_server.load::<DynamicWorld>("characters/fiora/config.ron");
-            let rc = asset_server.load::<DynamicWorld>("characters/Riven/config.ron");
-            let fs = if render {
-                Some(asset_server.load::<DynamicWorld>("characters/fiora/skins/skin0.ron"))
-            } else {
-                None
-            };
-            let rs = if render {
-                Some(asset_server.load::<DynamicWorld>("characters/Riven/skins/skin0.ron"))
-            } else {
-                None
-            };
-            (fc, rc, fs, rs)
-        };
-
-        // 生成英雄实体
-        let (fiora, riven) = spawn_champions_world(
-            app.world_mut(),
-            fiora_config_handle.clone(),
-            riven_config_handle.clone(),
-            fiora_skin_handle.clone(),
-            riven_skin_handle.clone(),
-            self.initial_fiora_pos,
-            self.initial_riven_pos,
-            render,
-        );
-
-        app.world_mut()
-            .insert_resource(FioraRivenEntities { fiora, riven });
-        add_common_observers(&mut app);
-
-        for observer in &self.extra_observers {
-            observer(&mut app);
-        }
-
-        // 等待游戏资源就绪并进入 GameState::Playing（仅无头模式在 build 中同步自旋等待；渲染模式由 visual_runner 事件循环异步等待，避免阻塞主线程窗口创建）
-        if !render {
-            for _ in 0..500 {
-                app.update();
-                let world = app.world();
-                let is_playing = world
-                    .get_resource::<State<GameState>>()
-                    .is_some_and(|s| *s.get() == GameState::Playing);
-
-                if is_playing {
-                    break;
-                }
-            }
-        }
-
-        let mut base = FioraRivenBaseEnv {
-            app,
-            fiora,
-            riven,
-            fiora_config_handle,
-            riven_config_handle,
-            fiora_skin_handle,
-            riven_skin_handle,
-            step_count: 0,
-            max_steps,
-            initial_fiora_pos: self.initial_fiora_pos,
-            initial_riven_pos: self.initial_riven_pos,
-            map_name: self.map_name,
-            enable_barrack: self.enable_barrack,
-            initial_skill_levels: self.initial_skill_levels,
-            warmup_secs: self.warmup_secs,
-            render_mode: self.config.render_mode,
-            on_ready_hooks: self.on_ready_hooks,
-            on_reset_hooks: self.on_reset_hooks,
-        };
-
-        // 仅在无头模式下由 build 执行初次就绪与物理预热
-        if !render {
-            let mut app = std::mem::replace(&mut base.app, App::new());
-            base.on_assets_ready(&mut app);
-            base.app = app;
-        }
-
-        base
-    }
-}
+/// 通用环境别名
+pub type FioraRivenBaseEnv = LolBaseEnv;
+pub type FioraRivenEnvBuilder = LolBaseEnvBuilder;
 
 // ── 观测 ────────────────────────────────────────────────────────────────────
 
@@ -719,11 +176,19 @@ pub struct VitalBreakTracker {
 
 pub fn on_vital_break_damage(
     trigger: On<EventDamageCreate>,
-    entities: Res<FioraRivenEntities>,
+    entities: Option<Res<FioraRivenEntities>>,
+    q_fiora: Query<&Fiora>,
     mut tracker: ResMut<VitalBreakTracker>,
 ) {
-    if trigger.source == entities.fiora && trigger.damage_type == DamageType::True {
-        tracker.hit = true;
+    if trigger.damage_type == DamageType::True {
+        let is_fiora = if let Some(entities) = entities {
+            trigger.source == entities.fiora
+        } else {
+            q_fiora.contains(trigger.source)
+        };
+        if is_fiora {
+            tracker.hit = true;
+        }
     }
 }
 

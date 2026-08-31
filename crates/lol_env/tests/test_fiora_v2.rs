@@ -113,8 +113,9 @@ fn test_fiora_v2_reset_keeps_skill_levels() {
 
     {
         let world = env.app.world();
+        let fiora = env.fiora();
         let skills = world
-            .get::<Skills>(env.fiora)
+            .get::<Skills>(fiora)
             .expect("重置后剑姬应已挂载 Skills");
         let skill_entities = skills.to_vec();
         assert!(

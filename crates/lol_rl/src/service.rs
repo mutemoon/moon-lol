@@ -3,7 +3,7 @@ use std::path::Path;
 use std::sync::Arc;
 
 use chrono::Utc;
-use lol_env::curriculum::{CurriculumConfig, CurriculumScheduler};
+use lol_env::curriculum::CurriculumScheduler;
 pub use lol_rl_protocol::{
     CheckpointItem, EngineMode, InFrame, ObsFeaturePayload, OutFrame, RewardItem,
     TaskConfigPayload, TaskOverviewItem,
@@ -805,14 +805,12 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment + 'static>(
         )),
     };
 
-    // 初始化课程学习调度器（支持任务显式配置，或对 SoloV0 自动启用默认课程）
-    let mut curriculum_scheduler = if let Some(ref c_cfg) = task_config.curriculum {
-        Some(CurriculumScheduler::new(c_cfg.clone()))
-    } else if task_config.env_name == "SoloV0" {
-        Some(CurriculumScheduler::new(CurriculumConfig::default()))
-    } else {
-        None
-    };
+    // 初始化课程学习调度器（支持任务显式配置，若未显式指定则优雅回退至环境 Trait 声明的默认课程）
+    let mut curriculum_scheduler = task_config
+        .curriculum
+        .clone()
+        .or_else(E::default_curriculum)
+        .map(CurriculumScheduler::new);
 
     // 初始课程参数下发
     if let Some(ref c) = curriculum_scheduler {

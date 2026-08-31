@@ -1,3 +1,4 @@
+pub mod base_env;
 pub mod fiora_riven_common;
 pub mod modifier_obs;
 pub use modifier_obs::*;
@@ -14,6 +15,10 @@ pub mod solo_v0;
 pub mod traits;
 pub mod visual_runner;
 
+pub use base_env::{
+    ChampionPluginSpec, ChampionSpawner, LolBaseEnv, LolBaseEnvBuilder, fiora_champion_spec,
+    riven_champion_spec, setup_champion_skill_levels,
+};
 pub use curriculum::{
     CurriculumConfig, CurriculumPhase, CurriculumRewardConfig, CurriculumScheduler,
 };
