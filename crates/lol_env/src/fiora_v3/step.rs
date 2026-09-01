@@ -149,7 +149,7 @@ pub fn step_fiora_v3_world(
     step_count: usize,
     max_steps: usize,
 ) -> StepResult<FioraV3Obs> {
-    let prev_f_obs = get_ego_obs_from_world(app.world(), fiora, 0.0);
+    let prev_f_obs = get_ego_obs_from_world(app.world(), fiora);
     let prev_f_cs = app
         .world()
         .get::<ChampionStats>(fiora)
@@ -172,8 +172,12 @@ pub fn step_fiora_v3_world(
         app.update();
     }
 
-    let curr_f_obs = get_ego_obs_from_world(app.world(), fiora, 0.0);
-    let curr_f_hp = curr_f_obs.self_hp;
+    let curr_f_obs = get_ego_obs_from_world(app.world(), fiora);
+    let curr_f_hp = app
+        .world()
+        .get::<Health>(fiora)
+        .map(|h| h.value)
+        .unwrap_or(1.0);
     let curr_f_cs = app
         .world()
         .get::<ChampionStats>(fiora)

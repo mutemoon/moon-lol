@@ -141,20 +141,133 @@ fn test_fiora_v3_last_hit_reward_and_attack_no_cs_penalty() {
 }
 
 #[test]
-fn test_fiora_v3_conditional_target_masks() {
+fn test_fiora_v3_mask_rule_1_unit_slot_validity() {
     use lol_rl_protocol::ObsContext;
 
+    // 构造包含 3 个有效单位槽位和 9 个无效槽位（unit_type <= 0）的观测
+    let mut visible_units = vec![
+        // Slot 0: 有效敌方远程兵
+        ObsContext::new()
+            .with_var("unit_type", 3.0)
+            .with_var("rel_pos[0]", 100.0)
+            .with_var("rel_pos[1]", 50.0)
+            .with_var("hp_pct", 0.8)
+            .with_var("hp_norm", 0.4)
+            .with_var("is_enemy", 1.0),
+        // Slot 1: 有效敌方近战兵
+        ObsContext::new()
+            .with_var("unit_type", 2.0)
+            .with_var("rel_pos[0]", 50.0)
+            .with_var("rel_pos[1]", 0.0)
+            .with_var("hp_pct", 0.5)
+            .with_var("hp_norm", 0.25)
+            .with_var("is_enemy", 1.0),
+        // Slot 2: 有效友方近战兵
+        ObsContext::new()
+            .with_var("unit_type", 2.0)
+            .with_var("rel_pos[0]", -50.0)
+            .with_var("rel_pos[1]", 0.0)
+            .with_var("hp_pct", 0.9)
+            .with_var("hp_norm", 0.45)
+            .with_var("is_enemy", 0.0),
+    ];
+    // 填充剩余 9 个空槽位（unit_type = 0.0）
+    while visible_units.len() < lol_env::fiora_v3::FIORA_V3_MAX_VISIBLE_UNITS {
+        visible_units.push(ObsContext::new().with_var("unit_type", 0.0));
+    }
+
     let obs = FioraV3Obs {
-        role_id: 0.0,
         self_pos: Vec3::ZERO,
-        self_hp: 1000.0,
-        self_max_hp: 1000.0,
         self_ad: 68.0,
         attack_state: 0,
         attack_is_windup: false,
         attack_is_cooldown: false,
         attack_timer_remaining: 0.0,
-        self_modifiers: Vec::new(),
+        visible_units,
+        visible_unit_entities: vec![None; lol_env::fiora_v3::FIORA_V3_MAX_VISIBLE_UNITS],
+        visible_missiles: Vec::new(),
+    };
+
+    let action_masks = FioraV3Env::action_masks(&obs).expect("应返回因式分解动作掩码");
+
+    // 验证规则 ①：目标实体槽位有效性过滤
+    // branch_masks[1] 为 UnitSelection target 头的掩码 (12 维)
+    let target_slot_masks = action_masks.branch_masks[1]
+        .as_ref()
+        .expect("应包含 target 槽位掩码");
+    assert_eq!(
+        target_slot_masks.len(),
+        lol_env::fiora_v3::FIORA_V3_MAX_VISIBLE_UNITS,
+        "target 槽位数应与 visible_units 容量一致 (12)"
+    );
+
+    // 有效槽位 0, 1, 2 开放选择
+    assert!(target_slot_masks[0], "有效槽位 0 应允许选择");
+    assert!(target_slot_masks[1], "有效槽位 1 应允许选择");
+    assert!(target_slot_masks[2], "有效槽位 2 应允许选择");
+
+    // 空槽位 3..12 全部必须被屏蔽
+    for i in 3..lol_env::fiora_v3::FIORA_V3_MAX_VISIBLE_UNITS {
+        assert!(
+            !target_slot_masks[i],
+            "空/无效槽位 {} 必须被规则 ① 禁用 (disable target)",
+            i
+        );
+    }
+}
+
+#[test]
+fn test_fiora_v3_mask_rule_2_global_attack_cooldown() {
+    use lol_rl_protocol::ObsContext;
+
+    let build_obs = |is_cooldown: bool| FioraV3Obs {
+        self_pos: Vec3::ZERO,
+        self_ad: 68.0,
+        attack_state: if is_cooldown { 2 } else { 0 },
+        attack_is_windup: false,
+        attack_is_cooldown: is_cooldown,
+        attack_timer_remaining: if is_cooldown { 0.8 } else { 0.0 },
+        visible_units: vec![ObsContext::new().with_var("unit_type", 2.0).with_var("is_enemy", 1.0)],
+        visible_unit_entities: vec![None],
+        visible_missiles: Vec::new(),
+    };
+
+    // 1. 冷却就绪场景：NoOp(0)、Move(1)、Attack(2) 均可用
+    {
+        let obs_ready = build_obs(false);
+        let masks_ready = FioraV3Env::action_masks(&obs_ready).expect("动作掩码");
+        let act_masks = masks_ready.branch_masks[2]
+            .as_ref()
+            .expect("主动作类型掩码");
+        assert!(act_masks[0], "NoOp 动作可用");
+        assert!(act_masks[1], "Move 动作可用");
+        assert!(act_masks[2], "未冷却时 Attack 动作可用");
+    }
+
+    // 2. 处于普攻冷却场景：Attack(2) 必须被全局禁用
+    {
+        let obs_cooldown = build_obs(true);
+        let masks_cd = FioraV3Env::action_masks(&obs_cooldown).expect("动作掩码");
+        let act_masks = masks_cd.branch_masks[2]
+            .as_ref()
+            .expect("主动作类型掩码");
+        assert!(act_masks[0], "NoOp 动作可用");
+        assert!(act_masks[1], "Move 动作可用");
+        assert!(!act_masks[2], "普攻冷却中 Attack 必须被规则 ② 全局禁用");
+    }
+}
+
+#[test]
+fn test_fiora_v3_mask_rule_3_conditional_target_masks() {
+    use lol_rl_protocol::ObsContext;
+
+    let obs = FioraV3Obs {
+        self_pos: Vec3::ZERO,
+        self_ad: 68.0,
+        attack_state: 0,
+        attack_is_windup: false,
+        attack_is_cooldown: false,
+        attack_timer_remaining: 0.0,
         visible_units: vec![
             // Slot 0: 敌方远程小兵
             ObsContext::new()
@@ -195,10 +308,18 @@ fn test_fiora_v3_conditional_target_masks() {
         .expect("应包含自回归条件目标掩码矩阵");
 
     // 敌方小兵：开放攻击
+    assert!(cond_masks[0][0], "敌方小兵 0 NoOp 有效");
+    assert!(cond_masks[0][1], "敌方小兵 0 Move 有效");
     assert!(cond_masks[0][2], "敌方小兵 0 Attack 有效");
+
+    assert!(cond_masks[1][0], "敌方小兵 1 NoOp 有效");
+    assert!(cond_masks[1][1], "敌方小兵 1 Move 有效");
     assert!(cond_masks[1][2], "敌方小兵 1 Attack 有效");
-    // 友方小兵：屏蔽攻击
-    assert!(!cond_masks[2][2], "友方小兵 Attack 必须被屏蔽");
+
+    // 友方小兵：禁止普通攻击
+    assert!(cond_masks[2][0], "友方小兵 NoOp 有效");
+    assert!(cond_masks[2][1], "友方小兵 Move 有效");
+    assert!(!cond_masks[2][2], "友方小兵 Attack 必须被规则 ③ 屏蔽");
 }
 
 #[test]
@@ -284,7 +405,6 @@ fn test_fiora_v3_obs_health_norm_and_ad_and_missiles() {
 
     // 1. 验证英雄自身属性
     assert!(f_obs.self_ad > 0.0, "英雄攻击力应大于 0");
-    assert!(f_obs.self_hp > 0.0, "英雄当前血量应大于 0");
 
     // 2. 验证可见单位包含 hp_norm 与 hp_pct
     assert!(!f_obs.visible_units.is_empty(), "可见单位不应为空");

@@ -8,12 +8,10 @@ use lol_core::missile::{Missile, MissileState};
 use lol_core::team::Team;
 use lol_rl_protocol::{ObsFeaturePayload, ObsSchema};
 
-use crate::modifier_obs::{ModifierNameId, ModifierSlotObs, extract_entity_modifiers};
 use crate::obs_plugins::{extract_attack_state, extract_champion_base};
 
 pub const FIORA_V3_MAX_VISIBLE_UNITS: usize = 12;
 pub const FIORA_V3_MAX_VISIBLE_MISSILES: usize = 4;
-pub const FIORA_V3_OBS_DISTANCE_SCALE: f32 = 100.0;
 
 pub static FIORA_V3_OBS_SCHEMA: std::sync::LazyLock<ObsSchema> = std::sync::LazyLock::new(|| {
     super::FIORA_V3_SPEC
@@ -24,19 +22,13 @@ pub static FIORA_V3_OBS_SCHEMA: std::sync::LazyLock<ObsSchema> = std::sync::Lazy
 
 #[derive(Debug, Clone)]
 pub struct FioraV3Obs {
-    pub role_id: f32,
-
     pub self_pos: Vec3,
-    pub self_hp: f32,
-    pub self_max_hp: f32,
     pub self_ad: f32,
 
     pub attack_state: u8,
     pub attack_is_windup: bool,
     pub attack_is_cooldown: bool,
     pub attack_timer_remaining: f32,
-
-    pub self_modifiers: Vec<ModifierSlotObs>,
 
     pub visible_units: Vec<lol_rl_protocol::ObsContext>,
     pub visible_unit_entities: Vec<Option<Entity>>,
@@ -46,7 +38,6 @@ pub struct FioraV3Obs {
 impl FioraV3Obs {
     pub fn to_context(&self) -> lol_rl_protocol::ObsContext {
         let mut ctx = lol_rl_protocol::ObsContext::new();
-        ctx.set_var("role_id", self.role_id);
         ctx.set_var(
             "attack_is_ready",
             if self.attack_state == 0 { 1.0 } else { 0.0 },
@@ -61,12 +52,8 @@ impl FioraV3Obs {
         );
         ctx.set_var("attack_timer_remaining", self.attack_timer_remaining);
 
-        ctx.set_var("self_hp", self.self_hp);
-        ctx.set_var("self_max_hp", self.self_max_hp);
         ctx.set_var("self_ad", self.self_ad);
 
-        let self_mods: Vec<_> = self.self_modifiers.iter().map(|m| m.to_context()).collect();
-        ctx.set_repeated("self_modifiers", self_mods);
         ctx.set_repeated("visible_units", self.visible_units.clone());
         ctx.set_repeated("visible_missiles", self.visible_missiles.clone());
 
@@ -83,11 +70,7 @@ impl FioraV3Obs {
 
     pub fn to_payload(&self) -> ObsFeaturePayload {
         ObsFeaturePayload {
-            fiora_hp_pct: if self.self_max_hp > 0.0 {
-                self.self_hp / self.self_max_hp
-            } else {
-                1.0
-            },
+            fiora_hp_pct: 1.0,
             tags: HashMap::from([
                 ("role".to_string(), "剑姬 (Fiora)".to_string()),
                 (
@@ -98,16 +81,6 @@ impl FioraV3Obs {
                         2 => format!("后摇中({:.2}s)", self.attack_timer_remaining),
                         _ => "未知".to_string(),
                     },
-                ),
-                (
-                    "modifiers_count".to_string(),
-                    format!(
-                        "Self:{}",
-                        self.self_modifiers
-                            .iter()
-                            .filter(|m| m.name_id != ModifierNameId::None)
-                            .count(),
-                    ),
                 ),
                 (
                     "visible_units".to_string(),
@@ -287,7 +260,7 @@ pub fn extract_visible_missiles_from_world(
     slots
 }
 
-pub fn get_ego_obs_from_world(world: &World, self_entity: Entity, role_id: f32) -> FioraV3Obs {
+pub fn get_ego_obs_from_world(world: &World, self_entity: Entity) -> FioraV3Obs {
     let self_base = extract_champion_base(world, self_entity);
     let self_team = world
         .get::<Team>(self_entity)
@@ -305,16 +278,12 @@ pub fn get_ego_obs_from_world(world: &World, self_entity: Entity, role_id: f32) 
     let visible_missiles = extract_visible_missiles_from_world(world, self_base.pos, self_team);
 
     FioraV3Obs {
-        role_id,
         self_pos: self_base.pos,
-        self_hp: self_base.hp,
-        self_max_hp: self_base.max_hp,
         self_ad,
         attack_state: atk.state_code,
         attack_is_windup: atk.is_windup,
         attack_is_cooldown: atk.is_cooldown,
         attack_timer_remaining: atk.timer_remaining,
-        self_modifiers: extract_entity_modifiers(world, self_entity, 4),
         visible_units,
         visible_unit_entities,
         visible_missiles,

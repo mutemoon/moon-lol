@@ -21,8 +21,6 @@ env FioraV3 {
 
 // ── 观测空间 ─────────────────────────────────────────────────────────────────
 obs FioraV3Obs {
-    category role: 4 -> embed(12) = role_id;
-
     struct attack {
         scalar is_ready = attack_is_ready;
         scalar is_windup = attack_is_windup;
@@ -31,28 +29,16 @@ obs FioraV3Obs {
         scalar self_ad_norm = self_ad / 100.0;
     }
 
-    struct health {
-        scalar self_hp_pct = clamp(self_hp / max(self_max_hp, 1.0), 0.0, 1.0);
-        scalar self_hp_norm = self_hp / 1000.0;
-    }
-
-    repeated self_modifiers[4] -> encoder: SharedMlpFlatten(hidden=[16]) {
-        category name: 11 -> embed(8) = name;
-        scalar remaining_duration = remaining_duration;
-        scalar stack_count = stack_count;
-        vector params: 2 = [params[0], params[1]];
-    }
-
     repeated visible_units[12] -> encoder: SharedMlpPool(hidden=[64, 32], pool=Max) {
         category unit_type: 6 -> embed(8) = unit_type;
-        vector rel_pos: 2 = [rel_pos[0] / 100.0, rel_pos[1] / 100.0];
+        vector rel_pos: 2 = [rel_pos[0] / 1000.0, rel_pos[1] / 1000.0];
         scalar hp_pct = hp_pct;
         scalar hp_norm = hp_norm;
         scalar is_enemy = is_enemy;
     }
 
     repeated visible_missiles[4] -> encoder: SharedMlpPool(hidden=[16, 8], pool=Max) {
-        vector rel_pos: 2 = [rel_pos[0] / 100.0, rel_pos[1] / 100.0];
+        vector rel_pos: 2 = [rel_pos[0] / 1000.0, rel_pos[1] / 1000.0];
         scalar is_enemy = is_enemy;
         scalar is_active = is_active;
     }
@@ -61,7 +47,7 @@ obs FioraV3Obs {
 // ── 动作空间 ─────────────────────────────────────────────────────────────────
 action FioraV3Action {
     continuous offset: 2;
-    unit_target target: visible_units[20 -> 32];
+    unit_target target: visible_units[12 -> 32];
     category action_type: 3 {
         0: "保持当前 (NoOp)",
         1: "移动 (Move)",

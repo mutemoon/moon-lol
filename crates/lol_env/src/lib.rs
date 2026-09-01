@@ -37,7 +37,7 @@ pub use fiora_v2::{
     FioraV2RewardContext, FioraV2RewardModel, V2_OBS_DISTANCE_IDX, V2_OBS_DISTANCE_SCALE,
 };
 pub use fiora_v3::{
-    FIORA_V3_OBS_DISTANCE_SCALE, FIORA_V3_OBS_SCHEMA, FIORA_V3_OFFSET_SCALE, FioraV3Action,
+    FIORA_V3_OBS_SCHEMA, FIORA_V3_OFFSET_SCALE, FioraV3Action,
     FioraV3DiscreteAction, FioraV3Env, FioraV3Obs, setup_fiora_v3_env_world,
     setup_fiora_v3_health_world, step_fiora_v3_world,
 };

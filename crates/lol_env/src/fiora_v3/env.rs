@@ -188,7 +188,7 @@ impl RlEnvironment for FioraV3Env {
     fn reset(&mut self) -> Vec<Self::Obs> {
         self.base.reset_base();
         let fiora = self.base.fiora();
-        vec![get_ego_obs_from_world(self.base.world(), fiora, 0.0)]
+        vec![get_ego_obs_from_world(self.base.world(), fiora)]
     }
 
     fn step(&mut self, actions: &[Self::Action]) -> Vec<StepResult<Self::Obs>> {
@@ -273,11 +273,11 @@ impl VisualEnvironment for FioraV3Env {
     fn reset_world(&mut self, app: &mut App) -> Vec<Self::Obs> {
         let champions = self.base.reset_app(app);
         let fiora = champions[0];
-        vec![get_ego_obs_from_world(app.world(), fiora, 0.0)]
+        vec![get_ego_obs_from_world(app.world(), fiora)]
     }
 
     fn get_current_obs_all(&self, world: &World) -> Vec<Self::Obs> {
-        vec![get_ego_obs_from_world(world, self.base.fiora(), 0.0)]
+        vec![get_ego_obs_from_world(world, self.base.fiora())]
     }
 
     fn step_world(
