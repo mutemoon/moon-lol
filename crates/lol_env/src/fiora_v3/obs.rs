@@ -11,7 +11,7 @@ use lol_rl_protocol::{ObsFeaturePayload, ObsSchema};
 use crate::modifier_obs::{ModifierNameId, ModifierSlotObs, extract_entity_modifiers};
 use crate::obs_plugins::{extract_attack_state, extract_champion_base};
 
-pub const FIORA_V3_MAX_VISIBLE_UNITS: usize = 20;
+pub const FIORA_V3_MAX_VISIBLE_UNITS: usize = 12;
 pub const FIORA_V3_MAX_VISIBLE_MISSILES: usize = 4;
 pub const FIORA_V3_OBS_DISTANCE_SCALE: f32 = 100.0;
 

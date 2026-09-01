@@ -43,7 +43,7 @@ obs FioraV3Obs {
         vector params: 2 = [params[0], params[1]];
     }
 
-    repeated visible_units[20] -> encoder: SharedMlpPool(hidden=[64, 32], pool=Max) {
+    repeated visible_units[12] -> encoder: SharedMlpPool(hidden=[64, 32], pool=Max) {
         category unit_type: 6 -> embed(8) = unit_type;
         vector rel_pos: 2 = [rel_pos[0] / 100.0, rel_pos[1] / 100.0];
         scalar hp_pct = hp_pct;
@@ -89,5 +89,5 @@ action FioraV3Action {
 // ── 奖励公式 ─────────────────────────────────────────────────────────────────
 reward FioraV3Reward {
     term last_hit             : "补刀成功奖励"     = cs_reward_coef * self_cs;
-    term attack_no_cs_penalty : "攻击小兵未补刀惩罚" = -1.0 * (penalty_coef * self_attack_no_cs);
+    term attack_no_cs_penalty : "攻击小兵未补刀惩罚" = -0.01 * (penalty_coef * self_attack_no_cs);
 }
