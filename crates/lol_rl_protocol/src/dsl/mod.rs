@@ -412,9 +412,14 @@ mod tests {
         assert_eq!(base_mask, &vec![true, true, true, true]); // NoOp, Move, Attack, CastQ all enabled
 
         let cond_masks = action_masks.conditional_target_masks.as_ref().unwrap();
-        assert_eq!(cond_masks.len(), 3);
-        assert_eq!(cond_masks[0], vec![true, true, true, true]); // slot 0 (enemy): all enabled
-        assert_eq!(cond_masks[1], vec![true, true, false, false]); // slot 1 (ally): Attack & CastQ disabled
-        assert_eq!(cond_masks[2], vec![true, true, false, false]); // slot 2 (empty): Attack & CastQ disabled
+        assert_eq!(cond_masks.len(), 4); // 4 action classes
+        // 0: NoOp -> slot 0 (enemy), slot 1 (ally) both valid, slot 2 (empty) invalid
+        assert_eq!(cond_masks[0], vec![true, true, false]);
+        // 1: Move -> slot 0, slot 1 valid, slot 2 invalid
+        assert_eq!(cond_masks[1], vec![true, true, false]);
+        // 2: Attack -> only slot 0 (enemy) valid; slot 1 (ally) & slot 2 (empty) invalid
+        assert_eq!(cond_masks[2], vec![true, false, false]);
+        // 3: CastQ -> only slot 0 (enemy) valid; slot 1 (ally) & slot 2 (empty) invalid
+        assert_eq!(cond_masks[3], vec![true, false, false]);
     }
 }

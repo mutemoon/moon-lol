@@ -113,8 +113,8 @@ fn main() -> anyhow::Result<()> {
             let (action_encoded, log_prob, val) =
                 agent.actor_critic.sample_action(&state_tensor, None)?;
 
-            let chosen_target = action_encoded[2] as usize;
-            let chosen_action = action_encoded[3] as usize;
+            let chosen_action = action_encoded[2] as usize;
+            let chosen_target = action_encoded[3] as usize;
 
             let is_target_correct = chosen_target == target_low_hp_slot;
             let is_action_attack = chosen_action == 2; // Discrete 2 = Attack

@@ -45,8 +45,8 @@ mod tests {
         assert_eq!(encoded.len(), 4);
         assert_eq!(encoded[0], 0.5);
         assert_eq!(encoded[1], -0.5);
-        assert_eq!(encoded[2], 3.0);
-        assert_eq!(encoded[3], 2.0);
+        assert_eq!(encoded[2], 2.0); // discrete: Attack
+        assert_eq!(encoded[3], 3.0); // target: 3
 
         let decoded = FioraV3Action::from_encoding(&encoded);
         assert_eq!(decoded.offset_x, 0.5);

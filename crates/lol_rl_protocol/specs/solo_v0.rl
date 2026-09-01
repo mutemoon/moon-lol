@@ -81,7 +81,6 @@ obs SoloV0Obs {
 // ── 动作空间 ─────────────────────────────────────────────────────────────────
 action SoloV0Action {
     continuous offset: 2;
-    unit_target target: visible_units[20 -> 16];
     category action_type: 8 {
         0: "保持当前 (NoOp)",
         1: "移动 (Move)",
@@ -92,6 +91,7 @@ action SoloV0Action {
         6: "施放 R (CastR)",
         7: "闪现 (Flash)",
     }
+    unit_target target: visible_units[20 -> 16];
 
     mask {
         // ① 目标实体槽位有效性过滤：当槽位单位无效 (unit_type <= 0) 时禁用该 target 槽位
@@ -108,7 +108,7 @@ action SoloV0Action {
         if r_ready < 0.5            { disable CastR; }
         if flash_ready < 0.5        { disable Flash; }
 
-        // ③ 针对选中目标的条件动作过滤：友军或非敌军目标禁止普通攻击与技能
+        // ③ 针对选中动作的条件目标过滤：普通攻击与技能禁止以友军或非敌军为目标
         for u in visible_units {
             if u.is_enemy <= 0.5 {
                 disable [Attack, CastQ, CastW, CastE, CastR, Flash];

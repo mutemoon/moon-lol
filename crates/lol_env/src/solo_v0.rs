@@ -141,8 +141,8 @@ impl SoloV0Action {
         let offset_x = encoded.first().copied().unwrap_or(0.0);
         let offset_z = encoded.get(1).copied().unwrap_or(0.0);
         if encoded.len() >= 4 {
-            let target_idx = encoded.get(2).copied().unwrap_or(0.0) as u8;
-            let discrete_idx = encoded.get(3).copied().unwrap_or(0.0) as u8;
+            let discrete_idx = encoded.get(2).copied().unwrap_or(0.0) as u8;
+            let target_idx = encoded.get(3).copied().unwrap_or(0.0) as u8;
             Self {
                 offset_x,
                 offset_z,
@@ -164,8 +164,8 @@ impl SoloV0Action {
         vec![
             self.offset_x,
             self.offset_z,
-            self.target_idx as f32,
             self.discrete.to_u8() as f32,
+            self.target_idx as f32,
         ]
     }
 
@@ -1437,8 +1437,8 @@ mod tests {
         assert_eq!(encoded.len(), 4);
         assert_eq!(encoded[0], 0.5);
         assert_eq!(encoded[1], -0.5);
-        assert_eq!(encoded[2], 3.0);
-        assert_eq!(encoded[3], 2.0);
+        assert_eq!(encoded[2], 2.0); // discrete: Attack
+        assert_eq!(encoded[3], 3.0); // target: 3
 
         let decoded = SoloV0Action::from_encoding(&encoded);
         assert_eq!(decoded.offset_x, 0.5);

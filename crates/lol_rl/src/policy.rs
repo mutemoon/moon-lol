@@ -2641,7 +2641,12 @@ pub enum ActionBranchHead {
         name: String,
     },
     UnitSelection {
-        query_proj: Linear,
+        w_h: Linear,
+        w_a: candle_nn::Embedding,
+        w_e: Linear,
+        v_a: Linear,
+        proj_dim: usize,
+        num_classes: usize,
         max_units: usize,
         unit_embed_dim: usize,
         name: String,
@@ -2682,16 +2687,31 @@ impl ActionBranchHead {
                 })
             }
             Self::UnitSelection {
-                query_proj,
+                w_h,
+                w_a,
+                w_e,
+                v_a,
+                proj_dim,
+                num_classes,
                 max_units,
                 unit_embed_dim,
                 name,
                 obs_entity_name,
             } => {
-                let w = query_proj.weight().to_device(device)?;
-                let b = query_proj.bias().map(|b| b.to_device(device)).transpose()?;
+                let w_h_w = w_h.weight().to_device(device)?;
+                let w_h_b = w_h.bias().map(|b| b.to_device(device)).transpose()?;
+                let w_a_embeddings = w_a.embeddings().to_device(device)?;
+                let w_e_w = w_e.weight().to_device(device)?;
+                let w_e_b = w_e.bias().map(|b| b.to_device(device)).transpose()?;
+                let v_a_w = v_a.weight().to_device(device)?;
+                let v_a_b = v_a.bias().map(|b| b.to_device(device)).transpose()?;
                 Ok(Self::UnitSelection {
-                    query_proj: Linear::new(w, b),
+                    w_h: Linear::new(w_h_w, w_h_b),
+                    w_a: candle_nn::Embedding::new(w_a_embeddings, *proj_dim),
+                    w_e: Linear::new(w_e_w, w_e_b),
+                    v_a: Linear::new(v_a_w, v_a_b),
+                    proj_dim: *proj_dim,
+                    num_classes: *num_classes,
                     max_units: *max_units,
                     unit_embed_dim: *unit_embed_dim,
                     name: name.clone(),
@@ -2712,6 +2732,14 @@ pub struct StructuredActionHead {
 impl StructuredActionHead {
     pub fn new(schema: ActionSchema, feat_dim: usize, vb: VarBuilder) -> Result<Self> {
         let flat = schema.flat_branches();
+        let cat_classes = flat
+            .iter()
+            .find_map(|node| match node {
+                ActionNode::Categorical { num_classes, .. } => Some(*num_classes),
+                _ => None,
+            })
+            .unwrap_or(1);
+
         let mut branches = Vec::new();
         for node in flat.iter() {
             let branch_vb = vb.pp(format!("action_{}", node.name()));
@@ -2747,9 +2775,18 @@ impl StructuredActionHead {
                     obs_entity_name,
                     ..
                 } => {
-                    let query_proj = candle_nn::linear(feat_dim, *unit_embed_dim, branch_vb)?;
+                    let proj_dim = *unit_embed_dim;
+                    let w_h = candle_nn::linear(feat_dim, proj_dim, branch_vb.pp("w_h"))?;
+                    let w_a = candle_nn::embedding(cat_classes, proj_dim, branch_vb.pp("w_a"))?;
+                    let w_e = candle_nn::linear(*unit_embed_dim, proj_dim, branch_vb.pp("w_e"))?;
+                    let v_a = candle_nn::linear(proj_dim, 1, branch_vb.pp("v_a"))?;
                     branches.push(ActionBranchHead::UnitSelection {
-                        query_proj,
+                        w_h,
+                        w_a,
+                        w_e,
+                        v_a,
+                        proj_dim,
+                        num_classes: cat_classes,
                         max_units: *max_units,
                         unit_embed_dim: *unit_embed_dim,
                         name: name.clone(),
@@ -2777,30 +2814,18 @@ impl StructuredActionHead {
         let mut encoded = Vec::new();
         let mut total_log_prob = 0.0f32;
         let mut rng = rand::rng();
-        let mut chosen_target_idx: Option<usize> = None;
+        let mut chosen_action_idx = 0usize;
 
         for (i, branch) in self.branches.iter().enumerate() {
-            let mut mask_i = masks
+            let mask_i = masks
                 .and_then(|m| m.branch_masks.get(i))
                 .and_then(|m| m.as_deref());
             match branch {
                 ActionBranchHead::Categorical { head, .. } => {
-                    // 自回归条件目标掩码：若已采样目标，优先使用目标对应的条件掩码
-                    let cond_mask: Option<&[bool]> = if let Some(target_idx) = chosen_target_idx {
-                        masks
-                            .and_then(|m| m.conditional_target_masks.as_ref())
-                            .and_then(|ctm| ctm.get(target_idx))
-                            .map(|v| v.as_slice())
-                    } else {
-                        None
-                    };
-                    if cond_mask.is_some() {
-                        mask_i = cond_mask;
-                    }
-
                     let logits: Vec<f32> = head.forward(feat)?.squeeze(0)?.to_vec1()?;
                     let masked = mask_logits_slice(&logits, mask_i);
                     let (idx, lp) = sample_categorical(&masked);
+                    chosen_action_idx = idx;
                     encoded.push(idx as f32);
                     total_log_prob += lp;
                 }
@@ -2817,24 +2842,39 @@ impl StructuredActionHead {
                     }
                 }
                 ActionBranchHead::UnitSelection {
-                    query_proj,
+                    w_h,
+                    w_a,
+                    w_e,
+                    v_a,
                     obs_entity_name,
                     ..
                 } => {
-                    let query = query_proj.forward(feat)?;
+                    let target_mask: Option<&[bool]> = if let Some(ctm) =
+                        masks.and_then(|m| m.conditional_target_masks.as_ref())
+                    {
+                        ctm.get(chosen_action_idx).map(|v| v.as_slice())
+                    } else {
+                        mask_i
+                    };
+
                     let embeds = entity_embeds.get(obs_entity_name).ok_or_else(|| {
                         candle_core::Error::Msg(format!(
                             "Missing entity embeds for '{}'",
                             obs_entity_name
                         ))
                     })?;
-                    let logits_t = embeds
-                        .squeeze(0)?
-                        .matmul(&query.squeeze(0)?.unsqueeze(1)?)?;
-                    let logits: Vec<f32> = logits_t.squeeze(1)?.to_vec1()?;
-                    let masked = mask_logits_slice(&logits, mask_i);
+
+                    let act_t = Tensor::new(&[chosen_action_idx as u32], feat.device())?;
+                    let h_proj = w_h.forward(feat)?.unsqueeze(1)?;
+                    let a_proj = w_a.forward(&act_t)?.unsqueeze(1)?;
+                    let e_proj = w_e.forward(embeds)?;
+                    let ha = (&h_proj + &a_proj)?;
+                    let sum = ha.broadcast_add(&e_proj)?;
+                    let act = sum.tanh()?;
+                    let logits_t = v_a.forward(&act)?.squeeze(2)?;
+                    let logits: Vec<f32> = logits_t.squeeze(0)?.to_vec1()?;
+                    let masked = mask_logits_slice(&logits, target_mask);
                     let (idx, lp) = sample_categorical(&masked);
-                    chosen_target_idx = Some(idx);
                     encoded.push(idx as f32);
                     total_log_prob += lp;
                 }
@@ -2854,44 +2894,52 @@ impl StructuredActionHead {
         let n = feat.dim(0)?;
         let mut all_log_probs: Vec<Tensor> = Vec::new();
         let mut all_entropies: Vec<Tensor> = Vec::new();
+
+        let mut cat_action_offset: Option<usize> = None;
+        let mut current_off = 0usize;
+        for branch in &self.branches {
+            match branch {
+                ActionBranchHead::Categorical { .. } => {
+                    if cat_action_offset.is_none() {
+                        cat_action_offset = Some(current_off);
+                    }
+                    current_off += 1;
+                }
+                ActionBranchHead::Continuous { dim, .. } => {
+                    current_off += *dim;
+                }
+                ActionBranchHead::UnitSelection { .. } => {
+                    current_off += 1;
+                }
+            }
+        }
+
+        let cat_actions = if let Some(cat_off) = cat_action_offset {
+            Some(
+                actions
+                    .narrow(1, cat_off, 1)?
+                    .squeeze(1)?
+                    .to_dtype(DType::U32)?,
+            )
+        } else {
+            None
+        };
+
         let mut action_offset = 0usize;
-        let mut unit_selection_offset: Option<usize> = None;
 
         for (_i, branch) in self.branches.iter().enumerate() {
             match branch {
-                ActionBranchHead::Categorical {
-                    head, num_classes, ..
-                } => {
+                ActionBranchHead::Categorical { head, num_classes, .. } => {
                     let logits = head.forward(feat)?;
-                    let masked_logits =
-                        if let (Some(u_off), Some(m)) = (unit_selection_offset, masks) {
-                            if let Some(ref ctm) = m.conditional_target_masks {
-                                let target_indices: Vec<u32> = actions
-                                    .narrow(1, u_off, 1)?
-                                    .squeeze(1)?
-                                    .to_dtype(DType::U32)?
-                                    .to_vec1()?;
-                                let mut flat_mask = Vec::with_capacity(n * *num_classes);
-                                let default_row = vec![true; *num_classes];
-                                for &t_idx in &target_indices {
-                                    let row = ctm.get(t_idx as usize).unwrap_or(&default_row);
-                                    for &valid in row {
-                                        flat_mask.push(if valid { 1.0f32 } else { 0.0f32 });
-                                    }
-                                }
-                                let mask_tensor =
-                                    Tensor::from_vec(flat_mask, (n, *num_classes), feat.device())?;
-                                mask_logits_tensor(&logits, Some(&mask_tensor))?
-                            } else if let Some(bm) = batch_masks {
-                                mask_logits_tensor(&logits, Some(bm))?
-                            } else {
-                                logits
-                            }
-                        } else if let Some(bm) = batch_masks {
+                    let masked_logits = if let Some(bm) = batch_masks {
+                        if bm.dim(1)? == *num_classes {
                             mask_logits_tensor(&logits, Some(bm))?
                         } else {
                             logits
-                        };
+                        }
+                    } else {
+                        logits
+                    };
 
                     let log_probs_all = candle_nn::ops::log_softmax(&masked_logits, D::Minus1)?;
                     let probs_all = candle_nn::ops::softmax(&masked_logits, D::Minus1)?;
@@ -2931,27 +2979,70 @@ impl StructuredActionHead {
                     action_offset += *dim;
                 }
                 ActionBranchHead::UnitSelection {
-                    query_proj,
+                    w_h,
+                    w_a,
+                    w_e,
+                    v_a,
+                    max_units,
                     obs_entity_name,
                     ..
                 } => {
-                    unit_selection_offset = Some(action_offset);
-                    let query = query_proj.forward(feat)?;
+                    let target_actions = actions
+                        .narrow(1, action_offset, 1)?
+                        .squeeze(1)?
+                        .to_dtype(DType::U32)?;
+
+                    let chosen_acts = if let Some(ref cat_act) = cat_actions {
+                        cat_act.clone()
+                    } else {
+                        Tensor::zeros((n,), DType::U32, feat.device())?
+                    };
+
                     let embeds = entity_embeds.get(obs_entity_name).ok_or_else(|| {
                         candle_core::Error::Msg(format!(
                             "Missing entity embeds for '{}'",
                             obs_entity_name
                         ))
                     })?;
-                    let query_3d = query.unsqueeze(2)?;
-                    let logits = embeds.matmul(&query_3d)?.squeeze(2)?;
-                    let log_probs_all = candle_nn::ops::log_softmax(&logits, D::Minus1)?;
-                    let probs_all = candle_nn::ops::softmax(&logits, D::Minus1)?;
-                    let act = actions
-                        .narrow(1, action_offset, 1)?
-                        .squeeze(1)?
-                        .to_dtype(DType::U32)?;
-                    let sel_lp = log_probs_all.gather(&act.unsqueeze(1)?, 1)?.squeeze(1)?;
+
+                    let h_proj = w_h.forward(feat)?.unsqueeze(1)?;
+                    let a_proj = w_a.forward(&chosen_acts)?.unsqueeze(1)?;
+                    let e_proj = w_e.forward(embeds)?;
+                    let ha = (&h_proj + &a_proj)?;
+                    let sum = ha.broadcast_add(&e_proj)?;
+                    let act = sum.tanh()?;
+                    let raw_logits = v_a.forward(&act)?.squeeze(2)?;
+
+                    let masked_logits = if let Some(ref ctm) =
+                        masks.and_then(|m| m.conditional_target_masks.as_ref())
+                    {
+                        let chosen_act_vec: Vec<u32> = chosen_acts.to_vec1()?;
+                        let mut flat_mask = Vec::with_capacity(n * *max_units);
+                        let default_row = vec![true; *max_units];
+                        for &a_idx in &chosen_act_vec {
+                            let row = ctm.get(a_idx as usize).unwrap_or(&default_row);
+                            for &valid in row {
+                                flat_mask.push(if valid { 1.0f32 } else { 0.0f32 });
+                            }
+                        }
+                        let mask_tensor =
+                            Tensor::from_vec(flat_mask, (n, *max_units), feat.device())?;
+                        mask_logits_tensor(&raw_logits, Some(&mask_tensor))?
+                    } else if let Some(bm) = batch_masks {
+                        if bm.dim(1)? == *max_units {
+                            mask_logits_tensor(&raw_logits, Some(bm))?
+                        } else {
+                            raw_logits
+                        }
+                    } else {
+                        raw_logits
+                    };
+
+                    let log_probs_all = candle_nn::ops::log_softmax(&masked_logits, D::Minus1)?;
+                    let probs_all = candle_nn::ops::softmax(&masked_logits, D::Minus1)?;
+                    let sel_lp = log_probs_all
+                        .gather(&target_actions.unsqueeze(1)?, 1)?
+                        .squeeze(1)?;
                     let ent = (probs_all * log_probs_all)?
                         .neg()?
                         .sum_keepdim(D::Minus1)?
@@ -2979,7 +3070,7 @@ impl StructuredActionHead {
         let mut displays = Vec::with_capacity(self.branches.len());
 
         for (i, branch) in self.branches.iter().enumerate() {
-            let mut mask_i = masks
+            let mask_i = masks
                 .and_then(|m| m.branch_masks.get(i))
                 .and_then(|m| m.as_deref());
             let node = flat.get(i);
@@ -2989,12 +3080,6 @@ impl StructuredActionHead {
                     num_classes,
                     name,
                 } => {
-                    // 若存在条件掩码，默认以 0 号目标（敌方英雄）展示基线动作分布
-                    if let Some(ref ctm) = masks.and_then(|m| m.conditional_target_masks.as_ref()) {
-                        if let Some(first_mask) = ctm.first() {
-                            mask_i = Some(first_mask.as_slice());
-                        }
-                    }
                     let logits: Vec<f32> = head.forward(feat)?.squeeze(0)?.to_vec1()?;
                     let raw_probs = softmax_slice(&logits);
                     let masked = mask_logits_slice(&logits, mask_i);
@@ -3039,20 +3124,35 @@ impl StructuredActionHead {
                     });
                 }
                 ActionBranchHead::UnitSelection {
-                    query_proj,
+                    w_h,
+                    w_a,
+                    w_e,
+                    v_a,
                     max_units,
                     name,
                     obs_entity_name,
                     ..
                 } => {
+                    let target_mask: Option<&[bool]> = if let Some(ctm) =
+                        masks.and_then(|m| m.conditional_target_masks.as_ref())
+                    {
+                        ctm.first().map(|v| v.as_slice())
+                    } else {
+                        mask_i
+                    };
+
                     let items = if let Some(embeds) = entity_embeds.get(obs_entity_name) {
-                        let query = query_proj.forward(feat)?;
-                        let logits_t = embeds
-                            .squeeze(0)?
-                            .matmul(&query.squeeze(0)?.unsqueeze(1)?)?;
-                        let logits: Vec<f32> = logits_t.squeeze(1)?.to_vec1()?;
+                        let act_0 = Tensor::new(&[0u32], feat.device())?;
+                        let h_proj = w_h.forward(feat)?.unsqueeze(1)?;
+                        let a_proj = w_a.forward(&act_0)?.unsqueeze(1)?;
+                        let e_proj = w_e.forward(embeds)?;
+                        let ha = (&h_proj + &a_proj)?;
+                        let sum = ha.broadcast_add(&e_proj)?;
+                        let act = sum.tanh()?;
+                        let logits_t = v_a.forward(&act)?.squeeze(2)?;
+                        let logits: Vec<f32> = logits_t.squeeze(0)?.to_vec1()?;
                         let raw_probs = softmax_slice(&logits);
-                        let masked = mask_logits_slice(&logits, mask_i);
+                        let masked = mask_logits_slice(&logits, target_mask);
                         let probs = softmax_slice(&masked);
                         (0..*max_units)
                             .map(|j| {
@@ -3061,7 +3161,7 @@ impl StructuredActionHead {
                                 } else {
                                     format!("Slot {j} (小兵/单位)")
                                 };
-                                let is_masked = mask_i
+                                let is_masked = target_mask
                                     .map(|m| !m.get(j).copied().unwrap_or(true))
                                     .unwrap_or(false);
                                 PolicyItem {
@@ -3099,6 +3199,7 @@ impl StructuredActionHead {
         })
     }
 
+    /// 收集多头输出层的所有参数张量信息
     pub fn collect_params(&self, out: &mut Vec<LayerParamInfo>) {
         for branch in &self.branches {
             match branch {
@@ -3141,17 +3242,51 @@ impl StructuredActionHead {
                     ));
                 }
                 ActionBranchHead::UnitSelection {
-                    query_proj, name, ..
+                    w_h,
+                    w_a,
+                    w_e,
+                    v_a,
+                    name,
+                    ..
                 } => {
                     out.push(LayerParamInfo::new(
                         "Actor 策略头",
-                        format!("action_{}.query_proj.weight", name),
-                        query_proj.weight().dims(),
+                        format!("action_{}.w_h.weight", name),
+                        w_h.weight().dims(),
                     ));
-                    if let Some(b) = query_proj.bias() {
+                    if let Some(b) = w_h.bias() {
                         out.push(LayerParamInfo::new(
                             "Actor 策略头",
-                            format!("action_{}.query_proj.bias", name),
+                            format!("action_{}.w_h.bias", name),
+                            b.dims(),
+                        ));
+                    }
+                    out.push(LayerParamInfo::new(
+                        "Actor 策略头",
+                        format!("action_{}.w_a.embeddings", name),
+                        w_a.embeddings().dims(),
+                    ));
+                    out.push(LayerParamInfo::new(
+                        "Actor 策略头",
+                        format!("action_{}.w_e.weight", name),
+                        w_e.weight().dims(),
+                    ));
+                    if let Some(b) = w_e.bias() {
+                        out.push(LayerParamInfo::new(
+                            "Actor 策略头",
+                            format!("action_{}.w_e.bias", name),
+                            b.dims(),
+                        ));
+                    }
+                    out.push(LayerParamInfo::new(
+                        "Actor 策略头",
+                        format!("action_{}.v_a.weight", name),
+                        v_a.weight().dims(),
+                    ));
+                    if let Some(b) = v_a.bias() {
+                        out.push(LayerParamInfo::new(
+                            "Actor 策略头",
+                            format!("action_{}.v_a.bias", name),
                             b.dims(),
                         ));
                     }
@@ -3432,7 +3567,6 @@ mod tests {
 
         let action_schema = ActionSchema::new(vec![
             ActionNode::continuous("offset", 2),
-            ActionNode::unit_selection("target", 7, 16, "visible_units"),
             ActionNode::categorical(
                 "action_type",
                 vec!["NoOp", "Move", "Attack", "CastQ"]
@@ -3440,6 +3574,7 @@ mod tests {
                     .map(String::from)
                     .collect(),
             ),
+            ActionNode::unit_selection("target", 7, 16, "visible_units"),
         ]);
 
         let ac = ActorCritic::from_schemas(
@@ -3465,7 +3600,6 @@ mod tests {
         let vb = VarBuilder::from_varmap(&varmap, DType::F32, &device);
 
         let schema = ActionSchema::new(vec![
-            ActionNode::unit_selection("target", 2, 16, "visible_units"),
             ActionNode::categorical(
                 "action_type",
                 vec!["NoOp", "Move", "Attack", "CastQ"]
@@ -3473,6 +3607,7 @@ mod tests {
                     .map(String::from)
                     .collect(),
             ),
+            ActionNode::unit_selection("target", 2, 16, "visible_units"),
         ]);
 
         let head = StructuredActionHead::new(schema, 32, vb)?;
@@ -3484,31 +3619,38 @@ mod tests {
             Tensor::randn(0.0f32, 1.0, (1, 2, 16), &device)?,
         );
 
-        // Target 0: 敌方 -> 全部 4 种动作允许
-        // Target 1: 友方 -> 仅允许 0 (NoOp) 和 1 (Move)
-        let cond_masks = vec![vec![true, true, true, true], vec![true, true, false, false]];
+        // 动作 0 (NoOp) / 1 (Move): 两个槽位均允许
+        // 动作 2 (Attack) / 3 (CastQ): 仅允许槽位 0 (敌方)，槽位 1 (友方) 禁用
+        let cond_masks = vec![
+            vec![true, true],  // 0: NoOp
+            vec![true, true],  // 1: Move
+            vec![true, false], // 2: Attack (友方 Slot 1 禁用)
+            vec![true, false], // 3: CastQ (友方 Slot 1 禁用)
+        ];
 
-        // 1. 强制选择 target=1（友军）时测试采样
-        let masks_target_1 = ActionMasks::with_conditional_target_masks(
-            vec![Some(vec![false, true]), Some(vec![true, true, true, true])],
+        // 1. 强制选择 action_type = 2 (Attack) 时测试目标采样
+        let masks_attack = ActionMasks::with_conditional_target_masks(
+            vec![
+                Some(vec![false, false, true, false]), // 强制选 Attack
+                Some(vec![true, true]),
+            ],
             cond_masks.clone(),
         );
 
         for _ in 0..20 {
-            let (encoded, _lp) = head.sample(&feat, Some(&masks_target_1), &entity_embeds)?;
+            let (encoded, _lp) = head.sample(&feat, Some(&masks_attack), &entity_embeds)?;
             assert_eq!(encoded.len(), 2);
-            assert_eq!(encoded[0], 1.0, "目标应强制选择友军 Slot 1");
-            assert!(
-                encoded[1] == 0.0 || encoded[1] == 1.0,
-                "选中友军时，动作类型只能为 0(NoOp) 或 1(Move)，实际采样到: {}",
-                encoded[1]
+            assert_eq!(encoded[0], 2.0, "动作类型应强制为 2 (Attack)");
+            assert_eq!(
+                encoded[1], 0.0,
+                "在 Attack 动作下，目标必须选择合法敌军 Slot 0，决不能选中友军 Slot 1"
             );
         }
 
         // 2. 测试 evaluate 条件评估对齐
-        // Sample A: target=0 (敌军), action_type=2 (Attack) -> 合法
-        // Sample B: target=1 (友军), action_type=1 (Move) -> 合法
-        let actions = Tensor::from_vec(vec![0.0f32, 2.0, 1.0, 1.0], (2, 2), &device)?;
+        // Sample A: action_type=2 (Attack), target=0 (敌军) -> 合法
+        // Sample B: action_type=1 (Move), target=1 (友军) -> 合法
+        let actions = Tensor::from_vec(vec![2.0f32, 0.0, 1.0, 1.0], (2, 2), &device)?;
         let feat_2 = Tensor::zeros((2, 32), DType::F32, &device)?;
         let mut entity_embeds_2 = HashMap::new();
         entity_embeds_2.insert(
@@ -3517,7 +3659,7 @@ mod tests {
         );
 
         let masks_all = ActionMasks::with_conditional_target_masks(
-            vec![Some(vec![true, true]), Some(vec![true, true, true, true])],
+            vec![Some(vec![true, true, true, true]), Some(vec![true, true])],
             cond_masks,
         );
 

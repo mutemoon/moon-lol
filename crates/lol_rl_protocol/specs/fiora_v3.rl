@@ -47,12 +47,12 @@ obs FioraV3Obs {
 // ── 动作空间 ─────────────────────────────────────────────────────────────────
 action FioraV3Action {
     continuous offset: 2;
-    unit_target target: visible_units[12 -> 32];
     category action_type: 3 {
         0: "保持当前 (NoOp)",
         1: "移动 (Move)",
         2: "普通攻击 (Attack)",
     }
+    unit_target target: visible_units[12 -> 32];
 
     mask {
         // ① 目标实体槽位有效性过滤：当槽位单位无效 (unit_type <= 0) 时禁用该 target 槽位
@@ -63,7 +63,7 @@ action FioraV3Action {
         // ② 全局基础冷却过滤
         if attack_is_cooldown > 0.5 { disable Attack; }
 
-        // ③ 针对选中目标的条件动作过滤：友军或非敌军目标禁止普通攻击
+        // ③ 针对选中动作的条件目标过滤：普通攻击禁止以友军或非敌军为目标
         for u in visible_units {
             if u.is_enemy <= 0.5 {
                 disable Attack;

@@ -191,8 +191,8 @@ fn test_fiora_v3_mask_rule_1_unit_slot_validity() {
     let action_masks = FioraV3Env::action_masks(&obs).expect("应返回因式分解动作掩码");
 
     // 验证规则 ①：目标实体槽位有效性过滤
-    // branch_masks[1] 为 UnitSelection target 头的掩码 (12 维)
-    let target_slot_masks = action_masks.branch_masks[1]
+    // branch_masks[2] 为 UnitSelection target 头的掩码 (12 维)
+    let target_slot_masks = action_masks.branch_masks[2]
         .as_ref()
         .expect("应包含 target 槽位掩码");
     assert_eq!(
@@ -236,7 +236,7 @@ fn test_fiora_v3_mask_rule_2_global_attack_cooldown() {
     {
         let obs_ready = build_obs(false);
         let masks_ready = FioraV3Env::action_masks(&obs_ready).expect("动作掩码");
-        let act_masks = masks_ready.branch_masks[2]
+        let act_masks = masks_ready.branch_masks[1]
             .as_ref()
             .expect("主动作类型掩码");
         assert!(act_masks[0], "NoOp 动作可用");
@@ -248,7 +248,7 @@ fn test_fiora_v3_mask_rule_2_global_attack_cooldown() {
     {
         let obs_cooldown = build_obs(true);
         let masks_cd = FioraV3Env::action_masks(&obs_cooldown).expect("动作掩码");
-        let act_masks = masks_cd.branch_masks[2]
+        let act_masks = masks_cd.branch_masks[1]
             .as_ref()
             .expect("主动作类型掩码");
         assert!(act_masks[0], "NoOp 动作可用");
@@ -307,19 +307,19 @@ fn test_fiora_v3_mask_rule_3_conditional_target_masks() {
         .conditional_target_masks
         .expect("应包含自回归条件目标掩码矩阵");
 
-    // 敌方小兵：开放攻击
-    assert!(cond_masks[0][0], "敌方小兵 0 NoOp 有效");
-    assert!(cond_masks[0][1], "敌方小兵 0 Move 有效");
-    assert!(cond_masks[0][2], "敌方小兵 0 Attack 有效");
+    assert_eq!(cond_masks.len(), 3, "应包含 3 种离散动作对应的条件目标掩码");
 
-    assert!(cond_masks[1][0], "敌方小兵 1 NoOp 有效");
-    assert!(cond_masks[1][1], "敌方小兵 1 Move 有效");
-    assert!(cond_masks[1][2], "敌方小兵 1 Attack 有效");
+    // 动作 0 (NoOp) 与 动作 1 (Move)：所有有效单位槽位 (0, 1, 2) 均可用
+    for act_idx in [0, 1] {
+        assert!(cond_masks[act_idx][0], "动作 {act_idx} 下 Slot 0 有效");
+        assert!(cond_masks[act_idx][1], "动作 {act_idx} 下 Slot 1 有效");
+        assert!(cond_masks[act_idx][2], "动作 {act_idx} 下 Slot 2 (友军) 允许作为移动/通用参考目标");
+    }
 
-    // 友方小兵：禁止普通攻击
-    assert!(cond_masks[2][0], "友方小兵 NoOp 有效");
-    assert!(cond_masks[2][1], "友方小兵 Move 有效");
-    assert!(!cond_masks[2][2], "友方小兵 Attack 必须被规则 ③ 屏蔽");
+    // 动作 2 (Attack)：仅敌方小兵 (Slot 0, 1) 允许，友方小兵 (Slot 2) 必须被规则 ③ 屏蔽
+    assert!(cond_masks[2][0], "Attack 动作下敌方小兵 0 有效");
+    assert!(cond_masks[2][1], "Attack 动作下敌方小兵 1 有效");
+    assert!(!cond_masks[2][2], "Attack 动作下友方小兵 2 必须被规则 ③ 屏蔽");
 }
 
 #[test]

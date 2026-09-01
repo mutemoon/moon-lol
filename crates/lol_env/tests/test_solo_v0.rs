@@ -342,37 +342,23 @@ fn test_solo_v0_conditional_target_masks_friendly_unit() {
         .conditional_target_masks
         .expect("应包含自回归条件目标掩码矩阵");
 
-    // 1. Slot 0（敌方英雄）：攻击与全技能均开放
-    let enemy_hero_mask = &cond_masks[0];
-    assert!(enemy_hero_mask[0], "NoOp 有效");
-    assert!(enemy_hero_mask[1], "Move 有效");
-    assert!(enemy_hero_mask[2], "Attack 有效");
-    assert!(enemy_hero_mask[3], "CastQ 有效");
-    assert!(enemy_hero_mask[4], "CastW 有效");
-    assert!(enemy_hero_mask[5], "CastE 有效");
-    assert!(enemy_hero_mask[6], "CastR 有效");
-    assert!(enemy_hero_mask[7], "Flash 有效");
+    assert_eq!(cond_masks.len(), 8, "应包含 8 种离散动作对应的条件目标掩码");
 
-    // 2. Slot 1（敌方小兵）：攻击与全技能均开放
-    let enemy_minion_mask = &cond_masks[1];
-    assert!(enemy_minion_mask[2], "敌方小兵 Attack 有效");
-    assert!(enemy_minion_mask[3], "敌方小兵 CastQ 有效");
+    // 1. NoOp (0) 与 Move (1)：所有有效槽位（敌方英雄、敌方小兵、友方小兵）均开放，空槽位 3 禁用
+    for act_idx in [0, 1] {
+        let mask = &cond_masks[act_idx];
+        assert!(mask[0], "动作 {act_idx} 下 Slot 0 有效");
+        assert!(mask[1], "动作 {act_idx} 下 Slot 1 有效");
+        assert!(mask[2], "动作 {act_idx} 下 Slot 2 (友军) 允许作为通用/移动参考目标");
+        assert!(!mask[3], "动作 {act_idx} 下 Slot 3 空槽位必须禁用");
+    }
 
-    // 3. Slot 2（友方小兵）：严格只允许 NoOp (0) 和 Move (1)，其余全部屏蔽
-    let ally_minion_mask = &cond_masks[2];
-    assert!(ally_minion_mask[0], "友方小兵 NoOp 有效");
-    assert!(ally_minion_mask[1], "友方小兵 Move 有效");
-    assert!(!ally_minion_mask[2], "友方小兵 Attack 必须被屏蔽");
-    assert!(!ally_minion_mask[3], "友方小兵 CastQ 必须被屏蔽");
-    assert!(!ally_minion_mask[4], "友方小兵 CastW 必须被屏蔽");
-    assert!(!ally_minion_mask[5], "友方小兵 CastE 必须被屏蔽");
-    assert!(!ally_minion_mask[6], "友方小兵 CastR 必须被屏蔽");
-    assert!(!ally_minion_mask[7], "友方小兵 Flash 必须被屏蔽");
-
-    // 4. Slot 3（空槽位）：同样只能空操作或移动
-    let empty_mask = &cond_masks[3];
-    assert!(empty_mask[0], "空槽位 NoOp 有效");
-    assert!(empty_mask[1], "空槽位 Move 有效");
-    assert!(!empty_mask[2], "空槽位 Attack 必须被屏蔽");
-    assert!(!empty_mask[3], "空槽位 CastQ 必须被屏蔽");
+    // 2. Attack (2) 及 技能 (3..=7)：仅允许敌方目标 (Slot 0, Slot 1)，友军 (Slot 2) 与空槽位 (Slot 3) 必须禁用
+    for act_idx in 2..=7 {
+        let mask = &cond_masks[act_idx];
+        assert!(mask[0], "动作 {act_idx} 下敌方英雄 Slot 0 有效");
+        assert!(mask[1], "动作 {act_idx} 下敌方小兵 Slot 1 有效");
+        assert!(!mask[2], "动作 {act_idx} 下友方小兵 Slot 2 必须被屏蔽");
+        assert!(!mask[3], "动作 {act_idx} 下空槽位 Slot 3 必须被屏蔽");
+    }
 }

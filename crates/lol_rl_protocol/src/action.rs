@@ -355,11 +355,13 @@ impl ActionSchema {
     }
 
     /// 统一求值：根据当前观测上下文，计算完整的 ActionMasks（包含各分支 branch_masks 与 conditional_target_masks）
+    /// conditional_target_masks 矩阵格式为 [action_type_idx][target_idx]，即选定动作类型下各目标槽位的合法性掩码。
     pub fn eval_action_masks(&self, ctx: &ObsContext) -> ActionMasks {
         let flat = self.flat_branches();
         let mut branch_masks = Vec::with_capacity(flat.len());
         let mut unit_selection_info: Option<(usize, String)> = None;
-        let mut cat_baseline_mask: Option<Vec<bool>> = None;
+        let mut cat_baseline_info: Option<(usize, String, Vec<bool>)> = None;
+        let mut target_base_mask: Option<Vec<bool>> = None;
 
         for node in &flat {
             match node {
@@ -433,6 +435,7 @@ impl ActionSchema {
                             slot_mask[i] = false;
                         }
                     }
+                    target_base_mask = Some(slot_mask.clone());
                     branch_masks.push(Some(slot_mask));
                 }
                 ActionNode::Categorical {
@@ -457,23 +460,27 @@ impl ActionSchema {
                             }
                         }
                     }
-                    cat_baseline_mask = Some(mask.clone());
+                    cat_baseline_info = Some((*num_classes, name.clone(), mask.clone()));
                     branch_masks.push(Some(mask));
                 }
                 ActionNode::Struct { .. } => unreachable!(),
             }
         }
 
-        let conditional_target_masks = if let (Some((max_units, obs_entity_name)), Some(base_mask)) =
-            (unit_selection_info, cat_baseline_mask)
+        let conditional_target_masks = if let (Some((max_units, obs_entity_name)), Some(base_slot_mask), Some((num_classes, _cat_name, _cat_mask))) =
+            (unit_selection_info, target_base_mask, cat_baseline_info)
         {
             let repeated_units = ctx.repeated.get(&obs_entity_name);
-            let mut cond_masks = Vec::with_capacity(max_units);
+            let mut cond_masks = Vec::with_capacity(num_classes);
 
-            for i in 0..max_units {
-                if i == 0 {
-                    let mut t_mask = base_mask.clone();
-                    if let Some(unit) = repeated_units.and_then(|v| v.get(0)) {
+            for act_idx in 0..num_classes {
+                let mut act_slot_mask = base_slot_mask.clone();
+
+                for i in 0..max_units {
+                    if !act_slot_mask[i] {
+                        continue;
+                    }
+                    if let Some(unit) = repeated_units.and_then(|v| v.get(i)) {
                         let mut entity_vars = ctx.vars.clone();
                         for (k, v) in &unit.vars {
                             entity_vars.insert(k.clone(), *v);
@@ -488,49 +495,22 @@ impl ActionSchema {
                             } = rule
                             {
                                 if entity_name == &obs_entity_name
-                                    && *disabled_branch < t_mask.len()
+                                    && *disabled_branch == act_idx
                                     && condition.eval(&entity_vars) > 0.0
                                 {
-                                    t_mask[*disabled_branch] = false;
+                                    act_slot_mask[i] = false;
+                                    break;
                                 }
                             }
                         }
                     }
-                    cond_masks.push(t_mask);
-                } else if let Some(unit) = repeated_units.and_then(|v| v.get(i)) {
-                    let mut t_mask = base_mask.clone();
-                    let mut entity_vars = ctx.vars.clone();
-                    for (k, v) in &unit.vars {
-                        entity_vars.insert(k.clone(), *v);
-                        entity_vars.insert(format!("u.{}", k), *v);
-                    }
-                    for rule in &self.mask_rules {
-                        if let ActionMaskRule::ConditionalTarget {
-                            entity_name,
-                            condition,
-                            disabled_branch,
-                            ..
-                        } = rule
-                        {
-                            if entity_name == &obs_entity_name
-                                && *disabled_branch < t_mask.len()
-                                && condition.eval(&entity_vars) > 0.0
-                            {
-                                t_mask[*disabled_branch] = false;
-                            }
-                        }
-                    }
-                    cond_masks.push(t_mask);
-                } else {
-                    let mut fallback = vec![false; base_mask.len()];
-                    if !fallback.is_empty() {
-                        fallback[0] = true;
-                    }
-                    if fallback.len() > 1 {
-                        fallback[1] = true;
-                    }
-                    cond_masks.push(fallback);
                 }
+
+                // 保底机制：若所有槽位均被禁用但 max_units > 0，槽位 0 作为 fallback 避免概率下溢
+                if act_slot_mask.iter().all(|&v| !v) && max_units > 0 {
+                    act_slot_mask[0] = true;
+                }
+                cond_masks.push(act_slot_mask);
             }
             Some(cond_masks)
         } else {
@@ -606,8 +586,8 @@ pub struct ActionMasks {
     /// 每个叶子分支的掩码。
     /// Categorical → Some(Vec<bool>), UnitSelection → Some(Vec<bool>), Continuous → None
     pub branch_masks: Vec<Option<Vec<bool>>>,
-    /// 自回归条件目标动作掩码矩阵（目标维度 -> 动作类别维度有效性布尔切片）
-    /// conditional_target_masks.as_ref()[target_idx] 对应选中目标 target_idx 时 action_type 的合法动作掩码
+    /// 自回归条件目标动作掩码矩阵（动作类别维度 -> 目标维度有效性布尔切片）
+    /// conditional_target_masks.as_ref()[action_type_idx] 对应选中动作 action_type_idx 时各目标槽位的合法掩码
     pub conditional_target_masks: Option<Vec<Vec<bool>>>,
 }
 

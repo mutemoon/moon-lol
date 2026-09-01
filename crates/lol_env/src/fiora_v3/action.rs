@@ -69,8 +69,8 @@ impl FioraV3Action {
         let offset_x = encoded.first().copied().unwrap_or(0.0);
         let offset_z = encoded.get(1).copied().unwrap_or(0.0);
         if encoded.len() >= 4 {
-            let target_idx = encoded.get(2).copied().unwrap_or(0.0) as u8;
-            let discrete_idx = encoded.get(3).copied().unwrap_or(0.0) as u8;
+            let discrete_idx = encoded.get(2).copied().unwrap_or(0.0) as u8;
+            let target_idx = encoded.get(3).copied().unwrap_or(0.0) as u8;
             Self {
                 offset_x,
                 offset_z,
@@ -92,8 +92,8 @@ impl FioraV3Action {
         vec![
             self.offset_x,
             self.offset_z,
-            self.target_idx as f32,
             self.discrete.to_u8() as f32,
+            self.target_idx as f32,
         ]
     }
 
