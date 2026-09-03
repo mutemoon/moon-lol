@@ -349,7 +349,10 @@ fn test_solo_v0_conditional_target_masks_friendly_unit() {
         let mask = &cond_masks[act_idx];
         assert!(mask[0], "动作 {act_idx} 下 Slot 0 有效");
         assert!(mask[1], "动作 {act_idx} 下 Slot 1 有效");
-        assert!(mask[2], "动作 {act_idx} 下 Slot 2 (友军) 允许作为通用/移动参考目标");
+        assert!(
+            mask[2],
+            "动作 {act_idx} 下 Slot 2 (友军) 允许作为通用/移动参考目标"
+        );
         assert!(!mask[3], "动作 {act_idx} 下 Slot 3 空槽位必须禁用");
     }
 

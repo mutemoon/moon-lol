@@ -1201,10 +1201,7 @@ fn render_mask_rule_item(rule: &ActionMaskRule, cx: &Context<AppSidebar>) -> Any
         } => (
             "实体槽位",
             format!("for in {entity_name}: if {}", expr_to_code(condition)),
-            format!(
-                "disable {}",
-                target_head.as_deref().unwrap_or("target")
-            ),
+            format!("disable {}", target_head.as_deref().unwrap_or("target")),
         ),
         ActionMaskRule::ConditionalTarget {
             entity_name,
@@ -1215,6 +1212,31 @@ fn render_mask_rule_item(rule: &ActionMaskRule, cx: &Context<AppSidebar>) -> Any
             "目标条件",
             format!("for in {entity_name}: if {}", expr_to_code(condition)),
             format!("disable {branch_label}"),
+        ),
+        ActionMaskRule::ConditionalBranch {
+            parent_label,
+            child_head,
+            branch_label,
+            condition,
+            ..
+        } => (
+            "条件分支",
+            format!("when {parent_label}: if {}", expr_to_code(condition)),
+            format!("disable {child_head}.{branch_label}"),
+        ),
+        ActionMaskRule::ConditionalEntitySlot {
+            parent_label,
+            entity_name,
+            condition,
+            target_head,
+            ..
+        } => (
+            "条件目标",
+            format!(
+                "when {parent_label}: for in {entity_name}: if {}",
+                expr_to_code(condition)
+            ),
+            format!("disable {}", target_head.as_deref().unwrap_or("target")),
         ),
     };
 
@@ -1238,11 +1260,7 @@ fn render_mask_rule_item(rule: &ActionMaskRule, cx: &Context<AppSidebar>) -> Any
                         .text_color(cx.theme().danger)
                         .child(tag_label),
                 )
-                .child(
-                    div()
-                        .text_color(cx.theme().foreground)
-                        .child(cond_text),
-                ),
+                .child(div().text_color(cx.theme().foreground).child(cond_text)),
         )
         .child(
             div()

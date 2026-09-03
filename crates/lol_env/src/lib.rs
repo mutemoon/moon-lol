@@ -37,9 +37,8 @@ pub use fiora_v2::{
     FioraV2RewardContext, FioraV2RewardModel, V2_OBS_DISTANCE_IDX, V2_OBS_DISTANCE_SCALE,
 };
 pub use fiora_v3::{
-    FIORA_V3_OBS_SCHEMA, FIORA_V3_OFFSET_SCALE, FioraV3Action,
-    FioraV3DiscreteAction, FioraV3Env, FioraV3Obs, setup_fiora_v3_env_world,
-    setup_fiora_v3_health_world, step_fiora_v3_world,
+    FIORA_V3_OBS_SCHEMA, FIORA_V3_OFFSET_SCALE, FioraV3Action, FioraV3DiscreteAction, FioraV3Env,
+    FioraV3Obs, setup_fiora_v3_env_world, setup_fiora_v3_health_world, step_fiora_v3_world,
 };
 pub use flash_plugin::{
     FLASH_COOLDOWN_SECS, FLASH_DISTANCE, FlashCooldown, dispatch_flash, extract_flash_obs,

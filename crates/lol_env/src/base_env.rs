@@ -57,9 +57,9 @@ pub fn fiora_champion_spec(
             app.add_plugins(PluginFiora);
         },
         spawner: Box::new(move |world, asset_server, render| {
-            let config_handle = asset_server.load::<DynamicWorld>("characters/fiora/config.ron");
+            let config_handle = asset_server.load::<DynamicWorld>("characters/Fiora/config.ron");
             let skin_handle = if render && is_player_focus {
-                Some(asset_server.load::<DynamicWorld>("characters/fiora/skins/skin0.ron"))
+                Some(asset_server.load::<DynamicWorld>("characters/Fiora/skins/skin0.ron"))
             } else {
                 None
             };
@@ -289,7 +289,10 @@ impl LolBaseEnv {
         }
         app.update();
 
-        if let Some(mut tracker) = app.world_mut().get_resource_mut::<crate::fiora_riven_common::AttackEventTracker>() {
+        if let Some(mut tracker) = app
+            .world_mut()
+            .get_resource_mut::<crate::fiora_riven_common::AttackEventTracker>()
+        {
             tracker.attack_hit = false;
             tracker.attack_ready = false;
         }

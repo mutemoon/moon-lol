@@ -42,7 +42,9 @@ pub fn setup_v2_fiora_riven_world(champions: &[Entity], world: &mut World) {
         if let Some(mut flash) = world.get_mut::<FlashCooldown>(champions[0]) {
             flash.reset();
         } else {
-            world.entity_mut(champions[0]).insert(FlashCooldown::default());
+            world
+                .entity_mut(champions[0])
+                .insert(FlashCooldown::default());
         }
     }
 }

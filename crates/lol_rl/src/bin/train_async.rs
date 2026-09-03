@@ -59,7 +59,8 @@ fn main() -> anyhow::Result<()> {
 
     // 4. 创建异步通信环形缓冲队列
     let queue_capacity = (tuned.num_parallel_envs * 4).clamp(32, 2048);
-    let traj_queue = TrajectoryRingBuffer::<<FioraVsRivenRealEnv as RlEnvironment>::Obs>::new(queue_capacity);
+    let traj_queue =
+        TrajectoryRingBuffer::<<FioraVsRivenRealEnv as RlEnvironment>::Obs>::new(queue_capacity);
 
     // 5. 启动 GPU/CPU 动态批处理推理引擎
     let mut infer_server = InferenceServer::new(
@@ -124,4 +125,3 @@ fn main() -> anyhow::Result<()> {
     info!("🎉 异步训练完成！");
     Ok(())
 }
-

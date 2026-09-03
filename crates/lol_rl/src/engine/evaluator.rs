@@ -41,7 +41,8 @@ pub trait PolicyEvaluator {
     /// 单独推断一个状态的价值（用于残局 Bootstrap V(s_T)）
     fn evaluate_value(&mut self, policy_slot: usize, state_vec: &[f32]) -> Result<f32> {
         let mut dummy_mamba = None;
-        let (_, _, val) = self.evaluate_step(policy_slot, state_vec, None, None, &mut dummy_mamba)?;
+        let (_, _, val) =
+            self.evaluate_step(policy_slot, state_vec, None, None, &mut dummy_mamba)?;
         Ok(val)
     }
 

@@ -252,10 +252,10 @@ impl RlEnvironment for FioraV2Env {
 
     fn action_masks(obs: &Self::Obs) -> Option<lol_rl_protocol::ActionMasks> {
         let flat_mask = FIORA_V2_ACTION_SCHEMA.eval_flat_mask(&obs.to_context());
-        Some(lol_rl_protocol::ActionMasks {
-            branch_masks: vec![None, Some(flat_mask)],
-            conditional_target_masks: None,
-        })
+        Some(lol_rl_protocol::ActionMasks::new(vec![
+            None,
+            Some(flat_mask),
+        ]))
     }
 
     fn reward_formula_spec() -> Option<RewardFormulaSpec> {

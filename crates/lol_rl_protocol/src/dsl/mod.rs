@@ -422,4 +422,119 @@ mod tests {
         // 3: CastQ -> only slot 0 (enemy) valid; slot 1 (ally) & slot 2 (empty) invalid
         assert_eq!(cond_masks[3], vec![true, false, false]);
     }
+
+    #[test]
+    fn test_dsl_when_hierarchical_conditional_branch_masks() {
+        let act_src = r#"
+        action HierarchicalAction {
+            continuous offset: 2;
+            category action_type: 5 {
+                0: "NoOp",
+                1: "Move",
+                2: "Attack",
+                3: "CastSkill",
+                4: "LevelUpSkill",
+            }
+            category skill_slot: 4 {
+                0: "Q",
+                1: "W",
+                2: "E",
+                3: "R",
+            }
+            unit_target target: visible_units[12 -> 32];
+
+            mask {
+                for u in visible_units {
+                    if u.unit_type <= 0.0 { disable target; }
+                }
+
+                if attack_is_cooldown > 0.5 { disable Attack; }
+                if can_cast_any < 0.5       { disable CastSkill; }
+                if can_level_up_any < 0.5   { disable LevelUpSkill; }
+
+                when CastSkill {
+                    if q_ready < 0.5 { disable skill_slot.Q; }
+                    if w_ready < 0.5 { disable skill_slot.W; }
+                    if e_ready < 0.5 { disable skill_slot.E; }
+                    if r_ready < 0.5 { disable skill_slot.R; }
+                }
+
+                when LevelUpSkill {
+                    if can_level_up_q < 0.5 { disable skill_slot.Q; }
+                    if can_level_up_w < 0.5 { disable skill_slot.W; }
+                    if can_level_up_e < 0.5 { disable skill_slot.E; }
+                    if can_level_up_r < 0.5 { disable skill_slot.R; }
+                }
+
+                when Attack {
+                    for u in visible_units {
+                        if u.is_enemy <= 0.5 {
+                            disable target;
+                        }
+                    }
+                }
+            }
+        }
+        "#;
+
+        let action = ActionSchema::from_dsl(act_src).expect("HierarchicalAction 应成功解析");
+        assert_eq!(action.nodes.len(), 4);
+        assert_eq!(action.encoding_dim(), 5); // 2 continuous + 1 action_type + 1 skill_slot + 1 target
+
+        let mut ctx = ObsContext::new();
+        ctx.set_var("attack_is_cooldown", 0.0);
+        ctx.set_var("can_cast_any", 1.0);
+        ctx.set_var("can_level_up_any", 1.0);
+
+        // 技能施放就绪状态：Q 就绪，W/E/R 冷却或未学
+        ctx.set_var("q_ready", 1.0);
+        ctx.set_var("w_ready", 0.0);
+        ctx.set_var("e_ready", 0.0);
+        ctx.set_var("r_ready", 0.0);
+
+        // 技能升级状态：Q/W 可升级，E/R 不可升级
+        ctx.set_var("can_level_up_q", 1.0);
+        ctx.set_var("can_level_up_w", 1.0);
+        ctx.set_var("can_level_up_e", 0.0);
+        ctx.set_var("can_level_up_r", 0.0);
+
+        ctx.set_repeated(
+            "visible_units",
+            vec![
+                ObsContext::new()
+                    .with_var("unit_type", 2.0)
+                    .with_var("is_enemy", 1.0),
+                ObsContext::new()
+                    .with_var("unit_type", 2.0)
+                    .with_var("is_enemy", 0.0),
+            ],
+        );
+
+        let action_masks = action.eval_action_masks(&ctx);
+
+        // 1. 验证主动作掩码
+        let act_type_mask = action_masks.branch_masks[1].as_ref().unwrap();
+        assert_eq!(act_type_mask, &vec![true, true, true, true, true]);
+
+        // 2. 验证自回归条件分支掩码 (conditional_branch_masks)
+        let branch_map = action_masks
+            .conditional_branch_masks
+            .as_ref()
+            .expect("应包含条件分支掩码");
+        let skill_slot_matrix = branch_map
+            .get("skill_slot")
+            .expect("应包含 skill_slot 条件掩码矩阵");
+        assert_eq!(skill_slot_matrix.len(), 5); // 对应 5 种 action_type
+
+        // 当 action_type = 3 (CastSkill) 时：Q 开放，W/E/R 禁用
+        assert_eq!(skill_slot_matrix[3], vec![true, false, false, false]);
+
+        // 当 action_type = 4 (LevelUpSkill) 时：Q/W 开放，E/R 禁用
+        assert_eq!(skill_slot_matrix[4], vec![true, true, false, false]);
+
+        // 当 action_type = 0 (NoOp) / 1 (Move) / 2 (Attack) 时：默认开放
+        assert_eq!(skill_slot_matrix[0], vec![true, true, true, true]);
+        assert_eq!(skill_slot_matrix[1], vec![true, true, true, true]);
+        assert_eq!(skill_slot_matrix[2], vec![true, true, true, true]);
+    }
 }

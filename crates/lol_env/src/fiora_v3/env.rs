@@ -125,7 +125,7 @@ impl RlEnvironment for FioraV3Env {
     fn action_space() -> ActionSpace {
         ActionSpace::Hybrid {
             continuous_dims: 2,
-            discrete_classes: 3,
+            discrete_classes: 5,
         }
     }
 
@@ -138,7 +138,13 @@ impl RlEnvironment for FioraV3Env {
     }
 
     fn action_labels() -> &'static [&'static str] {
-        &["保持当前 (NoOp)", "移动 (Move)", "普通攻击 (Attack)"]
+        &[
+            "保持当前 (NoOp)",
+            "移动 (Move)",
+            "普通攻击 (Attack)",
+            "施放技能 (CastSkill)",
+            "升级技能 (LevelUpSkill)",
+        ]
     }
 
     fn obs_schema() -> Option<ObsSchema> {
@@ -220,8 +226,16 @@ impl RlEnvironment for FioraV3Env {
 
     fn action_mask(obs: &Self::Obs) -> Option<Vec<bool>> {
         let is_cooldown = obs.attack_is_cooldown;
+        let can_cast_any = obs.skill_ready.iter().any(|&r| r);
+        let can_level_up_any = obs.can_level_up.iter().any(|&u| u);
 
-        Some(vec![true, true, !is_cooldown])
+        Some(vec![
+            true,
+            true,
+            !is_cooldown,
+            can_cast_any,
+            can_level_up_any,
+        ])
     }
 
     fn action_masks(obs: &Self::Obs) -> Option<lol_rl_protocol::ActionMasks> {

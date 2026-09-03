@@ -14,8 +14,8 @@ use bevy::prelude::{Component, Handle, Reflect, ReflectComponent, *};
 pub use enums::*;
 pub use events::*;
 pub use helpers::{
-    delay_from_cast_frame, get_skill_cast_radius, get_skill_data_value, get_skill_value,
-    is_skill_ready,
+    can_level_up_skill, delay_from_cast_frame, get_skill_cast_radius, get_skill_data_value,
+    get_skill_value, is_skill_ready,
 };
 use lol_base::spell::Spell;
 pub use observers::*;

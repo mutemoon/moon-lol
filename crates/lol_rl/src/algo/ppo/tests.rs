@@ -3,8 +3,7 @@ mod tests {
     use std::path::PathBuf;
 
     use candle_core::{DType, Device, Result, Tensor};
-    use candle_nn::VarMap;
-    use candle_nn::VarBuilder;
+    use candle_nn::{VarBuilder, VarMap};
     use lol_rl_protocol::{ActionSpace, PolicyBackbone};
 
     use crate::algo::buffer::RolloutBuffer;

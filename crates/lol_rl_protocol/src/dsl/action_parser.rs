@@ -181,6 +181,25 @@ enum RawMaskEntry {
         entity_name: String,
         rules: Vec<(ObsExpr, Option<String>, String)>,
     },
+    WhenBlock {
+        parent_ref: (Option<String>, String),
+        inner_entries: Vec<RawMaskEntry>,
+    },
+}
+
+fn parse_when_block<'i>(input: &mut &'i str) -> PResult<RawMaskEntry, ContextError> {
+    preceded(
+        symbol("when"),
+        (
+            parse_target_ref,
+            delimited(symbol("{"), repeat(0.., parse_raw_mask_entry), symbol("}")),
+        ),
+    )
+    .map(|(parent_ref, inner_entries)| RawMaskEntry::WhenBlock {
+        parent_ref,
+        inner_entries,
+    })
+    .parse_next(input)
 }
 
 fn parse_entity_loop<'i>(input: &mut &'i str) -> PResult<RawMaskEntry, ContextError> {
@@ -197,15 +216,17 @@ fn parse_entity_loop<'i>(input: &mut &'i str) -> PResult<RawMaskEntry, ContextEr
             ),
         ),
     )
-    .map(|(_loop_var, entity_name, rules)| RawMaskEntry::EntityLoop {
-        entity_name,
-        rules,
-    })
+    .map(|(_loop_var, entity_name, rules)| RawMaskEntry::EntityLoop { entity_name, rules })
     .parse_next(input)
 }
 
 fn parse_raw_mask_entry<'i>(input: &mut &'i str) -> PResult<RawMaskEntry, ContextError> {
-    alt((parse_entity_loop, parse_mask_rule_entry.map(RawMaskEntry::Global))).parse_next(input)
+    alt((
+        parse_when_block,
+        parse_entity_loop,
+        parse_mask_rule_entry.map(RawMaskEntry::Global),
+    ))
+    .parse_next(input)
 }
 
 /// 解析 `mask { ... }` 块
@@ -253,11 +274,117 @@ fn resolve_branch_index(
     None
 }
 
+fn find_head_for_branch(nodes: &[ActionNode], branch_name: &str) -> Option<String> {
+    for node in nodes {
+        if let ActionNode::Categorical { name, labels, .. } = node {
+            if labels.iter().any(|l| {
+                l == branch_name
+                    || l.contains(&format!("({})", branch_name))
+                    || l.contains(&format!(" {} ", branch_name))
+                    || l.ends_with(&format!(" {}", branch_name))
+                    || l.starts_with(&format!("{} ", branch_name))
+                    || l.contains(branch_name)
+            }) {
+                return Some(name.clone());
+            }
+        }
+    }
+    None
+}
+
 fn is_unit_selection_head(nodes: &[ActionNode], name: &str) -> bool {
     nodes.iter().any(|node| match node {
         ActionNode::UnitSelection { name: n, .. } => n == name,
         _ => false,
     })
+}
+
+fn process_raw_mask_entry(
+    raw_entry: RawMaskEntry,
+    nodes: &[ActionNode],
+    mask_rules: &mut Vec<ActionMaskRule>,
+) {
+    match raw_entry {
+        RawMaskEntry::Global(entries) => {
+            for (cond, head, branch_name) in entries {
+                if let Some(idx) = resolve_branch_index(nodes, &head, &branch_name) {
+                    mask_rules.push(ActionMaskRule::Global {
+                        condition: cond,
+                        target_head: head,
+                        disabled_branch: idx,
+                        branch_label: branch_name,
+                    });
+                }
+            }
+        }
+        RawMaskEntry::EntityLoop { entity_name, rules } => {
+            for (cond, head, target_or_branch) in rules {
+                if is_unit_selection_head(nodes, &target_or_branch) {
+                    mask_rules.push(ActionMaskRule::EntitySlot {
+                        entity_name: entity_name.clone(),
+                        condition: cond,
+                        target_head: Some(target_or_branch),
+                    });
+                } else if let Some(idx) = resolve_branch_index(nodes, &head, &target_or_branch) {
+                    mask_rules.push(ActionMaskRule::ConditionalTarget {
+                        entity_name: entity_name.clone(),
+                        condition: cond,
+                        target_head: head,
+                        disabled_branch: idx,
+                        branch_label: target_or_branch,
+                    });
+                }
+            }
+        }
+        RawMaskEntry::WhenBlock {
+            parent_ref: (parent_head, parent_branch_name),
+            inner_entries,
+        } => {
+            if let Some(parent_idx) = resolve_branch_index(nodes, &parent_head, &parent_branch_name)
+            {
+                for inner in inner_entries {
+                    match inner {
+                        RawMaskEntry::Global(entries) => {
+                            for (cond, child_head, child_branch_name) in entries {
+                                if let Some(child_idx) =
+                                    resolve_branch_index(nodes, &child_head, &child_branch_name)
+                                {
+                                    let resolved_child_head = child_head.unwrap_or_else(|| {
+                                        find_head_for_branch(nodes, &child_branch_name)
+                                            .unwrap_or_else(|| "action".to_string())
+                                    });
+                                    mask_rules.push(ActionMaskRule::ConditionalBranch {
+                                        parent_head: parent_head.clone(),
+                                        parent_branch: parent_idx,
+                                        parent_label: parent_branch_name.clone(),
+                                        child_head: resolved_child_head,
+                                        disabled_branch: child_idx,
+                                        branch_label: child_branch_name,
+                                        condition: cond,
+                                    });
+                                }
+                            }
+                        }
+                        RawMaskEntry::EntityLoop { entity_name, rules } => {
+                            for (cond, _head, target_or_branch) in rules {
+                                if is_unit_selection_head(nodes, &target_or_branch) {
+                                    mask_rules.push(ActionMaskRule::ConditionalEntitySlot {
+                                        parent_head: parent_head.clone(),
+                                        parent_branch: parent_idx,
+                                        parent_label: parent_branch_name.clone(),
+                                        entity_name: entity_name.clone(),
+                                        condition: cond,
+                                        target_head: Some(target_or_branch),
+                                    });
+                                }
+                            }
+                        }
+                        RawMaskEntry::WhenBlock { .. } => {}
+                    }
+                }
+            }
+        }
+    }
 }
 
 /// 解析任意单个 Action 节点
@@ -292,45 +419,7 @@ pub fn parse_action_schema<'i>(
             let mut mask_rules = Vec::new();
             if let Some(masks) = raw_masks {
                 for raw_entry in masks {
-                    match raw_entry {
-                        RawMaskEntry::Global(entries) => {
-                            for (cond, head, branch_name) in entries {
-                                if let Some(idx) =
-                                    resolve_branch_index(&nodes, &head, &branch_name)
-                                {
-                                    mask_rules.push(ActionMaskRule::Global {
-                                        condition: cond,
-                                        target_head: head,
-                                        disabled_branch: idx,
-                                        branch_label: branch_name,
-                                    });
-                                }
-                            }
-                        }
-                        RawMaskEntry::EntityLoop {
-                            entity_name, rules, ..
-                        } => {
-                            for (cond, head, target_or_branch) in rules {
-                                if is_unit_selection_head(&nodes, &target_or_branch) {
-                                    mask_rules.push(ActionMaskRule::EntitySlot {
-                                        entity_name: entity_name.clone(),
-                                        condition: cond,
-                                        target_head: Some(target_or_branch),
-                                    });
-                                } else if let Some(idx) =
-                                    resolve_branch_index(&nodes, &head, &target_or_branch)
-                                {
-                                    mask_rules.push(ActionMaskRule::ConditionalTarget {
-                                        entity_name: entity_name.clone(),
-                                        condition: cond,
-                                        target_head: head,
-                                        disabled_branch: idx,
-                                        branch_label: target_or_branch,
-                                    });
-                                }
-                            }
-                        }
-                    }
+                    process_raw_mask_entry(raw_entry, &nodes, &mut mask_rules);
                 }
             }
 

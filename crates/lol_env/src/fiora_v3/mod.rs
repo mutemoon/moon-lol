@@ -32,26 +32,34 @@ mod tests {
     #[test]
     fn test_fiora_v3_action_schema() {
         let schema = FioraV3Env::action_schema().expect("FioraV3 action schema");
-        assert_eq!(schema.encoding_dim(), 4); // 2 continuous + 1 unit selection + 1 categorical
-        assert_eq!(schema.num_branches(), 3);
+        assert_eq!(schema.encoding_dim(), 5); // 2 continuous + 1 action_type + 1 skill_slot + 1 unit selection
+        assert_eq!(schema.num_branches(), 4);
         let labels = schema.to_encoding_labels();
-        assert_eq!(labels.len(), 4);
+        assert_eq!(labels.len(), 5);
     }
 
     #[test]
     fn test_fiora_v3_action_encoding_roundtrip() {
-        let act = FioraV3Action::with_target(0.5, -0.5, 3, FioraV3DiscreteAction::Attack);
+        let act = FioraV3Action::with_skill(
+            0.5,
+            -0.5,
+            FioraV3DiscreteAction::CastSkill,
+            FioraV3SkillSlot::W,
+            3,
+        );
         let encoded = act.to_encoding();
-        assert_eq!(encoded.len(), 4);
+        assert_eq!(encoded.len(), 5);
         assert_eq!(encoded[0], 0.5);
         assert_eq!(encoded[1], -0.5);
-        assert_eq!(encoded[2], 2.0); // discrete: Attack
-        assert_eq!(encoded[3], 3.0); // target: 3
+        assert_eq!(encoded[2], 3.0); // discrete: CastSkill
+        assert_eq!(encoded[3], 1.0); // skill_slot: W
+        assert_eq!(encoded[4], 3.0); // target: 3
 
         let decoded = FioraV3Action::from_encoding(&encoded);
         assert_eq!(decoded.offset_x, 0.5);
         assert_eq!(decoded.offset_z, -0.5);
+        assert_eq!(decoded.discrete, FioraV3DiscreteAction::CastSkill);
+        assert_eq!(decoded.skill_slot, FioraV3SkillSlot::W);
         assert_eq!(decoded.target_idx, 3);
-        assert_eq!(decoded.discrete, FioraV3DiscreteAction::Attack);
     }
 }

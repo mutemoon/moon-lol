@@ -61,7 +61,8 @@ fn main() -> anyhow::Result<()> {
                 device.clone(),
             )?;
             let queue_capacity = (envs * 4).clamp(32, 2048);
-            let traj_queue = TrajectoryRingBuffer::<<SoloV0Env as RlEnvironment>::Obs>::new(queue_capacity);
+            let traj_queue =
+                TrajectoryRingBuffer::<<SoloV0Env as RlEnvironment>::Obs>::new(queue_capacity);
             let target_rollout_steps = envs * horizon * 2;
             let mut infer_server = InferenceServer::new(
                 agent.actor_critic.clone().into(),
@@ -104,4 +105,3 @@ fn main() -> anyhow::Result<()> {
     info!("🏁 对照基准完成.");
     Ok(())
 }
-

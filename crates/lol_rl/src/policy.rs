@@ -879,8 +879,7 @@ impl NodeExtractor {
             } => {
                 let (b, _total_raw) = x.dims2()?;
                 let item_input = x.reshape((b * max_count, *item_raw_dim))?;
-                let (in_feat, mut embeds) =
-                    item_extractor.forward_2d_with_entities(&item_input)?;
+                let (in_feat, mut embeds) = item_extractor.forward_2d_with_entities(&item_input)?;
 
                 let mut mlp_feat = in_feat.clone();
                 for layer in mlp_layers {
@@ -2929,7 +2928,9 @@ impl StructuredActionHead {
 
         for (_i, branch) in self.branches.iter().enumerate() {
             match branch {
-                ActionBranchHead::Categorical { head, num_classes, .. } => {
+                ActionBranchHead::Categorical {
+                    head, num_classes, ..
+                } => {
                     let logits = head.forward(feat)?;
                     let masked_logits = if let Some(bm) = batch_masks {
                         if bm.dim(1)? == *num_classes {

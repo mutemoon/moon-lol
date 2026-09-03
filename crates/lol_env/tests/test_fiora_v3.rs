@@ -179,6 +179,11 @@ fn test_fiora_v3_mask_rule_1_unit_slot_validity() {
     let obs = FioraV3Obs {
         self_pos: Vec3::ZERO,
         self_ad: 68.0,
+        hero_level: 1,
+        skill_points: 1,
+        skill_levels: [0, 0, 0, 0],
+        skill_ready: [false, false, false, false],
+        can_level_up: [true, true, true, false],
         attack_state: 0,
         attack_is_windup: false,
         attack_is_cooldown: false,
@@ -191,8 +196,8 @@ fn test_fiora_v3_mask_rule_1_unit_slot_validity() {
     let action_masks = FioraV3Env::action_masks(&obs).expect("应返回因式分解动作掩码");
 
     // 验证规则 ①：目标实体槽位有效性过滤
-    // branch_masks[2] 为 UnitSelection target 头的掩码 (12 维)
-    let target_slot_masks = action_masks.branch_masks[2]
+    // branch_masks[3] 为 UnitSelection target 头的掩码 (12 维)
+    let target_slot_masks = action_masks.branch_masks[3]
         .as_ref()
         .expect("应包含 target 槽位掩码");
     assert_eq!(
@@ -223,11 +228,20 @@ fn test_fiora_v3_mask_rule_2_global_attack_cooldown() {
     let build_obs = |is_cooldown: bool| FioraV3Obs {
         self_pos: Vec3::ZERO,
         self_ad: 68.0,
+        hero_level: 1,
+        skill_points: 1,
+        skill_levels: [0, 0, 0, 0],
+        skill_ready: [false, false, false, false],
+        can_level_up: [true, true, true, false],
         attack_state: if is_cooldown { 2 } else { 0 },
         attack_is_windup: false,
         attack_is_cooldown: is_cooldown,
         attack_timer_remaining: if is_cooldown { 0.8 } else { 0.0 },
-        visible_units: vec![ObsContext::new().with_var("unit_type", 2.0).with_var("is_enemy", 1.0)],
+        visible_units: vec![
+            ObsContext::new()
+                .with_var("unit_type", 2.0)
+                .with_var("is_enemy", 1.0),
+        ],
         visible_unit_entities: vec![None],
         visible_missiles: Vec::new(),
     };
@@ -248,9 +262,7 @@ fn test_fiora_v3_mask_rule_2_global_attack_cooldown() {
     {
         let obs_cooldown = build_obs(true);
         let masks_cd = FioraV3Env::action_masks(&obs_cooldown).expect("动作掩码");
-        let act_masks = masks_cd.branch_masks[1]
-            .as_ref()
-            .expect("主动作类型掩码");
+        let act_masks = masks_cd.branch_masks[1].as_ref().expect("主动作类型掩码");
         assert!(act_masks[0], "NoOp 动作可用");
         assert!(act_masks[1], "Move 动作可用");
         assert!(!act_masks[2], "普攻冷却中 Attack 必须被规则 ② 全局禁用");
@@ -264,6 +276,11 @@ fn test_fiora_v3_mask_rule_3_conditional_target_masks() {
     let obs = FioraV3Obs {
         self_pos: Vec3::ZERO,
         self_ad: 68.0,
+        hero_level: 1,
+        skill_points: 1,
+        skill_levels: [0, 0, 0, 0],
+        skill_ready: [false, false, false, false],
+        can_level_up: [true, true, true, false],
         attack_state: 0,
         attack_is_windup: false,
         attack_is_cooldown: false,
@@ -307,19 +324,156 @@ fn test_fiora_v3_mask_rule_3_conditional_target_masks() {
         .conditional_target_masks
         .expect("应包含自回归条件目标掩码矩阵");
 
-    assert_eq!(cond_masks.len(), 3, "应包含 3 种离散动作对应的条件目标掩码");
+    assert_eq!(
+        cond_masks.len(),
+        5,
+        "应包含 5 种离散主动作对应的条件目标掩码"
+    );
 
     // 动作 0 (NoOp) 与 动作 1 (Move)：所有有效单位槽位 (0, 1, 2) 均可用
     for act_idx in [0, 1] {
         assert!(cond_masks[act_idx][0], "动作 {act_idx} 下 Slot 0 有效");
         assert!(cond_masks[act_idx][1], "动作 {act_idx} 下 Slot 1 有效");
-        assert!(cond_masks[act_idx][2], "动作 {act_idx} 下 Slot 2 (友军) 允许作为移动/通用参考目标");
+        assert!(
+            cond_masks[act_idx][2],
+            "动作 {act_idx} 下 Slot 2 (友军) 允许作为移动/通用参考目标"
+        );
     }
 
-    // 动作 2 (Attack)：仅敌方小兵 (Slot 0, 1) 允许，友方小兵 (Slot 2) 必须被规则 ③ 屏蔽
+    // 动作 2 (Attack)：仅敌方小兵 (Slot 0, 1) 允许，友方小兵 (Slot 2) 必须被规则 ⑤ 屏蔽
     assert!(cond_masks[2][0], "Attack 动作下敌方小兵 0 有效");
     assert!(cond_masks[2][1], "Attack 动作下敌方小兵 1 有效");
-    assert!(!cond_masks[2][2], "Attack 动作下友方小兵 2 必须被规则 ③ 屏蔽");
+    assert!(
+        !cond_masks[2][2],
+        "Attack 动作下友方小兵 2 必须被规则 ⑤ 屏蔽"
+    );
+
+    // 动作 3 (CastSkill)：剑姬技能禁止以友军为目标，友方小兵 (Slot 2) 必须被规则 ③ 屏蔽
+    assert!(cond_masks[3][0], "CastSkill 动作下敌方小兵 0 有效");
+    assert!(cond_masks[3][1], "CastSkill 动作下敌方小兵 1 有效");
+    assert!(
+        !cond_masks[3][2],
+        "CastSkill 动作下友方小兵 2 必须被规则 ③ 屏蔽"
+    );
+}
+
+#[test]
+fn test_fiora_v3_hierarchical_skill_level_up_and_masks() {
+    use lol_env::fiora_v3::FioraV3SkillSlot;
+
+    let mut env = FioraV3Env::with_config(EnvConfig {
+        max_steps: 10,
+        render_mode: RenderMode::Headless,
+    });
+    let obs = env.reset();
+    let initial_f_obs = &obs[0];
+
+    // 1. 初始状态：英雄 1 级，1 技能点，所有技能 0 级
+    assert_eq!(initial_f_obs.hero_level, 1);
+    assert_eq!(initial_f_obs.skill_points, 1);
+    assert_eq!(initial_f_obs.skill_levels, [0, 0, 0, 0]);
+
+    // 验证初始掩码：
+    // 主动作：LevelUpSkill 可用 (true)，CastSkill 禁用 (false，因为未学技能)
+    let masks = FioraV3Env::action_masks(initial_f_obs).expect("掩码");
+    let act_masks = masks.branch_masks[1].as_ref().unwrap();
+    assert!(act_masks[4], "有技能点时 LevelUpSkill 主动作可用");
+    assert!(!act_masks[3], "0 级技能未学习时 CastSkill 主动作不可用");
+
+    // 自回归条件分支掩码：在 LevelUpSkill (4) 下，Q/W/E 允许升级 (true)，R 不允许升级 (false，1级不能学大招)
+    let branch_map = masks
+        .conditional_branch_masks
+        .as_ref()
+        .expect("条件分支掩码");
+    let slot_matrix = branch_map.get("skill_slot").expect("skill_slot 掩码矩阵");
+    assert_eq!(
+        slot_matrix[4],
+        vec![true, true, true, false],
+        "1 级时 LevelUpSkill 下 Q/W/E 可升级，R 必须被 mask"
+    );
+
+    // 2. 执行升级 Q 技能动作
+    let level_up_action = FioraV3Action::with_skill(
+        0.0,
+        0.0,
+        FioraV3DiscreteAction::LevelUpSkill,
+        FioraV3SkillSlot::Q,
+        0,
+    );
+    let step_res = env.step(&[level_up_action]);
+    let curr_obs = &step_res[0].obs;
+
+    // 验证升级结果：Q 升到 1 级，技能点变为 0
+    assert_eq!(curr_obs.skill_levels[0], 1, "Q 技能等级应提升为 1");
+    assert_eq!(curr_obs.skill_points, 0, "技能点应扣减为 0");
+
+    // 3. 技能点为 0 时：LevelUpSkill 主动作被 mask
+    let masks_no_points = FioraV3Env::action_masks(curr_obs).expect("掩码");
+    let act_masks_no_points = masks_no_points.branch_masks[1].as_ref().unwrap();
+    assert!(
+        !act_masks_no_points[4],
+        "0 技能点时 LevelUpSkill 主动作必须被禁用"
+    );
+
+    // 且现在 Q 技能已学习且就绪，CastSkill 主动作开放！
+    assert!(act_masks_no_points[3], "学习 Q 技能后 CastSkill 主动作可用");
+    let slot_matrix_cast = masks_no_points
+        .conditional_branch_masks
+        .as_ref()
+        .unwrap()
+        .get("skill_slot")
+        .unwrap();
+    assert_eq!(
+        slot_matrix_cast[3],
+        vec![true, false, false, false],
+        "CastSkill 下 Q 就绪可用，W/E/R 未学习被禁用"
+    );
+}
+
+#[test]
+fn test_fiora_v3_level_up_rules_4_and_6() {
+    use lol_core::skill::can_level_up_skill;
+
+    // 规则 1：1 级不能学大招 R
+    assert!(!can_level_up_skill(1, 3, 0, 1), "1 级英雄不能升级大招 R");
+    assert!(can_level_up_skill(1, 0, 0, 1), "1 级英雄可以升级 Q 技能");
+
+    // 规则 2：4 级时 Q 升到 3 级后不可再升 4 级 Q（最多 3 级）
+    assert!(
+        can_level_up_skill(4, 0, 2, 1),
+        "4 级英雄 Q 为 2 级时可以升到 3 级"
+    );
+    assert!(
+        !can_level_up_skill(4, 0, 3, 1),
+        "4 级英雄 Q 为 3 级时不能升 4 级 Q（最多 3 级）"
+    );
+    assert!(
+        can_level_up_skill(4, 1, 0, 1),
+        "4 级英雄仍可升级其他未达上限的普通技能（如 W）"
+    );
+    assert!(
+        !can_level_up_skill(4, 3, 0, 1),
+        "4 级英雄仍不能学习大招 R (<6 级)"
+    );
+
+    // 规则 3：6 级英雄可以学习大招 R
+    assert!(can_level_up_skill(6, 3, 0, 1), "6 级英雄可以学习大招 R");
+
+    // 规则 4：满级限制（普通技能 5 级，大招 3 级）
+    assert!(
+        !can_level_up_skill(18, 0, 5, 1),
+        "普通技能达到 5 级满级不可再升级"
+    );
+    assert!(
+        !can_level_up_skill(18, 3, 3, 1),
+        "大招达到 3 级满级不可再升级"
+    );
+
+    // 规则 5：0 技能点全部不可升级
+    assert!(
+        !can_level_up_skill(6, 0, 0, 0),
+        "0 技能点时不可升级任何技能"
+    );
 }
 
 #[test]
@@ -351,7 +505,8 @@ fn test_fiora_v3_attack_minion_step() {
             .map(|(idx, _)| idx as u8)
             .unwrap_or(0);
 
-        let action = FioraV3Action::with_target(0.0, 0.0, target_idx, FioraV3DiscreteAction::Attack);
+        let action =
+            FioraV3Action::with_target(0.0, 0.0, target_idx, FioraV3DiscreteAction::Attack);
         let res = env.step(&[action]);
         let r = &res[0];
         if r.reward_variables.get("self_cs") == Some(&1.0) {
@@ -389,8 +544,16 @@ fn test_fiora_v3_randomized_minion_health() {
     }
 
     assert!(total_minions >= 6, "重置后小兵总数应至少有 6 个");
-    assert!(killable_count >= 1, "应存在可以一击必杀的残血小兵 (<=68 HP)，实际: {}", killable_count);
-    assert!(high_hp_count >= 1, "不能全是一击必杀，应存在较高血量小兵 (>=120 HP)，实际: {}", high_hp_count);
+    assert!(
+        killable_count >= 1,
+        "应存在可以一击必杀的残血小兵 (<=68 HP)，实际: {}",
+        killable_count
+    );
+    assert!(
+        high_hp_count >= 1,
+        "不能全是一击必杀，应存在较高血量小兵 (>=120 HP)，实际: {}",
+        high_hp_count
+    );
 }
 
 #[test]
@@ -426,5 +589,9 @@ fn test_fiora_v3_obs_health_norm_and_ad_and_missiles() {
 
     // 4. 验证 to_vector / eval_to_vector 正常运行
     let vec = f_obs.to_vector();
-    assert_eq!(vec.len(), FioraV3Obs::dim(), "特征向量维度应与 Schema 严格一致");
+    assert_eq!(
+        vec.len(),
+        FioraV3Obs::dim(),
+        "特征向量维度应与 Schema 严格一致"
+    );
 }

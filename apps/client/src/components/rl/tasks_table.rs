@@ -58,7 +58,9 @@ impl TaskTableDelegate {
                     .min_width(px(120.)),
                 Column::new("algo", "算法").width(px(70.)),
                 Column::new("backbone", "骨干网络").width(px(80.)),
-                Column::new("engine", "引擎模式").width(px(85.)).text_center(),
+                Column::new("engine", "引擎模式")
+                    .width(px(85.))
+                    .text_center(),
                 Column::new("env", t!("app.rl.col_env")).width(px(150.)),
                 Column::new("status", t!("app.rl.col_status"))
                     .width(px(80.))
@@ -261,7 +263,6 @@ impl TableDelegate for TaskTableDelegate {
             .into_any_element()
     }
 }
-
 
 fn env_label(raw: &str) -> String {
     if let Some(spec) = lol_rl_protocol::get_env_spec(raw) {

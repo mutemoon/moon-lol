@@ -76,9 +76,9 @@ impl PolicySnapshot {
         structured_masks: Option<&[Option<ActionMasks>]>,
         masks: Option<&[Option<Vec<bool>>]>,
     ) -> Result<Vec<(Vec<f32>, f32, f32)>> {
-        let act_lps = self
-            .policy
-            .sample_batch_with_structured_masks(states, structured_masks, masks)?;
+        let act_lps =
+            self.policy
+                .sample_batch_with_structured_masks(states, structured_masks, masks)?;
         let values = if let Some(ref critic) = self.critic {
             let feat = self.policy.hidden(states)?;
             let v = critic.forward(&feat)?;
@@ -273,7 +273,11 @@ impl InferenceServer {
                         None
                     };
 
-                    match model.sample_batch_with_structured_masks(&state_tensor, struct_masks_ref, masks_ref) {
+                    match model.sample_batch_with_structured_masks(
+                        &state_tensor,
+                        struct_masks_ref,
+                        masks_ref,
+                    ) {
                         Ok(samples) => {
                             for (&i, (encoded_action, log_prob, value)) in
                                 idxs.iter().zip(samples.into_iter())

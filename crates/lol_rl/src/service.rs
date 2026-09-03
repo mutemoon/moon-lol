@@ -18,8 +18,8 @@ use crate::algo::grpo::{GRPOAgent, GRPOConfig};
 use crate::algo::ppo::{PPOAgent, PPOConfig};
 use crate::autotune::AutoTuner;
 use crate::db::{self, CheckpointRow, PgRlRepo, RlRepo, TaskRow};
-use crate::engine::pool::TrainingWorkerPool;
 use crate::engine::r#async::AsyncTrainingSession;
+use crate::engine::pool::TrainingWorkerPool;
 use crate::engine::sync::SyncTrainingSession;
 use crate::engine::traits::TrainingEngine;
 use crate::model_store::{checkpoint_dir, new_checkpoint_path};
@@ -485,7 +485,6 @@ impl RLService {
         let _ = self.event_tx.send(OutFrame::TaskList { tasks: task_items });
     }
 
-
     pub fn spawn_command_handler(self: Arc<Self>, mut rx: mpsc::Receiver<InFrame>) {
         tokio::spawn(async move {
             while let Some(frame) = rx.recv().await {
@@ -695,10 +694,22 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment + 'static>(
         task_id, task_config.algorithm, backbone
     );
     info!("  ├─ 并发环境 Actors:  {}", dyn_hp.num_parallel_envs);
-    info!("  ├─ 每轮总样本量:     {} 步", dyn_hp.total_iteration_samples);
-    info!("  ├─ 训练 MiniBatch:   {} 样本 (每轮更新 {} 次)", dyn_hp.train_batch_size, dyn_hp.num_minibatches);
-    info!("  ├─ PPO Epochs:       {} 轮 (总反向传播 {} 次)", effective_ppo_epochs, dyn_hp.target_updates_r);
-    info!("  ├─ 动态缩放学习率:   {:.6} (基准: {:.6})", effective_lr, task_config.lr);
+    info!(
+        "  ├─ 每轮总样本量:     {} 步",
+        dyn_hp.total_iteration_samples
+    );
+    info!(
+        "  ├─ 训练 MiniBatch:   {} 样本 (每轮更新 {} 次)",
+        dyn_hp.train_batch_size, dyn_hp.num_minibatches
+    );
+    info!(
+        "  ├─ PPO Epochs:       {} 轮 (总反向传播 {} 次)",
+        effective_ppo_epochs, dyn_hp.target_updates_r
+    );
+    info!(
+        "  ├─ 动态缩放学习率:   {:.6} (基准: {:.6})",
+        effective_lr, task_config.lr
+    );
     info!("  └─ 推理 Batch 大小:  {}", dyn_hp.infer_batch_size);
 
     let tuned = crate::autotune::TunedConfig {
@@ -1041,8 +1052,7 @@ fn run_generic_training_loop<E: lol_env::RlEnvironment + 'static>(
         let timing = &outcome.timing;
         let collect_pct =
             (timing.collect_ms / timing.total_ms.max(0.001) * 100.0).clamp(0.0, 100.0);
-        let train_pct =
-            (timing.train_ms / timing.total_ms.max(0.001) * 100.0).clamp(0.0, 100.0);
+        let train_pct = (timing.train_ms / timing.total_ms.max(0.001) * 100.0).clamp(0.0, 100.0);
 
         let curriculum_tag = if let Some(ref c) = curriculum_scheduler {
             format!(" | [{}]", c.summary())

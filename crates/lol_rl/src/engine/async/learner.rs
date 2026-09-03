@@ -151,9 +151,11 @@ impl<O: Send + 'static> AsyncLearner<O> {
 
         // 3. GPU/CPU PPO/GRPO Mini-Batch 梯度更新
         let train_start = Instant::now();
-        let stats = self
-            .agent
-            .update_multi_buffer(&collected_buffers, &collected_last_values, train_batch_size)?;
+        let stats = self.agent.update_multi_buffer(
+            &collected_buffers,
+            &collected_last_values,
+            train_batch_size,
+        )?;
         let train_elapsed = train_start.elapsed();
 
         // 4. 更新主策略版本号，并将最新模型与版本号推送给推理引擎（slot 0 = 当前主策略）

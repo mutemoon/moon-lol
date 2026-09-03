@@ -330,4 +330,3 @@ pub struct TaskOverviewItem {
     pub rollout_steps_per_env: usize,
     pub created_at: String,
 }
-

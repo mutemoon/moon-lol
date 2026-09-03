@@ -21,6 +21,39 @@ pub fn is_skill_ready(cooldown: &CoolDown, recast: Option<&SkillRecastWindow>) -
     cooldown.timer.as_ref().map_or(true, |t| t.is_finished())
 }
 
+/// 判断指定技能槽位在当前英雄等级和技能点下是否允许升级。
+///
+/// 规则：
+/// 1. 技能点必须大于 0 (`skill_points > 0`)；
+/// 2. 满级限制：大招 R (index 3) 上限 3 级，普通技能 Q/W/E (index 0..3) 上限 5 级；
+/// 3. 等级限制：6 级前不能学习/升级大招 R；6 级前普通技能最多升级到 3 级（如 4 级学不了 4 级 Q，最多 3 级）。
+pub fn can_level_up_skill(
+    hero_level: u32,
+    skill_index: usize,
+    current_skill_level: usize,
+    skill_points: u32,
+) -> bool {
+    if skill_points == 0 {
+        return false;
+    }
+    let max_level = match skill_index {
+        3 => 3,
+        _ => 5,
+    };
+    if current_skill_level >= max_level {
+        return false;
+    }
+    if hero_level < 6 {
+        if skill_index == 3 {
+            return false;
+        }
+        if current_skill_level >= 3 {
+            return false;
+        }
+    }
+    true
+}
+
 pub fn get_skill_value(
     skill_object: &Spell,
     name: &str,

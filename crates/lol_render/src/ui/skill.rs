@@ -9,7 +9,7 @@ use lol_core::base::level::Level;
 use lol_core::character::CharacterReady;
 use lol_core::skill::{
     CommandSkillLevelUp, CoolDown, PassiveSkill, Skill, SkillPoints, SkillRecastWindow, Skills,
-    is_skill_ready,
+    can_level_up_skill, is_skill_ready,
 };
 
 use crate::controller::SelfPlayer;
@@ -519,21 +519,10 @@ fn update_skill_level_up_buttons(
             continue;
         };
 
-        // 如果没有技能点，或者技能已经满级，或者不满足加点条件，则隐藏/销毁按钮
-        let mut should_show = skill_points.0 > 0;
-
-        if should_show {
-            if let Ok(skill) = q_skill.get(skill_entity) {
-                // 1 级只能加点 q w e，6 级才能加点 r，6 级前一个技能最多加 3 点
-                if level.value < 6 {
-                    if index == 3 {
-                        should_show = false;
-                    } else if skill.level >= 3 {
-                        should_show = false;
-                    }
-                }
-            }
-        }
+        let should_show = q_skill
+            .get(skill_entity)
+            .map(|skill| can_level_up_skill(level.value, index, skill.level, skill_points.0))
+            .unwrap_or(false);
 
         if should_show {
             debug!("显示技能升级按钮");

@@ -270,11 +270,7 @@ impl AutoTuner {
                         .critic
                         .to_device(&candle_core::Device::Cpu)?,
                 );
-                (
-                    cpu_policy,
-                    Some(cpu_critic),
-                    RlAgent::Ppo(agent),
-                )
+                (cpu_policy, Some(cpu_critic), RlAgent::Ppo(agent))
             }
         };
 
@@ -870,8 +866,14 @@ mod tests {
         assert_eq!(dyn_hp.num_parallel_envs, 256);
         assert_eq!(dyn_hp.total_iteration_samples, 256 * 128 * 2); // 65,536
         assert_eq!(dyn_hp.ppo_epochs, 2);
-        assert!(dyn_hp.train_batch_size >= 1024, "MiniBatch 大小应自适应扩大至 >= 1024");
+        assert!(
+            dyn_hp.train_batch_size >= 1024,
+            "MiniBatch 大小应自适应扩大至 >= 1024"
+        );
         assert!(dyn_hp.target_updates_r <= 128, "反向传播总次数应被显著削减");
-        assert!(dyn_hp.adjusted_lr > 3e-4, "学习率应随 MiniBatch 增大而自适应放大");
+        assert!(
+            dyn_hp.adjusted_lr > 3e-4,
+            "学习率应随 MiniBatch 增大而自适应放大"
+        );
     }
 }

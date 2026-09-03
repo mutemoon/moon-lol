@@ -84,8 +84,14 @@ fn main() -> anyhow::Result<()> {
 
     println!("  ├─ 循环次数:       {} 次", format_int(iterations));
     println!("  ├─ 总计耗时:       {:.2?}", elapsed);
-    println!("  ├─ 单次推理平均耗时: \x1b[1;32m{:.3} µs\x1b[0m (微秒)", avg_us);
-    println!("  └─ 单核纯前向吞吐:   \x1b[1;36m{} ops/sec\x1b[0m", format_float(inferences_per_sec));
+    println!(
+        "  ├─ 单次推理平均耗时: \x1b[1;32m{:.3} µs\x1b[0m (微秒)",
+        avg_us
+    );
+    println!(
+        "  └─ 单核纯前向吞吐:   \x1b[1;36m{} ops/sec\x1b[0m",
+        format_float(inferences_per_sec)
+    );
 
     // ─────────────────────────────────────────────────────────────────────────────
     // 2. CPU 单步完整动作采样 (Batch=1, sample_action 包含特征提取+前向+采样)
@@ -109,8 +115,14 @@ fn main() -> anyhow::Result<()> {
 
     println!("  ├─ 循环次数:       {} 次", format_int(sample_iterations));
     println!("  ├─ 总计耗时:       {:.2?}", elapsed);
-    println!("  ├─ 单次决策平均耗时: \x1b[1;32m{:.3} µs\x1b[0m (微秒)", avg_sample_us);
-    println!("  └─ 单核决策采样吞吐: \x1b[1;36m{} steps/sec\x1b[0m", format_float(samples_per_sec));
+    println!(
+        "  ├─ 单次决策平均耗时: \x1b[1;32m{:.3} µs\x1b[0m (微秒)",
+        avg_sample_us
+    );
+    println!(
+        "  └─ 单核决策采样吞吐: \x1b[1;36m{} steps/sec\x1b[0m",
+        format_float(samples_per_sec)
+    );
 
     // ─────────────────────────────────────────────────────────────────────────────
     // 3. CPU 不同 Batch Size 下的推理吞吐量压测
@@ -118,7 +130,10 @@ fn main() -> anyhow::Result<()> {
     println!("\n--------------------------------------------------------------------------------");
     println!("🔬 测试 3: CPU 不同 Batch Size 批处理前向耗时与吞吐量对比");
     println!("--------------------------------------------------------------------------------");
-    println!("{:<12} | {:<16} | {:<18} | {:<16}", "Batch Size", "单批耗时 (µs)", "单样本耗时 (µs)", "吞吐量 (SPS)");
+    println!(
+        "{:<12} | {:<16} | {:<18} | {:<16}",
+        "Batch Size", "单批耗时 (µs)", "单样本耗时 (µs)", "吞吐量 (SPS)"
+    );
     println!("--------------------------------------------------------------------------------");
 
     let batch_sizes = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024];
@@ -143,7 +158,10 @@ fn main() -> anyhow::Result<()> {
 
         println!(
             "{:<12} | {:<16.2} | {:<18.3} | {:<16}",
-            b, batch_us, per_sample_us, format_float(sps)
+            b,
+            batch_us,
+            per_sample_us,
+            format_float(sps)
         );
     }
 
@@ -179,17 +197,28 @@ fn main() -> anyhow::Result<()> {
     let multi_thread_sps = total_steps as f64 / total_elapsed.as_secs_f64();
 
     println!("  ├─ 并发线程数:     {} 线程", num_threads);
-    println!("  ├─ 每线程决策数:   {} 次 (总计: {} 次)", format_int(steps_per_thread), format_int(total_steps));
+    println!(
+        "  ├─ 每线程决策数:   {} 次 (总计: {} 次)",
+        format_int(steps_per_thread),
+        format_int(total_steps)
+    );
     println!("  ├─ 并发总耗时:     {:.2?}", total_elapsed);
-    println!("  └─ 32 线程并发采样吞吐量: \x1b[1;32m{} SPS\x1b[0m (决策/秒)", format_float(multi_thread_sps));
+    println!(
+        "  └─ 32 线程并发采样吞吐量: \x1b[1;32m{} SPS\x1b[0m (决策/秒)",
+        format_float(multi_thread_sps)
+    );
 
     // ─────────────────────────────────────────────────────────────────────────────
     // 5. 若有 CUDA 设备，测试 GPU 推理
     // ─────────────────────────────────────────────────────────────────────────────
     if let Ok(gpu_dev) = Device::new_cuda(0) {
-        println!("\n--------------------------------------------------------------------------------");
+        println!(
+            "\n--------------------------------------------------------------------------------"
+        );
         println!("🔬 测试 5: GPU (CUDA) 推理耗时对比");
-        println!("--------------------------------------------------------------------------------");
+        println!(
+            "--------------------------------------------------------------------------------"
+        );
         let gpu_agent = PPOAgent::create_for_env_with_backbone::<FioraV2Env>(
             state_dim,
             hidden_dim,

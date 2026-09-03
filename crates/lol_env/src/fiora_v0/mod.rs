@@ -4,9 +4,8 @@ pub mod step;
 
 pub use action::*;
 pub use env::*;
-pub use step::*;
-
 use lol_rl_protocol::ObsSchema;
+pub use step::*;
 
 pub use crate::fiora_riven_common::{
     ATTACK_MASK_DISTANCE, AttackEventTracker, FIORA_COMMON_OBS_SCHEMA, FioraVsRivenObs,

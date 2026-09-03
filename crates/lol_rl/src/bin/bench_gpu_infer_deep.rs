@@ -51,12 +51,16 @@ fn bench_batch_scaling(
     batch_sizes: &[usize],
 ) -> anyhow::Result<()> {
     println!("\n📊 【{}】不同 Batch Size 下的 GPU 推理延迟与吞吐量", name);
-    println!("--------------------------------------------------------------------------------------------------");
+    println!(
+        "--------------------------------------------------------------------------------------------------"
+    );
     println!(
         "{:<10} | {:<18} | {:<18} | {:<20} | {:<16}",
         "Batch Size", "单批耗时 (µs)", "单样本耗时 (µs)", "GPU 吞吐量 (SPS)", "相对 Batch=1 提速"
     );
-    println!("--------------------------------------------------------------------------------------------------");
+    println!(
+        "--------------------------------------------------------------------------------------------------"
+    );
 
     let mut base_per_sample_us = 1.0;
 
@@ -133,27 +137,51 @@ fn main() -> anyhow::Result<()> {
     // 模型 1: 小型 MLP (hidden_dim = 256, ~91K 参数)
     let (agent_mlp_256, p1) = create_agent(256, PolicyBackbone::Mlp, &gpu_device)?;
     let policy_mlp_256 = Arc::new(agent_mlp_256.policy().clone());
-    println!("  ├─ 1. 【小型网络】MLP-256 (当前基线):   {:>8} 参数 ({:.2} K)", format_num(p1 as f64), p1 as f64 / 1000.0);
+    println!(
+        "  ├─ 1. 【小型网络】MLP-256 (当前基线):   {:>8} 参数 ({:.2} K)",
+        format_num(p1 as f64),
+        p1 as f64 / 1000.0
+    );
 
     // 模型 2: 中型 MLP (hidden_dim = 512, ~350K 参数)
     let (agent_mlp_512, p2) = create_agent(512, PolicyBackbone::Mlp, &gpu_device)?;
     let policy_mlp_512 = Arc::new(agent_mlp_512.policy().clone());
-    println!("  └─ 2. 【中型网络】MLP-512 (加宽前馈):   {:>8} 参数 ({:.2} K)", format_num(p2 as f64), p2 as f64 / 1000.0);
+    println!(
+        "  └─ 2. 【中型网络】MLP-512 (加宽前馈):   {:>8} 参数 ({:.2} K)",
+        format_num(p2 as f64),
+        p2 as f64 / 1000.0
+    );
 
     let batch_sizes = [1, 4, 16, 64, 128, 256, 512, 1024, 2048, 4096];
 
     // ─────────────────────────────────────────────────────────────────────────────
     // 2. 压测 GPU Batch 缩放吞吐
     // ─────────────────────────────────────────────────────────────────────────────
-    bench_batch_scaling("小型网络 (MLP-256, 91K)", &policy_mlp_256, state_dim, &gpu_device, &batch_sizes)?;
-    bench_batch_scaling("中型网络 (MLP-512, 350K)", &policy_mlp_512, state_dim, &gpu_device, &batch_sizes)?;
+    bench_batch_scaling(
+        "小型网络 (MLP-256, 91K)",
+        &policy_mlp_256,
+        state_dim,
+        &gpu_device,
+        &batch_sizes,
+    )?;
+    bench_batch_scaling(
+        "中型网络 (MLP-512, 350K)",
+        &policy_mlp_512,
+        state_dim,
+        &gpu_device,
+        &batch_sizes,
+    )?;
 
     // ─────────────────────────────────────────────────────────────────────────────
     // 3. GPU 端到端细粒度耗时拆解 (PCIe H2D + CUDA Kernel + D2H)
     // ─────────────────────────────────────────────────────────────────────────────
-    println!("\n--------------------------------------------------------------------------------------------------");
+    println!(
+        "\n--------------------------------------------------------------------------------------------------"
+    );
     println!("🔬 深入剖析: GPU 单步端到端推理中的【各阶段耗时分布拆解】(Batch = 256)");
-    println!("--------------------------------------------------------------------------------------------------");
+    println!(
+        "--------------------------------------------------------------------------------------------------"
+    );
 
     let host_raw_data = vec![0.0f32; state_dim * 256];
     let iters = 300;
@@ -189,19 +217,48 @@ fn main() -> anyhow::Result<()> {
     let d2h_us = start.elapsed().as_secs_f64() * 1_000_000.0 / iters as f64;
 
     let total_e2e_us = h2d_us + kernel_us + d2h_us;
-    println!("  ├─ 1. [CPU ➔ GPU] Host-to-Device 拷贝: {:>8.2} µs (占 {:>4.1}%)", h2d_us, h2d_us / total_e2e_us * 100.0);
-    println!("  ├─ 2. [GPU 核心]  CUDA 算子前向计算:     {:>8.2} µs (占 {:>4.1}%)", kernel_us, kernel_us / total_e2e_us * 100.0);
-    println!("  ├─ 3. [GPU ➔ CPU] Device-to-Host 拷贝: {:>8.2} µs (占 {:>4.1}%)", d2h_us, d2h_us / total_e2e_us * 100.0);
-    println!("  └─ 🎯 [端到端总计] 单批 256 样本总耗时:   {:>8.2} µs (单样本折合 \x1b[1;32m{:.3} µs\x1b[0m)", total_e2e_us, total_e2e_us / 256.0);
+    println!(
+        "  ├─ 1. [CPU ➔ GPU] Host-to-Device 拷贝: {:>8.2} µs (占 {:>4.1}%)",
+        h2d_us,
+        h2d_us / total_e2e_us * 100.0
+    );
+    println!(
+        "  ├─ 2. [GPU 核心]  CUDA 算子前向计算:     {:>8.2} µs (占 {:>4.1}%)",
+        kernel_us,
+        kernel_us / total_e2e_us * 100.0
+    );
+    println!(
+        "  ├─ 3. [GPU ➔ CPU] Device-to-Host 拷贝: {:>8.2} µs (占 {:>4.1}%)",
+        d2h_us,
+        d2h_us / total_e2e_us * 100.0
+    );
+    println!(
+        "  └─ 🎯 [端到端总计] 单批 256 样本总耗时:   {:>8.2} µs (单样本折合 \x1b[1;32m{:.3} µs\x1b[0m)",
+        total_e2e_us,
+        total_e2e_us / 256.0
+    );
 
     // ─────────────────────────────────────────────────────────────────────────────
     // 4. CPU vs GPU 在不同模型规模下的性能拐点 (Cross-over Analysis)
     // ─────────────────────────────────────────────────────────────────────────────
-    println!("\n--------------------------------------------------------------------------------------------------");
+    println!(
+        "\n--------------------------------------------------------------------------------------------------"
+    );
     println!("⚖️ CPU vs GPU 跨模型规模【吞吐量与性能拐点对比】(Batch = 256)");
-    println!("--------------------------------------------------------------------------------------------------");
-    println!("{:<24} | {:<16} | {:<18} | {:<18} | {:<14}", "模型规格 (架构 / 参数量)", "CPU 吞吐量 (SPS)", "GPU 吞吐量 (SPS)", "GPU 相对 CPU 加速比", "推荐计算设备");
-    println!("--------------------------------------------------------------------------------------------------");
+    println!(
+        "--------------------------------------------------------------------------------------------------"
+    );
+    println!(
+        "{:<24} | {:<16} | {:<18} | {:<18} | {:<14}",
+        "模型规格 (架构 / 参数量)",
+        "CPU 吞吐量 (SPS)",
+        "GPU 吞吐量 (SPS)",
+        "GPU 相对 CPU 加速比",
+        "推荐计算设备"
+    );
+    println!(
+        "--------------------------------------------------------------------------------------------------"
+    );
 
     let models = [
         ("MLP-256 (91K)", 256, PolicyBackbone::Mlp),
@@ -213,9 +270,13 @@ fn main() -> anyhow::Result<()> {
         let (cpu_agent, _) = create_agent(h_dim, b_bone, &cpu_device)?;
         let cpu_pol = cpu_agent.policy();
         let cpu_in = Tensor::zeros((256, state_dim), DType::F32, &cpu_device)?;
-        for _ in 0..10 { let _ = cpu_pol.forward_actor(&cpu_in)?; }
+        for _ in 0..10 {
+            let _ = cpu_pol.forward_actor(&cpu_in)?;
+        }
         let c_start = Instant::now();
-        for _ in 0..100 { let _ = cpu_pol.forward_actor(&cpu_in)?; }
+        for _ in 0..100 {
+            let _ = cpu_pol.forward_actor(&cpu_in)?;
+        }
         let c_dur = c_start.elapsed();
         let cpu_sps = (100 * 256) as f64 / c_dur.as_secs_f64();
 
@@ -223,16 +284,26 @@ fn main() -> anyhow::Result<()> {
         let (gpu_agent, _) = create_agent(h_dim, b_bone, &gpu_device)?;
         let gpu_pol = gpu_agent.policy();
         let gpu_in = Tensor::zeros((256, state_dim), DType::F32, &gpu_device)?;
-        for _ in 0..10 { let _ = gpu_pol.forward_actor(&gpu_in)?; }
+        for _ in 0..10 {
+            let _ = gpu_pol.forward_actor(&gpu_in)?;
+        }
         gpu_device.synchronize()?;
         let g_start = Instant::now();
-        for _ in 0..200 { let _ = gpu_pol.forward_actor(&gpu_in)?; }
+        for _ in 0..200 {
+            let _ = gpu_pol.forward_actor(&gpu_in)?;
+        }
         gpu_device.synchronize()?;
         let g_dur = g_start.elapsed();
         let gpu_sps = (200 * 256) as f64 / g_dur.as_secs_f64();
 
         let ratio = gpu_sps / cpu_sps;
-        let recommendation = if ratio > 1.5 { "🟢 GPU 显著领先" } else if ratio > 0.8 { "🟡 CPU/GPU 相当" } else { "🔵 CPU 优势" };
+        let recommendation = if ratio > 1.5 {
+            "🟢 GPU 显著领先"
+        } else if ratio > 0.8 {
+            "🟡 CPU/GPU 相当"
+        } else {
+            "🔵 CPU 优势"
+        };
 
         println!(
             "{:<24} | {:<16} | {:<18} | \x1b[1;32m{:<18.2}x\x1b[0m | {}",

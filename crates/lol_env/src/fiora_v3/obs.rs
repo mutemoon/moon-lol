@@ -1,10 +1,14 @@
 use std::collections::HashMap;
 
 use bevy::prelude::*;
+use lol_core::base::level::Level;
 use lol_core::damage::Damage;
 use lol_core::entities::minion::Minion;
 use lol_core::life::Health;
 use lol_core::missile::{Missile, MissileState};
+use lol_core::skill::{
+    CoolDown, Skill, SkillPoints, SkillRecastWindow, Skills, can_level_up_skill, is_skill_ready,
+};
 use lol_core::team::Team;
 use lol_rl_protocol::{ObsFeaturePayload, ObsSchema};
 
@@ -24,6 +28,12 @@ pub static FIORA_V3_OBS_SCHEMA: std::sync::LazyLock<ObsSchema> = std::sync::Lazy
 pub struct FioraV3Obs {
     pub self_pos: Vec3,
     pub self_ad: f32,
+
+    pub hero_level: u32,
+    pub skill_points: u32,
+    pub skill_levels: [usize; 4],
+    pub skill_ready: [bool; 4],
+    pub can_level_up: [bool; 4],
 
     pub attack_state: u8,
     pub attack_is_windup: bool,
@@ -53,6 +63,51 @@ impl FioraV3Obs {
         ctx.set_var("attack_timer_remaining", self.attack_timer_remaining);
 
         ctx.set_var("self_ad", self.self_ad);
+
+        ctx.set_var("hero_level", self.hero_level as f32);
+        ctx.set_var("skill_points", self.skill_points as f32);
+        ctx.set_var("q_level", self.skill_levels[0] as f32);
+        ctx.set_var("w_level", self.skill_levels[1] as f32);
+        ctx.set_var("e_level", self.skill_levels[2] as f32);
+        ctx.set_var("r_level", self.skill_levels[3] as f32);
+
+        ctx.set_var("q_ready", if self.skill_ready[0] { 1.0 } else { 0.0 });
+        ctx.set_var("w_ready", if self.skill_ready[1] { 1.0 } else { 0.0 });
+        ctx.set_var("e_ready", if self.skill_ready[2] { 1.0 } else { 0.0 });
+        ctx.set_var("r_ready", if self.skill_ready[3] { 1.0 } else { 0.0 });
+
+        ctx.set_var(
+            "can_cast_any",
+            if self.skill_ready.iter().any(|&r| r) {
+                1.0
+            } else {
+                0.0
+            },
+        );
+        ctx.set_var(
+            "can_level_up_any",
+            if self.can_level_up.iter().any(|&u| u) {
+                1.0
+            } else {
+                0.0
+            },
+        );
+        ctx.set_var(
+            "can_level_up_q",
+            if self.can_level_up[0] { 1.0 } else { 0.0 },
+        );
+        ctx.set_var(
+            "can_level_up_w",
+            if self.can_level_up[1] { 1.0 } else { 0.0 },
+        );
+        ctx.set_var(
+            "can_level_up_e",
+            if self.can_level_up[2] { 1.0 } else { 0.0 },
+        );
+        ctx.set_var(
+            "can_level_up_r",
+            if self.can_level_up[3] { 1.0 } else { 0.0 },
+        );
 
         ctx.set_repeated("visible_units", self.visible_units.clone());
         ctx.set_repeated("visible_missiles", self.visible_missiles.clone());
@@ -273,6 +328,36 @@ pub fn get_ego_obs_from_world(world: &World, self_entity: Entity) -> FioraV3Obs 
         .map(|d| d.0)
         .unwrap_or(68.0);
 
+    let hero_level = world
+        .get::<Level>(self_entity)
+        .map(|l| l.value)
+        .unwrap_or(1);
+    let skill_points = world
+        .get::<SkillPoints>(self_entity)
+        .map(|sp| sp.0)
+        .unwrap_or(0);
+
+    let mut skill_levels = [0usize; 4];
+    let mut skill_ready = [false; 4];
+    let mut can_level_up = [false; 4];
+
+    if let Some(skills) = world.get::<Skills>(self_entity) {
+        for (i, s_entity) in skills.iter().enumerate().take(4) {
+            let skill_comp = world.get::<Skill>(s_entity);
+            let lvl = skill_comp.map(|s| s.level).unwrap_or(0);
+            skill_levels[i] = lvl;
+
+            let cd_comp = world.get::<CoolDown>(s_entity);
+            let recast_comp = world.get::<SkillRecastWindow>(s_entity);
+            skill_ready[i] = lvl > 0
+                && cd_comp
+                    .map(|cd| is_skill_ready(cd, recast_comp))
+                    .unwrap_or(false);
+
+            can_level_up[i] = can_level_up_skill(hero_level, i, lvl, skill_points);
+        }
+    }
+
     let (visible_units, visible_unit_entities) =
         extract_visible_units_from_world(world, self_base.pos, self_team);
     let visible_missiles = extract_visible_missiles_from_world(world, self_base.pos, self_team);
@@ -280,6 +365,11 @@ pub fn get_ego_obs_from_world(world: &World, self_entity: Entity) -> FioraV3Obs 
     FioraV3Obs {
         self_pos: self_base.pos,
         self_ad,
+        hero_level,
+        skill_points,
+        skill_levels,
+        skill_ready,
+        can_level_up,
         attack_state: atk.state_code,
         attack_is_windup: atk.is_windup,
         attack_is_cooldown: atk.is_cooldown,

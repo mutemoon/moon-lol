@@ -3,8 +3,8 @@ use lol_core::action::{Action, CommandAction};
 
 use super::action::{FioraVsRivenRealAction, MOVE_SCALE};
 use crate::fiora_riven_common::{
-    AttackEventTracker, FioraVsRivenObs, VitalBreakTracker, compute_step_reward, get_obs_from_world,
-    unpause_virtual_time,
+    AttackEventTracker, FioraVsRivenObs, VitalBreakTracker, compute_step_reward,
+    get_obs_from_world, unpause_virtual_time,
 };
 use crate::traits::StepResult;
 

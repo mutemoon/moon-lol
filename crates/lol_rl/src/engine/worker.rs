@@ -89,12 +89,8 @@ impl<E: RlEnvironment> RolloutWorker<E> {
                     structured_masks.push(E::action_masks(obs));
                 }
 
-                let batch_samples = evaluator.evaluate_batch(
-                    0,
-                    &state_vecs,
-                    &masks,
-                    &structured_masks,
-                )?;
+                let batch_samples =
+                    evaluator.evaluate_batch(0, &state_vecs, &masks, &structured_masks)?;
 
                 for ((state_vec, mask), (encoded, log_prob, val)) in state_vecs
                     .into_iter()

@@ -242,6 +242,28 @@ pub enum ActionMaskRule {
         disabled_branch: usize,
         branch_label: String,
     },
+    /// 自回归分层条件分支规则：当父动作 parent_branch 被选中时，若 condition (> 0.0) 成立，则在 child_head 的 disabled_branch 分支上应用禁用
+    ConditionalBranch {
+        #[serde(default)]
+        parent_head: Option<String>,
+        parent_branch: usize,
+        parent_label: String,
+        child_head: String,
+        disabled_branch: usize,
+        branch_label: String,
+        condition: ObsExpr,
+    },
+    /// 自回归分层条件实体槽位规则：当父动作 parent_branch 被选中时，针对 entity_name 的各个槽位评估 condition
+    ConditionalEntitySlot {
+        #[serde(default)]
+        parent_head: Option<String>,
+        parent_branch: usize,
+        parent_label: String,
+        entity_name: String,
+        condition: ObsExpr,
+        #[serde(default)]
+        target_head: Option<String>,
+    },
 }
 
 impl ActionMaskRule {
@@ -284,6 +306,44 @@ impl ActionMaskRule {
             target_head,
             disabled_branch,
             branch_label: branch_label.into(),
+        }
+    }
+
+    pub fn conditional_branch(
+        parent_head: Option<String>,
+        parent_branch: usize,
+        parent_label: impl Into<String>,
+        child_head: impl Into<String>,
+        disabled_branch: usize,
+        branch_label: impl Into<String>,
+        condition: ObsExpr,
+    ) -> Self {
+        Self::ConditionalBranch {
+            parent_head,
+            parent_branch,
+            parent_label: parent_label.into(),
+            child_head: child_head.into(),
+            disabled_branch,
+            branch_label: branch_label.into(),
+            condition,
+        }
+    }
+
+    pub fn conditional_entity_slot(
+        parent_head: Option<String>,
+        parent_branch: usize,
+        parent_label: impl Into<String>,
+        entity_name: impl Into<String>,
+        condition: ObsExpr,
+        target_head: Option<String>,
+    ) -> Self {
+        Self::ConditionalEntitySlot {
+            parent_head,
+            parent_branch,
+            parent_label: parent_label.into(),
+            entity_name: entity_name.into(),
+            condition,
+            target_head,
         }
     }
 
@@ -354,14 +414,13 @@ impl ActionSchema {
         mask
     }
 
-    /// 统一求值：根据当前观测上下文，计算完整的 ActionMasks（包含各分支 branch_masks 与 conditional_target_masks）
-    /// conditional_target_masks 矩阵格式为 [action_type_idx][target_idx]，即选定动作类型下各目标槽位的合法性掩码。
+    /// 统一求值：根据当前观测上下文，计算完整的 ActionMasks（包含各分支 branch_masks, conditional_target_masks 与 conditional_branch_masks）
     pub fn eval_action_masks(&self, ctx: &ObsContext) -> ActionMasks {
         let flat = self.flat_branches();
         let mut branch_masks = Vec::with_capacity(flat.len());
         let mut unit_selection_info: Option<(usize, String)> = None;
-        let mut cat_baseline_info: Option<(usize, String, Vec<bool>)> = None;
         let mut target_base_mask: Option<Vec<bool>> = None;
+        let mut all_cat_nodes: Vec<(String, usize, Vec<bool>)> = Vec::new();
 
         for node in &flat {
             match node {
@@ -394,9 +453,7 @@ impl ActionSchema {
                                     } = rule
                                     {
                                         if entity_name == obs_entity_name
-                                            && target_head
-                                                .as_ref()
-                                                .map_or(true, |h| h == name)
+                                            && target_head.as_ref().map_or(true, |h| h == name)
                                             && condition.eval(&entity_vars) > 0.0
                                         {
                                             slot_mask[i] = false;
@@ -420,9 +477,7 @@ impl ActionSchema {
                                 } = rule
                                 {
                                     if entity_name == obs_entity_name
-                                        && target_head
-                                            .as_ref()
-                                            .map_or(true, |h| h == name)
+                                        && target_head.as_ref().map_or(true, |h| h == name)
                                         && condition.eval(&entity_vars) > 0.0
                                     {
                                         disabled = true;
@@ -439,9 +494,7 @@ impl ActionSchema {
                     branch_masks.push(Some(slot_mask));
                 }
                 ActionNode::Categorical {
-                    name,
-                    num_classes,
-                    ..
+                    name, num_classes, ..
                 } => {
                     let mut mask = vec![true; *num_classes];
                     for rule in &self.mask_rules {
@@ -460,14 +513,20 @@ impl ActionSchema {
                             }
                         }
                     }
-                    cat_baseline_info = Some((*num_classes, name.clone(), mask.clone()));
+                    all_cat_nodes.push((name.clone(), *num_classes, mask.clone()));
                     branch_masks.push(Some(mask));
                 }
                 ActionNode::Struct { .. } => unreachable!(),
             }
         }
 
-        let conditional_target_masks = if let (Some((max_units, obs_entity_name)), Some(base_slot_mask), Some((num_classes, _cat_name, _cat_mask))) =
+        let cat_baseline_info = all_cat_nodes.first().cloned();
+
+        let conditional_target_masks = if let (
+            Some((max_units, obs_entity_name)),
+            Some(base_slot_mask),
+            Some((parent_cat_name, num_classes, _cat_mask)),
+        ) =
             (unit_selection_info, target_base_mask, cat_baseline_info)
         {
             let repeated_units = ctx.repeated.get(&obs_entity_name);
@@ -487,20 +546,44 @@ impl ActionSchema {
                             entity_vars.insert(format!("u.{}", k), *v);
                         }
                         for rule in &self.mask_rules {
-                            if let ActionMaskRule::ConditionalTarget {
-                                entity_name,
-                                condition,
-                                disabled_branch,
-                                ..
-                            } = rule
-                            {
-                                if entity_name == &obs_entity_name
-                                    && *disabled_branch == act_idx
-                                    && condition.eval(&entity_vars) > 0.0
-                                {
-                                    act_slot_mask[i] = false;
-                                    break;
+                            match rule {
+                                ActionMaskRule::ConditionalTarget {
+                                    entity_name,
+                                    condition,
+                                    disabled_branch,
+                                    target_head,
+                                    ..
+                                } => {
+                                    if entity_name == &obs_entity_name
+                                        && target_head
+                                            .as_ref()
+                                            .map_or(true, |h| h == &parent_cat_name)
+                                        && *disabled_branch == act_idx
+                                        && condition.eval(&entity_vars) > 0.0
+                                    {
+                                        act_slot_mask[i] = false;
+                                        break;
+                                    }
                                 }
+                                ActionMaskRule::ConditionalEntitySlot {
+                                    entity_name,
+                                    condition,
+                                    parent_branch,
+                                    parent_head,
+                                    ..
+                                } => {
+                                    if entity_name == &obs_entity_name
+                                        && parent_head
+                                            .as_ref()
+                                            .map_or(true, |h| h == &parent_cat_name)
+                                        && *parent_branch == act_idx
+                                        && condition.eval(&entity_vars) > 0.0
+                                    {
+                                        act_slot_mask[i] = false;
+                                        break;
+                                    }
+                                }
+                                _ => {}
                             }
                         }
                     }
@@ -517,9 +600,51 @@ impl ActionSchema {
             None
         };
 
+        // 计算下游各个 Categorical 头的自回归条件分支掩码矩阵
+        let conditional_branch_masks =
+            if let Some((parent_name, parent_classes, _)) = all_cat_nodes.first() {
+                let mut branch_map = std::collections::HashMap::new();
+
+                for (child_name, child_classes, child_base_mask) in all_cat_nodes.iter().skip(1) {
+                    let mut matrix = vec![child_base_mask.clone(); *parent_classes];
+
+                    for rule in &self.mask_rules {
+                        if let ActionMaskRule::ConditionalBranch {
+                            parent_head,
+                            parent_branch,
+                            child_head,
+                            disabled_branch,
+                            condition,
+                            ..
+                        } = rule
+                        {
+                            if parent_head.as_ref().map_or(true, |h| h == parent_name)
+                                && child_head == child_name
+                                && *parent_branch < *parent_classes
+                                && *disabled_branch < *child_classes
+                            {
+                                if condition.eval(&ctx.vars) > 0.0 {
+                                    matrix[*parent_branch][*disabled_branch] = false;
+                                }
+                            }
+                        }
+                    }
+                    branch_map.insert(child_name.clone(), matrix);
+                }
+
+                if branch_map.is_empty() {
+                    None
+                } else {
+                    Some(branch_map)
+                }
+            } else {
+                None
+            };
+
         ActionMasks {
             branch_masks,
             conditional_target_masks,
+            conditional_branch_masks,
         }
     }
 
@@ -589,6 +714,10 @@ pub struct ActionMasks {
     /// 自回归条件目标动作掩码矩阵（动作类别维度 -> 目标维度有效性布尔切片）
     /// conditional_target_masks.as_ref()[action_type_idx] 对应选中动作 action_type_idx 时各目标槽位的合法掩码
     pub conditional_target_masks: Option<Vec<Vec<bool>>>,
+    /// 自回归条件分支掩码表（下游分支节点名 -> [主动作类别维度][下游分支维度] 的掩码矩阵）
+    /// 例如 "skill_slot" -> [5 类主动作][4 个技能槽位] 的 bool 矩阵
+    #[serde(default)]
+    pub conditional_branch_masks: Option<std::collections::HashMap<String, Vec<Vec<bool>>>>,
 }
 
 impl ActionMasks {
@@ -596,6 +725,7 @@ impl ActionMasks {
         Self {
             branch_masks,
             conditional_target_masks: None,
+            conditional_branch_masks: None,
         }
     }
 
@@ -606,6 +736,7 @@ impl ActionMasks {
         Self {
             branch_masks,
             conditional_target_masks: Some(conditional_target_masks),
+            conditional_branch_masks: None,
         }
     }
 }

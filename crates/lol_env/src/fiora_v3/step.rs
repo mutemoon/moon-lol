@@ -139,6 +139,23 @@ pub fn dispatch_single_action(
                 });
             }
         }
+        FioraV3DiscreteAction::CastSkill => {
+            let skill_idx = action.skill_slot.to_u8() as usize;
+            world.trigger(CommandAction {
+                entity: self_entity,
+                action: Action::Skill {
+                    index: skill_idx,
+                    point: Vec2::new(target_offset_pos.x, target_offset_pos.z),
+                },
+            });
+        }
+        FioraV3DiscreteAction::LevelUpSkill => {
+            let skill_idx = action.skill_slot.to_u8() as usize;
+            world.trigger(CommandAction {
+                entity: self_entity,
+                action: Action::SkillLevelUp(skill_idx),
+            });
+        }
     }
 }
 

@@ -60,8 +60,7 @@ fn main() -> anyhow::Result<()> {
     let mut handles = Vec::new();
     for _ in 0..envs {
         let (cmd_tx, cmd_rx) = unbounded::<WorkerCommand>();
-        let (resp_tx, resp_rx) =
-            unbounded::<WorkerTrajectory<lol_env::fiora_v2::FioraV2Obs>>();
+        let (resp_tx, resp_rx) = unbounded::<WorkerTrajectory<lol_env::fiora_v2::FioraV2Obs>>();
         let h = std::thread::spawn(move || {
             let mut worker = RolloutWorker::<FioraV2Env>::new();
             while let Ok(cmd) = cmd_rx.recv() {
@@ -83,9 +82,7 @@ fn main() -> anyhow::Result<()> {
                             state_dim,
                             &candle_core::Device::Cpu,
                         );
-                        let _ = resp_tx.send(
-                            traj.unwrap_or_else(|_| WorkerTrajectory::empty()),
-                        );
+                        let _ = resp_tx.send(traj.unwrap_or_else(|_| WorkerTrajectory::empty()));
                     }
                     WorkerCommand::UpdateCurriculum {
                         hp_scale,
@@ -143,9 +140,7 @@ fn main() -> anyhow::Result<()> {
         let mut buffers = Vec::new();
         let mut last_values = Vec::new();
         for rx in &resp_receivers {
-            let traj = rx
-                .recv()
-                .unwrap_or_else(|_| WorkerTrajectory::empty());
+            let traj = rx.recv().unwrap_or_else(|_| WorkerTrajectory::empty());
             for ret in traj.ep_returns {
                 if recent_returns.len() >= 50 {
                     recent_returns.pop_front();

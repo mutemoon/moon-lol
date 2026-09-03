@@ -270,7 +270,11 @@ impl VisualEnvironment for FioraVsRivenRealEnv {
     }
 
     fn get_current_obs_all(&self, world: &World) -> Vec<Self::Obs> {
-        vec![get_obs_from_world(world, self.base.fiora(), self.base.riven())]
+        vec![get_obs_from_world(
+            world,
+            self.base.fiora(),
+            self.base.riven(),
+        )]
     }
 
     fn step_world(
