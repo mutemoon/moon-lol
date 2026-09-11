@@ -4,7 +4,11 @@
 
 <p align="center">
   <a href="https://www.youtube.com/watch?v=RfYSKW0mAU0" target="_blank">
-    <img src="https://img.youtube.com/vi/RfYSKW0mAU0/maxresdefault.jpg" alt="Video Demo" width="600" />
+    <img src="docs/images/video_preview.jpg" alt="moon-lol Gameplay Demo" width="700" />
+  </a>
+  <br />
+  <a href="https://www.youtube.com/watch?v=RfYSKW0mAU0" target="_blank">
+    <img src="https://img.shields.io/badge/YouTube-Watch%20Gameplay%20Demo-red?style=for-the-badge&logo=youtube" alt="Watch on YouTube" />
   </a>
 </p>
 
