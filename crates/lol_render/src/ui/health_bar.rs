@@ -7,7 +7,9 @@ use lol_base_render::ui::{
     LOLHeroFloatingInfoBarData, LOLStructureFloatingInfoBarData, LOLUiElementEffectInstancedData,
     LOLUiElementIconData, LOLUiElementRegionData, LOLUnitFloatingInfoBarData,
 };
-use lol_base_render::ui_components::{HealthBind, UIBindData, UIBindOf, UIBindTarget, UIElement};
+use lol_base_render::ui_components::{
+    HealthBind, UIBindData, UIBindOf, UIBindTarget, UIElement, UIElementChild,
+};
 use lol_core::base::bounding::Bounding;
 use lol_core::base::level::Level;
 use lol_core::life::Health;
@@ -254,7 +256,7 @@ fn update_health_ticks(
 
 fn update_health(
     mut q_health_bind: Query<(&HealthBind, &Children)>,
-    mut q_health_bar: Query<&mut Node>,
+    mut q_health_bar: Query<(&mut Node, &mut ImageNode), With<UIElementChild>>,
     q_health: Query<&Health>,
 ) {
     for (health_bind, children) in q_health_bind.iter_mut() {
@@ -262,10 +264,13 @@ fn update_health(
             continue;
         };
 
-        let Ok(mut node) = q_health_bar.get_mut(children[0]) else {
+        let Ok((mut node, mut image_node)) = q_health_bar.get_mut(children[0]) else {
             continue;
         };
 
+        if image_node.image_mode != NodeImageMode::Stretch {
+            image_node.image_mode = NodeImageMode::Stretch;
+        }
         node.width = Val::Percent(health.value / health.max * 100.0);
     }
 }

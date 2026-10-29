@@ -7,14 +7,17 @@ use std::os::windows::fs::FileExt;
 use std::sync::Arc;
 
 pub struct ArcFileReader {
+    #[cfg(any(unix, windows))]
     file: Arc<File>,
+    #[cfg_attr(not(any(unix, windows)), allow(dead_code))]
     start_offset: u64,
     current_pos: u64,
 }
 
 impl ArcFileReader {
-    pub fn new(file: Arc<File>, start_offset: u64) -> Self {
+    pub fn new(#[cfg_attr(not(any(unix, windows)), allow(unused_variables))] file: Arc<File>, start_offset: u64) -> Self {
         Self {
+            #[cfg(any(unix, windows))]
             file,
             start_offset,
             current_pos: 0,
@@ -23,24 +26,28 @@ impl ArcFileReader {
 }
 
 impl Read for ArcFileReader {
-    fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
-        let absolute_offset = self.start_offset + self.current_pos;
-
+    fn read(&mut self, _buf: &mut [u8]) -> io::Result<usize> {
         #[cfg(unix)]
-        let bytes_read = self.file.read_at(buf, absolute_offset)?;
+        {
+            let absolute_offset = self.start_offset + self.current_pos;
+            let bytes_read = self.file.read_at(_buf, absolute_offset)?;
+            self.current_pos += bytes_read as u64;
+            Ok(bytes_read)
+        }
         #[cfg(windows)]
-        let bytes_read = self.file.seek_read(buf, absolute_offset)?;
+        {
+            let absolute_offset = self.start_offset + self.current_pos;
+            let bytes_read = self.file.seek_read(_buf, absolute_offset)?;
+            self.current_pos += bytes_read as u64;
+            Ok(bytes_read)
+        }
         #[cfg(not(any(unix, windows)))]
-        let bytes_read = {
-            return Err(io::Error::new(
+        {
+            Err(io::Error::new(
                 io::ErrorKind::Unsupported,
                 "File reading is not supported on this platform",
-            ));
-        };
-
-        self.current_pos += bytes_read as u64;
-
-        Ok(bytes_read)
+            ))
+        }
     }
 }
 

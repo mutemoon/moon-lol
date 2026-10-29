@@ -236,9 +236,11 @@ fn resolve_texture(texture: &mut Option<VfxTexture>, asset_server: &AssetServer,
     if let Some(texture) = texture.as_mut() {
         let path = texture.path.clone();
         texture.handle = asset_server
-            .load_with_settings(path, move |settings: &mut ImageLoaderSettings| {
-                settings.is_srgb = is_srgb
-            });
+            .load_builder()
+            .with_settings(move |settings: &mut ImageLoaderSettings| {
+                settings.is_srgb = is_srgb;
+            })
+            .load(path);
     }
 }
 

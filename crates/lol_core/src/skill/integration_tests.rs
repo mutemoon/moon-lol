@@ -177,7 +177,7 @@ impl SkillHarness {
             values: Some(effect_amounts),
         };
 
-        self.app.world_mut().resource_mut::<Assets<Spell>>().insert(
+        let _ = self.app.world_mut().resource_mut::<Assets<Spell>>().insert(
             spell_handle(SPELL_KEY).id(),
             Spell {
                 spell_data: Some(DataSpell {

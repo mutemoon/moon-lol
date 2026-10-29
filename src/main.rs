@@ -84,8 +84,8 @@ fn main() {
             DefaultPlugins.build().set(log_plugin).set(WindowPlugin {
                 primary_window: Some(Window {
                     title: format!("classic 1v1 · {}", args.champion),
-                    resolution: (300, 300).into(),
-                    position: WindowPosition::At((0, 1000).into()),
+                    resolution: (1920, 1080).into(),
+                    position: WindowPosition::At((0, 0).into()),
                     ..default()
                 }),
                 ..default()

@@ -3,7 +3,7 @@
 mod common;
 
 use common::setup_pg;
-use lol_web_server::domain::auth::User;
+
 use lol_web_server::repository::user_repo::{PgUserRepo, UserRepo};
 
 #[tokio::test]

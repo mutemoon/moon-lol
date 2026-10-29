@@ -1,54 +1,16 @@
 {
-  "env": {
-    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
-  },
-  "permissions": {
-    "allow": [
-      "Agent",
-      "AskUserQuestion",
-      "Bash",
-      "CronCreate",
-      "CronDelete",
-      "CronList",
-      "Edit",
-      "EnterPlanMode",
-      "ExitPlanMode",
-      "Glob",
-      "Grep",
-      "KillShell",
-      "Read",
-      "SendMessage",
-      "Skill",
-      "Task",
-      "TaskCreate",
-      "TaskGet",
-      "TaskList",
-      "TaskOutput",
-      "TaskStop",
-      "TaskUpdate",
-      "TeamCreate",
-      "TeamDelete",
-      "Write"
-    ],
-    "deny": [
-      "EnterWorktree",
-      "ExitWorktree",
-      "ListMcpResourcesTool",
-      "LSP",
-      "NotebookEdit",
-      "ReadMcpResourceTool",
-      "WebFetch",
-      "WebSearch",
-      "mcp__ide__executeCode",
-      "mcp__ide__getDiagnostics"
-    ]
-  },
   "hooks": {
     "Stop": [
       {
         "hooks": [
-          { "type": "command", "command": "pnpm fix" },
-          { "type": "command", "command": "pnpm format" }
+          {
+            "type": "command",
+            "command": "pnpm fix"
+          },
+          {
+            "type": "command",
+            "command": "pnpm format"
+          }
         ]
       }
     ]

@@ -251,7 +251,6 @@ fn convert_shape(shape: &Option<EnumVfxShape>) -> Option<ConfigVfxShape> {
                 emit_offset: *emit_offset,
             }
         }
-        _ => ConfigVfxShape::Unk0xee39916f { emit_offset: None },
     })
 }
 

@@ -76,6 +76,7 @@ enum TeamSide {
 }
 
 impl TeamSide {
+    #[allow(dead_code)]
     fn winner(self) -> Winner {
         match self {
             TeamSide::Order => Winner::Order,

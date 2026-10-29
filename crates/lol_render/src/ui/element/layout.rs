@@ -28,7 +28,7 @@ pub fn update_element_layout(
         return;
     };
 
-    let mut temp_texture_data: Option<LOLEnumData> = None;
+    let temp_texture_data: Option<LOLEnumData>;
 
     let (ui_position, texture_data, name, layer) = match ui_element {
         UIElement::Icon(handle) => {
@@ -366,7 +366,6 @@ fn init_child_image_node(
             };
             commands.entity(child).insert(ImageNode {
                 image: asset_server.load(&atlas_data.m_texture_name),
-                image_mode: NodeImageMode::Stretch,
                 rect: Some(Rect::new(
                     m_texture_uv.x,
                     m_texture_uv.y,

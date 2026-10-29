@@ -38,7 +38,7 @@ impl AssetLoader for ConfigBarracksLoader {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+
 
     #[test]
     fn test_barrack_loader() {

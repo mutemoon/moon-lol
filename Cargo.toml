@@ -1,5 +1,5 @@
 [workspace]
-members = ["crates/*", "apps/client"]
+members = ["crates/*", "apps/*"]
 resolver = "2"
 
 [package]
@@ -146,3 +146,9 @@ opt-level = 3
 
 [profile.dev.package.lol_rl]
 opt-level = 3
+
+[profile.release]
+opt-level = 3
+
+[profile.release.package.particle]
+opt-level = "z"
