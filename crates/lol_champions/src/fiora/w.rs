@@ -295,7 +295,7 @@ fn counter_thrust(
 /// 招架硬控侦测：任一可净化 CC buff 生成时，若其目标正处菲奥娜 W 招架期，
 /// 标记 `parried_hard_cc = true`（反刺将改为眩晕）。
 pub fn on_fiora_w_parried_cc(
-    trigger: On<Add, ControlTag>,
+    trigger: On<Add<ControlTag>>,
     mut commands: Commands,
     q_buffof: Query<(Entity, &BuffOf)>,
     mut q_fiora_w: Query<(&BuffOf, &mut BuffFioraW)>,

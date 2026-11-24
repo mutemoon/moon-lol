@@ -554,7 +554,7 @@ fn setup_skill_level_up_buttons(
     for (index, level_up_data) in level_up_spells.iter().enumerate() {
         let button_entity = res_ui_element_entity.get_entity(&level_up_data.skill_up_button);
         commands.entity(button_entity).observe(
-            move |_: On<Pointer<Click>>, mut commands: Commands| {
+            move |_: On<PointerClick>, mut commands: Commands| {
                 commands.trigger(CommandSkillLevelUp {
                     entity: player_entity,
                     index,

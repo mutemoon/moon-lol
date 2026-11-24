@@ -18,17 +18,19 @@ use bevy::ecs::system::lifetimeless::{SRes, SResMut};
 use bevy::mesh::MeshVertexBufferLayoutRef;
 use bevy::pbr::{MaterialPipeline, MaterialPipelineKey};
 use bevy::prelude::*;
+use bevy::render::material_bind_groups::FallbackBuffer;
 use bevy::render::render_asset::RenderAssets;
 use bevy::render::render_resource::{
-    AddressMode, AsBindGroup, AsBindGroupError, BindGroupEntry, BindGroupLayout,
+    AddressMode, AsBindGroup, AsBindGroupError, BindGroupBuilder, BindGroupEntry, BindGroupLayout,
     BindGroupLayoutDescriptor, BindGroupLayoutEntry, BindingResource, BindingResources,
     BindingType, BlendComponent, BlendFactor, BlendOperation, BlendState, Buffer,
     BufferBindingType, BufferInitDescriptor, BufferUsages, FilterMode, MipmapFilterMode,
     PipelineCache, PreparedBindGroup, RenderPipelineDescriptor, Sampler, SamplerBindingType,
     SamplerDescriptor, ShaderStages, SpecializedMeshPipelineError, TextureSampleType,
-    TextureViewDimension, UnpreparedBindGroup,
+    TextureViewDimension,
 };
 use bevy::render::renderer::{RenderDevice, RenderQueue};
+use bevy::render::storage::GpuShaderBuffer;
 use bevy::render::texture::{FallbackImage, GpuImage};
 use bevy::render::{Extract, ExtractSchedule, Render, RenderApp, RenderSystems};
 use lol_base_render::camera::CameraState;
@@ -732,6 +734,8 @@ impl AsBindGroup for ParticleMaterialDynamic {
         _layout_descriptor: &BindGroupLayoutDescriptor,
         render_device: &RenderDevice,
         _pipeline_cache: &PipelineCache,
+        _fallback_buffer: &FallbackBuffer,
+        _shader_buffer_assets: &RenderAssets<GpuShaderBuffer>,
         (image_assets, fallback_image, layout_cache, buffer_cache, shared_sampler_cache, metrics): &mut SystemParamItem<
             '_,
             '_,
@@ -919,13 +923,14 @@ impl AsBindGroup for ParticleMaterialDynamic {
         })
     }
 
-    fn unprepared_bind_group(
+    fn build_bind_group(
         &self,
         _layout: &BindGroupLayout,
         _render_device: &RenderDevice,
         _param: &mut SystemParamItem<'_, '_, Self::Param>,
         _force_no_bindless: bool,
-    ) -> Result<UnpreparedBindGroup, AsBindGroupError> {
+        _output: &mut BindGroupBuilder,
+    ) -> Result<(), AsBindGroupError> {
         Err(AsBindGroupError::CreateBindGroupDirectly)
     }
 

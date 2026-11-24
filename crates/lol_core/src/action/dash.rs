@@ -208,7 +208,7 @@ pub fn on_action_dash(
 /// `MovementBlock` 由 `sync_cc_markers` 在 Stun/Fear/BuffCastBlock 添加时自动桥接到角色。
 /// 本观察者确保：眩晕等硬控到达时，位移立即取消（而非暂停）。
 pub fn on_movement_block_add_cancel_dash(
-    trigger: On<Add, MovementBlock>,
+    trigger: On<Add<MovementBlock>>,
     mut commands: Commands,
     q_movement: Query<&MovementState>,
 ) {

@@ -204,7 +204,7 @@ pub fn add_common_observers(app: &mut App) {
 
 /// 角色配置写入完成后同步设置 Q/W/E/R 技能等级。
 pub fn on_character_ready_set_skill_levels(
-    trigger: On<Add, CharacterReady>,
+    trigger: On<Add<CharacterReady>>,
     q_skills: Query<&Skills>,
     mut q_skill: Query<&mut Skill>,
     levels_res: Option<Res<ChampionInitialSkillLevels>>,

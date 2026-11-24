@@ -23,7 +23,7 @@ pub fn setup_v2_riven_health_world(world: &mut World, riven: Entity) {
 }
 
 pub fn on_v2_character_ready_setup_riven_health(
-    trigger: On<Add, CharacterReady>,
+    trigger: On<Add<CharacterReady>>,
     entities: Res<FioraRivenEntities>,
     mut q_health: Query<&mut Health>,
 ) {

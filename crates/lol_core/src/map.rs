@@ -1,8 +1,8 @@
 use std::collections::BTreeMap;
 use std::f32;
 
-use bevy::math::bounding::Aabb3d;
 use bevy::prelude::*;
+use bevy::shape::Aabb3d;
 use bevy::world_serialization::WorldInstanceReady;
 use lol_base::character::ConfigCharacterRecord;
 use lol_base::map::MapPaths;

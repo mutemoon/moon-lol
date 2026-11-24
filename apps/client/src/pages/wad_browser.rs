@@ -5,7 +5,7 @@ use std::sync::Arc;
 use gpui::prelude::*;
 use gpui::*;
 use gpui_component::button::{Button, ButtonVariants};
-use gpui_component::input::{Input, InputState};
+use gpui_component::input::{Editor, EditorState};
 use gpui_component::scroll::ScrollableElement;
 use gpui_component::{h_flex, v_flex, ActiveTheme, IconName, Sizable, StyledExt};
 use league_loader::game::LeagueLoader;
@@ -40,7 +40,7 @@ pub struct WadBrowserState {
     pub selected_file: Option<PathBuf>,
     pub status_message: Option<String>,
     pub file_size_bytes: usize,
-    pub editor_state: Option<Entity<InputState>>,
+    pub editor_state: Option<Entity<EditorState>>,
     pub pending_ron: Option<(String, usize)>,
     pub is_initialized: bool,
     pub is_scanning: bool,
@@ -118,7 +118,7 @@ pub fn render_wad_browser(
         )
     };
 
-    // 在 render 帧安全使用传进来的 window 句柄更新/新建 InputState
+    // 在 render 帧安全使用传进来的 window 句柄更新/新建 EditorState
     if let Some((ron_str, size)) = pending_ron {
         let state = &mut sidebar.wad_browser;
         state.file_size_bytes = size;
@@ -128,11 +128,10 @@ pub fn render_wad_browser(
             });
         } else {
             let ed = cx.new(|cx| {
-                InputState::new(window, cx)
-                    .code_editor("ron")
+                EditorState::new(window, cx)
+                    .language("ron")
                     .line_number(true)
                     .searchable(true)
-                    .multi_line(true)
                     .default_value(&ron_str)
             });
             state.editor_state = Some(ed);
@@ -390,7 +389,7 @@ pub fn render_wad_browser(
                                 .child("正在按需从 WAD 读取 payload 并反序列化...")
                                 .into_any_element()
                         } else if let Some(ed) = editor {
-                            Input::new(&ed).h_full().into_any_element()
+                            Editor::new(&ed).h_full().into_any_element()
                         } else {
                             div()
                                 .w_full()

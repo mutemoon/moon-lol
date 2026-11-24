@@ -1,6 +1,6 @@
-use bevy::math::bounding::{Aabb3d, IntersectsVolume};
 use bevy::platform::collections::HashSet;
 use bevy::prelude::*;
+use bevy::shape::{Aabb3d, IntersectsVolume};
 use lol_core::map::MapGeometry;
 
 use crate::particle::dynamic::ParticleMaterialDynamic;

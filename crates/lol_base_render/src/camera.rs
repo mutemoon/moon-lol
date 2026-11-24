@@ -1,7 +1,7 @@
 use bevy::camera::visibility::RenderLayers;
 use bevy::camera::{CameraProjection, RenderTarget, SubCameraView};
 use bevy::input::mouse::{MouseScrollUnit, MouseWheel};
-use bevy::math::{Mat4, Vec3A, Vec4};
+use bevy::math::{Mat4, Vec3A, Vec4, proj};
 use bevy::pbr::ScreenSpaceReflections;
 use bevy::prelude::*;
 use bevy::render::render_resource::{
@@ -283,7 +283,7 @@ pub struct CustomFlipXProjection {
 
 impl CameraProjection for CustomFlipXProjection {
     fn get_clip_from_view(&self) -> Mat4 {
-        let base = Mat4::perspective_infinite_reverse_rh(self.fov, self.aspect_ratio, self.near);
+        let base = proj::perspective_infinite_reverse(self.fov, self.aspect_ratio, self.near);
         let flip = Mat4::from_cols(
             Vec4::new(-1.0, 0.0, 0.0, 0.0),
             Vec4::new(0.0, 1.0, 0.0, 0.0),

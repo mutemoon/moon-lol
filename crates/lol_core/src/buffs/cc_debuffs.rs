@@ -6,7 +6,7 @@ use crate::movement::{CastBlock, MovementBlock, MovementSlow};
 
 /// 控制标签：所有可被净化的 CC debuff 都 `#[require(ControlTag)]`。
 /// 净化（`CommandCleanse`）= 批量销毁角色身上带此标签的 buff 实体，
-/// 标记会随 buff 死亡（`On<Remove, ControlTag>`）自动清除。
+/// 标记会随 buff 死亡（`On<Remove<ControlTag>>`）自动清除。
 #[derive(Component, Default)]
 pub struct ControlTag;
 
@@ -172,10 +172,10 @@ fn sync_cc_markers(
     }
 }
 
-/// `On<Add, ControlTag>`：任一可净化 CC buff 生成时触发。
+/// `On<Add<ControlTag>>`：任一可净化 CC buff 生成时触发。
 /// 若角色免控，立即销毁该 buff（CC 不沾身）；否则重算标记。
 fn on_add_control(
-    trigger: On<Add, ControlTag>,
+    trigger: On<Add<ControlTag>>,
     mut commands: Commands,
     q_buffof: Query<(Entity, &BuffOf)>,
     q_immune: Query<(), With<ImmuneToCC>>,
@@ -212,10 +212,10 @@ fn on_add_control(
     );
 }
 
-/// `On<Remove, ControlTag>`：任一可净化 CC buff 消亡（过期/净化/免疫销毁）时触发。
+/// `On<Remove<ControlTag>>`：任一可净化 CC buff 消亡（过期/净化/免疫销毁）时触发。
 /// 排除自身后重算标记——多 buff 叠加时移除其一不会误清标记。
 fn on_remove_control(
-    trigger: On<Remove, ControlTag>,
+    trigger: On<Remove<ControlTag>>,
     mut commands: Commands,
     q_buffof: Query<(Entity, &BuffOf)>,
     q_stun: Query<&DebuffStun>,
@@ -248,7 +248,7 @@ fn on_remove_control(
 /// `BuffCastBlock`（自施法锁，非 ControlTag、不可净化）的标记桥接。
 /// 自施法锁不被免控拦截（自身技能 windup 不受 Olaf R 影响）。
 fn on_add_cast_block(
-    trigger: On<Add, BuffCastBlock>,
+    trigger: On<Add<BuffCastBlock>>,
     mut commands: Commands,
     q_buffof: Query<(Entity, &BuffOf)>,
     q_stun: Query<&DebuffStun>,
@@ -278,7 +278,7 @@ fn on_add_cast_block(
 }
 
 fn on_remove_cast_block(
-    trigger: On<Remove, BuffCastBlock>,
+    trigger: On<Remove<BuffCastBlock>>,
     mut commands: Commands,
     q_buffof: Query<(Entity, &BuffOf)>,
     q_stun: Query<&DebuffStun>,
@@ -327,7 +327,7 @@ fn on_command_cleanse(
 }
 
 /// 全局 CC 计时：tick 所有 CC debuff 与自施法锁的 timer，过期则销毁实体
-/// （销毁触发 `On<Remove, ControlTag>` -> 标记自动重算）。
+/// （销毁触发 `On<Remove<ControlTag>>` -> 标记自动重算）。
 fn update_cc_buff_timers(
     mut commands: Commands,
     time: Res<Time>,

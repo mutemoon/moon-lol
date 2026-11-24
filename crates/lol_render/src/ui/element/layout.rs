@@ -305,7 +305,7 @@ pub fn update_on_add_ui_element(
         }
 
         commands.entity(entity).observe(
-            |event: On<Pointer<Click>>,
+            |event: On<PointerClick>,
              q_ui_element: Query<&UIElement>,
              icon_assets: Res<IconAssets>,
              anim_assets: Res<AnimAssets>,
@@ -313,7 +313,7 @@ pub fn update_on_add_ui_element(
              region_assets: Res<RegionAssets>,
              text_assets: Res<TextAssets>,
              fill_percentage_assets: Res<FillPercentageAssets>| {
-                let ui_element = q_ui_element.get(event.entity).unwrap();
+                let ui_element = q_ui_element.get(event.event().entity).unwrap();
                 let name = match ui_element {
                     UIElement::Icon(handle) => {
                         icon_assets.load_hash(*handle).map(|v| v.name.as_str())

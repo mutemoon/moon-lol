@@ -1,0 +1,64 @@
+diff --git a/src/world_asset_loader.rs b/src/world_asset_loader.rs
+index 263aee4..41e37f0 100644
+--- a/src/world_asset_loader.rs
++++ b/src/world_asset_loader.rs
+@@ -7,7 +7,7 @@ use bevy_reflect::{TypePath, TypeRegistryArc};
+ #[cfg(feature = "serialize")]
+ use {
+     crate::{serde::WorldDeserializer, DynamicWorld},
+-    bevy_asset::{io::Reader, AssetLoader, LoadContext},
++    bevy_asset::{io::Reader, AssetLoader, AssetPath, LoadContext, LoadFromPath, UntypedHandle},
+     serde::de::DeserializeSeed,
+     thiserror::Error,
+ };
+@@ -46,6 +46,39 @@ pub enum WorldAssetLoaderError {
+     RonSpannedError(#[from] ron::error::SpannedError),
+ }
+ 
++/// A `LoadFromPath` wrapper that catches panics and returns a default handle instead.
++///
++/// This allows deserialization to continue gracefully when asset types haven't been initialized,
++/// rather than crashing with a panic.
++#[cfg(feature = "serialize")]
++struct SafeLoader<'a> {
++    inner: &'a mut dyn LoadFromPath,
++}
++
++#[cfg(feature = "serialize")]
++impl LoadFromPath for SafeLoader<'_> {
++    fn load_from_path_erased(
++        &mut self,
++        type_id: core::any::TypeId,
++        path: AssetPath<'static>,
++    ) -> UntypedHandle {
++        // Try to load, catching any panics (e.g., from HandleDeserializeProcessor
++        // when an asset type hasn't been initialized)
++        let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
++            self.inner.load_from_path_erased(type_id, path)
++        }));
++
++        match result {
++            Ok(handle) => handle,
++            Err(_) => {
++                // Return a default UUID handle if loading fails
++                // This allows deserialization to continue with a placeholder handle
++                UntypedHandle::default_for_type(type_id)
++            }
++        }
++    }
++}
++
+ #[cfg(feature = "serialize")]
+ impl AssetLoader for WorldAssetLoader {
+     type Asset = DynamicWorld;
+@@ -63,7 +96,9 @@ impl AssetLoader for WorldAssetLoader {
+         let mut deserializer = ron::de::Deserializer::from_bytes(&bytes)?;
+         let scene_deserializer = WorldDeserializer {
+             type_registry: &self.type_registry.read(),
+-            load_from_path: load_context,
++            load_from_path: &mut SafeLoader {
++                inner: load_context,
++            },
+         };
+         Ok(scene_deserializer
+             .deserialize(&mut deserializer)

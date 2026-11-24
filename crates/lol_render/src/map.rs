@@ -56,12 +56,12 @@ fn setup(
 }
 
 pub fn on_click_map(
-    click: On<Pointer<Press>>,
+    click: On<PointerPress>,
     mut commands: Commands,
     q_move: Query<Entity, With<Controller>>,
     // q_map_geo: Query<&MapGeometry>,
 ) {
-    let Some(position) = click.hit.position else {
+    let Some(position) = click.event().hit.position else {
         return;
     };
     let targets = q_move.iter().collect::<Vec<Entity>>();

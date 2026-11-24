@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 
+use bevy::curve::{Curve, Interval, UnevenSampleAutoCurve};
 use bevy::math::StableInterpolate;
-use bevy::math::curve::{Curve, Interval, UnevenSampleAutoCurve};
 use bevy::prelude::*;
 use lol_base::hash_key::HashKey;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};

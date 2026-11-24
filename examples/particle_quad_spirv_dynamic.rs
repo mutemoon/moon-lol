@@ -127,11 +127,11 @@ fn setup(
             // path: "ASSETS/Characters/Riven/Skins/Base/Particles/sword_profile_glow_02.png".into(),
             path: "ASSETS/Characters/Riven/Skins/Base/Particles/Riven_Base_Q_SmokeShapes.png"
                 .into(),
-            handle: asset_server.load_with_settings(
-                // "ASSETS/Characters/Riven/Skins/Base/Particles/sword_profile_glow_02.png",
-                "ASSETS/Characters/Riven/Skins/Base/Particles/Riven_Base_Q_SmokeShapes.png",
-                |settings: &mut ImageLoaderSettings| settings.is_srgb = false,
-            ),
+            handle: // "ASSETS/Characters/Riven/Skins/Base/Particles/sword_profile_glow_02.png",
+                asset_server
+                .load_builder()
+                .with_settings(|settings: &mut ImageLoaderSettings| settings.is_srgb = false)
+                .load("ASSETS/Characters/Riven/Skins/Base/Particles/Riven_Base_Q_SmokeShapes.png"),
         }),
         particle_color_texture: None,
         tex_div: None,
@@ -173,10 +173,10 @@ fn setup(
             erosion_map: Some(VfxTexture {
                 path: "ASSETS/Characters/Riven/Skins/Base/Particles/Riven_Base_Z_Erosion.png"
                     .into(),
-                handle: asset_server.load_with_settings(
-                    "ASSETS/Characters/Riven/Skins/Base/Particles/Riven_Base_Z_Erosion.png",
-                    |settings: &mut ImageLoaderSettings| settings.is_srgb = false,
-                ),
+                handle: asset_server
+                    .load_builder()
+                    .with_settings(|settings: &mut ImageLoaderSettings| settings.is_srgb = false)
+                    .load("ASSETS/Characters/Riven/Skins/Base/Particles/Riven_Base_Z_Erosion.png"),
             }),
             erosion_map_address_mode: None,
             erosion_map_channel_mixer: const_sampler(Vec4::new(1.0, 0.0, 0.0, 0.0)),

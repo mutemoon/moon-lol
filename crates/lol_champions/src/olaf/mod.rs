@@ -202,11 +202,11 @@ fn on_olaf_r(
     );
 }
 
-/// `On<Remove, BuffOlafR>`：BuffOlafR 消亡（过期/销毁）时触发。
+/// `On<Remove<BuffOlafR>>`：BuffOlafR 消亡（过期/销毁）时触发。
 /// 若角色身上已无其它存活的 BuffOlafR，移除 ImmuneToCC 标记（系统只认标记）。
 /// 事件驱动：despawn 同步触发本观察者，标记在 buff 死亡当帧清除。
 fn on_remove_olaf_r(
-    trigger: On<Remove, BuffOlafR>,
+    trigger: On<Remove<BuffOlafR>>,
     mut commands: Commands,
     q_buffof: Query<(Entity, &BuffOf)>,
     q_olaf_r: Query<(), With<BuffOlafR>>,
@@ -226,7 +226,7 @@ fn on_remove_olaf_r(
     }
 }
 
-/// BuffOlafR 计时，过期销毁（触发 `On<Remove, BuffOlafR>` -> 移除 ImmuneToCC）。
+/// BuffOlafR 计时，过期销毁（触发 `On<Remove<BuffOlafR>>` -> 移除 ImmuneToCC）。
 fn update_olaf_r_timer(
     mut commands: Commands,
     time: Res<Time>,

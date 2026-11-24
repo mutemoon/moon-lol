@@ -4,7 +4,7 @@ use std::sync::Arc;
 
 use gpui::*;
 use gpui_component::table::TableState;
-use gpui_component::{h_flex, v_flex, Root, WindowExt as _};
+use gpui_component::{h_flex, v_flex, WindowExt as _};
 use lol_rl_protocol::{InFrame, TaskOverviewItem, VisualInFrame, VisualObsFrame};
 use lol_web_protocol::agent::Agent;
 use lol_web_protocol::agent_snapshot::AgentSnapshot;
@@ -495,8 +495,5 @@ impl Render for AppSidebar {
             .child(render_sidebar_menu(self, cx))
             .child(content)
             .relative()
-            .children(Root::render_dialog_layer(window, cx))
-            .children(Root::render_sheet_layer(window, cx))
-            .children(Root::render_notification_layer(window, cx))
     }
 }

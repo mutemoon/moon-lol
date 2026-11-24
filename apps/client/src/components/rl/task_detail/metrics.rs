@@ -4,7 +4,7 @@ use gpui::*;
 use gpui_component::plot::scale::{Scale, ScaleLinear, ScalePoint};
 use gpui_component::plot::shape::Line;
 use gpui_component::plot::tooltip::{CrossLine, Dot, Tooltip, TooltipState};
-use gpui_component::plot::{AxisText, Grid, IntoPlot, Plot, PlotAxis, StrokeStyle, AXIS_GAP};
+use gpui_component::plot::{AxisText, Grid, IntoPlot, Plot, PlotAxis, AXIS_GAP};
 use gpui_component::{h_flex, v_flex, ActiveTheme, StyledExt};
 use lol_rl_protocol::MetricsRow;
 use rust_i18n::t;
@@ -487,10 +487,7 @@ impl<T: 'static> MultiLineChart<T> {
 
     /// 所有系列共享的 x 点比例尺。
     fn x_scale(&self, width: f32) -> ScalePoint<usize> {
-        ScalePoint::new(
-            self.data.iter().map(|d| (self.x)(d)).collect(),
-            vec![0., width],
-        )
+        ScalePoint::new(self.data.iter().map(|d| (self.x)(d)), [0., width])
     }
 
     /// 覆盖所有系列取值与参考横线（含 0 基线）的 y 线性比例尺。
@@ -504,7 +501,7 @@ impl<T: 'static> MultiLineChart<T> {
         for h in &self.hlines {
             domain.push(h.value);
         }
-        ScaleLinear::new(domain, vec![height, 10.])
+        ScaleLinear::new(domain, [height, 10.])
     }
 }
 
@@ -541,7 +538,9 @@ impl<T: 'static> Plot for MultiLineChart<T> {
 
         // 网格
         Grid::new()
-            .y((0..=3).map(|i| height * i as f32 / 4.0).collect())
+            .y((0..=3)
+                .map(|i| height * i as f32 / 4.0)
+                .collect::<Vec<f32>>())
             .stroke(cx.theme().border)
             .dash_array(&[px(4.), px(2.)])
             .paint(&bounds, window);
@@ -556,7 +555,6 @@ impl<T: 'static> Plot for MultiLineChart<T> {
                 .x(move |d| Some(d.0 * width))
                 .y(move |d| ys.tick(&d.1))
                 .stroke(color)
-                .stroke_style(StrokeStyle::Linear)
                 .stroke_width(px(1.))
                 .paint(&bounds, window);
         }
@@ -573,7 +571,6 @@ impl<T: 'static> Plot for MultiLineChart<T> {
                 .x(move |d| xs.tick(&xf(*d)))
                 .y(move |d| ys.tick(&val(*d)))
                 .stroke(color)
-                .stroke_style(StrokeStyle::Linear)
                 .stroke_width(px(2.))
                 .paint(&bounds, window);
         }
@@ -597,7 +594,7 @@ impl<T: 'static> Plot for MultiLineChart<T> {
         let x = self.x_scale(bounds.size.width.as_f32());
         let y = self.y_scale(height);
 
-        let index = x.least_index(position.x.as_f32());
+        let index = nearest_index(&x, self.data.len(), position.x.as_f32());
         let d = self.data.get(index)?;
         let x_tick = x.tick(&(self.x)(d))?;
         let dots: Vec<Point<Pixels>> = self
@@ -816,4 +813,12 @@ fn render_curriculum_card(
         .bg(cx.theme().accent.opacity(0.04))
         .child(content)
         .into_any_element()
+}
+
+/// 返回离像素位置 `px` 最近的刻度索引（替代 0.11 已移除的 `ScalePoint::least_index`）。
+fn nearest_index(scale: &ScalePoint<usize>, len: usize, px: f32) -> usize {
+    let dist = |i: usize| scale.tick_at(i).map_or(f32::MAX, |t| (t - px).abs());
+    (0..len)
+        .min_by(|&a, &b| dist(a).total_cmp(&dist(b)))
+        .unwrap_or(0)
 }

@@ -93,7 +93,7 @@ pub fn on_command_knockback(
     );
 
     // 击退位移本身需经过 update_path_movement，故不加 MovementBlock（会跳过该实体）。
-    // CastBlock 由 PluginCc 的 On<Add, ControlTag> 观察者自动桥接到角色。
+    // CastBlock 由 PluginCc 的 On<Add<ControlTag>> 观察者自动桥接到角色。
     commands.entity(target).trigger(|e| CommandMovement {
         entity: e,
         priority: 100,

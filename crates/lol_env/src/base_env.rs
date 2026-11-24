@@ -565,7 +565,7 @@ impl LolBaseEnvBuilder {
         let levels_snapshot = skill_levels.clone();
         let entities_snapshot = champion_entities.clone();
         app.add_observer(
-            move |trigger: On<Add, CharacterReady>,
+            move |trigger: On<Add<CharacterReady>>,
                   q_skills: Query<&Skills>,
                   mut q_skill: Query<&mut Skill>| {
                 let entity = trigger.entity;

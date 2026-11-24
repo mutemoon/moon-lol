@@ -10,7 +10,7 @@ use std::collections::HashMap;
 
 use gpui::prelude::*;
 use gpui::*;
-use gpui_component::input::{Input, InputEvent, InputState};
+use gpui_component::input::{Input, InputEvent, InputState, Textarea, TextareaState};
 
 use crate::components::sidebar::AppSidebar;
 
@@ -27,8 +27,15 @@ pub struct EditOptions {
     pub on_enter: Option<Box<dyn Fn(String, &mut AppSidebar, &mut Context<AppSidebar>) + 'static>>,
 }
 
+/// 单行用 `InputState`，多行用 `TextareaState`（0.11 起多行是独立状态类型）。
+#[derive(Clone)]
+enum EditState {
+    Single(Entity<InputState>),
+    Multi(Entity<TextareaState>),
+}
+
 thread_local! {
-    static STATES: RefCell<HashMap<String, Entity<InputState>>> = RefCell::new(HashMap::new());
+    static STATES: RefCell<HashMap<String, EditState>> = RefCell::new(HashMap::new());
     /// 事件订阅需跨渲染存活（drop 会取消订阅）。
     static SUBS: RefCell<HashMap<String, Subscription>> = RefCell::new(HashMap::new());
 }
@@ -52,49 +59,96 @@ pub fn render_edit_input(
         .with(|s| s.borrow().get(id).cloned())
         .unwrap_or_else(|| {
             let init = get_value(sidebar);
-            let ed = cx.new(|cx| {
-                let mut st = InputState::new(window, cx).placeholder(placeholder);
-                if opts.multiline {
-                    st = st.multi_line(true);
+            let state = if opts.multiline {
+                EditState::Multi(create_textarea(window, cx, placeholder, &init, &opts))
+            } else {
+                EditState::Single(create_input(window, cx, placeholder, &init, &opts))
+            };
+            let sub = match &state {
+                EditState::Single(ed) => {
+                    subscribe_edit(ed, |s| s.value().to_string(), set_value, opts.on_enter, cx)
                 }
-                if opts.masked {
-                    st = st.masked(true);
+                EditState::Multi(ed) => {
+                    subscribe_edit(ed, |s| s.value().to_string(), set_value, opts.on_enter, cx)
                 }
-                if opts.submit_on_enter {
-                    st = st.submit_on_enter(true);
-                }
-                st.default_value(init)
-            });
-            // 创建时订阅一次：Change 实时写回，PressEnter 触发提交
-            let sub_entity = ed.clone();
-            let on_enter = opts.on_enter;
-            let sub = cx.subscribe(
-                &sub_entity,
-                move |this, state_entity, event: &InputEvent, cx| match event {
-                    InputEvent::Change => {
-                        let text = state_entity.read(cx).value().to_string();
-                        set_value(this, text);
-                        cx.notify();
-                    }
-                    InputEvent::PressEnter { .. } => {
-                        if let Some(f) = on_enter.as_ref() {
-                            let text = state_entity.read(cx).value().to_string();
-                            f(text, this, cx);
-                        }
-                    }
-                    _ => {}
-                },
-            );
-            STATES.with(|s| s.borrow_mut().insert(id.to_string(), ed.clone()));
+            };
+            STATES.with(|s| s.borrow_mut().insert(id.to_string(), state.clone()));
             SUBS.with(|s| s.borrow_mut().insert(id.to_string(), sub));
-            ed
+            state
         });
 
-    // 外部值 → InputState 同步（外部清空/加载时保持一致；输入中二者相等则跳过）
+    // 外部值 → 输入状态同步（外部清空/加载时保持一致；输入中二者相等则跳过）
     let external = get_value(sidebar);
-    if state.read(cx).value().to_string() != external {
-        cx.update_entity(&state, |s, cx| s.set_value(external.clone(), window, cx));
+    match &state {
+        EditState::Single(ed) => {
+            if ed.read(cx).value().to_string() != external {
+                cx.update_entity(ed, |s, cx| s.set_value(external.clone(), window, cx));
+            }
+            Input::new(ed).into_any_element()
+        }
+        EditState::Multi(ed) => {
+            if ed.read(cx).value().to_string() != external {
+                cx.update_entity(ed, |s, cx| s.set_value(external.clone(), window, cx));
+            }
+            Textarea::new(ed).into_any_element()
+        }
     }
+}
 
-    Input::new(&state).into_any_element()
+fn create_input(
+    window: &mut Window,
+    cx: &mut Context<AppSidebar>,
+    placeholder: &str,
+    init: &str,
+    opts: &EditOptions,
+) -> Entity<InputState> {
+    cx.new(|cx| {
+        let st = InputState::new(window, cx)
+            .placeholder(placeholder)
+            .masked(opts.masked)
+            .submit_on_enter(opts.submit_on_enter);
+        st.default_value(init)
+    })
+}
+
+fn create_textarea(
+    window: &mut Window,
+    cx: &mut Context<AppSidebar>,
+    placeholder: &str,
+    init: &str,
+    opts: &EditOptions,
+) -> Entity<TextareaState> {
+    cx.new(|cx| {
+        TextareaState::new(window, cx)
+            .placeholder(placeholder)
+            .submit_on_enter(opts.submit_on_enter)
+            .default_value(init)
+    })
+}
+
+/// 创建时订阅一次：Change 实时写回，PressEnter 触发提交。
+fn subscribe_edit<S: EventEmitter<InputEvent> + 'static>(
+    ed: &Entity<S>,
+    value_of: fn(&S) -> String,
+    set_value: impl Fn(&mut AppSidebar, String) + 'static,
+    on_enter: Option<Box<dyn Fn(String, &mut AppSidebar, &mut Context<AppSidebar>) + 'static>>,
+    cx: &mut Context<AppSidebar>,
+) -> Subscription {
+    cx.subscribe(
+        ed,
+        move |this, state_entity, event: &InputEvent, cx| match event {
+            InputEvent::Change => {
+                let text = value_of(state_entity.read(cx));
+                set_value(this, text);
+                cx.notify();
+            }
+            InputEvent::PressEnter { .. } => {
+                if let Some(f) = on_enter.as_ref() {
+                    let text = value_of(state_entity.read(cx));
+                    f(text, this, cx);
+                }
+            }
+            _ => {}
+        },
+    )
 }

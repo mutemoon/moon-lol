@@ -8,6 +8,14 @@ version = "0.1.0"
 edition = "2024"
 rust-version = "1.92.0"
 
+# 对 crates.io 上的 bevy 打补丁：`cargo patch-crate` 下载到 target/patch，补丁存于 patches/
+[package.metadata.patch]
+crates = ["bevy_render", "bevy_world_serialization"]
+
+[patch.crates-io]
+bevy_render = { path = "target/patch/bevy_render-0.20.1" }
+bevy_world_serialization = { path = "target/patch/bevy_world_serialization-0.20.1" }
+
 [workspace.dependencies]
 league_core = { path = "crates/league_core" }
 league_file = { path = "crates/league_file" }
@@ -40,7 +48,7 @@ tracing = "0.1.40"
 tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
 
 
-bevy = { git = "https://github.com/mutemoon/bevy", branch = "main", features = [
+bevy = { version = "=0.20.1", features = [
     "dds",
     "tga",
     "webp",

@@ -96,17 +96,17 @@ fn setup(
         // 因为绕过 ConfigVfxLoader 直接注入 Assets，所以需手动以线性方式加载贴图
         texture: Some(VfxTexture {
             path: "ASSETS/Characters/Fiora/Skins/Base/Particles/Fiora_mesh_Weapontrail.png".into(),
-            handle: asset_server.load_with_settings(
-                "ASSETS/Characters/Fiora/Skins/Base/Particles/Fiora_mesh_Weapontrail.png",
-                |settings: &mut ImageLoaderSettings| settings.is_srgb = false,
-            ),
+            handle: asset_server
+                .load_builder()
+                .with_settings(|settings: &mut ImageLoaderSettings| settings.is_srgb = false)
+                .load("ASSETS/Characters/Fiora/Skins/Base/Particles/Fiora_mesh_Weapontrail.png"),
         }),
         particle_color_texture: Some(VfxTexture {
             path: "ASSETS/Characters/Fiora/Skins/Base/Particles/common_color-rampdown.png".into(),
-            handle: asset_server.load_with_settings(
-                "ASSETS/Characters/Fiora/Skins/Base/Particles/common_color-rampdown.png",
-                |settings: &mut ImageLoaderSettings| settings.is_srgb = false,
-            ),
+            handle: asset_server
+                .load_builder()
+                .with_settings(|settings: &mut ImageLoaderSettings| settings.is_srgb = false)
+                .load("ASSETS/Characters/Fiora/Skins/Base/Particles/common_color-rampdown.png"),
         }),
         tex_div: None,
         slice_technique_range: None,
