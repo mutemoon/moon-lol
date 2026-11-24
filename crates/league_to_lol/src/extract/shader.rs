@@ -1135,8 +1135,6 @@ pub fn extract_shaders_pipeline(
     app.register_type::<SharedSamplerDef>();
     app.register_type::<SharedTextureDef>();
 
-
-
     let mut reflect_jobs: Vec<(LeagueShader, u64, PathBuf, String)> = Vec::new();
     for (shader_type, inner_map) in global_entries {
         for (u64_hash, spv_relative_path) in inner_map {

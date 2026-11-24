@@ -226,7 +226,6 @@ fn on_target_dead(trigger: On<EventDead>, mut q_aggro: Query<&mut AggroState>) {
 #[cfg(test)]
 mod tests {
 
-
     use bevy::prelude::*;
     use bevy::time::TimeUpdateStrategy;
 

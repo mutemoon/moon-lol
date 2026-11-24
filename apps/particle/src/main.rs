@@ -11,7 +11,6 @@ use lol_base_render::camera::{Focus, PluginCamera};
 use lol_base_render::particle::{ConfigVfxSystemDefinition, VfxTexture};
 use lol_particle::{CommandParticleDespawn, CommandParticleSpawn, PluginParticle};
 use serde::{Deserialize, Serialize};
-
 #[cfg(target_arch = "wasm32")]
 use wasm_bindgen::prelude::*;
 
@@ -164,7 +163,8 @@ fn setup_web_event_listener() {
         }
     }) as Box<dyn FnMut(web_sys::MessageEvent)>);
 
-    let _ = window.add_event_listener_with_callback("message", message_closure.as_ref().unchecked_ref());
+    let _ = window
+        .add_event_listener_with_callback("message", message_closure.as_ref().unchecked_ref());
     message_closure.forget();
 
     // 通知外部界面 Bevy 已就绪

@@ -237,7 +237,9 @@ fn apply_motion(
             target_xz + diff.normalize_or_zero() * distance
         }
         // 钳制距离：不超过到点的实际距离
-        DisplaceMotion::PullToPoint { point, distance, .. } => {
+        DisplaceMotion::PullToPoint {
+            point, distance, ..
+        } => {
             let diff = *point - target_xz;
             target_xz + diff.normalize_or_zero() * distance.min(diff.length())
         }

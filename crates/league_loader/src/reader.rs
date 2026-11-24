@@ -15,7 +15,10 @@ pub struct ArcFileReader {
 }
 
 impl ArcFileReader {
-    pub fn new(#[cfg_attr(not(any(unix, windows)), allow(unused_variables))] file: Arc<File>, start_offset: u64) -> Self {
+    pub fn new(
+        #[cfg_attr(not(any(unix, windows)), allow(unused_variables))] file: Arc<File>,
+        start_offset: u64,
+    ) -> Self {
         Self {
             #[cfg(any(unix, windows))]
             file,

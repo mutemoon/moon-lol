@@ -57,7 +57,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .to_path_buf();
 
     let characters_dir = workspace_root.join("assets").join("characters");
-    let output_dir = workspace_root.join("apps").join("particle").join("web").join("public").join("data");
+    let output_dir = workspace_root
+        .join("apps")
+        .join("particle")
+        .join("web")
+        .join("public")
+        .join("data");
     fs::create_dir_all(&output_dir)?;
 
     let mut hero_dirs: Vec<PathBuf> = fs::read_dir(&characters_dir)?
@@ -68,7 +73,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     hero_dirs.sort();
 
-    println!("发现 {} 个英雄目录，开始多线程解析 skin0_vfx.ron...", hero_dirs.len());
+    println!(
+        "发现 {} 个英雄目录，开始多线程解析 skin0_vfx.ron...",
+        hero_dirs.len()
+    );
 
     let results: Vec<(String, String, Vec<WebParticleSystem>)> = hero_dirs
         .into_par_iter()
@@ -91,8 +99,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             let mut systems = Vec::with_capacity(config.systems.len());
             for (&hash, def) in &config.systems {
                 if let Ok(ron_str) = ron::ser::to_string(def) {
-                    let emitter_count = def.complex_emitter_definition_data.as_ref().map(|l| l.len()).unwrap_or(0)
-                        + def.simple_emitter_definition_data.as_ref().map(|l| l.len()).unwrap_or(0);
+                    let emitter_count = def
+                        .complex_emitter_definition_data
+                        .as_ref()
+                        .map(|l| l.len())
+                        .unwrap_or(0)
+                        + def
+                            .simple_emitter_definition_data
+                            .as_ref()
+                            .map(|l| l.len())
+                            .unwrap_or(0);
 
                     systems.push(WebParticleSystem {
                         name: def.particle_name.clone(),

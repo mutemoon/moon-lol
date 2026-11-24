@@ -285,7 +285,9 @@ mod tests {
             "击飞应挂上 DebuffKnockup"
         );
         assert!(
-            app.world().get::<crate::movement::CastBlock>(target).is_some(),
+            app.world()
+                .get::<crate::movement::CastBlock>(target)
+                .is_some(),
             "滞空期间应无法施法"
         );
     }

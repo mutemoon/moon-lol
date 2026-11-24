@@ -35,7 +35,8 @@ fn test_naga_validate_all_extracted_spvs() {
 
 fn validate_spv(path: impl AsRef<Path>) {
     let path = path.as_ref();
-    let bytes = std::fs::read(path).unwrap_or_else(|e| panic!("Failed to read {}: {e}", path.display()));
+    let bytes =
+        std::fs::read(path).unwrap_or_else(|e| panic!("Failed to read {}: {e}", path.display()));
     let options = naga::front::spv::Options::default();
     let module = naga::front::spv::parse_u8_slice(&bytes, &options)
         .unwrap_or_else(|e| panic!("Failed to parse SPIR-V in {}: {e}", path.display()));

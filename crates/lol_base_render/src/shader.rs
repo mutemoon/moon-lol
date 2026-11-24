@@ -71,11 +71,7 @@ impl ShaderMap {
     }
 
     /// 获取指定 shader 变体的相对路径
-    pub fn get_shader_path(
-        &self,
-        shader_type: LeagueShader,
-        hash: u64,
-    ) -> Option<&str> {
+    pub fn get_shader_path(&self, shader_type: LeagueShader, hash: u64) -> Option<&str> {
         let entry = self.entries.get(&shader_type)?.get(&hash)?;
         Some(&entry.shader_path)
     }

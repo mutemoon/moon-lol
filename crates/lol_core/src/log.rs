@@ -52,7 +52,10 @@ mod native {
             let name = field.name();
             if name == "message" {
                 self.message = format!("{:?}", value);
-                if self.message.starts_with('"') && self.message.ends_with('"') && self.message.len() >= 2 {
+                if self.message.starts_with('"')
+                    && self.message.ends_with('"')
+                    && self.message.len() >= 2
+                {
                     self.message = self.message[1..self.message.len() - 1].to_string();
                 }
             } else if name == "entity_id" {

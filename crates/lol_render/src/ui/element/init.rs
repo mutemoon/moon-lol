@@ -346,10 +346,7 @@ fn spawn_ui_elements(
     for (hash, region_data) in &combined_regions {
         let name = format!("Region: {}", region_data.name);
         let entity = commands
-            .spawn((
-                UIElement::Region(hash.into()),
-                Name::new(name.clone()),
-            ))
+            .spawn((UIElement::Region(hash.into()), Name::new(name.clone())))
             .id();
 
         let scene_entity = res_ui_element_entity.get(region_data.scene);

@@ -39,7 +39,6 @@ impl AssetLoader for ConfigBarracksLoader {
 #[cfg(test)]
 mod tests {
 
-
     #[test]
     fn test_barrack_loader() {
         use lol_base::barrack::*;
