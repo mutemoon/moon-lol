@@ -1,1 +1,4 @@
 dist
+
+# 由 cargo run -p particle --bin export_vfx 生成，见 AGENTS.md
+web/public/data

@@ -24,7 +24,7 @@
         }
     </style>
     <!-- Trunk 依赖：编译当前 Rust crate 并注入 -->
-    <link data-trunk rel="rust" />
+    <link data-trunk rel="rust" data-bin="particle" data-wasm-opt="0" />
     <!-- 拷贝着色器及 map.ron -->
     <link data-trunk rel="copy-dir" href="../../assets/shaders" data-target-path="assets/shaders" />
     <!-- 拷贝 Riven 粒子贴图资源 -->

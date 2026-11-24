@@ -28,14 +28,8 @@ struct ShaderMapRon {
 
 #[derive(Deserialize)]
 struct EntryRon {
-    shader_handle: HandleRon,
+    shader_path: String,
     layout_index: u32,
-}
-
-/// map.ron 里 `Handle<Shader>` 经 Bevy 反射序列化为 `Path("...")`。
-#[derive(Deserialize)]
-enum HandleRon {
-    Path(String),
 }
 
 // ---------------------------------------------------------------------------
@@ -323,7 +317,7 @@ fn report_lost_member_names() {
         hashes.sort();
         for hash in hashes {
             let entry = &variants[hash];
-            let HandleRon::Path(rel) = &entry.shader_handle;
+            let rel = &entry.shader_path;
             let Some(layout) = shader_map.layouts.get(entry.layout_index as usize) else {
                 continue;
             };

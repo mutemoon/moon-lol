@@ -1135,7 +1135,7 @@ pub fn extract_shaders_pipeline(
     app.register_type::<SharedSamplerDef>();
     app.register_type::<SharedTextureDef>();
 
-    let asset_server = app.world().resource::<AssetServer>().clone();
+
 
     let mut reflect_jobs: Vec<(LeagueShader, u64, PathBuf, String)> = Vec::new();
     for (shader_type, inner_map) in global_entries {
@@ -1151,14 +1151,12 @@ pub fn extract_shaders_pipeline(
         }
     }
 
-    let mut metas: HashMap<LeagueShader, HashMap<u64, Handle<Shader>>> = HashMap::new();
+    let mut metas: HashMap<LeagueShader, HashMap<u64, String>> = HashMap::new();
     let mut layouts_map: HashMap<LeagueShader, HashMap<u64, ShaderLayoutDescriptor>> =
         HashMap::new();
     let mut spv_path_map: HashMap<LeagueShader, HashMap<u64, PathBuf>> = HashMap::new();
 
     for (shader_type, u64_hash, spv_abs_path, normalized_path) in reflect_jobs {
-        let shader_handle = asset_server.load(normalized_path);
-
         spv_path_map
             .entry(shader_type)
             .or_insert_with(HashMap::new)
@@ -1167,7 +1165,7 @@ pub fn extract_shaders_pipeline(
         metas
             .entry(shader_type)
             .or_insert_with(HashMap::new)
-            .insert(u64_hash, shader_handle);
+            .insert(u64_hash, normalized_path);
         layouts_map
             .entry(shader_type)
             .or_insert_with(HashMap::new)
@@ -1205,11 +1203,11 @@ pub fn extract_shaders_pipeline(
                     layout_pool.len() - 1
                 }
             };
-            let shader_handle = family_metas[&hash].clone();
+            let shader_path = family_metas[&hash].clone();
             entries.entry(family).or_insert_with(HashMap::new).insert(
                 hash,
                 ShaderMapEntry {
-                    shader_handle,
+                    shader_path,
                     layout_index: layout_index as u32,
                 },
             );

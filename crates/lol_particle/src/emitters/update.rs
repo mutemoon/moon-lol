@@ -245,6 +245,7 @@ pub fn update_emitters(
                             ..default()
                         },
                         shader_map,
+                        &res_asset_server,
                     );
                     if let Some((clip_from_world, cam_pos)) = cam_data.as_ref() {
                         material.set_param("mProj", clip_from_world.transpose());
@@ -283,6 +284,7 @@ pub fn update_emitters(
                                 ..default()
                             },
                             shader_map,
+                            &res_asset_server,
                         );
                         if let Some((clip_from_world, cam_pos)) = cam_data.as_ref() {
                             material.set_param("mProj", clip_from_world.transpose());
@@ -327,6 +329,7 @@ pub fn update_emitters(
                                 ..default()
                             },
                             shader_map,
+                            &res_asset_server,
                         );
                         if let Some((clip_from_world, cam_pos)) = cam_data.as_ref() {
                             material.set_param("mProj", clip_from_world.transpose());
@@ -475,6 +478,7 @@ pub fn update_emitters(
                         Some(color_remap_ramp.clone()),
                         &mut res_dynamic_material,
                         shader_map,
+                        &res_asset_server,
                         cam_data.as_ref(),
                         &skin_mesh_queries.q_mesh3d,
                         &skin_mesh_queries.q_skinned_mesh,
@@ -544,6 +548,7 @@ pub fn attach_mesh_visuals(
             ..default()
         },
         shader_map,
+        res_asset_server,
     );
     if let Some((clip_from_world, cam_pos)) = cam_data {
         material.set_param("mProj", clip_from_world.transpose());
@@ -598,6 +603,7 @@ pub fn attach_skinned_mesh_visuals(
     color_remap_ramp: Option<Handle<Image>>,
     res_dynamic_material: &mut ResMut<Assets<ParticleMaterialDynamic>>,
     shader_map: &ShaderMap,
+    res_asset_server: &Res<AssetServer>,
     cam_data: Option<&(Mat4, Vec3)>,
     q_mesh3d: &Query<&Mesh3d>,
     q_skinned_mesh: &Query<&SkinnedMesh>,
@@ -631,6 +637,7 @@ pub fn attach_skinned_mesh_visuals(
             ..default()
         },
         shader_map,
+        res_asset_server,
     );
     if let Some((clip_from_world, cam_pos)) = cam_data {
         material.set_param("mProj", clip_from_world.transpose());

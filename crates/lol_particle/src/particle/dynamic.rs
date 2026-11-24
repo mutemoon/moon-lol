@@ -407,6 +407,7 @@ impl ParticleMaterialDynamic {
         emitter_def: Arc<ConfigVfxEmitterDefinition>,
         textures_in: ParticleTextureInputs,
         shader_map: &ShaderMap,
+        asset_server: &AssetServer,
     ) -> Self {
         // PS 基路径对齐逆向：quad=ParticleSystem/QUAD_PS｜mesh=MESH_PS｜
         // skin=SkinnedMesh/PARTICLE_PS｜decal=Environment/UNLIT_DECAL_PS｜
@@ -446,10 +447,10 @@ impl ParticleMaterialDynamic {
         let frag_hash = league_utils::hash_shader_spec(&frag_defs);
 
         let shader_vert = shader_map
-            .get_shader_handle(vert_shader, vert_hash)
+            .get_shader_handle(vert_shader, vert_hash, asset_server)
             .unwrap_or_default();
         let shader_frag = shader_map
-            .get_shader_handle(frag_shader, frag_hash)
+            .get_shader_handle(frag_shader, frag_hash, asset_server)
             .unwrap_or_default();
 
         // 布局取家族“并集”统一布局（get_unified）而非单变体反射布局：

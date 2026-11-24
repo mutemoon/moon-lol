@@ -107,6 +107,7 @@ bincode.workspace = true
 tracing.workspace = true
 
 [dev-dependencies]
+naga = { version = "30", features = ["spv-in", "wgsl-out"] }
 crossbeam-channel.workspace = true
 image.workspace = true
 league_core.workspace = true
@@ -137,6 +138,8 @@ debug = "line-tables-only"
 [profile.dev.package."*"]
 # 为了开启 bevy 的动态链接
 opt-level = 3
+# 依赖不需要单步调试，省掉 O3 下最臃肿的那部分调试信息
+debug = false
 
 [profile.dev.package.lol_env]
 opt-level = 3

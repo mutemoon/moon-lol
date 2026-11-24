@@ -34,7 +34,7 @@ pub enum LeagueShader {
 #[derive(Reflect, Debug, Clone, Default)]
 #[reflect(Default)]
 pub struct ShaderMapEntry {
-    pub shader_handle: Handle<Shader>,
+    pub shader_path: String,
     /// 该 shader 变体 cbuffer 布局在 `ShaderMap::layouts` 去重池中的索引
     /// （VS 和 PS 各自独立存储，合并由材质层完成）
     pub layout_index: u32,
@@ -59,16 +59,25 @@ pub struct ShaderMap {
 }
 
 impl ShaderMap {
-    /// 获取指定 shader 变体的 handle
+    /// 获取指定 shader 变体的 handle（按需向 asset_server 请求加载，避免启动全量并发请求）
     pub fn get_shader_handle(
         &self,
         shader_type: LeagueShader,
         hash: u64,
+        asset_server: &AssetServer,
     ) -> Option<Handle<Shader>> {
-        self.entries
-            .get(&shader_type)?
-            .get(&hash)
-            .map(|entry| entry.shader_handle.clone())
+        let entry = self.entries.get(&shader_type)?.get(&hash)?;
+        Some(asset_server.load(&entry.shader_path))
+    }
+
+    /// 获取指定 shader 变体的相对路径
+    pub fn get_shader_path(
+        &self,
+        shader_type: LeagueShader,
+        hash: u64,
+    ) -> Option<&str> {
+        let entry = self.entries.get(&shader_type)?.get(&hash)?;
+        Some(&entry.shader_path)
     }
 
     /// 获取指定 shader 变体的 layout 描述符（从去重池取出并克隆）
