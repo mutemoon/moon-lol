@@ -9,7 +9,8 @@ use crate::ui::{
 };
 
 /// UI 元素组件
-#[derive(Component, Debug, Clone)]
+#[derive(Component, Debug, Clone, Reflect)]
+#[reflect(Component, Debug)]
 #[require(Node { position_type: PositionType::Absolute, overflow: Overflow::hidden(), ..default() }, Pickable::IGNORE)]
 pub enum UIElement {
     Icon(HashKey<LOLUiElementIconData>),

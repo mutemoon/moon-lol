@@ -15,6 +15,12 @@ pub use params::{
     SwitchChampionParams, ToggleCooldownParams, TogglePauseParams,
 };
 
+mod room;
+pub use room::PluginRoomProfile;
+
+mod screenshot;
+pub use screenshot::PluginScreenshot;
+
 pub struct PluginDebug;
 
 impl Plugin for PluginDebug {

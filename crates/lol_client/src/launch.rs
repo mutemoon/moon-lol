@@ -4,7 +4,9 @@
 //! RUST_LOG 默认值、workspace_root 探测、二进制名是共享的，归一于此。各端自行决定
 //! `cargo run` 前缀（桌面 `cargo run --`、云端 `cargo run --bin moon_lol --`）与 spawn 方式。
 
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
+
+use serde::{Deserialize, Serialize};
 
 /// Bevy 进程的游戏参数（CLI 标志）。`None` 的字段不产出对应标志，以兼容桌面端
 /// （传 mode/champion/scene）与云端 headless（仅 ws-port + headless）两种调用面。
@@ -15,6 +17,8 @@ pub struct BevyGameConfig {
     /// 场景名（原始名，自动包装成 `user_games://{name}.ron`）。
     pub scene: Option<String>,
     pub headless: bool,
+    /// 房间配置档路径：游戏进程读它的 `pause_at` 执行暂停计划。
+    pub profile: Option<PathBuf>,
 }
 
 /// 拼装 Bevy 进程的 CLI 参数（`--ws-port` 之后的游戏标志，不含 `cargo run --` 前缀）。
@@ -30,12 +34,45 @@ pub fn bevy_args(port: u16, cfg: &BevyGameConfig) -> Vec<String> {
     }
     if let Some(scene) = &cfg.scene {
         args.push("--scene".into());
-        args.push(format!("user_games://{}.ron", scene));
+        args.push(format!("user_games://{scene}.ron"));
+    }
+    if let Some(profile) = &cfg.profile {
+        args.push("--profile".into());
+        args.push(profile.display().to_string());
     }
     if cfg.headless {
         args.push("--headless".into());
     }
     args
+}
+
+/// 房间配置档：由 `lol room start` 写到 `~/.moon-lol/rooms/<id>/config.ron`，
+/// 游戏进程以 `--profile` 读回。只承载启动期决定的东西。
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
+pub struct RoomProfile {
+    /// 游戏内时间（秒）到点自动暂停，便于稳定截图/取快照。
+    #[serde(default)]
+    pub pause_at: Vec<f64>,
+}
+
+impl RoomProfile {
+    /// 读取配置档；文件缺失或损坏时视为「无计划」。
+    pub fn load(path: &Path) -> Self {
+        std::fs::read_to_string(path)
+            .ok()
+            .and_then(|text| ron::from_str(&text).ok())
+            .unwrap_or_default()
+    }
+
+    /// 写配置档（父目录自动创建）。
+    pub fn save(&self, path: &Path) -> std::io::Result<()> {
+        if let Some(parent) = path.parent() {
+            std::fs::create_dir_all(parent)?;
+        }
+        let text = ron::ser::to_string_pretty(self, ron::ser::PrettyConfig::default())
+            .map_err(std::io::Error::other)?;
+        std::fs::write(path, text)
+    }
 }
 
 /// 默认 RUST_LOG（桌面端 dev/release 两处共用）。
@@ -45,7 +82,7 @@ pub fn default_rust_log() -> &'static str {
 
 /// 运行环境探测：dev（`cargo run`/`cargo test` 会设置 `CARGO`）与否。
 pub fn is_dev() -> bool {
-    std::env::var("CARGO").is_ok()
+    std::env::var("CARGO").is_ok() || workspace_root().is_some()
 }
 
 /// 安装根目录：dev = workspace 根；release = 当前可执行文件所在目录。
@@ -106,21 +143,27 @@ pub fn resolve_executable(pkg: &str, bin: &str) -> (String, Vec<String>) {
     (bin.to_string(), vec![])
 }
 
-/// workspace 根目录（开发阶段从 `CARGO_MANIFEST_DIR` 向上遍历寻找含有 rust-toolchain.toml 或 pnpm-workspace.yaml 的目录作为根）。
+/// workspace 根目录：优先 `CARGO_MANIFEST_DIR`（`cargo run`/`cargo test` 自动设置），
+/// 否则从当前可执行文件所在的 `target/<profile>/` 向上定位。
 pub fn workspace_root() -> Option<PathBuf> {
-    let manifest_dir = std::env::var("CARGO_MANIFEST_DIR").ok()?;
-    let mut path = std::path::PathBuf::from(manifest_dir);
+    if let Ok(manifest_dir) = std::env::var("CARGO_MANIFEST_DIR") {
+        if let Some(root) = find_workspace_root(&PathBuf::from(manifest_dir)) {
+            return Some(root);
+        }
+    }
+    let exe_dir = std::env::current_exe().ok()?.parent().map(PathBuf::from)?;
+    find_workspace_root(&exe_dir)
+}
+
+/// 从 `start` 逐级向上找含 `rust-toolchain.toml`/`pnpm-workspace.yaml` 的目录。
+fn find_workspace_root(start: &std::path::Path) -> Option<PathBuf> {
+    let mut path = start.to_path_buf();
     loop {
         if path.join("rust-toolchain.toml").exists() || path.join("pnpm-workspace.yaml").exists() {
             return Some(path);
         }
-        if let Some(parent) = path.parent() {
-            path = parent.to_path_buf();
-        } else {
-            break;
-        }
+        path = path.parent()?.to_path_buf();
     }
-    None
 }
 
 /// 启动一个 Bevy 进程所需的可配置项。
@@ -165,4 +208,50 @@ pub fn build_command(req: &BevySpawnRequest) -> std::process::Command {
         cmd.arg("--log-db").arg(log_db);
     }
     cmd
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn profile_roundtrip_through_disk() {
+        let dir = std::env::temp_dir().join(format!("lol-room-profile-{}", std::process::id()));
+        let path = dir.join("config.ron");
+        RoomProfile {
+            pause_at: vec![10.0, 13.5],
+        }
+        .save(&path)
+        .unwrap();
+        assert_eq!(RoomProfile::load(&path).pause_at, vec![10.0, 13.5]);
+        assert!(
+            RoomProfile::load(&dir.join("missing.ron"))
+                .pause_at
+                .is_empty()
+        );
+        let _ = std::fs::remove_dir_all(dir);
+    }
+
+    #[test]
+    fn bevy_args_include_profile() {
+        let args = bevy_args(
+            9100,
+            &BevyGameConfig {
+                champion: Some("riven".into()),
+                profile: Some(PathBuf::from("C:/tmp/config.ron")),
+                ..Default::default()
+            },
+        );
+        assert_eq!(
+            args,
+            vec![
+                "--ws-port",
+                "9100",
+                "--champion",
+                "riven",
+                "--profile",
+                "C:/tmp/config.ron"
+            ]
+        );
+    }
 }

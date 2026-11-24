@@ -146,6 +146,9 @@ impl Plugin for PluginUIElement {
         app.register_type::<HashKey<lol_base_render::ui::LOLUiElementEffectDesaturateData>>();
         app.register_type::<HashKey<lol_base_render::ui::LOLUiElementGroupButtonData>>();
         app.register_type::<HashKey<lol_base_render::ui::LOLUiElementTextData>>();
+        app.register_type::<HashKey<lol_base_render::ui::LOLUiElementEffectAnimationData>>();
+        app.register_type::<HashKey<lol_base_render::ui::LOLUiElementEffectFillPercentageData>>();
+        app.register_type::<lol_base_render::ui_components::UIElement>();
 
         app.add_systems(Startup, startup_load_ui_data);
         app.add_systems(Update, poll_ui_load.run_if(in_state(UIState::Loading)));
@@ -172,6 +175,21 @@ pub enum UIState {
 #[derive(Resource, Default)]
 pub struct UIElementEntity {
     pub map: HashMap<u32, Entity>,
+    /// hash → 元素名（同一 hash 已绑定过多个实体时立即告警）。
+    pub names: HashMap<u32, String>,
+}
+
+impl UIElementEntity {
+    /// 绑定 hash → 实体；`name` 仅用于诊断输出。
+    pub fn bind(&mut self, hash: u32, name: &str, entity: Entity) {
+        if let Some(prev) = self.map.insert(hash, entity) {
+            bevy::log::error!(
+                "UI 元素 hash {hash}（{name}）被重复绑定：旧实体 {prev:?} → 新实体 {entity:?}；\
+                 两份 UI 配置导出了同名元素，旧实体会变成孤儿"
+            );
+        }
+        self.names.insert(hash, name.to_string());
+    }
 }
 
 #[derive(EntityEvent, Debug)]

@@ -10,7 +10,7 @@ use lol_base_render::ui::{
     LOLUiElementRegionData, LOLUiElementTextData, LOLUiFile, LOLUiPaths, LOLUiSceneData,
     LOLUnitFloatingInfoBarData,
 };
-use lol_base_render::ui_components::{UIButton, UIElement};
+use lol_base_render::ui_components::{UIButton, UIElement, UIElementChild};
 
 use super::{UIElementEntity, UIState};
 use crate::ui::text::UiTextState;
@@ -229,6 +229,7 @@ fn spawn_ui_elements(
 
     // 1. 创建场景实体
     for (hash, scene_data) in &combined_scenes {
+        let name = format!("Scene: {}", scene_data.name);
         let entity = commands
             .spawn((
                 Node {
@@ -240,11 +241,11 @@ fn spawn_ui_elements(
                 } else {
                     Visibility::Hidden
                 },
-                Name::new(format!("Scene: {}", scene_data.name)),
+                Name::new(name.clone()),
                 ZIndex(scene_data.layer.unwrap_or(0) as i32),
             ))
             .id();
-        res_ui_element_entity.add(*hash, entity);
+        res_ui_element_entity.bind(*hash, &name, entity);
     }
 
     // 2. 链接场景父子关系
@@ -258,6 +259,7 @@ fn spawn_ui_elements(
 
     // 3. 创建 UI 元素实体 (Icon) 并挂载到场景
     for (hash, icon_data) in &combined_elements {
+        let name = format!("Icon: {}", icon_data.name);
         let entity = commands
             .spawn((
                 UIElement::Icon(hash.into()),
@@ -266,17 +268,18 @@ fn spawn_ui_elements(
                 } else {
                     Visibility::Hidden
                 },
-                Name::new(format!("Icon: {}", icon_data.name)),
+                Name::new(name.clone()),
             ))
             .id();
 
         let scene_entity = res_ui_element_entity.get(icon_data.scene.0);
         commands.entity(scene_entity).add_child(entity);
-        res_ui_element_entity.add(*hash, entity);
+        res_ui_element_entity.bind(*hash, &name, entity);
     }
 
     // 4. 创建 Button 实体并挂载到场景
     for (hash, button_data) in &combined_buttons {
+        let name = format!("Button: {}", button_data.name);
         let entity = commands
             .spawn((
                 UIButton(hash.into()),
@@ -285,17 +288,18 @@ fn spawn_ui_elements(
                 } else {
                     Visibility::Hidden
                 },
-                Name::new(format!("Button: {}", button_data.name)),
+                Name::new(name.clone()),
             ))
             .id();
 
         let scene_entity = res_ui_element_entity.get(button_data.scene.0);
         commands.entity(scene_entity).add_child(entity);
-        res_ui_element_entity.add(*hash, entity);
+        res_ui_element_entity.bind(*hash, &name, entity);
     }
 
     // 5. 创建 Animation 实体并挂载到场景
     for (hash, anim_data) in &combined_animations {
+        let name = format!("Anim: {}", anim_data.name);
         let entity = commands
             .spawn((
                 UIElement::Animation(hash.into()),
@@ -309,17 +313,18 @@ fn spawn_ui_elements(
                 } else {
                     Visibility::Hidden
                 },
-                Name::new(format!("Anim: {}", anim_data.name)),
+                Name::new(name.clone()),
             ))
             .id();
 
         let scene_entity = res_ui_element_entity.get(anim_data.scene);
         commands.entity(scene_entity).add_child(entity);
-        res_ui_element_entity.add(*hash, entity);
+        res_ui_element_entity.bind(*hash, &name, entity);
     }
 
     // 6. 创建 Desaturate 实体并挂载到场景
     for (hash, desaturate_data) in &combined_desaturates {
+        let name = format!("Desaturate: {}", desaturate_data.name);
         let entity = commands
             .spawn((
                 UIElement::Desaturate(hash.into()),
@@ -328,31 +333,33 @@ fn spawn_ui_elements(
                 } else {
                     Visibility::Hidden
                 },
-                Name::new(format!("Desaturate: {}", desaturate_data.name)),
+                Name::new(name.clone()),
             ))
             .id();
 
         let scene_entity = res_ui_element_entity.get(desaturate_data.scene);
         commands.entity(scene_entity).add_child(entity);
-        res_ui_element_entity.add(*hash, entity);
+        res_ui_element_entity.bind(*hash, &name, entity);
     }
 
     // 7. 创建 Region 实体并挂载到场景
     for (hash, region_data) in &combined_regions {
+        let name = format!("Region: {}", region_data.name);
         let entity = commands
             .spawn((
                 UIElement::Region(hash.into()),
-                Name::new(format!("Region: {}", region_data.name)),
+                Name::new(name.clone()),
             ))
             .id();
 
         let scene_entity = res_ui_element_entity.get(region_data.scene);
         commands.entity(scene_entity).add_child(entity);
-        res_ui_element_entity.add(*hash, entity);
+        res_ui_element_entity.bind(*hash, &name, entity);
     }
 
     // 8. 创建 Text 实体并挂载到场景
     for (hash, text_data) in &combined_texts {
+        let name = format!("Text: {}", text_data.name);
         let entity = commands
             .spawn((
                 UIElement::Text(hash.into()),
@@ -361,20 +368,22 @@ fn spawn_ui_elements(
                 } else {
                     Visibility::Hidden
                 },
-                Name::new(format!("Text: {}", text_data.name)),
+                Name::new(name.clone()),
                 UiTextState {
                     text: "10".to_string(),
                 },
             ))
+            .with_child(UIElementChild)
             .id();
 
         let scene_entity = res_ui_element_entity.get(text_data.scene);
         commands.entity(scene_entity).add_child(entity);
-        res_ui_element_entity.add(*hash, entity);
+        res_ui_element_entity.bind(*hash, &name, entity);
     }
 
     // 9. 创建 FillPercentage 实体并挂载到场景
     for (hash, fill_percentage_data) in &combined_fill_percentages {
+        let name = format!("FillPercentage: {}", fill_percentage_data.name);
         let entity = commands
             .spawn((
                 UIElement::FillPercentage(hash.into()),
@@ -383,13 +392,13 @@ fn spawn_ui_elements(
                 } else {
                     Visibility::Hidden
                 },
-                Name::new(format!("FillPercentage: {}", fill_percentage_data.name)),
+                Name::new(name.clone()),
             ))
             .id();
 
         let scene_entity = res_ui_element_entity.get(fill_percentage_data.scene);
         commands.entity(scene_entity).add_child(entity);
-        res_ui_element_entity.add(*hash, entity);
+        res_ui_element_entity.bind(*hash, &name, entity);
     }
 
     // save_ui_tree_to_json(

@@ -1,3 +1,13 @@
+//! UI 元素布局：把 `UIElement` 的 LOL 坐标换算成 Bevy `Node` 的屏幕矩形。
+//!
+//! 文本元素是双层结构：
+//! - 元素实体（`UIElement::Text`）只承载位置与尺寸，负责把子节点摆到中间；
+//! - 子实体（`UIElementChild`）才持有 `Text`，由 `update_ui_text` 同步文字内容。
+//!
+//! 子实体必须由本模块创建并补齐 `Node`：直接往容器里插一个裸 `Text` 时它没有尺寸，
+//! 父节点按 0 宽高布局，文本不可见；而裸 `Text` 若是"孤儿"层，就会和真正的子节点
+//! 各画一份，形成错位重影——这正是之前 HUD 文字重影的根因。
+
 use bevy::prelude::*;
 use bevy::window::{PrimaryWindow, WindowResized};
 use lol_base::hash_key::LoadHashKeyTrait;
@@ -23,6 +33,7 @@ pub fn update_element_layout(
     q_node: &mut Query<&mut Node>,
     q_children: &Query<&Children>,
     q_image: &Query<&ImageNode>,
+    q_text: &Query<&Text>,
 ) {
     let Ok(mut node) = q_node.get_mut(entity) else {
         return;
@@ -179,24 +190,44 @@ pub fn update_element_layout(
         .entity(entity)
         .insert((ZIndex(layer), super::OriginalPosition(position_new)));
 
-    let child = if let Ok(children) = q_children.get(entity) {
-        if let Some(&child) = children.first() {
-            child
-        } else {
+    let child = match q_children.get(entity) {
+        Ok(children) => match children.first() {
+            Some(&child) => child,
+            // 文本元素尚无子实体：等构建期补出（见 init.rs），这里不碰。
+            None if matches!(ui_element, UIElement::Text(_)) => return,
+            None => {
+                let child = commands.spawn(UIElementChild).id();
+                commands.entity(entity).add_child(child);
+                child
+            }
+        },
+        Err(_) => {
             let child = commands.spawn(UIElementChild).id();
             commands.entity(entity).add_child(child);
             child
         }
-    } else {
-        let child = commands.spawn(UIElementChild).id();
-        commands.entity(entity).add_child(child);
-        child
     };
 
     if let UIElement::Text(_) = ui_element {
         node.justify_content = JustifyContent::Center;
         node.align_items = AlignItems::Center;
-        commands.entity(child).insert(TextLayout::no_wrap());
+        if !q_text.contains(child) {
+            commands.entity(child).insert((
+                UIElementChild,
+                Node {
+                    width: Val::Px(size_new.x),
+                    height: Val::Px(size_new.y),
+                    ..default()
+                },
+                Text::new(""),
+                TextFont {
+                    font_size: FontSize::Px(size_new.y * 0.95),
+                    ..default()
+                },
+                TextColor(Color::WHITE),
+                TextLayout::no_wrap(),
+            ));
+        }
         return;
     }
 
@@ -237,6 +268,7 @@ pub fn update_on_add_ui_element(
     mut q_node: Query<&mut Node>,
     q_children: Query<&Children>,
     q_image: Query<&ImageNode>,
+    q_text: Query<&Text>,
     q_window: Query<&Window, With<PrimaryWindow>>,
     icon_assets: Res<IconAssets>,
     anim_assets: Res<AnimAssets>,
@@ -268,6 +300,7 @@ pub fn update_on_add_ui_element(
                 &mut q_node,
                 &q_children,
                 &q_image,
+                &q_text,
             );
         }
 
@@ -316,6 +349,7 @@ pub fn update_on_window_resized(
     mut q_node: Query<&mut Node>,
     q_children: Query<&Children>,
     q_image: Query<&ImageNode>,
+    q_text: Query<&Text>,
     icon_assets: Res<IconAssets>,
     anim_assets: Res<AnimAssets>,
     desaturate_assets: Res<DesaturateAssets>,
@@ -342,6 +376,7 @@ pub fn update_on_window_resized(
                     &mut q_node,
                     &q_children,
                     &q_image,
+                    &q_text,
                 );
             }
         }

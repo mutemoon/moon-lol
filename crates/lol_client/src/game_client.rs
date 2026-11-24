@@ -119,6 +119,25 @@ impl GameClient {
         self.cmd(CMD_RL_STEP, params).await
     }
 
+    /// 请求游戏把主窗口截到 `path`（PNG）。游戏在落盘完成后才回 `ok`。
+    pub async fn screenshot(&self, path: &std::path::Path) -> Result<WsResponse, String> {
+        let resp = self
+            .cmd(
+                CMD_SCREENSHOT,
+                json!({ "path": path.display().to_string() }),
+            )
+            .await?;
+        if resp.ok && !path.is_file() {
+            return Err(format!("截图回执成功但未找到文件: {}", path.display()));
+        }
+        Ok(resp)
+    }
+
+    /// 导出世界里所有实体的组件值（每个值截断到 `max_value_chars`，默认由游戏定）。
+    pub async fn snapshot(&self, params: Value) -> Result<WsResponse, String> {
+        self.cmd(CMD_SNAPSHOT, params).await
+    }
+
     // ── 幂等暂停 / 恢复（先 get_state 再决定是否 toggle_pause）──
 
     /// 幂等暂停：已暂停则不操作。返回是否实际触发了切换。

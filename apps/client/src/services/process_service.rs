@@ -28,6 +28,7 @@ fn bevy_game_config(config: &GameConfig) -> lol_client::launch::BevyGameConfig {
         champion: Some(config.champion.clone()),
         scene: config.scene_name.clone(),
         headless: false,
+        ..Default::default()
     }
 }
 

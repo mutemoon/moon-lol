@@ -40,6 +40,10 @@ struct Args {
     #[arg(long)]
     headless: bool,
 
+    /// 由 `lol room start` 注入：房间配置档，含暂停计划。
+    #[arg(long)]
+    profile: Option<std::path::PathBuf>,
+
     /// 每局日志 SQLite 路径；缺省沿用 ~/.moon-lol/logs/debug.db。
     #[arg(long)]
     log_db: Option<std::path::PathBuf>,
@@ -98,6 +102,7 @@ fn main() {
                 ws_port: args.ws_port,
             },
             PluginDebug,
+            lol_debug::PluginScreenshot,
             PluginAgentObserver,
         ));
     }
@@ -115,6 +120,10 @@ fn main() {
     app.insert_resource(PlayerChampion(args.champion.to_lowercase()));
     app.add_plugins(PluginPlayerChampion);
     app.insert_resource(GameScenes::new(vec![scene_path]));
+
+    if let Some(profile) = args.profile {
+        app.add_plugins(lol_debug::PluginRoomProfile::load(&profile));
+    }
 
     app.run();
 }

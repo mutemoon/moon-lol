@@ -9589,7 +9589,10 @@ name = "lol_cli"
 version = "0.1.0"
 dependencies = [
  "clap",
+ "futures-util",
  "lol_client",
+ "ron 0.8.1",
+ "serde",
  "serde_json",
  "tokio",
 ]
@@ -9600,6 +9603,7 @@ version = "0.1.0"
 dependencies = [
  "futures-util",
  "rmcp",
+ "ron 0.8.1",
  "schemars 1.2.1",
  "serde",
  "serde_json",
@@ -9635,6 +9639,7 @@ dependencies = [
  "bevy",
  "lol_base",
  "lol_champions",
+ "lol_client",
  "lol_core",
  "lol_render",
  "lol_rpc",

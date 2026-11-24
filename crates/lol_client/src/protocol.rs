@@ -132,3 +132,5 @@ pub const CMD_RESET_POSITION: &str = "reset_position";
 pub const CMD_SET_SCRIPT: &str = "set_script";
 pub const CMD_RL_RESET: &str = "rl_reset";
 pub const CMD_RL_STEP: &str = "rl_step";
+pub const CMD_SCREENSHOT: &str = "screenshot";
+pub const CMD_SNAPSHOT: &str = "snapshot";

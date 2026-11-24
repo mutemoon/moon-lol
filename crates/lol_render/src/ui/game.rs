@@ -146,8 +146,20 @@ fn update_text_element(
     new_text: &str,
     q_ui_text_state: &mut Query<&mut UiTextState>,
 ) {
-    let entity = res_ui.get_entity(key);
+    let Some(&entity) = res_ui.map.get(&key.0) else {
+        warn_once!(
+            "UI 指标文本元素不在 UIElementEntity 中：{}（hash {}）→ 该指标不会显示",
+            res_ui
+                .names
+                .get(&key.0)
+                .map(String::as_str)
+                .unwrap_or("<未知>"),
+            key.0
+        );
+        return;
+    };
     let Ok(mut text_state) = q_ui_text_state.get_mut(entity) else {
+        warn_once!("UI 指标文本实体 {entity:?} 缺少 UiTextState → 该指标不会显示");
         return;
     };
     text_state.text = new_text.to_string();
