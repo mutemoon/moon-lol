@@ -13,7 +13,9 @@ use lol_base_render::ui_components::{
 use lol_core::base::bounding::Bounding;
 use lol_core::base::level::Level;
 use lol_core::life::Health;
+use lol_core::team::Team;
 
+use crate::controller::SelfPlayer;
 use crate::ui::element::UIState;
 use crate::ui::text::UiTextState;
 
@@ -27,7 +29,12 @@ impl Plugin for PluginUIHealthBar {
         );
         app.add_systems(
             Update,
-            (update_health, update_health_ticks, update_level_text),
+            (
+                update_health,
+                update_health_bar_tint,
+                update_health_ticks,
+                update_level_text,
+            ),
         );
     }
 }
@@ -45,6 +52,14 @@ pub struct HealthTickBind {
 
 #[derive(Component)]
 pub struct HealthTick;
+
+/// 灰度血条：贴图没有颜色变体，按目标与玩家的敌我关系染色
+#[derive(Component)]
+struct HealthBarTint;
+
+const ALLY_BAR_COLOR: Color = Color::srgb(0.26, 0.62, 0.95);
+const ENEMY_BAR_COLOR: Color = Color::srgb(0.90, 0.24, 0.20);
+const NEUTRAL_BAR_COLOR: Color = Color::srgb(0.95, 0.60, 0.18);
 
 fn update_spawn_health_bar(
     mut commands: Commands,
@@ -140,9 +155,14 @@ fn update_spawn_health_bar(
             .copied()
             .unwrap_or(hp_bar.health_bar.default_bar);
 
-        commands
-            .entity(health_bar_entity)
-            .with_child((UIElement::Icon(hp_bar_icon), HealthBind(entity)));
+        let mut hp_bar_commands = commands.spawn((
+            UIElement::Icon(hp_bar_icon),
+            HealthBind(entity),
+            ChildOf(health_bar_entity),
+        ));
+        if hp_bar.health_bar.additional_bar_types.is_none() {
+            hp_bar_commands.insert(HealthBarTint);
+        }
 
         let hp_bar_icon_data = res_assets_ui_element_icon_data
             .load_hash(hp_bar_icon)
@@ -256,7 +276,7 @@ fn update_health_ticks(
 
 fn update_health(
     mut q_health_bind: Query<(&HealthBind, &Children)>,
-    mut q_health_bar: Query<(&mut Node, &mut ImageNode), With<UIElementChild>>,
+    mut q_health_bar: Query<&mut Node, With<UIElementChild>>,
     q_health: Query<&Health>,
 ) {
     for (health_bind, children) in q_health_bind.iter_mut() {
@@ -264,15 +284,46 @@ fn update_health(
             continue;
         };
 
-        let Ok((mut node, mut image_node)) = q_health_bar.get_mut(children[0]) else {
+        let Ok(mut node) = q_health_bar.get_mut(children[0]) else {
             continue;
         };
 
-        if image_node.image_mode != NodeImageMode::Stretch {
-            image_node.image_mode = NodeImageMode::Stretch;
-        }
         node.width = Val::Percent(health.value / health.max * 100.0);
     }
+}
+
+fn update_health_bar_tint(
+    q_bar: Query<(&HealthBind, &Children), With<HealthBarTint>>,
+    q_team: Query<&Team>,
+    q_self_team: Query<&Team, With<SelfPlayer>>,
+    mut q_image: Query<&mut ImageNode, With<UIElementChild>>,
+) {
+    // 无自机（观战）时以蓝方视角显示
+    let self_team = q_self_team.single().copied().unwrap_or(Team::Order);
+
+    for (bind, children) in q_bar.iter() {
+        let Ok(&team) = q_team.get(bind.0) else {
+            continue;
+        };
+        let Ok(mut image) = q_image.get_mut(children[0]) else {
+            continue;
+        };
+
+        let color = bar_color(team, self_team);
+        if image.color != color {
+            image.color = color;
+        }
+    }
+}
+
+fn bar_color(team: Team, self_team: Team) -> Color {
+    if team == self_team {
+        return ALLY_BAR_COLOR;
+    }
+    if team == Team::Neutral {
+        return NEUTRAL_BAR_COLOR;
+    }
+    ENEMY_BAR_COLOR
 }
 
 fn update_level_text(

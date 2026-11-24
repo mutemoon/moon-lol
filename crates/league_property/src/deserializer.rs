@@ -10,6 +10,8 @@ use crate::types::{BinDeserializerResult, BinType, Error};
 pub struct BinDeserializer<'de> {
     pub parser: BinParser<'de>,
     pub value_type: BinType,
+    /// 顶层 entry 所属的类哈希，用于按类处理字段读取的特例。
+    pub entry_class: u32,
 }
 
 impl<'de> BinDeserializer<'de> {
@@ -17,11 +19,24 @@ impl<'de> BinDeserializer<'de> {
         BinDeserializer {
             parser: BinParser::from_bytes(input),
             value_type,
+            entry_class: 0,
+        }
+    }
+
+    pub fn from_entry_bytes(input: &'de [u8], entry_class: u32) -> Self {
+        BinDeserializer {
+            parser: BinParser::from_bytes(input),
+            value_type: BinType::Entry,
+            entry_class,
         }
     }
 
     pub fn from_parser(parser: BinParser<'de>, value_type: BinType) -> Self {
-        BinDeserializer { parser, value_type }
+        BinDeserializer {
+            parser,
+            value_type,
+            entry_class: 0,
+        }
     }
 }
 
@@ -34,11 +49,15 @@ impl<'de, 'a> de::Deserializer<'de> for &'a mut BinDeserializer<'de> {
         struct_fields: &'static [&'static str],
         visitor: V,
     ) -> BinDeserializerResult<V::Value> {
-        if self.value_type != BinType::Entry {
-            self.parser.read_struct_header()?;
-        }
+        let owner = if self.value_type != BinType::Entry {
+            self.parser
+                .read_struct_header()?
+                .map_or(0, |h| h.class_hash)
+        } else {
+            self.entry_class
+        };
 
-        let data_map = self.parser.read_fields()?;
+        let data_map = self.parser.read_fields(owner)?;
 
         visitor
             .visit_map(MapReader {

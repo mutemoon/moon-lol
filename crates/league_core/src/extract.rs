@@ -165,13 +165,13 @@ pub struct AnimationGraphData {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct AnimationResourceData {
-    pub m_animation_file_path: String,
+    pub m_animation_file_path: u64,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct AtlasData {
-    pub m_texture_name: String,
+    pub m_texture_name: u64,
     pub m_texture_source_resolution_height: Option<u32>,
     pub m_texture_source_resolution_width: Option<u32>,
     pub m_texture_uv: Option<Vec4>,
@@ -181,7 +181,7 @@ pub struct AtlasData {
 #[serde(rename_all = "camelCase")]
 pub struct AtlasData3SliceH {
     pub left_right_widths: Vec2,
-    pub m_texture_name: String,
+    pub m_texture_name: u64,
     pub m_texture_source_resolution_height: u32,
     pub m_texture_source_resolution_width: u32,
     pub texture_us: Vec4,
@@ -191,7 +191,7 @@ pub struct AtlasData3SliceH {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct AtlasData3SliceV {
-    pub m_texture_name: String,
+    pub m_texture_name: u64,
     pub m_texture_source_resolution_height: u32,
     pub m_texture_source_resolution_width: u32,
     pub texture_us: Vec2,
@@ -203,7 +203,7 @@ pub struct AtlasData3SliceV {
 #[serde(rename_all = "camelCase")]
 pub struct AtlasData9Slice {
     pub left_right_widths: Vec2,
-    pub m_texture_name: String,
+    pub m_texture_name: u64,
     pub m_texture_source_resolution_height: u32,
     pub m_texture_source_resolution_width: u32,
     pub texture_us: Vec4,
@@ -429,7 +429,7 @@ pub struct CcBehaviorData {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct CensoredImage {
-    pub image: String,
+    pub image: u64,
     pub uncensored_images: Option<BTreeMap<u32, String>>,
 }
 
@@ -535,13 +535,13 @@ pub struct CharacterRecord {
     pub health_bar_height: Option<f32>,
     pub highlight_healthbar_icons: Option<bool>,
     pub hit_fx_scale: Option<f32>,
-    pub hover_indicator_minimap_override: Option<String>,
+    pub hover_indicator_minimap_override: Option<u64>,
     pub hover_indicator_radius: Option<f32>,
     pub hover_indicator_radius_minimap: Option<f32>,
     pub hover_indicator_rotate_to_player: Option<bool>,
-    pub hover_indicator_texture_name: Option<String>,
-    pub hover_line_indicator_base_texture_name: Option<String>,
-    pub hover_line_indicator_target_texture_name: Option<String>,
+    pub hover_indicator_texture_name: Option<u64>,
+    pub hover_line_indicator_base_texture_name: Option<u64>,
+    pub hover_line_indicator_target_texture_name: Option<u64>,
     pub hover_line_indicator_width: Option<f32>,
     pub hover_line_indicator_width_minimap: Option<f32>,
     pub hp_per_level_modifiable: Option<ModifiableFloat>,
@@ -576,7 +576,7 @@ pub struct CharacterRecord {
     pub override_gameplay_collision_radius: Option<f32>,
     pub pack_manager_data: Option<PackManagerData>,
     pub par_name: Option<String>,
-    pub passive1_icon_name: Option<String>,
+    pub passive1_icon_name: Option<u64>,
     pub passive_lua_name: Option<String>,
     pub passive_name: Option<String>,
     pub passive_range: Option<f32>,
@@ -922,7 +922,7 @@ pub struct DynamicMaterialTextureSwapDef {
 #[serde(rename_all = "camelCase")]
 pub struct DynamicMaterialTextureSwapOption {
     pub driver: EnumDriver,
-    pub texture_name: Option<String>,
+    pub texture_name: Option<u64>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -966,6 +966,7 @@ pub enum EnumAbilityResourceByCoefficientCalculationPart {
     NamedDataValueCalculationPart(NamedDataValueCalculationPart),
     NumberCalculationPart(NumberCalculationPart),
     PercentageOfBuffNameElapsed(PercentageOfBuffNameElapsed),
+    Unk0x2b25a73a(Unk0x2b25a73a),
     ProductOfSubPartsCalculationPart(ProductOfSubPartsCalculationPart),
     StatByCoefficientCalculationPart(StatByCoefficientCalculationPart),
     StatByNamedDataValueCalculationPart(StatByNamedDataValueCalculationPart),
@@ -981,6 +982,12 @@ pub enum EnumAbilityResourceByCoefficientCalculationPart {
     Unk0xba007871(Unk0xba007871),
     Unk0xee18a47b(Unk0xee18a47b),
     Unk0xf3cbe7b2(Unk0xf3cbe7b2),
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct Unk0x2b25a73a {
+    pub unk_0x137cf12a: u32,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -1254,6 +1261,7 @@ pub enum EnumMap {
     Unk0xd8f395a4(Unk0xd8f395a4),
     Unk0xe64ff723(Unk0xe64ff723),
     Unk0xeb997689(Unk0xeb997689),
+    Unk0xfa42cdaf(Unk0xfa42cdaf),
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -2050,7 +2058,7 @@ pub struct HudShopButton {
     pub unk_0x40aa9d58: Option<u8>,
     pub unk_0x697f8b6b: Option<u32>,
     pub unk_0x778e26c6: Option<u32>,
-    pub unk_0x7dffe581: Option<String>,
+    pub unk_0x7dffe581: Option<u64>,
     pub unk_0x8031b7a0: Option<u32>,
     pub unk_0xb77375ae: Option<u32>,
 }
@@ -2225,7 +2233,7 @@ pub struct ItemDataBuild {
 pub struct ItemDataClient {
     pub effect_radius: Option<f32>,
     pub epicness: Option<u8>,
-    pub inventory_icon: String,
+    pub inventory_icon: u64,
     pub inventory_icon_large: Option<String>,
     pub inventory_icon_material: Option<u32>,
     pub inventory_icon_small: Option<String>,
@@ -2308,7 +2316,7 @@ pub struct KeyFrameFloatMapClipAccessoryData {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct LaunchAreaData {
-    pub indicator_texture_name: String,
+    pub indicator_texture_name: u64,
     pub inner_area_target_distance: f32,
     pub inner_radius: f32,
 }
@@ -2375,21 +2383,21 @@ pub struct LolGameStateViewController {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct LooseUiTextureData {
-    pub texture_name: String,
+    pub texture_name: u64,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct LooseUiTextureData3SliceH {
     pub edge_sizes_left_right: Option<Vec2>,
-    pub texture_name: String,
+    pub texture_name: u64,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct LooseUiTextureData3SliceV {
     pub edge_sizes_top_bottom: Vec2,
-    pub texture_name: String,
+    pub texture_name: u64,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -2397,7 +2405,7 @@ pub struct LooseUiTextureData3SliceV {
 pub struct LooseUiTextureData9Slice {
     pub edge_sizes_left_right: Option<Vec2>,
     pub edge_sizes_top_bottom: Option<Vec2>,
-    pub texture_name: String,
+    pub texture_name: u64,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -2442,7 +2450,7 @@ pub struct MapContainer {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct MapCubemapProbe {
-    pub cubemap_probe_path: String,
+    pub cubemap_probe_path: u64,
     pub cubemap_probe_scale: f32,
     pub cubemap_region: Option<MapCubemapRegion>,
     pub m_visibility_flags: Option<u8>,
@@ -2526,7 +2534,7 @@ pub struct MapSunProperties {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct MapTerrainPaint {
-    pub terrain_paint_texture_path: String,
+    pub terrain_paint_texture_path: u64,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -3064,10 +3072,10 @@ pub struct SkinCharacterDataProperties {
     pub health_bar_data: Option<CharacterHealthBarDataRecord>,
     pub hud_mute_event: Option<String>,
     pub hud_unmute_event: Option<String>,
-    pub icon_avatar: Option<String>,
-    pub icon_circle: Option<String>,
+    pub icon_avatar: Option<u64>,
+    pub icon_circle: Option<u64>,
     pub icon_circle_scale: Option<f32>,
-    pub icon_square: Option<String>,
+    pub icon_square: Option<u64>,
     pub idle_particles_effects: Option<Vec<SkinCharacterDataPropertiesCharacterIdleEffect>>,
     pub loadscreen: Option<CensoredImage>,
     pub loadscreen_vintage: Option<CensoredImage>,
@@ -3132,13 +3140,13 @@ pub struct SkinMeshDataProperties {
     pub bounding_sphere_radius: Option<f32>,
     pub brush_alpha_override: Option<f32>,
     pub cast_shadows: Option<bool>,
-    pub emissive_texture: Option<String>,
+    pub emissive_texture: Option<u64>,
     pub emitter_submesh_avatar_to_hide: Option<String>,
     pub enable_picking: Option<bool>,
     pub force_draw_last: Option<bool>,
     pub fresnel: Option<f32>,
     pub fresnel_color: Option<[u8; 4]>,
-    pub gloss_texture: Option<String>,
+    pub gloss_texture: Option<u64>,
     pub initial_submesh_avatar_to_hide: Option<String>,
     pub initial_submesh_mouse_overs_to_hide: Option<String>,
     pub initial_submesh_shadows_to_hide: Option<String>,
@@ -3150,7 +3158,7 @@ pub struct SkinMeshDataProperties {
     pub reduced_bone_skinning: Option<bool>,
     pub reflection_fresnel: Option<f32>,
     pub reflection_fresnel_color: Option<[u8; 4]>,
-    pub reflection_map: Option<String>,
+    pub reflection_map: Option<u64>,
     pub reflection_opacity_direct: Option<f32>,
     pub reflection_opacity_glancing: Option<f32>,
     pub rig_pose_modifier_data: Option<Vec<EnumRigPoseModifierData>>,
@@ -3159,17 +3167,17 @@ pub struct SkinMeshDataProperties {
     pub skeleton: Option<String>,
     pub skin_scale: Option<f32>,
     pub submesh_render_order: Option<String>,
-    pub texture: Option<String>,
+    pub texture: Option<u64>,
     pub uses_skin_vo: Option<bool>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct SkinMeshDataPropertiesMaterialOverride {
-    pub gloss_texture: Option<String>,
+    pub gloss_texture: Option<u64>,
     pub material: Option<u32>,
     pub submesh: String,
-    pub texture: Option<String>,
+    pub texture: Option<u64>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -3233,7 +3241,7 @@ pub struct SpellDataResource {
     pub data_values: Option<Vec<SpellDataValue>>,
     pub data_values_mode_override: Option<BTreeMap<u32, SpellDataValueVector>>,
     pub flags: Option<u32>,
-    pub img_icon_path: Option<String>,
+    pub img_icon_path: Option<u64>,
     pub loadable: Option<u32>,
     pub lua_on_missile_update_distance_interval: Option<f32>,
     pub m_affects_status_flags: Option<u32>,
@@ -3312,7 +3320,7 @@ pub struct SpellDataResource {
     pub m_look_at_policy: Option<u32>,
     pub m_max_ammo: Option<Vec<i32>>,
     pub m_minimap_icon_display_flag: Option<u16>,
-    pub m_minimap_icon_name: Option<String>,
+    pub m_minimap_icon_name: Option<u64>,
     pub m_minimap_icon_rotation: Option<bool>,
     pub m_missile_effect_enemy_key: Option<u32>,
     pub m_missile_effect_enemy_name: Option<String>,
@@ -3585,7 +3593,7 @@ pub struct StaticMaterialChildTechniqueDef {
 pub struct StaticMaterialDef {
     pub child_techniques: Option<Vec<StaticMaterialChildTechniqueDef>>,
     pub dynamic_material: Option<DynamicMaterialDef>,
-    pub name: String,
+    pub name: u64,
     pub param_values: Option<Vec<StaticMaterialShaderParamDef>>,
     pub r#type: Option<u32>,
     pub sampler_values: Option<Vec<StaticMaterialShaderSamplerDef>>,
@@ -3635,7 +3643,7 @@ pub struct StaticMaterialShaderSamplerDef {
     pub address_w: Option<u32>,
     pub sampler_name: Option<String>,
     pub texture_name: String,
-    pub texture_path: Option<String>,
+    pub texture_path: Option<u64>,
     pub uncensored_textures: Option<BTreeMap<u32, String>>,
 }
 
@@ -3791,7 +3799,7 @@ pub struct TargeterDefinitionAoe {
     pub max_range_size_scalar: Option<TargeterDefinitionAoeScalar>,
     pub override_radius: Option<FloatPerSpellLevel>,
     pub texture_orientation: Option<u32>,
-    pub texture_radius_override_name: Option<String>,
+    pub texture_radius_override_name: Option<u64>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -3821,7 +3829,7 @@ pub struct TargeterDefinitionCone {
     pub end_locator: DrawablePositionLocator,
     pub fallback_direction: Option<u32>,
     pub start_locator: Option<DrawablePositionLocator>,
-    pub texture_cone_override_name: Option<String>,
+    pub texture_cone_override_name: Option<u64>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -3847,10 +3855,10 @@ pub struct TargeterDefinitionLine {
     pub range_growth_max: Option<FloatPerSpellLevel>,
     pub range_growth_start_time: Option<FloatPerSpellLevel>,
     pub start_locator: Option<DrawablePositionLocator>,
-    pub texture_base_max_grow_name: Option<String>,
-    pub texture_base_override_name: Option<String>,
-    pub texture_target_max_grow_name: Option<String>,
-    pub texture_target_override_name: Option<String>,
+    pub texture_base_max_grow_name: Option<u64>,
+    pub texture_base_override_name: Option<u64>,
+    pub texture_target_max_grow_name: Option<u64>,
+    pub texture_target_override_name: Option<u64>,
     pub use_global_line_indicator: Option<bool>,
 }
 
@@ -3887,9 +3895,9 @@ pub struct TargeterDefinitionRange {
     pub range_growth_duration: Option<FloatPerSpellLevel>,
     pub range_growth_max: Option<FloatPerSpellLevel>,
     pub range_growth_start_time: Option<FloatPerSpellLevel>,
-    pub texture_max_grow_name: Option<String>,
+    pub texture_max_grow_name: Option<u64>,
     pub texture_orientation: Option<u32>,
-    pub texture_override_name: Option<String>,
+    pub texture_override_name: Option<u64>,
     pub use_caster_bounding_box: Option<bool>,
 }
 
@@ -4566,7 +4574,7 @@ pub struct UnitStatusData {
 #[serde(rename_all = "camelCase")]
 pub struct UnitStatusPriorityList {
     pub m_prioritized_unit_status_data: Vec<UnitStatusData>,
-    pub texture_name: String,
+    pub texture_name: u64,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -4933,17 +4941,17 @@ pub struct Unk0x7a1a2d27 {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Unk0x7ac70a36 {
-    pub default_texture_name: String,
-    pub unk_0x2af14c7: String,
-    pub unk_0x3d0587a: String,
-    pub unk_0x71089646: String,
-    pub unk_0x8df082e: String,
-    pub unk_0x8fb9b7b0: String,
-    pub unk_0x934eeacd: String,
-    pub unk_0xa521a0c5: String,
-    pub unk_0xb96a54f: String,
-    pub unk_0xee6f7154: String,
-    pub unk_0xf02aa447: String,
+    pub default_texture_name: u64,
+    pub unk_0x2af14c7: u64,
+    pub unk_0x3d0587a: u64,
+    pub unk_0x71089646: u64,
+    pub unk_0x8df082e: u64,
+    pub unk_0x8fb9b7b0: u64,
+    pub unk_0x934eeacd: u64,
+    pub unk_0xa521a0c5: u64,
+    pub unk_0xb96a54f: u64,
+    pub unk_0xee6f7154: u64,
+    pub unk_0xf02aa447: u64,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -5264,6 +5272,13 @@ pub struct Unk0xd8f395a4 {
     pub region: Unk0xb1c52813,
     pub transform: Mat4,
     pub unk_0xbbe68da1: bool,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct Unk0xfa42cdaf {
+    pub name: u32,
+    pub transform: Mat4,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -5594,7 +5609,7 @@ pub struct VfxAnimatedVector3fVariableData {
 #[serde(rename_all = "camelCase")]
 pub struct VfxAssetRemap {
     pub new_asset: Option<String>,
-    pub old_asset: Option<u32>,
+    pub old_asset: Option<u64>,
     pub r#type: Option<u32>,
 }
 
@@ -5918,7 +5933,7 @@ pub struct VfxMaterialDefinitionData {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct VfxMaterialOverrideDefinitionData {
-    pub base_texture: Option<String>,
+    pub base_texture: Option<u64>,
     pub gloss_texture: Option<String>,
     pub material: Option<u32>,
     pub override_blend_mode: Option<u32>,
@@ -5926,7 +5941,7 @@ pub struct VfxMaterialOverrideDefinitionData {
     pub sub_mesh_name: Option<String>,
     pub transition_sample: Option<f32>,
     pub transition_source: Option<u32>,
-    pub transition_texture: Option<String>,
+    pub transition_texture: Option<u64>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]

@@ -16,11 +16,11 @@ fn update_ui_bind(
     mut commands: Commands,
     camera_info: Single<(&Camera, &GlobalTransform), With<CameraState>>,
     q_global_transform: Query<&GlobalTransform>,
-    mut q_ui_bind: Query<(Entity, &mut Node, &UIBindOf, &UIBindData)>,
+    mut q_ui_bind: Query<(Entity, &mut Node, &mut Visibility, &UIBindOf, &UIBindData)>,
 ) {
     let (camera, camera_global_transform) = camera_info.into_inner();
 
-    for (entity, mut node, ui_bind_of, ui_bind_data) in q_ui_bind.iter_mut() {
+    for (entity, mut node, mut visibility, ui_bind_of, ui_bind_data) in q_ui_bind.iter_mut() {
         let Ok(bind_target) = q_global_transform.get(ui_bind_of.0) else {
             commands.entity(entity).despawn();
             continue;
@@ -30,10 +30,12 @@ fn update_ui_bind(
             camera_global_transform,
             bind_target.translation() + ui_bind_data.position,
         ) else {
+            // 目标在相机裁剪面之外，没有屏幕坐标
+            visibility.set_if_neq(Visibility::Hidden);
             continue;
         };
 
-        commands.entity(entity).insert(Visibility::Visible);
+        visibility.set_if_neq(Visibility::Visible);
 
         let viewport_position = viewport_position - ui_bind_data.anchor;
         node.left = Val::Px(viewport_position.x);

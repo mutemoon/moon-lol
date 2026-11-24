@@ -9,6 +9,14 @@ pub struct BinParser<'de> {
     pub input: &'de [u8],
 }
 
+/// 游戏数据中的已知例外：`StaticMaterialDef.name` 标记为 HASH，实际存 8 字节。
+/// 按 4 字节读取会让读取位置错位，导致后续字段解析失败。
+fn is_hash_field_holding_u64(owner: u32, hash: u32, vtype: BinType) -> bool {
+    const STATIC_MATERIAL_DEF: u32 = 0xFF9D_3409;
+    const STATIC_MATERIAL_DEF_NAME: u32 = 0x8D39_BDE6;
+    owner == STATIC_MATERIAL_DEF && hash == STATIC_MATERIAL_DEF_NAME && vtype == BinType::Hash
+}
+
 impl<'de> BinParser<'de> {
     pub fn from_bytes(input: &'de [u8]) -> Self {
         BinParser { input }
@@ -166,7 +174,11 @@ impl<'de> BinParser<'de> {
         Ok(class_hash == 0)
     }
 
-    pub fn read_fields(&mut self) -> BinDeserializerResult<HashMap<u32, (BinType, &'de [u8])>> {
+    /// 读取 `owner` 类的全部字段。
+    pub fn read_fields(
+        &mut self,
+        owner: u32,
+    ) -> BinDeserializerResult<HashMap<u32, (BinType, &'de [u8])>> {
         let field_count = self.read_u16().unwrap() as usize;
 
         let mut fields = HashMap::new();
@@ -176,7 +188,12 @@ impl<'de> BinParser<'de> {
 
             let vtype = self.read_type().unwrap();
 
-            fields.insert(hash, (vtype, self.skip_value(vtype).unwrap()));
+            let field = if is_hash_field_holding_u64(owner, hash, vtype) {
+                (BinType::U64, self.read_bytes(size_of::<u64>())?)
+            } else {
+                (vtype, self.skip_value(vtype).unwrap())
+            };
+            fields.insert(hash, field);
         }
 
         Ok(fields)

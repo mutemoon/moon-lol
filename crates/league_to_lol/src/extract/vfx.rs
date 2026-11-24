@@ -14,6 +14,8 @@ use lol_base_render::particle::{
     VfxTexture,
 };
 
+use crate::extract::utils::game_path_from_hash;
+
 fn convert_sampler_float(value: &ValueFloat, default: f32) -> Sampler<f32> {
     let constant_val = value.constant_value.unwrap_or(default);
     if let Some(ref dynamics) = value.dynamics {
@@ -337,8 +339,7 @@ fn convert_material_override(
             .map(|o| ConfigVfxMaterialOverride {
                 base_texture: o
                     .base_texture
-                    .as_deref()
-                    .filter(|p| !p.is_empty())
+                    .and_then(game_path_from_hash)
                     .map(|p| load_texture(p)),
             })
             .collect()

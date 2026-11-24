@@ -22,7 +22,7 @@ use crate::data::Data;
 use crate::extract::animation::animation_graph_to_config;
 use crate::extract::audio::export_audio_for_skin;
 use crate::extract::utils::{
-    extract_particle_texture, extract_texture, get_texture_path, write_to_file,
+    extract_particle_texture, extract_texture, game_path_from_hash, get_texture_path, write_to_file,
 };
 use crate::skin_gltf_export::export_skin_to_glb;
 use crate::utils::decode_texture_to_png;
@@ -74,8 +74,8 @@ pub fn extract_skin_for_champion(
         None => return,
     };
 
-    let texture_path = match &skin_mesh_properties.texture {
-        Some(path) => path.clone(),
+    let texture_path = match skin_mesh_properties.texture.and_then(game_path_from_hash) {
+        Some(path) => path,
         None => return,
     };
 
@@ -133,7 +133,7 @@ pub fn extract_skin_for_champion(
                     if let Some(samplers) = &static_material.sampler_values {
                         for sampler in samplers {
                             if &sampler.texture_name == "Diffuse_Texture" {
-                                if let Some(texture_path) = &sampler.texture_path {
+                                if let Some(texture_path) = sampler.texture_path.and_then(game_path_from_hash) {
                                     println!("[DEBUG] Found Diffuse_Texture for submesh '{}': path={}", submesh_name, texture_path);
                                     if let Ok(buf) = loader.get_wad_entry_buffer_by_path(texture_path) {
                                         if let Ok((_, texture)) = league_loader::texture::LeagueTexture::parse(&buf) {
@@ -160,7 +160,7 @@ pub fn extract_skin_for_champion(
                 } else {
                     println!("[DEBUG] StaticMaterialDef not found in skin_prop_group for submesh '{}': hash={}", submesh_name, material_hash);
                 }
-            } else if let Some(texture_path) = &override_item.texture {
+            } else if let Some(texture_path) = override_item.texture.and_then(game_path_from_hash) {
                 if let Ok(buf) = loader.get_wad_entry_buffer_by_path(texture_path) {
                     if let Ok((_, texture)) = league_loader::texture::LeagueTexture::parse(&buf) {
                         if let Some(png_data) = decode_texture_to_png(&texture) {
@@ -197,8 +197,8 @@ pub fn extract_skin_for_champion(
         .unwrap_or(0);
     let avatar_name = skin_data
         .icon_avatar
-        .as_ref()
-        .or(skin_data.icon_circle.as_ref());
+        .or(skin_data.icon_circle)
+        .and_then(game_path_from_hash);
 
     // 导出头像纹理
     let avatar = if let Some(name) = avatar_name {
@@ -353,10 +353,11 @@ fn load_animations_for_skin(
             continue;
         };
 
-        let anm_path = &atomic_clip.m_animation_resource_data.m_animation_file_path;
-        if anm_path.is_empty() {
+        let Some(anm_path) =
+            game_path_from_hash(atomic_clip.m_animation_resource_data.m_animation_file_path)
+        else {
             continue;
-        }
+        };
 
         // 加载 .anm 文件
         let Ok(anm_buf) = loader.get_wad_entry_buffer_by_path(anm_path) else {

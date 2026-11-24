@@ -57,7 +57,8 @@ where
     T: Asset + DeserializeOwned + Serialize + TypePath + Send + Sync + 'static,
 {
     fn load_and_add(&self, load_context: &mut LoadContext<'_>, entry: &EntryData) -> UntypedHandle {
-        match from_entry::<T>(entry) {
+        let class_hash = league_utils::type_name_to_hash(T::short_type_path());
+        match from_entry::<T>(class_hash, entry) {
             Ok(asset) => load_context
                 .add_labeled_asset(entry.hash.to_string(), asset)
                 .untyped(),
@@ -66,7 +67,8 @@ where
     }
 
     fn to_ron(&self, entry: &EntryData) -> Result<String, String> {
-        let asset = from_entry::<T>(entry).map_err(|e| e.to_string())?;
+        let class_hash = league_utils::type_name_to_hash(T::short_type_path());
+        let asset = from_entry::<T>(class_hash, entry).map_err(|e| e.to_string())?;
         ron::ser::to_string_pretty(&asset, ron::ser::PrettyConfig::default())
             .map_err(|e| e.to_string())
     }

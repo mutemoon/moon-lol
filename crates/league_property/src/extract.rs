@@ -592,7 +592,7 @@ fn extract_type_data(
             let Some(header) = parser.read_struct_header()? else {
                 return Ok(ClassData::Base("()".to_string()));
             };
-            let fields = parser.read_fields()?;
+            let fields = parser.read_fields(header.class_hash)?;
 
             let sub_class_map = extract_struct_class(header.class_hash, &fields).unwrap();
             merge_class_maps(class_map, sub_class_map);
@@ -613,7 +613,7 @@ fn extract_type_data(
 
                     class_hashes.insert(header.class_hash);
 
-                    let item_fields = item_parser.read_fields()?;
+                    let item_fields = item_parser.read_fields(header.class_hash)?;
                     let item_class_map =
                         extract_struct_class(header.class_hash, &item_fields).unwrap();
                     merge_class_maps(class_map, item_class_map);
@@ -653,7 +653,7 @@ fn extract_type_data(
 
                     class_hashes.insert(header.class_hash);
 
-                    let item_fields = parser.read_fields()?;
+                    let item_fields = parser.read_fields(header.class_hash)?;
                     let item_class_map = extract_struct_class(header.class_hash, &item_fields)?;
                     merge_class_maps(class_map, item_class_map);
                 }
@@ -744,7 +744,7 @@ pub fn get_hashes(paths: &[&str]) -> HashMap<u32, String> {
 
 pub fn extract_entry_class(class_hash: u32, entry: &EntryData) -> Result<ClassMap, Error> {
     let mut parser = BinParser::from_bytes(&entry.data);
-    let data_map = parser.read_fields().unwrap();
+    let data_map = parser.read_fields(class_hash).unwrap();
     let class_map = extract_struct_class(class_hash, &data_map).unwrap();
     Ok(class_map)
 }

@@ -1,10 +1,28 @@
+use std::collections::HashMap;
 use std::path::Path;
+use std::sync::OnceLock;
 
 use league_loader::game::LeagueLoader;
 use league_loader::prop_bin::LeagueWadLoaderTrait;
 use serde::Serialize;
 
 use crate::utils::{decode_texture_to_linear_png, decode_texture_to_png};
+
+static GAME_PATH_HASHES: OnceLock<HashMap<u64, String>> = OnceLock::new();
+
+/// 将 bin 中的路径哈希还原为游戏路径（依赖 CommunityDragon 的 `hashes.game.txt`）。
+pub fn game_path_from_hash(hash: u64) -> Option<&'static str> {
+    GAME_PATH_HASHES
+        .get_or_init(|| {
+            league_utils::load_game_path_hashes(Path::new("assets/CommunityDragon-Data/hashes/lol"))
+                .unwrap_or_else(|e| {
+                    eprintln!("[WARN] 无法加载游戏路径字典: {e}");
+                    HashMap::new()
+                })
+        })
+        .get(&hash)
+        .map(String::as_str)
+}
 
 /// 从 WAD 中提取纹理图片到 assets 目录
 /// 获取纹理的目标保存路径（处理后缀转换）

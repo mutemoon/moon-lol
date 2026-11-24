@@ -383,6 +383,7 @@ pub fn update_on_window_resized(
     }
 }
 
+/// 图片一律拉伸填满 LOL 配置的矩形，默认的 Auto 会保持贴图宽高比。
 fn init_child_image_node(
     commands: &mut Commands,
     asset_server: &AssetServer,
@@ -395,6 +396,7 @@ fn init_child_image_node(
             let Some(m_texture_uv) = atlas_data.m_texture_uv else {
                 commands.entity(child).insert(ImageNode {
                     image: asset_server.load(&atlas_data.m_texture_name),
+                    image_mode: NodeImageMode::Stretch,
                     ..default()
                 });
                 return;
@@ -407,12 +409,14 @@ fn init_child_image_node(
                     m_texture_uv.z,
                     m_texture_uv.w,
                 )),
+                image_mode: NodeImageMode::Stretch,
                 ..default()
             });
         }
         LOLEnumData::LooseUiTextureData(loose_data) => {
             commands.entity(child).insert(ImageNode {
                 image: asset_server.load(&loose_data.texture_name),
+                image_mode: NodeImageMode::Stretch,
                 ..default()
             });
         }

@@ -24,6 +24,7 @@ use league_utils::hash_bin;
 use rayon::prelude::*;
 use texpresso::Format;
 
+use crate::extract::utils::game_path_from_hash;
 use crate::extract::write_to_file;
 use crate::utils::Error;
 
@@ -62,14 +63,10 @@ pub fn export_mapgeo_to_gltf(
                         .iter()
                         .enumerate()
                         .find_map(|(idx, s)| {
-                            if (s.texture_name == "DiffuseTexture"
-                                || s.texture_name == "Diffuse_Texture")
-                                && s.texture_path.is_some()
-                            {
-                                Some((idx as u32, s.texture_path.as_ref().unwrap().clone()))
-                            } else {
-                                None
-                            }
+                            let is_diffuse = s.texture_name == "DiffuseTexture"
+                                || s.texture_name == "Diffuse_Texture";
+                            let path = game_path_from_hash(s.texture_path?)?;
+                            is_diffuse.then(|| (idx as u32, path.to_string()))
                         })
                 });
 
@@ -123,12 +120,14 @@ pub fn export_mapgeo_to_gltf(
                 if let Some(def) = material_defs.get(&material_hash) {
                     if let Some(samplers) = &def.sampler_values {
                         for sampler in samplers {
-                            if (sampler.texture_name == "DiffuseTexture"
-                                || sampler.texture_name == "Diffuse_Texture")
-                                && sampler.texture_path.is_some()
+                            if sampler.texture_name == "DiffuseTexture"
+                                || sampler.texture_name == "Diffuse_Texture"
                             {
-                                texture_paths
-                                    .insert(sampler.texture_path.as_ref().unwrap().clone());
+                                if let Some(path) =
+                                    sampler.texture_path.and_then(game_path_from_hash)
+                                {
+                                    texture_paths.insert(path.to_string());
+                                }
                             }
                         }
                     }
@@ -610,18 +609,14 @@ impl<'a> GltfBuilder<'a> {
         material_index
     }
 
-    fn find_diffuse_path(&self, material_hash: u32) -> Option<(u32, &String)> {
+    fn find_diffuse_path(&self, material_hash: u32) -> Option<(u32, String)> {
         let def = self.material_defs.get(&material_hash)?;
         let samplers = def.sampler_values.as_ref()?;
         samplers.iter().enumerate().find_map(|(idx, s)| {
             let is_diffuse =
                 s.texture_name == "DiffuseTexture" || s.texture_name == "Diffuse_Texture";
-            let path = s.texture_path.as_ref()?;
-            if is_diffuse {
-                Some((idx as u32, path))
-            } else {
-                None
-            }
+            let path = game_path_from_hash(s.texture_path?)?;
+            is_diffuse.then(|| (idx as u32, path.to_string()))
         })
     }
 

@@ -164,3 +164,30 @@ pub fn get_extension_by_bytes(bytes: &[u8]) -> &str {
 
     "unk"
 }
+
+/// 加载 CommunityDragon 游戏路径字典（`hashes.game.txt.*`，每行 `十六进制哈希 路径`），哈希 → 路径。
+pub fn load_game_path_hashes(dir: &std::path::Path) -> std::io::Result<HashMap<u64, String>> {
+    use std::io::BufRead;
+
+    let mut map = HashMap::new();
+    for entry in std::fs::read_dir(dir)? {
+        let path = entry?.path();
+        let is_shard = path
+            .file_name()
+            .and_then(|n| n.to_str())
+            .is_some_and(|n| n.starts_with("hashes.game.txt"));
+        if !is_shard {
+            continue;
+        }
+        for line in std::io::BufReader::new(std::fs::File::open(&path)?).lines() {
+            let line = line?;
+            let Some((hex, game_path)) = line.split_once(' ') else {
+                continue;
+            };
+            if let Ok(hash) = u64::from_str_radix(hex, 16) {
+                map.insert(hash, game_path.to_string());
+            }
+        }
+    }
+    Ok(map)
+}

@@ -42,7 +42,7 @@ use lol_base_render::ui::{
 };
 
 use crate::data::Data;
-use crate::extract::utils::write_to_file;
+use crate::extract::utils::{game_path_from_hash, write_to_file};
 
 /// UI 元素提取结果
 pub struct UiExtractResult {
@@ -107,59 +107,80 @@ pub fn extract_ui_data(
                 let scene_hash = league_utils::type_name_to_hash("UiSceneData");
 
                 for entry in prop_file.iter_entry_by_class(anim_hash) {
-                    if let Ok(anim_data) =
-                        league_property::from_entry::<UiElementEffectAnimationData>(entry)
-                    {
+                    if let Ok(anim_data) = league_property::from_entry::<UiElementEffectAnimationData>(
+                        league_utils::type_name_to_hash("UiElementEffectAnimationData"),
+                        entry,
+                    ) {
                         all_ui_animation_datas.push(anim_data);
                     }
                 }
                 for entry in prop_file.iter_entry_by_class(desaturate_hash) {
                     if let Ok(desaturate_data) =
-                        league_property::from_entry::<UiElementEffectDesaturateData>(entry)
+                        league_property::from_entry::<UiElementEffectDesaturateData>(
+                            league_utils::type_name_to_hash("UiElementEffectDesaturateData"),
+                            entry,
+                        )
                     {
                         all_ui_desaturate_datas.push(desaturate_data);
                     }
                 }
                 for entry in prop_file.iter_entry_by_class(instanced_hash) {
                     if let Ok(instanced_data) =
-                        league_property::from_entry::<UiElementEffectInstancedData>(entry)
+                        league_property::from_entry::<UiElementEffectInstancedData>(
+                            league_utils::type_name_to_hash("UiElementEffectInstancedData"),
+                            entry,
+                        )
                     {
                         all_ui_instanced_datas.push(instanced_data);
                     }
                 }
                 for entry in prop_file.iter_entry_by_class(fill_percentage_hash) {
                     if let Ok(fill_percentage_data) =
-                        league_property::from_entry::<UiElementEffectFillPercentageData>(entry)
+                        league_property::from_entry::<UiElementEffectFillPercentageData>(
+                            league_utils::type_name_to_hash("UiElementEffectFillPercentageData"),
+                            entry,
+                        )
                     {
                         all_ui_fill_percentage_datas.push(fill_percentage_data);
                     }
                 }
                 for entry in prop_file.iter_entry_by_class(button_hash) {
-                    if let Ok(button_data) =
-                        league_property::from_entry::<UiElementGroupButtonData>(entry)
-                    {
+                    if let Ok(button_data) = league_property::from_entry::<UiElementGroupButtonData>(
+                        league_utils::type_name_to_hash("UiElementGroupButtonData"),
+                        entry,
+                    ) {
                         all_ui_button_datas.push(button_data);
                     }
                 }
                 for entry in prop_file.iter_entry_by_class(icon_hash) {
-                    if let Ok(ui_data) = league_property::from_entry::<UiElementIconData>(entry) {
+                    if let Ok(ui_data) = league_property::from_entry::<UiElementIconData>(
+                        league_utils::type_name_to_hash("UiElementIconData"),
+                        entry,
+                    ) {
                         all_ui_element_datas.push(ui_data);
                     }
                 }
                 for entry in prop_file.iter_entry_by_class(region_hash) {
-                    if let Ok(region_data) =
-                        league_property::from_entry::<UiElementRegionData>(entry)
-                    {
+                    if let Ok(region_data) = league_property::from_entry::<UiElementRegionData>(
+                        league_utils::type_name_to_hash("UiElementRegionData"),
+                        entry,
+                    ) {
                         all_ui_region_datas.push(region_data);
                     }
                 }
                 for entry in prop_file.iter_entry_by_class(text_hash) {
-                    if let Ok(text_data) = league_property::from_entry::<UiElementTextData>(entry) {
+                    if let Ok(text_data) = league_property::from_entry::<UiElementTextData>(
+                        league_utils::type_name_to_hash("UiElementTextData"),
+                        entry,
+                    ) {
                         all_ui_text_datas.push(text_data);
                     }
                 }
                 for entry in prop_file.iter_entry_by_class(scene_hash) {
-                    if let Ok(scene_data) = league_property::from_entry::<UiSceneData>(entry) {
+                    if let Ok(scene_data) = league_property::from_entry::<UiSceneData>(
+                        league_utils::type_name_to_hash("UiSceneData"),
+                        entry,
+                    ) {
                         let hash = hash_bin(&scene_data.name);
                         all_scene_datas.insert(hash, scene_data);
                     }
@@ -214,64 +235,9 @@ pub fn extract_ui_data(
     for ui_data in all_ui_element_datas {
         // 收集原始纹理路径用于提取
         if let Some(texture_data) = &ui_data.texture_data {
-            match texture_data {
-                EnumData::AtlasData(atlas) => {
-                    if !atlas.m_texture_name.is_empty()
-                        && !all_texture_names.contains(&atlas.m_texture_name)
-                    {
-                        all_texture_names.push(atlas.m_texture_name.clone());
-                    }
-                }
-                EnumData::AtlasData3SliceH(atlas) => {
-                    if !atlas.m_texture_name.is_empty()
-                        && !all_texture_names.contains(&atlas.m_texture_name)
-                    {
-                        all_texture_names.push(atlas.m_texture_name.clone());
-                    }
-                }
-                EnumData::AtlasData3SliceV(atlas) => {
-                    if !atlas.m_texture_name.is_empty()
-                        && !all_texture_names.contains(&atlas.m_texture_name)
-                    {
-                        all_texture_names.push(atlas.m_texture_name.clone());
-                    }
-                }
-                EnumData::AtlasData9Slice(atlas) => {
-                    if !atlas.m_texture_name.is_empty()
-                        && !all_texture_names.contains(&atlas.m_texture_name)
-                    {
-                        all_texture_names.push(atlas.m_texture_name.clone());
-                    }
-                }
-                EnumData::LooseUiTextureData(loose) => {
-                    if !loose.texture_name.is_empty()
-                        && !all_texture_names.contains(&loose.texture_name)
-                    {
-                        all_texture_names.push(loose.texture_name.clone());
-                    }
-                }
-                EnumData::LooseUiTextureData3SliceH(loose) => {
-                    if !loose.texture_name.is_empty()
-                        && !all_texture_names.contains(&loose.texture_name)
-                    {
-                        all_texture_names.push(loose.texture_name.clone());
-                    }
-                }
-                EnumData::LooseUiTextureData3SliceV(loose) => {
-                    if !loose.texture_name.is_empty()
-                        && !all_texture_names.contains(&loose.texture_name)
-                    {
-                        all_texture_names.push(loose.texture_name.clone());
-                    }
-                }
-                EnumData::LooseUiTextureData9Slice(loose) => {
-                    if !loose.texture_name.is_empty()
-                        && !all_texture_names.contains(&loose.texture_name)
-                    {
-                        all_texture_names.push(loose.texture_name.clone());
-                    }
-                }
-                _ => panic!("UI资源类型 {:?} 渲染器暂不支持", ui_data.texture_data),
+            match ui_texture_hash(texture_data) {
+                Some(hash) => push_texture_name(&mut all_texture_names, hash),
+                None => panic!("UI资源类型 {:?} 渲染器暂不支持", ui_data.texture_data),
             }
         }
 
@@ -281,64 +247,9 @@ pub fn extract_ui_data(
 
     for anim_data in all_ui_animation_datas {
         // 收集原始纹理路径用于提取
-        match &anim_data.texture_data {
-            EnumData::AtlasData(atlas) => {
-                if !atlas.m_texture_name.is_empty()
-                    && !all_texture_names.contains(&atlas.m_texture_name)
-                {
-                    all_texture_names.push(atlas.m_texture_name.clone());
-                }
-            }
-            EnumData::AtlasData3SliceH(atlas) => {
-                if !atlas.m_texture_name.is_empty()
-                    && !all_texture_names.contains(&atlas.m_texture_name)
-                {
-                    all_texture_names.push(atlas.m_texture_name.clone());
-                }
-            }
-            EnumData::AtlasData3SliceV(atlas) => {
-                if !atlas.m_texture_name.is_empty()
-                    && !all_texture_names.contains(&atlas.m_texture_name)
-                {
-                    all_texture_names.push(atlas.m_texture_name.clone());
-                }
-            }
-            EnumData::AtlasData9Slice(atlas) => {
-                if !atlas.m_texture_name.is_empty()
-                    && !all_texture_names.contains(&atlas.m_texture_name)
-                {
-                    all_texture_names.push(atlas.m_texture_name.clone());
-                }
-            }
-            EnumData::LooseUiTextureData(loose) => {
-                if !loose.texture_name.is_empty()
-                    && !all_texture_names.contains(&loose.texture_name)
-                {
-                    all_texture_names.push(loose.texture_name.clone());
-                }
-            }
-            EnumData::LooseUiTextureData3SliceH(loose) => {
-                if !loose.texture_name.is_empty()
-                    && !all_texture_names.contains(&loose.texture_name)
-                {
-                    all_texture_names.push(loose.texture_name.clone());
-                }
-            }
-            EnumData::LooseUiTextureData3SliceV(loose) => {
-                if !loose.texture_name.is_empty()
-                    && !all_texture_names.contains(&loose.texture_name)
-                {
-                    all_texture_names.push(loose.texture_name.clone());
-                }
-            }
-            EnumData::LooseUiTextureData9Slice(loose) => {
-                if !loose.texture_name.is_empty()
-                    && !all_texture_names.contains(&loose.texture_name)
-                {
-                    all_texture_names.push(loose.texture_name.clone());
-                }
-            }
-            _ => panic!("UI资源类型 {:?} 渲染器暂不支持", anim_data.texture_data),
+        match ui_texture_hash(&anim_data.texture_data) {
+            Some(hash) => push_texture_name(&mut all_texture_names, hash),
+            None => panic!("UI资源类型 {:?} 渲染器暂不支持", anim_data.texture_data),
         }
 
         let lol_anim = convert_ui_animation_data(&anim_data);
@@ -348,64 +259,9 @@ pub fn extract_ui_data(
     for desaturate_data in all_ui_desaturate_datas {
         // 收集原始纹理路径用于提取
         if let Some(texture_data) = &desaturate_data.texture_data {
-            match texture_data {
-                EnumData::AtlasData(atlas) => {
-                    if !atlas.m_texture_name.is_empty()
-                        && !all_texture_names.contains(&atlas.m_texture_name)
-                    {
-                        all_texture_names.push(atlas.m_texture_name.clone());
-                    }
-                }
-                EnumData::AtlasData3SliceH(atlas) => {
-                    if !atlas.m_texture_name.is_empty()
-                        && !all_texture_names.contains(&atlas.m_texture_name)
-                    {
-                        all_texture_names.push(atlas.m_texture_name.clone());
-                    }
-                }
-                EnumData::AtlasData3SliceV(atlas) => {
-                    if !atlas.m_texture_name.is_empty()
-                        && !all_texture_names.contains(&atlas.m_texture_name)
-                    {
-                        all_texture_names.push(atlas.m_texture_name.clone());
-                    }
-                }
-                EnumData::AtlasData9Slice(atlas) => {
-                    if !atlas.m_texture_name.is_empty()
-                        && !all_texture_names.contains(&atlas.m_texture_name)
-                    {
-                        all_texture_names.push(atlas.m_texture_name.clone());
-                    }
-                }
-                EnumData::LooseUiTextureData(loose) => {
-                    if !loose.texture_name.is_empty()
-                        && !all_texture_names.contains(&loose.texture_name)
-                    {
-                        all_texture_names.push(loose.texture_name.clone());
-                    }
-                }
-                EnumData::LooseUiTextureData3SliceH(loose) => {
-                    if !loose.texture_name.is_empty()
-                        && !all_texture_names.contains(&loose.texture_name)
-                    {
-                        all_texture_names.push(loose.texture_name.clone());
-                    }
-                }
-                EnumData::LooseUiTextureData3SliceV(loose) => {
-                    if !loose.texture_name.is_empty()
-                        && !all_texture_names.contains(&loose.texture_name)
-                    {
-                        all_texture_names.push(loose.texture_name.clone());
-                    }
-                }
-                EnumData::LooseUiTextureData9Slice(loose) => {
-                    if !loose.texture_name.is_empty()
-                        && !all_texture_names.contains(&loose.texture_name)
-                    {
-                        all_texture_names.push(loose.texture_name.clone());
-                    }
-                }
-                _ => panic!(
+            match ui_texture_hash(texture_data) {
+                Some(hash) => push_texture_name(&mut all_texture_names, hash),
+                None => panic!(
                     "UI资源类型 {:?} 渲染器暂不支持",
                     desaturate_data.texture_data
                 ),
@@ -419,11 +275,7 @@ pub fn extract_ui_data(
     for instanced_data in all_ui_instanced_datas {
         // 收集原始纹理路径用于提取
         if let Some(atlas) = &instanced_data.texture_data {
-            if !atlas.m_texture_name.is_empty()
-                && !all_texture_names.contains(&atlas.m_texture_name)
-            {
-                all_texture_names.push(atlas.m_texture_name.clone());
-            }
+            push_texture_name(&mut all_texture_names, atlas.m_texture_name);
         }
 
         let lol_instanced = convert_ui_instanced_data(&instanced_data);
@@ -433,9 +285,7 @@ pub fn extract_ui_data(
     for fill_percentage_data in all_ui_fill_percentage_datas {
         // 收集原始纹理路径用于提取
         let atlas = &fill_percentage_data.texture_data;
-        if !atlas.m_texture_name.is_empty() && !all_texture_names.contains(&atlas.m_texture_name) {
-            all_texture_names.push(atlas.m_texture_name.clone());
-        }
+        push_texture_name(&mut all_texture_names, atlas.m_texture_name);
 
         let lol_fill_percentage = convert_ui_fill_percentage_data(&fill_percentage_data);
         assets.add_fill_percentage(lol_fill_percentage);
@@ -562,7 +412,7 @@ fn convert_ui_fill_percentage_data(
 
 fn convert_atlas_data(atlas: &league_core::extract::AtlasData) -> LOLAtlasData {
     LOLAtlasData {
-        m_texture_name: crate::extract::utils::get_texture_path(&atlas.m_texture_name),
+        m_texture_name: texture_path(atlas.m_texture_name),
         m_texture_uv: atlas.m_texture_uv,
     }
 }
@@ -700,48 +550,48 @@ fn convert_anchor(anchor: &league_core::extract::EnumAnchor) -> LOLEnumAnchor {
 fn convert_texture_data(data: &EnumData) -> Option<LOLEnumData> {
     match data {
         EnumData::AtlasData(atlas) => Some(LOLEnumData::AtlasData(LOLAtlasData {
-            m_texture_name: crate::extract::utils::get_texture_path(&atlas.m_texture_name),
+            m_texture_name: texture_path(atlas.m_texture_name),
             m_texture_uv: atlas.m_texture_uv,
         })),
         EnumData::AtlasData3SliceH(atlas) => {
             Some(LOLEnumData::AtlasData3SliceH(LOLAtlasData3SliceH {
-                m_texture_name: crate::extract::utils::get_texture_path(&atlas.m_texture_name),
+                m_texture_name: texture_path(atlas.m_texture_name),
                 texture_us: atlas.texture_us,
                 texture_vs: atlas.texture_vs,
             }))
         }
         EnumData::AtlasData3SliceV(atlas) => {
             Some(LOLEnumData::AtlasData3SliceV(LOLAtlasData3SliceV {
-                m_texture_name: crate::extract::utils::get_texture_path(&atlas.m_texture_name),
+                m_texture_name: texture_path(atlas.m_texture_name),
                 texture_us: atlas.texture_us,
                 texture_vs: atlas.texture_vs,
             }))
         }
         EnumData::AtlasData9Slice(atlas) => {
             Some(LOLEnumData::AtlasData9Slice(LOLAtlasData9Slice {
-                m_texture_name: crate::extract::utils::get_texture_path(&atlas.m_texture_name),
+                m_texture_name: texture_path(atlas.m_texture_name),
                 texture_us: atlas.texture_us,
                 texture_vs: atlas.texture_vs,
             }))
         }
         EnumData::LooseUiTextureData(loose) => {
             Some(LOLEnumData::LooseUiTextureData(LOLLooseUiTextureData {
-                texture_name: crate::extract::utils::get_texture_path(&loose.texture_name),
+                texture_name: texture_path(loose.texture_name),
             }))
         }
         EnumData::LooseUiTextureData3SliceH(loose) => Some(LOLEnumData::LooseUiTextureData3SliceH(
             LOLLooseUiTextureData3SliceH {
-                texture_name: crate::extract::utils::get_texture_path(&loose.texture_name),
+                texture_name: texture_path(loose.texture_name),
             },
         )),
         EnumData::LooseUiTextureData3SliceV(loose) => Some(LOLEnumData::LooseUiTextureData3SliceV(
             LOLLooseUiTextureData3SliceV {
-                texture_name: crate::extract::utils::get_texture_path(&loose.texture_name),
+                texture_name: texture_path(loose.texture_name),
             },
         )),
         EnumData::LooseUiTextureData9Slice(loose) => Some(LOLEnumData::LooseUiTextureData9Slice(
             LOLLooseUiTextureData9Slice {
-                texture_name: crate::extract::utils::get_texture_path(&loose.texture_name),
+                texture_name: texture_path(loose.texture_name),
             },
         )),
         EnumData::Unk0x5eaead1a => Some(LOLEnumData::Unk0x5eaead1a),
@@ -807,7 +657,10 @@ fn convert_hud_shop_button(data: &league_core::extract::HudShopButton) -> LOLHud
         unk_0x40aa9d58: data.unk_0x40aa9d58,
         unk_0x697f8b6b: data.unk_0x697f8b6b,
         unk_0x778e26c6: data.unk_0x778e26c6,
-        unk_0x7dffe581: data.unk_0x7dffe581.clone(),
+        unk_0x7dffe581: data
+            .unk_0x7dffe581
+            .and_then(game_path_from_hash)
+            .map(String::from),
         unk_0x8031b7a0: data.unk_0x8031b7a0,
         unk_0xb77375ae: data.unk_0xb77375ae,
     }
@@ -1545,4 +1398,39 @@ fn convert_enum_ui_metric(metric: &EnumUiMetric) -> LOLEnumUiMetric {
             unk_0x3a568777: u.unk_0x3a568777.clone(),
         }),
     }
+}
+
+/// UI 纹理数据引用的贴图路径哈希；不含贴图的类型返回 None。
+fn ui_texture_hash(data: &EnumData) -> Option<u64> {
+    match data {
+        EnumData::AtlasData(atlas) => Some(atlas.m_texture_name),
+        EnumData::AtlasData3SliceH(atlas) => Some(atlas.m_texture_name),
+        EnumData::AtlasData3SliceV(atlas) => Some(atlas.m_texture_name),
+        EnumData::AtlasData9Slice(atlas) => Some(atlas.m_texture_name),
+        EnumData::LooseUiTextureData(loose) => Some(loose.texture_name),
+        EnumData::LooseUiTextureData3SliceH(loose) => Some(loose.texture_name),
+        EnumData::LooseUiTextureData3SliceV(loose) => Some(loose.texture_name),
+        EnumData::LooseUiTextureData9Slice(loose) => Some(loose.texture_name),
+        _ => None,
+    }
+}
+
+/// 把贴图哈希还原为路径并去重加入列表；哈希为 0 或字典缺失时跳过。
+fn push_texture_name(names: &mut Vec<String>, hash: u64) {
+    if hash == 0 {
+        return;
+    }
+    let Some(name) = game_path_from_hash(hash) else {
+        return;
+    };
+    if !names.iter().any(|n| n == name) {
+        names.push(name.to_string());
+    }
+}
+
+/// 贴图哈希还原为导出用的路径（字典缺失或为 0 时为空串）。
+fn texture_path(hash: u64) -> String {
+    game_path_from_hash(hash)
+        .map(crate::extract::utils::get_texture_path)
+        .unwrap_or_default()
 }

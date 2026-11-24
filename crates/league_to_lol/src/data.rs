@@ -65,8 +65,9 @@ impl Data for PropFile {
         &self,
         hash: impl Into<HashKey<T>>,
     ) -> Option<T> {
+        let class_hash = type_name_to_hash(T::short_type_path());
         self.get_entry(hash.into().0)
-            .and_then(|v| from_entry::<T>(v).ok())
+            .and_then(|v| from_entry::<T>(class_hash, v).ok())
     }
 
     fn get_by_class<T: TypePath + DeserializeOwned>(&self) -> Option<T> {
@@ -74,7 +75,7 @@ impl Data for PropFile {
         let class_hash = type_name_to_hash(type_name);
         for (bin_class_hash, entry) in self.iter_class_hash_and_entry() {
             if bin_class_hash == class_hash {
-                return from_entry::<T>(entry).ok();
+                return from_entry::<T>(class_hash, entry).ok();
             }
         }
         None
@@ -85,7 +86,7 @@ impl Data for PropFile {
         let class_hash = type_name_to_hash(type_name);
         self.iter_class_hash_and_entry()
             .filter(|(bin_class_hash, _)| *bin_class_hash == class_hash)
-            .filter_map(|(_, entry)| from_entry::<T>(entry).ok())
+            .filter_map(|(_, entry)| from_entry::<T>(class_hash, entry).ok())
             .collect()
     }
 
@@ -94,7 +95,11 @@ impl Data for PropFile {
         let class_hash = type_name_to_hash(type_name);
         self.iter_class_hash_and_entry()
             .filter(|(bin_class_hash, _)| *bin_class_hash == class_hash)
-            .filter_map(|(_, entry)| from_entry::<T>(entry).ok().map(|v| (entry.hash, v)))
+            .filter_map(|(_, entry)| {
+                from_entry::<T>(class_hash, entry)
+                    .ok()
+                    .map(|v| (entry.hash, v))
+            })
             .collect()
     }
 }

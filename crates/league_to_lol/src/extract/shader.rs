@@ -369,7 +369,10 @@ pub fn extract_shared_render_data(game_path: &str) -> SharedRenderData {
 
     let sampler_hash = league_utils::type_name_to_hash("X3DSharedSamplerDef");
     for entry in prop.iter_entry_by_class(sampler_hash) {
-        if let Ok(def) = league_property::from_entry::<X3dSharedSamplerDef>(entry) {
+        if let Ok(def) = league_property::from_entry::<X3dSharedSamplerDef>(
+            league_utils::type_name_to_hash("X3dSharedSamplerDef"),
+            entry,
+        ) {
             data.samplers.insert(
                 def.name.clone(),
                 SharedSamplerDef {
@@ -387,7 +390,10 @@ pub fn extract_shared_render_data(game_path: &str) -> SharedRenderData {
 
     let data_hash = league_utils::type_name_to_hash("X3DSharedData");
     for entry in prop.iter_entry_by_class(data_hash) {
-        if let Ok(shared) = league_property::from_entry::<X3dSharedData>(entry) {
+        if let Ok(shared) = league_property::from_entry::<X3dSharedData>(
+            league_utils::type_name_to_hash("X3dSharedData"),
+            entry,
+        ) {
             for tex in &shared.textures {
                 data.textures.insert(
                     tex.name.clone(),
