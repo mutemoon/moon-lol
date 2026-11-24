@@ -7,7 +7,7 @@ use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
 };
 use lol_core::action::dash::{ActionDash, DashMoveType};
-use lol_core::action::knockback::{CommandKnockback, DisplaceDirection};
+use lol_core::action::knockback::{CommandKnockback, DisplaceDirection, Knockup};
 use lol_core::base::buff::BuffOf;
 use lol_core::buffs::cc_debuffs::DebuffSlow;
 use lol_core::damage::{DamageType, EventDamageCreate};
@@ -327,7 +327,7 @@ fn on_leesin_damage_hit(
                 .with_related::<BuffOf>(DebuffSlow::new(0.6, 2.0));
         }
         3 => {
-            // R命中：击退
+            // R命中：击退 + 击飞
             commands
                 .entity(target_entity)
                 .trigger(|e| CommandKnockback {
@@ -335,7 +335,7 @@ fn on_leesin_damage_hit(
                     source: leesin_entity,
                     distance: 200.0,
                     speed: 1200.0,
-                    duration: Some(1.0),
+                    knockup: Some(Knockup::new(120.0)),
                     direction: DisplaceDirection::Away,
                 });
 

@@ -5,20 +5,22 @@ use lol_core::action::dash::{ActionDash, DashMoveType};
 use lol_core::action::displace::{
     ActionDisplace, DisplaceCenter, DisplaceEffect, DisplaceMotion, DisplaceTargetSelection,
 };
+use lol_core::action::knockback::{CommandKnockback, DisplaceDirection, Knockup};
 use lol_core::attack::CommandAttackReset;
 use lol_core::damage::{Damage, DamageType};
 use lol_core::missile::CommandAttachedFieldCreate;
 use lol_core::movement::{EventMovementEnd, MovementSource};
 use lol_core::skill::{EventSkillCast, Skill, SkillRecastWindow, SkillSlot, get_skill_value};
+use lol_core::team::Team;
 
 use crate::riven::Riven;
 use crate::riven::buffs::RivenQ3Pending;
 
 const RIVEN_Q_RECAST_WINDOW: f32 = 4.0;
-const RIVEN_Q3_KNOCKBACK_DISTANCE: f32 = 75.0;
-const RIVEN_Q3_KNOCKBACK_RADIUS: f32 = 250.0;
-const RIVEN_Q3_KNOCKUP_DURATION: f32 = 0.75;
-const RIVEN_Q3_KNOCKBACK_SPEED: f32 = 1200.0;
+const RIVEN_Q3_KNOCKBACK_DISTANCE: f32 = 120.0;
+const RIVEN_Q3_KNOCKBACK_SPEED: f32 = 900.0;
+const RIVEN_Q3_KNOCKUP_HEIGHT: f32 = 150.0;
+const RIVEN_Q3_RADIUS: f32 = 250.0;
 const RIVEN_Q_FIELD_DURATION: f32 = 0.5;
 const RIVEN_Q_RADII: [f32; 3] = [100.0, 100.0, 100.0];
 
@@ -134,11 +136,18 @@ pub fn on_riven_q(
     }
 }
 
-/// 锐雯 Q3 位移结束后，以落点为圆心造成范围伤害 + 震退 + 击飞
+/// 锐雯 Q3 位移结束后，以落点为圆心结算：
+/// 范围伤害（`ActionDisplace`，无位移）→ 震退 + 击飞（`CommandKnockback`）。
+///
+/// 震退是平滑的直线强制位移（不进寻路，故不会一帧瞬移），目标沿背离锐雯的方向
+/// 滑出 [`RIVEN_Q3_KNOCKBACK_DISTANCE`]；击飞以滞空控制呈现，期间目标无法施法。
 pub fn on_riven_dash_end(
     trigger: On<EventMovementEnd>,
     mut commands: Commands,
     q_pending: Query<&RivenQ3Pending>,
+    q_team: Query<&Team>,
+    q_transform: Query<&Transform>,
+    q_targets: Query<(Entity, &Team, &Transform), Without<Riven>>,
 ) {
     if trigger.event().source != MovementSource::Dash {
         return;
@@ -146,6 +155,9 @@ pub fn on_riven_dash_end(
 
     let entity = trigger.event_target();
     let Ok(pending) = q_pending.get(entity) else {
+        return;
+    };
+    let (Ok(team), Ok(transform)) = (q_team.get(entity), q_transform.get(entity)) else {
         return;
     };
 
@@ -161,29 +173,36 @@ pub fn on_riven_dash_end(
         key: "RivenQ3_OnCast".to_string(),
     });
 
-    // 使用统一位移体系：Circle + PushAway + Knockup + Damage
     commands.trigger(ActionDisplace {
         entity,
         targets: DisplaceTargetSelection::Circle {
-            radius: RIVEN_Q3_KNOCKBACK_RADIUS,
+            radius: RIVEN_Q3_RADIUS,
             center: DisplaceCenter::Caster,
         },
-        motion: DisplaceMotion::PushAway {
-            distance: RIVEN_Q3_KNOCKBACK_DISTANCE,
-            speed: RIVEN_Q3_KNOCKBACK_SPEED,
-        },
-        effects: vec![
-            DisplaceEffect::Knockup {
-                duration: RIVEN_Q3_KNOCKUP_DURATION,
-            },
-            DisplaceEffect::Damage {
-                amount: pending.damage,
-                damage_type: DamageType::Physical,
-                tag: None,
-            },
-        ],
+        motion: DisplaceMotion::None,
+        effects: vec![DisplaceEffect::Damage {
+            amount: pending.damage,
+            damage_type: DamageType::Physical,
+            tag: None,
+        }],
         cone_hit_policy: None,
     });
+
+    let landed_at = transform.translation;
+    for (target, target_team, target_transform) in q_targets.iter() {
+        if target_team == team || target_transform.translation.distance(landed_at) > RIVEN_Q3_RADIUS
+        {
+            continue;
+        }
+        commands.entity(target).trigger(|e| CommandKnockback {
+            entity: e,
+            source: entity,
+            distance: RIVEN_Q3_KNOCKBACK_DISTANCE,
+            speed: RIVEN_Q3_KNOCKBACK_SPEED,
+            knockup: Some(Knockup::new(RIVEN_Q3_KNOCKUP_HEIGHT)),
+            direction: DisplaceDirection::Away,
+        });
+    }
 
     commands.entity(entity).remove::<RivenQ3Pending>();
 }

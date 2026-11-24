@@ -117,6 +117,69 @@ fn riven_q3_knocks_back_enemies() {
     h.finish();
 }
 
+/// Q3 落地同时击飞：落点圆内敌人获得滞空控制（DebuffKnockup），期间无法施法。
+#[test]
+fn riven_q3_knocks_enemies_into_the_air() {
+    use lol_core::base::buff::Buffs;
+    use lol_core::buffs::cc_debuffs::DebuffKnockup;
+    use lol_core::movement::CastBlock;
+
+    let mut h = build_headless("riven_q3_knockup");
+    let enemy = h.add_enemy(Vec3::new(220.0, 0.0, 0.0));
+
+    h.cast_skill(0, Vec2::new(100.0, 0.0)).advance(0.4);
+    h.cast_skill(0, Vec2::new(100.0, 0.0)).advance(0.4);
+    // Q3 位移 250unit @ 1000speed = 0.25s，落地即结算击退 + 击飞
+    h.cast_skill(0, Vec2::new(100.0, 0.0)).advance(0.3);
+
+    let buffs = h.app.world().get::<Buffs>(enemy).expect("敌人应有 Buffs");
+    let buff_entities: Vec<_> = buffs.iter().copied().collect();
+    assert!(
+        buff_entities
+            .iter()
+            .any(|b| h.app.world().get::<DebuffKnockup>(*b).is_some()),
+        "Q3 应使敌人进入击飞状态"
+    );
+    assert!(
+        h.app.world().get::<CastBlock>(enemy).is_some(),
+        "击飞期间敌人应无法施法"
+    );
+
+    h.finish();
+}
+
+/// Q3 的震退必须是平滑位移：不能一帧之内把敌人搬到终点。
+#[test]
+fn riven_q3_knockback_is_smooth_not_teleport() {
+    let mut h = build_headless("riven_q3_smooth");
+    let enemy = h.add_enemy(Vec3::new(220.0, 0.0, 0.0));
+
+    h.cast_skill(0, Vec2::new(100.0, 0.0)).advance(0.4);
+    h.cast_skill(0, Vec2::new(100.0, 0.0)).advance(0.4);
+    h.cast_skill(0, Vec2::new(100.0, 0.0));
+
+    let mut xs = vec![h.position(enemy).x];
+    for _ in 0..30 {
+        h.advance(1.0 / 30.0);
+        xs.push(h.position(enemy).x);
+    }
+
+    let max_step = xs
+        .windows(2)
+        .map(|w| (w[1] - w[0]).abs())
+        .fold(0.0_f32, f32::max);
+    assert!(
+        max_step < 60.0,
+        "震退应平滑推进（单帧位移 {max_step}，轨迹 {xs:?}）"
+    );
+    assert!(
+        xs.iter().any(|x| (100.0..190.0).contains(x)),
+        "震退过程中应有中间帧处于途中位置（轨迹 {xs:?}）"
+    );
+
+    h.finish();
+}
+
 #[test]
 fn riven_q_field_damages_enemy_once() {
     let mut h = build_headless("riven_q_field_damage");

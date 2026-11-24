@@ -170,7 +170,10 @@ fn select_targets(
                     .get(entity)
                     .map(|t| t.translation)
                     .unwrap_or_default(),
-                DisplaceCenter::Point(p) => Vec3::new(p.x, 0.0, p.y),
+                DisplaceCenter::Point(p) => {
+                    let height = q_transform.get(entity).map_or(0.0, |t| t.translation.y);
+                    Vec3::new(p.x, height, p.y)
+                }
             };
             q_targets
                 .iter()
@@ -203,8 +206,10 @@ fn select_targets(
 
 /// 应用单个位移效果
 ///
-/// 使用 `CommandMovement` 直接控制位移，不通过 `CommandKnockback`，
-/// 因为后者会自动施加 `DebuffKnockup`，而 CC 效果由 `apply_effect` 统一管理。
+/// 强制位移一律走 [`MovementWay::Path`]（直线、按速度逐帧推进），不走 `Pathfind`：
+/// 被击退的目标不该绕障寻路，更不该被导航网格卡住后瞬移。
+/// 不使用 `CommandKnockback` 是因为后者会自动施加 `DebuffKnockup`，
+/// 而 CC 效果由 `apply_effect` 统一管理。
 fn apply_motion(
     commands: &mut Commands,
     target: Entity,
@@ -212,78 +217,49 @@ fn apply_motion(
     motion: &DisplaceMotion,
     q_transform: &Query<&Transform>,
 ) {
-    match motion {
-        DisplaceMotion::PullToward { distance, speed } => {
-            let Ok(target_transform) = q_transform.get(target) else {
-                return;
-            };
-            let Ok(source_transform) = q_transform.get(source) else {
-                return;
-            };
-            let diff = source_transform.translation.xz() - target_transform.translation.xz();
-            let direction = diff.normalize_or_zero();
-            // 钳制距离：不越过 source
-            let clamped = distance.min(diff.length());
-            let dest_xz = target_transform.translation.xz() + direction * clamped;
-            let destination = Vec3::new(dest_xz.x, target_transform.translation.y, dest_xz.y);
-            commands.entity(target).trigger(|e| CommandMovement {
-                entity: e,
-                priority: 100,
-                action: MovementAction::Start {
-                    way: MovementWay::Path(vec![destination]),
-                    speed: Some(*speed),
-                    source: MovementSource::Knockback,
-                },
-            });
+    let (Ok(target_transform), Ok(source_transform)) =
+        (q_transform.get(target), q_transform.get(source))
+    else {
+        return;
+    };
+    let start = target_transform.translation;
+    let target_xz = start.xz();
+    let source_xz = source_transform.translation.xz();
+
+    let destination = match motion {
+        // 钳制距离：不越过 source
+        DisplaceMotion::PullToward { distance, .. } => {
+            let diff = source_xz - target_xz;
+            target_xz + diff.normalize_or_zero() * distance.min(diff.length())
         }
-        DisplaceMotion::PushAway { distance, speed } => {
-            let Ok(target_transform) = q_transform.get(target) else {
-                return;
-            };
-            let Ok(source_transform) = q_transform.get(source) else {
-                return;
-            };
-            let diff = target_transform.translation.xz() - source_transform.translation.xz();
-            let direction = diff.normalize_or_zero();
-            let dest_xz = target_transform.translation.xz() + direction * distance;
-            let destination = Vec3::new(dest_xz.x, target_transform.translation.y, dest_xz.y);
-            commands.entity(target).trigger(|e| CommandMovement {
-                entity: e,
-                priority: 100,
-                action: MovementAction::Start {
-                    way: MovementWay::Path(vec![destination]),
-                    speed: Some(*speed),
-                    source: MovementSource::Knockback,
-                },
-            });
+        DisplaceMotion::PushAway { distance, .. } => {
+            let diff = target_xz - source_xz;
+            target_xz + diff.normalize_or_zero() * distance
         }
-        DisplaceMotion::PullToPoint {
-            point,
-            distance,
-            speed,
-        } => {
-            let Ok(target_transform) = q_transform.get(target) else {
-                return;
-            };
-            let target_pos = target_transform.translation.xz();
-            let direction = (point - target_pos).normalize_or_zero();
-            // 钳制距离：不超过到点的实际距离
-            let actual_dist = target_pos.distance(*point);
-            let clamped = distance.min(actual_dist);
-            let dest_xz = target_transform.translation.xz() + direction * clamped;
-            let destination = Vec3::new(dest_xz.x, target_transform.translation.y, dest_xz.y);
-            commands.entity(target).trigger(|e| CommandMovement {
-                entity: e,
-                priority: 100,
-                action: MovementAction::Start {
-                    way: MovementWay::Path(vec![destination]),
-                    speed: Some(*speed),
-                    source: MovementSource::Knockback,
-                },
-            });
+        // 钳制距离：不超过到点的实际距离
+        DisplaceMotion::PullToPoint { point, distance, .. } => {
+            let diff = *point - target_xz;
+            target_xz + diff.normalize_or_zero() * distance.min(diff.length())
         }
-        DisplaceMotion::None => {}
-    }
+        DisplaceMotion::None => return,
+    };
+
+    let speed = match motion {
+        DisplaceMotion::PullToward { speed, .. }
+        | DisplaceMotion::PushAway { speed, .. }
+        | DisplaceMotion::PullToPoint { speed, .. } => *speed,
+        DisplaceMotion::None => return,
+    };
+
+    commands.entity(target).trigger(|e| CommandMovement {
+        entity: e,
+        priority: 100,
+        action: MovementAction::Start {
+            way: MovementWay::Path(vec![Vec3::new(destination.x, start.y, destination.y)]),
+            speed: Some(speed),
+            source: MovementSource::Knockback,
+        },
+    });
 }
 
 /// 应用单个效果到目标

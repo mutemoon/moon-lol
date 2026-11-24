@@ -146,7 +146,9 @@ pub enum MovementAction {
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum MovementWay {
+    /// 按导航网格寻路到目标点（跑动、追击）。
     Pathfind(Vec3),
+    /// 直线路径：逐点推进，无视导航网格（冲刺、击退等强制位移）。
     Path(Vec<Vec3>),
 }
 
@@ -283,6 +285,7 @@ fn update_path_movement(
             let distance_to_target_xz = vector_to_target_xz.length();
 
             if distance_to_target_xz.abs() < f32::EPSILON {
+                transform.translation.y = target.y;
                 let new_index = movement_state.current_target_index + 1;
                 if new_index >= movement_state.path.len() {
                     movement_state.completed = true;
